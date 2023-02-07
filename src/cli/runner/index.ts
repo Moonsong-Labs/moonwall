@@ -4,14 +4,31 @@ import path from 'path';
 import fs from 'fs/promises';
 import { runMochaTests } from './lib/runner-functions';
 
-export async function runner(tests, config?: MoonwallConfig) {
-  const options: MochaOptions = {};
+export async function runner(args) {
+  // READ CONFIG TO CONSTRUCT CONCEPT OF NETWORKS
+
+  // parseConfig(config)
+  //refactor this vv
+  if (
+    !(await fs
+      .access(args.configFile)
+      .then(() => true)
+      .catch(() => false))
+  ) {
+    throw new Error(`Moonwall Config file ${args.configFile} cannot be found`);
+  }
+
+  const file = await fs.readFile(args.configFile, { encoding: 'utf-8' });
+  const config = JSON.parse(file) as MoonwallConfig;
+
+  console.log(config);
+
+  ///////////////////
+
+  const options: MochaOptions = { timeout: config.defaultTestTimeout };
   const mocha = new Mocha(options);
 
-  // READ CONFIG TO CONSTRUCT CONCEPT OF NETWORKS
-  // parseConfig()
-
-  tests.forEach((testFile) => mocha.addFile(testFile));
+  args.testSpecs.forEach((testFile) => mocha.addFile(testFile));
 
   // RUN SPEC TO FIND TEST FILES
 

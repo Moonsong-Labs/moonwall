@@ -1,4 +1,7 @@
-export type MoonwallConfig = {};
+export type MoonwallConfig = {
+    defaultTestTimeout: number,
+    environments: number
+};
 
 export type MoonwallTestFile = {};
 

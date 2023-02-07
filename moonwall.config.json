@@ -1,0 +1,20 @@
+{
+  "label": "MoonwallSampleConfig",
+  "version": 0.1,
+  "defaultTestTimeout": 40000,
+  "environment": [
+    {
+      "name": "New_Test",
+      "foundation": {
+        "type": "production"
+      },
+      "providers": [
+        {
+          "name": "parachain",
+          "type": "polkadotJs",
+          "endpoints": ["wss://moonbeam.api.onfinality.io/public-ws", "ENV_VAR"]
+        }
+      ]
+    }
+  ]
+}

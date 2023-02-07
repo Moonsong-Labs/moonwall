@@ -22,7 +22,7 @@ yargs(hideBin(process.argv))
       });
     },
     async (argv) => {
-      await runner(argv.testSpecs as any);
+      await runner(argv as any);
     }
   )
   .options({
@@ -30,7 +30,7 @@ yargs(hideBin(process.argv))
       type: 'string',
       alias: 'c',
       description: 'path to MoonwallConfig file',
-      demandOption: false,
+      default: "./moonwall.config.json"
     },
   })
   .parse();
