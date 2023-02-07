@@ -12,9 +12,8 @@ import { defineTestSuiteAndAddTests } from '../../../../tests/sample/test_sample
   }
 })();
 
-export async function executeRun (suiteCallBacks){
-
-  suiteCallBacks.forEach(fn => fn())
+export async function executeRun(suiteCallBacks) {
+  suiteCallBacks.forEach((fn) => fn());
 
   try {
     const result = await runMochaTests();
@@ -22,5 +21,4 @@ export async function executeRun (suiteCallBacks){
   } catch (e) {
     console.log(e);
   }
-
 }

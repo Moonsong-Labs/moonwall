@@ -11,17 +11,18 @@ yargs(hideBin(process.argv))
   .usage('Usage: $0')
   .version('2.0.0')
   .command(
-    `test`,
-    'run tests found in test files',
+    `test [testSpecs..]`,
+    'Run tests found in test specs',
     (yargs) => {
-      return yargs.option('testSpecs', {
-        alias: "f",
-        describe: "Path to test spec file(s)",
-        demandOption: true,
+      return yargs.positional('testSpecs', {
+        alias: 'testSpecs',
+        array: true,
+        describe: 'Path to test spec file(s)',
+        default: '*.ts',
       });
     },
-    (argv) => {
-      runner(argv.testSpecs as any);
+    async (argv) => {
+      await runner(argv.testSpecs as any);
     }
   )
   .options({

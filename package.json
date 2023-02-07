@@ -2,16 +2,16 @@
   "name": "moonwall",
   "version": "1.0.0",
   "description": "Testing framework for the Moon family of projects",
-  "main": "dist/lib/es5/src/index.js",
-  "module": "dist/lib/es6/src/index.js",
+  "main": "dist/lib/src/index.js",
   "scripts": {
-    "compile": "rm -rf dist/lib/* && tsc && tsc --build tsconfig.es5.json",
-    "start": "node dist/lib/es5/src/cli/index.js",
+    "compile": "rm -rf dist/lib/* && tsc ",
+    "start": "node -r ts-node/register dist/lib/src/cli/index.js",
     "test": "npx ts-node src/cli/runner/lib/execute-test.ts",
-    "test-bin": " npm run start -- test -f tests/sample/test_sample.ts"
+    "lint": "npx prettier --write --ignore-path .gitignore '**/*.(yml|js|ts|json)'",
+    "test-bin": "npm run compile && npm run start -- test -f tests/*.ts"
   },
   "bin": {
-    "moonwall": "dist/lib/es5/src/cli/index.js"
+    "moonwall": "dist/lib/src/cli/index.js"
   },
   "author": "",
   "license": "ISC",
