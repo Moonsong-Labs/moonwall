@@ -1,0 +1,39 @@
+{
+  "name": "moonwall",
+  "version": "1.0.0",
+  "description": "Testing framework for the Moon family of projects",
+  "main": "dist/lib/es5/src/index.js",
+  "module": "dist/lib/es6/src/index.js",
+  "scripts": {
+    "compile": "rm -rf dist/lib/* && tsc && tsc --build tsconfig.es5.json",
+    "start": "node dist/lib/es5/src/cli/index.js",
+    "test": "npx ts-node src/cli/runner/lib/execute-test.ts",
+    "test-bin": " npm run start -- test -f tests/sample/test_sample.ts"
+  },
+  "bin": {
+    "moonwall": "dist/lib/es5/src/cli/index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@moonbeam-network/api-augment": "^0.2000.1",
+    "@polkadot/api": "^9.13.6",
+    "@types/chai": "^4.3.4",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^18.11.19",
+    "@types/yargs": "^17.0.22",
+    "bottleneck": "^2.19.5",
+    "chai": "^4.3.7",
+    "chalk": "^5.2.0",
+    "debug": "^4.3.4",
+    "ethers": "^6.0.2",
+    "mocha": "^10.2.0",
+    "moment-timezone": "^0.5.40",
+    "prettier": "^2.8.3",
+    "semver": "^7.3.8",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.5",
+    "web3": "^1.8.2",
+    "yargs": "^17.6.2"
+  }
+}
