@@ -32,5 +32,11 @@ yargs(hideBin(process.argv))
       description: 'path to MoonwallConfig file',
       default: "./moonwall.config.json"
     },
+    environment: {
+      type: 'string',
+      alias: 't',
+      description: 'name of environment tests to run',
+      demandOption: false
+    },
   })
   .parse();

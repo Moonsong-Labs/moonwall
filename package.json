@@ -5,7 +5,7 @@
   "main": "dist/lib/src/index.js",
   "scripts": {
     "compile": "rm -rf dist/lib/* && tsc ",
-    "start": "node -r ts-node/register dist/lib/src/cli/index.js",
+    "start": "node -r ts-node/register -r ./src/cli/runner/lib/mochaGlobalHooks.ts  dist/lib/src/cli/index.js",
     "test": "npx ts-node src/cli/runner/lib/execute-test.ts",
     "lint": "npx prettier --write --ignore-path .gitignore '**/*.(yml|js|ts|json)'",
     "test-bin": "npm run compile && npm run start -- test -f tests/*.ts"
@@ -18,10 +18,14 @@
   "dependencies": {
     "@moonbeam-network/api-augment": "^0.2000.1",
     "@polkadot/api": "^9.13.6",
+    "@polkadot/apps-config": "^0.122.2",
+    "@polkadot/keyring": "^10.3.1",
+    "@polkadot/util": "^10.3.1",
     "@types/chai": "^4.3.4",
     "@types/mocha": "^10.0.1",
-    "@types/node": "^18.11.19",
+    "@types/node": "^18.13.0",
     "@types/yargs": "^17.0.22",
+    "api:9.9.4": "link:@polkadpt/api:9.9.4",
     "bottleneck": "^2.19.5",
     "chai": "^4.3.7",
     "chalk": "^5.2.0",
@@ -29,11 +33,31 @@
     "ethers": "^6.0.2",
     "mocha": "^10.2.0",
     "moment-timezone": "^0.5.40",
-    "prettier": "^2.8.3",
+    "prettier": "^2.8.4",
     "semver": "^7.3.8",
     "ts-node": "^10.9.1",
     "typescript": "^4.9.5",
     "web3": "^1.8.2",
     "yargs": "^17.6.2"
+  },
+  "overrides": {
+    "@polkadot/api": "$@polkadot/api",
+    "@polkadot/api-derive": "$@polkadot/api",
+    "@polkadot/api-augment": "$@polkadot/api",
+    "@polkadot/api-base": "$@polkadot/api",
+    "@polkadot/rpc-augment": "$@polkadot/api",
+    "@polkadot/rpc-core": "$@polkadot/api",
+    "@polkadot/rpc-provider": "$@polkadot/api",
+    "@polkadot/types-create": "$@polkadot/api",
+    "@polkadot/types-augment": "$@polkadot/api",
+    "@polkadot/types-support": "$@polkadot/api",
+    "@polkadot/types-codec": "$@polkadot/api",
+    "@polkadot/types": "$@polkadot/api",
+    "@polkadot/types-known": "$@polkadot/api",
+    "@polkadot/util": "$@polkadot/util",
+    "@polkadot/util-crypto": "$@polkadot/util"
+  },
+  "mocha": {
+    "require": ["tsconfig/register"]
   }
 }

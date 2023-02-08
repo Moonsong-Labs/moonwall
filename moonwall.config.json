@@ -2,13 +2,33 @@
   "label": "MoonwallSampleConfig",
   "version": 0.1,
   "defaultTestTimeout": 40000,
-  "environment": [
+  "environments": [
     {
       "name": "New_Test",
+      "testFileDir":"tests/production/",
       "foundation": {
         "type": "production"
       },
-      "providers": [
+      "connections": [
+        {
+          "name": "MB",
+          "type": "polkadotJs",
+          "endpoints": ["wss://moonbeam.api.onfinality.io/public-ws"]
+        },
+        {
+          "name": "DOT",
+          "type": "polkadotJs",
+          "endpoints": ["wss://rpc.polkadot.io"]
+        }
+      ]
+    },
+    {
+      "name": "New_Test2",
+      "testFilePath":"",
+      "foundation": {
+        "type": "chopsticks"
+      },
+      "connections": [
         {
           "name": "parachain",
           "type": "polkadotJs",

@@ -1,5 +1,5 @@
 import { runMochaTests } from './mocha-setup';
-import { defineTestSuiteAndAddTests } from '../../../../tests/sample/test_sample';
+import { defineTestSuiteAndAddTests } from '../../../../../tests/sample/test_sample';
 
 (async () => {
   defineTestSuiteAndAddTests();

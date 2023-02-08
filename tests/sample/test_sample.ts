@@ -1,4 +1,4 @@
-import { suite, Test, suiteInstance } from '../../src/cli/runner/lib/mocha-setup';
+import { suite, Test, suiteInstance } from '../../src/cli/runner/lib/deprecated/mocha-setup';
 import { expect } from 'chai';
 
 export const defineTestSuiteAndAddTests = () => {
