@@ -1,4 +1,5 @@
-import { testSuite } from '../src/cli/runner/lib/runner-functions';
+import { testSuite } from '../src/cli/runner/util/runner-functions';
+import { setTimeout } from 'timers/promises';
 import { expect } from 'chai';
 
 testSuite({
@@ -20,7 +21,7 @@ testSuite({
     });
 
     it('Long test', async function () {
-      await new Promise((resolve) => setTimeout(() => resolve(''), 5000));
+      await setTimeout(5000)
       expect(true).to.be.true;
     });
   },

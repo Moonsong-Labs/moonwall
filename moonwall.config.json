@@ -12,7 +12,7 @@
       "connections": [
         {
           "name": "MB",
-          "type": "polkadotJs",
+          "type": "moonbeam",
           "endpoints": ["wss://moonbeam.api.onfinality.io/public-ws"]
         },
         {

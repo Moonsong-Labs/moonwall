@@ -1,4 +1,4 @@
-import { testSuite } from '../../src/cli/runner/lib/runner-functions';
+import { testSuite } from '../src/cli/runner/util/runner-functions';
 import { expect } from 'chai';
 
 testSuite({

@@ -1,14 +1,13 @@
-import '@moonbeam-network/api-augment';
-import { ApiPromise, WsProvider } from '@polkadot/api';
+import { setTimeout } from 'timers/promises';
 import {
   ConnectedProvider,
   LaunchedNode,
   MoonwallConfig,
   MoonwallEnvironment,
   MoonwallProvider,
-} from './types';
-import { populateProviderInterface, prepareProductionProviders } from './util/providers';
-const debug = require('debug')('global:setup');
+} from '../lib/types';
+import { populateProviderInterface, prepareProductionProviders } from './providers';
+const debug = require('debug')('global:context');
 
 export class MoonwallContext {
   private static instance: MoonwallContext;
@@ -22,11 +21,12 @@ export class MoonwallContext {
 
     config.environments.forEach((env) => {
       const blob = { name: env.name, context: {}, providers: [] };
-
+console.log(blob)
       switch (env.foundation.type) {
         case 'production':
-          blob.providers.push(...prepareProductionProviders(env.connections));
+          blob.providers = prepareProductionProviders(env.connections);
           debug(`🟢  Foundation "${env.foundation.type}" setup`);
+          console.log(blob.providers)
           break;
         default:
           debug(`🚧  Foundation "${env.foundation.type}" unsupported, skipping setup`);
@@ -80,12 +80,9 @@ export class MoonwallContext {
     }
     return MoonwallContext.instance;
   }
-  public static delete(){
+  public static async destroy(){
+    MoonwallContext.instance.disconnect()
     delete MoonwallContext.instance
+    await setTimeout(2000)
   }
-}
-
-export function globalSetup(config: MoonwallConfig){
-  MoonwallContext.getContext(config);
-  debug(`🟢  Global context created`)
 }

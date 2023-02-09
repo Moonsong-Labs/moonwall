@@ -1,10 +1,11 @@
 {
   "compilerOptions": {
     "module": "CommonJS",
+    "baseUrl": ".",
     "target": "ES2020",
     "lib": ["ES2020"],
     "declaration": true,
-    "outDir": "./dist/lib",
+    "outDir": "./dist/",
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "importHelpers": false,
@@ -23,9 +24,13 @@
     "transpileOnly": true,
     "files": true,
     "compilerOptions": {
+      "baseUrl": ".",
       // compilerOptions specified here will override those declared below,
       // but *only* in ts-node.  Useful if you want ts-node and tsc to use
       // different options with a single tsconfig.json.
+      "paths": {
+        "@moonwall": ["./src/cli/runner/index.ts"]
+      }
     }
   }
 }

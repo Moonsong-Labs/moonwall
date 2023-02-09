@@ -1,4 +1,4 @@
-import { MoonwallConfig } from '../types';
+import { MoonwallConfig } from '../lib/types';
 import fs from 'fs/promises';
 
 export async function loadConfig(path: string): Promise<MoonwallConfig> {

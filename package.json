@@ -2,25 +2,29 @@
   "name": "moonwall",
   "version": "1.0.0",
   "description": "Testing framework for the Moon family of projects",
-  "main": "dist/lib/src/index.js",
+  "main": "./dist/src/index.js",
   "scripts": {
-    "compile": "rm -rf dist/lib/* && tsc ",
-    "start": "node -r ts-node/register dist/lib/src/cli/index.js",
-    "test": "npx ts-node src/cli/runner/lib/execute-test.ts",
+    "compile": "rm -rf dist/* && tsc ",
+    "start": "node -r ts-node/register dist/src/cli/index.js",
     "lint": "npx prettier --write --ignore-path .gitignore '**/*.(yml|js|ts|json)'",
     "test-bin": "npm run compile && npm run start -- test -f tests/*.ts",
-    "new-cmd": "ts-node -r ts-node/register ./src/cli/index.ts test -t New_Test"
+    "new-cmd": "DEBUG=global* npx ts-node -r ts-node/register ./src/cli/index.ts test -t New_Test",
+    "new-cmd-js": "npm run compile && DEBUG=smoke* npm run start -- test -t New_Test"
   },
   "bin": {
-    "moonwall": "dist/lib/src/cli/index.js"
+    "moonwall": "./src/cli/index.ts"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@moonbeam-network/api-augment": "^0.2000.1",
     "@polkadot/api": "^9.13.6",
+    "@polkadot/api-augment": "^9.13.6",
+    "@polkadot/api-derive": "^9.13.6",
     "@polkadot/apps-config": "^0.122.2",
     "@polkadot/keyring": "^10.3.1",
+    "@polkadot/types": "^9.13.6",
+    "@polkadot/types-codec": "^9.13.6",
     "@polkadot/util": "^10.3.1",
     "@types/chai": "^4.3.4",
     "@types/mocha": "^10.0.1",
@@ -34,9 +38,11 @@
     "ethers": "^6.0.2",
     "mocha": "^10.2.0",
     "moment-timezone": "^0.5.40",
+    "moonbeam-types-bundle": "^2.0.9",
     "prettier": "^2.8.4",
     "semver": "^7.3.8",
     "ts-node": "^10.9.1",
+    "types": "link:@polkadot/types-codec/types",
     "typescript": "^4.9.5",
     "web3": "^1.8.2",
     "yargs": "^17.6.2"
