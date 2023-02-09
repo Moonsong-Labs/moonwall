@@ -8,10 +8,9 @@ import {
   MoonwallProvider,
 } from './types';
 import { populateProviderInterface, prepareProductionProviders } from './util/providers';
-import Mocha, { MochaOptions } from 'mocha';
 const debug = require('debug')('global:setup');
 
-
+console.log("This is global context file")
 let globalContext: MoonwallContext
 
 export class MoonwallContext {
@@ -67,22 +66,23 @@ export class MoonwallContext {
       this.providers.forEach((prov) => prov.disconnect());
     }
   }
-  public static printStats() {
-    if (globalContext) {
-      console.log(globalContext);
-    } else {
-      console.log('Global context not created!');
-    }
-  }
+}
 
-  public static getContext(config?: MoonwallConfig): MoonwallContext {
-    if (!globalContext) {
-      if (!config) {
-        console.error('❌ Config must be provided on Global Context instantiation');
-        process.exit(1);
-      }
-      globalContext = new MoonwallContext(config);
-    }
-    return globalContext;
+export function printStats() {
+  if (globalContext) {
+    console.log(globalContext);
+  } else {
+    console.log('Global context not created!');
   }
+}
+
+export function getContext(config?: MoonwallConfig): MoonwallContext {
+  if (!globalContext) {
+    if (!config) {
+      console.error('❌ Config must be provided on Global Context instantiation');
+      process.exit(1);
+    }
+    globalContext = new MoonwallContext(config);
+  }
+  return globalContext;
 }

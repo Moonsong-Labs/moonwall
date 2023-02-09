@@ -5,7 +5,7 @@
   "main": "dist/lib/src/index.js",
   "scripts": {
     "compile": "rm -rf dist/lib/* && tsc ",
-    "start": "node -r ts-node/register -r ./src/cli/runner/lib/mochaGlobalHooks.ts  dist/lib/src/cli/index.js",
+    "start": "node -r ts-node/register dist/lib/src/cli/index.js",
     "test": "npx ts-node src/cli/runner/lib/execute-test.ts",
     "lint": "npx prettier --write --ignore-path .gitignore '**/*.(yml|js|ts|json)'",
     "test-bin": "npm run compile && npm run start -- test -f tests/*.ts"
@@ -56,8 +56,5 @@
     "@polkadot/types-known": "$@polkadot/api",
     "@polkadot/util": "$@polkadot/util",
     "@polkadot/util-crypto": "$@polkadot/util"
-  },
-  "mocha": {
-    "require": ["tsconfig/register"]
   }
 }

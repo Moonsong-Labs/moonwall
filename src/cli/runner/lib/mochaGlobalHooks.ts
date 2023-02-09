@@ -1,17 +1,14 @@
-import { MoonwallContext } from "./globalContext";
-
-const debug = require("debug")("global");
 
 
-console.log("helllooo")
-MoonwallContext.printStats()
+// const debug = require("debug")("global");
 
-export function mochaGlobalSetup() {
-  console.log('mocha global setup');
-  MoonwallContext.printStats()
-  debug("please help me")
-}
 
-export function mochaGlobalTeardown() {
-  console.log('mocha global Teardown');
-}
+
+// export function mochaGlobalSetup() {
+//   console.log('mocha global setup');
+//   debug("please help me")
+// }
+
+// export function mochaGlobalTeardown() {
+//   console.log('mocha global Teardown');
+// }
