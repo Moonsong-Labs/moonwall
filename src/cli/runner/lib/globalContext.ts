@@ -10,20 +10,15 @@ import {
 import { populateProviderInterface, prepareProductionProviders } from './util/providers';
 const debug = require('debug')('global:setup');
 
-console.log("This is global context file")
-let globalContext: MoonwallContext
-
 export class MoonwallContext {
-  // private static instance: MoonwallContext;
+  private static instance: MoonwallContext;
   environments: MoonwallEnvironment[];
   providers: ConnectedProvider[];
-  // mocha: Mocha;
   nodes?: LaunchedNode[];
 
   constructor(config: MoonwallConfig) {
     this.environments = [];
     this.providers = [];
-    // this.mocha = new Mocha({ timeout: config.defaultTestTimeout, globals: []});
 
     config.environments.forEach((env) => {
       const blob = { name: env.name, context: {}, providers: [] };
@@ -66,23 +61,31 @@ export class MoonwallContext {
       this.providers.forEach((prov) => prov.disconnect());
     }
   }
-}
 
-export function printStats() {
-  if (globalContext) {
-    console.log(globalContext);
-  } else {
-    console.log('Global context not created!');
-  }
-}
-
-export function getContext(config?: MoonwallConfig): MoonwallContext {
-  if (!globalContext) {
-    if (!config) {
-      console.error('❌ Config must be provided on Global Context instantiation');
-      process.exit(1);
+  public static  printStats() {
+    if (MoonwallContext) {
+      console.log(MoonwallContext.instance);
+    } else {
+      console.log('Global context not created!');
     }
-    globalContext = new MoonwallContext(config);
   }
-  return globalContext;
+  
+   public static  getContext(config?: MoonwallConfig): MoonwallContext {
+    if (!MoonwallContext.instance) {
+      if (!config) {
+        console.error('❌ Config must be provided on Global Context instantiation');
+        process.exit(1);
+      }
+      MoonwallContext.instance = new MoonwallContext(config);
+    }
+    return MoonwallContext.instance;
+  }
+  public static delete(){
+    delete MoonwallContext.instance
+  }
+}
+
+export function globalSetup(config: MoonwallConfig){
+  MoonwallContext.getContext(config);
+  debug(`🟢  Global context created`)
 }

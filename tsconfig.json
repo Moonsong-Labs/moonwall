@@ -7,7 +7,7 @@
     "outDir": "./dist/lib",
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
-    "importHelpers": true,
+    "importHelpers": false,
     "skipLibCheck": true,
     "removeComments": true,
     "preserveConstEnums": true,

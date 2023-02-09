@@ -8,7 +8,8 @@
     "start": "node -r ts-node/register dist/lib/src/cli/index.js",
     "test": "npx ts-node src/cli/runner/lib/execute-test.ts",
     "lint": "npx prettier --write --ignore-path .gitignore '**/*.(yml|js|ts|json)'",
-    "test-bin": "npm run compile && npm run start -- test -f tests/*.ts"
+    "test-bin": "npm run compile && npm run start -- test -f tests/*.ts",
+    "new-cmd": "ts-node -r ts-node/register ./src/cli/index.ts test -t New_Test"
   },
   "bin": {
     "moonwall": "dist/lib/src/cli/index.js"

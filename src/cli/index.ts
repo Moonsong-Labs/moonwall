@@ -1,7 +1,4 @@
 #!/usr/bin/env node
-
-import fs from 'fs/promises';
-import path from 'path';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { MoonwallConfig, MoonwallTestFile } from './runner/lib/types';
