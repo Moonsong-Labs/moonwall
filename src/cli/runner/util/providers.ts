@@ -3,8 +3,8 @@ import {
   types,
 } from "moonbeam-types-bundle";
 import { ApiPromise, WsProvider } from "@polkadot/api";
-import {Web3BaseProvider} from "web3-types"
 import Web3 from "web3";
+import { ethers } from "ethers";
 import {
   ConnectedProvider,
   LaunchedNode,
@@ -16,6 +16,7 @@ import {
 } from "../lib/types";
 import { ApiOptions } from "@polkadot/api/types";
 import { WebSocketProvider } from "ethers";
+import { Web3BaseProvider}   from "web3-types"
 const debug = require("debug")("global:providers");
 
 export function prepareProductionProviders(
@@ -63,12 +64,25 @@ export function prepareProductionProviders(
 
       case ProviderType.Web3:
         debug(`🟢  Web3 provider ${name} details prepared`);
+        const wsProvider: Web3BaseProvider =new Web3.providers.WebsocketProvider(url)
+        return {
+          name,
+          type,
+          ws: wsProvider,
+          connect: () => {
+            const ethApi = new Web3(wsProvider)
+            return ethApi;
+          },
+        };
+
+        case ProviderType.Ethers:
+        debug(`🟢  Ethers provider ${name} details prepared`);
         return {
           name,
           type,
           connect: async () => {
-            const ethApi = new Web3(new Web3.providers.WebsocketProvider(url))
-            return ethApi;
+            const ethersApi = new ethers.WebSocketProvider(url)
+            return ethersApi;
           },
         };
 
@@ -86,7 +100,8 @@ export function prepareProductionProviders(
 export async function populateProviderInterface(
   name: string,
   type: ProviderType,
-  connect: () => Promise<ApiPromise> | Promise<WebSocketProvider> |Web3 | void
+  connect: () => Promise<ApiPromise> | Promise<WebSocketProvider> |Web3 | void,
+  ws?: () => void
 ) {
   switch (type) {
     case ProviderType.PolkadotJs:
@@ -119,8 +134,6 @@ export async function populateProviderInterface(
 
     case ProviderType.Ethers:
       const ethApi = (await connect()) as WebSocketProvider;
-      // console.log(ethApi)
-      console.dir(connect, {depth:2})
       return {
         name,
         api: ethApi,
@@ -136,8 +149,6 @@ export async function populateProviderInterface(
 
       case ProviderType.Web3:
         const web3Api = (await connect()) as Web3;
-        // console.log(ethApi)
-        // console.dir(connect, {depth:2})
         return {
           name,
           api: web3Api,
@@ -146,8 +157,9 @@ export async function populateProviderInterface(
               `👋 Provider ${name} is connected to chain ` + JSON.stringify(await web3Api.eth.getChainId())
             ),
           disconnect: () => {
-            // web3Api.removeAllListeners();
-            // await web3Api.eth.currentProvider.disconnect()
+            // console.log(web3Api.currentProvider)
+            console.dir(ws, {depth: null})
+            // console.log(web3Api.currentProvider)
           },
         };
   

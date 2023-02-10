@@ -1,10 +1,8 @@
-import { setTimeout } from "timers/promises";
 import {
   ConnectedProvider,
   LaunchedNode,
   MoonwallConfig,
   MoonwallEnvironment,
-  MoonwallProvider,
 } from "../lib/types";
 import {
   populateProviderInterface,
@@ -53,13 +51,11 @@ export class MoonwallContext {
     const promises = this.environments
       .find(({ name }) => name === environmentName)
       .providers.map(
-        async ({ name, type, connect }) =>
+        async ({ name, type, connect, ws }) =>
           new Promise(async (resolve) => {
-            const providerDetails = await populateProviderInterface(
-              name,
-              type,
-              connect
-            );
+            const providerDetails = ws
+              ? await populateProviderInterface(name, type, connect, ws)
+              : await populateProviderInterface(name, type, connect);
             this.providers.push(providerDetails);
             resolve("");
           })
@@ -105,3 +101,11 @@ export class MoonwallContext {
     delete MoonwallContext.instance;
   }
 }
+
+export const contextCreator = async (config: MoonwallConfig, env: string) => {
+  console.log(env);
+  const ctx = MoonwallContext.getContext(config);
+  debug(`🟢  Global context fetched for mocha`);
+  await ctx.connectEnvironment(env);
+  ctx.providers.forEach(async ({ greet }) => await greet());
+};

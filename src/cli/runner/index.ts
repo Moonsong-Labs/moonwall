@@ -1,44 +1,21 @@
 import "@moonbeam-network/api-augment/moonbase";
 import "@polkadot/api-augment/polkadot";
-import {
-  typesBundlePre900,
-  rpcDefinitions,
-  types,
-} from "moonbeam-types-bundle";
-import { MoonwallConfig } from "./lib/types";
 import Mocha, { MochaOptions } from "mocha";
-// import { executeRun, runMochaTests } from './lib/runner-functions';
 import { loadConfig } from "./util/configReader";
-import { ApiPromise, WsProvider } from "@polkadot/api";
 import fs from "fs/promises";
 import path from "path";
-import { MoonwallContext } from "./util/globalContext";
-import { setTimeout } from "timers/promises";
-import { executeRun } from "./util/runner-functions";
-import { WebSocketProvider } from "ethers";
-import { monitorEventLoopDelay } from "perf_hooks";
+import { MoonwallContext, contextCreator } from "./util/globalContext";
+import { MoonwallConfig } from "./lib/types";
 const debug = require("debug")("global:setup");
+
+
 
 export async function runner(args) {
   const config = await loadConfig(args.configFile);
-  const mocha = new Mocha({ timeout: config.defaultTestTimeout });
-  mocha.enableGlobalSetup(true);
-  mocha.enableGlobalTeardown(true);
+  const mocha = new Mocha({ timeout: config.defaultTestTimeout, require:["index.ts", "./src/cli/runner/index.ts"] });
+
   mocha.checkLeaks();
-
-  const contextFetcher = async () => {
-    const ctx = MoonwallContext.getContext(config);
-    debug(`🟢  Global context fetched for mocha`);
-    await ctx.connectEnvironment(args.environment);
-    ctx.providers.forEach(async ({ greet }) => await greet());
-  };
-  const contextDestructor = () => MoonwallContext.destroy();
-
-
-  mocha.globalSetup(contextFetcher);
-  mocha.globalTeardown(contextDestructor);
-
-  await MoonwallContext.getContext(config).connectEnvironment(args.environment);
+  await contextCreator(config, args.environment)
 
   if (args.environment) {
     // For files selected by Config.Environments.testFileDir

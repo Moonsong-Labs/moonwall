@@ -7,11 +7,8 @@ import {
 import Bottleneck from "bottleneck";
 import semverLt from "semver/functions/lt";
 import { testSuite } from "../../src/cli/runner/util/runner-functions";
-import { ApiPromise } from "@polkadot/api";
 import { WebSocketProvider } from "ethers";
-import { Web3BaseProvider } from "web3-types";
 import Web3 from "web3";
-import { timbo } from "src";
 const debug = require("debug")("smoke:block-finalized");
 const timePeriod = process.env.TIME_PERIOD
   ? Number(process.env.TIME_PERIOD)
@@ -21,10 +18,9 @@ const timeout = Math.floor(timePeriod / 12); // 2 hour -> 10 minute timeout
 testSuite({
   id: "S400",
   title: "Parachain blocks should be finalized",
-  testCases: ({ context, polkaCtx, it }) => {
-    const api = polkaCtx("MB");
-    const ethersApi = context["ethers"] as WebSocketProvider;
-    const web3Api = context["W3"] as Web3;
+  testCases: ({ context, it }) => {
+    const api = context.polkaCtx("MB");
+    const web3 = context.web3Api("w3");
 
     it("C100", `should have a recently finalized block`, async function () {
       const head = await api.rpc.chain.getFinalizedHead();
@@ -44,7 +40,7 @@ testSuite({
         debug(`ChainSpec ${specVersion}, client ${clientVersion} unsupported BlockTag, skipping.`);
         this.skip();
       }
-      const timestamp = (await web3Api.eth.getBlock("latest")).timestamp;
+      const timestamp = (await web3.eth.getBlock("latest")).timestamp;
       const diff = BigInt(Date.now()) - timestamp * 1000n;
       debug(`Last eth block was ${diff / 1000n} seconds ago`);
       expect(diff < 10n * 60n * 1000n).to.be.true;
@@ -72,6 +68,7 @@ testSuite({
           lastBlockNumber,
           firstBlockTime
         )) as number;
+
 
         debug(`Checking if blocks #${firstBlockNumber} - #${lastBlockNumber} are finalized.`);
         const promises = (() => {

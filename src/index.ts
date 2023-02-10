@@ -1,2 +1,2 @@
 export { timbo, jimbo } from './people';
-export { newTestSuite } from './cli/runner/util/runner-functions';
+export  * as utils  from './cli/runner/util/runner-functions';

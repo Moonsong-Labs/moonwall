@@ -36,6 +36,7 @@ export interface MoonwallProvider {
   name: string;
   type: ProviderType;
   connect: () => Promise<ApiPromise> | Promise<WebSocketProvider> | Web3 | void;
+  ws? : any 
 }
 
 export interface ConnectedProvider {

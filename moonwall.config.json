@@ -4,8 +4,36 @@
   "defaultTestTimeout": 40000,
   "environments": [
     {
-      "name": "New_Test",
-      "testFileDir":"tests/production/",
+      "name": "ether_test",
+      "testFileDir":"tests/eth_test/",
+      "foundation": {
+        "type": "production"
+      },
+      "connections": [
+        {
+          "name": "eth",
+          "type": "ethers",
+          "endpoints": ["wss://moonbeam.api.onfinality.io/public-ws"]
+        }
+      ]
+    },
+    {
+      "name": "web3_test",
+      "testFileDir":"tests/web3_test/",
+      "foundation": {
+        "type": "production"
+      },
+      "connections": [
+        {
+          "name": "w3",
+          "type": "web3",
+          "endpoints": ["wss://moonbeam.api.onfinality.io/public-ws"]
+        }
+      ]
+    },
+    {
+      "name": "SmokeCopy",
+      "testFileDir":"tests/dummy-smoke/",
       "foundation": {
         "type": "production"
       },
@@ -21,10 +49,19 @@
           "endpoints": ["wss://rpc.polkadot.io"]
         },
         {
-          "name": "W3",
+          "name": "w3",
           "type": "web3",
           "endpoints": ["wss://moonbeam.api.onfinality.io/public-ws"]
         }
+      ]
+    },
+    {
+      "name": "basic",
+      "testFilePath":"tests/basic",
+      "foundation": {
+        "type": "production"
+      },
+      "connections": [
       ]
     },
     {

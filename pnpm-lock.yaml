@@ -14,7 +14,6 @@ specifiers:
   '@types/mocha': ^10.0.1
   '@types/node': ^18.13.0
   '@types/yargs': ^17.0.22
-  api:9.9.4: link:@polkadpt/api:9.9.4
   bottleneck: ^2.19.5
   chai: ^4.3.7
   chalk: ^5.2.0
@@ -26,7 +25,6 @@ specifiers:
   prettier: ^2.8.4
   semver: ^7.3.8
   ts-node: ^10.9.1
-  types: link:@polkadot/types-codec/types
   typescript: ^4.9.5
   web3: 4.0.1-alpha.5
   web3-types: 0.1.1-alpha.4
@@ -46,7 +44,6 @@ dependencies:
   '@types/mocha': 10.0.1
   '@types/node': 18.13.0
   '@types/yargs': 17.0.22
-  api:9.9.4: link:@polkadpt/api:9.9.4
   bottleneck: 2.19.5
   chai: 4.3.7
   chalk: 5.2.0
@@ -58,7 +55,6 @@ dependencies:
   prettier: 2.8.4
   semver: 7.3.8
   ts-node: 10.9.1_4bewfcp2iebiwuold25d6rgcsy
-  types: link:@polkadot/types-codec/types
   typescript: 4.9.5
   web3: 4.0.1-alpha.5
   web3-types: 0.1.1-alpha.4
@@ -797,7 +793,7 @@ packages:
       '@polkadot/x-ws': 8.7.1
       '@substrate/connect': 0.7.0-alpha.0
       eventemitter3: 4.0.7
-      mock-socket: 9.1.5
+      mock-socket: 9.2.0
       nock: 13.3.0
     transitivePeerDependencies:
       - encoding
@@ -818,7 +814,7 @@ packages:
       '@polkadot/x-global': 10.3.1
       '@polkadot/x-ws': 10.3.1
       eventemitter3: 5.0.0
-      mock-socket: 9.1.5
+      mock-socket: 9.2.0
       nock: 13.3.0
     optionalDependencies:
       '@substrate/connect': 0.7.19
@@ -2666,8 +2662,8 @@ packages:
       yargs-unparser: 2.0.0
     dev: false
 
-  /mock-socket/9.1.5:
-    resolution: {integrity: sha512-3DeNIcsQixWHHKk6NdoBhWI4t1VMj5/HzfnI1rE/pLl5qKx7+gd4DNA07ehTaZ6MoUU053si6Hd+YtiM/tQZfg==}
+  /mock-socket/9.2.0:
+    resolution: {integrity: sha512-cFDvRRbNoxABvcmXfeECwTn61BWfiC2X6ZPM1S5FuGDFp65RS7R8ucoceU00GncRwPuuGcB4yGYN14TT50k7rw==}
     engines: {node: '>= 8'}
     dev: false
 

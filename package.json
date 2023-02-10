@@ -3,13 +3,16 @@
   "version": "1.0.0",
   "description": "Testing framework for the Moon family of projects",
   "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
   "scripts": {
+    "build": "tsc",
+    "prepare": "npm run build",
     "compile": "rm -rf dist/* && tsc ",
     "start": "node -r ts-node/register dist/src/cli/index.js",
     "lint": "npx prettier --write --ignore-path .gitignore '**/*.(yml|js|ts|json)'",
     "test-bin": "npm run compile && npm run start -- test -f tests/*.ts",
-    "new-cmd": "DEBUG=smoke* npx ts-node -r ts-node/register ./src/cli/index.ts test -t New_Test",
-    "new-cmd-js": "npm run compile && DEBUG=smoke* npm run start -- test -t New_Test"
+    "new-cmd": "DEBUG=global* npx ts-node -r ts-node/register ./src/cli/index.ts test -t SmokeCopy",
+    "new-cmd-js": "npm run compile && DEBUG=smoke* npm run start -- test -t SmokeCopy"
   },
   "bin": {
     "moonwall": "./src/cli/index.ts"
@@ -30,7 +33,6 @@
     "@types/mocha": "^10.0.1",
     "@types/node": "^18.13.0",
     "@types/yargs": "^17.0.22",
-    "api:9.9.4": "link:@polkadpt/api:9.9.4",
     "bottleneck": "^2.19.5",
     "chai": "^4.3.7",
     "chalk": "^5.2.0",
@@ -42,7 +44,6 @@
     "prettier": "^2.8.4",
     "semver": "^7.3.8",
     "ts-node": "^10.9.1",
-    "types": "link:@polkadot/types-codec/types",
     "typescript": "^4.9.5",
     "web3": "4.0.1-alpha.5",
     "web3-types": "0.1.1-alpha.4",
