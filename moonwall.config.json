@@ -12,13 +12,18 @@
       "connections": [
         {
           "name": "MB",
-          "type": "moonbeam",
+          "type": "moon",
           "endpoints": ["wss://moonbeam.api.onfinality.io/public-ws"]
         },
         {
           "name": "DOT",
           "type": "polkadotJs",
           "endpoints": ["wss://rpc.polkadot.io"]
+        },
+        {
+          "name": "W3",
+          "type": "web3",
+          "endpoints": ["wss://moonbeam.api.onfinality.io/public-ws"]
         }
       ]
     },

@@ -8,7 +8,7 @@
     "start": "node -r ts-node/register dist/src/cli/index.js",
     "lint": "npx prettier --write --ignore-path .gitignore '**/*.(yml|js|ts|json)'",
     "test-bin": "npm run compile && npm run start -- test -f tests/*.ts",
-    "new-cmd": "DEBUG=global* npx ts-node -r ts-node/register ./src/cli/index.ts test -t New_Test",
+    "new-cmd": "DEBUG=smoke* npx ts-node -r ts-node/register ./src/cli/index.ts test -t New_Test",
     "new-cmd-js": "npm run compile && DEBUG=smoke* npm run start -- test -t New_Test"
   },
   "bin": {
@@ -44,7 +44,8 @@
     "ts-node": "^10.9.1",
     "types": "link:@polkadot/types-codec/types",
     "typescript": "^4.9.5",
-    "web3": "^1.8.2",
+    "web3": "4.0.1-alpha.5",
+    "web3-types": "0.1.1-alpha.4",
     "yargs": "^17.6.2"
   },
   "overrides": {

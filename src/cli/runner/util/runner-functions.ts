@@ -1,9 +1,11 @@
-import { MoonwallContext } from './globalContext';
-import { ApiPromise } from '@polkadot/api';
-import { ConnectedProvider } from '../lib/types';
+import { MoonwallContext } from "./globalContext";
+import { ApiPromise } from "@polkadot/api";
+import { ConnectedProvider } from "../lib/types";
+import { WebSocketProvider } from "ethers";
+import Web3 from "web3";
 
 export function newTestSuite() {
-  return 'Test complete!';
+  return "Test complete!";
 }
 
 export function testSuite({ id, title, testCases }: SuiteParameters) {
@@ -13,11 +15,15 @@ export function testSuite({ id, title, testCases }: SuiteParameters) {
       context[a.name] = a.api;
     });
 
-    function testCase(id: string, title: string, callback: () => void) {
-      it(`📁  #${id.concat(id)} ${title}`, callback);
+    function testCase(testcaseId: string, title: string, callback: () => void) {
+      it(`📁  #${id.concat(testcaseId)} ${title}`, callback);
     }
 
-    testCases({ context, it: testCase });
+    const polkaCtx = (name: string): ApiPromise => {
+      return context[name] as ApiPromise;
+    };
+
+    testCases({ context, polkaCtx, it: testCase });
   });
 }
 
@@ -34,14 +40,14 @@ interface SuiteParameters {
 }
 
 type TestContext = {
-  context: { [name: string]: ApiPromise };
+  context: { [name: string]: ApiPromise | WebSocketProvider | Web3 };
+  polkaCtx: (string) => ApiPromise;
   it: CustomTest;
 };
 
 export async function executeRun(ctx) {
   try {
     const result = await runMochaTests();
-    console.log(result);
     ctx.disconnect();
     process.exitCode = 0;
   } catch (e) {
@@ -52,12 +58,12 @@ export async function executeRun(ctx) {
 
 export const runMochaTests = () => {
   return new Promise((resolve, reject) => {
-    console.log('before actual run');
+    console.log("before actual run");
     mocha.run((failures) => {
       if (failures) {
-        reject('🚧  At least one test failed, check report for more details.');
+        reject("🚧  At least one test failed, check report for more details.");
       }
-      resolve('🎉  Test run has completed without errors.');
+      resolve("🎉  Test run has completed without errors.");
     });
   });
 };

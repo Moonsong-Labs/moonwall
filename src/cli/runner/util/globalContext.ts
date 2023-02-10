@@ -1,13 +1,16 @@
-import { setTimeout } from 'timers/promises';
+import { setTimeout } from "timers/promises";
 import {
   ConnectedProvider,
   LaunchedNode,
   MoonwallConfig,
   MoonwallEnvironment,
   MoonwallProvider,
-} from '../lib/types';
-import { populateProviderInterface, prepareProductionProviders } from './providers';
-const debug = require('debug')('global:context');
+} from "../lib/types";
+import {
+  populateProviderInterface,
+  prepareProductionProviders,
+} from "./providers";
+const debug = require("debug")("global:context");
 
 export class MoonwallContext {
   private static instance: MoonwallContext;
@@ -21,15 +24,16 @@ export class MoonwallContext {
 
     config.environments.forEach((env) => {
       const blob = { name: env.name, context: {}, providers: [] };
-console.log(blob)
+
       switch (env.foundation.type) {
-        case 'production':
+        case "production":
           blob.providers = prepareProductionProviders(env.connections);
           debug(`🟢  Foundation "${env.foundation.type}" setup`);
-          console.log(blob.providers)
           break;
         default:
-          debug(`🚧  Foundation "${env.foundation.type}" unsupported, skipping setup`);
+          debug(
+            `🚧  Foundation "${env.foundation.type}" unsupported, skipping setup`
+          );
           return;
       }
       this.environments.push(blob);
@@ -40,15 +44,24 @@ console.log(blob)
     return this.environments.find(({ name }) => name == query);
   }
 
-  public async connect(environmentName: string) {
+  public async connectEnvironment(environmentName: string) {
+    if (this.providers.length > 0) {
+      console.log("Providers already connected! Skipping command");
+      return MoonwallContext.getContext();
+    }
+
     const promises = this.environments
       .find(({ name }) => name === environmentName)
       .providers.map(
-        async ({ name, connect }) =>
+        async ({ name, type, connect }) =>
           new Promise(async (resolve) => {
-            const providerDetails = await populateProviderInterface(name, connect);
+            const providerDetails = await populateProviderInterface(
+              name,
+              type,
+              connect
+            );
             this.providers.push(providerDetails);
-            resolve('');
+            resolve("");
           })
       );
     await Promise.all(promises);
@@ -62,27 +75,33 @@ console.log(blob)
     }
   }
 
-  public static  printStats() {
+  public static printStats() {
     if (MoonwallContext) {
-      console.log(MoonwallContext.instance);
+      console.log(MoonwallContext.getContext());
     } else {
-      console.log('Global context not created!');
+      console.log("Global context not created!");
     }
   }
-  
-   public static  getContext(config?: MoonwallConfig): MoonwallContext {
+
+  public static getContext(config?: MoonwallConfig): MoonwallContext {
     if (!MoonwallContext.instance) {
       if (!config) {
-        console.error('❌ Config must be provided on Global Context instantiation');
+        console.error(
+          "❌ Config must be provided on Global Context instantiation"
+        );
         process.exit(1);
       }
       MoonwallContext.instance = new MoonwallContext(config);
+      debug(`🟢  Moonwall context "${config.label}" created`);
     }
     return MoonwallContext.instance;
   }
-  public static async destroy(){
-    MoonwallContext.instance.disconnect()
-    delete MoonwallContext.instance
-    await setTimeout(2000)
+  public static destroy() {
+    try {
+      MoonwallContext.getContext().disconnect();
+    } catch {
+      console.log("🛑  All connections disconnected");
+    }
+    delete MoonwallContext.instance;
   }
 }

@@ -1,5 +1,6 @@
-import { MoonwallConfig } from '../lib/types';
-import fs from 'fs/promises';
+import { MoonwallConfig } from "../lib/types";
+import fs from "fs/promises";
+import util from "util";
 
 export async function loadConfig(path: string): Promise<MoonwallConfig> {
   if (
@@ -11,9 +12,9 @@ export async function loadConfig(path: string): Promise<MoonwallConfig> {
     throw new Error(`Moonwall Config file ${path} cannot be found`);
   }
 
-  const file = await fs.readFile(path, { encoding: 'utf-8' });
-  return JSON.parse(file) as MoonwallConfig;
+  const file = await fs.readFile(path, { encoding: "utf-8" });
+  const json: MoonwallConfig = JSON.parse(file);
+  return json;
 }
-
 
 export async function buildFoundations(config: MoonwallConfig) {}
