@@ -1,6 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ProviderType = void 0;
+exports.ProviderType = exports.FoundationType = void 0;
+var FoundationType;
+(function (FoundationType) {
+    FoundationType["ReadOnly"] = "read_only";
+    FoundationType["DevMode"] = "dev";
+    FoundationType["Forked"] = "fork";
+    FoundationType["ZombieNet"] = "zombie";
+    FoundationType["Chopsticks"] = "chopsticks";
+})(FoundationType = exports.FoundationType || (exports.FoundationType = {}));
 var ProviderType;
 (function (ProviderType) {
     ProviderType[ProviderType["PolkadotJs"] = "polkadotJs"] = "PolkadotJs";

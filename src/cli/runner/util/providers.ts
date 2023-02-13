@@ -7,7 +7,6 @@ import Web3 from "web3";
 import { ethers } from "ethers";
 import {
   ConnectedProvider,
-  LaunchedNode,
   MoonwallConfig,
   MoonwallEnvironment,
   MoonwallProvider,
@@ -110,7 +109,7 @@ export async function populateProviderInterface(
         name,
         api: pjsApi,
         greet: () =>
-          console.log(
+          debug(
             `👋  Provider ${name} is connected to chain` +
               ` ${pjsApi.consts.system.version.specName.toString()} ` +
               `RT${pjsApi.consts.system.version.specVersion.toNumber()}`
@@ -124,7 +123,7 @@ export async function populateProviderInterface(
         name,
         api: mbApi,
         greet: () =>
-          console.log(
+          debug(
             `👋  Provider ${name} is connected to chain` +
               ` ${mbApi.consts.system.version.specName.toString()} ` +
               `RT${mbApi.consts.system.version.specVersion.toNumber()}`
@@ -138,11 +137,12 @@ export async function populateProviderInterface(
         name,
         api: ethApi,
         greet: async () =>
-          console.log(
-            `👋 Provider ${name} is connected to chain ` + JSON.stringify(await ethApi.getNetwork())
+          debug(
+            `👋  Provider ${name} is connected to chain ` +  (await ethApi.getNetwork()).chainId
           ),
         disconnect: () => {
           ethApi.removeAllListeners();
+          ethApi.provider.destroy()
           ethApi.destroy();
         },
       };

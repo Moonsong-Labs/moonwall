@@ -1,10 +1,13 @@
-import { ConnectedProvider, LaunchedNode, MoonwallConfig, MoonwallEnvironment } from "../lib/types";
+/// <reference types="node" />
+import { ConnectedProvider, MoonwallConfig, MoonwallEnvironment } from "../lib/types";
+import { ChildProcess } from "child_process";
 export declare class MoonwallContext {
     private static instance;
     environments: MoonwallEnvironment[];
     providers: ConnectedProvider[];
-    nodes?: LaunchedNode[];
+    nodes: ChildProcess[];
     constructor(config: MoonwallConfig);
+    startNetwork(environmentName: string): Promise<MoonwallContext>;
     env(query: string): MoonwallEnvironment | undefined;
     connectEnvironment(environmentName: string): Promise<MoonwallContext>;
     disconnect(providerName?: string): void;

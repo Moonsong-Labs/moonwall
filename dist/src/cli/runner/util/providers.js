@@ -79,14 +79,14 @@ function prepareProductionProviders(providerConfigs) {
     });
 }
 exports.prepareProductionProviders = prepareProductionProviders;
-async function populateProviderInterface(name, type, connect, disconnect) {
+async function populateProviderInterface(name, type, connect, ws) {
     switch (type) {
         case types_1.ProviderType.PolkadotJs:
             const pjsApi = (await connect());
             return {
                 name,
                 api: pjsApi,
-                greet: () => console.log(`👋  Provider ${name} is connected to chain` +
+                greet: () => debug(`👋  Provider ${name} is connected to chain` +
                     ` ${pjsApi.consts.system.version.specName.toString()} ` +
                     `RT${pjsApi.consts.system.version.specVersion.toNumber()}`),
                 disconnect: () => pjsApi.disconnect(),
@@ -96,7 +96,7 @@ async function populateProviderInterface(name, type, connect, disconnect) {
             return {
                 name,
                 api: mbApi,
-                greet: () => console.log(`👋  Provider ${name} is connected to chain` +
+                greet: () => debug(`👋  Provider ${name} is connected to chain` +
                     ` ${mbApi.consts.system.version.specName.toString()} ` +
                     `RT${mbApi.consts.system.version.specVersion.toNumber()}`),
                 disconnect: () => mbApi.disconnect(),
@@ -106,9 +106,10 @@ async function populateProviderInterface(name, type, connect, disconnect) {
             return {
                 name,
                 api: ethApi,
-                greet: async () => console.log(`👋 Provider ${name} is connected to chain ` + JSON.stringify(await ethApi.getNetwork())),
+                greet: async () => debug(`👋  Provider ${name} is connected to chain ` + (await ethApi.getNetwork()).chainId),
                 disconnect: () => {
                     ethApi.removeAllListeners();
+                    ethApi.provider.destroy();
                     ethApi.destroy();
                 },
             };
@@ -119,9 +120,7 @@ async function populateProviderInterface(name, type, connect, disconnect) {
                 api: web3Api,
                 greet: async () => console.log(`👋 Provider ${name} is connected to chain ` + JSON.stringify(await web3Api.eth.getChainId())),
                 disconnect: () => {
-                    console.log(web3Api.currentProvider);
-                    disconnect();
-                    console.log(web3Api.currentProvider);
+                    console.dir(ws, { depth: null });
                 },
             };
         default:

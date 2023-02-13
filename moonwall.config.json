@@ -4,10 +4,50 @@
   "defaultTestTimeout": 40000,
   "environments": [
     {
-      "name": "ether_test",
-      "testFileDir":"tests/eth_test/",
+      "name": "dev_tests",
+      "testFileDir": "tests/dev_tests",
       "foundation": {
-        "type": "production"
+        "type": "dev",
+        "launchSpec": [
+          {
+            "bin": {
+              "name": "moonbeam",
+              "path": "/home/timbotronic/workspace/moonbeam/moonbeam/target/release/moonbeam"
+            },
+            "ports": { "p2pPort": 30333, "wsPort": 9944, "rpcPort":  9933},
+            "alreadyRunning": false,
+            "options": [
+              "--dev",
+              "--no-hardware-benchmarks",
+              "--no-telemetry",
+              "--reserved-only",
+              "--rpc-cors=all",
+              "--no-grandpa",
+              "--force-authoring",
+              "--no-prometheus"
+            ]
+          }
+        ]
+      },
+      "connections": [
+        {
+          "name": "eth",
+          "type": "ethers",
+          "endpoints": ["ws://localhost:9944"]
+        },
+        {
+          "name": "dot",
+          "type": "polkadotJs",
+          "endpoints": ["ws://localhost:9944"]
+        }
+      ]
+    },
+
+    {
+      "name": "ether_test",
+      "testFileDir": "tests/eth_test/",
+      "foundation": {
+        "type": "read_only"
       },
       "connections": [
         {
@@ -19,9 +59,9 @@
     },
     {
       "name": "web3_test",
-      "testFileDir":"tests/web3_test/",
+      "testFileDir": "tests/web3_test/",
       "foundation": {
-        "type": "production"
+        "type": "read_only"
       },
       "connections": [
         {
@@ -33,9 +73,9 @@
     },
     {
       "name": "SmokeCopy",
-      "testFileDir":"tests/dummy-smoke/",
+      "testFileDir": "tests/dummy-smoke/",
       "foundation": {
-        "type": "production"
+        "type": "read_only"
       },
       "connections": [
         {
@@ -57,16 +97,15 @@
     },
     {
       "name": "basic",
-      "testFilePath":"tests/basic",
+      "testFilePath": "tests/basic",
       "foundation": {
-        "type": "production"
+        "type": "read_only"
       },
-      "connections": [
-      ]
+      "connections": []
     },
     {
       "name": "New_Test2",
-      "testFilePath":"",
+      "testFilePath": "",
       "foundation": {
         "type": "chopsticks"
       },

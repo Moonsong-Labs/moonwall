@@ -13,8 +13,29 @@ export type Environment = {
     connections: ProviderConfig[];
 };
 export type Foundation = {
-    type: "production" | "dev" | "fork" | "zombie" | "chopsticks";
+    type: FoundationType;
+    launchSpec?: LaunchSpec;
 };
+export type LaunchSpec = {
+    bin: {
+        name: string;
+        path: string;
+    };
+    ports: {
+        p2pPort: number;
+        wsPort: number;
+        rpcPort: number;
+    };
+    alreadyRunning: boolean;
+    options: string[];
+};
+export declare enum FoundationType {
+    ReadOnly = "read_only",
+    DevMode = "dev",
+    Forked = "fork",
+    ZombieNet = "zombie",
+    Chopsticks = "chopsticks"
+}
 export interface ProviderConfig {
     name: string;
     type: ProviderType;
@@ -23,6 +44,7 @@ export interface ProviderConfig {
 export type MoonwallEnvironment = {
     name: string;
     providers: MoonwallProvider[];
+    nodes: Node[];
     context: any;
 };
 export interface MoonwallProvider {
@@ -44,8 +66,12 @@ export declare enum ProviderType {
     Moonbeam,
     Unknown
 }
-export interface LaunchedNode {
-}
+export type Node = {
+    name: string;
+    type: "binary" | "chopsticks" | "zombie";
+    cmd: string;
+    args: string[];
+};
 export type MoonwallTestFile = {};
 export type MoonwallTestSuite = {
     tests: MoonwallTestCase[];

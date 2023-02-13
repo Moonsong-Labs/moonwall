@@ -11,8 +11,8 @@
     "start": "node -r ts-node/register dist/src/cli/index.js",
     "lint": "npx prettier --write --ignore-path .gitignore '**/*.(yml|js|ts|json)'",
     "test-bin": "npm run compile && npm run start -- test -f tests/*.ts",
-    "new-cmd": "DEBUG=global* npx ts-node -r ts-node/register ./src/cli/index.ts test -t SmokeCopy",
-    "new-cmd-js": "npm run compile && DEBUG=smoke* npm run start -- test -t SmokeCopy"
+    "new-cmd-js": "npm run compile && DEBUG=smoke* npm run start -- test -t SmokeCopy",
+    "new-cmd": "DEBUG=global* npx ts-node -r ts-node/register ./src/cli/index.ts test -t dev_tests"
   },
   "bin": {
     "moonwall": "./src/cli/index.ts"

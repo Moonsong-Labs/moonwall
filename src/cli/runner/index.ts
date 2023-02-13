@@ -16,7 +16,6 @@ export async function runner(args) {
 
   mocha.checkLeaks();
   await contextCreator(config, args.environment)
-
   if (args.environment) {
     // For files selected by Config.Environments.testFileDir
     try {
@@ -38,7 +37,7 @@ export async function runner(args) {
         })
       );
       MoonwallContext.destroy()
-      process.exitCode = 0;
+      process.exit(0)
     } catch (e) {
       console.error(e);
       process.exit(1);

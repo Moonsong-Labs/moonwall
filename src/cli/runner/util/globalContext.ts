@@ -1,41 +1,100 @@
 import {
   ConnectedProvider,
-  LaunchedNode,
+  FoundationType,
   MoonwallConfig,
   MoonwallEnvironment,
+  Node,
 } from "../lib/types";
+import { ChildProcess, spawn } from "child_process";
 import {
   populateProviderInterface,
   prepareProductionProviders,
 } from "./providers";
-const debug = require("debug")("global:context");
+import { launchDevNode } from "./LocalNode";
+const debugSetup = require("debug")("global:context");
+const debugNode = require("debug")("global:node");
 
 export class MoonwallContext {
   private static instance: MoonwallContext;
   environments: MoonwallEnvironment[];
   providers: ConnectedProvider[];
-  nodes?: LaunchedNode[];
+  nodes: ChildProcess[];
 
   constructor(config: MoonwallConfig) {
     this.environments = [];
     this.providers = [];
+    this.nodes = [];
 
     config.environments.forEach((env) => {
-      const blob = { name: env.name, context: {}, providers: [] };
+      const blob = { name: env.name, context: {}, providers: [], nodes: [] };
 
       switch (env.foundation.type) {
-        case "production":
+        case FoundationType.ReadOnly:
           blob.providers = prepareProductionProviders(env.connections);
-          debug(`🟢  Foundation "${env.foundation.type}" setup`);
+          debugSetup(
+            `🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`
+          );
+          break;
+
+        case FoundationType.DevMode:
+          /// eventually turn this into function
+          const item = env.foundation.launchSpec[0];
+          const cmd = item.bin.path;
+          let args = [...item.options];
+          const ports = item.ports;
+          if (ports.p2pPort) {
+            args.push(`--port=${ports.p2pPort}`);
+          }
+          if (ports.wsPort) {
+            args.push(`--ws-port=${ports.wsPort}`);
+          }
+          if (ports.rpcPort) {
+            args.push(`--rpc-port=${ports.rpcPort}`);
+          }
+
+          // const args = env.foundation.launchSpec[0]
+
+          debugNode(`The run command is: ${cmd}`);
+          debugNode(`The run args are: ${args}`);
+
+          blob.nodes.push({
+            name: item.bin.name,
+            cmd,
+            args,
+          });
+
+          // function end
+          blob.providers = prepareProductionProviders(env.connections);
+          debugSetup(
+            `🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`
+          );
           break;
         default:
-          debug(
-            `🚧  Foundation "${env.foundation.type}" unsupported, skipping setup`
+          debugSetup(
+            `🚧  Foundation "${env.foundation.type}" unsupported, skipping`
           );
           return;
       }
       this.environments.push(blob);
     });
+  }
+
+  public async startNetwork(environmentName: string) {
+    console.log(environmentName);
+
+    if (this.nodes.length > 0) {
+      console.log("Nodes already started! Skipping command");
+      return MoonwallContext.getContext();
+    }
+
+    const nodes = MoonwallContext.getContext().environments.find(
+      (env) => env.name == environmentName
+    ).nodes;
+    const promises = nodes.map(async ({ cmd, args, name }) => {
+      await launchDevNode(cmd, args, name);
+    });
+
+    await Promise.all(promises);
   }
 
   public env(query: string): MoonwallEnvironment | undefined {
@@ -73,7 +132,7 @@ export class MoonwallContext {
 
   public static printStats() {
     if (MoonwallContext) {
-      console.log(MoonwallContext.getContext());
+      console.dir(MoonwallContext.getContext(), { depth: 1 });
     } else {
       console.log("Global context not created!");
     }
@@ -88,7 +147,8 @@ export class MoonwallContext {
         process.exit(1);
       }
       MoonwallContext.instance = new MoonwallContext(config);
-      debug(`🟢  Moonwall context "${config.label}" created`);
+
+      debugSetup(`🟢  Moonwall context "${config.label}" created`);
     }
     return MoonwallContext.instance;
   }
@@ -103,9 +163,9 @@ export class MoonwallContext {
 }
 
 export const contextCreator = async (config: MoonwallConfig, env: string) => {
-  console.log(env);
   const ctx = MoonwallContext.getContext(config);
-  debug(`🟢  Global context fetched for mocha`);
+  debugSetup(`🟢  Global context fetched for mocha`);
+  await ctx.startNetwork(env);
   await ctx.connectEnvironment(env);
-  ctx.providers.forEach(async ({ greet }) => await greet());
+  await Promise.all(ctx.providers.map(async ({ greet }) => greet()))
 };

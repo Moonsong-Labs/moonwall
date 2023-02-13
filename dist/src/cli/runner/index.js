@@ -30,8 +30,8 @@ async function runner(args) {
                     resolve("🎉  Test run has completed without errors.");
                 });
             }));
-            globalContext_1.MoonwallContext.getContext().disconnect();
-            process.exitCode = 0;
+            globalContext_1.MoonwallContext.destroy();
+            process.exit(0);
         }
         catch (e) {
             console.error(e);
