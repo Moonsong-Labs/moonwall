@@ -20,13 +20,14 @@ export async function testCmd(args) {
 
       process.env.TEST_ENV = args.environment;
 
+      // TODO: sort out reporter config
       const files = await fs.readdir(dir);
       console.log(
         await new Promise(async (resolve, reject) => {
-          const vitest = await startVitest("test", ["test.spec.ts"], {
+          const vitest = await startVitest("test", files, {
             watch: false,
-
             globals: true,
+            reporters:["verbose", "html"],
             setupFiles: ["src/cli/runner/internal/setupFixture.ts"],
           });
           await vitest?.close();
