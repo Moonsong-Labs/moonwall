@@ -7,7 +7,7 @@ exports.extractPreimageDeposit = exports.extractWeight = exports.getBlockArray =
 require("@moonbeam-network/api-augment/moonbase");
 const bottleneck_1 = __importDefault(require("bottleneck"));
 const debug = require("debug")("test:blocks");
-async function createAndFinalizeBlock(api, parentHash, finalize = true) {
+async function createAndFinalizeBlock(api, parentHash, finalize = false) {
     const startTime = Date.now();
     const block = parentHash
         ? await api.rpc.engine.createBlock(true, finalize, parentHash)

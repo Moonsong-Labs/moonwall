@@ -4,7 +4,7 @@
   "defaultTestTimeout": 40000,
   "environments": [
     {
-      "name": "dev_tests",
+      "name": "dev_test",
       "testFileDir": "tests/dev_tests",
       "foundation": {
         "type": "dev",
@@ -57,6 +57,9 @@
         }
       ]
     },
+
+
+
     {
       "name": "web3_test",
       "testFileDir": "tests/web3_test/",
@@ -84,7 +87,7 @@
           "endpoints": ["wss://moonbeam.api.onfinality.io/public-ws"]
         },
         {
-          "name": "DOT",
+          "name": "DOT", 
           "type": "polkadotJs",
           "endpoints": ["wss://rpc.polkadot.io"]
         },

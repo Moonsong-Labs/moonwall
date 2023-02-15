@@ -1,15 +1,17 @@
 import { expect } from "chai";
 import { testSuite } from "../../src/cli/runner/util/runner-functions";
 import { Contract, formatUnits } from "ethers";
-import { xcAssetAbi } from "../../src/cli/runner/lib/moonbeam_consts";
+import { xcAssetAbi } from "../../src/cli/runner/lib/moonbeamConsts";
+import { createBlock } from "src/utils/contextHelpers";
 
 testSuite({
-  id: "eth",
+  id: "S100",
   title: "Ethers test suite",
+  // environment:[ "ether_test",],
   testCases: ({ it, context }) => {
-    const api = context.ethersApi("eth");
+    const api = context.getEthers();
 
-    it("x01", "Calling chain data", async function () {
+    it("E01", "Calling chain data", async function () {
       console.log(
         `The latest block is ${(await api.getBlock("latest")).number}`
       );
@@ -22,7 +24,7 @@ testSuite({
       expect(bal).to.be.greaterThan(0);
     });
 
-    it("x02", "Accessing contract methods", async function () {
+    it("E02", "Accessing contract methods", async function () {
       const address = "0xFFFFFFfFea09FB06d082fd1275CD48b191cbCD1d";
       const contract = new Contract(address, xcAssetAbi, api);
       const totalSupply = await contract.totalSupply();
@@ -35,5 +37,6 @@ testSuite({
       );
       expect(totalSupply > 0).to.be.true;
     });
+
   },
 });

@@ -6,7 +6,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const yargs_1 = __importDefault(require("yargs"));
 const helpers_1 = require("yargs/helpers");
-const runner_1 = require("./runner");
+const test_1 = require("./runner/cmds/test");
 (0, yargs_1.default)((0, helpers_1.hideBin)(process.argv))
     .usage('Usage: $0')
     .version('2.0.0')
@@ -18,7 +18,7 @@ const runner_1 = require("./runner");
         default: '*.ts',
     });
 }, async (argv) => {
-    await (0, runner_1.runner)(argv);
+    await (0, test_1.testCmd)(argv);
 })
     .options({
     configFile: {

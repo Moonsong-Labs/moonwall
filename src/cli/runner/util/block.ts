@@ -24,7 +24,7 @@ const debug = require("debug")("test:blocks");
 export async function createAndFinalizeBlock(
   api: ApiPromise,
   parentHash?: string,
-  finalize: boolean = true
+  finalize: boolean = false
 ): Promise<{
   duration: number;
   hash: string;

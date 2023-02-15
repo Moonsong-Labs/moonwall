@@ -23,9 +23,13 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.utils = exports.jimbo = exports.timbo = void 0;
+exports.testSuite = exports.MoonwallContext = exports.utils = exports.jimbo = exports.timbo = void 0;
 var people_1 = require("./people");
 Object.defineProperty(exports, "timbo", { enumerable: true, get: function () { return people_1.timbo; } });
 Object.defineProperty(exports, "jimbo", { enumerable: true, get: function () { return people_1.jimbo; } });
 exports.utils = __importStar(require("./cli/runner/util/runner-functions"));
+var globalContext_1 = require("./cli/runner/internal/globalContext");
+Object.defineProperty(exports, "MoonwallContext", { enumerable: true, get: function () { return globalContext_1.MoonwallContext; } });
+var runner_functions_1 = require("./cli/runner/util/runner-functions");
+Object.defineProperty(exports, "testSuite", { enumerable: true, get: function () { return runner_functions_1.testSuite; } });
 //# sourceMappingURL=index.js.map

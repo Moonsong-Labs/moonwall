@@ -50,7 +50,6 @@ class MoonwallContext {
         });
     }
     async startNetwork(environmentName) {
-        console.log(environmentName);
         if (this.nodes.length > 0) {
             console.log("Nodes already started! Skipping command");
             return MoonwallContext.getContext();
@@ -123,7 +122,7 @@ const contextCreator = async (config, env) => {
     debugSetup(`🟢  Global context fetched for mocha`);
     await ctx.startNetwork(env);
     await ctx.connectEnvironment(env);
-    await Promise.all(ctx.providers.map(async ({ greet }) => greet()));
+    return ctx;
 };
 exports.contextCreator = contextCreator;
 //# sourceMappingURL=globalContext.js.map

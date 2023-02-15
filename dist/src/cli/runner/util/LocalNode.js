@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.launchDevNode = void 0;
 const child_process_1 = require("child_process");
-const globalContext_1 = require("./globalContext");
+const globalContext_1 = require("../internal/globalContext");
 const debugNode = require("debug")("global:node");
 async function launchDevNode(cmd, args, name) {
     const nodesList = globalContext_1.MoonwallContext.getContext().nodes;

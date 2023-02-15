@@ -3,14 +3,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.populateProviderInterface = exports.prepareProductionProviders = void 0;
+exports.populateProviderInterface = exports.prepareProviders = void 0;
 const moonbeam_types_bundle_1 = require("moonbeam-types-bundle");
 const api_1 = require("@polkadot/api");
 const web3_1 = __importDefault(require("web3"));
 const ethers_1 = require("ethers");
 const types_1 = require("../lib/types");
 const debug = require("debug")("global:providers");
-function prepareProductionProviders(providerConfigs) {
+function prepareProviders(providerConfigs) {
     return providerConfigs.map(({ name, endpoints, type }) => {
         const url = endpoints.includes("ENV_VAR")
             ? process.env.WSS_URL
@@ -49,12 +49,11 @@ function prepareProductionProviders(providerConfigs) {
                 };
             case types_1.ProviderType.Web3:
                 debug(`🟢  Web3 provider ${name} details prepared`);
-                const wsProvider = new web3_1.default.providers.WebsocketProvider(url);
                 return {
                     name,
                     type,
-                    ws: wsProvider,
                     connect: () => {
+                        const wsProvider = new web3_1.default.providers.WebsocketProvider(url);
                         const ethApi = new web3_1.default(wsProvider);
                         return ethApi;
                     },
@@ -78,7 +77,7 @@ function prepareProductionProviders(providerConfigs) {
         }
     });
 }
-exports.prepareProductionProviders = prepareProductionProviders;
+exports.prepareProviders = prepareProviders;
 async function populateProviderInterface(name, type, connect, ws) {
     switch (type) {
         case types_1.ProviderType.PolkadotJs:
@@ -86,6 +85,7 @@ async function populateProviderInterface(name, type, connect, ws) {
             return {
                 name,
                 api: pjsApi,
+                type,
                 greet: () => debug(`👋  Provider ${name} is connected to chain` +
                     ` ${pjsApi.consts.system.version.specName.toString()} ` +
                     `RT${pjsApi.consts.system.version.specVersion.toNumber()}`),
@@ -96,6 +96,7 @@ async function populateProviderInterface(name, type, connect, ws) {
             return {
                 name,
                 api: mbApi,
+                type,
                 greet: () => debug(`👋  Provider ${name} is connected to chain` +
                     ` ${mbApi.consts.system.version.specName.toString()} ` +
                     `RT${mbApi.consts.system.version.specVersion.toNumber()}`),
@@ -106,6 +107,7 @@ async function populateProviderInterface(name, type, connect, ws) {
             return {
                 name,
                 api: ethApi,
+                type,
                 greet: async () => debug(`👋  Provider ${name} is connected to chain ` + (await ethApi.getNetwork()).chainId),
                 disconnect: () => {
                     ethApi.removeAllListeners();
@@ -118,9 +120,9 @@ async function populateProviderInterface(name, type, connect, ws) {
             return {
                 name,
                 api: web3Api,
-                greet: async () => console.log(`👋 Provider ${name} is connected to chain ` + JSON.stringify(await web3Api.eth.getChainId())),
+                type,
+                greet: async () => console.log(`👋 Provider ${name} is connected to chain ` + await web3Api.eth.getChainId()),
                 disconnect: () => {
-                    console.dir(ws, { depth: null });
                 },
             };
         default:

@@ -17,8 +17,8 @@ const timeout = Math.floor(timePeriod / 12);
     id: "S400",
     title: "Parachain blocks should be finalized",
     testCases: ({ context, it }) => {
-        const api = context.polkaCtx("MB");
-        const web3 = context.web3Api("w3");
+        const api = context.getPolkadotJs();
+        const web3 = context.getWeb3();
         it("C100", `should have a recently finalized block`, async function () {
             const head = await api.rpc.chain.getFinalizedHead();
             const block = await api.rpc.chain.getBlock(head);

@@ -15,4 +15,4 @@ export declare class MoonwallContext {
     static getContext(config?: MoonwallConfig): MoonwallContext;
     static destroy(): void;
 }
-export declare const contextCreator: (config: MoonwallConfig, env: string) => Promise<void>;
+export declare const contextCreator: (config: MoonwallConfig, env: string) => Promise<MoonwallContext>;

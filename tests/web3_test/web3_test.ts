@@ -1,12 +1,12 @@
 import { expect } from "chai";
 import { testSuite } from "../../src/cli/runner/util/runner-functions";
-import { xcAssetAbi } from "../../src/cli/runner/lib/moonbeam_consts";
+import { xcAssetAbi } from "../../src/cli/runner/lib/moonbeamConsts";
 
 testSuite({
   id: "w3",
   title: "Web3 test suite",
   testCases: ({ it, context }) => {
-    const web3 = context.web3Api("w3");
+    const web3 = context.getWeb3("w3");
 
     it("t1", "Calling chain data", async function () {
       console.log(

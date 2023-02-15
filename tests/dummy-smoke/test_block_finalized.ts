@@ -19,13 +19,14 @@ testSuite({
   id: "S400",
   title: "Parachain blocks should be finalized",
   testCases: ({ context, it }) => {
-    const api = context.polkaCtx("MB");
-    const web3 = context.web3Api("w3");
+    const api = context.getPolkadotJs();
+    const web3 = context.getWeb3();
 
     it("C100", `should have a recently finalized block`, async function () {
       const head = await api.rpc.chain.getFinalizedHead();
       const block = await api.rpc.chain.getBlock(head);
       const diff = Date.now() - getBlockTime(block);
+
       debug(`Last finalized block was ${diff / 1000} seconds ago`);
       expect(diff).to.be.lessThanOrEqual(10 * 60 * 1000); // 10 minutes in milliseconds
     });

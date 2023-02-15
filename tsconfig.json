@@ -19,7 +19,7 @@
   },
   "include": ["src/**/*", "tests"],
   "ts-node": {
-    "transpileOnly": true,
+    "swc": true,
     "files": true,
     "compilerOptions": {
       "baseUrl": ".",

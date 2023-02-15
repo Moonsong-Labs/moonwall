@@ -18,7 +18,7 @@ import { WebSocketProvider } from "ethers";
 import { Web3BaseProvider}   from "web3-types"
 const debug = require("debug")("global:providers");
 
-export function prepareProductionProviders(
+export function prepareProviders(
   providerConfigs: ProviderConfig[]
 ): MoonwallProvider[] {
 
@@ -63,12 +63,13 @@ export function prepareProductionProviders(
 
       case ProviderType.Web3:
         debug(`🟢  Web3 provider ${name} details prepared`);
-        const wsProvider: Web3BaseProvider =new Web3.providers.WebsocketProvider(url)
+        
         return {
           name,
           type,
-          ws: wsProvider,
+          // ws: wsProvider,
           connect: () => {
+            const wsProvider: Web3BaseProvider =new Web3.providers.WebsocketProvider(url)
             const ethApi = new Web3(wsProvider)
             return ethApi;
           },
@@ -108,6 +109,7 @@ export async function populateProviderInterface(
       return {
         name,
         api: pjsApi,
+        type,
         greet: () =>
           debug(
             `👋  Provider ${name} is connected to chain` +
@@ -122,6 +124,7 @@ export async function populateProviderInterface(
       return {
         name,
         api: mbApi,
+        type,
         greet: () =>
           debug(
             `👋  Provider ${name} is connected to chain` +
@@ -136,6 +139,7 @@ export async function populateProviderInterface(
       return {
         name,
         api: ethApi,
+        type,
         greet: async () =>
           debug(
             `👋  Provider ${name} is connected to chain ` +  (await ethApi.getNetwork()).chainId
@@ -152,13 +156,15 @@ export async function populateProviderInterface(
         return {
           name,
           api: web3Api,
+          type,
           greet: async () =>
             console.log(
-              `👋 Provider ${name} is connected to chain ` + JSON.stringify(await web3Api.eth.getChainId())
+              `👋 Provider ${name} is connected to chain ` + await web3Api.eth.getChainId()
             ),
           disconnect: () => {
+            // web3Api.currentProvider
             // console.log(web3Api.currentProvider)
-            console.dir(ws, {depth: null})
+            // console.dir(ws, {depth: null})
             // console.log(web3Api.currentProvider)
           },
         };

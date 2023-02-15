@@ -13,12 +13,12 @@ export type Environment = {
   name: string;
   testFileDir: string;
   foundation: Foundation;
-  connections: ProviderConfig[];
+  connections?: ProviderConfig[];
 };
 
 export type Foundation = {
   type: FoundationType;
-  launchSpec?: LaunchSpec;
+  launchSpec?: LaunchSpec[];
 };
 
 export type LaunchSpec = {
@@ -26,13 +26,13 @@ export type LaunchSpec = {
     name: string;
     path: string;
   };
-  ports: {
+  ports?: {
     p2pPort: number;
     wsPort: number;
     rpcPort: number;
   };
-  alreadyRunning: boolean;
-  options: string[];
+  alreadyRunning?: boolean;
+  options?: string[];
 };
 
 export enum FoundationType {
@@ -65,6 +65,7 @@ export interface MoonwallProvider {
 
 export interface ConnectedProvider {
   name: string;
+  type: ProviderType;
   api: ApiPromise | WebSocketProvider | Web3;
   disconnect: () => void;
   greet: () => Promise<void> | void;

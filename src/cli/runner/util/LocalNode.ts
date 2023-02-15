@@ -1,5 +1,5 @@
 import { spawn } from "child_process";
-import { MoonwallContext } from "./globalContext";
+import { MoonwallContext } from "../internal/globalContext";
 
 const debugNode = require("debug")("global:node");
 
