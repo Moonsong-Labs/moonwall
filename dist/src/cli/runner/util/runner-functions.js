@@ -1,10 +1,9 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.testSuite = void 0;
-const globalContext_1 = require("../internal/globalContext");
-const types_1 = require("../lib/types");
-function testSuite({ id, title, testCases, supportedFoundations, }) {
-    const ctx = globalContext_1.MoonwallContext.getContext();
+import { describe, it } from "vitest";
+import { MoonwallContext } from "../../../../src/index.js";
+import { ProviderType } from "../lib/types";
+export function testSuite({ id, title, testCases, supportedFoundations, }) {
+    console.log("hello timbo");
+    const ctx = MoonwallContext.getContext();
     describe(`🗃️  #${id} ${title}`, function () {
         let context = {
             providers: {},
@@ -13,7 +12,7 @@ function testSuite({ id, title, testCases, supportedFoundations, }) {
                     return context.providers[apiName];
                 }
                 else {
-                    return globalContext_1.MoonwallContext.getContext().providers.find((a) => a.type == types_1.ProviderType.PolkadotJs).api;
+                    return MoonwallContext.getContext().providers.find((a) => a.type == ProviderType.PolkadotJs).api;
                 }
             },
             getMoonbeam: (apiName) => {
@@ -21,7 +20,7 @@ function testSuite({ id, title, testCases, supportedFoundations, }) {
                     return context.providers[apiName];
                 }
                 else {
-                    return globalContext_1.MoonwallContext.getContext().providers.find((a) => a.type == types_1.ProviderType.Moonbeam).api;
+                    return MoonwallContext.getContext().providers.find((a) => a.type == ProviderType.Moonbeam).api;
                 }
             },
             getEthers: (apiName) => {
@@ -29,7 +28,7 @@ function testSuite({ id, title, testCases, supportedFoundations, }) {
                     return context.providers[apiName];
                 }
                 else {
-                    return globalContext_1.MoonwallContext.getContext().providers.find((a) => a.type == types_1.ProviderType.Ethers).api;
+                    return MoonwallContext.getContext().providers.find((a) => a.type == ProviderType.Ethers).api;
                 }
             },
             getWeb3: (apiName) => {
@@ -37,11 +36,10 @@ function testSuite({ id, title, testCases, supportedFoundations, }) {
                     return context.providers[apiName];
                 }
                 else {
-                    return globalContext_1.MoonwallContext.getContext().providers.find((a) => a.type == types_1.ProviderType.Web3).api;
+                    return MoonwallContext.getContext().providers.find((a) => a.type == ProviderType.Web3).api;
                 }
             },
         };
-        console.log("genesis is " + ctx.genesis);
         if (supportedFoundations &&
             !supportedFoundations.includes(ctx.foundation)) {
             throw new Error(`Test file does not support foundation ${ctx.foundation}`);
@@ -55,5 +53,4 @@ function testSuite({ id, title, testCases, supportedFoundations, }) {
         testCases({ context, it: testCase });
     });
 }
-exports.testSuite = testSuite;
 //# sourceMappingURL=runner-functions.js.map

@@ -1,22 +1,14 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.buildFoundations = exports.loadConfig = void 0;
-const promises_1 = __importDefault(require("fs/promises"));
-async function loadConfig(path) {
-    if (!(await promises_1.default
+import fs from "fs/promises";
+export async function loadConfig(path) {
+    if (!(await fs
         .access(path)
         .then(() => true)
         .catch(() => false))) {
         throw new Error(`Moonwall Config file ${path} cannot be found`);
     }
-    const file = await promises_1.default.readFile(path, { encoding: "utf-8" });
+    const file = await fs.readFile(path, { encoding: "utf-8" });
     const json = JSON.parse(file);
     return json;
 }
-exports.loadConfig = loadConfig;
-async function buildFoundations(config) { }
-exports.buildFoundations = buildFoundations;
+export async function buildFoundations(config) { }
 //# sourceMappingURL=configReader.js.map

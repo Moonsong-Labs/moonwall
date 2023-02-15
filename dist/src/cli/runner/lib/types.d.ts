@@ -1,22 +1,22 @@
 import { ApiPromise } from "@polkadot/api";
 import { WebSocketProvider } from "ethers";
 import Web3 from "web3";
-export type MoonwallConfig = {
+export declare type MoonwallConfig = {
     label: string;
     defaultTestTimeout: number;
     environments: Environment[];
 };
-export type Environment = {
+export declare type Environment = {
     name: string;
     testFileDir: string;
     foundation: Foundation;
     connections?: ProviderConfig[];
 };
-export type Foundation = {
+export declare type Foundation = {
     type: FoundationType;
     launchSpec?: LaunchSpec[];
 };
-export type LaunchSpec = {
+export declare type LaunchSpec = {
     bin: {
         name: string;
         path: string;
@@ -41,7 +41,7 @@ export interface ProviderConfig {
     type: ProviderType;
     endpoints: string[];
 }
-export type MoonwallEnvironment = {
+export declare type MoonwallEnvironment = {
     name: string;
     providers: MoonwallProvider[];
     nodes: Node[];
@@ -67,14 +67,14 @@ export declare enum ProviderType {
     Moonbeam,
     Unknown
 }
-export type Node = {
+export declare type Node = {
     name: string;
     type: "binary" | "chopsticks" | "zombie";
     cmd: string;
     args: string[];
 };
-export type MoonwallTestFile = {};
-export type MoonwallTestSuite = {
+export declare type MoonwallTestFile = {};
+export declare type MoonwallTestSuite = {
     tests: MoonwallTestCase[];
 };
-export type MoonwallTestCase = {};
+export declare type MoonwallTestCase = {};

@@ -1,9 +1,9 @@
-#!/usr/bin/env ts-node
+#!/usr/bin/env ts-node-esm
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 // import { runner } from './runner';
-import { testCmd } from "./runner/cmds/test";
-import { runNetwork } from "./runner/cmds/runNetwork";
+import { testCmd } from "./runner/cmds/runTests.js";
+import { runNetwork } from "./runner/cmds/runNetwork.js";
 
 yargs(hideBin(process.argv))
   .usage("Usage: $0")

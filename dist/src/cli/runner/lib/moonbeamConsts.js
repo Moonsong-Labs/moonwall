@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.xcAssetAbi = void 0;
-exports.xcAssetAbi = [
+export const xcAssetAbi = [
     {
         anonymous: false,
         inputs: [

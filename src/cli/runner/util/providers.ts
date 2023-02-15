@@ -12,11 +12,12 @@ import {
   MoonwallProvider,
   ProviderConfig,
   ProviderType,
-} from "../lib/types";
+} from "../lib/types.js";
 import { ApiOptions } from "@polkadot/api/types";
 import { WebSocketProvider } from "ethers";
 import { Web3BaseProvider}   from "web3-types"
-const debug = require("debug")("global:providers");
+import Debug from "debug"
+const debug = Debug("global:providers");
 
 export function prepareProviders(
   providerConfigs: ProviderConfig[]

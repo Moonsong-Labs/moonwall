@@ -9,13 +9,14 @@ import {
 
 // import { globalConfig } from "../../../../moonwalls.config";
 import { ChildProcess, spawn } from "child_process";
-import { populateProviderInterface, prepareProviders } from "../util/providers";
-import { launchDevNode } from "../util/LocalNode";
-import globalConfig from "../../../../moonwalls.config";
-import { parseRunCmd } from "./devFoundation";
+import { populateProviderInterface, prepareProviders } from "../util/providers.js";
+import { launchDevNode } from "../util/LocalNode.js";
+import globalConfig from "../../../../moonwall.config.js";
+import { parseRunCmd } from "./devFoundation.js";
 import { ApiPromise } from "@polkadot/api";
-const debugSetup = require("debug")("global:context");
-const debugNode = require("debug")("global:node");
+import Debug from "debug"
+const debugSetup = Debug("global:context");
+const debugNode = Debug("global:node");
 
 export class MoonwallContext {
   private static instance: MoonwallContext;

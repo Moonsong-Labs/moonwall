@@ -13,14 +13,15 @@ import { u32, u64, u128, Option } from "@polkadot/types";
 
 import { expect } from "chai";
 
-import { WEIGHT_PER_GAS } from "../lib/constants";
+import { WEIGHT_PER_GAS } from "../lib/constants.js";
 // import { DevTestContext } from "./setup-dev-tests";
 
 import type { Block, AccountId20 } from "@polkadot/types/interfaces/runtime/types";
 import type { TxWithEvent } from "@polkadot/api-derive/types";
 import type { ITuple } from "@polkadot/types-codec/types";
 import Bottleneck from "bottleneck";
-const debug = require("debug")("test:blocks");
+import Debug from "debug"
+const debug = Debug("test:blocks");
 export async function createAndFinalizeBlock(
   api: ApiPromise,
   parentHash?: string,

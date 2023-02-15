@@ -1,11 +1,9 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.launchDevNode = void 0;
-const child_process_1 = require("child_process");
-const globalContext_1 = require("../internal/globalContext");
-const debugNode = require("debug")("global:node");
-async function launchDevNode(cmd, args, name) {
-    const nodesList = globalContext_1.MoonwallContext.getContext().nodes;
+import { spawn } from "child_process";
+import { MoonwallContext } from "../internal/globalContext.js";
+import Debug from "debug";
+const debugNode = Debug("global:node");
+export async function launchDevNode(cmd, args, name) {
+    const nodesList = MoonwallContext.getContext().nodes;
     const currentNode = nodesList.length + 1;
     nodesList[currentNode] = null;
     const onProcessExit = () => {
@@ -16,7 +14,7 @@ async function launchDevNode(cmd, args, name) {
     };
     process.once("exit", onProcessExit);
     process.once("SIGINT", onProcessInterrupt);
-    nodesList[currentNode] = (0, child_process_1.spawn)(cmd, args);
+    nodesList[currentNode] = spawn(cmd, args);
     nodesList[currentNode].once("exit", () => {
         process.removeListener("exit", onProcessExit);
         process.removeListener("SIGINT", onProcessInterrupt);
@@ -57,5 +55,4 @@ async function launchDevNode(cmd, args, name) {
         nodesList[currentNode].stdout.on("data", onData);
     });
 }
-exports.launchDevNode = launchDevNode;
 //# sourceMappingURL=LocalNode.js.map

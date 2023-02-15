@@ -1,6 +1,6 @@
 import { expect } from "chai";
-import { testSuite } from "../../src/cli/runner/util/runner-functions";
-import { xcAssetAbi } from "../../src/cli/runner/lib/moonbeamConsts";
+import { testSuite } from "../../src/cli/runner/util/runner-functions.js";
+import { xcAssetAbi } from "../../src/cli/runner/lib/moonbeamConsts.js";
 
 testSuite({
   id: "w3",

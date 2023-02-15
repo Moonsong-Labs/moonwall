@@ -22,6 +22,6 @@ export interface Subscription<T> extends Web3Subscription<T> {
 export declare function web3Subscribe(web3: Web3, type: "newBlockHeaders"): Subscription<BlockHeader>;
 export declare function web3Subscribe(web3: Web3, type: "pendingTransactions"): Subscription<string>;
 export declare function web3Subscribe(web3: Web3, type: "logs", params: {}): Subscription<Log>;
-export type EnhancedWeb3 = Web3 & {
+export declare type EnhancedWeb3 = Web3 & {
     customRequest: (method: string, params: any[]) => Promise<JsonRpcResponse>;
 };

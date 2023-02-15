@@ -1,20 +1,18 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getObjectMethods = exports.Percent = exports.Perbill = exports.sortObjectByKeys = void 0;
-const util_1 = require("@polkadot/util");
-function sortObjectByKeys(o) {
+import { BN } from "@polkadot/util";
+export function sortObjectByKeys(o) {
     return Object.keys(o)
         .sort()
         .reduce((r, k) => ((r[k] = o[k]), r), {});
 }
-exports.sortObjectByKeys = sortObjectByKeys;
 class Perthing {
+    unit;
+    perthing;
     constructor(unit, numerator, denominator) {
-        if (!(numerator instanceof util_1.BN)) {
-            numerator = new util_1.BN(numerator.toString());
+        if (!(numerator instanceof BN)) {
+            numerator = new BN(numerator.toString());
         }
-        if (denominator && !(denominator instanceof util_1.BN)) {
-            denominator = new util_1.BN(denominator.toString());
+        if (denominator && !(denominator instanceof BN)) {
+            denominator = new BN(denominator.toString());
         }
         this.unit = unit;
         if (denominator) {
@@ -55,19 +53,17 @@ class Perthing {
         return dm.div.negative !== 0 ? dm.div.isubn(1) : dm.div.iaddn(1);
     }
 }
-class Perbill extends Perthing {
+export class Perbill extends Perthing {
     constructor(numerator, denominator) {
-        super(new util_1.BN(1000000000), numerator, denominator);
+        super(new BN(1000000000), numerator, denominator);
     }
 }
-exports.Perbill = Perbill;
-class Percent extends Perthing {
+export class Percent extends Perthing {
     constructor(numerator, denominator) {
-        super(new util_1.BN(100), numerator, denominator);
+        super(new BN(100), numerator, denominator);
     }
 }
-exports.Percent = Percent;
-function getObjectMethods(obj) {
+export function getObjectMethods(obj) {
     let properties = new Set();
     let currentObj = obj;
     do {
@@ -75,5 +71,4 @@ function getObjectMethods(obj) {
     } while ((currentObj = Object.getPrototypeOf(currentObj)));
     return [...properties.keys()].filter((item) => typeof obj[item] === "function");
 }
-exports.getObjectMethods = getObjectMethods;
 //# sourceMappingURL=common.js.map

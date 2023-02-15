@@ -12,16 +12,16 @@ import {
   EventRecord,
 } from "@polkadot/types/interfaces";
 import { AnyTuple, RegistryError } from "@polkadot/types/types";
-import { u8aToHex } from "@polkadot/util";
-import { customWeb3Request } from "../../src/cli/runner/internal/providers";
-import { ALITH_PRIVATE_KEY, alith } from "../../src/cli/runner/lib/accounts";
-import { createAndFinalizeBlock } from "../../src/cli/runner/util/block";
+import { customWeb3Request } from "../../src/cli/runner/internal/providers.js";
+import { ALITH_PRIVATE_KEY, alith } from "../../src/cli/runner/lib/accounts.js";
+import { createAndFinalizeBlock } from "../../src/cli/runner/util/block.js";
 import Web3 from "web3";
 import { ethers } from "ethers";
-import { MoonwallContext } from "../cli/runner/internal/globalContext";
-import { FoundationType } from "../../src/cli/runner/lib/types";
+import { MoonwallContext } from "../cli/runner/internal/globalContext.js";
+import { FoundationType } from "../../src/cli/runner/lib/types.js";
 import { assert } from "chai";
-const debug = require("debug")("context");
+import Debug from "debug"
+const debug = Debug("context");
 
 export async function resetToGenesis(api: ApiPromise){
   // TODO: This isn't working as expected, investigate and fix

@@ -1,7 +1,8 @@
 import { expect } from 'chai';
+import { beforeAll } from 'vitest';
 
 describe('This is a timbo test suite', function () {
-  before(function () {
+  beforeAll(function () {
     console.log('this is test setup');
   });
 

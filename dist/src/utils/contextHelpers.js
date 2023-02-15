@@ -1,28 +1,25 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.alithSigner = exports.extractInfo = exports.isExtrinsicSuccessful = exports.extractError = exports.getDispatchError = exports.filterAndApply = exports.createBlock = exports.resetToGenesis = void 0;
-const providers_1 = require("../../src/cli/runner/internal/providers");
-const accounts_1 = require("../../src/cli/runner/lib/accounts");
-const block_1 = require("../../src/cli/runner/util/block");
-const ethers_1 = require("ethers");
-const globalContext_1 = require("../cli/runner/internal/globalContext");
-const types_1 = require("../../src/cli/runner/lib/types");
-const chai_1 = require("chai");
-const debug = require("debug")("context");
-async function resetToGenesis(api) {
-    if (!globalContext_1.MoonwallContext.getContext().genesis) {
+import { customWeb3Request } from "../../src/cli/runner/internal/providers.js";
+import { ALITH_PRIVATE_KEY, alith } from "../../src/cli/runner/lib/accounts.js";
+import { createAndFinalizeBlock } from "../../src/cli/runner/util/block.js";
+import { ethers } from "ethers";
+import { MoonwallContext } from "../cli/runner/internal/globalContext.js";
+import { FoundationType } from "../../src/cli/runner/lib/types.js";
+import { assert } from "chai";
+import Debug from "debug";
+const debug = Debug("context");
+export async function resetToGenesis(api) {
+    if (!MoonwallContext.getContext().genesis) {
         debug(`No genesis noted for context, is forkGenesis() being called too early?`);
         throw new Error("No genesis found for context");
     }
     else {
-        await api.rpc.engine.createBlock(true, true, globalContext_1.MoonwallContext.getContext().genesis);
+        await api.rpc.engine.createBlock(true, true, MoonwallContext.getContext().genesis);
         const newGenesis = (await api.rpc.chain.getFinalizedHead()).toString();
-        globalContext_1.MoonwallContext.getContext().genesis = newGenesis;
+        MoonwallContext.getContext().genesis = newGenesis;
     }
 }
-exports.resetToGenesis = resetToGenesis;
-async function createBlock(w3Api, pjsApi, transactions, options = {}) {
-    (0, chai_1.assert)(globalContext_1.MoonwallContext.getContext().foundation == types_1.FoundationType.DevMode, "createBlock should only be used on DevMode foundations");
+export async function createBlock(w3Api, pjsApi, transactions, options = {}) {
+    assert(MoonwallContext.getContext().foundation == FoundationType.DevMode, "createBlock should only be used on DevMode foundations");
     const results = [];
     const txs = transactions == undefined
         ? []
@@ -33,7 +30,7 @@ async function createBlock(w3Api, pjsApi, transactions, options = {}) {
         if (typeof call == "string") {
             results.push({
                 type: "eth",
-                hash: (await (0, providers_1.customWeb3Request)(w3Api, "eth_sendRawTransaction", [call]))
+                hash: (await customWeb3Request(w3Api, "eth_sendRawTransaction", [call]))
                     .result,
             });
         }
@@ -54,12 +51,12 @@ async function createBlock(w3Api, pjsApi, transactions, options = {}) {
                 .join("; ")}) [ nonce: ${tx.nonce}]`);
             results.push({
                 type: "sub",
-                hash: (await call.signAndSend(accounts_1.alith)).toString(),
+                hash: (await call.signAndSend(alith)).toString(),
             });
         }
     }
     const { parentHash, finalize } = options;
-    const blockResult = await (0, block_1.createAndFinalizeBlock)(pjsApi, parentHash, finalize);
+    const blockResult = await createAndFinalizeBlock(pjsApi, parentHash, finalize);
     if (results.length == 0) {
         return {
             block: blockResult,
@@ -99,39 +96,32 @@ async function createBlock(w3Api, pjsApi, transactions, options = {}) {
         result: Array.isArray(transactions) ? result : result[0],
     };
 }
-exports.createBlock = createBlock;
-function filterAndApply(events, section, methods, onFound) {
+export function filterAndApply(events, section, methods, onFound) {
     return events
         .filter(({ event }) => section === event.section && methods.includes(event.method))
         .map((record) => onFound(record));
 }
-exports.filterAndApply = filterAndApply;
-function getDispatchError({ event: { data: [dispatchError], }, }) {
+export function getDispatchError({ event: { data: [dispatchError], }, }) {
     return dispatchError;
 }
-exports.getDispatchError = getDispatchError;
 function getDispatchInfo({ event: { data, method }, }) {
     return method === "ExtrinsicSuccess"
         ? data[0]
         : data[1];
 }
-function extractError(events = []) {
+export function extractError(events = []) {
     return filterAndApply(events, "system", ["ExtrinsicFailed"], getDispatchError)[0];
 }
-exports.extractError = extractError;
-function isExtrinsicSuccessful(events = []) {
+export function isExtrinsicSuccessful(events = []) {
     return (filterAndApply(events, "system", ["ExtrinsicSuccess"], () => true).length >
         0);
 }
-exports.isExtrinsicSuccessful = isExtrinsicSuccessful;
-function extractInfo(events = []) {
+export function extractInfo(events = []) {
     return filterAndApply(events, "system", ["ExtrinsicFailed", "ExtrinsicSuccess"], getDispatchInfo)[0];
 }
-exports.extractInfo = extractInfo;
-const alithSigner = (context) => {
-    const signer = new ethers_1.ethers.Wallet(accounts_1.ALITH_PRIVATE_KEY, context);
+export const alithSigner = (context) => {
+    const signer = new ethers.Wallet(ALITH_PRIVATE_KEY, context);
     signer.connect(context);
     return signer;
 };
-exports.alithSigner = alithSigner;
 //# sourceMappingURL=contextHelpers.js.map

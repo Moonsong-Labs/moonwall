@@ -1,13 +1,14 @@
 import { expect } from "chai";
-import { testSuite } from "../../src/cli/runner/util/runner-functions";
+import { testSuite } from "../../src/cli/runner/util/runner-functions.js";
 import { Contract, formatUnits } from "ethers";
-import { xcAssetAbi } from "../../src/cli/runner/lib/moonbeamConsts";
-import { createBlock } from "src/utils/contextHelpers";
+import { xcAssetAbi } from "../../src/cli/runner/lib/moonbeamConsts.js";
+import { createBlock } from "src/utils/contextHelpers.js";
+
+console.log("hello")
 
 testSuite({
   id: "S100",
   title: "Ethers test suite",
-  // environment:[ "ether_test",],
   testCases: ({ it, context }) => {
     const api = context.getEthers();
 

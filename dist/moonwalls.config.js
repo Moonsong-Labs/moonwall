@@ -1,16 +1,13 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.globalConfig = void 0;
-const types_1 = require("./src/cli/runner/lib/types");
-exports.globalConfig = {
+import { FoundationType, ProviderType, } from "./src/cli/runner/lib/types.js";
+export const globalConfig = {
     label: "test new config",
     defaultTestTimeout: 40000,
     environments: [
         {
             name: "dev_minimal",
-            testFileDir: "tests/dev_tests/",
+            testFileDir: "tests/compile_error/",
             foundation: {
-                type: types_1.FoundationType.DevMode,
+                type: FoundationType.DevMode,
                 launchSpec: [
                     {
                         bin: {
@@ -25,17 +22,17 @@ exports.globalConfig = {
             name: "mixed",
             testFileDir: "tests/compile_error/",
             foundation: {
-                type: types_1.FoundationType.ReadOnly,
+                type: FoundationType.ReadOnly,
             },
             connections: [
                 {
                     name: "w3",
-                    type: types_1.ProviderType.Web3,
+                    type: ProviderType.Web3,
                     endpoints: ["wss://moonbeam.api.onfinality.io/public-ws"],
                 },
                 {
                     name: "mb",
-                    type: types_1.ProviderType.Moonbeam,
+                    type: ProviderType.Moonbeam,
                     endpoints: ["wss://moonbeam.api.onfinality.io/public-ws"],
                 },
             ],
@@ -44,7 +41,7 @@ exports.globalConfig = {
             name: "pass",
             testFileDir: "tests/compile_error/",
             foundation: {
-                type: types_1.FoundationType.DevMode,
+                type: FoundationType.DevMode,
                 launchSpec: [
                     {
                         bin: {
@@ -70,12 +67,12 @@ exports.globalConfig = {
             connections: [
                 {
                     name: "w3",
-                    type: types_1.ProviderType.Web3,
+                    type: ProviderType.Web3,
                     endpoints: ["ws://localhost:9944"],
                 },
                 {
                     name: "mb",
-                    type: types_1.ProviderType.Moonbeam,
+                    type: ProviderType.Moonbeam,
                     endpoints: ["ws://localhost:9944"],
                 },
             ],
@@ -84,12 +81,12 @@ exports.globalConfig = {
             name: "web3_test",
             testFileDir: "tests/web3_test/",
             foundation: {
-                type: types_1.FoundationType.ReadOnly,
+                type: FoundationType.ReadOnly,
             },
             connections: [
                 {
                     name: "w3",
-                    type: types_1.ProviderType.Web3,
+                    type: ProviderType.Web3,
                     endpoints: ["wss://moonbeam.api.onfinality.io/public-ws"],
                 },
             ],
@@ -98,12 +95,12 @@ exports.globalConfig = {
             name: "new",
             testFileDir: "tests/eth_test/",
             foundation: {
-                type: types_1.FoundationType.ReadOnly,
+                type: FoundationType.ReadOnly,
             },
             connections: [
                 {
                     name: "eth",
-                    type: types_1.ProviderType.Ethers,
+                    type: ProviderType.Ethers,
                     endpoints: ["wss://moonbeam.api.onfinality.io/public-ws"],
                 },
             ],
@@ -112,7 +109,7 @@ exports.globalConfig = {
             name: "dev_test",
             testFileDir: "tests/dev_tests",
             foundation: {
-                type: types_1.FoundationType.DevMode,
+                type: FoundationType.DevMode,
                 launchSpec: [
                     {
                         bin: {
@@ -138,22 +135,22 @@ exports.globalConfig = {
             connections: [
                 {
                     name: "eth",
-                    type: types_1.ProviderType.Ethers,
+                    type: ProviderType.Ethers,
                     endpoints: ["ws://localhost:9944"],
                 },
                 {
                     name: "w3",
-                    type: types_1.ProviderType.Web3,
+                    type: ProviderType.Web3,
                     endpoints: ["ws://localhost:9944"],
                 },
                 {
                     name: "pjs",
-                    type: types_1.ProviderType.PolkadotJs,
+                    type: ProviderType.PolkadotJs,
                     endpoints: ["ws://localhost:9944"],
                 },
             ],
         },
     ],
 };
-exports.default = exports.globalConfig;
+export default globalConfig;
 //# sourceMappingURL=moonwalls.config.js.map

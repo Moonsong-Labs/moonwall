@@ -2,8 +2,7 @@ import {
   FoundationType,
   MoonwallConfig,
   ProviderType,
-} from "./src/cli/runner/lib/types";
-import path from "path"
+} from "./src/cli/runner/lib/types.js";
 
 export const globalConfig: MoonwallConfig = {
   label: "test new config",
@@ -11,7 +10,7 @@ export const globalConfig: MoonwallConfig = {
   environments: [
     {
       name: "dev_minimal",
-      testFileDir: "tests/dev_tests/",
+      testFileDir: "tests/compile_error/",
       foundation: {
         type: FoundationType.DevMode,
         launchSpec: [

@@ -1,4 +1,4 @@
-import { testSuite } from '../../src/cli/runner/util/runner-functions';
+import { testSuite } from '../../src/cli/runner/util/runner-functions.js';
 import { setTimeout } from 'timers/promises';
 import { expect } from 'chai';
 

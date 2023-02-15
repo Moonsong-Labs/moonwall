@@ -1,7 +1,7 @@
 import { spawn } from "child_process";
-import { MoonwallContext } from "../internal/globalContext";
-
-const debugNode = require("debug")("global:node");
+import { MoonwallContext } from "../internal/globalContext.js";
+import Debug from "debug"
+const debugNode = Debug("global:node");
 
 export async function launchDevNode(
   cmd: string,

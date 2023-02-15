@@ -1,7 +1,7 @@
-import { expect } from 'chai';
+import { expect, beforeAll } from 'vitest'
 
 describe('This is a jimbo test suite', function () {
-  before(function () {
+  beforeAll(function () {
     console.log('this is test setup');
   });
 

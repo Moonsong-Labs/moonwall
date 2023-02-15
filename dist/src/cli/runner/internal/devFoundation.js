@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseRunCmd = void 0;
-function parseRunCmd(launchSpec) {
+export function parseRunCmd(launchSpec) {
     const cmd = launchSpec.bin.path;
     let args = launchSpec.options
         ? [...launchSpec.options]
@@ -34,5 +31,4 @@ function parseRunCmd(launchSpec) {
     }
     return { cmd, args };
 }
-exports.parseRunCmd = parseRunCmd;
 //# sourceMappingURL=devFoundation.js.map

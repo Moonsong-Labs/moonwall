@@ -1,8 +1,9 @@
-import { MoonwallContext } from "../internal/globalContext";
+import { describe, it} from "vitest";
+// import { MoonwallContext } from "../internal/globalContext";
+import { MoonwallContext } from "../../../../src/index.js";
 import { ApiPromise } from "@polkadot/api";
 import { ConnectedProvider, FoundationType, ProviderType } from "../lib/types";
 import { WebSocketProvider } from "ethers";
-
 import Web3 from "web3";
 
 export function testSuite({
@@ -11,6 +12,8 @@ export function testSuite({
   testCases,
   supportedFoundations,
 }: SuiteParameters) {
+  
+  console.log("hello timbo")
   const ctx = MoonwallContext.getContext();
 
   describe(`🗃️  #${id} ${title}`, function () {
@@ -53,7 +56,6 @@ export function testSuite({
         }
       },
     };
-    console.log("genesis is "+ ctx.genesis)
 
     if (
       supportedFoundations &&

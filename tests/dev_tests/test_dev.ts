@@ -4,16 +4,15 @@ import {
   alithSigner,
   createBlock,
   resetToGenesis,
-} from "../../src/utils/contextHelpers";
+} from "../../src/utils/contextHelpers.js";
 import { parseEther } from "ethers";
 import {
   BALTATHAR_ADDRESS,
   alith,
   baltathar,
-} from "../../src/cli/runner/lib/accounts";
+} from "../../src/cli/runner/lib/accounts.js";
 import { BN } from "@polkadot/util";
-import { create } from "domain";
-import { MoonwallContext } from "../../src/cli/runner/internal/globalContext";
+
 
 testSuite({
   id: "dev",

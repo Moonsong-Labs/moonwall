@@ -1,8 +1,8 @@
 import { expect } from "chai";
-import { testSuite } from "../../src/cli/runner/util/runner-functions";
-import { createBlock } from "../../src/utils/contextHelpers";
-import { FoundationType } from "../../src/cli/runner/lib/types";
-import { ALITH_ADDRESS } from "../../src/cli/runner/lib/accounts";
+import { testSuite } from "../../src/cli/runner/util/runner-functions.js";
+import { createBlock } from "../../src/utils/contextHelpers.js";
+import { FoundationType } from "../../src/cli/runner/lib/types.js";
+import { ALITH_ADDRESS } from "../../src/cli/runner/lib/accounts.js";
 
 testSuite({
   id: "S100",

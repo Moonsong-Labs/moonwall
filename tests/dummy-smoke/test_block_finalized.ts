@@ -3,13 +3,14 @@ import {
   checkBlockFinalized,
   getBlockTime,
   fetchHistoricBlockNum,
-} from "../../src/cli/runner/util/block";
+} from "../../src/cli/runner/util/block.js";
 import Bottleneck from "bottleneck";
-import semverLt from "semver/functions/lt";
-import { testSuite } from "../../src/cli/runner/util/runner-functions";
+import semverLt from "semver/functions/lt.js";
+import { testSuite } from "../../src/cli/runner/util/runner-functions.js";
 import { WebSocketProvider } from "ethers";
 import Web3 from "web3";
-const debug = require("debug")("smoke:block-finalized");
+import Debug from "debug"
+const debug = Debug("smoke:block-finalized");
 const timePeriod = process.env.TIME_PERIOD
   ? Number(process.env.TIME_PERIOD)
   :  60 * 1000;
