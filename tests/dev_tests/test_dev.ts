@@ -1,19 +1,5 @@
-// import { expect } from "vitest";
-// import { testSuite } from "../../src/cli/runner/util/runner-functions.js";
-// import { Contract, WebSocketProvider, ethers, formatUnits } from "ethers";
-// import { xcAssetAbi } from "../../src/cli/runner/lib/moonbeamConsts.js";
-// import { createBlock } from "../../src/utils/contextHelpers.js";
-// import { MoonwallContext } from "../../src/index.js";
-// import Debug from "debug";
-// const debug = Debug("test:eth");
-
-
 import { testSuite } from "../../src/cli/runner/util/runner-functions";
-import {
-  alithSigner,
-  createBlock,
-  resetToGenesis,
-} from "../../src/utils/contextHelpers.js";
+import { alithSigner, resetToGenesis } from "../../src/utils/contextHelpers.js";
 import { WebSocketProvider, parseEther } from "ethers";
 import {
   BALTATHAR_ADDRESS,
@@ -23,21 +9,22 @@ import {
 import { BN } from "@polkadot/util";
 import Web3 from "web3";
 import { ApiPromise } from "@polkadot/api";
-
+import { Foundation } from "../../src/cli/runner/lib/types.js";
 
 testSuite({
   id: "dev",
   title: "Dev test suite",
+  foundationMethods: Foundation.Dev,
   testCases: ({ it, context }) => {
-    let api: WebSocketProvider
-    let w3: Web3
-    let polkadotJs :ApiPromise
+    let api: WebSocketProvider;
+    let w3: Web3;
+    let polkadotJs: ApiPromise;
 
-    beforeAll(()=>{
-       api = context.getEthers();
-       w3 = context.getWeb3();
-       polkadotJs = context.getPolkadotJs();
-    })
+    beforeAll(() => {
+      api = context.getEthers();
+      w3 = context.getWeb3();
+      polkadotJs = context.getPolkadotJs();
+    });
 
     // beforeEach(async () => {
     //   await resetToGenesis(polkadotJs);
@@ -50,7 +37,7 @@ testSuite({
         const block = (
           await context.getPolkadotJs().rpc.chain.getBlock()
         ).block.header.number.toNumber();
-        await createBlock(w3, context.getPolkadotJs());
+        await context.createBlock();
         const block2 = (
           await context.getPolkadotJs().rpc.chain.getBlock()
         ).block.header.number.toNumber();
@@ -66,7 +53,7 @@ testSuite({
         .transfer(BALTATHAR_ADDRESS, parseEther("2"))
         .signAndSend(alith);
 
-      await createBlock(w3, polkadotJs);
+      await context.createBlock();
 
       const balanceAfter = (
         await polkadotJs.query.system.account(BALTATHAR_ADDRESS)
@@ -75,10 +62,11 @@ testSuite({
     });
 
     it("E03", "Checking that sudo can be used", async function () {
-      await createBlock(w3, polkadotJs);
+      await context.createBlock();
       const tx = polkadotJs.tx.system.fillBlock(60 * 10 ** 7);
       await polkadotJs.tx.sudo.sudo(tx).signAndSend(alith);
-      await createBlock(w3, polkadotJs);
+
+      await context.createBlock();
       const blockFill = await polkadotJs.query.system.blockWeight();
       expect(blockFill.normal.refTime.unwrap().gt(new BN(0))).to.be.true;
     });
@@ -93,13 +81,12 @@ testSuite({
         to: BALTATHAR_ADDRESS,
         value: parseEther("1.0"),
       });
+      await context.createBlock();
 
-      await createBlock(w3, polkadotJs);
       const balanceAfter = (
         await polkadotJs.query.system.account(BALTATHAR_ADDRESS)
       ).data.free;
       expect(balanceBefore.lt(balanceAfter)).to.be.true;
     });
-
   },
 });

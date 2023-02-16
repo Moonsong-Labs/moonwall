@@ -1,5 +1,5 @@
 import {
-  FoundationType,
+  Foundation,
   MoonwallConfig,
   ProviderType,
 } from "./src/cli/runner/lib/types.js";
@@ -12,7 +12,7 @@ export const globalConfig: MoonwallConfig = {
       name: "dev_minimal",
       testFileDir: "tests/compile_error/",
       foundation: {
-        type: FoundationType.DevMode,
+        type: Foundation.Dev,
         launchSpec: [
           {
             bin: {
@@ -27,7 +27,7 @@ export const globalConfig: MoonwallConfig = {
       name: "mixed",
       testFileDir: "tests/compile_error/",
       foundation: {
-        type: FoundationType.ReadOnly,
+        type: Foundation.ReadOnly,
       },
       connections: [
         {
@@ -46,7 +46,7 @@ export const globalConfig: MoonwallConfig = {
       name: "pass",
       testFileDir: "tests/compile_error/",
       foundation: {
-        type: FoundationType.DevMode,
+        type: Foundation.Dev,
         launchSpec: [
           {
             bin: {
@@ -86,7 +86,7 @@ export const globalConfig: MoonwallConfig = {
       name: "web3_test",
       testFileDir: "tests/web3_test/",
       foundation: {
-        type: FoundationType.ReadOnly,
+        type: Foundation.ReadOnly,
       },
       connections: [
         {
@@ -101,7 +101,7 @@ export const globalConfig: MoonwallConfig = {
       testFileDir: "tests/eth_test/",
       include: ['**/{test,spec,test_,test-}*{ts,mts,cts}'],
       foundation: {
-        type: FoundationType.ReadOnly,
+        type: Foundation.ReadOnly,
       },
       connections: [
         {
@@ -115,7 +115,7 @@ export const globalConfig: MoonwallConfig = {
       name: "dev_test",
       testFileDir: "tests/dev_tests",
       foundation: {
-        type: FoundationType.DevMode,
+        type: Foundation.Dev,
         launchSpec: [
           {
             bin: {

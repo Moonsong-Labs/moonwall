@@ -1,6 +1,6 @@
 import {
   ConnectedProvider,
-  FoundationType,
+  Foundation,
   MoonwallConfig,
   MoonwallEnvironment,
   Node,
@@ -23,7 +23,7 @@ export class MoonwallContext {
   environments: MoonwallEnvironment[];
   providers: ConnectedProvider[];
   nodes: ChildProcess[];
-  foundation?: FoundationType;
+  foundation?: Foundation;
   private _genesis?: string;
 
   constructor(config: MoonwallConfig) {
@@ -35,7 +35,7 @@ export class MoonwallContext {
       const blob = { name: env.name, context: {}, providers: [], nodes: [] };
 
       switch (env.foundation.type) {
-        case FoundationType.ReadOnly:
+        case Foundation.ReadOnly:
           if (!env.connections) {
             throw new Error(
               `${env.name} env config is missing connections specification, required by foundation READ_ONLY`
@@ -49,7 +49,7 @@ export class MoonwallContext {
           );
           break;
 
-        case FoundationType.DevMode:
+        case Foundation.Dev:
           const { cmd, args } = parseRunCmd(env.foundation.launchSpec[0]);
           // debugNode(`The run command is: ${cmd}`);
           // debugNode(`The run args are: ${args}`);
@@ -149,7 +149,7 @@ export class MoonwallContext {
       ({ name }) => name == environmentName
     ).foundation.type;
 
-    if (this.foundation == FoundationType.DevMode) {
+    if (this.foundation == Foundation.Dev) {
       this.genesis = (
         await (
           this.providers.find(

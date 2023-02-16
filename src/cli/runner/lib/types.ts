@@ -12,13 +12,13 @@ export type MoonwallConfig = {
 export type Environment = {
   name: string;
   testFileDir: string;
-  foundation: Foundation;
+  foundation: FoundationDetails;
   include?: string[]
   connections?: ProviderConfig[];
 };
 
-export type Foundation = {
-  type: FoundationType;
+export type FoundationDetails = {
+  type: Foundation;
   launchSpec?: LaunchSpec[];
 };
 
@@ -36,9 +36,9 @@ export type LaunchSpec = {
   options?: string[];
 };
 
-export enum FoundationType {
+export enum Foundation {
   ReadOnly = "read_only",
-  DevMode = "dev",
+  Dev = "dev",
   Forked = "fork",
   ZombieNet = "zombie",
   Chopsticks = "chopsticks",

@@ -1,16 +1,23 @@
 import { expect } from "chai";
 import { testSuite } from "../../src/cli/runner/util/runner-functions.js";
 import { createBlock } from "../../src/utils/contextHelpers.js";
-import { FoundationType } from "../../src/cli/runner/lib/types.js";
+import { Foundation } from "../../src/cli/runner/lib/types.js";
 import { ALITH_ADDRESS } from "../../src/cli/runner/lib/accounts.js";
+import Web3 from "web3";
+import { ApiPromise } from "@polkadot/api";
 
 testSuite({
   id: "S100",
   title: "Testing for compile time errors",
-  supportedFoundations: [FoundationType.DevMode],
+  foundationMethods: Foundation.Dev,
   testCases: ({ it, context }) => {
-    const api = context.getWeb3();
-    const mbApi = context.getMoonbeam();
+    let api: Web3;
+    let mbApi: ApiPromise;
+
+    beforeAll(() => {
+      api = context.getWeb3();
+      mbApi = context.getMoonbeam();
+    });
 
     it("E01", "Calling chain data", async function () {
       console.log(
