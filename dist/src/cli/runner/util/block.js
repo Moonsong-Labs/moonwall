@@ -1,4 +1,3 @@
-import "@moonbeam-network/api-augment/moonbase";
 import Bottleneck from "bottleneck";
 import Debug from "debug";
 const debug = Debug("test:blocks");

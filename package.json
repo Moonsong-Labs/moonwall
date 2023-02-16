@@ -10,13 +10,14 @@
   },
   "scripts": {
     "build": "tsc",
+    "run:reports-server": "npx vite preview --base __vitest__ --outDir html",
     "prepare": "npm run build",
     "compile": "rm -rf dist/* && tsc ",
     "start": "node -r ts-node/register dist/src/cli/index.js",
     "lint": "npx prettier --write --ignore-path .gitignore '**/*.(yml|js|ts|json)'",
     "test-bin": "npm run compile && npm run start -- test -f tests/*.ts",
     "new-cmd-js": "npm run compile && DEBUG=smoke* npm run start -- test -t SmokeCopy",
-    "bk-new-cmd": "DEBUG=global* npx ts-node-esm -r ts-node/register ./src/cli/index.ts test -t dev_test",
+    "bk-new-cmd": "DEBUG=global* npx ts-node-esm ./src/cli/index.ts test -t dev_test",
     "new-cmd": "DEBUG=global* npx ts-node-esm ./src/cli/index.ts test -t new",
     "run-pkg": "DEBUG=global* npx moonwall test -t dev_test"
   },
@@ -36,7 +37,6 @@
     "@polkadot/types-codec": "^9.13.6",
     "@polkadot/util": "^10.3.1",
     "@types/chai": "^4.3.4",
-    "@types/mocha": "^10.0.1",
     "@types/node": "^18.13.0",
     "@types/yargs": "^17.0.22",
     "bottleneck": "^2.19.5",

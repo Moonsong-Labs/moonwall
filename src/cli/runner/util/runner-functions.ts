@@ -1,4 +1,4 @@
-import { describe, it} from "vitest";
+import { describe, it , beforeAll} from "vitest";
 // import { MoonwallContext } from "../internal/globalContext";
 import { MoonwallContext } from "../../../../src/index.js";
 import { ApiPromise } from "@polkadot/api";
@@ -12,11 +12,13 @@ export function testSuite({
   testCases,
   supportedFoundations,
 }: SuiteParameters) {
-  
-  console.log("hello timbo")
-  const ctx = MoonwallContext.getContext();
-
   describe(`🗃️  #${id} ${title}`, function () {
+    let ctx: MoonwallContext | undefined;
+
+    beforeAll(() => {
+      ctx = MoonwallContext.getContext();
+    });
+
     let context = {
       providers: {},
       getPolkadotJs: (apiName?: string): ApiPromise => {
@@ -66,15 +68,17 @@ export function testSuite({
       );
     }
 
-    ctx.providers.forEach((a: ConnectedProvider) => {
-      context.providers[a.name] = a.api;
-    });
+    if (ctx) {
+      ctx.providers.forEach((a: ConnectedProvider) => {
+        context.providers[a.name] = a.api;
+      });
+    }
 
     function testCase(testcaseId: string, title: string, callback: () => void) {
       it(`📁  #${id.concat(testcaseId)} ${title}`, callback);
     }
 
-    testCases({ context, it: testCase });
+    testCases({ context, it: testCase ,});
   });
 }
 

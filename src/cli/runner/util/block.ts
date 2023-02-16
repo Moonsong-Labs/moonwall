@@ -1,5 +1,3 @@
-import "@moonbeam-network/api-augment/moonbase";
-
 import { ApiPromise } from "@polkadot/api";
 import {
   BlockHash,
@@ -10,7 +8,7 @@ import {
 } from "@polkadot/types/interfaces";
 import { FrameSystemEventRecord, SpWeightsWeightV2Weight } from "@polkadot/types/lookup";
 import { u32, u64, u128, Option } from "@polkadot/types";
-
+// import "@moonbeam-network/api-augment/moonbase";
 import { expect } from "chai";
 
 import { WEIGHT_PER_GAS } from "../lib/constants.js";

@@ -6,3 +6,7 @@ beforeAll(async () => {
   const ctx = await contextCreator(globalConfig, process.env.TEST_ENV);
   await Promise.all(ctx.providers.map(async ({ greet }) => greet()));
 });
+
+afterAll(async () => {
+  MoonwallContext.destroy();
+});

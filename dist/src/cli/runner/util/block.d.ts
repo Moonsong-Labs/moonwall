@@ -1,4 +1,3 @@
-import "@moonbeam-network/api-augment/moonbase";
 import { ApiPromise } from "@polkadot/api";
 import { BlockHash, RuntimeDispatchInfo } from "@polkadot/types/interfaces";
 import { SpWeightsWeightV2Weight } from "@polkadot/types/lookup";

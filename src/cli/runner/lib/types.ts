@@ -13,6 +13,7 @@ export type Environment = {
   name: string;
   testFileDir: string;
   foundation: Foundation;
+  include?: string[]
   connections?: ProviderConfig[];
 };
 

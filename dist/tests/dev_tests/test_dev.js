@@ -1,6 +1,5 @@
-import { expect } from "chai";
 import { testSuite } from "../../src/cli/runner/util/runner-functions";
-import { alithSigner, createBlock, resetToGenesis, } from "../../src/utils/contextHelpers.js";
+import { alithSigner, createBlock, } from "../../src/utils/contextHelpers.js";
 import { parseEther } from "ethers";
 import { BALTATHAR_ADDRESS, alith, } from "../../src/cli/runner/lib/accounts.js";
 import { BN } from "@polkadot/util";
@@ -8,11 +7,13 @@ testSuite({
     id: "dev",
     title: "Dev test suite",
     testCases: ({ it, context }) => {
-        const api = context.getEthers();
-        const w3 = context.getWeb3();
-        const polkadotJs = context.getPolkadotJs();
-        beforeEach(async () => {
-            await resetToGenesis(polkadotJs);
+        let api;
+        let w3;
+        let polkadotJs;
+        beforeAll(() => {
+            api = context.getEthers();
+            w3 = context.getWeb3();
+            polkadotJs = context.getPolkadotJs();
         });
         it("E01", "Checking that launched node can create blocks", async function () {
             const block = (await context.getPolkadotJs().rpc.chain.getBlock()).block.header.number.toNumber();

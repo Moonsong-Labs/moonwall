@@ -99,6 +99,7 @@ export const globalConfig: MoonwallConfig = {
     {
       name: "new",
       testFileDir: "tests/eth_test/",
+      include: ['**/{test,spec,test_,test-}*{ts,mts,cts}'],
       foundation: {
         type: FoundationType.ReadOnly,
       },

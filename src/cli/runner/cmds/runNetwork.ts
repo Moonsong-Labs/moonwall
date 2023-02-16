@@ -1,8 +1,5 @@
 import "@moonbeam-network/api-augment/moonbase";
 import "@polkadot/api-augment/polkadot";
-import { loadConfig } from "../util/configReader.js";
-import fs from "node:fs/promises";
-import path from "node:path";
 import inquirer from "inquirer"
 import { MoonwallContext, runNetworkOnly } from "../internal/globalContext.js";
 import { globalConfig } from "../../../../moonwall.config.js";

@@ -1,30 +1,47 @@
-import { expect } from "chai";
+// import { expect } from "vitest";
+// import { testSuite } from "../../src/cli/runner/util/runner-functions.js";
+// import { Contract, WebSocketProvider, ethers, formatUnits } from "ethers";
+// import { xcAssetAbi } from "../../src/cli/runner/lib/moonbeamConsts.js";
+// import { createBlock } from "../../src/utils/contextHelpers.js";
+// import { MoonwallContext } from "../../src/index.js";
+// import Debug from "debug";
+// const debug = Debug("test:eth");
+
+
 import { testSuite } from "../../src/cli/runner/util/runner-functions";
 import {
   alithSigner,
   createBlock,
   resetToGenesis,
 } from "../../src/utils/contextHelpers.js";
-import { parseEther } from "ethers";
+import { WebSocketProvider, parseEther } from "ethers";
 import {
   BALTATHAR_ADDRESS,
   alith,
   baltathar,
 } from "../../src/cli/runner/lib/accounts.js";
 import { BN } from "@polkadot/util";
+import Web3 from "web3";
+import { ApiPromise } from "@polkadot/api";
 
 
 testSuite({
   id: "dev",
   title: "Dev test suite",
   testCases: ({ it, context }) => {
-    const api = context.getEthers();
-    const w3 = context.getWeb3();
-    const polkadotJs = context.getPolkadotJs();
+    let api: WebSocketProvider
+    let w3: Web3
+    let polkadotJs :ApiPromise
 
-    beforeEach(async () => {
-      await resetToGenesis(polkadotJs);
-    });
+    beforeAll(()=>{
+       api = context.getEthers();
+       w3 = context.getWeb3();
+       polkadotJs = context.getPolkadotJs();
+    })
+
+    // beforeEach(async () => {
+    //   await resetToGenesis(polkadotJs);
+    // });
 
     it(
       "E01",

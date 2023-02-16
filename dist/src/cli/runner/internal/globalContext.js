@@ -31,8 +31,6 @@ export class MoonwallContext {
                     break;
                 case FoundationType.DevMode:
                     const { cmd, args } = parseRunCmd(env.foundation.launchSpec[0]);
-                    debugNode(`The run command is: ${cmd}`);
-                    debugNode(`The run args are: ${args}`);
                     blob.nodes.push({
                         name: env.foundation.launchSpec[0].bin.name,
                         cmd,
@@ -148,14 +146,12 @@ export class MoonwallContext {
 }
 export const contextCreator = async (config, env) => {
     const ctx = MoonwallContext.getContext(config);
-    debugSetup(`🟢  Global context fetched for mocha`);
     await ctx.startNetwork(env);
     await ctx.connectEnvironment(env);
     return ctx;
 };
 export const runNetworkOnly = async (config, env) => {
     const ctx = MoonwallContext.getContext(config);
-    debugSetup(`🟢  Global context fetched for mocha`);
     await ctx.startNetwork(env);
 };
 //# sourceMappingURL=globalContext.js.map

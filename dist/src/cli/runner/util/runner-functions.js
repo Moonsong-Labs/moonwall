@@ -1,10 +1,12 @@
-import { describe, it } from "vitest";
+import { describe, it, beforeAll } from "vitest";
 import { MoonwallContext } from "../../../../src/index.js";
 import { ProviderType } from "../lib/types";
 export function testSuite({ id, title, testCases, supportedFoundations, }) {
-    console.log("hello timbo");
-    const ctx = MoonwallContext.getContext();
     describe(`🗃️  #${id} ${title}`, function () {
+        let ctx;
+        beforeAll(() => {
+            ctx = MoonwallContext.getContext();
+        });
         let context = {
             providers: {},
             getPolkadotJs: (apiName) => {
@@ -44,13 +46,15 @@ export function testSuite({ id, title, testCases, supportedFoundations, }) {
             !supportedFoundations.includes(ctx.foundation)) {
             throw new Error(`Test file does not support foundation ${ctx.foundation}`);
         }
-        ctx.providers.forEach((a) => {
-            context.providers[a.name] = a.api;
-        });
+        if (ctx) {
+            ctx.providers.forEach((a) => {
+                context.providers[a.name] = a.api;
+            });
+        }
         function testCase(testcaseId, title, callback) {
             it(`📁  #${id.concat(testcaseId)} ${title}`, callback);
         }
-        testCases({ context, it: testCase });
+        testCases({ context, it: testCase, });
     });
 }
 //# sourceMappingURL=runner-functions.js.map
