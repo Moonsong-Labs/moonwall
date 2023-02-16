@@ -26,10 +26,6 @@ testSuite({
       polkadotJs = context.getPolkadotJs();
     });
 
-    // beforeEach(async () => {
-    //   await resetToGenesis(polkadotJs);
-    // });
-
     it(
       "E01",
       "Checking that launched node can create blocks",

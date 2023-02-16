@@ -9,16 +9,34 @@ export const globalConfig: MoonwallConfig = {
   defaultTestTimeout: 40000,
   environments: [
     {
+      name: "chop_test",
+      testFileDir: "tests/chopsticks/",
+      foundation: {
+        type: Foundation.Chopsticks,
+        launchSpec: [
+          {
+            name: "mb",
+            configPath: "src/cli/runner/lib/chopsticksConfig.yml"
+          },
+        ],
+      },
+      connections: [
+        {
+          name: "MB",
+          type: ProviderType.Moonbeam,
+          endpoints: ["ws://localhost:8000"],
+        }
+      ],
+    },
+    {
       name: "dev_minimal",
       testFileDir: "tests/compile_error/",
       foundation: {
         type: Foundation.Dev,
         launchSpec: [
           {
-            bin: {
-              name: "moonbeam",
-              path: "/home/timbotronic/workspace/moonbeam/moonbeam/target/release/moonbeam",
-            }
+            name: "moonbeam",
+            binPath: "/home/timbotronic/workspace/moonbeam/moonbeam/target/release/moonbeam",
           },
         ],
       },
@@ -49,10 +67,8 @@ export const globalConfig: MoonwallConfig = {
         type: Foundation.Dev,
         launchSpec: [
           {
-            bin: {
-              name: "moonbeam",
-              path: "/home/timbotronic/workspace/moonbeam/moonbeam/target/release/moonbeam",
-            },
+            name: "moonbeam",
+            binPath: "/home/timbotronic/workspace/moonbeam/moonbeam/target/release/moonbeam",
             ports: { p2pPort: 30333, wsPort: 9944, rpcPort: 9933 },
             alreadyRunning: false,
             options: [
@@ -118,10 +134,8 @@ export const globalConfig: MoonwallConfig = {
         type: Foundation.Dev,
         launchSpec: [
           {
-            bin: {
-              name: "moonbeam",
-              path: "/home/timbotronic/workspace/moonbeam/moonbeam/target/release/moonbeam",
-            },
+            name: "moonbeam",
+            binPath: "/home/timbotronic/workspace/moonbeam/moonbeam/target/release/moonbeam",
             ports: { p2pPort: 30333, wsPort: 9944, rpcPort: 9933 },
             alreadyRunning: false,
             options: [

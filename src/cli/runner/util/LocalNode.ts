@@ -1,5 +1,6 @@
 import { spawn } from "child_process";
 import { MoonwallContext } from "../internal/globalContext.js";
+import chalk from "chalk"
 import Debug from "debug"
 const debugNode = Debug("global:node");
 
@@ -40,20 +41,20 @@ export async function launchDevNode(
     });
 
     const binaryLogs: any[] = [];
-    return await new Promise<void>((resolve) => {
+    return await new Promise<void>((resolve, reject) => {
       const timer = setTimeout(() => {
-        console.error(`\x1b[31m Failed to start Moonbeam Test Node.\x1b[0m`);
+        console.error(chalk.redBright("Failed to start Moonbeam Test Node."));
         console.error(`Command: ${cmd} ${args.join(" ")}`);
         console.error(`Logs:`);
         console.error(binaryLogs.map((chunk) => chunk.toString()).join("\n"));
-        throw new Error("Failed to launch node");
-      }, 15000);
+        reject("Failed to launch node")
+      }, 10000);
 
       const onData = async (chunk: any) => {
         debugNode(chunk.toString());
 
         binaryLogs.push(chunk);
-        if (chunk.toString().match(/Development Service Ready/)) {
+        if (chunk.toString().match(/Development Service Ready/) || chunk.toString().match(/ RPC listening on port/)) {
           clearTimeout(timer);
           if (true) {
             nodesList[currentNode].stderr.off("data", onData);

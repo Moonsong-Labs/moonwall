@@ -27,6 +27,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@acala-network/chopsticks": "^0.3.12",
     "@moonbeam-network/api-augment": "^0.2000.1",
     "@polkadot/api": "^9.13.6",
     "@polkadot/api-augment": "^9.13.6",

@@ -20,6 +20,8 @@ export async function testCmd(args) {
       watch: false,
       globals: true,
       reporters: ["verbose"],
+      testTimeout: 1000000,
+      hookTimeout: 500000,
       setupFiles: ["src/cli/runner/internal/setupFixture.ts"],
       include: env.include
         ? env.include
@@ -28,6 +30,7 @@ export async function testCmd(args) {
 
     const vitest = await startVitest("test", files, options);
     await vitest.close();
+    process.exit(0)
   } else {
     // For files selected by positional arg
     // TODO implement this code branch

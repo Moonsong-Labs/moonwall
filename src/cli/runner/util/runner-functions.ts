@@ -238,14 +238,12 @@ interface CustomTest {
 type TestSuiteType<TFoundation = Foundation> = TFoundation extends Foundation.Dev ? {
   id: string;
   title: string;
-  environment?: string;
   testCases: (TestContext: DevTestContext) => void;
   options?: Object;
   foundationMethods?: TFoundation;
 } : {
   id: string;
   title: string;
-  environment?: string;
   testCases: (TestContext: GenericTestContext) => void;
   options?: Object;
   foundationMethods?: TFoundation;

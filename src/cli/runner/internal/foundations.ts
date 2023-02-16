@@ -1,7 +1,9 @@
-import { LaunchSpec } from "../lib/types";
+import { ChopsticksLaunchSpec, DevLaunchSpec, GenericLaunchSpec } from "../lib/types";
 
-export function parseRunCmd(launchSpec: LaunchSpec){
-    const cmd = launchSpec.bin.path;
+// export function parseRunCmd(launchSpec: ChopsticksLaunchSpec ): {cmd: string, args:string}
+// export function parseRunCmd(launchSpec: DevLaunchSpec ): {cmd: string, args:string}
+export function parseRunCmd(launchSpec: DevLaunchSpec ){
+    const cmd = launchSpec.binPath
     let args = launchSpec.options
       ? [...launchSpec.options]
       : [
@@ -33,4 +35,10 @@ export function parseRunCmd(launchSpec: LaunchSpec){
       }
     }
     return {cmd, args}
+}
+
+export function parseChopsticksRunCmd(launchSpec: ChopsticksLaunchSpec ){
+  const chopsticksCmd = "npx"
+  const chopsticksArgs = ["chopsticks" ,"run",`--config=${launchSpec.configPath}`]
+  return {cmd: chopsticksCmd, args:chopsticksArgs}
 }

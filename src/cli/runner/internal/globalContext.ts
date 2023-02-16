@@ -9,12 +9,15 @@ import {
 
 // import { globalConfig } from "../../../../moonwalls.config";
 import { ChildProcess, spawn } from "child_process";
-import { populateProviderInterface, prepareProviders } from "../util/providers.js";
+import {
+  populateProviderInterface,
+  prepareProviders,
+} from "../util/providers.js";
 import { launchDevNode } from "../util/LocalNode.js";
 import globalConfig from "../../../../moonwall.config.js";
-import { parseRunCmd } from "./devFoundation.js";
+import { parseRunCmd } from "./foundations.js";
 import { ApiPromise } from "@polkadot/api";
-import Debug from "debug"
+import Debug from "debug";
 const debugSetup = Debug("global:context");
 const debugNode = Debug("global:node");
 
@@ -49,13 +52,30 @@ export class MoonwallContext {
           );
           break;
 
-        case Foundation.Dev:
-          const { cmd, args } = parseRunCmd(env.foundation.launchSpec[0]);
-          // debugNode(`The run command is: ${cmd}`);
-          // debugNode(`The run args are: ${args}`);
+        case Foundation.Chopsticks:
+          const chopsticksCmd = "npx";
+          const chopsticksArgs = [
+            "chopsticks",
+            "dev",
+            `--config=${env.foundation.launchSpec[0].configPath}`,
+          ];
 
           blob.nodes.push({
-            name: env.foundation.launchSpec[0].bin.name,
+            name: env.foundation.launchSpec[0].name,
+            cmd: chopsticksCmd,
+            args: chopsticksArgs,
+          });
+
+          blob.providers = prepareProviders(env.connections);
+          debugSetup(
+            `🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`
+          );
+          break;
+
+        case Foundation.Dev:
+          const { cmd, args } = parseRunCmd(env.foundation.launchSpec[0]);
+          blob.nodes.push({
+            name: env.foundation.launchSpec[0].name,
             cmd,
             args,
           });
@@ -94,15 +114,15 @@ export class MoonwallContext {
     });
   }
 
-  public get genesis(){
-    return this._genesis
+  public get genesis() {
+    return this._genesis;
   }
 
-  public set genesis(hash: string){
-    if (hash.length !== 66){
-      throw new Error("Cannot set genesis to invalid hash")
+  public set genesis(hash: string) {
+    if (hash.length !== 66) {
+      throw new Error("Cannot set genesis to invalid hash");
     }
-    this._genesis=hash
+    this._genesis = hash;
   }
 
   public async startNetwork(environmentName: string) {
@@ -114,11 +134,13 @@ export class MoonwallContext {
     const nodes = MoonwallContext.getContext().environments.find(
       (env) => env.name == environmentName
     ).nodes;
+    console.log(nodes);
     const promises = nodes.map(async ({ cmd, args, name }) => {
       await launchDevNode(cmd, args, name);
     });
 
     await Promise.all(promises);
+    console.log("network started");
   }
 
   public env(query: string): MoonwallEnvironment | undefined {
@@ -198,6 +220,8 @@ export class MoonwallContext {
     } catch {
       console.log("🛑  All connections disconnected");
     }
+
+    MoonwallContext.getContext().nodes.forEach((process) => process.kill());
     delete MoonwallContext.instance;
   }
 }

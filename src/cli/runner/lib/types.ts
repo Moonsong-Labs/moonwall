@@ -1,7 +1,7 @@
 import { ApiPromise } from "@polkadot/api";
 import { WebSocketProvider } from "ethers";
+import { Interface } from "readline";
 import Web3 from "web3";
-import { Web3BaseProvider } from "web3-types";
 
 export type MoonwallConfig = {
   label: string;
@@ -13,28 +13,38 @@ export type Environment = {
   name: string;
   testFileDir: string;
   foundation: FoundationDetails;
-  include?: string[]
+  include?: string[];
   connections?: ProviderConfig[];
 };
 
-export type FoundationDetails = {
-  type: Foundation;
-  launchSpec?: LaunchSpec[];
-};
+export type FoundationDetails<TFoundation = Foundation> =
+  TFoundation extends Foundation.Dev
+    ? {
+        type: TFoundation;
+        launchSpec: DevLaunchSpec[];
+      }
+    : TFoundation extends Foundation.Chopsticks
+    ? { type: TFoundation; launchSpec: ChopsticksLaunchSpec[] }
+    : { type: TFoundation };
 
-export type LaunchSpec = {
-  bin: {
-    name: string;
-    path: string;
-  };
+export interface GenericLaunchSpec {
+  name: string;
+  alreadyRunning?: boolean;
+  options?: string[];
+}
+
+export interface ChopsticksLaunchSpec extends GenericLaunchSpec {
+  configPath: string;
+}
+
+export interface DevLaunchSpec extends GenericLaunchSpec {
+  binPath: string;
   ports?: {
     p2pPort: number;
     wsPort: number;
     rpcPort: number;
   };
-  alreadyRunning?: boolean;
-  options?: string[];
-};
+}
 
 export enum Foundation {
   ReadOnly = "read_only",
@@ -86,11 +96,3 @@ export type Node = {
   cmd: string;
   args: string[];
 };
-
-export type MoonwallTestFile = {};
-
-export type MoonwallTestSuite = {
-  tests: MoonwallTestCase[];
-};
-
-export type MoonwallTestCase = {};
