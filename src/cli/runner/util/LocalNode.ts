@@ -18,6 +18,9 @@ export async function launchDevNode(
     const onProcessInterrupt = () => {
       process.exit(2);
     };
+
+
+    // TODO: FIX KILLING PROCESSES
     process.once("exit", onProcessExit);
     process.once("SIGINT", onProcessInterrupt);
     nodesList[currentNode] = spawn(cmd, args);

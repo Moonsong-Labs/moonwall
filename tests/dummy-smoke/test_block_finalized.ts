@@ -6,7 +6,7 @@ import {
 } from "../../src/cli/runner/util/block.js";
 import Bottleneck from "bottleneck";
 import semverLt from "semver/functions/lt.js";
-import { testSuite } from "../../src/cli/runner/util/runner-functions.js";
+import { describeSuite } from "../../src/cli/runner/util/runner-functions.js";
 import { WebSocketProvider } from "ethers";
 import Web3 from "web3";
 import Debug from "debug"
@@ -16,7 +16,7 @@ const timePeriod = process.env.TIME_PERIOD
   :  60 * 1000;
 const timeout = Math.floor(timePeriod / 12); // 2 hour -> 10 minute timeout
 
-testSuite({
+describeSuite({
   id: "S400",
   title: "Parachain blocks should be finalized",
   testCases: ({ context, it }) => {

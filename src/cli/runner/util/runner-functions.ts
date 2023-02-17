@@ -1,5 +1,6 @@
-import { describe, it, beforeAll, assert } from "vitest";
+import { describe, it, beforeAll, assert, TestAPI } from "vitest";
 // import { MoonwallContext } from "../internal/globalContext";
+import { getCurrentSuite, setFn } from "vitest/suite";
 import { MoonwallContext } from "../../../../src/index.js";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { ConnectedProvider, Foundation, ProviderType } from "../lib/types";
@@ -22,7 +23,7 @@ import { setTimeout } from "timers/promises";
 import globalConfig from "../../../../moonwall.config.js";
 const debug = Debug("test:setup");
 
-export function testSuite({
+export function describeSuite({
   id,
   title,
   testCases,
@@ -81,8 +82,27 @@ export function testSuite({
       });
     }
 
-    function testCase(testcaseId: string, title: string, callback: () => void) {
-      it(`📁  #${id.concat(testcaseId)} ${title}`, callback);
+    function testCase(params: {
+      id: string;
+      title: string;
+      test: () => void;
+      modifier?: "only" | "skip";
+      timeout?: number;
+    }) {
+      if (params.modifier) {
+        it[params.modifier](
+          `📁  #${id.concat(params.id)} ${params.title}`,
+          params.test,
+          params.timeout
+        );
+        return;
+      }
+
+      it(
+        `📁  #${id.concat(params.id)} ${params.title}`,
+        params.test,
+        params.timeout
+      );
     }
 
     if (foundationMethods == Foundation.Dev) {
@@ -265,8 +285,37 @@ export function testSuite({
   });
 }
 
+// export function  timboCase(name, fn){
+// const task = getCurrentSuite().custom(name)
+
+// task.meta = {
+//   customPropertyToDifferentiateTask: true,
+// }
+
+// setFn(task, fn || (()=>))
+
+// }
+
+// export const myCustomTask = function (name, fn) {
+//   const task = getCurrentSuite().custom(name)
+//   task.meta = {
+//     customPropertyToDifferentiateTask: true
+//   }
+//   setFn(task, fn || (() => {}))
+// }
+
+// interface CustomTest {
+//   (id: string, title: string, cb: () => void, only?: boolean): void;
+// }
+
 interface CustomTest {
-  (id: string, title: string, cb: () => void, only?: boolean): void;
+  (params: {
+    id: string;
+    title: string;
+    test: () => void;
+    modifier?: "only" | "skip";
+    timeout?: number;
+  }): void;
 }
 
 type TestSuiteType<TFoundation = Foundation> =

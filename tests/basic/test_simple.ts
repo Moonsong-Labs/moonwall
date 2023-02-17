@@ -1,7 +1,7 @@
-import { testSuite } from '../../src/cli/runner/util/runner-functions.js';
+import { describeSuite } from '../../src/cli/runner/util/runner-functions.js';
 import { expect } from 'chai';
 
-testSuite({
+describeSuite({
   id: 'P100',
   title: 'Tests that are using the production foundation',
   testCases: ({ it }) => {

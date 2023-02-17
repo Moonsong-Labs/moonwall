@@ -1,8 +1,8 @@
-import { testSuite } from '../../src/cli/runner/util/runner-functions.js';
+import { describeSuite } from '../../src/cli/runner/util/runner-functions.js';
 import { setTimeout } from 'timers/promises';
 import { expect } from 'chai';
 
-testSuite({
+describeSuite({
   id: 'T100',
   title: 'New Test Suite',
   testCases: function () {

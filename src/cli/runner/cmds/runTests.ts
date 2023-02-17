@@ -4,10 +4,10 @@ import fs from "node:fs/promises";
 import { globalConfig } from "../../../../moonwall.config.js";
 import { startVitest } from "vitest/node";
 import { UserConfig } from "vitest";
+import { MoonwallContext } from "../internal/globalContext.js";
 
 export async function testCmd(args) {
-  // For files selected by Config.Environments.testFileDir
-  if (args.environment) {
+
     const env = globalConfig.environments.find(
       ({ name }) => name === args.environment
     );
@@ -20,7 +20,7 @@ export async function testCmd(args) {
       watch: false,
       globals: true,
       reporters: ["verbose"],
-      testTimeout: 1000000,
+      testTimeout: 10000,
       hookTimeout: 500000,
       setupFiles: ["src/cli/runner/internal/setupFixture.ts"],
       include: env.include
@@ -28,11 +28,18 @@ export async function testCmd(args) {
         : ["**/{test,spec,test_,test-}*{ts,mts,cts}"],
     };
 
-    const vitest = await startVitest("test", files, options);
-    await vitest.close();
-    process.exit(0)
-  } else {
-    // For files selected by positional arg
-    // TODO implement this code branch
-  }
+    try{
+      const vitest = await startVitest("test", files, options);
+      await vitest.close();
+      process.exit(0)
+    } catch (e) {
+      console.error(e)
+      MoonwallContext.destroy()
+      process.exit(1)
+    }
+
+
+
+    
+
 }

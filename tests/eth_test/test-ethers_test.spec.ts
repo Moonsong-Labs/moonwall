@@ -1,5 +1,5 @@
 import { expect } from "vitest";
-import { testSuite } from "../../src/cli/runner/util/runner-functions.js";
+import { describeSuite } from "../../src/cli/runner/util/runner-functions.js";
 import { Contract, WebSocketProvider, ethers, formatUnits } from "ethers";
 import { xcAssetAbi } from "../../src/cli/runner/lib/moonbeamConsts.js";
 import { createBlock } from "src/utils/contextHelpers.js";
@@ -7,7 +7,7 @@ import { MoonwallContext } from "../../src/index.js";
 import Debug from "debug";
 const debug = Debug("test:eth");
 
-testSuite({
+describeSuite({
   id: "S01",
   title: "Ethers test suite",
   testCases: ({it, context}) => {
