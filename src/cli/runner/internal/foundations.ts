@@ -38,7 +38,7 @@ export function parseRunCmd(launchSpec: DevLaunchSpec ){
 }
 
 export function parseChopsticksRunCmd(launchSpec: ChopsticksLaunchSpec ){
-  const chopsticksCmd = "npx"
-  const chopsticksArgs = ["chopsticks" ,"run",`--config=${launchSpec.configPath}`]
+  const chopsticksCmd = "node"
+  const chopsticksArgs = ["node_modules/@acala-network/chopsticks/chopsticks.js" ,"dev",`--config=${launchSpec.configPath}`]
   return {cmd: chopsticksCmd, args:chopsticksArgs}
 }

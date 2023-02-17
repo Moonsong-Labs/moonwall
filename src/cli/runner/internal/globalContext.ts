@@ -7,7 +7,6 @@ import {
   ProviderType,
 } from "../lib/types";
 
-// import { globalConfig } from "../../../../moonwalls.config";
 import { ChildProcess, spawn } from "child_process";
 import {
   populateProviderInterface,
@@ -15,7 +14,7 @@ import {
 } from "../util/providers.js";
 import { launchDevNode } from "../util/LocalNode.js";
 import globalConfig from "../../../../moonwall.config.js";
-import { parseRunCmd } from "./foundations.js";
+import { parseChopsticksRunCmd, parseRunCmd } from "./foundations.js";
 import { ApiPromise } from "@polkadot/api";
 import Debug from "debug";
 const debugSetup = Debug("global:context");
@@ -34,84 +33,82 @@ export class MoonwallContext {
     this.providers = [];
     this.nodes = [];
 
-   const env =  config.environments.find(({name})=>name == process.env.TEST_ENV) 
-  const blob = { name: env.name, context: {}, providers: [], nodes: [] };
+    const env = config.environments.find(
+      ({ name }) => name == process.env.TEST_ENV
+    );
+    const blob = { name: env.name, context: {}, providers: [], nodes: [] };
 
-      switch (env.foundation.type) {
-        case Foundation.ReadOnly:
-          if (!env.connections) {
-            throw new Error(
-              `${env.name} env config is missing connections specification, required by foundation READ_ONLY`
-            );
-          } else {
-            blob.providers = prepareProviders(env.connections);
-          }
-
-          debugSetup(
-            `🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`
+    switch (env.foundation.type) {
+      case Foundation.ReadOnly:
+        if (!env.connections) {
+          throw new Error(
+            `${env.name} env config is missing connections specification, required by foundation READ_ONLY`
           );
-          break;
-
-        case Foundation.Chopsticks:
-          const chopsticksCmd = "npx";
-          const chopsticksArgs = [
-            "chopsticks",
-            "dev",
-            `--config=${env.foundation.launchSpec[0].configPath}`,
-          ];
-
-          blob.nodes.push({
-            name: env.foundation.launchSpec[0].name,
-            cmd: chopsticksCmd,
-            args: chopsticksArgs,
-          });
-
+        } else {
           blob.providers = prepareProviders(env.connections);
-          debugSetup(
-            `🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`
-          );
-          break;
+        }
 
-        case Foundation.Dev:
-          const { cmd, args } = parseRunCmd(env.foundation.launchSpec[0]);
-          blob.nodes.push({
-            name: env.foundation.launchSpec[0].name,
-            cmd,
-            args,
-          });
+        debugSetup(
+          `🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`
+        );
+        break;
 
-          blob.providers = env.connections
-            ? prepareProviders(env.connections)
-            : prepareProviders([
-                {
-                  name: "w3",
-                  type: ProviderType.Web3,
-                  endpoints: ["ws://localhost:9944"],
-                },
-                {
-                  name: "eth",
-                  type: ProviderType.Ethers,
-                  endpoints: ["ws://localhost:9944"],
-                },
-                {
-                  name: "polka",
-                  type: ProviderType.PolkadotJs,
-                  endpoints: ["ws://localhost:9944"],
-                },
-              ]);
+      case Foundation.Chopsticks:
+        const { cmd: chopCmd, args: chopArg } = parseChopsticksRunCmd(
+          env.foundation.launchSpec[0]
+        );
 
-          debugSetup(
-            `🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`
-          );
-          break;
-        default:
-          debugSetup(
-            `🚧  Foundation "${env.foundation.type}" unsupported, skipping`
-          );
-          return;
-      }
-      this.environment = blob
-    
+        blob.nodes.push({
+          name: env.foundation.launchSpec[0].name,
+          cmd: chopCmd,
+          args: chopArg,
+        });
+
+        blob.providers = prepareProviders(env.connections);
+        debugSetup(
+          `🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`
+        );
+        break;
+
+      case Foundation.Dev:
+        const { cmd, args } = parseRunCmd(env.foundation.launchSpec[0]);
+        blob.nodes.push({
+          name: env.foundation.launchSpec[0].name,
+          cmd,
+          args,
+        });
+
+        blob.providers = env.connections
+          ? prepareProviders(env.connections)
+          : prepareProviders([
+              {
+                name: "w3",
+                type: ProviderType.Web3,
+                endpoints: ["ws://localhost:9944"],
+              },
+              {
+                name: "eth",
+                type: ProviderType.Ethers,
+                endpoints: ["ws://localhost:9944"],
+              },
+              {
+                name: "polka",
+                type: ProviderType.PolkadotJs,
+                endpoints: ["ws://localhost:9944"],
+              },
+            ]);
+
+        debugSetup(
+          `🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`
+        );
+        break;
+      default:
+        debugSetup(
+          `🚧  Foundation "${env.foundation.type}" unsupported, skipping`
+        );
+        return;
+    }
+    this.environment = blob;
   }
 
   public get genesis() {
@@ -131,18 +128,13 @@ export class MoonwallContext {
       return MoonwallContext.getContext();
     }
 
-    const nodes = MoonwallContext.getContext().environment
-    .nodes;
+    const nodes = MoonwallContext.getContext().environment.nodes;
     const promises = nodes.map(async ({ cmd, args, name }) => {
-      await launchDevNode(cmd, args, name);
+      this.nodes.push(await launchDevNode(cmd, args, name));
     });
 
     await Promise.all(promises);
   }
-
-  // public env(query: string): MoonwallEnvironment | undefined {
-  //   return this.environments.find(({ name }) => name == query);
-  // }
 
   public async connectEnvironment(environmentName: string) {
     if (this.providers.length > 0) {
@@ -150,9 +142,8 @@ export class MoonwallContext {
       return MoonwallContext.getContext();
     }
 
-    const promises = this.environment
-      // .find(({ name }) => name === environmentName)
-      .providers.map(
+    const promises = this.environment.providers
+      .map(
         async ({ name, type, connect, ws }) =>
           new Promise(async (resolve) => {
             const providerDetails = ws
