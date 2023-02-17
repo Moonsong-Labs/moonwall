@@ -23,19 +23,19 @@ const debugNode = Debug("global:node");
 
 export class MoonwallContext {
   private static instance: MoonwallContext;
-  environments: MoonwallEnvironment[];
+  environment: MoonwallEnvironment;
   providers: ConnectedProvider[];
   nodes: ChildProcess[];
   foundation?: Foundation;
   private _genesis?: string;
 
   constructor(config: MoonwallConfig) {
-    this.environments = [];
+    this.environment;
     this.providers = [];
     this.nodes = [];
 
-    config.environments.forEach((env) => {
-      const blob = { name: env.name, context: {}, providers: [], nodes: [] };
+   const env =  config.environments.find(({name})=>name == process.env.TEST_ENV) 
+  const blob = { name: env.name, context: {}, providers: [], nodes: [] };
 
       switch (env.foundation.type) {
         case Foundation.ReadOnly:
@@ -110,8 +110,8 @@ export class MoonwallContext {
           );
           return;
       }
-      this.environments.push(blob);
-    });
+      this.environment = blob
+    
   }
 
   public get genesis() {
@@ -131,21 +131,18 @@ export class MoonwallContext {
       return MoonwallContext.getContext();
     }
 
-    const nodes = MoonwallContext.getContext().environments.find(
-      (env) => env.name == environmentName
-    ).nodes;
-    console.log(nodes);
+    const nodes = MoonwallContext.getContext().environment
+    .nodes;
     const promises = nodes.map(async ({ cmd, args, name }) => {
       await launchDevNode(cmd, args, name);
     });
 
     await Promise.all(promises);
-    console.log("network started");
   }
 
-  public env(query: string): MoonwallEnvironment | undefined {
-    return this.environments.find(({ name }) => name == query);
-  }
+  // public env(query: string): MoonwallEnvironment | undefined {
+  //   return this.environments.find(({ name }) => name == query);
+  // }
 
   public async connectEnvironment(environmentName: string) {
     if (this.providers.length > 0) {
@@ -153,8 +150,8 @@ export class MoonwallContext {
       return MoonwallContext.getContext();
     }
 
-    const promises = this.environments
-      .find(({ name }) => name === environmentName)
+    const promises = this.environment
+      // .find(({ name }) => name === environmentName)
       .providers.map(
         async ({ name, type, connect, ws }) =>
           new Promise(async (resolve) => {

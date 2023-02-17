@@ -1,7 +1,4 @@
-import {
-  rpcDefinitions,
-  types,
-} from "moonbeam-types-bundle";
+import { rpcDefinitions, types } from "moonbeam-types-bundle";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import Web3 from "web3";
 import { ethers } from "ethers";
@@ -15,14 +12,13 @@ import {
 } from "../lib/types.js";
 import { ApiOptions } from "@polkadot/api/types";
 import { WebSocketProvider } from "ethers";
-import { Web3BaseProvider}   from "web3-types"
-import Debug from "debug"
+import { Web3BaseProvider } from "web3-types";
+import Debug from "debug";
 const debug = Debug("global:providers");
 
 export function prepareProviders(
   providerConfigs: ProviderConfig[]
 ): MoonwallProvider[] {
-
   return providerConfigs.map(({ name, endpoints, type }) => {
     const url = endpoints.includes("ENV_VAR")
       ? process.env.WSS_URL
@@ -31,32 +27,29 @@ export function prepareProviders(
     switch (type) {
       case ProviderType.PolkadotJs:
         debug(`🟢  PolkadotJs provider ${name} details prepared`);
-        const ws = new WsProvider(url)
         return {
           name,
           type,
-          ws: ws,
           connect: async () => {
             const api = await ApiPromise.create({
-              provider: ws,
+              provider: new WsProvider(url),
               initWasm: false,
-              noInitWarn: true
+              noInitWarn: true,
             });
             await api.isReady;
             return api;
           },
+          ws: ()=> new WsProvider(url)
         };
 
       case ProviderType.Moonbeam:
         debug(`🟢  Moonbeam provider ${name} details prepared`);
-        const mbWs = new WsProvider(url)
         return {
           name,
           type,
-          ws: mbWs,
           connect: async () => {
             const moonApi = await ApiPromise.create({
-              provider: mbWs,
+              provider:  new WsProvider(url),
               rpc: rpcDefinitions,
               typesBundle: types,
               noInitWarn: true,
@@ -64,29 +57,30 @@ export function prepareProviders(
             await moonApi.isReady;
             return moonApi;
           },
+          ws: ()=> new WsProvider(url)
         };
 
       case ProviderType.Web3:
         debug(`🟢  Web3 provider ${name} details prepared`);
-        
         return {
           name,
           type,
           // ws: wsProvider,
           connect: () => {
-            const wsProvider: Web3BaseProvider =new Web3.providers.WebsocketProvider(url)
-            const ethApi = new Web3(wsProvider)
+            const wsProvider: Web3BaseProvider =
+              new Web3.providers.WebsocketProvider(url);
+            const ethApi = new Web3(wsProvider);
             return ethApi;
           },
         };
 
-        case ProviderType.Ethers:
+      case ProviderType.Ethers:
         debug(`🟢  Ethers provider ${name} details prepared`);
         return {
           name,
           type,
           connect: async () => {
-            const ethersApi = new ethers.WebSocketProvider(url)
+            const ethersApi = new ethers.WebSocketProvider(url);
             return ethersApi;
           },
         };
@@ -105,7 +99,7 @@ export function prepareProviders(
 export async function populateProviderInterface(
   name: string,
   type: ProviderType,
-  connect: () => Promise<ApiPromise> | Promise<WebSocketProvider> |Web3 | void,
+  connect: () => Promise<ApiPromise> | Promise<WebSocketProvider> | Web3 | void,
   ws?: () => void
 ) {
   switch (type) {
@@ -124,7 +118,7 @@ export async function populateProviderInterface(
         disconnect: () => pjsApi.disconnect(),
       };
 
-    case  ProviderType.Moonbeam:
+    case ProviderType.Moonbeam:
       const mbApi = (await connect()) as ApiPromise;
       return {
         name,
@@ -147,37 +141,34 @@ export async function populateProviderInterface(
         type,
         greet: async () =>
           debug(
-            `👋  Provider ${name} is connected to chain ` +  (await ethApi.getNetwork()).chainId
+            `👋  Provider ${name} is connected to chain ` +
+              (await ethApi.getNetwork()).chainId
           ),
         disconnect: () => {
           ethApi.removeAllListeners();
-          ethApi.provider.destroy()
+          ethApi.provider.destroy();
           ethApi.destroy();
         },
       };
 
-      case ProviderType.Web3:
-        const web3Api = (await connect()) as Web3;
-        return {
-          name,
-          api: web3Api,
-          type,
-          greet: async () =>
-            console.log(
-              `👋 Provider ${name} is connected to chain ` + await web3Api.eth.getChainId()
-            ),
-          disconnect: () => {
-            // web3Api.currentProvider
-            // console.log(web3Api.currentProvider)
-            // console.dir(ws, {depth: null})
-            // console.log(web3Api.currentProvider)
-          },
-        };
-  
+    case ProviderType.Web3:
+      const web3Api = (await connect()) as Web3;
+      return {
+        name,
+        api: web3Api,
+        type,
+        greet: async () =>
+          console.log(
+            `👋 Provider ${name} is connected to chain ` +
+              (await web3Api.eth.getChainId())
+          ),
+        disconnect: () => {
+          // web3Api.currentProvider
+        },
+      };
 
-      default:
-        console.log(type)
-        console.log(typeof type)
-        throw new Error("UNKNOWN TYPE")
+    default:
+
+      throw new Error("UNKNOWN TYPE");
   }
 }

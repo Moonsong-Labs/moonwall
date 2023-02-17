@@ -8,7 +8,7 @@ import { setTimeout } from "timers/promises";
 testSuite({
   id: "X1",
   title: "Basic chopsticks test",
-  foundationMethods: Foundation.Dev,
+  foundationMethods: Foundation.Chopsticks,
   testCases: ({ context, it }) => {
     let api: ApiPromise;
 
@@ -27,25 +27,24 @@ testSuite({
       expect(chainName).toBe("moonbeam");
     });
 
-    it("T1", "Send a transaction ", async function () {
+    it("T2", "Send a transaction ", async function () {
       const currentBalance = (await api.query.system.account(ETHAN_ADDRESS))
         .data.free;
       await api.tx.balances
         .transfer(ETHAN_ADDRESS, parseEther("10"))
         .signAndSend(alith);
-
-
-        await 
-
-        // TODO: Add Create block method for chopsticks
-        await context.createBlock()
+      await context.createBlock();
 
       const balanceAfter = (await api.query.system.account(ETHAN_ADDRESS)).data
         .free;
-      console.log(currentBalance);
-      console.log(balanceAfter);
-
       expect(currentBalance.lt(balanceAfter)).toBeTruthy();
+    });
+
+    it("T3", "Skips multiple blocks ", async function () {
+      const currentBlock = (await api.rpc.chain.getHeader()).number.toNumber();
+      await context.createBlock({ count: 3 });
+      const laterBlock = (await api.rpc.chain.getHeader()).number.toNumber();
+      expect(laterBlock - currentBlock).toBe(3);
     });
   },
 });
