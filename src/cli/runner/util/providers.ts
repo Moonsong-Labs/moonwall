@@ -31,12 +31,14 @@ export function prepareProviders(
     switch (type) {
       case ProviderType.PolkadotJs:
         debug(`🟢  PolkadotJs provider ${name} details prepared`);
+        const ws = new WsProvider(url)
         return {
           name,
           type,
+          ws: ws,
           connect: async () => {
             const api = await ApiPromise.create({
-              provider: new WsProvider(url),
+              provider: ws,
               initWasm: false,
               noInitWarn: true
             });
@@ -47,12 +49,14 @@ export function prepareProviders(
 
       case ProviderType.Moonbeam:
         debug(`🟢  Moonbeam provider ${name} details prepared`);
+        const mbWs = new WsProvider(url)
         return {
           name,
           type,
+          ws: mbWs,
           connect: async () => {
             const moonApi = await ApiPromise.create({
-              provider: new WsProvider(url),
+              provider: mbWs,
               rpc: rpcDefinitions,
               typesBundle: types,
               noInitWarn: true,

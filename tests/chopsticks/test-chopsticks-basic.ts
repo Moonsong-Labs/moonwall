@@ -8,7 +8,7 @@ import { setTimeout } from "timers/promises";
 testSuite({
   id: "X1",
   title: "Basic chopsticks test",
-  foundationMethods: Foundation.Chopsticks,
+  foundationMethods: Foundation.Dev,
   testCases: ({ context, it }) => {
     let api: ApiPromise;
 
@@ -33,6 +33,9 @@ testSuite({
       await api.tx.balances
         .transfer(ETHAN_ADDRESS, parseEther("10"))
         .signAndSend(alith);
+
+
+        await 
 
         // TODO: Add Create block method for chopsticks
         await context.createBlock()
