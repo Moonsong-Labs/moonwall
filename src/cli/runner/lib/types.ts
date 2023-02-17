@@ -1,4 +1,4 @@
-import { ApiPromise } from "@polkadot/api";
+import { ApiPromise, WsProvider } from "@polkadot/api";
 import { WebSocketProvider } from "ethers";
 import { Interface } from "readline";
 import Web3 from "web3";
@@ -78,6 +78,7 @@ export interface ConnectedProvider {
   name: string;
   type: ProviderType;
   api: ApiPromise | WebSocketProvider | Web3;
+  ws?: WsProvider
   disconnect: () => void;
   greet: () => Promise<void> | void;
 }

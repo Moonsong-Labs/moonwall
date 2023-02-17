@@ -4,7 +4,6 @@ import { expect } from 'chai';
 testSuite({
   id: 'T100',
   title: 'New Test Suite',
-  environment: "New_Test",
   testCases: ({ it }) => {
     it('T01', 'Passing Test', function () {
       expect(true).to.be.true;

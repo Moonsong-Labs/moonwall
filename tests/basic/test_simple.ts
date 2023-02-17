@@ -4,7 +4,6 @@ import { expect } from 'chai';
 testSuite({
   id: 'P100',
   title: 'Tests that are using the production foundation',
-  environment: "New_Test",
   testCases: ({ it }) => {
     it('T01', 'Passing Test', function () {
       expect(true).to.be.true;
