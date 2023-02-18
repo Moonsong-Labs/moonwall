@@ -33,8 +33,18 @@ export interface GenericLaunchSpec {
   options?: string[];
 }
 
+// TODO: Separate single chopsticks network and multi chopsticks into separate interfaces
 export interface ChopsticksLaunchSpec extends GenericLaunchSpec {
   configPath: string;
+  
+  // Quirk of Chopsticks is that port is only used for dev mode not xcm 
+  wsPort?: number;
+
+  type?: "relaychain" | "parachain"
+
+  // Unclear what buildBlockMode actually does given it still requires
+  // ws signal dev_newBlock to seal
+  buildBlockMode?: "batch" | "manual" | "instant"
 }
 
 export interface DevLaunchSpec extends GenericLaunchSpec {

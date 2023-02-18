@@ -1,5 +1,5 @@
 endpoint: wss://wss.api.moonbeam.network
-port: 21321
+port: 55321
 mock-signature-host: true
 db: ./db.sqlite
 

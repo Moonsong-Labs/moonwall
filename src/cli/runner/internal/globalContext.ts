@@ -54,17 +54,8 @@ export class MoonwallContext {
         break;
 
       case Foundation.Chopsticks:
-        const { cmd: chopCmd, args: chopArg } = parseChopsticksRunCmd(
-          env.foundation.launchSpec[0]
-        );
-
-        blob.nodes.push({
-          name: env.foundation.launchSpec[0].name,
-          cmd: chopCmd,
-          args: chopArg,
-        });
-
-        blob.providers = prepareProviders(env.connections);
+        blob.nodes.push(parseChopsticksRunCmd(env.foundation.launchSpec));
+        blob.providers.push(...prepareProviders(env.connections));
         debugSetup(
           `🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`
         );
@@ -122,7 +113,7 @@ export class MoonwallContext {
     this._genesis = hash;
   }
 
-  public async startNetwork(environmentName: string) {
+  public async startNetwork(environmentName?: string) {
     if (this.nodes.length > 0) {
       console.log("Nodes already started! Skipping command");
       return MoonwallContext.getContext();
@@ -142,17 +133,16 @@ export class MoonwallContext {
       return MoonwallContext.getContext();
     }
 
-    const promises = this.environment.providers
-      .map(
-        async ({ name, type, connect, ws }) =>
-          new Promise(async (resolve) => {
-            const providerDetails = ws
-              ? await populateProviderInterface(name, type, connect, ws)
-              : await populateProviderInterface(name, type, connect);
-            this.providers.push(providerDetails);
-            resolve("");
-          })
-      );
+    const promises = this.environment.providers.map(
+      async ({ name, type, connect, ws }) =>
+        new Promise(async (resolve) => {
+          const providerDetails = ws
+            ? await populateProviderInterface(name, type, connect, ws)
+            : await populateProviderInterface(name, type, connect);
+          this.providers.push(providerDetails);
+          resolve("");
+        })
+    );
     await Promise.all(promises);
 
     this.foundation = globalConfig.environments.find(

@@ -242,6 +242,8 @@ export function describeSuite({
       testCases({
         context: {
           ...context,
+          // TODO: Add function to upgrade runtime
+          // Refer to "upgradeRuntime()" in setup-para-tests.ts
           createBlock: async (params?: {
             providerName?: string;
             count?: number;
@@ -284,29 +286,6 @@ export function describeSuite({
     }
   });
 }
-
-// export function  timboCase(name, fn){
-// const task = getCurrentSuite().custom(name)
-
-// task.meta = {
-//   customPropertyToDifferentiateTask: true,
-// }
-
-// setFn(task, fn || (()=>))
-
-// }
-
-// export const myCustomTask = function (name, fn) {
-//   const task = getCurrentSuite().custom(name)
-//   task.meta = {
-//     customPropertyToDifferentiateTask: true
-//   }
-//   setFn(task, fn || (() => {}))
-// }
-
-// interface CustomTest {
-//   (id: string, title: string, cb: () => void, only?: boolean): void;
-// }
 
 interface CustomTest {
   (params: {
@@ -374,7 +353,7 @@ interface ChopsticksContext extends GenericContext {
   }) => Promise<void>;
 }
 
-interface DevModeContext extends GenericContext {
+export interface DevModeContext extends GenericContext {
   createBlock<
     ApiType extends ApiTypes,
     Call extends

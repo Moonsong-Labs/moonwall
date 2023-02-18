@@ -5,7 +5,7 @@ import {
 } from "./src/cli/runner/lib/types.js";
 
 export const globalConfig: MoonwallConfig = {
-  label: "test new config",
+  label: "Global Test Config 🐯",
   defaultTestTimeout: 40000,
   environments: [
     {
@@ -16,7 +16,14 @@ export const globalConfig: MoonwallConfig = {
         launchSpec: [
           {
             name: "mb",
-            configPath: "src/cli/runner/lib/chopsticksConfig.yml"
+            type: "parachain",
+            rtUpgradePath: "downloads/MB2100.wasm",
+            configPath: "src/cli/runner/lib/chopsticksConfig.yml",
+          },
+          {
+            name: "mb2",
+            type: "parachain",
+            configPath: "src/cli/runner/lib/chopsticksConfig2.yml",
           },
         ],
       },
@@ -24,7 +31,12 @@ export const globalConfig: MoonwallConfig = {
         {
           name: "MB",
           type: ProviderType.Moonbeam,
-          endpoints: ["ws://localhost:8000"],
+          endpoints: ["ws://localhost:21321"],
+        },
+        {
+          name: "MB2",
+          type: ProviderType.Moonbeam,
+          endpoints: ["ws://localhost:55321"],
         }
       ],
     },
