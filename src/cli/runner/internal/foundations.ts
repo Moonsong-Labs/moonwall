@@ -69,6 +69,12 @@ export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
       `--config=${launchSpecs[0].configPath}`,
     ];
 
+    const mode = launchSpecs[0].buildBlockMode
+      ? launchSpecs[0].buildBlockMode
+      : "manual";
+    const num = mode == "batch" ? 0 : mode == "instant" ? 1 : 2;
+    chopsticksArgs.push(`--build-block-mode=${num}`);
+
     if (launchSpecs[0].wsPort) {
       chopsticksArgs.push(`--port=${launchSpecs[0].wsPort}`);
     }
@@ -76,9 +82,6 @@ export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
     return {
       cmd: chopsticksCmd,
       args: chopsticksArgs,
-      // rtUpgradePath: launchSpecs[0].rtUpgradePath
-      //   ? launchSpecs[0].rtUpgradePath
-      //   : "",
     };
   }
 

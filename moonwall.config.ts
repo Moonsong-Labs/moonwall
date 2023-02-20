@@ -18,13 +18,8 @@ export const globalConfig: MoonwallConfig = {
           {
             name: "mb",
             type: "parachain",
-            // buildBlockMode: "manual",
+            buildBlockMode: "manual",
             configPath: "src/cli/runner/lib/chopsticksConfig.yml",
-          },
-          {
-            name: "mb2",
-            type: "parachain",
-            configPath: "src/cli/runner/lib/chopsticksConfig2.yml",
           },
         ],
       },
@@ -34,11 +29,6 @@ export const globalConfig: MoonwallConfig = {
           type: ProviderType.PolkadotJs,
           endpoints: ["ws://localhost:21321"],
         },
-        {
-          name: "MB2",
-          type: ProviderType.PolkadotJs,
-          endpoints: ["ws://localhost:15321"],
-        }
       ],
     },
     {

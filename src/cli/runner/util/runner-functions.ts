@@ -1,8 +1,5 @@
-import { describe, it, beforeAll, assert, TestAPI } from "vitest";
-// import { MoonwallContext } from "../internal/globalContext";
-import { getCurrentSuite, setFn } from "vitest/suite";
+import { describe, it, beforeAll } from "vitest";
 import { MoonwallContext } from "../../../../src/index.js";
-import { blake2AsHex } from "@polkadot/util-crypto";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { ConnectedProvider, Foundation, ProviderType } from "../lib/types";
 import { WebSocketProvider } from "ethers";
@@ -10,38 +7,24 @@ import Web3 from "web3";
 import {
   ApiTypes,
   AugmentedEvent,
-  AugmentedEvents,
   SubmittableExtrinsic,
 } from "@polkadot/api/types/index.js";
 import {
   BlockCreation,
   BlockCreationResponse,
-  ExtrinsicCreation,
-  extractError,
 } from "../../../utils/contextHelpers.js";
-import { customWeb3Request } from "../internal/providers.js";
 import Debug from "debug";
-import { alith } from "../lib/accounts.js";
-import { createAndFinalizeBlock } from "./block.js";
-import { EventRecord } from "@polkadot/types/interfaces/types.js";
-import { RegistryError } from "@polkadot/types-codec/types/registry";
-import { setTimeout } from "timers/promises";
-import globalConfig from "../../../../moonwall.config.js";
-import {
-  UpgradePreferences,
-  upgradeRuntime,
-  upgradeRuntimeChopsticks,
-} from "./upgrade.js";
-import { readFileSync } from "fs";
+import { upgradeRuntimeChopsticks } from "./upgrade.js";
 import {
   sendNewBlockRequest,
   sendSetStorageRequest,
+  sendNewBlockAndCheck,
 } from "../internal/chopsticksHelpers.js";
 import {
   createDevBlock,
   createDevBlockCheckEvents,
 } from "../internal/devModeHelpers.js";
-import { bool } from "@polkadot/types-codec";
+
 const debug = Debug("test:setup");
 
 export function describeSuite({
@@ -59,6 +42,23 @@ export function describeSuite({
 
     const context: GenericContext = {
       providers: {},
+
+      getSubstrateApi: (options?: {
+        apiName?: string;
+        type?: ProviderType;
+      }): ApiPromise => {
+        if (options && options.apiName) {
+          return context.providers[options.apiName];
+        } else if (options && options.type) {
+          return MoonwallContext.getContext().providers.find(
+            (a) => a.type == options.type
+          ).api as ApiPromise;
+        } else {
+          return MoonwallContext.getContext().providers.find(
+            (a) => a.type == ProviderType.Moonbeam || ProviderType.PolkadotJs
+          ).api as ApiPromise;
+        }
+      },
       getPolkadotJs: (apiName?: string): ApiPromise => {
         if (apiName) {
           return context.providers[apiName];
@@ -173,6 +173,9 @@ export function describeSuite({
             count?: number;
             to?: number;
           }) => await sendNewBlockRequest(params),
+          createBlockAndCheck: async (
+            expectedEvents: AugmentedEvent<ApiTypes>[]
+          ) => await sendNewBlockAndCheck(context, expectedEvents),
           setStorage: async (params?: {
             providerName?: string;
             module: string;
@@ -247,6 +250,10 @@ interface GenericTestContext {
 export interface GenericContext {
   providers: Object;
   getPolkadotJs: ([name]?: string) => ApiPromise;
+  getSubstrateApi: (options?: {
+    apiName?: string;
+    type?: ProviderType;
+  }) => ApiPromise;
   getMoonbeam: ([name]?: string) => ApiPromise;
   getEthers: ([name]?: string) => WebSocketProvider;
   getWeb3: ([name]?: string) => Web3;
@@ -257,7 +264,10 @@ export interface ChopsticksContext extends GenericContext {
     providerName?: string;
     count?: number;
     to?: number;
-  }) => Promise<void>;
+  }) => Promise<string>;
+  createBlockAndCheck: (
+    events: AugmentedEvent<ApiTypes>[]
+  ) => Promise<{ match: boolean; events: any[] }>;
   setStorage: (params: {
     providerName?: string;
     module: string;
@@ -299,4 +309,3 @@ export interface DevModeContext extends GenericContext {
     options?: BlockCreation
   ): Promise<{ match: boolean; events: any[] }>;
 }
-

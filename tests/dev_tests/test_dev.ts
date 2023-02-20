@@ -106,9 +106,7 @@ describeSuite({
       // modifier: "only",
       timeout: 30000,
       test: async function () {
-        console.log("hello!");
-
-        const events = [
+          const events = [
           polkadotJs.events.system.ExtrinsicSuccess,
           polkadotJs.events.balances.Transfer,
           // polkadotJs.events.authorFilter.EligibleUpdated

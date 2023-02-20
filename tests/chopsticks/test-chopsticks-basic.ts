@@ -4,11 +4,15 @@ import { MoonwallContext, describeSuite } from "../../src/index.js";
 import { expect } from "vitest";
 import { blake2AsHex } from "@polkadot/util-crypto";
 import { parseEther, formatEther } from "ethers";
-import { ETHAN_ADDRESS, alith } from "../../src/cli/runner/lib/accounts.js";
+import {
+  CHARLETH_ADDRESS,
+  ETHAN_ADDRESS,
+  alith,
+} from "../../src/cli/runner/lib/accounts.js";
 import { setTimeout } from "timers/promises";
 import { readFileSync } from "fs";
 import globalConfig from "../../moonwall.config.js";
-import {  upgradeRuntimeChopsticks } from "../../src/cli/runner/util/upgrade.js";
+import { upgradeRuntimeChopsticks } from "../../src/cli/runner/util/upgrade.js";
 describeSuite({
   id: "X1",
   title: "Basic chopsticks test",
@@ -112,9 +116,30 @@ describeSuite({
       // modifier: "only",
       test: async function () {
         const rtBefore = api.consts.system.version.specVersion.toNumber();
-       await context.upgradeRuntime(context)
+        await context.upgradeRuntime(context);
         const rtafter = api.consts.system.version.specVersion.toNumber();
         expect(rtBefore).toBeLessThan(rtafter);
+      },
+    });
+
+    it({
+      id: "T6",
+      title: "Check the createBlockAndCheck fn",
+      // modifier: "only",
+      test: async function () {
+        const events = [
+          api.events.system.ExtrinsicSuccess,
+          api.events.balances.Transfer,
+          api.events.system.NewAccount,
+          // api.events.authorFilter.EligibleUpdated
+        ];
+        await api.tx.balances
+          .transfer(CHARLETH_ADDRESS, parseEther("3"))
+          .signAndSend(alith);
+
+        const { match } = await context.createBlockAndCheck(events);
+
+        expect(match).toStrictEqual(true);
       },
     });
   },

@@ -46,7 +46,7 @@ export interface ChopsticksLaunchSpec extends GenericLaunchSpec {
   wsPort?: number;
   type?: "relaychain" | "parachain";
 
-  // Unclear what buildBlockMode actually does given it still requires
+  // buildBlockMode only supported for single chopsticks
   // ws signal dev_newBlock to seal
   buildBlockMode?: "batch" | "manual" | "instant";
 }
