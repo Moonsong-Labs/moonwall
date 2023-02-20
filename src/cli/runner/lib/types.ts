@@ -39,7 +39,7 @@ export interface ChopsticksLaunchSpec extends GenericLaunchSpec {
   
   // Quirk of Chopsticks is that port is only used for dev mode not xcm 
   wsPort?: number;
-
+  rtUpgradePath?: string,
   type?: "relaychain" | "parachain"
 
   // Unclear what buildBlockMode actually does given it still requires
@@ -105,4 +105,5 @@ export type Node = {
   type: "binary" | "chopsticks" | "zombie";
   cmd: string;
   args: string[];
+  rtUpgradePath?: string
 };

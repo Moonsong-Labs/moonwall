@@ -59,6 +59,7 @@ export function parseRunCmd(launchSpec: DevLaunchSpec) {
 export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
   cmd: string;
   args: string[];
+  rtUpgradePath: string;
 } {
   if (launchSpecs.length === 1) {
     const chopsticksCmd = "node";
@@ -72,7 +73,13 @@ export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
       chopsticksArgs.push(`--port=${launchSpecs[0].wsPort}`);
     }
 
-    return { cmd: chopsticksCmd, args: chopsticksArgs };
+    return {
+      cmd: chopsticksCmd,
+      args: chopsticksArgs,
+      rtUpgradePath: launchSpecs[0].rtUpgradePath
+        ? launchSpecs[0].rtUpgradePath
+        : "",
+    };
   }
 
   const chopsticksCmd = "node";
@@ -92,5 +99,11 @@ export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
     }
   });
 
-  return { cmd: chopsticksCmd, args: chopsticksArgs };
+  return {
+    cmd: chopsticksCmd,
+    args: chopsticksArgs,
+    rtUpgradePath: launchSpecs[0].rtUpgradePath
+      ? launchSpecs[0].rtUpgradePath
+      : "",
+  };
 }

@@ -18,6 +18,7 @@ export interface UpgradePreferences {
   from?: KeyringPair;
   waitMigration?: boolean;
   useGovernance?: boolean;
+  localPath?: string
 }
 
 export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePreferences) {
@@ -30,7 +31,7 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
   return new Promise<number>(async (resolve, reject) => {
     try {
       const code = fs
-        .readFileSync(await getRuntimeWasm(options.runtimeName, options.runtimeTag))
+        .readFileSync(await getRuntimeWasm(options.runtimeName, options.runtimeTag, options.localPath))
         .toString();
 
       const existingCode = await api.rpc.state.getStorage(":code");

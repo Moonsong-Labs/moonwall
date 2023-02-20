@@ -71,7 +71,8 @@ export async function getMoonbeamDockerBinary(binaryTag: string): Promise<string
 // Downloads the runtime and return the filepath
 export async function getRuntimeWasm(
   runtimeName: "moonbase" | "moonriver" | "moonbeam",
-  runtimeTag: "local" | string
+  runtimeTag: "local" | string,
+  localPath?: string
 ): Promise<string> {
   const runtimePath = path.join(RUNTIME_DIRECTORY, `${runtimeName}-${runtimeTag}.wasm`);
 
@@ -80,7 +81,7 @@ export async function getRuntimeWasm(
   }
 
   if (runtimeTag == "local") {
-    const builtRuntimePath = path.join(
+    const builtRuntimePath = localPath ? localPath :path.join(
       OVERRIDE_RUNTIME_PATH || `../target/release/wbuild/${runtimeName}-runtime/`,
       `${runtimeName}_runtime.compact.compressed.wasm`
     );

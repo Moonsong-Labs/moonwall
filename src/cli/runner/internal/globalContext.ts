@@ -62,7 +62,7 @@ export class MoonwallContext {
         break;
 
       case Foundation.Dev:
-        const { cmd, args } = parseRunCmd(env.foundation.launchSpec[0]);
+        const { cmd, args  } = parseRunCmd(env.foundation.launchSpec[0]);
         blob.nodes.push({
           name: env.foundation.launchSpec[0].name,
           cmd,

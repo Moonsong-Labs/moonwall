@@ -3,3 +3,4 @@ dist/
 html/
 db.sqlite*
 downloads/*
+*.wasm

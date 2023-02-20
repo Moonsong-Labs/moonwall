@@ -21,6 +21,7 @@ import { EventRecord } from "@polkadot/types/interfaces/types.js";
 import { RegistryError } from "@polkadot/types-codec/types/registry";
 import { setTimeout } from "timers/promises";
 import globalConfig from "../../../../moonwall.config.js";
+import { UpgradePreferences, upgradeRuntime } from "./upgrade.js";
 const debug = Debug("test:setup");
 
 export function describeSuite({
@@ -278,6 +279,49 @@ export function describeSuite({
             await ws.disconnect();
             return;
           },
+          setStorage: async (params?: {
+            providerName?: string;
+            module: string;
+            method: string;
+            methodParams: any[];
+          }) => {
+            const ws =
+              params && params.providerName
+                ? MoonwallContext.getContext()
+                    .environment.providers.find(
+                      ({ name }) => name == params.providerName
+                    )
+                    .ws()
+                : MoonwallContext.getContext()
+                    .environment.providers.find(
+                      ({ type }) =>
+                        type == ProviderType.Moonbeam ||
+                        type == ProviderType.PolkadotJs
+                    )
+                    .ws();
+
+            await ws.connect();
+            while (!ws.isConnected) {
+              await setTimeout(100);
+            }
+
+            await ws.send("dev_setStorage", [
+              { [params.module]: { [params.method]: [params.methodParams] } },
+            ]);
+
+            await ws.disconnect();
+            return;
+          },
+          upgradeRuntime: (preferences, apiName?) => {
+            if (apiName) {
+              return upgradeRuntime(
+                context.getPolkadotJs(apiName),
+                preferences
+              );
+            } else {
+              return upgradeRuntime(context.getPolkadotJs(), preferences);
+            }
+          },
         },
         it: testCase,
       });
@@ -351,6 +395,16 @@ interface ChopsticksContext extends GenericContext {
     count?: number;
     to?: number;
   }) => Promise<void>;
+  setStorage: (params: {
+    providerName?: string;
+    module: string;
+    method: string;
+    methodParams: any[];
+  }) => Promise<void>;
+  upgradeRuntime: (
+    preferences: UpgradePreferences,
+    apiName?: string
+  ) => Promise<number>;
 }
 
 export interface DevModeContext extends GenericContext {

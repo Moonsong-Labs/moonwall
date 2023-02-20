@@ -17,7 +17,8 @@ export const globalConfig: MoonwallConfig = {
           {
             name: "mb",
             type: "parachain",
-            rtUpgradePath: "downloads/MB2100.wasm",
+            rtUpgradePath: "/home/timbotronic/workspace/moonbeam/moonbeam/target/release/wbuild/moonbeam-runtime/moonbeam_runtime.compact.compressed.wasm",
+            buildBlockMode: "manual",
             configPath: "src/cli/runner/lib/chopsticksConfig.yml",
           },
           {
@@ -30,13 +31,13 @@ export const globalConfig: MoonwallConfig = {
       connections: [
         {
           name: "MB",
-          type: ProviderType.Moonbeam,
+          type: ProviderType.PolkadotJs,
           endpoints: ["ws://localhost:21321"],
         },
         {
           name: "MB2",
-          type: ProviderType.Moonbeam,
-          endpoints: ["ws://localhost:55321"],
+          type: ProviderType.PolkadotJs,
+          endpoints: ["ws://localhost:15321"],
         }
       ],
     },
