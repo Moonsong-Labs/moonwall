@@ -69,7 +69,7 @@ export class MoonwallContext {
       case Foundation.Chopsticks:
         blob.nodes.push(parseChopsticksRunCmd(env.foundation.launchSpec));
         blob.providers.push(...prepareProviders(env.connections));
-        this.rtUpgradePath = env.foundation.rtUpgradePath 
+        this.rtUpgradePath = env.foundation.rtUpgradePath;
         debugSetup(
           `🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`
         );

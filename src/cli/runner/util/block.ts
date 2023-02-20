@@ -6,7 +6,10 @@ import {
   Extrinsic,
   RuntimeDispatchInfo,
 } from "@polkadot/types/interfaces";
-import { FrameSystemEventRecord, SpWeightsWeightV2Weight } from "@polkadot/types/lookup";
+import {
+  FrameSystemEventRecord,
+  SpWeightsWeightV2Weight,
+} from "@polkadot/types/lookup";
 import { u32, u64, u128, Option } from "@polkadot/types";
 // import "@moonbeam-network/api-augment/moonbase";
 import { expect } from "chai";
@@ -14,11 +17,14 @@ import { expect } from "chai";
 import { WEIGHT_PER_GAS } from "../lib/constants.js";
 // import { DevTestContext } from "./setup-dev-tests";
 
-import type { Block, AccountId20 } from "@polkadot/types/interfaces/runtime/types";
+import type {
+  Block,
+  AccountId20,
+} from "@polkadot/types/interfaces/runtime/types";
 import type { TxWithEvent } from "@polkadot/api-derive/types";
 import type { ITuple } from "@polkadot/types-codec/types";
 import Bottleneck from "bottleneck";
-import Debug from "debug"
+import Debug from "debug";
 const debug = Debug("test:blocks");
 export async function createAndFinalizeBlock(
   api: ApiPromise,
@@ -43,7 +49,10 @@ export async function createAndFinalizeBlock(
 // This is meant to precisely mimic the logic in the Moonbeam runtimes where the burn amount
 // is calculated and the treasury is treated as the remainder. This precision is important to
 // avoid off-by-one errors.
-export function calculateFeePortions(amount: bigint): { burnt: bigint; treasury: bigint } {
+export function calculateFeePortions(amount: bigint): {
+  burnt: bigint;
+  treasury: bigint;
+} {
   const burnt = (amount * 80n) / 100n; // 20% goes to treasury
   return { burnt, treasury: amount - burnt };
 }
@@ -347,12 +356,16 @@ export const getBlockExtrinsic = async (
   const extrinsic = extIndex > -1 ? block.extrinsics[extIndex] : null;
 
   const events = records
-    .filter(({ phase }) => phase.isApplyExtrinsic && phase.asApplyExtrinsic.eq(extIndex))
+    .filter(
+      ({ phase }) =>
+        phase.isApplyExtrinsic && phase.asApplyExtrinsic.eq(extIndex)
+    )
     .map(({ event }) => event);
   const resultEvent = events.find(
     (event) =>
       event.section === "system" &&
-      (event.method === "ExtrinsicSuccess" || event.method === "ExtrinsicFailed")
+      (event.method === "ExtrinsicSuccess" ||
+        event.method === "ExtrinsicFailed")
   );
   return { block, extrinsic, events, resultEvent };
 };
@@ -389,8 +402,11 @@ export const getBlockTime = (signedBlock: any) =>
 export const checkBlockFinalized = async (api: ApiPromise, number: number) => {
   return {
     number,
-    finalized: (await api.rpc.moon.isBlockFinalized(await api.rpc.chain.getBlockHash(number)))
-      .isTrue,
+    finalized: (
+      await api.rpc.moon.isBlockFinalized(
+        await api.rpc.chain.getBlockHash(number)
+      )
+    ).isTrue,
   };
 };
 
@@ -421,7 +437,11 @@ export const fetchHistoricBlockNum = async (
   );
 };
 
-export const getBlockArray = async (api: ApiPromise, timePeriod: number, limiter?: Bottleneck) => {
+export const getBlockArray = async (
+  api: ApiPromise,
+  timePeriod: number,
+  limiter?: Bottleneck
+) => {
   /**  
   @brief Returns an sequential array of block numbers from a given period of time in the past
   @param api Connected ApiPromise to perform queries on
@@ -432,8 +452,12 @@ export const getBlockArray = async (api: ApiPromise, timePeriod: number, limiter
   if (limiter == null) {
     limiter = new Bottleneck({ maxConcurrent: 10, minTime: 100 });
   }
-  const finalizedHead = await limiter.schedule(() => api.rpc.chain.getFinalizedHead());
-  const signedBlock = await limiter.schedule(() => api.rpc.chain.getBlock(finalizedHead));
+  const finalizedHead = await limiter.schedule(() =>
+    api.rpc.chain.getFinalizedHead()
+  );
+  const signedBlock = await limiter.schedule(() =>
+    api.rpc.chain.getBlock(finalizedHead)
+  );
 
   const lastBlockNumber = signedBlock.block.header.number.toNumber();
   const lastBlockTime = getBlockTime(signedBlock);
@@ -451,7 +475,11 @@ export const getBlockArray = async (api: ApiPromise, timePeriod: number, limiter
 };
 
 export function extractWeight(
-  weightV1OrV2: u64 | Option<u64> | SpWeightsWeightV2Weight | Option<SpWeightsWeightV2Weight>
+  weightV1OrV2:
+    | u64
+    | Option<u64>
+    | SpWeightsWeightV2Weight
+    | Option<SpWeightsWeightV2Weight>
 ) {
   if ("isSome" in weightV1OrV2) {
     const weight = weightV1OrV2.unwrap();

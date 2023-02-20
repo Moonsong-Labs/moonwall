@@ -39,7 +39,7 @@ export function prepareProviders(
             await api.isReady;
             return api;
           },
-          ws: ()=> new WsProvider(url)
+          ws: () => new WsProvider(url),
         };
 
       case ProviderType.Moonbeam:
@@ -49,7 +49,7 @@ export function prepareProviders(
           type,
           connect: async () => {
             const moonApi = await ApiPromise.create({
-              provider:  new WsProvider(url),
+              provider: new WsProvider(url),
               rpc: rpcDefinitions,
               typesBundle: types,
               noInitWarn: true,
@@ -57,7 +57,7 @@ export function prepareProviders(
             await moonApi.isReady;
             return moonApi;
           },
-          ws: ()=> new WsProvider(url)
+          ws: () => new WsProvider(url),
         };
 
       case ProviderType.Web3:
@@ -168,7 +168,6 @@ export async function populateProviderInterface(
       };
 
     default:
-
       throw new Error("UNKNOWN TYPE");
   }
 }

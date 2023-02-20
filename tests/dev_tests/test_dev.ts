@@ -106,18 +106,17 @@ describeSuite({
       // modifier: "only",
       timeout: 30000,
       test: async function () {
-          const events = [
+        const events = [
           polkadotJs.events.system.ExtrinsicSuccess,
           polkadotJs.events.balances.Transfer,
           // polkadotJs.events.authorFilter.EligibleUpdated
         ];
 
-        const {match} = await context.createBlockAndCheck(
+        const { match } = await context.createBlockAndCheck(
           events,
           polkadotJs.tx.balances.transfer(CHARLETH_ADDRESS, parseEther("3"))
         );
-        expect(match).toStrictEqual(true)
-
+        expect(match).toStrictEqual(true);
       },
     });
   },

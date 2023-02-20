@@ -67,7 +67,8 @@ export const GERALD_CONTRACT_ADDRESSES = [
 ];
 
 // This is Alice0x6Be02d1d3665660d22FF9624b7BE0551ee1Ac91b
-export const ALITH_GENESIS_FREE_BALANCE = DEFAULT_GENESIS_BALANCE - DEFAULT_GENESIS_MAPPING;
+export const ALITH_GENESIS_FREE_BALANCE =
+  DEFAULT_GENESIS_BALANCE - DEFAULT_GENESIS_MAPPING;
 export const ALITH_GENESIS_LOCK_BALANCE = DEFAULT_GENESIS_STAKING;
 export const ALITH_GENESIS_RESERVE_BALANCE = DEFAULT_GENESIS_MAPPING;
 export const ALITH_GENESIS_TRANSFERABLE_BALANCE =
@@ -85,8 +86,12 @@ export const goliath = keyringEth.addFromUri(GOLIATH_PRIVATE_KEY);
 export const gerald = keyringEth.addFromUri(GERALD_PRIVATE_KEY);
 
 let accountSeed = 10000;
-export function generateKeyringPair(type: "ethereum" | "sr25519" | "ed25519" = "ethereum") {
-  const privateKey = `0xDEADBEEF${(accountSeed++).toString(16).padStart(56, "0")}`;
+export function generateKeyringPair(
+  type: "ethereum" | "sr25519" | "ed25519" = "ethereum"
+) {
+  const privateKey = `0xDEADBEEF${(accountSeed++)
+    .toString(16)
+    .padStart(56, "0")}`;
   if (type == "sr25519") {
     return keyringSr25519.addFromUri(privateKey);
   } else if (type == "ed25519") {
@@ -94,5 +99,3 @@ export function generateKeyringPair(type: "ethereum" | "sr25519" | "ed25519" = "
   }
   return keyringEth.addFromUri(privateKey);
 }
-
-

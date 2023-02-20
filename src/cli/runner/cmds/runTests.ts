@@ -7,39 +7,33 @@ import { UserConfig } from "vitest";
 import { MoonwallContext } from "../internal/globalContext.js";
 
 export async function testCmd(args) {
+  const env = globalConfig.environments.find(
+    ({ name }) => name === args.envName
+  );
 
-    const env = globalConfig.environments.find(
-      ({ name }) => name === args.envName
-    );
+  process.env.TEST_ENV = args.envName;
 
-    process.env.TEST_ENV = args.envName;
+  // TODO: sort out reporter config
+  const files = await fs.readdir(env.testFileDir);
+  const options: UserConfig = {
+    watch: false,
+    globals: true,
+    reporters: ["verbose"],
+    testTimeout: 10000,
+    hookTimeout: 500000,
+    setupFiles: ["src/cli/runner/internal/setupFixture.ts"],
+    include: env.include
+      ? env.include
+      : ["**/{test,spec,test_,test-}*{ts,mts,cts}"],
+  };
 
-    // TODO: sort out reporter config
-    const files = await fs.readdir(env.testFileDir);
-    const options: UserConfig = {
-      watch: false,
-      globals: true,
-      reporters: ["verbose"],
-      testTimeout: 10000,
-      hookTimeout: 500000,
-      setupFiles: ["src/cli/runner/internal/setupFixture.ts"],
-      include: env.include
-        ? env.include
-        : ["**/{test,spec,test_,test-}*{ts,mts,cts}"],
-    };
-
-    try{
-      const vitest = await startVitest("test", files, options);
-      await vitest.close();
-      process.exit(0)
-    } catch (e) {
-      console.error(e)
-      MoonwallContext.destroy()
-      process.exit(1)
-    }
-
-
-
-    
-
+  try {
+    const vitest = await startVitest("test", files, options);
+    await vitest.close();
+    process.exit(0);
+  } catch (e) {
+    console.error(e);
+    MoonwallContext.destroy();
+    process.exit(1);
+  }
 }

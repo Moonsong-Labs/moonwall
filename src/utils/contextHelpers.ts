@@ -19,19 +19,25 @@ import Web3 from "web3";
 import { ethers } from "ethers";
 import { MoonwallContext } from "../cli/runner/internal/globalContext.js";
 import { Foundation } from "../../src/cli/runner/lib/types.js";
-import { assert } from "vitest"
-import Debug from "debug"
+import { assert } from "vitest";
+import Debug from "debug";
 const debug = Debug("context");
 
-export async function resetToGenesis(api: ApiPromise){
+export async function resetToGenesis(api: ApiPromise) {
   // TODO: This isn't working as expected, investigate and fix
-  if (!MoonwallContext.getContext().genesis){
-    debug(`No genesis noted for context, is forkGenesis() being called too early?`)
-    throw new Error("No genesis found for context")
+  if (!MoonwallContext.getContext().genesis) {
+    debug(
+      `No genesis noted for context, is forkGenesis() being called too early?`
+    );
+    throw new Error("No genesis found for context");
   } else {
-    await api.rpc.engine.createBlock(true,true,MoonwallContext.getContext().genesis)
-    const newGenesis = (await api.rpc.chain.getFinalizedHead()).toString()
-    MoonwallContext.getContext().genesis = newGenesis
+    await api.rpc.engine.createBlock(
+      true,
+      true,
+      MoonwallContext.getContext().genesis
+    );
+    const newGenesis = (await api.rpc.chain.getFinalizedHead()).toString();
+    MoonwallContext.getContext().genesis = newGenesis;
   }
 }
 

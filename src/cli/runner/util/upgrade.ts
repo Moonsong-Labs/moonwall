@@ -6,7 +6,10 @@ import { KeyringPair } from "@polkadot/keyring/types";
 import { blake2AsHex } from "@polkadot/util-crypto";
 import { sha256 } from "ethers";
 import { getRuntimeWasm } from "./binaries.js";
-import { cancelReferendaWithCouncil, executeProposalWithCouncil } from "./governance.js";
+import {
+  cancelReferendaWithCouncil,
+  executeProposalWithCouncil,
+} from "./governance.js";
 import { alith } from "../lib/accounts.js";
 import { ChopsticksContext } from "./runner-functions.js";
 
@@ -16,13 +19,14 @@ export interface UpgradePreferences {
   from?: KeyringPair;
   waitMigration?: boolean;
   useGovernance?: boolean;
-  localPath?: string
+  localPath?: string;
 }
 
-export async function  upgradeRuntimeChopsticks(context: ChopsticksContext, path: string){
-  const rtWasm = readFileSync(
-    path
-  );
+export async function upgradeRuntimeChopsticks(
+  context: ChopsticksContext,
+  path: string
+) {
+  const rtWasm = readFileSync(path);
   const rtHex = `0x${rtWasm.toString("hex")}`;
   const rtHash = blake2AsHex(rtHex);
   await context.setStorage({
@@ -38,7 +42,10 @@ export async function  upgradeRuntimeChopsticks(context: ChopsticksContext, path
   await context.createBlock({ count: 3 });
 }
 
-export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePreferences) {
+export async function upgradeRuntime(
+  api: ApiPromise,
+  preferences: UpgradePreferences
+) {
   const options = {
     from: alith,
     waitMigration: true,
@@ -48,33 +55,49 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
   return new Promise<number>(async (resolve, reject) => {
     try {
       const code = fs
-        .readFileSync(await getRuntimeWasm(options.runtimeName, options.runtimeTag, options.localPath))
+        .readFileSync(
+          await getRuntimeWasm(
+            options.runtimeName,
+            options.runtimeTag,
+            options.localPath
+          )
+        )
         .toString();
 
       const existingCode = await api.rpc.state.getStorage(":code");
       if (existingCode.toString() == code) {
         reject(
-          `Runtime upgrade with same code: ${existingCode.toString().slice(0, 20)} vs ${code
+          `Runtime upgrade with same code: ${existingCode
             .toString()
-            .slice(0, 20)}`
+            .slice(0, 20)} vs ${code.toString().slice(0, 20)}`
         );
       }
 
-      let nonce = (await api.rpc.system.accountNextIndex(options.from.address)).toNumber();
+      let nonce = (
+        await api.rpc.system.accountNextIndex(options.from.address)
+      ).toNumber();
 
       if (options.useGovernance) {
         // We just prepare the proposals
-        let proposal = api.tx.parachainSystem.authorizeUpgrade(blake2AsHex(code));
+        let proposal = api.tx.parachainSystem.authorizeUpgrade(
+          blake2AsHex(code)
+        );
         let encodedProposal = proposal.method.toHex();
         let encodedHash = blake2AsHex(encodedProposal);
 
         // Check if already in governance
         const preImageExists =
-          api.query.preimage && (await api.query.preimage.statusFor(encodedHash));
+          api.query.preimage &&
+          (await api.query.preimage.statusFor(encodedHash));
         const democracyPreImageExists =
-          !api.query.preimage && ((await api.query.democracy.preimages(encodedHash)) as any);
+          !api.query.preimage &&
+          ((await api.query.democracy.preimages(encodedHash)) as any);
 
-        if (api.query.preimage && preImageExists.isSome && preImageExists.unwrap().isRequested) {
+        if (
+          api.query.preimage &&
+          preImageExists.isSome &&
+          preImageExists.unwrap().isRequested
+        ) {
           process.stdout.write(`Preimage ${encodedHash} already exists !\n`);
         } else if (
           // TODO: remove support for democracy preimage support after 2000
@@ -111,29 +134,39 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
                 (ref) =>
                   ref[1].unwrap().isOngoing &&
                   ref[1].unwrap().asOngoing.proposal.isLookup &&
-                  ref[1].unwrap().asOngoing.proposal.asLookup.hash.toHex() == encodedHash
+                  ref[1].unwrap().asOngoing.proposal.asLookup.hash.toHex() ==
+                    encodedHash
               )
               .map((ref) =>
-                api.registry.createType("u32", ref[0].toU8a().slice(-4)).toNumber()
+                api.registry
+                  .createType("u32", ref[0].toU8a().slice(-4))
+                  .toNumber()
               )?.[0]
           : referendum
               .filter(
                 (ref) =>
                   ref[1].unwrap().isOngoing &&
-                  (ref[1].unwrap().asOngoing as any).proposalHash.toHex() == encodedHash
+                  (ref[1].unwrap().asOngoing as any).proposalHash.toHex() ==
+                    encodedHash
               )
               .map((ref) =>
-                api.registry.createType("u32", ref[0].toU8a().slice(-4)).toNumber()
+                api.registry
+                  .createType("u32", ref[0].toU8a().slice(-4))
+                  .toNumber()
               )?.[0];
 
         if (referendaIndex !== null && referendaIndex !== undefined) {
-          process.stdout.write(`Vote for upgrade already in referendum, cancelling it.\n`);
+          process.stdout.write(
+            `Vote for upgrade already in referendum, cancelling it.\n`
+          );
           await cancelReferendaWithCouncil(api, referendaIndex);
         }
         await executeProposalWithCouncil(api, encodedHash);
 
         // Needs to retrieve nonce after those governance calls
-        nonce = (await api.rpc.system.accountNextIndex(options.from.address)).toNumber();
+        nonce = (
+          await api.rpc.system.accountNextIndex(options.from.address)
+        ).toNumber();
         process.stdout.write(`Enacting authorized upgrade...`);
         await api.tx.parachainSystem
           .enactAuthorizedUpgrade(code)
@@ -145,7 +178,8 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
             code.length / 1024
           )} kb])...`
         );
-        const isWeightV1 = !api.registry.createType<WeightV2>("Weight").proofSize;
+        const isWeightV1 =
+          !api.registry.createType<WeightV2>("Weight").proofSize;
         await api.tx.sudo
           .sudoUncheckedWeight(
             await api.tx.system.setCodeWithoutChecks(code),
@@ -160,40 +194,49 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
         process.stdout.write(`✅\n`);
       }
 
-      process.stdout.write(`Waiting to apply new runtime (${chalk.red(`~4min`)})...`);
+      process.stdout.write(
+        `Waiting to apply new runtime (${chalk.red(`~4min`)})...`
+      );
       let isInitialVersion = true;
-      const unsub = await api.rpc.state.subscribeRuntimeVersion(async (version) => {
-        if (!isInitialVersion) {
-          const blockNumber = (await api.rpc.chain.getHeader()).number.toNumber();
-          console.log(
-            `✅ [${version.implName}-${version.specVersion} ${existingCode
-              .toString()
-              .slice(0, 6)}...] [#${blockNumber}]`
-          );
-          unsub();
-          const newCode = await api.rpc.state.getStorage(":code");
-          if (newCode.toString() != code) {
-            reject(
-              `Unexpected new code: ${newCode.toString().slice(0, 20)} vs ${code
+      const unsub = await api.rpc.state.subscribeRuntimeVersion(
+        async (version) => {
+          if (!isInitialVersion) {
+            const blockNumber = (
+              await api.rpc.chain.getHeader()
+            ).number.toNumber();
+            console.log(
+              `✅ [${version.implName}-${version.specVersion} ${existingCode
                 .toString()
-                .slice(0, 20)}`
+                .slice(0, 6)}...] [#${blockNumber}]`
             );
-          }
-          if (options.waitMigration) {
-            const blockToWait = (await api.rpc.chain.getHeader()).number.toNumber() + 1;
-            await new Promise(async (resolve) => {
-              const subBlocks = await api.rpc.chain.subscribeNewHeads(async (header) => {
-                if (header.number.toNumber() == blockToWait) {
-                  subBlocks();
-                  resolve(blockToWait);
-                }
+            unsub();
+            const newCode = await api.rpc.state.getStorage(":code");
+            if (newCode.toString() != code) {
+              reject(
+                `Unexpected new code: ${newCode
+                  .toString()
+                  .slice(0, 20)} vs ${code.toString().slice(0, 20)}`
+              );
+            }
+            if (options.waitMigration) {
+              const blockToWait =
+                (await api.rpc.chain.getHeader()).number.toNumber() + 1;
+              await new Promise(async (resolve) => {
+                const subBlocks = await api.rpc.chain.subscribeNewHeads(
+                  async (header) => {
+                    if (header.number.toNumber() == blockToWait) {
+                      subBlocks();
+                      resolve(blockToWait);
+                    }
+                  }
+                );
               });
-            });
+            }
+            resolve(blockNumber);
           }
-          resolve(blockNumber);
+          isInitialVersion = false;
         }
-        isInitialVersion = false;
-      });
+      );
     } catch (e) {
       console.error(`Failed to setCode`);
       reject(e);

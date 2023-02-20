@@ -9,11 +9,11 @@ import semverLt from "semver/functions/lt.js";
 import { describeSuite } from "../../src/cli/runner/util/runner-functions.js";
 import { WebSocketProvider } from "ethers";
 import Web3 from "web3";
-import Debug from "debug"
+import Debug from "debug";
 const debug = Debug("smoke:block-finalized");
 const timePeriod = process.env.TIME_PERIOD
   ? Number(process.env.TIME_PERIOD)
-  :  60 * 1000;
+  : 60 * 1000;
 const timeout = Math.floor(timePeriod / 12); // 2 hour -> 10 minute timeout
 
 describeSuite({
@@ -36,10 +36,12 @@ describeSuite({
       const specVersion = api.consts.system.version.specVersion.toNumber();
       const clientVersion = (await api.rpc.system.version())
         .toString()
-        .split('-')[0];
+        .split("-")[0];
 
-      if (specVersion < 1900 || semverLt(clientVersion, '0.27.2')) {
-        debug(`ChainSpec ${specVersion}, client ${clientVersion} unsupported BlockTag, skipping.`);
+      if (specVersion < 1900 || semverLt(clientVersion, "0.27.2")) {
+        debug(
+          `ChainSpec ${specVersion}, client ${clientVersion} unsupported BlockTag, skipping.`
+        );
         this.skip();
       }
       const timestamp = (await web3.eth.getBlock("latest")).timestamp;
@@ -49,7 +51,7 @@ describeSuite({
     });
 
     it(
-      'C300',
+      "C300",
       `should have only finalized blocks in the past` +
         ` ${(timePeriod / (1000 * 60 * 60)).toFixed(2)} hours #C300`,
       async function () {
@@ -71,12 +73,15 @@ describeSuite({
           firstBlockTime
         )) as number;
 
-
-        debug(`Checking if blocks #${firstBlockNumber} - #${lastBlockNumber} are finalized.`);
+        debug(
+          `Checking if blocks #${firstBlockNumber} - #${lastBlockNumber} are finalized.`
+        );
         const promises = (() => {
           const length = lastBlockNumber - firstBlockNumber;
           return Array.from({ length }, (_, i) => firstBlockNumber + i);
-        })().map((num) => limiter.schedule(() => checkBlockFinalized(api, num)));
+        })().map((num) =>
+          limiter.schedule(() => checkBlockFinalized(api, num))
+        );
 
         const results = await Promise.all(promises);
 
@@ -85,7 +90,7 @@ describeSuite({
           unfinalizedBlocks,
           `The following blocks were not finalized ${unfinalizedBlocks
             .map((a) => a.number)
-            .join(', ')}`
+            .join(", ")}`
         ).to.be.empty;
       }
     );

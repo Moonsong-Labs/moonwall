@@ -14,7 +14,7 @@ describe("This is a sample test suite", async () => {
   it("this is a test case 3", async ({}) => {
     await setTimeout(1000);
 
-    console.log(MoonwallContext.getContext().providers)
+    console.log(MoonwallContext.getContext().providers);
     expect(true).to.be.true;
   });
   it("this is a test case 4", async ({}) => {

@@ -10,7 +10,11 @@ import { typesBundlePre900 } from "moonbeam-types-bundle";
 import { alith, ALITH_PRIVATE_KEY } from "../lib/accounts";
 import { MIN_GAS_PRICE } from "../lib/constants";
 
-export async function customWeb3Request(web3: Web3, method: string, params: any[]) {
+export async function customWeb3Request(
+  web3: Web3,
+  method: string,
+  params: any[]
+) {
   return new Promise<JsonRpcResponse>((resolve, reject) => {
     (web3.currentProvider as any).send(
       {
@@ -25,7 +29,9 @@ export async function customWeb3Request(web3: Web3, method: string, params: any[
             `Failed to send custom request (${method} (${params
               .map((p) => {
                 const str = p.toString();
-                return str.length > 128 ? `${str.slice(0, 96)}...${str.slice(-28)}` : str;
+                return str.length > 128
+                  ? `${str.slice(0, 96)}...${str.slice(-28)}`
+                  : str;
               })
               .join(",")})): ${error.message || error.toString()}`
           );
@@ -63,13 +69,26 @@ export async function web3EthCall(web3: Web3, options: Web3EthCallOptions) {
 
 // Extra type because web3 is not well typed
 export interface Subscription<T> extends Web3Subscription<T> {
-  once: (type: "data" | "connected", handler: (data: T) => void) => Subscription<T>;
+  once: (
+    type: "data" | "connected",
+    handler: (data: T) => void
+  ) => Subscription<T>;
 }
 
 // Little helper to hack web3 that are not complete.
-export function web3Subscribe(web3: Web3, type: "newBlockHeaders"): Subscription<BlockHeader>;
-export function web3Subscribe(web3: Web3, type: "pendingTransactions"): Subscription<string>;
-export function web3Subscribe(web3: Web3, type: "logs", params: {}): Subscription<Log>;
+export function web3Subscribe(
+  web3: Web3,
+  type: "newBlockHeaders"
+): Subscription<BlockHeader>;
+export function web3Subscribe(
+  web3: Web3,
+  type: "pendingTransactions"
+): Subscription<string>;
+export function web3Subscribe(
+  web3: Web3,
+  type: "logs",
+  params: {}
+): Subscription<Log>;
 export function web3Subscribe(
   web3: Web3,
   type: "newBlockHeaders" | "pendingTransactions" | "logs",

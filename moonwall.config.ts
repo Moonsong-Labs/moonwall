@@ -13,7 +13,8 @@ export const globalConfig: MoonwallConfig = {
       testFileDir: "tests/chopsticks/",
       foundation: {
         type: Foundation.Chopsticks,
-        rtUpgradePath: "/home/timbotronic/workspace/moonbeam/moonwall/downloads/moonbeam-runtime-2100.wasm",
+        rtUpgradePath:
+          "/home/timbotronic/workspace/moonbeam/moonwall/downloads/moonbeam-runtime-2100.wasm",
         launchSpec: [
           {
             name: "mb",
@@ -39,7 +40,8 @@ export const globalConfig: MoonwallConfig = {
         launchSpec: [
           {
             name: "moonbeam",
-            binPath: "/home/timbotronic/workspace/moonbeam/moonbeam/target/release/moonbeam",
+            binPath:
+              "/home/timbotronic/workspace/moonbeam/moonbeam/target/release/moonbeam",
           },
         ],
       },
@@ -71,7 +73,8 @@ export const globalConfig: MoonwallConfig = {
         launchSpec: [
           {
             name: "moonbeam",
-            binPath: "/home/timbotronic/workspace/moonbeam/moonbeam/target/release/moonbeam",
+            binPath:
+              "/home/timbotronic/workspace/moonbeam/moonbeam/target/release/moonbeam",
             ports: { p2pPort: 30333, wsPort: 9944, rpcPort: 9933 },
             alreadyRunning: false,
             options: [
@@ -118,7 +121,7 @@ export const globalConfig: MoonwallConfig = {
     {
       name: "new",
       testFileDir: "tests/eth_test/",
-      include: ['**/{test,spec,test_,test-}*{ts,mts,cts}'],
+      include: ["**/{test,spec,test_,test-}*{ts,mts,cts}"],
       foundation: {
         type: Foundation.ReadOnly,
       },
@@ -138,7 +141,8 @@ export const globalConfig: MoonwallConfig = {
         launchSpec: [
           {
             name: "moonbeam",
-            binPath: "/home/timbotronic/workspace/moonbeam/moonbeam/target/release/moonbeam",
+            binPath:
+              "/home/timbotronic/workspace/moonbeam/moonbeam/target/release/moonbeam",
             ports: { p2pPort: 30333, wsPort: 9944, rpcPort: 9933 },
             alreadyRunning: false,
             options: [
