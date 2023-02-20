@@ -24,7 +24,7 @@ describeSuite({
     beforeAll(() => {
       api = context.getEthers();
       w3 = context.getWeb3();
-      polkadotJs = context.getPolkadotJs();
+      polkadotJs = context.getMoonbeam();
     });
 
     it({
@@ -32,11 +32,11 @@ describeSuite({
       title: "Checking that launched node can create blocks",
       test: async function () {
         const block = (
-          await context.getPolkadotJs().rpc.chain.getBlock()
+          await polkadotJs.rpc.chain.getBlock()
         ).block.header.number.toNumber();
         await context.createBlock();
         const block2 = (
-          await context.getPolkadotJs().rpc.chain.getBlock()
+          await polkadotJs.rpc.chain.getBlock()
         ).block.header.number.toNumber();
         expect(block2).to.be.greaterThan(block);
       },
@@ -45,18 +45,17 @@ describeSuite({
     it({
       id: "E02",
       title: "Checking that substrate txns possible",
-      modifier: "skip",
       timeout: 20000,
       test: async function () {
         const balanceBefore = (
           await polkadotJs.query.system.account(BALTATHAR_ADDRESS)
         ).data.free;
+        
         await polkadotJs.tx.balances
           .transfer(BALTATHAR_ADDRESS, parseEther("2"))
           .signAndSend(alith);
 
         await context.createBlock();
-        await setTimeout(15000)
 
         const balanceAfter = (
           await polkadotJs.query.system.account(BALTATHAR_ADDRESS)
@@ -70,7 +69,7 @@ describeSuite({
       title: "Checking that sudo can be used",
       test: async function () {
         await context.createBlock();
-        const tx = polkadotJs.tx.system.fillBlock(60 * 10 ** 7);
+        const tx = polkadotJs.tx.rootTesting.fillBlock(60 * 10 ** 7);
         await polkadotJs.tx.sudo.sudo(tx).signAndSend(alith);
 
         await context.createBlock();

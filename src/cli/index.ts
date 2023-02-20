@@ -9,11 +9,10 @@ yargs(hideBin(process.argv))
   .usage("Usage: $0")
   .version("2.0.0")
   .command(
-    `test [testSpecs..]`,
-    "Run tests found in test specs",
+    `test <envName>`,
+    "Run tests for a given Environment",
     (yargs) => {
-      return yargs.positional("testSpecs", {
-        alias: "testSpecs",
+      return yargs.positional("envName", {
         array: true,
         describe: "Path to test spec file(s)",
         default: "*.ts",
@@ -42,11 +41,11 @@ yargs(hideBin(process.argv))
       description: "path to MoonwallConfig file",
       default: "./moonwall.config.json",
     },
-    environment: {
-      type: "string",
-      alias: "t",
-      description: "name of environment tests to run",
-      demandOption: false,
-    },
+    // environment: {
+    //   type: "string",
+    //   alias: "t",
+    //   description: "name of environment tests to run",
+    //   demandOption: false,
+    // },
   })
   .parse();

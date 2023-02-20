@@ -32,6 +32,7 @@ import {
   sendNewBlockRequest,
   sendSetStorageRequest,
 } from "../internal/chopsticksHelpers.js";
+import { createDevBlock } from "../internal/devModeHelpers.js";
 const debug = Debug("test:setup");
 
 export function describeSuite({
@@ -131,121 +132,7 @@ export function describeSuite({
           >(
             transactions?: Calls,
             options: BlockCreation = {}
-          ) => {
-            const results: (
-              | { type: "eth"; hash: string }
-              | { type: "sub"; hash: string }
-            )[] = [];
-            const txs =
-              transactions == undefined
-                ? []
-                : Array.isArray(transactions)
-                ? transactions
-                : [transactions];
-            for await (const call of txs) {
-              if (typeof call == "string") {
-                // Ethereum
-                results.push({
-                  type: "eth",
-                  hash: (
-                    await customWeb3Request(
-                      context.getWeb3(),
-                      "eth_sendRawTransaction",
-                      [call]
-                    )
-                  ).result,
-                });
-              } else if (call.isSigned) {
-                const tx = context.getPolkadotJs().tx(call);
-                debug(
-                  `- Signed: ${tx.method.section}.${tx.method.method}(${tx.args
-                    .map((d) => d.toHuman())
-                    .join("; ")}) [ nonce: ${tx.nonce}]`
-                );
-                results.push({
-                  type: "sub",
-                  hash: (await call.send()).toString(),
-                });
-              } else {
-                const tx = context.getPolkadotJs().tx(call);
-                debug(
-                  `- Unsigned: ${tx.method.section}.${
-                    tx.method.method
-                  }(${tx.args.map((d) => d.toHuman()).join("; ")}) [ nonce: ${
-                    tx.nonce
-                  }]`
-                );
-                results.push({
-                  type: "sub",
-                  hash: (await call.signAndSend(alith)).toString(),
-                });
-              }
-            }
-
-            const { parentHash, finalize } = options;
-            const blockResult = await createAndFinalizeBlock(
-              context.getPolkadotJs(),
-              parentHash,
-              finalize
-            );
-
-            // No need to extract events if no transactions
-            if (results.length == 0) {
-              return {
-                block: blockResult,
-                result: null,
-              };
-            }
-
-            // We retrieve the events for that block
-            const allRecords: EventRecord[] = (await (
-              await context.getPolkadotJs().at(blockResult.hash)
-            ).query.system.events()) as any;
-            // We retrieve the block (including the extrinsics)
-            const blockData = await context
-              .getPolkadotJs()
-              .rpc.chain.getBlock(blockResult.hash);
-
-            const result: ExtrinsicCreation[] = results.map((result) => {
-              const extrinsicIndex =
-                result.type == "eth"
-                  ? allRecords
-                      .find(
-                        ({ phase, event: { section, method, data } }) =>
-                          phase.isApplyExtrinsic &&
-                          section == "ethereum" &&
-                          method == "Executed" &&
-                          data[2].toString() == result.hash
-                      )
-                      ?.phase?.asApplyExtrinsic?.toNumber()
-                  : blockData.block.extrinsics.findIndex(
-                      (ext) => ext.hash.toHex() == result.hash
-                    );
-              // We retrieve the events associated with the extrinsic
-              const events = allRecords.filter(
-                ({ phase }) =>
-                  phase.isApplyExtrinsic &&
-                  phase.asApplyExtrinsic.toNumber() === extrinsicIndex
-              );
-              const failure = extractError(events);
-              return {
-                extrinsic:
-                  extrinsicIndex >= 0
-                    ? blockData.block.extrinsics[extrinsicIndex]
-                    : null,
-                events,
-                error:
-                  failure &&
-                  ((failure.isModule &&
-                    context
-                      .getPolkadotJs()
-                      .registry.findMetaError(failure.asModule)) ||
-                    ({ name: failure.toString() } as RegistryError)),
-                successful: extrinsicIndex !== undefined && !failure,
-                hash: result.hash,
-              };
-            });
-          },
+          ) => await createDevBlock(context, transactions, options),
         },
         it: testCase,
       });
@@ -329,7 +216,7 @@ interface GenericTestContext {
   it: CustomTest;
 }
 
-interface GenericContext {
+export interface GenericContext {
   providers: Object;
   getPolkadotJs: ([name]?: string) => ApiPromise;
   getMoonbeam: ([name]?: string) => ApiPromise;

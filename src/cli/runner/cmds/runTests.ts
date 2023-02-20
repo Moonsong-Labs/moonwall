@@ -9,10 +9,10 @@ import { MoonwallContext } from "../internal/globalContext.js";
 export async function testCmd(args) {
 
     const env = globalConfig.environments.find(
-      ({ name }) => name === args.environment
+      ({ name }) => name === args.envName
     );
 
-    process.env.TEST_ENV = args.environment;
+    process.env.TEST_ENV = args.envName;
 
     // TODO: sort out reporter config
     const files = await fs.readdir(env.testFileDir);

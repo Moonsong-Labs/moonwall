@@ -178,7 +178,7 @@ export const globalConfig: MoonwallConfig = {
         },
         {
           name: "pjs",
-          type: ProviderType.PolkadotJs,
+          type: ProviderType.Moonbeam,
           endpoints: ["ws://localhost:9944"],
         },
       ],
