@@ -3,7 +3,11 @@ import {
   ExtrinsicCreation,
   extractError,
 } from "../../../utils/contextHelpers.js";
-import { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types/index.js";
+import {
+  ApiTypes,
+  AugmentedEvent,
+  SubmittableExtrinsic,
+} from "@polkadot/api/types/index.js";
 import { customWeb3Request } from "./providers.js";
 import { GenericContext } from "../util/runner-functions.js";
 import Debug from "debug";
@@ -12,6 +16,32 @@ import { createAndFinalizeBlock } from "../util/block.js";
 import { EventRecord } from "@polkadot/types/interfaces/types.js";
 import { RegistryError } from "@polkadot/types-codec/types/registry";
 const debug = Debug("DevTest");
+
+export async function createDevBlockCheckEvents<
+  ApiType extends ApiTypes,
+  Call extends
+    | SubmittableExtrinsic<ApiType>
+    | Promise<SubmittableExtrinsic<ApiType>>
+    | string
+    | Promise<string>,
+  Calls extends Call | Call[]
+>(
+  context: GenericContext,
+  expectedEvents: AugmentedEvent<ApiType>[],
+  transactions?: Calls,
+  options: BlockCreation = {}
+) {
+  const { result } = await createDevBlock(context, transactions, options);
+  const actualEvents = result.events;
+  return {
+    events: actualEvents,
+    match: expectedEvents.every((eEvt) => {
+      return actualEvents
+        .map((aEvt) => eEvt.is(aEvt.event))
+        .reduce((acc, curr) => acc || curr, false);
+    }),
+  };
+}
 
 export async function createDevBlock<
   ApiType extends ApiTypes,
@@ -122,4 +152,13 @@ export async function createDevBlock<
       hash: result.hash,
     };
   });
+
+  // Adds extra time to avoid empty transaction when querying it
+  if (results.find((r) => r.type == "eth")) {
+    await new Promise((resolve) => setTimeout(resolve, 2));
+  }
+  return {
+    block: blockResult,
+    result: Array.isArray(transactions) ? result : (result[0] as any),
+  };
 }

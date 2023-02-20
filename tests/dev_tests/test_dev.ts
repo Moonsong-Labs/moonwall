@@ -1,11 +1,11 @@
 import { describeSuite } from "../../src/cli/runner/util/runner-functions";
-import { alithSigner, resetToGenesis } from "../../src/utils/contextHelpers.js";
-import { WebSocketProvider, parseEther } from "ethers";
+import { alithSigner } from "../../src/utils/contextHelpers.js";
+import { WebSocketProvider, formatEther, parseEther } from "ethers";
 import { setTimeout } from "timers/promises";
 import {
   BALTATHAR_ADDRESS,
+  CHARLETH_ADDRESS,
   alith,
-  baltathar,
 } from "../../src/cli/runner/lib/accounts.js";
 import { BN } from "@polkadot/util";
 import Web3 from "web3";
@@ -50,7 +50,7 @@ describeSuite({
         const balanceBefore = (
           await polkadotJs.query.system.account(BALTATHAR_ADDRESS)
         ).data.free;
-        
+
         await polkadotJs.tx.balances
           .transfer(BALTATHAR_ADDRESS, parseEther("2"))
           .signAndSend(alith);
@@ -97,6 +97,29 @@ describeSuite({
           await polkadotJs.query.system.account(BALTATHAR_ADDRESS)
         ).data.free;
         expect(balanceBefore.lt(balanceAfter)).to.be.true;
+      },
+    });
+
+    it({
+      id: "E05",
+      title: "Testing out Create block and listen for event",
+      // modifier: "only",
+      timeout: 30000,
+      test: async function () {
+        console.log("hello!");
+
+        const events = [
+          polkadotJs.events.system.ExtrinsicSuccess,
+          polkadotJs.events.balances.Transfer,
+          // polkadotJs.events.authorFilter.EligibleUpdated
+        ];
+
+        const {match} = await context.createBlockAndCheck(
+          events,
+          polkadotJs.tx.balances.transfer(CHARLETH_ADDRESS, parseEther("3"))
+        );
+        expect(match).toStrictEqual(true)
+
       },
     });
   },

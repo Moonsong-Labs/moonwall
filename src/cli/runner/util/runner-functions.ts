@@ -7,7 +7,12 @@ import { ApiPromise, WsProvider } from "@polkadot/api";
 import { ConnectedProvider, Foundation, ProviderType } from "../lib/types";
 import { WebSocketProvider } from "ethers";
 import Web3 from "web3";
-import { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types/index.js";
+import {
+  ApiTypes,
+  AugmentedEvent,
+  AugmentedEvents,
+  SubmittableExtrinsic,
+} from "@polkadot/api/types/index.js";
 import {
   BlockCreation,
   BlockCreationResponse,
@@ -32,7 +37,11 @@ import {
   sendNewBlockRequest,
   sendSetStorageRequest,
 } from "../internal/chopsticksHelpers.js";
-import { createDevBlock } from "../internal/devModeHelpers.js";
+import {
+  createDevBlock,
+  createDevBlockCheckEvents,
+} from "../internal/devModeHelpers.js";
+import { bool } from "@polkadot/types-codec";
 const debug = Debug("test:setup");
 
 export function describeSuite({
@@ -133,6 +142,25 @@ export function describeSuite({
             transactions?: Calls,
             options: BlockCreation = {}
           ) => await createDevBlock(context, transactions, options),
+          createBlockAndCheck: async <
+            ApiType extends ApiTypes,
+            Call extends
+              | SubmittableExtrinsic<ApiType>
+              | Promise<SubmittableExtrinsic<ApiType>>
+              | string
+              | Promise<string>,
+            Calls extends Call | Call[]
+          >(
+            expectedEvents: AugmentedEvent<ApiType>[],
+            transactions?: Calls,
+            options: BlockCreation = {}
+          ) =>
+            await createDevBlockCheckEvents(
+              context,
+              expectedEvents,
+              transactions,
+              options
+            ),
         },
         it: testCase,
       });
@@ -257,4 +285,18 @@ export interface DevModeContext extends GenericContext {
       Calls extends Call[] ? Awaited<Call>[] : Awaited<Call>
     >
   >;
+  createBlockAndCheck<
+    ApiType extends ApiTypes,
+    Call extends
+      | SubmittableExtrinsic<ApiType>
+      | Promise<SubmittableExtrinsic<ApiType>>
+      | string
+      | Promise<string>,
+    Calls extends Call | Call[]
+  >(
+    events: AugmentedEvent<ApiType>[],
+    transactions?: Calls,
+    options?: BlockCreation
+  ): Promise<{ match: boolean; events: any[] }>;
 }
+
