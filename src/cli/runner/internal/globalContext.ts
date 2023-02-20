@@ -1,22 +1,28 @@
 import {
+  ChopsticksLaunchSpec,
   ConnectedProvider,
   Foundation,
+  FoundationDetails,
   MoonwallConfig,
   MoonwallEnvironment,
   Node,
   ProviderType,
 } from "../lib/types";
-
+import fs from "fs";
+import { setTimeout } from "timers/promises";
 import { ChildProcess, spawn } from "child_process";
 import {
   populateProviderInterface,
   prepareProviders,
 } from "../util/providers.js";
 import { launchDevNode } from "../util/LocalNode.js";
+import { blake2AsHex } from "@polkadot/util-crypto";
 import globalConfig from "../../../../moonwall.config.js";
 import { parseChopsticksRunCmd, parseRunCmd } from "./foundations.js";
 import { ApiPromise } from "@polkadot/api";
 import Debug from "debug";
+import { Api } from "@acala-network/chopsticks";
+import { alith } from "../lib/accounts.js";
 const debugSetup = Debug("global:context");
 const debugNode = Debug("global:node");
 
@@ -27,6 +33,7 @@ export class MoonwallContext {
   nodes: ChildProcess[];
   foundation?: Foundation;
   private _genesis?: string;
+  rtUpgradePath?: string;
 
   constructor(config: MoonwallConfig) {
     this.environment;
@@ -36,7 +43,13 @@ export class MoonwallContext {
     const env = config.environments.find(
       ({ name }) => name == process.env.TEST_ENV
     );
-    const blob = { name: env.name, context: {}, providers: [], nodes: [] };
+    const blob = {
+      name: env.name,
+      context: {},
+      providers: [],
+      nodes: [],
+      foundationType: env.foundation.type,
+    };
 
     switch (env.foundation.type) {
       case Foundation.ReadOnly:
@@ -56,13 +69,14 @@ export class MoonwallContext {
       case Foundation.Chopsticks:
         blob.nodes.push(parseChopsticksRunCmd(env.foundation.launchSpec));
         blob.providers.push(...prepareProviders(env.connections));
+        this.rtUpgradePath = env.foundation.rtUpgradePath 
         debugSetup(
           `🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`
         );
         break;
 
       case Foundation.Dev:
-        const { cmd, args  } = parseRunCmd(env.foundation.launchSpec[0]);
+        const { cmd, args } = parseRunCmd(env.foundation.launchSpec[0]);
         blob.nodes.push({
           name: env.foundation.launchSpec[0].name,
           cmd,
@@ -99,6 +113,7 @@ export class MoonwallContext {
         );
         return;
     }
+
     this.environment = blob;
   }
 
@@ -206,8 +221,9 @@ export class MoonwallContext {
 
 export const contextCreator = async (config: MoonwallConfig, env: string) => {
   const ctx = MoonwallContext.getContext(config);
-  await ctx.startNetwork(env);
+  await runNetworkOnly(config, env);
   await ctx.connectEnvironment(env);
+
   return ctx;
 };
 

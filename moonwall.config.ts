@@ -13,12 +13,12 @@ export const globalConfig: MoonwallConfig = {
       testFileDir: "tests/chopsticks/",
       foundation: {
         type: Foundation.Chopsticks,
+        rtUpgradePath: "/home/timbotronic/workspace/moonbeam/moonwall/downloads/moonbeam-runtime-2100.wasm",
         launchSpec: [
           {
             name: "mb",
             type: "parachain",
-            rtUpgradePath: "/home/timbotronic/workspace/moonbeam/moonbeam/target/release/wbuild/moonbeam-runtime/moonbeam_runtime.compact.compressed.wasm",
-            buildBlockMode: "manual",
+            // buildBlockMode: "manual",
             configPath: "src/cli/runner/lib/chopsticksConfig.yml",
           },
           {

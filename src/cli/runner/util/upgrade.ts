@@ -1,16 +1,14 @@
-import fs from "fs";
+import fs, { readFileSync } from "fs";
 import chalk from "chalk";
-
 import type { WeightV2 } from "@polkadot/types/interfaces";
-
 import { ApiPromise } from "@polkadot/api";
 import { KeyringPair } from "@polkadot/keyring/types";
 import { blake2AsHex } from "@polkadot/util-crypto";
 import { sha256 } from "ethers";
-
 import { getRuntimeWasm } from "./binaries.js";
 import { cancelReferendaWithCouncil, executeProposalWithCouncil } from "./governance.js";
 import { alith } from "../lib/accounts.js";
+import { ChopsticksContext } from "./runner-functions.js";
 
 export interface UpgradePreferences {
   runtimeName: "moonbase" | "moonriver" | "moonbeam";
@@ -19,6 +17,25 @@ export interface UpgradePreferences {
   waitMigration?: boolean;
   useGovernance?: boolean;
   localPath?: string
+}
+
+export async function  upgradeRuntimeChopsticks(context: ChopsticksContext, path: string){
+  const rtWasm = readFileSync(
+    path
+  );
+  const rtHex = `0x${rtWasm.toString("hex")}`;
+  const rtHash = blake2AsHex(rtHex);
+  await context.setStorage({
+    module: "parachainSystem",
+    method: "authorizedUpgrade",
+    methodParams: rtHash,
+  });
+  await context.createBlock();
+  await context
+    .getPolkadotJs()
+    .tx.parachainSystem.enactAuthorizedUpgrade(rtHex)
+    .signAndSend(alith);
+  await context.createBlock({ count: 3 });
 }
 
 export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePreferences) {

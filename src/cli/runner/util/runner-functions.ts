@@ -2,6 +2,7 @@ import { describe, it, beforeAll, assert, TestAPI } from "vitest";
 // import { MoonwallContext } from "../internal/globalContext";
 import { getCurrentSuite, setFn } from "vitest/suite";
 import { MoonwallContext } from "../../../../src/index.js";
+import { blake2AsHex } from "@polkadot/util-crypto";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { ConnectedProvider, Foundation, ProviderType } from "../lib/types";
 import { WebSocketProvider } from "ethers";
@@ -21,7 +22,16 @@ import { EventRecord } from "@polkadot/types/interfaces/types.js";
 import { RegistryError } from "@polkadot/types-codec/types/registry";
 import { setTimeout } from "timers/promises";
 import globalConfig from "../../../../moonwall.config.js";
-import { UpgradePreferences, upgradeRuntime } from "./upgrade.js";
+import {
+  UpgradePreferences,
+  upgradeRuntime,
+  upgradeRuntimeChopsticks,
+} from "./upgrade.js";
+import { readFileSync } from "fs";
+import {
+  sendNewBlockRequest,
+  sendSetStorageRequest,
+} from "../internal/chopsticksHelpers.js";
 const debug = Debug("test:setup");
 
 export function describeSuite({
@@ -243,84 +253,22 @@ export function describeSuite({
       testCases({
         context: {
           ...context,
-          // TODO: Add function to upgrade runtime
-          // Refer to "upgradeRuntime()" in setup-para-tests.ts
           createBlock: async (params?: {
             providerName?: string;
             count?: number;
             to?: number;
-          }) => {
-            const ws =
-              params && params.providerName
-                ? MoonwallContext.getContext()
-                    .environment.providers.find(
-                      ({ name }) => name == params.providerName
-                    )
-                    .ws()
-                : MoonwallContext.getContext()
-                    .environment.providers.find(
-                      ({ type }) =>
-                        type == ProviderType.Moonbeam ||
-                        type == ProviderType.PolkadotJs
-                    )
-                    .ws();
-
-            await ws.connect();
-            while (!ws.isConnected) {
-              await setTimeout(100);
-            }
-            if ((params && params.count) || (params && params.to)) {
-              await ws.send("dev_newBlock", [
-                { count: params.count, to: params.to },
-              ]);
-            } else {
-              await ws.send("dev_newBlock", [{ count: 1 }]);
-            }
-            await ws.disconnect();
-            return;
-          },
+          }) => await sendNewBlockRequest(params),
           setStorage: async (params?: {
             providerName?: string;
             module: string;
             method: string;
             methodParams: any[];
-          }) => {
-            const ws =
-              params && params.providerName
-                ? MoonwallContext.getContext()
-                    .environment.providers.find(
-                      ({ name }) => name == params.providerName
-                    )
-                    .ws()
-                : MoonwallContext.getContext()
-                    .environment.providers.find(
-                      ({ type }) =>
-                        type == ProviderType.Moonbeam ||
-                        type == ProviderType.PolkadotJs
-                    )
-                    .ws();
-
-            await ws.connect();
-            while (!ws.isConnected) {
-              await setTimeout(100);
-            }
-
-            await ws.send("dev_setStorage", [
-              { [params.module]: { [params.method]: [params.methodParams] } },
-            ]);
-
-            await ws.disconnect();
-            return;
-          },
-          upgradeRuntime: (preferences, apiName?) => {
-            if (apiName) {
-              return upgradeRuntime(
-                context.getPolkadotJs(apiName),
-                preferences
-              );
-            } else {
-              return upgradeRuntime(context.getPolkadotJs(), preferences);
-            }
+          }) => await sendSetStorageRequest(params),
+          upgradeRuntime: async (ctx: ChopsticksContext) => {
+            await upgradeRuntimeChopsticks(
+              ctx,
+              MoonwallContext.getContext().rtUpgradePath
+            );
           },
         },
         it: testCase,
@@ -389,7 +337,7 @@ interface GenericContext {
   getWeb3: ([name]?: string) => Web3;
 }
 
-interface ChopsticksContext extends GenericContext {
+export interface ChopsticksContext extends GenericContext {
   createBlock: (params?: {
     providerName?: string;
     count?: number;
@@ -399,12 +347,9 @@ interface ChopsticksContext extends GenericContext {
     providerName?: string;
     module: string;
     method: string;
-    methodParams: any[];
+    methodParams: any;
   }) => Promise<void>;
-  upgradeRuntime: (
-    preferences: UpgradePreferences,
-    apiName?: string
-  ) => Promise<number>;
+  upgradeRuntime: (context: ChopsticksContext) => Promise<void>;
 }
 
 export interface DevModeContext extends GenericContext {

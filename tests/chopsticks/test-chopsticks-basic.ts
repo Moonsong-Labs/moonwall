@@ -2,9 +2,13 @@ import { ApiPromise } from "@polkadot/api";
 import { Foundation } from "../../src/cli/runner/lib/types.js";
 import { MoonwallContext, describeSuite } from "../../src/index.js";
 import { expect } from "vitest";
+import { blake2AsHex } from "@polkadot/util-crypto";
 import { parseEther, formatEther } from "ethers";
 import { ETHAN_ADDRESS, alith } from "../../src/cli/runner/lib/accounts.js";
 import { setTimeout } from "timers/promises";
+import { readFileSync } from "fs";
+import globalConfig from "../../moonwall.config.js";
+import {  upgradeRuntimeChopsticks } from "../../src/cli/runner/util/upgrade.js";
 describeSuite({
   id: "X1",
   title: "Basic chopsticks test",
@@ -66,12 +70,12 @@ describeSuite({
       id: "T4",
       title: "Can overwrite storage values",
       timeout: 30000,
-      modifier: "only",
       test: async function () {
-
         const storageValue = [
-          ["0x3Cd0A705a2DC65e5b1E1205896BaA2be8A07c6e0"],
-          { data: { free: "1337000000000000000000" }, nonce: 1 },
+          [
+            ["0x3Cd0A705a2DC65e5b1E1205896BaA2be8A07c6e0"],
+            { data: { free: "1337000000000000000000" }, nonce: 1 },
+          ],
         ];
 
         const balBefore = (
@@ -98,6 +102,19 @@ describeSuite({
         );
 
         expect(balBefore.lt(balAfter));
+      },
+    });
+
+    it({
+      id: "T5",
+      title: "Do an upgrade test",
+      timeout: 120000,
+      // modifier: "only",
+      test: async function () {
+        const rtBefore = api.consts.system.version.specVersion.toNumber();
+       await context.upgradeRuntime(context)
+        const rtafter = api.consts.system.version.specVersion.toNumber();
+        expect(rtBefore).toBeLessThan(rtafter);
       },
     });
   },

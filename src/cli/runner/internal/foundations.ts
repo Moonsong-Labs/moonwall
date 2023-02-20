@@ -59,7 +59,7 @@ export function parseRunCmd(launchSpec: DevLaunchSpec) {
 export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
   cmd: string;
   args: string[];
-  rtUpgradePath: string;
+  // rtUpgradePath: string;
 } {
   if (launchSpecs.length === 1) {
     const chopsticksCmd = "node";
@@ -76,9 +76,9 @@ export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
     return {
       cmd: chopsticksCmd,
       args: chopsticksArgs,
-      rtUpgradePath: launchSpecs[0].rtUpgradePath
-        ? launchSpecs[0].rtUpgradePath
-        : "",
+      // rtUpgradePath: launchSpecs[0].rtUpgradePath
+      //   ? launchSpecs[0].rtUpgradePath
+      //   : "",
     };
   }
 
@@ -102,8 +102,8 @@ export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
   return {
     cmd: chopsticksCmd,
     args: chopsticksArgs,
-    rtUpgradePath: launchSpecs[0].rtUpgradePath
-      ? launchSpecs[0].rtUpgradePath
-      : "",
+    // rtUpgradePath: launchSpecs[0].rtUpgradePath
+    //   ? launchSpecs[0].rtUpgradePath
+    //   : "",
   };
 }

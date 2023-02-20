@@ -1,0 +1,12 @@
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "dev_setStorage",
+  "params": [
+    {
+      "parachainSystem": {
+        "authorizedUpgrade": "0xd393fd5dab7404b7954140de75dd143a84a6901f05de867c021ea46497cfe24b"
+      }
+    }
+  ]
+}
