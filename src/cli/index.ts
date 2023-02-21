@@ -9,13 +9,6 @@ import { main } from "./runner/cmds/main.js";
 yargs(hideBin(process.argv))
   .usage("Usage: $0")
   .version("2.0.0")
-  // .command(
-  //   "*",
-  //   "Run the guided walkthrough",
-  //   async () => {
-  //     await main();
-  //   }
-  // )
   .command(
     `init`,
     "Run tests for a given Environment",
@@ -47,6 +40,13 @@ yargs(hideBin(process.argv))
     },
     async (argv) => {
       await runNetwork(argv as any);
+    }
+  )
+  .command(
+    "*",
+    "Run the guided walkthrough",
+    async () => {
+      await main();
     }
   )
   .options({

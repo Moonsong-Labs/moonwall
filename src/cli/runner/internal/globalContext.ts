@@ -118,7 +118,7 @@ export class MoonwallContext {
     this._genesis = hash;
   }
 
-  public async startNetwork(environmentName?: string) {
+  public async startNetwork() {
     if (this.nodes.length > 0) {
       console.log("Nodes already started! Skipping command");
       return MoonwallContext.getContext();
@@ -213,13 +213,13 @@ export class MoonwallContext {
 
 export const contextCreator = async (config: MoonwallConfig, env: string) => {
   const ctx = MoonwallContext.getContext(config);
-  await runNetworkOnly(config, env);
+  await runNetworkOnly(config);
   await ctx.connectEnvironment(env);
 
   return ctx;
 };
 
-export const runNetworkOnly = async (config: MoonwallConfig, env: string) => {
+export const runNetworkOnly = async (config: MoonwallConfig) => {
   const ctx = MoonwallContext.getContext(config);
-  await ctx.startNetwork(env);
+  await ctx.startNetwork();
 };

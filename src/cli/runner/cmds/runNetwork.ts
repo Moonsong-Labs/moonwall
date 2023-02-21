@@ -4,12 +4,16 @@ import PressToContinuePrompt from "inquirer-press-to-continue";
 import inquirer from "inquirer";
 import { MoonwallContext, runNetworkOnly } from "../internal/globalContext.js";
 import { importConfig } from "../../../utils/configReader.js";
-import clear from "clear"
+import clear from "clear";
+import chalk from "chalk";
+import { Environment } from "../../../types/config.js";
+import { executeTests } from "./runTests.js";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
 export async function runNetwork(args) {
   process.env.TEST_ENV = args.envName;
+  const globalConfig = await importConfig("../../moonwall.config.js");
 
   const questions = [
     {
@@ -28,7 +32,8 @@ export async function runNetwork(args) {
       name: "MenuChoice",
       type: "list",
       message:
-        `Environment : ${args.envName}\n` + "Please select a choice: ",
+        `Environment : ${chalk.bgGray.cyanBright(args.envName)}\n` +
+        "Please select a choice: ",
       default: 0,
       pageSize: 10,
       choices: [
@@ -43,7 +48,13 @@ export async function runNetwork(args) {
           short: "info",
         },
         {
-          name: "3) Test:      Execute tests registered for this environment",
+          name:
+            "3) Test:      Execute tests registered for this environment   ( " +
+            chalk.bgGrey.cyanBright(
+              globalConfig.environments.find(({ name }) => name == args.envName)
+                .testFileDir
+            ) +
+            " )",
           value: 2,
           short: "test",
         },
@@ -67,9 +78,8 @@ export async function runNetwork(args) {
   ];
 
   try {
-    const globalConfig = await importConfig("../../moonwall.config.js");
-    await runNetworkOnly(globalConfig, process.env.TEST_ENV);
-  clear()
+    await runNetworkOnly(globalConfig);
+    clear();
     await inquirer.prompt(
       questions.find(({ name }) => name == "NetworkStarted")
     );
@@ -78,18 +88,22 @@ export async function runNetwork(args) {
       const choice = await inquirer.prompt(
         questions.find(({ name }) => name == "MenuChoice")
       );
+      const env = globalConfig.environments.find(
+        ({ name }) => name === args.envName
+      );
 
+      
       switch (choice.MenuChoice) {
         case 0:
           console.log("I'm chilling");
           break;
 
         case 1:
-          console.log(`Show info for ${process.env.TEST_ENV}`);
+          resolveInfoChoice(env);
           break;
 
         case 2:
-          console.log("I'm running tests!");
+          await resolveTestChoice(env);
           break;
 
         case 3:
@@ -106,12 +120,19 @@ export async function runNetwork(args) {
     }
 
     MoonwallContext.destroy();
-    console.log(`Goodbye! 👋`)
+    console.log(`Goodbye! 👋`);
     process.exit(0);
   } catch (e) {
     console.error(e);
     process.exit(1);
   }
-
-
 }
+
+const resolveInfoChoice = async (env) => {
+  console.dir(env, {depth: null})
+};
+
+const resolveTestChoice = async (env: Environment) => {
+  return await executeTests(env);
+};
+

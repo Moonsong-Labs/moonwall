@@ -2,42 +2,40 @@ import inquirer from "inquirer";
 import PressToContinuePrompt from "inquirer-press-to-continue";
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 import fs from "fs/promises";
-import fse from "fs-extra";
 
 export async function generateConfig() {
-  try {
+  while (true) {
     if (await fs.access("moonwall.config.ts").catch(() => true)) {
-      const answers = await inquirer
-        .prompt(questions.filter(({ name }) => name.match("Ask")))
-        .then((answers) => answers);
+      const answers = await inquirer.prompt(generateQuestions);
+      console.dir(answers, { depth: null });
 
+      const proceed = await inquirer.prompt(
+        questions.find(({ name }) => name === "Confirm")
+      );
+
+      if (proceed.Confirm === false) {
+        continue;
+      }
       await fs.writeFile("moonwall.config.ts", getBody(answers), "utf-8");
+      break;
     } else {
       console.log("ℹ️  Config file already exists at this location. Quitting.");
       return;
     }
-
-    await inquirer.prompt(questions.find((a) => a.name == "Success"));
-  } catch (e) {
-    await inquirer.prompt(
-      questions.find((a) => {
-        console.error(e);
-        return a.name == "Failure";
-      })
-    );
   }
+  console.log(`Goodbye! 👋`);
 }
 
-const questions = [
+const generateQuestions = [
   {
-    name: "AskLabel",
+    name: "Label",
     type: "input",
     message: "Provide a label for the config file",
     default: "moonwall_config",
   },
   {
-    name: "AskTimeout",
-    type: "input",
+    name: "Timeout",
+    type: "number",
     message: "Provide a global timeout value",
     default: 30000,
     validate: (input: string) => {
@@ -49,23 +47,31 @@ const questions = [
     },
   },
   {
-    name: "AskEnvironmentName",
+    name: "EnvironmentName",
     type: "input",
     message: "Provide a name for this environment",
     default: "default_env",
   },
   {
-    name: "AskEnvironmentTestDir",
+    name: "EnvironmentTestDir",
     type: "input",
     message: "Provide the path for where tests for this environment are kept",
     default: "tests/",
   },
   {
-    name: "AskEnvironmentFoundation",
+    name: "EnvironmentFoundation",
     type: "list",
     message: "What type of network foundation is this?",
     choices: ["ReadOnly", "Dev", "Forked", "ZombieNet", "Chopsticks"],
     default: "tests/",
+  },
+];
+const questions = [
+  {
+    name: "Confirm",
+    type: "confirm",
+    message:
+      "Would you like to generate this config? (no to restart from beginning)",
   },
   {
     name: "Success",
@@ -85,18 +91,18 @@ const questions = [
 
 const getBody = (answers) => {
   return (
-    'import { Foundation, ProviderType } from "src/types/enum.js";\n' +
-    'import { MoonwallConfig } from "src/types/config.js";\n' +
+    'import { Foundation, ProviderType } from "./src/types/enum.js";\n' +
+    'import { MoonwallConfig } from "./src/types/config.js";\n' +
     `\n
   export const globalConfig: MoonwallConfig = {
-  label: "${answers.AskLabel}",
-  defaultTestTimeout: ${answers.AskTimeout},
+  label: "${answers.Label}",
+  defaultTestTimeout: ${answers.Timeout},
   environments: [
     {
-      name: "${answers.AskEnvironmentName}",
-      testFileDir: "${answers.AskEnvironmentTestDir}",
+      name: "${answers.EnvironmentName}",
+      testFileDir: "${answers.EnvironmentTestDir}",
       foundation: {
-        type: Foundation.${answers.AskEnvironmentFoundation},
+        type: Foundation.${answers.EnvironmentFoundation},
         // Provide additional config here if you are starting a new network
       },
       connections: [
