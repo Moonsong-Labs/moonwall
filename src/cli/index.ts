@@ -1,19 +1,26 @@
-#!/usr/bin/env ts-node
+#!/usr/bin/env ts-node-esm
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
-// import { runner } from './runner';
-import { testCmd } from "./runner/cmds/test";
-import { runNetwork } from "./runner/cmds/runNetwork";
+import { testCmd } from "./runner/cmds/runTests.js";
+import { runNetwork } from "./runner/cmds/runNetwork.js";
+import { generateConfig } from "./runner/cmds/generateConfig.js";
+import { main } from "./runner/cmds/main.js";
 
 yargs(hideBin(process.argv))
   .usage("Usage: $0")
   .version("2.0.0")
   .command(
-    `test [testSpecs..]`,
-    "Run tests found in test specs",
+    `init`,
+    "Run tests for a given Environment",
+    async () => {
+      await generateConfig();
+    }
+  )
+  .command(
+    `test <envName>`,
+    "Run tests for a given Environment",
     (yargs) => {
-      return yargs.positional("testSpecs", {
-        alias: "testSpecs",
+      return yargs.positional("envName", {
         array: true,
         describe: "Path to test spec file(s)",
         default: "*.ts",
@@ -35,6 +42,13 @@ yargs(hideBin(process.argv))
       await runNetwork(argv as any);
     }
   )
+  .command(
+    "*",
+    "Run the guided walkthrough",
+    async () => {
+      await main();
+    }
+  )
   .options({
     configFile: {
       type: "string",
@@ -42,11 +56,11 @@ yargs(hideBin(process.argv))
       description: "path to MoonwallConfig file",
       default: "./moonwall.config.json",
     },
-    environment: {
-      type: "string",
-      alias: "t",
-      description: "name of environment tests to run",
-      demandOption: false,
-    },
+    // environment: {
+    //   type: "string",
+    //   alias: "t",
+    //   description: "name of environment tests to run",
+    //   demandOption: false,
+    // },
   })
   .parse();

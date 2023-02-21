@@ -1,89 +1,134 @@
-import { expect } from "chai";
-import { testSuite } from "../../src/cli/runner/util/runner-functions";
-import {
-  alithSigner,
-  createBlock,
-  resetToGenesis,
-} from "../../src/utils/contextHelpers";
-import { parseEther } from "ethers";
+import { Foundation, describeSuite } from "../../src/index.js";
+import { alithSigner } from "../../src/utils/contextHelpers.js";
+import { WebSocketProvider, formatEther, parseEther } from "ethers";
+import { setTimeout } from "timers/promises";
 import {
   BALTATHAR_ADDRESS,
+  CHARLETH_ADDRESS,
   alith,
-  baltathar,
-} from "../../src/cli/runner/lib/accounts";
+} from "../../src/cli/runner/lib/accounts.js";
 import { BN } from "@polkadot/util";
-import { create } from "domain";
-import { MoonwallContext } from "../../src/cli/runner/internal/globalContext";
+import Web3 from "web3";
+import { ApiPromise } from "@polkadot/api";
 
-testSuite({
-  id: "dev",
+
+describeSuite({
+  id: "D01",
   title: "Dev test suite",
+  foundationMethods: Foundation.Dev,
   testCases: ({ it, context }) => {
-    const api = context.getEthers();
-    const w3 = context.getWeb3();
-    const polkadotJs = context.getPolkadotJs();
+    let api: WebSocketProvider;
+    let w3: Web3;
+    let polkadotJs: ApiPromise;
 
-    beforeEach(async () => {
-      await resetToGenesis(polkadotJs);
+    beforeAll(() => {
+      api = context.getEthers();
+      w3 = context.getWeb3();
+      polkadotJs = context.getMoonbeam();
     });
 
-    it(
-      "E01",
-      "Checking that launched node can create blocks",
-      async function () {
+    it({
+      id: "E01",
+      title: "Checking that launched node can create blocks",
+      test: async function () {
         const block = (
-          await context.getPolkadotJs().rpc.chain.getBlock()
+          await polkadotJs.rpc.chain.getBlock()
         ).block.header.number.toNumber();
-        await createBlock(w3, context.getPolkadotJs());
+        await context.createBlock();
         const block2 = (
-          await context.getPolkadotJs().rpc.chain.getBlock()
+          await polkadotJs.rpc.chain.getBlock()
         ).block.header.number.toNumber();
         expect(block2).to.be.greaterThan(block);
-      }
-    );
-
-    it("E02", "Checking that substrate txns possible", async function () {
-      const balanceBefore = (
-        await polkadotJs.query.system.account(BALTATHAR_ADDRESS)
-      ).data.free;
-      await polkadotJs.tx.balances
-        .transfer(BALTATHAR_ADDRESS, parseEther("2"))
-        .signAndSend(alith);
-
-      await createBlock(w3, polkadotJs);
-
-      const balanceAfter = (
-        await polkadotJs.query.system.account(BALTATHAR_ADDRESS)
-      ).data.free;
-      expect(balanceBefore.lt(balanceAfter)).to.be.true;
+      },
     });
 
-    it("E03", "Checking that sudo can be used", async function () {
-      await createBlock(w3, polkadotJs);
-      const tx = polkadotJs.tx.system.fillBlock(60 * 10 ** 7);
-      await polkadotJs.tx.sudo.sudo(tx).signAndSend(alith);
-      await createBlock(w3, polkadotJs);
-      const blockFill = await polkadotJs.query.system.blockWeight();
-      expect(blockFill.normal.refTime.unwrap().gt(new BN(0))).to.be.true;
+    it({
+      id: "E02",
+      title: "Checking that substrate txns possible",
+      timeout: 20000,
+      test: async function () {
+        const balanceBefore = (
+          await polkadotJs.query.system.account(BALTATHAR_ADDRESS)
+        ).data.free;
+
+        await polkadotJs.tx.balances
+          .transfer(BALTATHAR_ADDRESS, parseEther("2"))
+          .signAndSend(alith);
+
+        await context.createBlock();
+
+        const balanceAfter = (
+          await polkadotJs.query.system.account(BALTATHAR_ADDRESS)
+        ).data.free;
+        expect(balanceBefore.lt(balanceAfter)).to.be.true;
+      },
     });
 
-    it("E04", "Can send Ethers txns", async function () {
-      const signer = alithSigner(api);
-      const balanceBefore = (
-        await polkadotJs.query.system.account(BALTATHAR_ADDRESS)
-      ).data.free;
+    it({
+      id: "E03",
+      title: "Checking that sudo can be used",
+      test: async function () {
+        await context.createBlock();
+        const tx = polkadotJs.tx.rootTesting.fillBlock(60 * 10 ** 7);
+        await polkadotJs.tx.sudo.sudo(tx).signAndSend(alith);
 
-      await signer.sendTransaction({
-        to: BALTATHAR_ADDRESS,
-        value: parseEther("1.0"),
-      });
-
-      await createBlock(w3, polkadotJs);
-      const balanceAfter = (
-        await polkadotJs.query.system.account(BALTATHAR_ADDRESS)
-      ).data.free;
-      expect(balanceBefore.lt(balanceAfter)).to.be.true;
+        await context.createBlock();
+        const blockFill = await polkadotJs.query.system.blockWeight();
+        expect(blockFill.normal.refTime.unwrap().gt(new BN(0))).to.be.true;
+      },
     });
 
+    it({
+      id: "E04",
+      title: "Can send Ethers txns",
+      test: async function () {
+        const signer = alithSigner(api);
+        const balanceBefore = (
+          await polkadotJs.query.system.account(BALTATHAR_ADDRESS)
+        ).data.free;
+
+        await signer.sendTransaction({
+          to: BALTATHAR_ADDRESS,
+          value: parseEther("1.0"),
+        });
+        await context.createBlock();
+
+        const balanceAfter = (
+          await polkadotJs.query.system.account(BALTATHAR_ADDRESS)
+        ).data.free;
+        expect(balanceBefore.lt(balanceAfter)).to.be.true;
+      },
+    });
+
+    it({
+      id: "E05",
+      title: "Testing out Create block and listen for event",
+      // modifier: "only",
+      timeout: 30000,
+      test: async function () {
+
+        const expectedEvents = [
+          polkadotJs.events.system.ExtrinsicSuccess,
+          polkadotJs.events.balances.Transfer,
+          // polkadotJs.events.authorFilter.EligibleUpdated
+        ];
+
+        const { match, events } = await context.createBlockAndCheck(
+          expectedEvents,
+          polkadotJs.tx.balances.transfer(CHARLETH_ADDRESS, parseEther("3"))
+        );
+        // maybe: reponse has methods for asserts
+        // maybe: add options to createBlock for asserts of events/storages etc
+
+        expect(match).toStrictEqual(true);
+        // expect(
+        //   events.some(
+        //     (evt) =>
+        //       polkadotJs.events.balances.Transfer.is(evt.event) &&
+        //       evt.event.data.amount.toString() == parseEther("3")
+        //   )
+        // ).toStrictEqual(true);
+      },
+    });
   },
 });

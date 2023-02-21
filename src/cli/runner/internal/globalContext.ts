@@ -1,127 +1,135 @@
+import { MoonwallConfig } from "../../../types/config";
+import { ChildProcess } from "child_process";
+import {
+  populateProviderInterface,
+  prepareProviders,
+} from "../../../utils/providers.js";
+import { launchDevNode } from "../../../utils/LocalNode.js";
+import { importConfig } from "../../../utils/configReader.js";
+import { parseChopsticksRunCmd, parseRunCmd } from "./foundations.js";
+import { ApiPromise } from "@polkadot/api";
+import Debug from "debug";
 import {
   ConnectedProvider,
-  FoundationType,
-  MoonwallConfig,
   MoonwallEnvironment,
-  Node,
-  ProviderType,
-} from "../lib/types";
-
-// import { globalConfig } from "../../../../moonwalls.config";
-import { ChildProcess, spawn } from "child_process";
-import { populateProviderInterface, prepareProviders } from "../util/providers";
-import { launchDevNode } from "../util/LocalNode";
-import globalConfig from "../../../../moonwalls.config";
-import { parseRunCmd } from "./devFoundation";
-import { ApiPromise } from "@polkadot/api";
-const debugSetup = require("debug")("global:context");
-const debugNode = require("debug")("global:node");
+} from "../../../types/context.js";
+import { Foundation, ProviderType } from "../../../types/enum.js";
+const debugSetup = Debug("global:context");
 
 export class MoonwallContext {
   private static instance: MoonwallContext;
-  environments: MoonwallEnvironment[];
+  environment: MoonwallEnvironment;
   providers: ConnectedProvider[];
   nodes: ChildProcess[];
-  foundation?: FoundationType;
+  foundation?: Foundation;
   private _genesis?: string;
+  rtUpgradePath?: string;
 
   constructor(config: MoonwallConfig) {
-    this.environments = [];
+    this.environment;
     this.providers = [];
     this.nodes = [];
 
-    config.environments.forEach((env) => {
-      const blob = { name: env.name, context: {}, providers: [], nodes: [] };
+    const env = config.environments.find(
+      ({ name }) => name == process.env.TEST_ENV
+    );
+    const blob = {
+      name: env.name,
+      context: {},
+      providers: [],
+      nodes: [],
+      foundationType: env.foundation.type,
+    };
 
-      switch (env.foundation.type) {
-        case FoundationType.ReadOnly:
-          if (!env.connections) {
-            throw new Error(
-              `${env.name} env config is missing connections specification, required by foundation READ_ONLY`
-            );
-          } else {
-            blob.providers = prepareProviders(env.connections);
-          }
-
-          debugSetup(
-            `🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`
+    switch (env.foundation.type) {
+      case Foundation.ReadOnly:
+        if (!env.connections) {
+          throw new Error(
+            `${env.name} env config is missing connections specification, required by foundation READ_ONLY`
           );
-          break;
+        } else {
+          blob.providers = prepareProviders(env.connections);
+        }
 
-        case FoundationType.DevMode:
-          const { cmd, args } = parseRunCmd(env.foundation.launchSpec[0]);
-          debugNode(`The run command is: ${cmd}`);
-          debugNode(`The run args are: ${args}`);
+        debugSetup(
+          `🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`
+        );
+        break;
 
-          blob.nodes.push({
-            name: env.foundation.launchSpec[0].bin.name,
-            cmd,
-            args,
-          });
+      case Foundation.Chopsticks:
+        blob.nodes.push(parseChopsticksRunCmd(env.foundation.launchSpec));
+        blob.providers.push(...prepareProviders(env.connections));
+        this.rtUpgradePath = env.foundation.rtUpgradePath;
+        debugSetup(
+          `🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`
+        );
+        break;
 
-          blob.providers = env.connections
-            ? prepareProviders(env.connections)
-            : prepareProviders([
-                {
-                  name: "w3",
-                  type: ProviderType.Web3,
-                  endpoints: ["ws://localhost:9944"],
-                },
-                {
-                  name: "eth",
-                  type: ProviderType.Ethers,
-                  endpoints: ["ws://localhost:9944"],
-                },
-                {
-                  name: "polka",
-                  type: ProviderType.PolkadotJs,
-                  endpoints: ["ws://localhost:9944"],
-                },
-              ]);
+      case Foundation.Dev:
+        const { cmd, args } = parseRunCmd(env.foundation.launchSpec[0]);
+        blob.nodes.push({
+          name: env.foundation.launchSpec[0].name,
+          cmd,
+          args,
+        });
 
-          debugSetup(
-            `🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`
-          );
-          break;
-        default:
-          debugSetup(
-            `🚧  Foundation "${env.foundation.type}" unsupported, skipping`
-          );
-          return;
-      }
-      this.environments.push(blob);
-    });
-  }
+        blob.providers = env.connections
+          ? prepareProviders(env.connections)
+          : prepareProviders([
+              {
+                name: "w3",
+                type: ProviderType.Web3,
+                endpoints: ["ws://localhost:9944"],
+              },
+              {
+                name: "eth",
+                type: ProviderType.Ethers,
+                endpoints: ["ws://localhost:9944"],
+              },
+              {
+                name: "polka",
+                type: ProviderType.PolkadotJs,
+                endpoints: ["ws://localhost:9944"],
+              },
+            ]);
 
-  public get genesis(){
-    return this._genesis
-  }
-
-  public set genesis(hash: string){
-    if (hash.length !== 66){
-      throw new Error("Cannot set genesis to invalid hash")
+        debugSetup(
+          `🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`
+        );
+        break;
+      default:
+        debugSetup(
+          `🚧  Foundation "${env.foundation.type}" unsupported, skipping`
+        );
+        return;
     }
-    this._genesis=hash
+
+    this.environment = blob;
   }
 
-  public async startNetwork(environmentName: string) {
+  public get genesis() {
+    return this._genesis;
+  }
+
+  public set genesis(hash: string) {
+    if (hash.length !== 66) {
+      throw new Error("Cannot set genesis to invalid hash");
+    }
+    this._genesis = hash;
+  }
+
+  public async startNetwork() {
     if (this.nodes.length > 0) {
       console.log("Nodes already started! Skipping command");
       return MoonwallContext.getContext();
     }
 
-    const nodes = MoonwallContext.getContext().environments.find(
-      (env) => env.name == environmentName
-    ).nodes;
+    const nodes = MoonwallContext.getContext().environment.nodes;
     const promises = nodes.map(async ({ cmd, args, name }) => {
-      await launchDevNode(cmd, args, name);
+      this.nodes.push(await launchDevNode(cmd, args, name));
     });
 
     await Promise.all(promises);
-  }
-
-  public env(query: string): MoonwallEnvironment | undefined {
-    return this.environments.find(({ name }) => name == query);
   }
 
   public async connectEnvironment(environmentName: string) {
@@ -130,25 +138,25 @@ export class MoonwallContext {
       return MoonwallContext.getContext();
     }
 
-    const promises = this.environments
-      .find(({ name }) => name === environmentName)
-      .providers.map(
-        async ({ name, type, connect, ws }) =>
-          new Promise(async (resolve) => {
-            const providerDetails = ws
-              ? await populateProviderInterface(name, type, connect, ws)
-              : await populateProviderInterface(name, type, connect);
-            this.providers.push(providerDetails);
-            resolve("");
-          })
-      );
+    const globalConfig = await importConfig("../../moonwall.config.js");
+
+    const promises = this.environment.providers.map(
+      async ({ name, type, connect, ws }) =>
+        new Promise(async (resolve) => {
+          const providerDetails = ws
+            ? await populateProviderInterface(name, type, connect, ws)
+            : await populateProviderInterface(name, type, connect);
+          this.providers.push(providerDetails);
+          resolve("");
+        })
+    );
     await Promise.all(promises);
 
     this.foundation = globalConfig.environments.find(
       ({ name }) => name == environmentName
     ).foundation.type;
 
-    if (this.foundation == FoundationType.DevMode) {
+    if (this.foundation == Foundation.Dev) {
       this.genesis = (
         await (
           this.providers.find(
@@ -197,20 +205,21 @@ export class MoonwallContext {
     } catch {
       console.log("🛑  All connections disconnected");
     }
+
+    MoonwallContext.getContext().nodes.forEach((process) => process.kill());
     delete MoonwallContext.instance;
   }
 }
 
 export const contextCreator = async (config: MoonwallConfig, env: string) => {
   const ctx = MoonwallContext.getContext(config);
-  debugSetup(`🟢  Global context fetched for mocha`);
-  await ctx.startNetwork(env);
+  await runNetworkOnly(config);
   await ctx.connectEnvironment(env);
+
   return ctx;
 };
 
-export const runNetworkOnly = async (config: MoonwallConfig, env: string) => {
+export const runNetworkOnly = async (config: MoonwallConfig) => {
   const ctx = MoonwallContext.getContext(config);
-  debugSetup(`🟢  Global context fetched for mocha`);
-  await ctx.startNetwork(env);
+  await ctx.startNetwork();
 };

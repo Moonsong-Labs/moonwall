@@ -1,17 +1,16 @@
-import { testSuite } from '../../src/cli/runner/util/runner-functions';
-import { expect } from 'chai';
+import { describeSuite } from "../../src/index.js";
+import { expect } from "chai";
 
-testSuite({
-  id: 'P100',
-  title: 'Tests that are using the production foundation',
-  environment: "New_Test",
+describeSuite({
+  id: "P100",
+  title: "Tests that are using the production foundation",
   testCases: ({ it }) => {
-    it('T01', 'Passing Test', function () {
+    it("T01", "Passing Test", function () {
       expect(true).to.be.true;
     });
 
-    it('T02', 'Skipped test', function () {
-      this.skip()
+    it("T02", "Skipped test", function () {
+      this.skip();
       expect(false).to.be.true;
     });
   },

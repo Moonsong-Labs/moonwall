@@ -1,21 +1,18 @@
 import { expect } from "chai";
-import {
-  checkBlockFinalized,
-  getBlockTime,
-  fetchHistoricBlockNum,
-} from "../../src/cli/runner/util/block";
 import Bottleneck from "bottleneck";
-import semverLt from "semver/functions/lt";
-import { testSuite } from "../../src/cli/runner/util/runner-functions";
+import semverLt from "semver/functions/lt.js";
+import { describeSuite } from "../../src/index.js";
 import { WebSocketProvider } from "ethers";
 import Web3 from "web3";
-const debug = require("debug")("smoke:block-finalized");
+import Debug from "debug";
+import { checkBlockFinalized, fetchHistoricBlockNum, getBlockTime } from "../../src/utils/block.js";
+const debug = Debug("smoke:block-finalized");
 const timePeriod = process.env.TIME_PERIOD
   ? Number(process.env.TIME_PERIOD)
-  :  60 * 1000;
+  : 60 * 1000;
 const timeout = Math.floor(timePeriod / 12); // 2 hour -> 10 minute timeout
 
-testSuite({
+describeSuite({
   id: "S400",
   title: "Parachain blocks should be finalized",
   testCases: ({ context, it }) => {
@@ -35,10 +32,12 @@ testSuite({
       const specVersion = api.consts.system.version.specVersion.toNumber();
       const clientVersion = (await api.rpc.system.version())
         .toString()
-        .split('-')[0];
+        .split("-")[0];
 
-      if (specVersion < 1900 || semverLt(clientVersion, '0.27.2')) {
-        debug(`ChainSpec ${specVersion}, client ${clientVersion} unsupported BlockTag, skipping.`);
+      if (specVersion < 1900 || semverLt(clientVersion, "0.27.2")) {
+        debug(
+          `ChainSpec ${specVersion}, client ${clientVersion} unsupported BlockTag, skipping.`
+        );
         this.skip();
       }
       const timestamp = (await web3.eth.getBlock("latest")).timestamp;
@@ -48,7 +47,7 @@ testSuite({
     });
 
     it(
-      'C300',
+      "C300",
       `should have only finalized blocks in the past` +
         ` ${(timePeriod / (1000 * 60 * 60)).toFixed(2)} hours #C300`,
       async function () {
@@ -70,12 +69,15 @@ testSuite({
           firstBlockTime
         )) as number;
 
-
-        debug(`Checking if blocks #${firstBlockNumber} - #${lastBlockNumber} are finalized.`);
+        debug(
+          `Checking if blocks #${firstBlockNumber} - #${lastBlockNumber} are finalized.`
+        );
         const promises = (() => {
           const length = lastBlockNumber - firstBlockNumber;
           return Array.from({ length }, (_, i) => firstBlockNumber + i);
-        })().map((num) => limiter.schedule(() => checkBlockFinalized(api, num)));
+        })().map((num) =>
+          limiter.schedule(() => checkBlockFinalized(api, num))
+        );
 
         const results = await Promise.all(promises);
 
@@ -84,7 +86,7 @@ testSuite({
           unfinalizedBlocks,
           `The following blocks were not finalized ${unfinalizedBlocks
             .map((a) => a.number)
-            .join(', ')}`
+            .join(", ")}`
         ).to.be.empty;
       }
     );

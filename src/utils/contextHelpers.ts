@@ -12,26 +12,32 @@ import {
   EventRecord,
 } from "@polkadot/types/interfaces";
 import { AnyTuple, RegistryError } from "@polkadot/types/types";
-import { u8aToHex } from "@polkadot/util";
-import { customWeb3Request } from "../../src/cli/runner/internal/providers";
-import { ALITH_PRIVATE_KEY, alith } from "../../src/cli/runner/lib/accounts";
-import { createAndFinalizeBlock } from "../../src/cli/runner/util/block";
+import { customWeb3Request } from "../../src/cli/runner/internal/providers.js";
+import { ALITH_PRIVATE_KEY, alith } from "../../src/cli/runner/lib/accounts.js";
 import Web3 from "web3";
 import { ethers } from "ethers";
-import { MoonwallContext } from "../cli/runner/internal/globalContext";
-import { FoundationType } from "../../src/cli/runner/lib/types";
-import { assert } from "chai";
-const debug = require("debug")("context");
+import { MoonwallContext } from "../cli/runner/internal/globalContext.js";
+import { assert } from "vitest";
+import Debug from "debug";
+import { Foundation } from "../types/enum.js";
+import { createAndFinalizeBlock } from "./block.js";
+const debug = Debug("context");
 
-export async function resetToGenesis(api: ApiPromise){
+export async function resetToGenesis(api: ApiPromise) {
   // TODO: This isn't working as expected, investigate and fix
-  if (!MoonwallContext.getContext().genesis){
-    debug(`No genesis noted for context, is forkGenesis() being called too early?`)
-    throw new Error("No genesis found for context")
+  if (!MoonwallContext.getContext().genesis) {
+    debug(
+      `No genesis noted for context, is forkGenesis() being called too early?`
+    );
+    throw new Error("No genesis found for context");
   } else {
-    await api.rpc.engine.createBlock(true,true,MoonwallContext.getContext().genesis)
-    const newGenesis = (await api.rpc.chain.getFinalizedHead()).toString()
-    MoonwallContext.getContext().genesis = newGenesis
+    await api.rpc.engine.createBlock(
+      true,
+      true,
+      MoonwallContext.getContext().genesis
+    );
+    const newGenesis = (await api.rpc.chain.getFinalizedHead()).toString();
+    MoonwallContext.getContext().genesis = newGenesis;
   }
 }
 
@@ -55,7 +61,7 @@ export async function createBlock<
   >
 > {
   assert(
-    MoonwallContext.getContext().foundation == FoundationType.DevMode,
+    MoonwallContext.getContext().foundation == Foundation.Dev,
     "createBlock should only be used on DevMode foundations"
   );
   const results: (

@@ -1,4 +1,5 @@
-export { timbo, jimbo } from "./people";
-export * as utils from "./cli/runner/util/runner-functions";
+export * as utils from "./utils/runner-functions.js";
 export { MoonwallContext } from "./cli/runner/internal/globalContext";
-export { testSuite} from "./cli/runner/util/runner-functions"
+export { describeSuite } from "./utils/runner-functions";
+export { Foundation, ProviderType } from "./types/enum.js";
+export { MoonwallConfig } from "./types/config.js";

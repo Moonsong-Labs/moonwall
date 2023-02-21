@@ -1,8 +1,8 @@
 import { expect } from "chai";
-import { testSuite } from "../../src/cli/runner/util/runner-functions";
-import { xcAssetAbi } from "../../src/cli/runner/lib/moonbeamConsts";
+import { describeSuite } from "../../src/index.js";
+import { xcAssetAbi } from "../../src/cli/runner/lib/moonbeamConsts.js";
 
-testSuite({
+describeSuite({
   id: "w3",
   title: "Web3 test suite",
   testCases: ({ it, context }) => {
