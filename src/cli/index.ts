@@ -4,10 +4,18 @@ import { hideBin } from "yargs/helpers";
 import { testCmd } from "./runner/cmds/runTests.js";
 import { runNetwork } from "./runner/cmds/runNetwork.js";
 import { generateConfig } from "./runner/cmds/generateConfig.js";
+import { main } from "./runner/cmds/main.js";
 
 yargs(hideBin(process.argv))
   .usage("Usage: $0")
   .version("2.0.0")
+  // .command(
+  //   "*",
+  //   "Run the guided walkthrough",
+  //   async () => {
+  //     await main();
+  //   }
+  // )
   .command(
     `init`,
     "Run tests for a given Environment",

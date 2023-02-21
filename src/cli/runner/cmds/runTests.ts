@@ -5,14 +5,15 @@ import { importConfig } from "../../../utils/configReader.js";
 import { startVitest } from "vitest/node";
 import { UserConfig } from "vitest";
 import { MoonwallContext } from "../internal/globalContext.js";
+import { } from "../../../../moonwall.config.js"
 
 export async function testCmd(args) {
-  const globalConfig = await importConfig("../../../../moonwall.config.js")
+  const globalConfig = await importConfig("../../moonwall.config.js");
   const env = globalConfig.environments.find(
     ({ name }) => name === args.envName
   );
-
   process.env.TEST_ENV = args.envName;
+
 
   // TODO: sort out reporter config
   const files = await fs.readdir(env.testFileDir);

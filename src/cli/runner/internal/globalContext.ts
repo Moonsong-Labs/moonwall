@@ -138,7 +138,7 @@ export class MoonwallContext {
       return MoonwallContext.getContext();
     }
 
-    const globalConfig = await importConfig("../../../../moonwall.config.js");
+    const globalConfig = await importConfig("../../moonwall.config.js");
 
     const promises = this.environment.providers.map(
       async ({ name, type, connect, ws }) =>

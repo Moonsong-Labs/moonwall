@@ -1,5 +1,5 @@
-import { Foundation, ProviderType } from "src/types/enum.js";
-import { MoonwallConfig } from "src/types/config.js";
+import { Foundation, ProviderType } from "./src/types/enum.js";
+import { MoonwallConfig } from "./src/types/config.js";
 
 export const globalConfig: MoonwallConfig = {
   label: "Global Test Config 🐯",

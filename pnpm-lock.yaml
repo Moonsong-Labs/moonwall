@@ -22,6 +22,7 @@ specifiers:
   bottleneck: ^2.19.5
   chai: ^4.3.7
   chalk: ^5.2.0
+  clear: ^0.1.0
   debug: ^4.3.4
   dotenv: ^16.0.3
   esm: ^3.2.25
@@ -66,6 +67,7 @@ dependencies:
   bottleneck: 2.19.5
   chai: 4.3.7
   chalk: 5.2.0
+  clear: 0.1.0
   debug: 4.3.4
   dotenv: 16.0.3
   esm: 3.2.25
@@ -3246,6 +3248,10 @@ packages:
     engines: {node: '>=6'}
     dev: false
     optional: true
+
+  /clear/0.1.0:
+    resolution: {integrity: sha512-qMjRnoL+JDPJHeLePZJuao6+8orzHMGP04A8CdwCNsKhRbOnKRjefxONR7bwILT3MHecxKBjHkKL/tkZ8r4Uzw==}
+    dev: false
 
   /cli-cursor/3.1.0:
     resolution: {integrity: sha512-I/zHAwsKf9FqGoXM4WWRACob9+SNukZTd94DWF57E4toouRulbCxcUh6RKUEOQlYTHJnzkPMySvPNaaSLNfLZw==}
