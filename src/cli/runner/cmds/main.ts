@@ -6,6 +6,8 @@ import { MoonwallConfig } from "../../../types/config.js";
 import { generateConfig } from "./generateConfig.js";
 import colors from "colors";
 import { Result } from "ethers";
+import { runNetwork } from "./runNetwork.js";
+import { testCmd } from "./runTests.js";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
@@ -78,24 +80,43 @@ async function mainMenu(config: MoonwallConfig) {
     case 0:
       await generateConfig();
       return false;
+    case 1:
+      const chosenRunEnv = await chooseEnv(config);
+      await runNetwork(chosenRunEnv);
+      return false;
+    case 2:
+      const chosenTestEnv = await chooseEnv(config);
+      await testCmd(chosenTestEnv);
+      return false;
     case 3:
       return await resolveQuitChoice();
   }
 }
+const chooseEnv = async (config: MoonwallConfig) => {
+  const envs = config.environments.map((a) => a.name);
+  const result = await inquirer.prompt({
+    name: "envName",
+    message: "Select a environment to run",
+    type: "list",
+    choices: envs,
+  });
+
+  return result;
+};
 
 const resolveQuitChoice = async () => {
-  const result =  await inquirer.prompt({
+  const result = await inquirer.prompt({
     name: "Quit",
     type: "confirm",
     message: "Are you sure you want to Quit?",
     default: false,
   });
-  return result.Quit
+  return result.Quit;
 };
 
 const printIntro = () => {
-  const logo = `\n                                             
-                                                                                
+  const logo =
+    chalk.cyan(`\n                                                                                                                  
                                       ####################                      
                                   ############################                  
                                ###################################              
@@ -106,8 +127,8 @@ const printIntro = () => {
                        .#################################################       
                        ##################################################       
                        ##################################################       
-                                                                                
-                                                                                
+`) +
+    chalk.magenta(`                                                                                
             ***   ************************************************************  
                                                                                 
 ****  *********************************************                                                     
@@ -121,7 +142,7 @@ const printIntro = () => {
                                                                                 
                       ****  *****************************                       
                                                                                                                                                               
-`;
+`);
   console.log(logo);
   console.log(
     colors.rainbow(
@@ -129,7 +150,7 @@ const printIntro = () => {
     )
   );
   console.log(
-    chalk.bgMagenta.cyanBright(
+    chalk.bgCyan.magenta(
       "                               MOONWALL                               "
     )
   );
