@@ -1,6 +1,6 @@
 import { afterAll, beforeAll } from "vitest";
 import { MoonwallContext, contextCreator } from "./globalContext.js";
-import { importConfig } from "../util/configReader.js";
+import { importConfig } from "../../../utils/configReader.js";
 
 beforeAll(async () => {
   const globalConfig = await importConfig("../../../../moonwall.config.js")

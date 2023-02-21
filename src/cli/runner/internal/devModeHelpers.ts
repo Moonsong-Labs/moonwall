@@ -9,10 +9,10 @@ import {
   SubmittableExtrinsic,
 } from "@polkadot/api/types/index.js";
 import { customWeb3Request } from "./providers.js";
-import { GenericContext } from "../util/runner-functions.js";
+import { GenericContext } from "../../../utils/runner-functions.js";
 import Debug from "debug";
 import { alith } from "../lib/accounts.js";
-import { createAndFinalizeBlock } from "../util/block.js";
+import { createAndFinalizeBlock } from "../../../utils/block.js";
 import { EventRecord } from "@polkadot/types/interfaces/types.js";
 import { RegistryError } from "@polkadot/types-codec/types/registry";
 const debug = Debug("DevTest");

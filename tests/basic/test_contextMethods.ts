@@ -1,5 +1,6 @@
-import { describeSuite } from "../../src/cli/runner/util/runner-functions.js";
+
 import { expect } from "chai";
+import { describeSuite } from "../../src/index.js";
 
 describeSuite({
   id: "T100",

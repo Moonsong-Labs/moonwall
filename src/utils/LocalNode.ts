@@ -1,5 +1,5 @@
 import { ChildProcess, spawn } from "child_process";
-import { MoonwallContext } from "../internal/globalContext.js";
+import { MoonwallContext } from "../cli/runner/internal/globalContext.js"
 import chalk from "chalk";
 import Debug from "debug";
 const debugNode = Debug("global:node");

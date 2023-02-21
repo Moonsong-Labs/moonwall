@@ -3,7 +3,7 @@ import "@polkadot/api-augment/polkadot";
 import PressToContinuePrompt from "inquirer-press-to-continue";
 import inquirer from "inquirer";
 import { MoonwallContext, runNetworkOnly } from "../internal/globalContext.js";
-import { importConfig } from "../util/configReader.js";
+import { importConfig } from "../../../utils/configReader.js";
 
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);

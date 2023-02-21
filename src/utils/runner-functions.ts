@@ -1,7 +1,6 @@
 import { describe, it, beforeAll } from "vitest";
-import { MoonwallContext } from "../../../../src/index.js";
+
 import { ApiPromise, WsProvider } from "@polkadot/api";
-import { ConnectedProvider, Foundation, ProviderType } from "../../../types/configAndContext.js";
 import { WebSocketProvider } from "ethers";
 import Web3 from "web3";
 import {
@@ -9,22 +8,17 @@ import {
   AugmentedEvent,
   SubmittableExtrinsic,
 } from "@polkadot/api/types/index.js";
-import {
-  BlockCreation,
-  BlockCreationResponse,
-} from "../../../utils/contextHelpers.js";
+
 import Debug from "debug";
 import { upgradeRuntimeChopsticks } from "./upgrade.js";
-import {
-  sendNewBlockRequest,
-  sendSetStorageRequest,
-  sendNewBlockAndCheck,
-} from "../internal/chopsticksHelpers.js";
-import {
-  createDevBlock,
-  createDevBlockCheckEvents,
-} from "../internal/devModeHelpers.js";
-import { ChopsticksContext, GenericContext, TestSuiteType } from "../../../types/runner.js";
+import { ChopsticksContext, GenericContext, TestSuiteType } from "../types/runner.js";
+import { MoonwallContext } from "../cli/runner/internal/globalContext.js";
+import { Foundation, ProviderType } from "../types/enum.js";
+import { ConnectedProvider } from "../types/context.js";
+import { BlockCreation } from "./contextHelpers.js";
+import { createDevBlock, createDevBlockCheckEvents } from "../cli/runner/internal/devModeHelpers.js";
+import { sendNewBlockAndCheck, sendNewBlockRequest, sendSetStorageRequest } from "../cli/runner/internal/chopsticksHelpers.js";
+
 
 const debug = Debug("test:setup");
 

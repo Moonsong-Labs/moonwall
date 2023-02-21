@@ -10,8 +10,9 @@ import {
   cancelReferendaWithCouncil,
   executeProposalWithCouncil,
 } from "./governance.js";
-import { alith } from "../lib/accounts.js";
-import { ChopsticksContext } from "../../../types/runner.js";
+import { ChopsticksContext } from "../types/runner.js";
+import { alith } from "../cli/runner/lib/accounts.js";
+
 
 export interface UpgradePreferences {
   runtimeName: "moonbase" | "moonriver" | "moonbeam";

@@ -1,4 +1,4 @@
-import { describeSuite } from "../../src/cli/runner/util/runner-functions";
+import { Foundation, describeSuite } from "../../src/index.js";
 import { alithSigner } from "../../src/utils/contextHelpers.js";
 import { WebSocketProvider, formatEther, parseEther } from "ethers";
 import { setTimeout } from "timers/promises";
@@ -10,7 +10,7 @@ import {
 import { BN } from "@polkadot/util";
 import Web3 from "web3";
 import { ApiPromise } from "@polkadot/api";
-import { Foundation } from "../../src/types/configAndContext.js";
+
 
 describeSuite({
   id: "D01",

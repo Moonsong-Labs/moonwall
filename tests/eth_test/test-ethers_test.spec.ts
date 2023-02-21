@@ -1,5 +1,5 @@
 import { expect } from "vitest";
-import { describeSuite } from "../../src/cli/runner/util/runner-functions.js";
+import { describeSuite } from "../../src/index.js";
 import { Contract, WebSocketProvider, ethers, formatUnits } from "ethers";
 import { xcAssetAbi } from "../../src/cli/runner/lib/moonbeamConsts.js";
 import { createBlock } from "src/utils/contextHelpers.js";

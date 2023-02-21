@@ -14,13 +14,13 @@ import {
 import { AnyTuple, RegistryError } from "@polkadot/types/types";
 import { customWeb3Request } from "../../src/cli/runner/internal/providers.js";
 import { ALITH_PRIVATE_KEY, alith } from "../../src/cli/runner/lib/accounts.js";
-import { createAndFinalizeBlock } from "../../src/cli/runner/util/block.js";
 import Web3 from "web3";
 import { ethers } from "ethers";
 import { MoonwallContext } from "../cli/runner/internal/globalContext.js";
-import { Foundation } from "../types/configAndContext.js";
 import { assert } from "vitest";
 import Debug from "debug";
+import { Foundation } from "../types/enum.js";
+import { createAndFinalizeBlock } from "./block.js";
 const debug = Debug("context");
 
 export async function resetToGenesis(api: ApiPromise) {

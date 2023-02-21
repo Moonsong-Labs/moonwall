@@ -2,18 +2,13 @@ import { rpcDefinitions, types } from "moonbeam-types-bundle";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import Web3 from "web3";
 import { ethers } from "ethers";
-import {
-  ConnectedProvider,
-  MoonwallConfig,
-  MoonwallEnvironment,
-  MoonwallProvider,
-  ProviderConfig,
-  ProviderType,
-} from "../../../types/configAndContext.js";
 import { ApiOptions } from "@polkadot/api/types";
 import { WebSocketProvider } from "ethers";
 import { Web3BaseProvider } from "web3-types";
 import Debug from "debug";
+import { ProviderConfig } from "../types/config.js";
+import { MoonwallProvider } from "../types/context.js";
+import { ProviderType } from "../types/enum.js";
 const debug = Debug("global:providers");
 
 export function prepareProviders(

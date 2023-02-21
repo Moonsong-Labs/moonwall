@@ -57,8 +57,7 @@ const questions = [
   {
     name: "AskEnvironmentTestDir",
     type: "input",
-    message:
-      "Provide the path for where tests for this environment are kept",
+    message: "Provide the path for where tests for this environment are kept",
     default: "tests/",
   },
   {
@@ -86,7 +85,8 @@ const questions = [
 
 const getBody = (answers) => {
   return (
-    'import { Foundation, MoonwallConfig, ProviderType } from "moonwall";\n' +
+    'import { Foundation, ProviderType } from "src/types/enum.js";\n' +
+    'import { MoonwallConfig } from "src/types/config.js";\n' +
     `\n
   export const globalConfig: MoonwallConfig = {
   label: "${answers.AskLabel}",

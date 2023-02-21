@@ -6,9 +6,8 @@ import {
 } from "@polkadot/types/lookup";
 import { blake2AsHex } from "@polkadot/util-crypto";
 import { expect } from "chai";
-
-import { alith, baltathar, charleth, dorothy } from "../lib/accounts.js";
-import { DevModeContext } from "../../../types/runner.js";
+import { alith, baltathar, charleth, dorothy } from "../cli/runner/lib/accounts.js";
+import { DevModeContext } from "../types/runner.js";
 
 export const COUNCIL_MEMBERS = [baltathar, charleth, dorothy];
 export const COUNCIL_THRESHOLD = Math.ceil((COUNCIL_MEMBERS.length * 2) / 3);

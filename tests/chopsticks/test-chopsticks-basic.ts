@@ -1,6 +1,5 @@
 import { ApiPromise } from "@polkadot/api";
-import { Foundation } from "../../src/types/configAndContext.js";
-import { describeSuite } from "../../src/index.js";
+import { Foundation, describeSuite } from "../../src/index.js";
 import { expect } from "vitest";
 import { parseEther, formatEther } from "ethers";
 import {

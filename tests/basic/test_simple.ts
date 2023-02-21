@@ -1,4 +1,4 @@
-import { describeSuite } from "../../src/cli/runner/util/runner-functions.js";
+import { describeSuite } from "../../src/index.js";
 import { expect } from "chai";
 
 describeSuite({

@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { describeSuite } from "../../src/cli/runner/util/runner-functions.js";
+import { describeSuite } from "../../src/index.js";
 import { xcAssetAbi } from "../../src/cli/runner/lib/moonbeamConsts.js";
 
 describeSuite({

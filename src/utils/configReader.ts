@@ -1,4 +1,4 @@
-import { MoonwallConfig } from "../../../types/configAndContext";
+import { MoonwallConfig } from "../types/config.js";
 import fs from "fs/promises";
 import util from "util";
 

@@ -1,31 +1,20 @@
-import {
-  ChopsticksLaunchSpec,
-  ConnectedProvider,
-  Foundation,
-  FoundationDetails,
-  MoonwallConfig,
-  MoonwallEnvironment,
-  Node,
-  ProviderType,
-} from "../../../types/configAndContext";
-import fs from "fs";
-import { setTimeout } from "timers/promises";
-import { ChildProcess, spawn } from "child_process";
+import { MoonwallConfig } from "../../../types/config";
+import { ChildProcess } from "child_process";
 import {
   populateProviderInterface,
   prepareProviders,
-} from "../util/providers.js";
-import { launchDevNode } from "../util/LocalNode.js";
-import { blake2AsHex } from "@polkadot/util-crypto";
-// import globalConfig from "../../../../moonwall.config.js";
-import { importConfig } from "../util/configReader.js";
+} from "../../../utils/providers.js";
+import { launchDevNode } from "../../../utils/LocalNode.js";
+import { importConfig } from "../../../utils/configReader.js";
 import { parseChopsticksRunCmd, parseRunCmd } from "./foundations.js";
 import { ApiPromise } from "@polkadot/api";
 import Debug from "debug";
-import { Api } from "@acala-network/chopsticks";
-import { alith } from "../lib/accounts.js";
+import {
+  ConnectedProvider,
+  MoonwallEnvironment,
+} from "../../../types/context.js";
+import { Foundation, ProviderType } from "../../../types/enum.js";
 const debugSetup = Debug("global:context");
-const debugNode = Debug("global:node");
 
 export class MoonwallContext {
   private static instance: MoonwallContext;
@@ -149,7 +138,7 @@ export class MoonwallContext {
       return MoonwallContext.getContext();
     }
 
-    const globalConfig = await importConfig("../../../../moonwall.config.js")
+    const globalConfig = await importConfig("../../../../moonwall.config.js");
 
     const promises = this.environment.providers.map(
       async ({ name, type, connect, ws }) =>
