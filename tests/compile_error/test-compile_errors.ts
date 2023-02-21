@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { describeSuite } from "../../src/cli/runner/util/runner-functions.js";
 import { createBlock } from "../../src/utils/contextHelpers.js";
-import { Foundation } from "../../src/cli/runner/lib/types.js";
+import { Foundation } from "../../src/types/configAndContext.js";
 import { ALITH_ADDRESS } from "../../src/cli/runner/lib/accounts.js";
 import Web3 from "web3";
 import { ApiPromise } from "@polkadot/api";

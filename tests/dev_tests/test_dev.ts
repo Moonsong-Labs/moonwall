@@ -10,7 +10,7 @@ import {
 import { BN } from "@polkadot/util";
 import Web3 from "web3";
 import { ApiPromise } from "@polkadot/api";
-import { Foundation } from "../../src/cli/runner/lib/types.js";
+import { Foundation } from "../../src/types/configAndContext.js";
 
 describeSuite({
   id: "D01",
@@ -106,17 +106,28 @@ describeSuite({
       // modifier: "only",
       timeout: 30000,
       test: async function () {
-        const events = [
+
+        const expectedEvents = [
           polkadotJs.events.system.ExtrinsicSuccess,
           polkadotJs.events.balances.Transfer,
           // polkadotJs.events.authorFilter.EligibleUpdated
         ];
 
-        const { match } = await context.createBlockAndCheck(
-          events,
+        const { match, events } = await context.createBlockAndCheck(
+          expectedEvents,
           polkadotJs.tx.balances.transfer(CHARLETH_ADDRESS, parseEther("3"))
         );
+        // maybe: reponse has methods for asserts
+        // maybe: add options to createBlock for asserts of events/storages etc
+
         expect(match).toStrictEqual(true);
+        // expect(
+        //   events.some(
+        //     (evt) =>
+        //       polkadotJs.events.balances.Transfer.is(evt.event) &&
+        //       evt.event.data.amount.toString() == parseEther("3")
+        //   )
+        // ).toStrictEqual(true);
       },
     });
   },

@@ -2,7 +2,7 @@ import {
   ChopsticksLaunchSpec,
   DevLaunchSpec,
   GenericLaunchSpec,
-} from "../lib/types";
+} from "../../../types/configAndContext";
 
 // export function parseRunCmd(launchSpec: ChopsticksLaunchSpec ): {cmd: string, args:string}
 // export function parseRunCmd(launchSpec: DevLaunchSpec ): {cmd: string, args:string}

@@ -1,7 +1,7 @@
 import { WsProvider } from "@polkadot/api";
 import { setTimeout } from "timers/promises";
 import { MoonwallContext } from "./globalContext.js";
-import { ProviderType } from "../lib/types.js";
+import { ProviderType } from "../../../types/configAndContext.js";
 import { GenericContext } from "../util/runner-functions.js";
 import { ApiTypes, AugmentedEvent } from "@polkadot/api/types/index.js";
 

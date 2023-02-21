@@ -18,7 +18,7 @@ import { createAndFinalizeBlock } from "../../src/cli/runner/util/block.js";
 import Web3 from "web3";
 import { ethers } from "ethers";
 import { MoonwallContext } from "../cli/runner/internal/globalContext.js";
-import { Foundation } from "../../src/cli/runner/lib/types.js";
+import { Foundation } from "../types/configAndContext.js";
 import { assert } from "vitest";
 import Debug from "debug";
 const debug = Debug("context");

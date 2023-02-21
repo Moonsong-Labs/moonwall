@@ -48,6 +48,7 @@
     "esm": "^3.2.25",
     "esm-path": "^1.0.1",
     "ethers": "^6.0.2",
+    "fs-extra": "^11.1.0",
     "inquirer": "^8.2.5",
     "inquirer-press-to-continue": "^1.1.4",
     "moment-timezone": "^0.5.40",

@@ -9,7 +9,7 @@ import {
   MoonwallProvider,
   ProviderConfig,
   ProviderType,
-} from "../lib/types.js";
+} from "../../../types/configAndContext.js";
 import { ApiOptions } from "@polkadot/api/types";
 import { WebSocketProvider } from "ethers";
 import { Web3BaseProvider } from "web3-types";

@@ -1,4 +1,4 @@
-import { MoonwallConfig } from "../lib/types";
+import { MoonwallConfig } from "../../../types/configAndContext";
 import fs from "fs/promises";
 import util from "util";
 
@@ -17,4 +17,8 @@ export async function loadConfig(path: string): Promise<MoonwallConfig> {
   return json;
 }
 
-export async function buildFoundations(config: MoonwallConfig) {}
+
+export async function importConfig(configPath: string):Promise<MoonwallConfig>{
+  const {globalConfig} = await import(configPath);
+  return globalConfig;
+}

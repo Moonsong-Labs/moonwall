@@ -7,7 +7,7 @@ import {
   MoonwallEnvironment,
   Node,
   ProviderType,
-} from "../lib/types";
+} from "../../../types/configAndContext";
 import fs from "fs";
 import { setTimeout } from "timers/promises";
 import { ChildProcess, spawn } from "child_process";
@@ -17,7 +17,8 @@ import {
 } from "../util/providers.js";
 import { launchDevNode } from "../util/LocalNode.js";
 import { blake2AsHex } from "@polkadot/util-crypto";
-import globalConfig from "../../../../moonwall.config.js";
+// import globalConfig from "../../../../moonwall.config.js";
+import { importConfig } from "../util/configReader.js";
 import { parseChopsticksRunCmd, parseRunCmd } from "./foundations.js";
 import { ApiPromise } from "@polkadot/api";
 import Debug from "debug";
@@ -147,6 +148,8 @@ export class MoonwallContext {
       console.log("Providers already connected! Skipping command");
       return MoonwallContext.getContext();
     }
+
+    const globalConfig = await importConfig("../../../../moonwall.config.js")
 
     const promises = this.environment.providers.map(
       async ({ name, type, connect, ws }) =>

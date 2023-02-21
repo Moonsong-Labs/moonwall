@@ -1,2 +1,2 @@
 import { MoonwallContext } from "./internal/globalContext";
-import {} from "./lib/types";
+import {} from "../../types/configAndContext";

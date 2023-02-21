@@ -1,18 +1,14 @@
 import "@moonbeam-network/api-augment/moonbase";
 import "@polkadot/api-augment/polkadot";
 import PressToContinuePrompt from "inquirer-press-to-continue";
-import type { KeyDescriptor } from "inquirer-press-to-continue";
 import inquirer from "inquirer";
 import { MoonwallContext, runNetworkOnly } from "../internal/globalContext.js";
-import { globalConfig } from "../../../../moonwall.config.js";
+import { importConfig } from "../util/configReader.js";
+
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
-// const { key: enterKey } = await inquirer.prompt<{ key: KeyDescriptor }>({
-//   name: 'key',
-//   type: 'press-to-continue',
-//   enter: true,
-// });
+
 
 const questions = [
   {
@@ -40,6 +36,11 @@ export async function runNetwork(args) {
   process.env.TEST_ENV = args.envName;
 
   try {
+
+    const globalConfig = await importConfig("../../../../moonwall.config.js")
+    console.log(globalConfig)
+
+
     await runNetworkOnly(globalConfig, process.env.TEST_ENV);
 
     await inquirer.prompt(questions.find((a) => a.name == "NetworkStarted"));

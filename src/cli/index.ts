@@ -1,13 +1,20 @@
 #!/usr/bin/env ts-node-esm
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
-// import { runner } from './runner';
 import { testCmd } from "./runner/cmds/runTests.js";
 import { runNetwork } from "./runner/cmds/runNetwork.js";
+import { generateConfig } from "./runner/cmds/generateConfig.js";
 
 yargs(hideBin(process.argv))
   .usage("Usage: $0")
   .version("2.0.0")
+  .command(
+    `init`,
+    "Run tests for a given Environment",
+    async () => {
+      await generateConfig();
+    }
+  )
   .command(
     `test <envName>`,
     "Run tests for a given Environment",
