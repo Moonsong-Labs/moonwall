@@ -4,3 +4,5 @@ html/*
 db.sqlite*
 downloads/*
 *.wasm
+moonbeam
+polkadot

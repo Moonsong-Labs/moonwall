@@ -44,6 +44,7 @@
     "chai": "^4.3.7",
     "chalk": "^5.2.0",
     "clear": "^0.1.0",
+    "cli-progress": "^3.12.0",
     "colors": "^1.4.0",
     "debug": "^4.3.4",
     "dotenv": "^16.0.3",
@@ -55,6 +56,7 @@
     "inquirer-press-to-continue": "^1.1.4",
     "moment-timezone": "^0.5.40",
     "moonbeam-types-bundle": "^2.0.10",
+    "node-fetch": "^3.3.0",
     "prettier": "^2.8.4",
     "semver": "^7.3.8",
     "ts-node": "^10.9.1",
@@ -69,27 +71,6 @@
     "ws": "^8.12.1",
     "yargs": "^17.7.1"
   },
-  "overrides": {
-    "@polkadot/api": "$@polkadot/api",
-    "@polkadot/api-derive": "$@polkadot/api",
-    "@polkadot/api-augment": "$@polkadot/api",
-    "@polkadot/api-base": "$@polkadot/api",
-    "@polkadot/rpc-augment": "$@polkadot/api",
-    "@polkadot/rpc-core": "$@polkadot/api",
-    "@polkadot/rpc-provider": "$@polkadot/api",
-    "@polkadot/types-create": "$@polkadot/api",
-    "@polkadot/types-augment": "$@polkadot/api",
-    "@polkadot/types-support": "$@polkadot/api",
-    "@polkadot/types-codec": "$@polkadot/api",
-    "@polkadot/types": "$@polkadot/api",
-    "@polkadot/types-known": "$@polkadot/api",
-    "@polkadot/util": "$@polkadot/util",
-    "@polkadot/util-crypto": "$@polkadot/util",
-    "@polkadot/wasm-crypto": "$@polkadot/api",
-    "@polkadot/wasm-crypto-wasm": "$@polkadot/api",
-    "@polkadot/wasm-bridge": "$@polkadot/api",
-    "@polkadot/wasm-util": "$@polkadot/api"
-  },
   "devDependencies": {
     "@swc/cli": "^0.1.62",
     "@swc/core": "^1.3.36",
@@ -98,5 +79,10 @@
     "@vitest/ui": "^0.28.5",
     "regenerator-runtime": "^0.13.11",
     "typescript": "5.0.0-dev.20230215"
+  },
+  "pnpm": {
+    "overrides": {
+      "@polkadot/util": "$@polkadot/util"
+    }
   }
 }

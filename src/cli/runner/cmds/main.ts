@@ -5,10 +5,10 @@ import { importConfig } from "../../../utils/configReader.js";
 import { MoonwallConfig } from "../../../types/config.js";
 import { generateConfig } from "./generateConfig.js";
 import colors from "colors";
-import { Result } from "ethers";
+import clear from "clear";
 import { runNetwork } from "./runNetwork.js";
 import { testCmd } from "./runTests.js";
-import { MoonwallContext } from "../internal/globalContext.js";
+import { downloader } from "./downloader.js";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
@@ -18,7 +18,7 @@ export async function main() {
     try {
       globalConfig = await importConfig("../../moonwall.config.js");
     } catch (e) {}
-
+    clear();
     printIntro();
     if (await mainMenu(globalConfig)) {
       break;
@@ -59,14 +59,22 @@ async function mainMenu(config: MoonwallConfig) {
       {
         name: configPresent
           ? "3) Run Tests:        Execute a test pack, spinning up a network if needed."
-          : chalk.dim("2) Run Tests:        NO CONFIG FOUND"),
+          : chalk.dim("3) Run Tests:        NO CONFIG FOUND"),
         value: 2,
         short: "test",
         disabled: !configPresent,
       },
       {
-        name: `4) Quit Application`,
+        name: configPresent
+          ? "4) Download:         Download node binaries or runtime wasms."
+          : chalk.dim("4) Download:        NO CONFIG FOUND"),
         value: 3,
+        short: "test",
+        disabled: !configPresent,
+      },
+      {
+        name: `5) Quit Application`,
+        value: 4,
         short: "quit",
       },
     ],
@@ -90,8 +98,49 @@ async function mainMenu(config: MoonwallConfig) {
       await testCmd(chosenTestEnv);
       return false;
     case 3:
+      // const chosenTestEnv = await chooseTestEnv(config);
+      // await testCmd(chosenTestEnv);
+      await resolveDownloadChoice();
+      return false;
+    case 4:
       return await resolveQuitChoice();
   }
+}
+
+async function resolveDownloadChoice() {
+  const args = await inquirer.prompt([
+    {
+      name: "artifact",
+      type: "list",
+      message: `Download - which artifact?`,
+      choices: [
+        "moonbeam",
+        "polkadot",
+        "moonbase-runtime",
+        "moonriver-runtime",
+        "moonbeam-runtime",
+      ],
+    },
+    {
+      name: "binVersion",
+      type: "input",
+      default: "latest",
+      message: `Download - which version?`,
+    },
+    {
+      name: "path",
+      type: "input",
+      message: `Download - where would you like it placed?`,
+      default: "./",
+    },
+  ]);
+  await downloader(args);
+  await inquirer.prompt({
+    name: "NetworkStarted",
+    type: "press-to-continue",
+    anyKey: true,
+    pressToContinueMessage: `✅ ${args.artifact} has been downloaded. Press any key to continue...\n`,
+  });
 }
 
 const chooseTestEnv = async (config: MoonwallConfig) => {
@@ -114,26 +163,34 @@ const chooseTestEnv = async (config: MoonwallConfig) => {
 };
 
 const chooseRunEnv = async (config: MoonwallConfig) => {
-  const envs = config.environments
-    .map((a) => {
-      const result = { name: "", value: a.name, disabled: false };
-      if (a.foundation.type === "dev" || a.foundation.type === "chopsticks") {
-        result.name = `Env: ${a.name}     (${a.foundation.type})`;
-      } else {
-        result.name = chalk.dim(
-          `Env: ${a.name} (${a.foundation.type})     NO NETWORK TO RUN`
-        );
-        result.disabled = true;
-      }
-      return result;
-    })
-    .sort((a, b) => (a.disabled === false && b.disabled === true ? -1 : +1));
+  const envs = config.environments.map((a) => {
+    const result = { name: "", value: a.name, disabled: false };
+    if (a.foundation.type === "dev" || a.foundation.type === "chopsticks") {
+      result.name = `Env: ${a.name}     (${a.foundation.type})`;
+    } else {
+      result.name = chalk.dim(
+        `Env: ${a.name} (${a.foundation.type})     NO NETWORK TO RUN`
+      );
+      result.disabled = true;
+    }
+    return result;
+  });
+
+  const choices = [
+    ...envs
+      .filter(({ disabled }) => disabled === false)
+      .sort((a, b) => (a.name > b.name ? 1 : -1)),
+    new inquirer.Separator(),
+    ...envs
+      .filter(({ disabled }) => disabled === true)
+      .sort((a, b) => (a.name > b.name ? 1 : -1)),
+  ];
 
   const result = await inquirer.prompt({
     name: "envName",
     message: "Select a environment to run",
     type: "list",
-    choices: envs,
+    choices,
   });
 
   return result;

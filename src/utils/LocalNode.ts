@@ -9,17 +9,15 @@ export async function launchDevNode(
   args: string[],
   name: string
 ): Promise<ChildProcess> {
-  const nodesList = MoonwallContext.getContext().nodes;
-  const currentNode = nodesList.length + 1;
   let runningNode: ChildProcess;
+
   const onProcessExit = () => {
-    nodesList[currentNode] && nodesList[currentNode].kill();
+    runningNode.kill();
   };
   const onProcessInterrupt = () => {
     process.exit(2);
   };
 
-  // TODO: FIX KILLING PROCESSES
   process.once("exit", onProcessExit);
   process.once("SIGINT", onProcessInterrupt);
   runningNode = spawn(cmd, args);

@@ -5,15 +5,46 @@ import { testCmd } from "./runner/cmds/runTests.js";
 import { runNetwork } from "./runner/cmds/runNetwork.js";
 import { generateConfig } from "./runner/cmds/generateConfig.js";
 import { main } from "./runner/cmds/main.js";
+import { downloader } from "./runner/cmds/downloader.js";
 
 yargs(hideBin(process.argv))
   .usage("Usage: $0")
   .version("2.0.0")
+  .command(`init`, "Run tests for a given Environment", async () => {
+    await generateConfig();
+  })
   .command(
-    `init`,
-    "Run tests for a given Environment",
-    async () => {
-      await generateConfig();
+    `download <artifact> [bin-version] [path]`,
+    "Download a published artifact from GitHub",
+    (yargs) => {
+      return yargs
+        .positional("artifact", {
+          describe:
+            "Name of artifact to download\n[ moonbeam | polkadot | *-runtime ]",
+        })
+        .positional("bin-version", {
+          describe: "Artifact version to download",
+          default: "latest",
+        })
+        .positional("path", {
+          describe: "Path where to save artifacts",
+          type: "string",
+          default: "./",
+        })
+        .option("overwrite", {
+          describe: "If file exists, should it be overwritten?",
+          type: "boolean",
+          alias: "d",
+          default: true,
+        })
+        .option("output-name", {
+          describe: "Rename downloaded file to this name",
+          alias: "o",
+          type: "string",
+        });
+    },
+    async (argv) => {
+      await downloader(argv as any);
     }
   )
   .command(
@@ -21,9 +52,7 @@ yargs(hideBin(process.argv))
     "Run tests for a given Environment",
     (yargs) => {
       return yargs.positional("envName", {
-        array: true,
-        describe: "Path to test spec file(s)",
-        default: "*.ts",
+        describe: "Network environment to run tests against",
       });
     },
     async (argv) => {
@@ -42,13 +71,9 @@ yargs(hideBin(process.argv))
       await runNetwork(argv as any);
     }
   )
-  .command(
-    "*",
-    "Run the guided walkthrough",
-    async () => {
-      await main();
-    }
-  )
+  .command("*", "Run the guided walkthrough", async () => {
+    await main();
+  })
   .options({
     configFile: {
       type: "string",

@@ -1,5 +1,8 @@
 lockfileVersion: 5.4
 
+overrides:
+  '@polkadot/util': ^10.4.2
+
 specifiers:
   '@acala-network/chopsticks': ^0.3.12
   '@moonbeam-network/api-augment': ^0.2100.0
@@ -22,6 +25,7 @@ specifiers:
   chai: ^4.3.7
   chalk: ^5.2.0
   clear: ^0.1.0
+  cli-progress: ^3.12.0
   colors: ^1.4.0
   debug: ^4.3.4
   dotenv: ^16.0.3
@@ -33,6 +37,7 @@ specifiers:
   inquirer-press-to-continue: ^1.1.4
   moment-timezone: ^0.5.40
   moonbeam-types-bundle: ^2.0.10
+  node-fetch: ^3.3.0
   prettier: ^2.8.4
   regenerator-runtime: ^0.13.11
   semver: ^7.3.8
@@ -66,6 +71,7 @@ dependencies:
   chai: 4.3.7
   chalk: 5.2.0
   clear: 0.1.0
+  cli-progress: 3.12.0
   colors: 1.4.0
   debug: 4.3.4
   dotenv: 16.0.3
@@ -77,6 +83,7 @@ dependencies:
   inquirer-press-to-continue: 1.1.4_inquirer@8.2.5
   moment-timezone: 0.5.40
   moonbeam-types-bundle: 2.0.10
+  node-fetch: 3.3.0
   prettier: 2.8.4
   semver: 7.3.8
   ts-node: 10.9.1_brfgfinf7o454rw5zcbh3kqtyq
@@ -1907,6 +1914,13 @@ packages:
       parse5: 5.1.1
       parse5-htmlparser2-tree-adapter: 6.0.1
       yargs: 16.2.0
+    dev: false
+
+  /cli-progress/3.12.0:
+    resolution: {integrity: sha512-tRkV3HJ1ASwm19THiiLIXLO7Im7wlTuKnvkYaTkyoAPefqjNg7W7DHKUlGRxy9vxDvbyCYQkQozvptuMkGCg8A==}
+    engines: {node: '>=4'}
+    dependencies:
+      string-width: 4.2.3
     dev: false
 
   /cli-spinners/2.7.0:
