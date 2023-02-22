@@ -16,7 +16,7 @@ describeSuite({
     let api: ApiPromise;
 
     beforeAll(() => {
-      api = context.getPolkadotJs();
+      api = context.getMoonbeam();
     });
 
     it({

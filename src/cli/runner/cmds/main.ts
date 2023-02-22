@@ -8,6 +8,7 @@ import colors from "colors";
 import { Result } from "ethers";
 import { runNetwork } from "./runNetwork.js";
 import { testCmd } from "./runTests.js";
+import { MoonwallContext } from "../internal/globalContext.js";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
@@ -81,19 +82,53 @@ async function mainMenu(config: MoonwallConfig) {
       await generateConfig();
       return false;
     case 1:
-      const chosenRunEnv = await chooseEnv(config);
+      const chosenRunEnv = await chooseRunEnv(config);
       await runNetwork(chosenRunEnv);
       return false;
     case 2:
-      const chosenTestEnv = await chooseEnv(config);
+      const chosenTestEnv = await chooseTestEnv(config);
       await testCmd(chosenTestEnv);
       return false;
     case 3:
       return await resolveQuitChoice();
   }
 }
-const chooseEnv = async (config: MoonwallConfig) => {
-  const envs = config.environments.map((a) => a.name);
+
+const chooseTestEnv = async (config: MoonwallConfig) => {
+  const envs = config.environments
+    .map((a) => ({
+      name: `Env: ${a.name}     (${a.foundation.type})`,
+      value: a.name,
+      disabled: false,
+    }))
+    .sort((a, b) => (a.name > b.name ? -1 : +1));
+
+  const result = await inquirer.prompt({
+    name: "envName",
+    message: "Select a environment to run",
+    type: "list",
+    choices: envs,
+  });
+
+  return result;
+};
+
+const chooseRunEnv = async (config: MoonwallConfig) => {
+  const envs = config.environments
+    .map((a) => {
+      const result = { name: "", value: a.name, disabled: false };
+      if (a.foundation.type === "dev" || a.foundation.type === "chopsticks") {
+        result.name = `Env: ${a.name}     (${a.foundation.type})`;
+      } else {
+        result.name = chalk.dim(
+          `Env: ${a.name} (${a.foundation.type})     NO NETWORK TO RUN`
+        );
+        result.disabled = true;
+      }
+      return result;
+    })
+    .sort((a, b) => (a.disabled === false && b.disabled === true ? -1 : +1));
+
   const result = await inquirer.prompt({
     name: "envName",
     message: "Select a environment to run",

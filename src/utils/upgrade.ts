@@ -13,7 +13,6 @@ import {
 import { ChopsticksContext } from "../types/runner.js";
 import { alith } from "../cli/runner/lib/accounts.js";
 
-
 export interface UpgradePreferences {
   runtimeName: "moonbase" | "moonriver" | "moonbeam";
   runtimeTag: "local" | string;
@@ -36,10 +35,14 @@ export async function upgradeRuntimeChopsticks(
     methodParams: rtHash,
   });
   await context.createBlock();
-  await context
-    .getPolkadotJs()
-    .tx.parachainSystem.enactAuthorizedUpgrade(rtHex)
-    .signAndSend(alith);
+
+  const api =
+    context.getMoonbeam() || context.getPolkadotJs()
+      ? context.getMoonbeam()
+      : context.getPolkadotJs();
+
+  await api.tx.parachainSystem.enactAuthorizedUpgrade(rtHex).signAndSend(alith);
+
   await context.createBlock({ count: 3 });
 }
 

@@ -11,6 +11,8 @@ import { executeTests } from "./runTests.js";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
+// TODO: CHeck if env can run (ie there is any connect specs generated)
+
 export async function runNetwork(args) {
   process.env.TEST_ENV = args.envName;
   const globalConfig = await importConfig("../../moonwall.config.js");
@@ -38,8 +40,9 @@ export async function runNetwork(args) {
       pageSize: 10,
       choices: [
         {
-          name: "1) Chill:     Hide this bar and tail logs",
+          name: chalk.dim("1) Chill:   🏗️  Not Yet Implemented"),
           value: 0,
+          disabled: true,
           short: "chill",
         },
         {
@@ -49,12 +52,12 @@ export async function runNetwork(args) {
         },
         {
           name:
-            "3) Test:      Execute tests registered for this environment   ( " +
+            "3) Test:      Execute tests registered for this environment   (" +
             chalk.bgGrey.cyanBright(
               globalConfig.environments.find(({ name }) => name == args.envName)
                 .testFileDir
             ) +
-            " )",
+            ")",
           value: 2,
           short: "test",
         },

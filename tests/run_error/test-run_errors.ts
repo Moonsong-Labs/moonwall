@@ -1,13 +1,12 @@
 import { expect } from "chai";
 import { Foundation, describeSuite } from "../../src/index.js";
-import { createBlock } from "../../src/utils/contextHelpers.js";
 import { ALITH_ADDRESS } from "../../src/cli/runner/lib/accounts.js";
 import Web3 from "web3";
 import { ApiPromise } from "@polkadot/api";
 
 describeSuite({
   id: "S100",
-  title: "Testing for compile time errors",
+  title: "Testing for running against wrong network",
   foundationMethods: Foundation.Dev,
   testCases: ({ it, context }) => {
     let api: Web3;
@@ -34,7 +33,7 @@ describeSuite({
       id: "E02",
       title: "Create block",
       test: async function () {
-        await createBlock(api, mbApi);
+        await context.createBlock();
       },
     });
   },

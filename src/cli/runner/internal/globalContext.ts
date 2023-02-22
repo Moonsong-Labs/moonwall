@@ -88,7 +88,7 @@ export class MoonwallContext {
               },
               {
                 name: "polka",
-                type: ProviderType.PolkadotJs,
+                type: ProviderType.Moonbeam,
                 endpoints: ["ws://localhost:9944"],
               },
             ]);

@@ -1,4 +1,3 @@
-import { WsProvider } from "@polkadot/api";
 import { setTimeout } from "timers/promises";
 import { MoonwallContext } from "./globalContext.js";
 import { ProviderType } from "../../../types/enum.js";
@@ -54,9 +53,9 @@ export async function sendNewBlockRequest(params?: {
 
   let result = "";
 
-  await ws.connect();
-  while (!ws.isConnected) {
-    await setTimeout(100);
+  while (!ws.isConnected) { 
+
+    await setTimeout(500);
   }
   if ((params && params.count) || (params && params.to)) {
     result = await ws.send("dev_newBlock", [
@@ -79,7 +78,6 @@ export async function sendSetStorageRequest(params?: {
     ? await getWsFromConfig(params.providerName)
     : await getWsFromConfig();
 
-  await ws.connect();
   while (!ws.isConnected) {
     await setTimeout(100);
   }

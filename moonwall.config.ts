@@ -11,7 +11,7 @@ export const globalConfig: MoonwallConfig = {
       foundation: {
         type: Foundation.Chopsticks,
         rtUpgradePath:
-          "/home/timbotronic/workspace/moonbeam/moonwall/downloads/moonbeam-runtime-2100.wasm",
+          "/home/timbotronic/workspace/moonbeam/moonwall/moonbeam-runtime-2100.wasm",
         launchSpec: [
           {
             name: "mb",
@@ -24,14 +24,14 @@ export const globalConfig: MoonwallConfig = {
       connections: [
         {
           name: "MB",
-          type: ProviderType.PolkadotJs,
+          type: ProviderType.Moonbeam,
           endpoints: ["ws://localhost:21321"],
         },
       ],
     },
     {
       name: "dev_minimal",
-      testFileDir: "tests/compile_error/",
+      testFileDir: "tests/dev_tests/",
       foundation: {
         type: Foundation.Dev,
         launchSpec: [
@@ -44,8 +44,8 @@ export const globalConfig: MoonwallConfig = {
       },
     },
     {
-      name: "mixed",
-      testFileDir: "tests/compile_error/",
+      name: "wrongFoundation",
+      testFileDir: "tests/run_error/",
       foundation: {
         type: Foundation.ReadOnly,
       },
@@ -64,7 +64,7 @@ export const globalConfig: MoonwallConfig = {
     },
     {
       name: "pass",
-      testFileDir: "tests/compile_error/",
+      testFileDir: "tests/run_error/",
       foundation: {
         type: Foundation.Dev,
         launchSpec: [
@@ -176,5 +176,3 @@ export const globalConfig: MoonwallConfig = {
     },
   ],
 };
-
-export default globalConfig;
