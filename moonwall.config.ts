@@ -31,7 +31,7 @@ export const globalConfig: MoonwallConfig = {
     },
     {
       name: "dev_minimal",
-      testFileDir: ["tests/run_error/", "tests/dev_tests"],
+      testFileDir: [ "tests/test_separation"],
       foundation: {
         type: Foundation.Dev,
         launchSpec: [

@@ -22,7 +22,7 @@ export interface ConnectedProvider {
   name: string;
   type: ProviderType;
   api: ApiPromise | WebSocketProvider | Web3;
-  disconnect: () => void;
+  disconnect: () => Promise<void>;
   greet: () => Promise<void> | void;
 }
 

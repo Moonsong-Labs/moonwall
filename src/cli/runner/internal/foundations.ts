@@ -26,6 +26,8 @@ export function parseRunCmd(launchSpec: DevLaunchSpec) {
         "--tmp",
       ];
 
+  `ws://localhost:${10000 + Number(process.env.VITEST_POOL_ID) * 100}`;
+
   if (launchSpec.ports) {
     const ports = launchSpec.ports;
     if (ports.p2pPort) {
@@ -37,6 +39,12 @@ export function parseRunCmd(launchSpec: DevLaunchSpec) {
     if (ports.rpcPort) {
       args.push(`--rpc-port=${ports.rpcPort}`);
     }
+  } else {
+    args.push(`--port=${10000 + Number(process.env.VITEST_POOL_ID) * 100 + 2}`);
+    args.push(`--ws-port=${10000 + Number(process.env.VITEST_POOL_ID) * 100}`);
+    args.push(
+      `--rpc-port=${10000 + (Number(process.env.VITEST_POOL_ID) * 100 + 1)}`
+    );
   }
   return { cmd, args };
 }

@@ -22,7 +22,7 @@ export class MoonwallContext {
   providers: ConnectedProvider[];
   nodes: ChildProcess[];
   foundation?: Foundation;
-  private _genesis?: string;
+  private _finalizedHead?: string;
   rtUpgradePath?: string;
 
   constructor(config: MoonwallConfig) {
@@ -73,23 +73,24 @@ export class MoonwallContext {
           args,
         });
 
+
         blob.providers = env.connections
           ? prepareProviders(env.connections)
           : prepareProviders([
               {
                 name: "w3",
                 type: ProviderType.Web3,
-                endpoints: ["ws://localhost:9944"],
+                endpoints: [`ws://localhost:${10000 + (Number(process.env.VITEST_POOL_ID) * 100)}`],
               },
               {
                 name: "eth",
                 type: ProviderType.Ethers,
-                endpoints: ["ws://localhost:9944"],
+                endpoints: [`ws://localhost:${10000 + (Number(process.env.VITEST_POOL_ID) * 100)}`],
               },
               {
                 name: "polka",
                 type: ProviderType.Moonbeam,
-                endpoints: ["ws://localhost:9944"],
+                endpoints: [`ws://localhost:${10000 + (Number(process.env.VITEST_POOL_ID) * 100)}`],
               },
             ]);
 
@@ -108,14 +109,14 @@ export class MoonwallContext {
   }
 
   public get genesis() {
-    return this._genesis;
+    return this._finalizedHead;
   }
 
   public set genesis(hash: string) {
     if (hash.length !== 66) {
       throw new Error("Cannot set genesis to invalid hash");
     }
-    this._genesis = hash;
+    this._finalizedHead = hash;
   }
 
   public async startNetwork() {
@@ -126,10 +127,19 @@ export class MoonwallContext {
 
     const nodes = MoonwallContext.getContext().environment.nodes;
     const promises = nodes.map(async ({ cmd, args, name }) => {
-      this.nodes.push(await launchDevNode(cmd, args, name));
+      return this.nodes.push(await launchDevNode(cmd, args, name));
     });
 
     await Promise.all(promises);
+  }
+
+  public async stopNetwork() {
+    if (this.nodes.length === 0) {
+      console.log("Nodes already stopped! Skipping command");
+      return MoonwallContext.getContext();
+    }
+
+    this.nodes.forEach((node) => node.kill());
   }
 
   public async connectEnvironment(environmentName: string) {
@@ -168,11 +178,13 @@ export class MoonwallContext {
     }
   }
 
-  public disconnect(providerName?: string) {
+  
+
+  public async disconnect(providerName?: string) {
     if (providerName) {
       this.providers.find(({ name }) => name === providerName).disconnect();
     } else {
-      this.providers.forEach((prov) => prov.disconnect());
+      await Promise.all(this.providers.map((prov) => prov.disconnect()))
     }
   }
 

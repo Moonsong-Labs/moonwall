@@ -33,7 +33,7 @@ export async function executeTests(env: Environment) {
     globals: true,
     reporters: ["verbose"],
     testTimeout: 10000,
-    threads: false,
+    // threads: false,
     hookTimeout: 500000,
     setupFiles: ["src/cli/runner/internal/setupFixture.ts"],
     include: env.include

@@ -110,7 +110,7 @@ export async function populateProviderInterface(
               ` ${pjsApi.consts.system.version.specName.toString()} ` +
               `RT${pjsApi.consts.system.version.specVersion.toNumber()}`
           ),
-        disconnect: () => pjsApi.disconnect(),
+        disconnect: async () => pjsApi.disconnect(),
       };
 
     case ProviderType.Moonbeam:
@@ -125,7 +125,7 @@ export async function populateProviderInterface(
               ` ${mbApi.consts.system.version.specName.toString()} ` +
               `RT${mbApi.consts.system.version.specVersion.toNumber()}`
           ),
-        disconnect: () => mbApi.disconnect(),
+        disconnect: async () => mbApi.disconnect(),
       };
 
     case ProviderType.Ethers:
@@ -139,10 +139,10 @@ export async function populateProviderInterface(
             `👋  Provider ${name} is connected to chain ` +
               (await ethApi.getNetwork()).chainId
           ),
-        disconnect: () => {
+        disconnect: async () => {
           ethApi.removeAllListeners();
           ethApi.provider.destroy();
-          ethApi.destroy();
+          // ethApi.destroy();
         },
       };
 
@@ -157,8 +157,9 @@ export async function populateProviderInterface(
             `👋 Provider ${name} is connected to chain ` +
               (await web3Api.eth.getChainId())
           ),
-        disconnect: () => {
-          // web3Api.currentProvider
+        disconnect: async () => {
+          // @ts-ignore
+          web3Api.currentProvider.disconnect(1000)
         },
       };
 

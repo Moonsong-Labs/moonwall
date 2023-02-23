@@ -1,5 +1,5 @@
 import { describe, it, beforeAll } from "vitest";
-
+import { setTimeout } from "timers/promises";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { WebSocketProvider } from "ethers";
 import Web3 from "web3";
@@ -16,10 +16,13 @@ import {
   GenericContext,
   TestSuiteType,
 } from "../types/runner.js";
-import { MoonwallContext } from "../cli/runner/internal/globalContext.js";
+import {
+  MoonwallContext,
+  contextCreator,
+} from "../cli/runner/internal/globalContext.js";
 import { Foundation, ProviderType } from "../types/enum.js";
 import { ConnectedProvider } from "../types/context.js";
-import { BlockCreation } from "./contextHelpers.js";
+import { BlockCreation, resetToGenesis } from "./contextHelpers.js";
 import {
   createDevBlock,
   createDevBlockCheckEvents,
@@ -29,6 +32,7 @@ import {
   sendNewBlockRequest,
   sendSetStorageRequest,
 } from "../cli/runner/internal/chopsticksHelpers.js";
+import { importConfig } from "./configReader.js";
 
 const debug = Debug("test:setup");
 
@@ -41,9 +45,41 @@ export function describeSuite({
   describe(`🗃️  #${id} ${title}`, function () {
     let ctx: MoonwallContext;
 
-    beforeAll(() => {
-      ctx = MoonwallContext.getContext();
+    beforeAll(async function () {
+      // TODO: start all nodes
+      // await MoonwallContext.getContext().startNetwork()
+      // console.log(process.env.TEST_ENV)
+      // await MoonwallContext.getContext().connectEnvironment(process.env.TEST_ENV)
+      // console.log("starting network")
+      // const globalConfig = await importConfig("../../../moonwall.config.js");
+      // const ctx = await contextCreator(globalConfig, process.env.TEST_ENV);
+      // await Promise.all(ctx.providers.map(async ({ greet }) => greet()));
+      
+      // ctx = MoonwallContext.getContext();
+      // console.log("original genesis is " + ctx.genesis);
+      // const api = ctx.providers.find(
+      //   ({ type }) => type == ProviderType.Moonbeam
+      // ).api as ApiPromise;
+
+      // const header = (await api.rpc.chain.getBlockHash()).toString();
+      // if ((await api.rpc.moon.isBlockFinalized(header)).isFalse) {
+      //   await createDevBlock(context, [], {
+      //     finalize: true,
+      //     parentHash: ctx.genesis,
+      //   });
+      //   const newHash = (await api.rpc.chain.getFinalizedHead()).toString();
+      //   ctx.genesis = newHash;
+      //   await createDevBlock(context);
+      // }
+
+      // await setTimeout(500);
+      // console.log("new genesis is " + ctx.genesis);
     });
+
+    // afterAll(async function (){
+    //   await MoonwallContext.getContext().disconnect()
+    //   MoonwallContext.getContext().stopNetwork()
+    // })
 
     const context: GenericContext = {
       providers: {},

@@ -75,12 +75,15 @@ export async function runNetwork(args) {
       anyKey: true,
       pressToContinueMessage:
         "✅ Network has started. Press any key to continue...\n",
+       
     },
   ];
 
   try {
     await runNetworkOnly(globalConfig);
-    clear();
+    clear(); 
+    // TODO: Say which Ports and services have been opened
+    console.log("service opened at blah blah blah ports blah blah blah ")
     await inquirer.prompt(
       questions.find(({ name }) => name == "NetworkStarted")
     );
@@ -129,6 +132,8 @@ export async function runNetwork(args) {
 }
 
 const resolveInfoChoice = async (env) => {
+  // TODO: Give info on what has started where and what port
+  console.log("Services running blah blah")
   console.dir(env, { depth: null });
 };
 
