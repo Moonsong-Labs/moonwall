@@ -93,7 +93,6 @@ export async function runNetwork(args) {
         ({ name }) => name === args.envName
       );
 
-      
       switch (choice.MenuChoice) {
         case 0:
           console.log("I'm chilling");
@@ -130,10 +129,9 @@ export async function runNetwork(args) {
 }
 
 const resolveInfoChoice = async (env) => {
-  console.dir(env, {depth: null})
+  console.dir(env, { depth: null });
 };
 
 const resolveTestChoice = async (env: Environment) => {
   return await executeTests(env);
 };
-

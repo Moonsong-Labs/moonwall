@@ -3,7 +3,7 @@ import "@polkadot/api-augment/polkadot";
 import fs from "node:fs/promises";
 import { importConfig } from "../../../utils/configReader.js";
 import { startVitest } from "vitest/node";
-import {  UserConfig } from "vitest";
+import { UserConfig } from "vitest";
 import { MoonwallContext } from "../internal/globalContext.js";
 import { Environment } from "../../../types/config.js";
 
@@ -15,7 +15,7 @@ export async function testCmd(args) {
   process.env.TEST_ENV = args.envName;
 
   try {
-    const vitest = await executeTests(env)
+    const vitest = await executeTests(env);
     await vitest.close();
     process.exit(0);
   } catch (e) {
@@ -25,14 +25,15 @@ export async function testCmd(args) {
   }
 }
 
-export async function executeTests(env: Environment){
+export async function executeTests(env: Environment) {
   // TODO: sort out reporter config
-  const files = await fs.readdir(env.testFileDir);
+  // TODO: Create a node pool and re-enable multi-threading
   const options: UserConfig = {
     watch: false,
     globals: true,
     reporters: ["verbose"],
     testTimeout: 10000,
+    threads: false,
     hookTimeout: 500000,
     setupFiles: ["src/cli/runner/internal/setupFixture.ts"],
     include: env.include
@@ -40,5 +41,5 @@ export async function executeTests(env: Environment){
       : ["**/{test,spec,test_,test-}*{ts,mts,cts}"],
   };
 
-  return await startVitest("test", files, options)
+  return await startVitest("test", env.testFileDir, options);
 }

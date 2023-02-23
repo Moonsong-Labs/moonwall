@@ -42,40 +42,43 @@ async function mainMenu(config: MoonwallConfig) {
     choices: [
       {
         name: !configPresent
-          ? "1) Initialise:         Generate a new Moonwall Config File."
-          : chalk.dim("1) Initialise:     CONFIG ALREADY GENERATED"),
-        value: 0,
-        short: "init",
+          ? "1) Initialise:               Generate a new Moonwall Config File."
+          : chalk.dim("1) Initialise:           ✅  CONFIG ALREADY GENERATED"),
+        value: "init",
         disabled: configPresent,
       },
       {
         name: configPresent
-          ? `2) Run Network:      Run a network from specified environments.`
-          : chalk.dim("2) Run Network:      NO CONFIG FOUND"),
-        value: 1,
-        short: "run",
+          ? `2) Run Network:            Run a network from specified environments.`
+          : chalk.dim("2) Run Network:            NO CONFIG FOUND"),
+        value: "run",
         disabled: !configPresent,
       },
       {
         name: configPresent
-          ? "3) Run Tests:        Execute a test pack, spinning up a network if needed."
-          : chalk.dim("3) Run Tests:        NO CONFIG FOUND"),
-        value: 2,
-        short: "test",
+          ? "3) Run Tests:              Execute a test pack, spinning up a network if needed."
+          : chalk.dim("3) Run Tests:              NO CONFIG FOUND"),
+        value: "test",
+
         disabled: !configPresent,
+      },
+      {
+        name: chalk.dim("4) Batch-Run Tests:      🏗️  NOT YET IMPLEMENTED "),
+        value: "batch",
+
+        disabled: true,
       },
       {
         name: configPresent
-          ? "4) Download:         Download node binaries or runtime wasms."
-          : chalk.dim("4) Download:        NO CONFIG FOUND"),
-        value: 3,
-        short: "test",
+          ? "5) Download:               Download node binaries or runtime wasms."
+          : chalk.dim("5) Download:              NO CONFIG FOUND"),
+        value: "download",
+
         disabled: !configPresent,
       },
       {
-        name: `5) Quit Application`,
-        value: 4,
-        short: "quit",
+        name: `6) Quit Application`,
+        value: "quit",
       },
     ],
     filter(val) {
@@ -86,23 +89,23 @@ async function mainMenu(config: MoonwallConfig) {
   const answers = await inquirer.prompt(questionList);
 
   switch (answers.MenuChoice) {
-    case 0:
+    case "init":
       await generateConfig();
       return false;
-    case 1:
+    case "run":
       const chosenRunEnv = await chooseRunEnv(config);
       await runNetwork(chosenRunEnv);
       return false;
-    case 2:
+    case "test":
       const chosenTestEnv = await chooseTestEnv(config);
       await testCmd(chosenTestEnv);
       return false;
-    case 3:
+    case "download":
       // const chosenTestEnv = await chooseTestEnv(config);
       // await testCmd(chosenTestEnv);
       await resolveDownloadChoice();
       return false;
-    case 4:
+    case "quit":
       return await resolveQuitChoice();
   }
 }

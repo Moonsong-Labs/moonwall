@@ -8,7 +8,7 @@ export type MoonwallConfig = {
 
 export type Environment = {
   name: string;
-  testFileDir: string;
+  testFileDir: string[];
   foundation: FoundationDetails;
   include?: string[];
   connections?: ProviderConfig[];
@@ -62,5 +62,3 @@ export interface ProviderConfig {
   type: ProviderType;
   endpoints: string[];
 }
-
-

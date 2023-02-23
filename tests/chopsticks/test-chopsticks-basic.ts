@@ -123,8 +123,6 @@ describeSuite({
       title: "Check the createBlockAndCheck fn",
       // modifier: "only",
       test: async function () {
-
-        
         const events = [
           api.events.system.ExtrinsicSuccess,
           api.events.balances.Transfer,

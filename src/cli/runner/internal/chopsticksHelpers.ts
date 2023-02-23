@@ -53,8 +53,7 @@ export async function sendNewBlockRequest(params?: {
 
   let result = "";
 
-  while (!ws.isConnected) { 
-
+  while (!ws.isConnected) {
     await setTimeout(500);
   }
   if ((params && params.count) || (params && params.to)) {

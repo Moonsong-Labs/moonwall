@@ -17,8 +17,9 @@ export async function loadConfig(path: string): Promise<MoonwallConfig> {
   return json;
 }
 
-
-export async function importConfig(configPath: string):Promise<MoonwallConfig>{
-  const {globalConfig} = await import(configPath);
+export async function importConfig(
+  configPath: string
+): Promise<MoonwallConfig> {
+  const { globalConfig } = await import(configPath);
   return globalConfig;
 }

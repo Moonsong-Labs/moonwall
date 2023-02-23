@@ -11,7 +11,6 @@ import { BN } from "@polkadot/util";
 import Web3 from "web3";
 import { ApiPromise } from "@polkadot/api";
 
-
 describeSuite({
   id: "D01",
   title: "Dev test suite",
@@ -106,7 +105,6 @@ describeSuite({
       // modifier: "only",
       timeout: 30000,
       test: async function () {
-
         const expectedEvents = [
           polkadotJs.events.system.ExtrinsicSuccess,
           polkadotJs.events.balances.Transfer,

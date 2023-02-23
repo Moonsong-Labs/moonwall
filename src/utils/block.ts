@@ -58,7 +58,6 @@ export interface BlockRangeOption {
   concurrency?: number;
 }
 
-
 export const getBlockExtrinsic = async (
   api: ApiPromise,
   blockHash: string | BlockHash,

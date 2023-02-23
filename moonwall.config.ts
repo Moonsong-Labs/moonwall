@@ -7,7 +7,7 @@ export const globalConfig: MoonwallConfig = {
   environments: [
     {
       name: "chop_test",
-      testFileDir: "tests/chopsticks/",
+      testFileDir: ["tests/chopsticks/"],
       foundation: {
         type: Foundation.Chopsticks,
         rtUpgradePath:
@@ -31,7 +31,7 @@ export const globalConfig: MoonwallConfig = {
     },
     {
       name: "dev_minimal",
-      testFileDir: "tests/dev_tests/",
+      testFileDir: ["tests/run_error/", "tests/dev_tests"],
       foundation: {
         type: Foundation.Dev,
         launchSpec: [
@@ -45,7 +45,7 @@ export const globalConfig: MoonwallConfig = {
     },
     {
       name: "wrongFoundation",
-      testFileDir: "tests/run_error/",
+      testFileDir: ["tests/run_error/"],
       foundation: {
         type: Foundation.ReadOnly,
       },
@@ -64,7 +64,7 @@ export const globalConfig: MoonwallConfig = {
     },
     {
       name: "pass",
-      testFileDir: "tests/run_error/",
+      testFileDir: ["tests/run_error/"],
       foundation: {
         type: Foundation.Dev,
         launchSpec: [
@@ -103,7 +103,7 @@ export const globalConfig: MoonwallConfig = {
     },
     {
       name: "web3_test",
-      testFileDir: "tests/web3_test/",
+      testFileDir: ["tests/web3_test/"],
       foundation: {
         type: Foundation.ReadOnly,
       },
@@ -117,7 +117,7 @@ export const globalConfig: MoonwallConfig = {
     },
     {
       name: "new",
-      testFileDir: "tests/eth_test/",
+      testFileDir: ["tests/eth_test/"],
       include: ["**/{test,spec,test_,test-}*{ts,mts,cts}"],
       foundation: {
         type: Foundation.ReadOnly,
@@ -132,7 +132,7 @@ export const globalConfig: MoonwallConfig = {
     },
     {
       name: "dev_test",
-      testFileDir: "tests/dev_tests",
+      testFileDir: ["tests/dev_tests"],
       foundation: {
         type: Foundation.Dev,
         launchSpec: [

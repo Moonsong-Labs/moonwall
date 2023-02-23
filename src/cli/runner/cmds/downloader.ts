@@ -45,9 +45,7 @@ export async function downloader(args) {
   const repoName = args.artifact.includes("-runtime")
     ? "moonbeam"
     : args.artifact;
-  const binaryPath = path.isAbsolute(path.join(args.path, binary))
-    ? path.join(args.path, binary)
-    : path.join("./", args.path, binary);
+  const binaryPath = path.join("./", args.path, binary);
 
   const releases = (await (await fetch(repos[repoName])).json()) as any[];
   // console.dir(releases[1], {depth: null})
@@ -89,7 +87,7 @@ export async function downloader(args) {
     await fs.chmod(binaryPath, "755");
     process.stdout.write(` ${chalk.green("done")} ✓\n`);
     process.stdout.write(`Checking ${binaryPath} ...`);
-    const version = (await runTask(`${binaryPath} --version`)).trim();
+    const version = (await runTask(`./${binaryPath} --version`)).trim();
     process.stdout.write(` ${chalk.green(version.trim())} ✓\n`);
   }
 

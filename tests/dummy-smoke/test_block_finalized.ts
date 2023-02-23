@@ -5,7 +5,11 @@ import { describeSuite } from "../../src/index.js";
 import { WebSocketProvider } from "ethers";
 import Web3 from "web3";
 import Debug from "debug";
-import { checkBlockFinalized, fetchHistoricBlockNum, getBlockTime } from "../../src/utils/block.js";
+import {
+  checkBlockFinalized,
+  fetchHistoricBlockNum,
+  getBlockTime,
+} from "../../src/utils/block.js";
 const debug = Debug("smoke:block-finalized");
 const timePeriod = process.env.TIME_PERIOD
   ? Number(process.env.TIME_PERIOD)
