@@ -33,13 +33,19 @@ export async function executeTests(env: Environment) {
     globals: true,
     reporters: ["verbose"],
     testTimeout: 10000,
-    // threads: false,
     hookTimeout: 500000,
     setupFiles: ["src/cli/runner/internal/setupFixture.ts"],
     include: env.include
       ? env.include
       : ["**/{test,spec,test_,test-}*{ts,mts,cts}"],
   };
+
+  if (env.threads || env.threads <= 1) {
+    options.threads = true;
+    options.maxThreads = env.threads;
+  } else {
+    options.threads = false;
+  }
 
   return await startVitest("test", env.testFileDir, options);
 }

@@ -46,40 +46,31 @@ export function describeSuite({
     let ctx: MoonwallContext;
 
     beforeAll(async function () {
-      // TODO: start all nodes
-      // await MoonwallContext.getContext().startNetwork()
-      // console.log(process.env.TEST_ENV)
-      // await MoonwallContext.getContext().connectEnvironment(process.env.TEST_ENV)
-      // console.log("starting network")
-      // const globalConfig = await importConfig("../../../moonwall.config.js");
-      // const ctx = await contextCreator(globalConfig, process.env.TEST_ENV);
-      // await Promise.all(ctx.providers.map(async ({ greet }) => greet()));
-      
-      // ctx = MoonwallContext.getContext();
-      // console.log("original genesis is " + ctx.genesis);
-      // const api = ctx.providers.find(
-      //   ({ type }) => type == ProviderType.Moonbeam
-      // ).api as ApiPromise;
 
-      // const header = (await api.rpc.chain.getBlockHash()).toString();
-      // if ((await api.rpc.moon.isBlockFinalized(header)).isFalse) {
-      //   await createDevBlock(context, [], {
-      //     finalize: true,
-      //     parentHash: ctx.genesis,
-      //   });
-      //   const newHash = (await api.rpc.chain.getFinalizedHead()).toString();
-      //   ctx.genesis = newHash;
-      //   await createDevBlock(context);
-      // }
+      // TODO: Get this code working so that forking from genesis provides state separation between dev/chopsticks suites
+      ctx = MoonwallContext.getContext();
+      if (ctx.environment.foundationType === Foundation.Dev) {
+        console.log("original genesis is " + ctx.genesis);
+        const api = ctx.providers.find(
+          ({ type }) => type == ProviderType.Moonbeam
+        ).api as ApiPromise;
 
-      // await setTimeout(500);
-      // console.log("new genesis is " + ctx.genesis);
+        await createDevBlock(context);
+        const header = (await api.rpc.chain.getBlockHash()).toString();
+        if ((await api.rpc.moon.isBlockFinalized(header)).isFalse) {
+          await createDevBlock(context);
+          await createDevBlock(context, [], {
+            finalize: true,
+            parentHash: ctx.genesis,
+          });
+          const newHash = (await api.rpc.chain.getFinalizedHead()).toString();
+          ctx.genesis = newHash;
+          await createDevBlock(context);
+        }
+
+      }
+
     });
-
-    // afterAll(async function (){
-    //   await MoonwallContext.getContext().disconnect()
-    //   MoonwallContext.getContext().stopNetwork()
-    // })
 
     const context: GenericContext = {
       providers: {},

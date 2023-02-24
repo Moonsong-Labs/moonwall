@@ -6,8 +6,13 @@ import { MoonwallContext, runNetworkOnly } from "../internal/globalContext.js";
 import { importConfig } from "../../../utils/configReader.js";
 import clear from "clear";
 import chalk from "chalk";
-import { Environment } from "../../../types/config.js";
+import { DevLaunchSpec, Environment } from "../../../types/config.js";
 import { executeTests } from "./runTests.js";
+import { MoonwallEnvironment } from "../../../types/context.js";
+import { parse } from "yaml";
+import fs from "fs/promises";
+import { Foundation } from "../../../types/enum.js";
+import { globalConfig } from "../../../../moonwall.config.js";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
@@ -38,31 +43,32 @@ export async function runNetwork(args) {
       pageSize: 10,
       choices: [
         {
-          name: chalk.dim("1) Chill:   🏗️  Not Yet Implemented"),
-          value: 0,
-          disabled: true,
-          short: "chill",
-        },
-        {
-          name: `2) Info:      Display Information about this environment ${args.envName}`,
-          value: 1,
+          name: `Info:      Display Information about this environment ${args.envName}`,
+          value: 2,
           short: "info",
         },
         {
           name:
-            "3) Test:      Execute tests registered for this environment   (" +
+            "Test:      Execute tests registered for this environment   (" +
             chalk.bgGrey.cyanBright(
               globalConfig.environments.find(({ name }) => name == args.envName)
                 .testFileDir
             ) +
             ")",
-          value: 2,
+          value: 3,
           short: "test",
         },
         {
-          name: "4) Quit:      Close network and quit the application",
-          value: 3,
+          name: "Quit:      Close network and quit the application",
+          value: 4,
           short: "quit",
+        },
+        new inquirer.Separator(),
+        {
+          name: chalk.dim("Chill:   🏗️  Not Yet Implemented"),
+          value: 1,
+          disabled: true,
+          short: "chill",
         },
       ],
       filter(val) {
@@ -73,17 +79,15 @@ export async function runNetwork(args) {
       name: "NetworkStarted",
       type: "press-to-continue",
       anyKey: true,
-      pressToContinueMessage:
-        "✅ Network has started. Press any key to continue...\n",
-       
+      pressToContinueMessage: "✅  Press any key to continue...\n",
     },
   ];
 
   try {
     await runNetworkOnly(globalConfig);
-    clear(); 
-    // TODO: Say which Ports and services have been opened
-    console.log("service opened at blah blah blah ports blah blah blah ")
+    clear();
+    const ports = await reportServicePorts();
+    console.log(`  🖥️   https://polkadot.js.org/apps/?rpc=ws%3A%2F%2Flocalhost%3A${ports.wsPort}`)
     await inquirer.prompt(
       questions.find(({ name }) => name == "NetworkStarted")
     );
@@ -97,19 +101,20 @@ export async function runNetwork(args) {
       );
 
       switch (choice.MenuChoice) {
-        case 0:
+        case 1:
           console.log("I'm chilling");
           break;
 
-        case 1:
-          resolveInfoChoice(env);
-          break;
-
         case 2:
-          await resolveTestChoice(env);
+          resolveInfoChoice(env);
+          await reportServicePorts();
           break;
 
         case 3:
+          await resolveTestChoice(env);
+          break;
+
+        case 4:
           const quit = await inquirer.prompt(
             questions.find(({ name }) => name == "Quit")
           );
@@ -131,9 +136,40 @@ export async function runNetwork(args) {
   }
 }
 
-const resolveInfoChoice = async (env) => {
-  // TODO: Give info on what has started where and what port
-  console.log("Services running blah blah")
+const reportServicePorts = async () => {
+  const ctx = MoonwallContext.getContext();
+  const ports = { wsPort: "", httpPort: "" };
+  const config = globalConfig.environments.find(
+    ({ name }) => name == process.env.TEST_ENV
+  );
+  if (config.foundation.type == Foundation.Dev) {
+    ports.wsPort =
+      ctx.environment.nodes[0].args
+        .find((a) => a.includes("ws-port"))
+        .split("=")[1] || "9944";
+    ports.httpPort =
+      ctx.environment.nodes[0].args
+        .find((a) => a.includes("rpc-port"))
+        .split("=")[1] || "9933";
+  } else if (config.foundation.type == Foundation.Chopsticks) {
+    // ports.wsPort =
+    const yaml = parse(
+      (await fs.readFile(config.foundation.launchSpec[0].configPath)).toString()
+    );
+    ports.wsPort = yaml.port || "8000";
+    ports.httpPort = "<🏗️  NOT YET IMPLEMENTED>";
+  }
+
+  console.log(
+    `  🌐  Node has started, listening on ports - Websocket: ${ports.wsPort} and HTTP: ${ports.httpPort}`
+  );
+  return ports
+};
+
+const resolveInfoChoice = async (env: Environment) => {
+  console.log(chalk.bgWhite.blackBright("Node Launch args:"));
+  console.dir(MoonwallContext.getContext().environment, { depth: null });
+  console.log(chalk.bgWhite.blackBright("Launch Spec in Config File:"));
   console.dir(env, { depth: null });
 };
 

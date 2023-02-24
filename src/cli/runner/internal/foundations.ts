@@ -4,8 +4,6 @@ import {
   GenericLaunchSpec,
 } from "../../../types/config";
 
-// export function parseRunCmd(launchSpec: ChopsticksLaunchSpec ): {cmd: string, args:string}
-// export function parseRunCmd(launchSpec: DevLaunchSpec ): {cmd: string, args:string}
 export function parseRunCmd(launchSpec: DevLaunchSpec) {
   const cmd = launchSpec.binPath;
   let args = launchSpec.options
@@ -40,10 +38,10 @@ export function parseRunCmd(launchSpec: DevLaunchSpec) {
       args.push(`--rpc-port=${ports.rpcPort}`);
     }
   } else {
-    args.push(`--port=${10000 + Number(process.env.VITEST_POOL_ID) * 100 + 2}`);
-    args.push(`--ws-port=${10000 + Number(process.env.VITEST_POOL_ID) * 100}`);
+    args.push(`--port=${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100 + 2}`);
+    args.push(`--ws-port=${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`);
     args.push(
-      `--rpc-port=${10000 + (Number(process.env.VITEST_POOL_ID) * 100 + 1)}`
+      `--rpc-port=${10000 + (Number(process.env.VITEST_POOL_ID || 1) * 100 + 1)}`
     );
   }
   return { cmd, args };

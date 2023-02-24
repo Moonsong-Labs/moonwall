@@ -12,6 +12,7 @@ export type Environment = {
   foundation: FoundationDetails;
   include?: string[];
   connections?: ProviderConfig[];
+  threads?: number;
 };
 
 export type FoundationDetails<TFoundation = Foundation> =
@@ -31,7 +32,6 @@ export type FoundationDetails<TFoundation = Foundation> =
 
 export interface GenericLaunchSpec {
   name: string;
-  alreadyRunning?: boolean;
   options?: string[];
 }
 

@@ -80,17 +80,17 @@ export class MoonwallContext {
               {
                 name: "w3",
                 type: ProviderType.Web3,
-                endpoints: [`ws://localhost:${10000 + (Number(process.env.VITEST_POOL_ID) * 100)}`],
+                endpoints: [`ws://localhost:${10000 + (Number(process.env.VITEST_POOL_ID || 1) * 100)}`],
               },
               {
                 name: "eth",
                 type: ProviderType.Ethers,
-                endpoints: [`ws://localhost:${10000 + (Number(process.env.VITEST_POOL_ID) * 100)}`],
+                endpoints: [`ws://localhost:${10000 + (Number(process.env.VITEST_POOL_ID || 1) * 100)}`],
               },
               {
                 name: "polka",
                 type: ProviderType.Moonbeam,
-                endpoints: [`ws://localhost:${10000 + (Number(process.env.VITEST_POOL_ID) * 100)}`],
+                endpoints: [`ws://localhost:${10000 + (Number(process.env.VITEST_POOL_ID || 1) * 100)}`],
               },
             ]);
 
