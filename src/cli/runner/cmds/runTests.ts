@@ -30,7 +30,7 @@ export async function executeTests(env: Environment) {
   const options: UserConfig = {
     watch: false,
     globals: true,
-    reporters: ["verbose"],
+    reporters: ["verbose", "html"],
     testTimeout: 10000,
     hookTimeout: 500000,
     setupFiles: ["src/cli/runner/internal/setupFixture.ts"],

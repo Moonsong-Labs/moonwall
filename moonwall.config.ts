@@ -165,6 +165,7 @@ export const globalConfig: MoonwallConfig = {
     {
       name: "dev_test",
       testFileDir: ["tests/dev_tests"],
+      // htmlOutput: true,
       foundation: {
         type: Foundation.Dev,
         launchSpec: [
