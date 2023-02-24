@@ -77,7 +77,7 @@ describeSuite({
       test: async function () {
         const balanceBefore = (await api.query.system.account(DUMMY_ACCOUNT))
           .data.free;
-        // expect(balanceBefore.toString()).toEqual("0");
+        expect(balanceBefore.toString()).toEqual("0");
 
         
 

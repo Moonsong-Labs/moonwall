@@ -46,25 +46,21 @@ export function describeSuite({
     let ctx: MoonwallContext;
 
     beforeAll(async function () {
-      // TODO: Get this code working so that forking from genesis provides state separation between dev/chopsticks suites
+      // TODO: Tidy up this code so that forking from genesis provides state separation between dev/chopsticks suites
       ctx = MoonwallContext.getContext();
       if (ctx.environment.foundationType === Foundation.Dev) {
-        console.log("original genesis is " + ctx.genesis);
         const api = ctx.providers.find(
           ({ type }) => type == ProviderType.Moonbeam
         ).api as ApiPromise;
 
-        await createDevBlock(context);
-        const header = (await api.rpc.chain.getBlockHash()).toString();
-        if ((await api.rpc.moon.isBlockFinalized(header)).isFalse) {
-          await createDevBlock(context);
-          await createDevBlock(context, [], {
-            finalize: true,
-            parentHash: ctx.genesis,
-          });
-          const newHash = (await api.rpc.chain.getFinalizedHead()).toString();
-          ctx.genesis = newHash;
-          await createDevBlock(context);
+        const finalizedHead = (await api.rpc.chain.getFinalizedHead()).toString()
+        await api.rpc.engine.createBlock(true, true, finalizedHead)
+        while (true){
+          const newHead = (await api.rpc.chain.getFinalizedHead()).toString()
+          await setTimeout(100)
+          if (newHead !== finalizedHead){
+            break
+          }
         }
       }
     });
