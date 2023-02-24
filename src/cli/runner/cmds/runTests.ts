@@ -1,6 +1,5 @@
 import "@moonbeam-network/api-augment/moonbase";
 import "@polkadot/api-augment/polkadot";
-import fs from "node:fs/promises";
 import { importConfig } from "../../../utils/configReader.js";
 import { startVitest } from "vitest/node";
 import { UserConfig } from "vitest";

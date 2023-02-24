@@ -6,18 +6,22 @@ export const globalConfig: MoonwallConfig = {
   defaultTestTimeout: 40000,
   environments: [
     {
-      name: "chop_test",
-      testFileDir: ["tests/chopsticks/"],
+      name: "chopsticks_xcm",
+      testFileDir: [],
       foundation: {
         type: Foundation.Chopsticks,
-        rtUpgradePath:
-          "/home/timbotronic/workspace/moonbeam/moonwall/moonbeam-runtime-2100.wasm",
         launchSpec: [
           {
             name: "mb",
             type: "parachain",
             buildBlockMode: "manual",
-            configPath: "src/cli/runner/lib/chopsticksConfig.yml",
+            configPath: "./moonriverChopsticks.yml",
+          },
+          {
+            name: "mb",
+            type: "parachain",
+            buildBlockMode: "manual",
+            configPath: "./moonbeamChopsticks.yml",
           },
         ],
       },
@@ -25,7 +29,36 @@ export const globalConfig: MoonwallConfig = {
         {
           name: "MB",
           type: ProviderType.Moonbeam,
-          endpoints: ["ws://localhost:21321"],
+          endpoints: ["ws://localhost:10000"],
+        },
+        {
+          name: "MR",
+          type: ProviderType.Moonbeam,
+          endpoints: ["ws://localhost:12000"],
+        },
+      ],
+    },
+    {
+      name: "chop_test",
+      testFileDir: ["tests/chopsticks/"],
+      foundation: {
+        type: Foundation.Chopsticks,
+        rtUpgradePath:
+          "./moonbeam-runtime-2200.wasm",
+        launchSpec: [
+          {
+            name: "mb",
+            type: "parachain",
+            buildBlockMode: "manual",
+            configPath: "./moonbeamChopsticks.yml",
+          },
+        ],
+      },
+      connections: [
+        {
+          name: "MB",
+          type: ProviderType.Moonbeam,
+          endpoints: ["ws://localhost:12000"],
         },
       ],
     },
@@ -73,7 +106,6 @@ export const globalConfig: MoonwallConfig = {
             binPath:
               "/home/timbotronic/workspace/moonbeam/moonbeam/target/release/moonbeam",
             ports: { p2pPort: 30333, wsPort: 9944, rpcPort: 9933 },
-            alreadyRunning: false,
             options: [
               "--dev",
               "--no-hardware-benchmarks",
@@ -141,7 +173,6 @@ export const globalConfig: MoonwallConfig = {
             binPath:
               "/home/timbotronic/workspace/moonbeam/moonbeam/target/release/moonbeam",
             ports: { p2pPort: 30333, wsPort: 9944, rpcPort: 9933 },
-            alreadyRunning: false,
             options: [
               "--dev",
               "--no-hardware-benchmarks",

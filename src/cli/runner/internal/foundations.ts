@@ -85,6 +85,10 @@ export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
       chopsticksArgs.push(`--port=${launchSpecs[0].wsPort}`);
     }
 
+    if (launchSpecs[0].wasmOverride){
+      chopsticksArgs.push(`--wasm-override=${launchSpecs[0].wasmOverride}`);
+    }
+
     return {
       cmd: chopsticksCmd,
       args: chopsticksArgs,

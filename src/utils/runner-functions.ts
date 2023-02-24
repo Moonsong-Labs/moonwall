@@ -46,7 +46,6 @@ export function describeSuite({
     let ctx: MoonwallContext;
 
     beforeAll(async function () {
-
       // TODO: Get this code working so that forking from genesis provides state separation between dev/chopsticks suites
       ctx = MoonwallContext.getContext();
       if (ctx.environment.foundationType === Foundation.Dev) {
@@ -67,9 +66,7 @@ export function describeSuite({
           ctx.genesis = newHash;
           await createDevBlock(context);
         }
-
       }
-
     });
 
     const context: GenericContext = {
@@ -139,7 +136,7 @@ export function describeSuite({
       id: string;
       title: string;
       test: () => void;
-      modifier?: "only" | "skip";
+      modifier?: TestCaseModifier;
       timeout?: number;
     }) {
       if (params.modifier) {
@@ -229,3 +226,7 @@ export function describeSuite({
   });
 }
 export { GenericContext };
+
+// TODO: Extend to include skipIf() and runIf()
+type TestCaseModifier = "only" | "skip" 
+

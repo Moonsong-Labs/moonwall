@@ -1,7 +1,7 @@
 node_modules/
 dist/
 html/*
-db.sqlite*
+*.sqlite
 downloads/*
 *.wasm
 moonbeam

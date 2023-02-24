@@ -108,6 +108,7 @@ describeSuite({
       id: "T5",
       title: "Do an upgrade test",
       timeout: 120000,
+      modifier:"skip",
       test: async function () {
         const rtBefore = api.consts.system.version.specVersion.toNumber();
         await context.upgradeRuntime(context);

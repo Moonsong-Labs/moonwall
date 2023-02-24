@@ -6,9 +6,8 @@ import { MoonwallContext, runNetworkOnly } from "../internal/globalContext.js";
 import { importConfig } from "../../../utils/configReader.js";
 import clear from "clear";
 import chalk from "chalk";
-import { DevLaunchSpec, Environment } from "../../../types/config.js";
+import {  Environment } from "../../../types/config.js";
 import { executeTests } from "./runTests.js";
-import { MoonwallEnvironment } from "../../../types/context.js";
 import { parse } from "yaml";
 import fs from "fs/promises";
 import { Foundation } from "../../../types/enum.js";
@@ -19,6 +18,9 @@ inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 export async function runNetwork(args) {
   process.env.TEST_ENV = args.envName;
   const globalConfig = await importConfig("../../moonwall.config.js");
+  const testFileDirs = globalConfig.environments.find(
+    ({ name }) => name == args.envName
+  ).testFileDir;
 
   const questions = [
     {
@@ -49,13 +51,13 @@ export async function runNetwork(args) {
         },
         {
           name:
-            "Test:      Execute tests registered for this environment   (" +
-            chalk.bgGrey.cyanBright(
-              globalConfig.environments.find(({ name }) => name == args.envName)
-                .testFileDir
-            ) +
-            ")",
+            testFileDirs.length > 0
+              ? "Test:      Execute tests registered for this environment   (" +
+                chalk.bgGrey.cyanBright(testFileDirs) +
+                ")"
+              : chalk.dim("Test:    NO TESTS SPECIFIED"),
           value: 3,
+          disabled: testFileDirs.length > 0 ? false : true,
           short: "test",
         },
         {
@@ -86,8 +88,14 @@ export async function runNetwork(args) {
   try {
     await runNetworkOnly(globalConfig);
     clear();
-    const ports = await reportServicePorts();
-    console.log(`  🖥️   https://polkadot.js.org/apps/?rpc=ws%3A%2F%2Flocalhost%3A${ports.wsPort}`)
+    const portsList = await reportServicePorts();
+
+    portsList.forEach((ports) =>
+      console.log(
+        `  🖥️   https://polkadot.js.org/apps/?rpc=ws%3A%2F%2Flocalhost%3A${ports.wsPort}`
+      )
+    );
+
     await inquirer.prompt(
       questions.find(({ name }) => name == "NetworkStarted")
     );
@@ -102,6 +110,7 @@ export async function runNetwork(args) {
 
       switch (choice.MenuChoice) {
         case 1:
+          /// TODO: Add ability to listen to logs of started node (dev or chopsticks)
           console.log("I'm chilling");
           break;
 
@@ -138,11 +147,12 @@ export async function runNetwork(args) {
 
 const reportServicePorts = async () => {
   const ctx = MoonwallContext.getContext();
-  const ports = { wsPort: "", httpPort: "" };
+  const portsList = [];
   const config = globalConfig.environments.find(
     ({ name }) => name == process.env.TEST_ENV
   );
   if (config.foundation.type == Foundation.Dev) {
+    const ports = { wsPort: "", httpPort: "" };
     ports.wsPort =
       ctx.environment.nodes[0].args
         .find((a) => a.includes("ws-port"))
@@ -151,19 +161,28 @@ const reportServicePorts = async () => {
       ctx.environment.nodes[0].args
         .find((a) => a.includes("rpc-port"))
         .split("=")[1] || "9933";
-  } else if (config.foundation.type == Foundation.Chopsticks) {
-    // ports.wsPort =
-    const yaml = parse(
-      (await fs.readFile(config.foundation.launchSpec[0].configPath)).toString()
-    );
-    ports.wsPort = yaml.port || "8000";
-    ports.httpPort = "<🏗️  NOT YET IMPLEMENTED>";
-  }
 
-  console.log(
-    `  🌐  Node has started, listening on ports - Websocket: ${ports.wsPort} and HTTP: ${ports.httpPort}`
+    portsList.push(ports);
+  } else if (config.foundation.type == Foundation.Chopsticks) {
+    portsList.push(
+      ...(await Promise.all(
+        config.foundation.launchSpec.map(async ({ configPath }) => {
+          const yaml = parse((await fs.readFile(configPath)).toString());
+          return {
+            wsPort: yaml.port || "8000",
+            httpPort: "<🏗️  NOT YET IMPLEMENTED>",
+          };
+        })
+      ))
+    );
+  }
+  portsList.forEach((ports) =>
+    console.log(
+      `  🌐  Node has started, listening on ports - Websocket: ${ports.wsPort} and HTTP: ${ports.httpPort}`
+    )
   );
-  return ports
+
+  return portsList;
 };
 
 const resolveInfoChoice = async (env: Environment) => {
