@@ -181,6 +181,7 @@ export class MoonwallContext {
       ({ name }) => name == environmentName
     )!.foundation.type;
 
+    // TODO: Do we actually need this?
     if (this.foundation == Foundation.Dev) {
       this.genesis = (
         await (

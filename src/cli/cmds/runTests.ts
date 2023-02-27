@@ -25,7 +25,6 @@ export async function testCmd(args) {
 }
 
 export async function executeTests(env: Environment) {
-  // TODO: sort out reporter config
   const options: UserConfig = {
     watch: false,
     globals: true,

@@ -127,6 +127,7 @@ export function describeSuite({
       skipIf?: boolean;
       timeout?: number;
     }) {
+    
       if (params.modifier) {
         it[params.modifier](
           `📁  #${id.concat(params.id)} ${params.title}`,
@@ -142,6 +143,7 @@ export function describeSuite({
           params.test,
           params.timeout
         );
+        return 
       }
 
       it(
@@ -210,7 +212,7 @@ export function describeSuite({
           upgradeRuntime: async (ctx: ChopsticksContext) => {
             await upgradeRuntimeChopsticks(
               ctx,
-              MoonwallContext.getContext().rtUpgradePath
+              MoonwallContext.getContext().rtUpgradePath!
             );
           },
         },

@@ -4,7 +4,7 @@ import { importConfig } from "../../utils/configReader.js";
 import Debug from "debug";
 const debugSetup = Debug("global:setup");
 
-beforeAll(async () => {
+beforeAll(async () => { 
   const globalConfig = await importConfig("../../moonwall.config.js");
   if (process.env.TEST_ENV) {
     const ctx = await contextCreator(globalConfig, process.env.TEST_ENV);
