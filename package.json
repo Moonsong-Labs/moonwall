@@ -62,7 +62,7 @@
     "semver": "^7.3.8",
     "ts-node": "^10.9.1",
     "vite": "^4.1.4",
-    "vitest": "^0.28.5",
+    "vitest": "^0.29.1",
     "web3": "4.0.1-alpha.5",
     "web3-core": "^1.8.2",
     "web3-core-helpers": "^1.8.2",

@@ -16,7 +16,7 @@ export function prepareProviders(
 ): MoonwallProvider[] {
   return providerConfigs.map(({ name, endpoints, type }) => {
     const url = endpoints.includes("ENV_VAR")
-      ? process.env.WSS_URL
+      ? process.env.WSS_URL!
       : endpoints[0];
 
     switch (type) {

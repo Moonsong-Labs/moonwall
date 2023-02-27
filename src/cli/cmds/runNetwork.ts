@@ -20,7 +20,7 @@ export async function runNetwork(args) {
   const globalConfig = await importConfig("../../moonwall.config.js");
   const testFileDirs = globalConfig.environments.find(
     ({ name }) => name == args.envName
-  ).testFileDir;
+  )!.testFileDir;
 
   const questions = [
     {
@@ -92,7 +92,7 @@ export async function runNetwork(args) {
 
     portsList.forEach((ports) =>
       console.log(
-        `  🖥️   https://polkadot.js.org/apps/?rpc=ws%3A%2F%2Flocalhost%3A${ports.wsPort}`
+        `  🖥️   https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0.0.1%3A${ports.wsPort}`
       )
     );
 
@@ -106,7 +106,7 @@ export async function runNetwork(args) {
       );
       const env = globalConfig.environments.find(
         ({ name }) => name === args.envName
-      );
+      )!;
 
       switch (choice.MenuChoice) {
         case 1:
@@ -147,19 +147,22 @@ export async function runNetwork(args) {
 
 const reportServicePorts = async () => {
   const ctx = MoonwallContext.getContext();
-  const portsList = [];
+  const portsList: {
+    wsPort: string;
+    httpPort: string;
+  }[] = [];
   const config = globalConfig.environments.find(
     ({ name }) => name == process.env.TEST_ENV
-  );
+  )!;
   if (config.foundation.type == Foundation.Dev) {
     const ports = { wsPort: "", httpPort: "" };
     ports.wsPort =
       ctx.environment.nodes[0].args
-        .find((a) => a.includes("ws-port"))
+        .find((a) => a.includes("ws-port"))!
         .split("=")[1] || "9944";
     ports.httpPort =
       ctx.environment.nodes[0].args
-        .find((a) => a.includes("rpc-port"))
+        .find((a) => a.includes("rpc-port"))!
         .split("=")[1] || "9933";
 
     portsList.push(ports);

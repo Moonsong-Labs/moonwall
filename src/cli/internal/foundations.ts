@@ -24,7 +24,7 @@ export function parseRunCmd(launchSpec: DevLaunchSpec) {
         "--tmp",
       ];
 
-  `ws://localhost:${10000 + Number(process.env.VITEST_POOL_ID) * 100}`;
+  `ws://127.0.0.1:${10000 + Number(process.env.VITEST_POOL_ID) * 100}`;
 
   if (launchSpec.ports) {
     const ports = launchSpec.ports;

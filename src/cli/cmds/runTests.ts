@@ -10,12 +10,12 @@ export async function testCmd(args) {
   const globalConfig = await importConfig("../../moonwall.config.js");
   const env = globalConfig.environments.find(
     ({ name }) => name === args.envName
-  );
+  )!;
   process.env.TEST_ENV = args.envName;
 
   try {
     const vitest = await executeTests(env);
-    await vitest.close();
+    await vitest!.close();
     process.exit(0);
   } catch (e) {
     console.error(e);
@@ -31,6 +31,7 @@ export async function executeTests(env: Environment) {
     globals: true,
     reporters: env.html ? ["verbose", "html"] : ["verbose"],
     testTimeout: 10000,
+
     hookTimeout: 500000,
     setupFiles: ["src/cli/internal/setupFixture.ts"],
     include: env.include
@@ -38,10 +39,9 @@ export async function executeTests(env: Environment) {
       : ["**/{test,spec,test_,test-}*{ts,mts,cts}"],
   };
 
-
-  if (env.threads || env.threads <= 1) {
+  if (env.threads && env.threads > 1) {
     options.threads = true;
-    options.maxThreads = env.threads;
+    options.minThreads = env.threads;
   } else {
     options.threads = false;
   }

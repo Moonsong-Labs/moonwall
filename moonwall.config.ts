@@ -54,7 +54,7 @@ export const globalConfig: MoonwallConfig = {
         {
           name: "MB",
           type: ProviderType.Moonbeam,
-          endpoints: ["ws://localhost:12000"],
+          endpoints: ["ws://127.0.0.1:12000"],
         },
       ],
     },
@@ -82,12 +82,12 @@ export const globalConfig: MoonwallConfig = {
         {
           name: "MB",
           type: ProviderType.Moonbeam,
-          endpoints: ["ws://localhost:10000"],
+          endpoints: ["ws://127.0.0.1:10000"],
         },
         {
           name: "MR",
           type: ProviderType.Moonbeam,
-          endpoints: ["ws://localhost:12000"],
+          endpoints: ["ws://127.0.0.1:12000"],
         },
       ],
     },
@@ -110,13 +110,14 @@ export const globalConfig: MoonwallConfig = {
         {
           name: "MB",
           type: ProviderType.Moonbeam,
-          endpoints: ["ws://localhost:12000"],
+          endpoints: ["ws://127.0.0.1:12000"],
         },
       ],
     },
     {
       name: "dev_minimal",
       testFileDir: ["tests/test_separation"],
+      threads: 5,
       foundation: {
         type: Foundation.Dev,
         launchSpec: [
@@ -154,8 +155,7 @@ export const globalConfig: MoonwallConfig = {
         launchSpec: [
           {
             name: "moonbeam",
-            binPath:
-              "/home/timbotronic/workspace/moonbeam/moonbeam/target/release/moonbeam",
+            binPath: "./moonbeam",
             ports: { p2pPort: 30333, wsPort: 9944, rpcPort: 9933 },
             options: [
               "--dev",
@@ -164,6 +164,7 @@ export const globalConfig: MoonwallConfig = {
               "--reserved-only",
               "--rpc-cors=all",
               "--no-grandpa",
+              "--unsafe-ws-external",
               "--sealing=manual",
               "--force-authoring",
               "--no-prometheus",
@@ -175,12 +176,12 @@ export const globalConfig: MoonwallConfig = {
         {
           name: "w3",
           type: ProviderType.Web3,
-          endpoints: ["ws://localhost:9944"],
+          endpoints: ["ws://127.0.0.1:9944"],
         },
         {
           name: "mb",
-          type: ProviderType.Moonbeam,
-          endpoints: ["ws://localhost:9944"],
+          type: ProviderType.PolkadotJs,
+          endpoints: ["ws://127.0.0.1:9944"],
         },
       ],
     },
@@ -199,7 +200,7 @@ export const globalConfig: MoonwallConfig = {
       ],
     },
     {
-      name: "new",
+      name: "eth_test",
       testFileDir: ["tests/eth_test/"],
       include: ["**/{test,spec,test_,test-}*{ts,mts,cts}"],
       foundation: {
@@ -216,14 +217,12 @@ export const globalConfig: MoonwallConfig = {
     {
       name: "dev_test",
       testFileDir: ["tests/dev_tests"],
-      // htmlOutput: true,
       foundation: {
         type: Foundation.Dev,
         launchSpec: [
           {
             name: "moonbeam",
-            binPath:
-              "/home/timbotronic/workspace/moonbeam/moonbeam/target/release/moonbeam",
+            binPath: "./moonbeam",
             ports: { p2pPort: 30333, wsPort: 9944, rpcPort: 9933 },
             options: [
               "--dev",
@@ -243,17 +242,17 @@ export const globalConfig: MoonwallConfig = {
         {
           name: "eth",
           type: ProviderType.Ethers,
-          endpoints: ["ws://localhost:9944"],
+          endpoints: ["ws://127.0.0.1:9944"],
         },
         {
           name: "w3",
           type: ProviderType.Web3,
-          endpoints: ["ws://localhost:9944"],
+          endpoints: ["ws://127.0.0.1:9944"],
         },
         {
           name: "pjs",
           type: ProviderType.Moonbeam,
-          endpoints: ["ws://localhost:9944"],
+          endpoints: ["ws://127.0.0.1:9944"],
         },
       ],
     },

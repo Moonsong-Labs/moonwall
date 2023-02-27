@@ -46,7 +46,7 @@ export async function sendNewBlockAndCheck(
 export async function chopForkToFinalizedHead(context: MoonwallContext) {
   const api = context.providers.find(
     ({ type }) => type == ProviderType.Moonbeam
-  ).api as ApiPromise;
+  )!.api as ApiPromise;
 
   const finalizedHead = context.genesis;
   await sendSetHeadRequest(finalizedHead);
@@ -121,7 +121,7 @@ export async function sendSetStorageRequest(params?: {
   }
 
   await ws.send("dev_setStorage", [
-    { [params.module]: { [params.method]: params.methodParams } },
+    { [params!.module]: { [params!.method]: params!.methodParams } },
   ]);
   await ws.disconnect();
 }

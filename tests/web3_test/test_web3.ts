@@ -1,4 +1,4 @@
-import { expect } from "chai";
+import { expect, beforeAll } from "vitest";
 import { Foundation, describeSuite } from "../../src/index.js";
 import { xcAssetAbi } from "../../src/cli/lib/moonbeamConsts.js";
 import Web3 from "web3";

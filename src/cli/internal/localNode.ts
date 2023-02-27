@@ -1,5 +1,5 @@
 import { ChildProcess, spawn } from "child_process";
-import { MoonwallContext } from "../cli/internal/globalContext.js";
+import { MoonwallContext } from "./globalContext.js";
 import chalk from "chalk";
 import Debug from "debug";
 const debugNode = Debug("global:node");
@@ -59,15 +59,13 @@ export async function launchDevNode(
         chunk.toString().match(/ RPC listening on port/)
       ) {
         clearTimeout(timer);
-        if (true) {
-          runningNode.stderr.off("data", onData);
-          runningNode.stdout.off("data", onData);
-        }
+        runningNode.stderr!.off("data", onData);
+        runningNode.stdout!.off("data", onData);
         resolve();
       }
     };
-    runningNode.stderr.on("data", onData);
-    runningNode.stdout.on("data", onData);
+    runningNode.stderr!.on("data", onData);
+    runningNode.stdout!.on("data", onData);
   });
 
   return runningNode;

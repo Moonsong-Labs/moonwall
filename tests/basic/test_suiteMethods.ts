@@ -1,11 +1,11 @@
 import { describeSuite } from "../../src/index.js";
 import { setTimeout } from "timers/promises";
-import { expect } from "chai";
+import { expect } from "vitest";
 
 describeSuite({
   id: "T100",
   title: "New Test Suite",
-  testCases: function () {
+  testCases: function (it) {
     it("Sample test", () => {
       expect(true).to.be.true;
     });

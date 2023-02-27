@@ -4,12 +4,16 @@ import {
   populateProviderInterface,
   prepareProviders,
 } from "../../utils/providers.js";
-import { launchDevNode } from "../../utils/LocalNode.js";
+import { launchDevNode } from "./localNode.js";
 import { importConfig } from "../../utils/configReader.js";
 import { parseChopsticksRunCmd, parseRunCmd } from "./foundations.js";
 import { ApiPromise } from "@polkadot/api";
 import Debug from "debug";
-import { ConnectedProvider, MoonwallEnvironment } from "../../types/context.js";
+import {
+  ConnectedProvider,
+  MoonwallEnvironment,
+  MoonwallProvider,
+} from "../../types/context.js";
 import { Foundation, ProviderType } from "../../types/enum.js";
 const debugSetup = Debug("global:context");
 
@@ -29,12 +33,12 @@ export class MoonwallContext {
 
     const env = config.environments.find(
       ({ name }) => name == process.env.TEST_ENV
-    );
+    )!;
     const blob = {
       name: env.name,
       context: {},
-      providers: [],
-      nodes: [],
+      providers: [] as MoonwallProvider[],
+      nodes: [] as { name?: string; cmd: string; args: string[] }[],
       foundationType: env.foundation.type,
     };
 
@@ -55,7 +59,7 @@ export class MoonwallContext {
 
       case Foundation.Chopsticks:
         blob.nodes.push(parseChopsticksRunCmd(env.foundation.launchSpec));
-        blob.providers.push(...prepareProviders(env.connections));
+        blob.providers.push(...prepareProviders(env.connections!));
         this.rtUpgradePath = env.foundation.rtUpgradePath;
         debugSetup(
           `🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`
@@ -77,7 +81,7 @@ export class MoonwallContext {
                 name: "w3",
                 type: ProviderType.Web3,
                 endpoints: [
-                  `ws://localhost:${
+                  `ws://127.0.0.1:${
                     10000 + Number(process.env.VITEST_POOL_ID || 1) * 100
                   }`,
                 ],
@@ -86,16 +90,16 @@ export class MoonwallContext {
                 name: "eth",
                 type: ProviderType.Ethers,
                 endpoints: [
-                  `ws://localhost:${
+                  `ws://127.0.0.1:${
                     10000 + Number(process.env.VITEST_POOL_ID || 1) * 100
                   }`,
                 ],
               },
               {
-                name: "polka",
+                name: "mb",
                 type: ProviderType.Moonbeam,
                 endpoints: [
-                  `ws://localhost:${
+                  `ws://127.0.0.1:${
                     10000 + Number(process.env.VITEST_POOL_ID || 1) * 100
                   }`,
                 ],
@@ -117,7 +121,11 @@ export class MoonwallContext {
   }
 
   public get genesis() {
-    return this._finalizedHead;
+    if (this._finalizedHead) {
+      return this._finalizedHead;
+    } else {
+      return "";
+    }
   }
 
   public set genesis(hash: string) {
@@ -134,10 +142,10 @@ export class MoonwallContext {
     }
 
     const nodes = MoonwallContext.getContext().environment.nodes;
-    const promises = nodes.map(async ({ cmd, args, name }) => {
-      return this.nodes.push(await launchDevNode(cmd, args, name));
-    });
 
+    const promises = nodes.map(async ({ cmd, args, name }) => {
+      return this.nodes.push(await launchDevNode(cmd, args, name!));
+    });
     await Promise.all(promises);
   }
 
@@ -157,7 +165,6 @@ export class MoonwallContext {
     }
 
     const globalConfig = await importConfig("../../moonwall.config.js");
-
     const promises = this.environment.providers.map(
       async ({ name, type, connect, ws }) =>
         new Promise(async (resolve) => {
@@ -172,7 +179,7 @@ export class MoonwallContext {
 
     this.foundation = globalConfig.environments.find(
       ({ name }) => name == environmentName
-    ).foundation.type;
+    )!.foundation.type;
 
     if (this.foundation == Foundation.Dev) {
       this.genesis = (
@@ -180,7 +187,7 @@ export class MoonwallContext {
           this.providers.find(
             ({ type }) =>
               type == ProviderType.PolkadotJs || type == ProviderType.Moonbeam
-          ).api as ApiPromise
+          )!.api as ApiPromise
         ).rpc.chain.getBlockHash(0)
       ).toString();
     }
@@ -188,7 +195,7 @@ export class MoonwallContext {
 
   public async disconnect(providerName?: string) {
     if (providerName) {
-      this.providers.find(({ name }) => name === providerName).disconnect();
+      this.providers.find(({ name }) => name === providerName)!.disconnect();
     } else {
       await Promise.all(this.providers.map((prov) => prov.disconnect()));
     }
@@ -223,9 +230,7 @@ export class MoonwallContext {
     } catch {
       console.log("🛑  All connections disconnected");
     }
-
     MoonwallContext.getContext().nodes.forEach((process) => process.kill());
-    delete MoonwallContext.instance;
   }
 }
 
@@ -233,7 +238,6 @@ export const contextCreator = async (config: MoonwallConfig, env: string) => {
   const ctx = MoonwallContext.getContext(config);
   await runNetworkOnly(config);
   await ctx.connectEnvironment(env);
-
   return ctx;
 };
 

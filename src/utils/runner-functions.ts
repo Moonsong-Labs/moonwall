@@ -68,11 +68,11 @@ export function describeSuite({
         } else if (options && options.type) {
           return MoonwallContext.getContext().providers.find(
             (a) => a.type == options.type
-          ).api as ApiPromise;
+          )!.api as ApiPromise;
         } else {
           return MoonwallContext.getContext().providers.find(
             (a) => a.type == ProviderType.Moonbeam || ProviderType.PolkadotJs
-          ).api as ApiPromise;
+          )!.api as ApiPromise;
         }
       },
       getPolkadotJs: (apiName?: string): ApiPromise => {
@@ -81,7 +81,7 @@ export function describeSuite({
         } else {
           return MoonwallContext.getContext().providers.find(
             (a) => a.type == ProviderType.PolkadotJs
-          ).api as ApiPromise;
+          )!.api as ApiPromise;
         }
       },
       getMoonbeam: (apiName?: string): ApiPromise => {
@@ -90,7 +90,7 @@ export function describeSuite({
         } else {
           return MoonwallContext.getContext().providers.find(
             (a) => a.type == ProviderType.Moonbeam
-          ).api as ApiPromise;
+          )!.api as ApiPromise;
         }
       },
       getEthers: (apiName?: string): WebSocketProvider => {
@@ -99,7 +99,7 @@ export function describeSuite({
         } else {
           return MoonwallContext.getContext().providers.find(
             (a) => a.type == ProviderType.Ethers
-          ).api as WebSocketProvider;
+          )!.api as WebSocketProvider;
         }
       },
       getWeb3: (apiName?: string): Web3 => {
@@ -108,16 +108,16 @@ export function describeSuite({
         } else {
           return MoonwallContext.getContext().providers.find(
             (a) => a.type == ProviderType.Web3
-          ).api as Web3;
+          )!.api as Web3;
         }
       },
     };
 
-    if (ctx) {
-      ctx.providers.forEach((a: ConnectedProvider) => {
-        context.providers[a.name] = a.api;
-      });
-    }
+    // if (ctx) {
+    //   ctx.providers.forEach((a: ConnectedProvider) => {
+    //     context.providers[a.name] = a.api;
+    //   });
+    // }
 
     function testCase(params: {
       id: string;
@@ -127,8 +127,6 @@ export function describeSuite({
       skipIf?: boolean;
       timeout?: number;
     }) {
-
-      console.log(params.skipIf)
       if (params.modifier) {
         it[params.modifier](
           `📁  #${id.concat(params.id)} ${params.title}`,

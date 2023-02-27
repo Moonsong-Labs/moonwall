@@ -23,7 +23,7 @@ const debug = Debug("DevTest");
 export async function devForkToFinalizedHead(context: MoonwallContext) {
   const api = context.providers.find(
     ({ type }) => type == ProviderType.Moonbeam
-  ).api as ApiPromise;
+  )!.api as ApiPromise;
 
   const finalizedHead = (await api.rpc.chain.getFinalizedHead()).toString();
   await api.rpc.engine.createBlock(true, true, finalizedHead);
@@ -161,7 +161,7 @@ export async function createDevBlock<
     const failure = extractError(events);
     return {
       extrinsic:
-        extrinsicIndex >= 0 ? blockData.block.extrinsics[extrinsicIndex] : null,
+        extrinsicIndex! >= 0 ? blockData.block.extrinsics[extrinsicIndex!] : null,
       events,
       error:
         failure &&

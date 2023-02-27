@@ -27,8 +27,8 @@ export interface ConnectedProvider {
 }
 
 export type Node = {
-  name: string;
-  type: "binary" | "chopsticks" | "zombie";
+  name?: string;
+  // type: "binary" | "chopsticks" | "zombie";
   cmd: string;
   args: string[];
   rtUpgradePath?: string;

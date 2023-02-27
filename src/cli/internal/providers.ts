@@ -36,7 +36,7 @@ export async function customWeb3Request(
               .join(",")})): ${error.message || error.toString()}`
           );
         }
-        resolve(result);
+        resolve(result!);
       }
     );
   });
@@ -100,34 +100,3 @@ export function web3Subscribe(
 export type EnhancedWeb3 = Web3 & {
   customRequest: (method: string, params: any[]) => Promise<JsonRpcResponse>;
 };
-
-// export const provideWeb3Api = async (uri: string) => {
-//   const web3 = new Web3(uri);
-
-//   // Adding genesis account for convenience
-//   web3.eth.accounts.wallet.add(ALITH_PRIVATE_KEY);
-
-//   // Hack to add customRequest method.
-//   (web3 as any).customRequest = (method: string, params: any[]) =>
-//     customWeb3Request(web3, method, params);
-
-//   return web3 as EnhancedWeb3;
-// };
-
-// export const providePolkadotApi = async (port: number, isNotMoonbeam?: boolean) => {
-//   return isNotMoonbeam
-//     ? await ApiPromise.create({
-//         initWasm: false,
-//         provider: new WsProvider(`ws://localhost:${port}`),
-//         noInitWarn: true,
-//       })
-//     : await ApiPromise.create({
-//         provider: new WsProvider(`ws://localhost:${port}`),
-//         typesBundle: typesBundlePre900 as any,
-//         noInitWarn: true,
-//       });
-// };
-
-// export const provideEthersApi = async (uri: string) => {
-//   return new ethers.providers.JsonRpcProvider(uri);
-// };
