@@ -85,6 +85,9 @@
   "pnpm": {
     "overrides": {
       "@polkadot/util": "$@polkadot/util"
+    },
+    "bin": {
+      "moon-wall": "./src/cli/index.ts"
     }
   }
 }

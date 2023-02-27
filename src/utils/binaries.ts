@@ -2,7 +2,7 @@ import path from "path";
 import fs from "fs";
 import child_process from "child_process";
 
-import { OVERRIDE_RUNTIME_PATH } from "../cli/runner/lib/constants.js";
+import { OVERRIDE_RUNTIME_PATH } from "../cli/lib/constants.js";
 
 export const BINARY_DIRECTORY = process.env.BINARY_DIRECTORY || "binaries";
 export const RUNTIME_DIRECTORY = process.env.RUNTIME_DIRECTORY || "runtimes";

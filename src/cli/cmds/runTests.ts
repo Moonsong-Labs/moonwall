@@ -1,10 +1,10 @@
 import "@moonbeam-network/api-augment/moonbase";
 import "@polkadot/api-augment/polkadot";
-import { importConfig } from "../../../utils/configReader.js";
+import { importConfig } from "../../utils/configReader.js";
 import { startVitest } from "vitest/node";
 import { UserConfig } from "vitest";
 import { MoonwallContext } from "../internal/globalContext.js";
-import { Environment } from "../../../types/config.js";
+import { Environment } from "../../types/config.js";
 
 export async function testCmd(args) {
   const globalConfig = await importConfig("../../moonwall.config.js");
@@ -26,18 +26,18 @@ export async function testCmd(args) {
 
 export async function executeTests(env: Environment) {
   // TODO: sort out reporter config
-  // TODO: Create a node pool and re-enable multi-threading
   const options: UserConfig = {
     watch: false,
     globals: true,
-    reporters: ["verbose", "html"],
+    reporters: env.html ? ["verbose", "html"] : ["verbose"],
     testTimeout: 10000,
     hookTimeout: 500000,
-    setupFiles: ["src/cli/runner/internal/setupFixture.ts"],
+    setupFiles: ["src/cli/internal/setupFixture.ts"],
     include: env.include
       ? env.include
       : ["**/{test,spec,test_,test-}*{ts,mts,cts}"],
   };
+
 
   if (env.threads || env.threads <= 1) {
     options.threads = true;

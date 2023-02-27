@@ -18,6 +18,7 @@ export interface CustomTest {
     title: string;
     test: () => void;
     modifier?: "only" | "skip";
+    skipIf?: boolean;
     timeout?: number;
   }): void;
 }

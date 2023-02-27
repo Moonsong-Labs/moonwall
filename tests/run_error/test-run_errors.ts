@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { Foundation, describeSuite } from "../../src/index.js";
-import { ALITH_ADDRESS } from "../../src/cli/runner/lib/accounts.js";
+import { ALITH_ADDRESS } from "../../src/cli/lib/accounts.js";
 import Web3 from "web3";
 import { ApiPromise } from "@polkadot/api";
 

@@ -1,19 +1,16 @@
-import { MoonwallConfig } from "../../../types/config";
+import { MoonwallConfig } from "../../types/config";
 import { ChildProcess } from "child_process";
 import {
   populateProviderInterface,
   prepareProviders,
-} from "../../../utils/providers.js";
-import { launchDevNode } from "../../../utils/LocalNode.js";
-import { importConfig } from "../../../utils/configReader.js";
+} from "../../utils/providers.js";
+import { launchDevNode } from "../../utils/LocalNode.js";
+import { importConfig } from "../../utils/configReader.js";
 import { parseChopsticksRunCmd, parseRunCmd } from "./foundations.js";
 import { ApiPromise } from "@polkadot/api";
 import Debug from "debug";
-import {
-  ConnectedProvider,
-  MoonwallEnvironment,
-} from "../../../types/context.js";
-import { Foundation, ProviderType } from "../../../types/enum.js";
+import { ConnectedProvider, MoonwallEnvironment } from "../../types/context.js";
+import { Foundation, ProviderType } from "../../types/enum.js";
 const debugSetup = Debug("global:context");
 
 export class MoonwallContext {
@@ -73,24 +70,35 @@ export class MoonwallContext {
           args,
         });
 
-
         blob.providers = env.connections
           ? prepareProviders(env.connections)
           : prepareProviders([
               {
                 name: "w3",
                 type: ProviderType.Web3,
-                endpoints: [`ws://localhost:${10000 + (Number(process.env.VITEST_POOL_ID || 1) * 100)}`],
+                endpoints: [
+                  `ws://localhost:${
+                    10000 + Number(process.env.VITEST_POOL_ID || 1) * 100
+                  }`,
+                ],
               },
               {
                 name: "eth",
                 type: ProviderType.Ethers,
-                endpoints: [`ws://localhost:${10000 + (Number(process.env.VITEST_POOL_ID || 1) * 100)}`],
+                endpoints: [
+                  `ws://localhost:${
+                    10000 + Number(process.env.VITEST_POOL_ID || 1) * 100
+                  }`,
+                ],
               },
               {
                 name: "polka",
                 type: ProviderType.Moonbeam,
-                endpoints: [`ws://localhost:${10000 + (Number(process.env.VITEST_POOL_ID || 1) * 100)}`],
+                endpoints: [
+                  `ws://localhost:${
+                    10000 + Number(process.env.VITEST_POOL_ID || 1) * 100
+                  }`,
+                ],
               },
             ]);
 
@@ -178,13 +186,11 @@ export class MoonwallContext {
     }
   }
 
-  
-
   public async disconnect(providerName?: string) {
     if (providerName) {
       this.providers.find(({ name }) => name === providerName).disconnect();
     } else {
-      await Promise.all(this.providers.map((prov) => prov.disconnect()))
+      await Promise.all(this.providers.map((prov) => prov.disconnect()));
     }
   }
 

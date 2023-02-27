@@ -1,6 +1,6 @@
 import { afterAll, beforeAll } from "vitest";
 import { MoonwallContext, contextCreator } from "./globalContext.js";
-import { importConfig } from "../../../utils/configReader.js";
+import { importConfig } from "../../utils/configReader.js";
 import Debug from "debug";
 const debugSetup = Debug("global:setup");
 

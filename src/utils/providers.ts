@@ -159,7 +159,7 @@ export async function populateProviderInterface(
           ),
         disconnect: async () => {
           // @ts-ignore
-          web3Api.currentProvider.disconnect(1000)
+          web3Api.currentProvider.disconnect(1000);
         },
       };
 

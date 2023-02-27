@@ -1,11 +1,11 @@
 #!/usr/bin/env ts-node-esm
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
-import { testCmd } from "./runner/cmds/runTests.js";
-import { runNetwork } from "./runner/cmds/runNetwork.js";
-import { generateConfig } from "./runner/cmds/generateConfig.js";
-import { main } from "./runner/cmds/main.js";
-import { downloader } from "./runner/cmds/downloader.js";
+import { testCmd } from "./cmds/runTests.js";
+import { runNetwork } from "./cmds/runNetwork.js";
+import { generateConfig } from "./cmds/generateConfig.js";
+import { main } from "./cmds/main.js";
+import { downloader } from "./cmds/downloader.js";
 
 yargs(hideBin(process.argv))
   .usage("Usage: $0")
@@ -15,7 +15,7 @@ yargs(hideBin(process.argv))
   })
   .command(
     `download <artifact> [bin-version] [path]`,
-    "Download a published artifact from GitHub",
+    "Download a published x86 artifact from GitHub",
     (yargs) => {
       return yargs
         .positional("artifact", {

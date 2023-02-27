@@ -27,7 +27,7 @@
     "compilerOptions": {
       "baseUrl": ".",
       "paths": {
-        "@moonwall": ["./src/cli/runner/index.ts"]
+        "@moonwall": ["./src/cli/index.ts"]
       }
     }
   }

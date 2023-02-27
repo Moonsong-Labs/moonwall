@@ -6,7 +6,7 @@ import {
   BALTATHAR_ADDRESS,
   CHARLETH_ADDRESS,
   alith,
-} from "../../src/cli/runner/lib/accounts.js";
+} from "../../src/cli/lib/accounts.js";
 import { BN } from "@polkadot/util";
 import Web3 from "web3";
 import { ApiPromise } from "@polkadot/api";

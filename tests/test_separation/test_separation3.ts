@@ -1,8 +1,7 @@
 import { Foundation, describeSuite } from "../../src/index.js";
 import { parseEther } from "ethers";
-import { alith } from "../../src/cli/runner/lib/accounts.js";
+import { alith } from "../../src/cli/lib/accounts.js";
 import { ApiPromise } from "@polkadot/api";
-
 
 describeSuite({
   id: "D02",

@@ -1,6 +1,6 @@
 import { Foundation, describeSuite } from "../../src/index.js";
 import { parseEther } from "ethers";
-import { alith } from "../../src/cli/runner/lib/accounts.js";
+import { alith } from "../../src/cli/lib/accounts.js";
 import { ApiPromise } from "@polkadot/api";
 
 describeSuite({
@@ -22,7 +22,7 @@ describeSuite({
         const balanceBefore = (await api.query.system.account(DUMMY_ACCOUNT))
           .data.free;
         expect(balanceBefore.toString()).toEqual("0");
-        
+
         await api.tx.balances
           .transfer(DUMMY_ACCOUNT, parseEther("1"))
           .signAndSend(alith);
@@ -32,10 +32,8 @@ describeSuite({
         expect(balanceAfter.sub(balanceBefore).toString()).toEqual(
           parseEther("1").toString()
         );
-
       },
     });
-
 
     it({
       id: "E02",
@@ -43,7 +41,7 @@ describeSuite({
       test: async function () {
         const balanceBefore = (await api.query.system.account(DUMMY_ACCOUNT))
           .data.free;
-          expect(balanceBefore.toString()).toEqual( parseEther("1").toString());
+        expect(balanceBefore.toString()).toEqual(parseEther("1").toString());
         await api.tx.balances
           .transfer(DUMMY_ACCOUNT, parseEther("1"))
           .signAndSend(alith);
@@ -57,4 +55,3 @@ describeSuite({
     });
   },
 });
-

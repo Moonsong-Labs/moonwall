@@ -19,19 +19,21 @@ import {
 import {
   MoonwallContext,
   contextCreator,
-} from "../cli/runner/internal/globalContext.js";
+} from "../cli/internal/globalContext.js";
 import { Foundation, ProviderType } from "../types/enum.js";
 import { ConnectedProvider } from "../types/context.js";
-import { BlockCreation, resetToGenesis } from "./contextHelpers.js";
+import { BlockCreation } from "./contextHelpers.js";
 import {
   createDevBlock,
   createDevBlockCheckEvents,
-} from "../cli/runner/internal/devModeHelpers.js";
+  devForkToFinalizedHead,
+} from "../cli/internal/devModeHelpers.js";
 import {
+  chopForkToFinalizedHead,
   sendNewBlockAndCheck,
   sendNewBlockRequest,
   sendSetStorageRequest,
-} from "../cli/runner/internal/chopsticksHelpers.js";
+} from "../cli/internal/chopsticksHelpers.js";
 import { importConfig } from "./configReader.js";
 
 const debug = Debug("test:setup");
@@ -46,22 +48,11 @@ export function describeSuite({
     let ctx: MoonwallContext;
 
     beforeAll(async function () {
-      // TODO: Tidy up this code so that forking from genesis provides state separation between dev/chopsticks suites
       ctx = MoonwallContext.getContext();
       if (ctx.environment.foundationType === Foundation.Dev) {
-        const api = ctx.providers.find(
-          ({ type }) => type == ProviderType.Moonbeam
-        ).api as ApiPromise;
-
-        const finalizedHead = (await api.rpc.chain.getFinalizedHead()).toString()
-        await api.rpc.engine.createBlock(true, true, finalizedHead)
-        while (true){
-          const newHead = (await api.rpc.chain.getFinalizedHead()).toString()
-          await setTimeout(100)
-          if (newHead !== finalizedHead){
-            break
-          }
-        }
+        await devForkToFinalizedHead(ctx);
+      } else if (ctx.environment.foundationType === Foundation.Chopsticks) {
+        await chopForkToFinalizedHead(ctx);
       }
     });
 
@@ -133,8 +124,11 @@ export function describeSuite({
       title: string;
       test: () => void;
       modifier?: TestCaseModifier;
+      skipIf?: boolean;
       timeout?: number;
     }) {
+
+      console.log(params.skipIf)
       if (params.modifier) {
         it[params.modifier](
           `📁  #${id.concat(params.id)} ${params.title}`,
@@ -142,6 +136,14 @@ export function describeSuite({
           params.timeout
         );
         return;
+      }
+
+      if (params.skipIf) {
+        it.skip(
+          `📁  #${id.concat(params.id)} ${params.title}`,
+          params.test,
+          params.timeout
+        );
       }
 
       it(
@@ -224,5 +226,4 @@ export function describeSuite({
 export { GenericContext };
 
 // TODO: Extend to include skipIf() and runIf()
-type TestCaseModifier = "only" | "skip" 
-
+type TestCaseModifier = "only" | "skip";

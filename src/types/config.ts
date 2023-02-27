@@ -7,6 +7,7 @@ export type MoonwallConfig = {
 };
 
 export type Environment = {
+  html?: boolean;
   name: string;
   testFileDir: string[];
   foundation: FoundationDetails;
@@ -38,7 +39,7 @@ export interface GenericLaunchSpec {
 // TODO: Separate single chopsticks network and multi chopsticks into separate interfaces
 export interface ChopsticksLaunchSpec extends GenericLaunchSpec {
   configPath: string;
-  wsPort?: number;   // Quirk of Chopsticks is that port option  only for single mode not xcm
+  wsPort?: number; // Quirk of Chopsticks is that port option  only for single mode not xcm
   type?: "relaychain" | "parachain";
   wasmOverride?: string;
   // buildBlockMode only supported for single mode chopsticks

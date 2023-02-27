@@ -2,20 +2,39 @@ import {
   BlockCreation,
   ExtrinsicCreation,
   extractError,
-} from "../../../utils/contextHelpers.js";
+} from "../../utils/contextHelpers.js";
 import {
   ApiTypes,
   AugmentedEvent,
   SubmittableExtrinsic,
 } from "@polkadot/api/types/index.js";
 import { customWeb3Request } from "./providers.js";
-import { GenericContext } from "../../../utils/runner-functions.js";
+import { GenericContext } from "../../utils/runner-functions.js";
 import Debug from "debug";
 import { alith } from "../lib/accounts.js";
-import { createAndFinalizeBlock } from "../../../utils/block.js";
+import { createAndFinalizeBlock } from "../../utils/block.js";
 import { EventRecord } from "@polkadot/types/interfaces/types.js";
 import { RegistryError } from "@polkadot/types-codec/types/registry";
+import { MoonwallContext } from "./globalContext.js";
+import { ApiPromise } from "@polkadot/api";
+import { ProviderType } from "../../../src/types/enum.js";
 const debug = Debug("DevTest");
+
+export async function devForkToFinalizedHead(context: MoonwallContext) {
+  const api = context.providers.find(
+    ({ type }) => type == ProviderType.Moonbeam
+  ).api as ApiPromise;
+
+  const finalizedHead = (await api.rpc.chain.getFinalizedHead()).toString();
+  await api.rpc.engine.createBlock(true, true, finalizedHead);
+  while (true) {
+    const newHead = (await api.rpc.chain.getFinalizedHead()).toString();
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    if (newHead !== finalizedHead) {
+      break;
+    }
+  }
+}
 
 export async function createDevBlockCheckEvents<
   ApiType extends ApiTypes,

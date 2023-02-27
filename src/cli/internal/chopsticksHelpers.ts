@@ -1,8 +1,9 @@
 import { setTimeout } from "timers/promises";
 import { MoonwallContext } from "./globalContext.js";
-import { ProviderType } from "../../../types/enum.js";
-import { GenericContext } from "../../../types/runner.js";
+import { ProviderType } from "../../types/enum.js";
+import { GenericContext } from "../../types/runner.js";
 import { ApiTypes, AugmentedEvent } from "@polkadot/api/types/index.js";
+import { ApiPromise } from "@polkadot/api";
 
 export async function getWsFromConfig(providerName?: string) {
   return providerName
@@ -42,6 +43,44 @@ export async function sendNewBlockAndCheck(
   return { match, events: actualEvents };
 }
 
+export async function chopForkToFinalizedHead(context: MoonwallContext) {
+  const api = context.providers.find(
+    ({ type }) => type == ProviderType.Moonbeam
+  ).api as ApiPromise;
+
+  const finalizedHead = context.genesis;
+  await sendSetHeadRequest(finalizedHead);
+  await sendNewBlockRequest();
+  while (true) {
+    const newHead = (await api.rpc.chain.getFinalizedHead()).toString();
+    await setTimeout(50);
+    if (newHead !== finalizedHead) {
+      context.genesis = newHead;
+      break;
+    }
+  }
+}
+
+export async function sendSetHeadRequest(
+  newHead: string,
+  providerName?: string
+) {
+  const ws = providerName
+    ? await getWsFromConfig(providerName)
+    : await getWsFromConfig();
+
+  let result = "";
+
+  while (!ws.isConnected) {
+    await setTimeout(100);
+  }
+
+  result = await ws.send("dev_setHead", [newHead]);
+
+  await ws.disconnect();
+  return result;
+}
+
 export async function sendNewBlockRequest(params?: {
   providerName?: string;
   count?: number;
@@ -54,7 +93,7 @@ export async function sendNewBlockRequest(params?: {
   let result = "";
 
   while (!ws.isConnected) {
-    await setTimeout(500);
+    await setTimeout(100);
   }
   if ((params && params.count) || (params && params.to)) {
     result = await ws.send("dev_newBlock", [

@@ -6,7 +6,7 @@ import {
   CHARLETH_ADDRESS,
   ETHAN_ADDRESS,
   alith,
-} from "../../src/cli/runner/lib/accounts.js";
+} from "../../src/cli/lib/accounts.js";
 
 describeSuite({
   id: "X1",
@@ -108,7 +108,7 @@ describeSuite({
       id: "T5",
       title: "Do an upgrade test",
       timeout: 120000,
-      modifier:"skip",
+      modifier: "skip",
       test: async function () {
         const rtBefore = api.consts.system.version.specVersion.toNumber();
         await context.upgradeRuntime(context);

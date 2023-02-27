@@ -3,15 +3,15 @@ import "@polkadot/api-augment/polkadot";
 import PressToContinuePrompt from "inquirer-press-to-continue";
 import inquirer from "inquirer";
 import { MoonwallContext, runNetworkOnly } from "../internal/globalContext.js";
-import { importConfig } from "../../../utils/configReader.js";
+import { importConfig } from "../../utils/configReader.js";
 import clear from "clear";
 import chalk from "chalk";
-import {  Environment } from "../../../types/config.js";
+import { Environment } from "../../types/config.js";
 import { executeTests } from "./runTests.js";
 import { parse } from "yaml";
 import fs from "fs/promises";
-import { Foundation } from "../../../types/enum.js";
-import { globalConfig } from "../../../../moonwall.config.js";
+import { Foundation } from "../../types/enum.js";
+import { globalConfig } from "../../../moonwall.config.js";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 

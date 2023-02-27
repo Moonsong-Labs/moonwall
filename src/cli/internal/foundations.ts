@@ -2,7 +2,7 @@ import {
   ChopsticksLaunchSpec,
   DevLaunchSpec,
   GenericLaunchSpec,
-} from "../../../types/config";
+} from "../../types/config";
 
 export function parseRunCmd(launchSpec: DevLaunchSpec) {
   const cmd = launchSpec.binPath;
@@ -38,10 +38,16 @@ export function parseRunCmd(launchSpec: DevLaunchSpec) {
       args.push(`--rpc-port=${ports.rpcPort}`);
     }
   } else {
-    args.push(`--port=${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100 + 2}`);
-    args.push(`--ws-port=${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`);
     args.push(
-      `--rpc-port=${10000 + (Number(process.env.VITEST_POOL_ID || 1) * 100 + 1)}`
+      `--port=${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100 + 2}`
+    );
+    args.push(
+      `--ws-port=${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`
+    );
+    args.push(
+      `--rpc-port=${
+        10000 + (Number(process.env.VITEST_POOL_ID || 1) * 100 + 1)
+      }`
     );
   }
   return { cmd, args };
@@ -85,7 +91,7 @@ export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
       chopsticksArgs.push(`--port=${launchSpecs[0].wsPort}`);
     }
 
-    if (launchSpecs[0].wasmOverride){
+    if (launchSpecs[0].wasmOverride) {
       chopsticksArgs.push(`--wasm-override=${launchSpecs[0].wasmOverride}`);
     }
 

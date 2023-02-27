@@ -6,6 +6,59 @@ export const globalConfig: MoonwallConfig = {
   defaultTestTimeout: 40000,
   environments: [
     {
+      name: "mb_skip",
+      testFileDir: ["tests/dummy-smoke/"],
+      include: ["**/*conditional*"],
+      foundation: {
+        type: Foundation.ReadOnly,
+      },
+      connections: [
+        {
+          name: "MB",
+          type: ProviderType.Moonbeam,
+          endpoints: ["wss://moonbeam.api.onfinality.io/public-ws"],
+        },
+      ],
+    },
+    {
+      name: "mr_run",
+      testFileDir: ["tests/dummy-smoke/"],
+      include: ["**/*conditional*"],
+      foundation: {
+        type: Foundation.ReadOnly,
+      },
+      connections: [
+        {
+          name: "MB",
+          type: ProviderType.Moonbeam,
+          endpoints: ["wss://wss.api.moonriver.moonbeam.network"],
+        },
+      ],
+    },
+    {
+      name: "chop_state_test",
+      testFileDir: ["tests/chopsticks/"],
+      include: ["**/*state*"],
+      foundation: {
+        type: Foundation.Chopsticks,
+        launchSpec: [
+          {
+            name: "mb",
+            type: "parachain",
+            buildBlockMode: "manual",
+            configPath: "./moonbeamChopsticks.yml",
+          },
+        ],
+      },
+      connections: [
+        {
+          name: "MB",
+          type: ProviderType.Moonbeam,
+          endpoints: ["ws://localhost:12000"],
+        },
+      ],
+    },
+    {
       name: "chopsticks_xcm",
       testFileDir: [],
       foundation: {
@@ -43,8 +96,7 @@ export const globalConfig: MoonwallConfig = {
       testFileDir: ["tests/chopsticks/"],
       foundation: {
         type: Foundation.Chopsticks,
-        rtUpgradePath:
-          "./moonbeam-runtime-2200.wasm",
+        rtUpgradePath: "./moonbeam-runtime-2200.wasm",
         launchSpec: [
           {
             name: "mb",
@@ -64,14 +116,13 @@ export const globalConfig: MoonwallConfig = {
     },
     {
       name: "dev_minimal",
-      testFileDir: [ "tests/test_separation"],
+      testFileDir: ["tests/test_separation"],
       foundation: {
         type: Foundation.Dev,
         launchSpec: [
           {
             name: "moonbeam",
-            binPath:
-              "/home/timbotronic/workspace/moonbeam/moonbeam/target/release/moonbeam",
+            binPath: "./moonbeam",
           },
         ],
       },

@@ -11,7 +11,7 @@ import {
   executeProposalWithCouncil,
 } from "./governance.js";
 import { ChopsticksContext } from "../types/runner.js";
-import { alith } from "../cli/runner/lib/accounts.js";
+import { alith } from "../cli/lib/accounts.js";
 
 export interface UpgradePreferences {
   runtimeName: "moonbase" | "moonriver" | "moonbeam";

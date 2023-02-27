@@ -1,15 +1,15 @@
 import fs from "node:fs/promises";
-import { importConfig } from "../../../utils/configReader.js";
+import { importConfig } from "../../utils/configReader.js";
 import { startVitest } from "vitest/node";
 import { UserConfig } from "vitest";
 import { MoonwallContext } from "../internal/globalContext.js";
-import { Environment } from "../../../types/config.js";
+import { Environment } from "../../types/config.js";
 import path from "path";
 import fetch from "node-fetch";
 import chalk from "chalk";
 import semver from "semver";
 import { SingleBar } from "cli-progress";
-import { runTask } from "../../../utils/runner.js";
+import { runTask } from "../../utils/runner.js";
 
 const supportedBinaries = [
   "moonbeam",

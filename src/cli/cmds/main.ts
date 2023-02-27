@@ -1,8 +1,8 @@
 import chalk from "chalk";
 import inquirer from "inquirer";
 import PressToContinuePrompt from "inquirer-press-to-continue";
-import { importConfig } from "../../../utils/configReader.js";
-import { MoonwallConfig } from "../../../types/config.js";
+import { importConfig } from "../../utils/configReader.js";
+import { MoonwallConfig } from "../../types/config.js";
 import { generateConfig } from "./generateConfig.js";
 import colors from "colors";
 import clear from "clear";
