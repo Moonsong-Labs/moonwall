@@ -94,6 +94,7 @@ export const globalConfig: MoonwallConfig = {
     {
       name: "chop_test",
       testFileDir: ["tests/chopsticks/"],
+      include:["**/*basic*"],
       foundation: {
         type: Foundation.Chopsticks,
         rtUpgradePath: "./moonbeam-runtime-2200.wasm",

@@ -42,7 +42,7 @@ export async function executeTests(env: Environment) {
     options.threads = true;
     options.minThreads = env.threads;
   } else {
-    options.threads = false;
+    options.singleThread = true
   }
 
   return await startVitest("test", env.testFileDir, options);

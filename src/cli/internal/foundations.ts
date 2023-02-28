@@ -53,25 +53,9 @@ export function parseRunCmd(launchSpec: DevLaunchSpec) {
   return { cmd, args };
 }
 
-// export function parseChopsticksRunCmd(launchSpec: ChopsticksLaunchSpec) {
-//   const chopsticksCmd = "node";
-//   const chopsticksArgs = [
-//     "node_modules/@acala-network/chopsticks/chopsticks.js",
-//     "dev",
-//     `--config=${launchSpec.configPath}`,
-//   ];
-
-//   if (launchSpec.wsPort) {
-//     chopsticksArgs.push(`--port=${launchSpec.wsPort}`);
-//   }
-
-//   return { cmd: chopsticksCmd, args: chopsticksArgs };
-// }
-
 export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
   cmd: string;
   args: string[];
-  // rtUpgradePath: string;
 } {
   if (launchSpecs.length === 1) {
     const chopsticksCmd = "node";

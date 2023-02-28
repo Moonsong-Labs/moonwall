@@ -192,6 +192,17 @@ export class MoonwallContext {
         ).rpc.chain.getBlockHash(0)
       ).toString();
     }
+
+    if (this.foundation == Foundation.Chopsticks) {
+      this.genesis = (
+        await (
+          this.providers.find(
+            ({ type }) =>
+              type == ProviderType.PolkadotJs || type == ProviderType.Moonbeam
+          )!.api as ApiPromise
+        ).rpc.chain.getFinalizedHead()
+      ).toString();
+    }
   }
 
   public async disconnect(providerName?: string) {

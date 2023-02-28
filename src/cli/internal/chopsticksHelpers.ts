@@ -71,9 +71,7 @@ export async function sendSetHeadRequest(
 
   let result = "";
 
-  while (!ws.isConnected) {
-    await setTimeout(100);
-  }
+  await ws.isReady
 
   result = await ws.send("dev_setHead", [newHead]);
 
