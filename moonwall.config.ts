@@ -1,261 +1,262 @@
-import { Foundation, ProviderType } from "./src/types/enum.js";
-import { MoonwallConfig } from "./src/types/config.js";
+import { MoonwallConfig } from "./src/index.js";
 
-export const globalConfig: MoonwallConfig = {
-  label: "Global Test Config 🐯",
-  defaultTestTimeout: 40000,
-  environments: [
-    {
-      name: "mb_skip",
-      testFileDir: ["tests/dummy-smoke/"],
-      include: ["**/*conditional*"],
-      foundation: {
-        type: Foundation.ReadOnly,
-      },
-      connections: [
-        {
-          name: "MB",
-          type: ProviderType.Moonbeam,
-          endpoints: ["wss://moonbeam.api.onfinality.io/public-ws"],
+export default function globalConfig(): MoonwallConfig {
+  return {
+    label: "Global Test Config 🐯",
+    defaultTestTimeout: 40000,
+    environments: [
+      {
+        name: "mb_skip",
+        testFileDir: ["tests/dummy-smoke/"],
+        include: ["**/*conditional*"],
+        foundation: {
+          type: "read_only",
         },
-      ],
-    },
-    {
-      name: "mr_run",
-      testFileDir: ["tests/dummy-smoke/"],
-      include: ["**/*conditional*"],
-      foundation: {
-        type: Foundation.ReadOnly,
+        connections: [
+          {
+            name: "MB",
+            type: "moon",
+            endpoints: ["wss://moonbeam.api.onfinality.io/public-ws"],
+          },
+        ],
       },
-      connections: [
-        {
-          name: "MB",
-          type: ProviderType.Moonbeam,
-          endpoints: ["wss://wss.api.moonriver.moonbeam.network"],
+      {
+        name: "mr_run",
+        testFileDir: ["tests/dummy-smoke/"],
+        include: ["**/*conditional*"],
+        foundation: {
+          type: "read_only",
         },
-      ],
-    },
-    {
-      name: "chop_state_test",
-      testFileDir: ["tests/chopsticks/"],
-      include: ["**/*state*"],
-      foundation: {
-        type: Foundation.Chopsticks,
-        launchSpec: [
+        connections: [
+          {
+            name: "MB",
+            type: "moon",
+            endpoints: ["wss://wss.api.moonriver.moonbeam.network"],
+          },
+        ],
+      },
+      {
+        name: "chop_state_test",
+        testFileDir: ["tests/chopsticks/"],
+        include: ["**/*state*"],
+        foundation: {
+          type: "chopsticks",
+          launchSpec: [
+            {
+              name: "mb",
+              type: "parachain",
+              buildBlockMode: "manual",
+              configPath: "./moonbeamChopsticks.yml",
+            },
+          ],
+        },
+        connections: [
+          {
+            name: "MB",
+            type: "moon",
+            endpoints: ["ws://127.0.0.1:12000"],
+          },
+        ],
+      },
+      {
+        name: "chopsticks_xcm",
+        testFileDir: [],
+        foundation: {
+          type: "chopsticks",
+          launchSpec: [
+            {
+              name: "mb",
+              type: "parachain",
+              buildBlockMode: "manual",
+              configPath: "./moonriverChopsticks.yml",
+            },
+            {
+              name: "mb",
+              type: "parachain",
+              buildBlockMode: "manual",
+              configPath: "./moonbeamChopsticks.yml",
+            },
+          ],
+        },
+        connections: [
+          {
+            name: "MB",
+            type: "moon",
+            endpoints: ["ws://127.0.0.1:10000"],
+          },
+          {
+            name: "MR",
+            type: "moon",
+            endpoints: ["ws://127.0.0.1:12000"],
+          },
+        ],
+      },
+      {
+        name: "chop_test",
+        testFileDir: ["tests/chopsticks/"],
+        include: ["**/*basic*"],
+        foundation: {
+          type: "chopsticks",
+          rtUpgradePath: "./moonbeam-runtime-2200.wasm",
+          launchSpec: [
+            {
+              name: "mb",
+              type: "parachain",
+              buildBlockMode: "manual",
+              configPath: "./moonbeamChopsticks.yml",
+            },
+          ],
+        },
+        connections: [
+          {
+            name: "MB",
+            type: "moon",
+            endpoints: ["ws://127.0.0.1:12000"],
+          },
+        ],
+      },
+      {
+        name: "dev_minimal",
+        testFileDir: ["tests/test_separation"],
+        threads: 5,
+        foundation: {
+          type: "dev",
+          launchSpec: [
+            {
+              name: "moonbeam",
+              binPath: "./moonbeam",
+            },
+          ],
+        },
+      },
+      {
+        name: "wrongFoundation",
+        testFileDir: ["tests/run_error/"],
+        foundation: {
+          type: "read_only",
+        },
+        connections: [
+          {
+            name: "w3",
+            type: "web3",
+            endpoints: ["wss://moonbeam.api.onfinality.io/public-ws"],
+          },
           {
             name: "mb",
-            type: "parachain",
-            buildBlockMode: "manual",
-            configPath: "./moonbeamChopsticks.yml",
+            type: "moon",
+            endpoints: ["wss://moonbeam.api.onfinality.io/public-ws"],
           },
         ],
       },
-      connections: [
-        {
-          name: "MB",
-          type: ProviderType.Moonbeam,
-          endpoints: ["ws://127.0.0.1:12000"],
+      {
+        name: "pass",
+        testFileDir: ["tests/run_error/"],
+        foundation: {
+          type: "dev",
+          launchSpec: [
+            {
+              name: "moonbeam",
+              binPath: "./moonbeam",
+              ports: { p2pPort: 30333, wsPort: 9944, rpcPort: 9933 },
+              options: [
+                "--dev",
+                "--no-hardware-benchmarks",
+                "--no-telemetry",
+                "--reserved-only",
+                "--rpc-cors=all",
+                "--no-grandpa",
+                "--unsafe-ws-external",
+                "--sealing=manual",
+                "--force-authoring",
+                "--no-prometheus",
+              ],
+            },
+          ],
         },
-      ],
-    },
-    {
-      name: "chopsticks_xcm",
-      testFileDir: [],
-      foundation: {
-        type: Foundation.Chopsticks,
-        launchSpec: [
+        connections: [
+          {
+            name: "w3",
+            type: "web3",
+            endpoints: ["ws://127.0.0.1:9944"],
+          },
           {
             name: "mb",
-            type: "parachain",
-            buildBlockMode: "manual",
-            configPath: "./moonriverChopsticks.yml",
-          },
-          {
-            name: "mb",
-            type: "parachain",
-            buildBlockMode: "manual",
-            configPath: "./moonbeamChopsticks.yml",
+            type: "polkadotJs",
+            endpoints: ["ws://127.0.0.1:9944"],
           },
         ],
       },
-      connections: [
-        {
-          name: "MB",
-          type: ProviderType.Moonbeam,
-          endpoints: ["ws://127.0.0.1:10000"],
+      {
+        name: "web3_test",
+        testFileDir: ["tests/web3_test/"],
+        foundation: {
+          type: "read_only",
         },
-        {
-          name: "MR",
-          type: ProviderType.Moonbeam,
-          endpoints: ["ws://127.0.0.1:12000"],
-        },
-      ],
-    },
-    {
-      name: "chop_test",
-      testFileDir: ["tests/chopsticks/"],
-      include:["**/*basic*"],
-      foundation: {
-        type: Foundation.Chopsticks,
-        rtUpgradePath: "./moonbeam-runtime-2200.wasm",
-        launchSpec: [
+        connections: [
           {
-            name: "mb",
-            type: "parachain",
-            buildBlockMode: "manual",
-            configPath: "./moonbeamChopsticks.yml",
+            name: "w3",
+            type: "web3",
+            endpoints: ["wss://moonbeam.api.onfinality.io/public-ws"],
           },
         ],
       },
-      connections: [
-        {
-          name: "MB",
-          type: ProviderType.Moonbeam,
-          endpoints: ["ws://127.0.0.1:12000"],
+      {
+        name: "eth_test",
+        testFileDir: ["tests/eth_test/"],
+        include: ["**/{test,spec,test_,test-}*{ts,mts,cts}"],
+        foundation: {
+          type: "read_only",
         },
-      ],
-    },
-    {
-      name: "dev_minimal",
-      testFileDir: ["tests/test_separation"],
-      threads: 5,
-      foundation: {
-        type: Foundation.Dev,
-        launchSpec: [
+        connections: [
           {
-            name: "moonbeam",
-            binPath: "./moonbeam",
+            name: "eth",
+            type: "ethers",
+            endpoints: ["wss://moonbeam.api.onfinality.io/public-ws"],
           },
         ],
       },
-    },
-    {
-      name: "wrongFoundation",
-      testFileDir: ["tests/run_error/"],
-      foundation: {
-        type: Foundation.ReadOnly,
-      },
-      connections: [
-        {
-          name: "w3",
-          type: ProviderType.Web3,
-          endpoints: ["wss://moonbeam.api.onfinality.io/public-ws"],
+      {
+        name: "dev_test",
+        testFileDir: ["tests/dev_tests"],
+        foundation: {
+          type: "dev",
+          launchSpec: [
+            {
+              name: "moonbeam",
+              binPath: "./moonbeam",
+              ports: { p2pPort: 30333, wsPort: 9944, rpcPort: 9933 },
+              options: [
+                "--dev",
+                "--no-hardware-benchmarks",
+                "--no-telemetry",
+                "--reserved-only",
+                "--rpc-cors=all",
+                "--no-grandpa",
+                "--sealing=manual",
+                "--force-authoring",
+                "--no-prometheus",
+              ],
+            },
+          ],
         },
-        {
-          name: "mb",
-          type: ProviderType.Moonbeam,
-          endpoints: ["wss://moonbeam.api.onfinality.io/public-ws"],
-        },
-      ],
-    },
-    {
-      name: "pass",
-      testFileDir: ["tests/run_error/"],
-      foundation: {
-        type: Foundation.Dev,
-        launchSpec: [
+        connections: [
           {
-            name: "moonbeam",
-            binPath: "./moonbeam",
-            ports: { p2pPort: 30333, wsPort: 9944, rpcPort: 9933 },
-            options: [
-              "--dev",
-              "--no-hardware-benchmarks",
-              "--no-telemetry",
-              "--reserved-only",
-              "--rpc-cors=all",
-              "--no-grandpa",
-              "--unsafe-ws-external",
-              "--sealing=manual",
-              "--force-authoring",
-              "--no-prometheus",
-            ],
+            name: "eth",
+            type: "ethers",
+            endpoints: ["ws://127.0.0.1:9944"],
+          },
+          {
+            name: "w3",
+            type: "web3",
+            endpoints: ["ws://127.0.0.1:9944"],
+          },
+          {
+            name: "pjs",
+            type: "moon",
+            endpoints: ["ws://127.0.0.1:9944"],
           },
         ],
       },
-      connections: [
-        {
-          name: "w3",
-          type: ProviderType.Web3,
-          endpoints: ["ws://127.0.0.1:9944"],
-        },
-        {
-          name: "mb",
-          type: ProviderType.PolkadotJs,
-          endpoints: ["ws://127.0.0.1:9944"],
-        },
-      ],
-    },
-    {
-      name: "web3_test",
-      testFileDir: ["tests/web3_test/"],
-      foundation: {
-        type: Foundation.ReadOnly,
-      },
-      connections: [
-        {
-          name: "w3",
-          type: ProviderType.Web3,
-          endpoints: ["wss://moonbeam.api.onfinality.io/public-ws"],
-        },
-      ],
-    },
-    {
-      name: "eth_test",
-      testFileDir: ["tests/eth_test/"],
-      include: ["**/{test,spec,test_,test-}*{ts,mts,cts}"],
-      foundation: {
-        type: Foundation.ReadOnly,
-      },
-      connections: [
-        {
-          name: "eth",
-          type: ProviderType.Ethers,
-          endpoints: ["wss://moonbeam.api.onfinality.io/public-ws"],
-        },
-      ],
-    },
-    {
-      name: "dev_test",
-      testFileDir: ["tests/dev_tests"],
-      foundation: {
-        type: Foundation.Dev,
-        launchSpec: [
-          {
-            name: "moonbeam",
-            binPath: "./moonbeam",
-            ports: { p2pPort: 30333, wsPort: 9944, rpcPort: 9933 },
-            options: [
-              "--dev",
-              "--no-hardware-benchmarks",
-              "--no-telemetry",
-              "--reserved-only",
-              "--rpc-cors=all",
-              "--no-grandpa",
-              "--sealing=manual",
-              "--force-authoring",
-              "--no-prometheus",
-            ],
-          },
-        ],
-      },
-      connections: [
-        {
-          name: "eth",
-          type: ProviderType.Ethers,
-          endpoints: ["ws://127.0.0.1:9944"],
-        },
-        {
-          name: "w3",
-          type: ProviderType.Web3,
-          endpoints: ["ws://127.0.0.1:9944"],
-        },
-        {
-          name: "pjs",
-          type: ProviderType.Moonbeam,
-          endpoints: ["ws://127.0.0.1:9944"],
-        },
-      ],
-    },
-  ],
-};
+    ],
+  };
+}

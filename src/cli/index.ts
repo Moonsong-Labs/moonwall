@@ -1,4 +1,4 @@
-#!/usr/bin/env ts-node-esm
+#!/usr/bin/env ts-node
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import { testCmd } from "./cmds/runTests.js";

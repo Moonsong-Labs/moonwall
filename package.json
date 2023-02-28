@@ -2,30 +2,31 @@
   "name": "moonwall",
   "version": "1.0.0",
   "description": "Testing framework for the Moon family of projects",
-  "exports": "./dist/src/index.js",
-  "types": "./dist/src/index.d.ts",
+  "exports": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "type": "module",
   "engines": {
     "node": ">=14.16",
     "pnpm": ">=7"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf dist/** && tsc",
+    "prepublish": "npm run build",
     "display-reports": "pnpm exec vite preview --base __vitest__ --outDir html",
     "prepare": "npm run build",
     "compile": "rm -rf dist/* && tsc ",
-    "start": "node -r ts-node/register dist/src/cli/index.js",
+    "start": "npx ts-node ./src/cli/index.ts",
     "lint": "npx prettier --write --ignore-path .gitignore '**/*.(yml|js|ts|json)'",
     "test-bin": "npm run compile && npm run start -- test -f tests/*.ts",
     "new-cmd-js": "npm run compile && DEBUG=smoke* npm run start -- test -t SmokeCopy",
-    "bk-new-cmd": "DEBUG=global* npx ts-node-esm ./src/cli/index.ts test -t dev_test",
-    "new-cmd": "DEBUG=global* npx ts-node-esm ./src/cli/index.ts test -t new",
+    "bk-new-cmd": "DEBUG=global* npx ts-node ./src/cli/index.ts test -t dev_test",
+    "new-cmd": "DEBUG=global* npx ts-node ./src/cli/index.ts test -t new",
     "run-pkg": "DEBUG=global* npx moonwall test -t dev_test"
   },
   "bin": {
-    "moonwall": "./src/cli/index.ts"
+    "moonwall": "./dist/cli/index.js"
   },
-  "author": "",
+  "author": "timbrinded",
   "license": "ISC",
   "dependencies": {
     "@acala-network/chopsticks": "^0.4.0",
@@ -75,7 +76,7 @@
   },
   "devDependencies": {
     "@swc/cli": "^0.1.62",
-    "@swc/core": "^1.3.36",
+    "@swc/core": "^1.3.37",
     "@swc/helpers": "^0.4.14",
     "@types/debug": "^4.1.7",
     "@vitest/ui": "^0.28.5",

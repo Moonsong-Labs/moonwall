@@ -14,7 +14,7 @@ import { ApiPromise } from "@polkadot/api";
 describeSuite({
   id: "D01",
   title: "Dev test suite",
-  foundationMethods: Foundation.Dev,
+  foundationMethods: "dev",
   testCases: ({ it, context }) => {
     let api: WebSocketProvider;
     let w3: Web3;

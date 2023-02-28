@@ -1,5 +1,3 @@
-import { Foundation, ProviderType } from "./enum.js";
-
 export type MoonwallConfig = {
   label: string;
   defaultTestTimeout: number;
@@ -10,26 +8,24 @@ export type Environment = {
   html?: boolean;
   name: string;
   testFileDir: string[];
-  foundation: FoundationDetails;
+  foundation: IFoundation;
   include?: string[];
   connections?: ProviderConfig[];
   threads?: number;
 };
 
-export type FoundationDetails<TFoundation = Foundation> =
-  TFoundation extends Foundation.Dev
-    ? {
-        type: TFoundation;
+export type IFoundation = {
+  type: "dev"
+  launchSpec: DevLaunchSpec[]
+} | {
+  type: "chopsticks";
+  rtUpgradePath?: string;
+  launchSpec: ChopsticksLaunchSpec[];
+} | {
+  type: "read_only" | "fork" | "zombie" 
+}
 
-        launchSpec: DevLaunchSpec[];
-      }
-    : TFoundation extends Foundation.Chopsticks
-    ? {
-        type: TFoundation;
-        rtUpgradePath?: string;
-        launchSpec: ChopsticksLaunchSpec[];
-      }
-    : { type: TFoundation };
+export type FoundationType = IFoundation["type"]
 
 export interface GenericLaunchSpec {
   name: string;
@@ -60,3 +56,12 @@ export interface ProviderConfig {
   type: ProviderType;
   endpoints: string[];
 }
+
+export type Foundation = "read_only" | "dev" | "fork" | "zombie" | "chopsticks";
+
+export type ProviderType =
+  | "polkadotJs"
+  | "ethers"
+  | "web3"
+  | "moon"
+  | "unknown";

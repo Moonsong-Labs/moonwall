@@ -1,7 +1,8 @@
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { WebSocketProvider } from "ethers";
 import Web3 from "web3";
-import { Foundation, ProviderType } from "./enum.js";
+import { Foundation, ProviderType } from "./config.js";
+// import { Foundation, ProviderType } from "./enum.js";
 
 export type MoonwallEnvironment = {
   name: string;

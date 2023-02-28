@@ -91,26 +91,26 @@ const questions = [
 
 const getBody = (answers) => {
   return (
-    'import { Foundation, ProviderType } from "./src/types/enum.js";\n' +
-    'import { MoonwallConfig } from "./src/types/config.js";\n' +
-    `\n
-  export const globalConfig: MoonwallConfig = {
-  label: "${answers.Label}",
-  defaultTestTimeout: ${answers.Timeout},
-  environments: [
-    {
-      name: "${answers.EnvironmentName}",
-      testFileDir: "${answers.EnvironmentTestDir}",
-      foundation: {
-        type: Foundation.${answers.EnvironmentFoundation},
-        // Provide additional config here if you are starting a new network
-      },
-      connections: [
-        // Provide config here for connecting providers
-      ]
-    },
-    // Add additional environments as required
-  ],
-};`
+    'import { MoonwallConfig, Foundation, ProviderType } from "moonwall";\n\n' +
+    `    export default function globalConfig(): MoonwallConfig {
+      return {
+        label: "${answers.Label}",
+        defaultTestTimeout: ${answers.Timeout},
+        environments: [
+          {
+            name: "${answers.EnvironmentName}",
+            testFileDir: ["${answers.EnvironmentTestDir}"],
+            foundation: {
+              type: Foundation.${answers.EnvironmentFoundation},
+              // Provide additional config here if you are starting a new network
+            },
+            connections: [
+              // Provide config here for connecting providers
+            ],
+          },
+          // Add additional environments as required
+        ],
+      };
+    }`
   );
 };

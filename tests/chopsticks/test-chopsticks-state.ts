@@ -11,7 +11,7 @@ import {
 describeSuite({
   id: "S1",
   title: "Chopsticks test for state separation",
-  foundationMethods: Foundation.Chopsticks,
+  foundationMethods: "chopsticks",
   testCases: ({ context, it }) => {
     let api: ApiPromise;
 
@@ -53,7 +53,7 @@ describeSuite({
 describeSuite({
   id: "S2",
   title: "Chopsticks test for state separation",
-  foundationMethods: Foundation.Chopsticks,
+  foundationMethods: "chopsticks",
   testCases: ({ context, it }) => {
     let api: ApiPromise;
 

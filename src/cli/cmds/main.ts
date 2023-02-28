@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import inquirer from "inquirer";
 import PressToContinuePrompt from "inquirer-press-to-continue";
-import { importConfig } from "../../utils/configReader.js";
+import { importConfigDefault } from "../../utils/configReader.js";
 import { MoonwallConfig } from "../../types/config.js";
 import { generateConfig } from "./generateConfig.js";
 import colors from "colors";
@@ -14,10 +14,12 @@ inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
 export async function main() {
   while (true) {
-    let globalConfig: MoonwallConfig;
+    let globalConfig;
     try {
-      globalConfig = await importConfig("../../moonwall.config.js");
-    } catch (e) {}
+      globalConfig = await importConfigDefault();
+    } catch (e) {
+      console.log(e)
+    }
     clear();
     printIntro();
     if (await mainMenu(globalConfig)) {

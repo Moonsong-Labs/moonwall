@@ -1,6 +1,5 @@
 import { setTimeout } from "timers/promises";
 import { MoonwallContext } from "./globalContext.js";
-import { ProviderType } from "../../types/enum.js";
 import { GenericContext } from "../../types/runner.js";
 import { ApiTypes, AugmentedEvent } from "@polkadot/api/types/index.js";
 import { ApiPromise } from "@polkadot/api";
@@ -13,7 +12,7 @@ export async function getWsFromConfig(providerName?: string) {
     : MoonwallContext.getContext()
         .environment.providers.find(
           ({ type }) =>
-            type == ProviderType.Moonbeam || type == ProviderType.PolkadotJs
+            type == "moon" || type == "polkadotJs"
         )
         .ws();
 }
@@ -45,7 +44,7 @@ export async function sendNewBlockAndCheck(
 
 export async function chopForkToFinalizedHead(context: MoonwallContext) {
   const api = context.providers.find(
-    ({ type }) => type == ProviderType.Moonbeam
+    ({ type }) => type == "moon" || type == "polkadotJs"
   )!.api as ApiPromise;
 
   const finalizedHead = context.genesis;

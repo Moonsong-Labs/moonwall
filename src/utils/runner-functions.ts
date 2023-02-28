@@ -14,13 +14,13 @@ import { upgradeRuntimeChopsticks } from "./upgrade.js";
 import {
   ChopsticksContext,
   GenericContext,
-  TestSuiteType,
+  ITestSuiteType,
 } from "../types/runner.js";
 import {
   MoonwallContext,
   contextCreator,
 } from "../cli/internal/globalContext.js";
-import { Foundation, ProviderType } from "../types/enum.js";
+
 import { ConnectedProvider } from "../types/context.js";
 import { BlockCreation } from "./contextHelpers.js";
 import {
@@ -35,6 +35,7 @@ import {
   sendSetStorageRequest,
 } from "../cli/internal/chopsticksHelpers.js";
 import { importConfig } from "./configReader.js";
+import { ProviderType } from "../types/config.js";
 
 const debug = Debug("test:setup");
 
@@ -43,15 +44,15 @@ export function describeSuite({
   title,
   testCases,
   foundationMethods,
-}: TestSuiteType) {
+}: ITestSuiteType) {
   describe(`🗃️  #${id} ${title}`, function () {
     let ctx: MoonwallContext;
 
     beforeAll(async function () {
       ctx = MoonwallContext.getContext();
-      if (ctx.environment.foundationType === Foundation.Dev) {
+      if (ctx.environment.foundationType === "dev") {
         await devForkToFinalizedHead(ctx);
-      } else if (ctx.environment.foundationType === Foundation.Chopsticks) {
+      } else if (ctx.environment.foundationType === "chopsticks") {
         await chopForkToFinalizedHead(ctx);
       }
     });
@@ -71,7 +72,7 @@ export function describeSuite({
           )!.api as ApiPromise;
         } else {
           return MoonwallContext.getContext().providers.find(
-            (a) => a.type == ProviderType.Moonbeam || ProviderType.PolkadotJs
+            (a) => a.type == "moon" || a.type == "polkadotJs"
           )!.api as ApiPromise;
         }
       },
@@ -80,7 +81,7 @@ export function describeSuite({
           return context.providers[apiName];
         } else {
           return MoonwallContext.getContext().providers.find(
-            (a) => a.type == ProviderType.PolkadotJs
+            (a) => a.type == "polkadotJs"
           )!.api as ApiPromise;
         }
       },
@@ -89,7 +90,7 @@ export function describeSuite({
           return context.providers[apiName];
         } else {
           return MoonwallContext.getContext().providers.find(
-            (a) => a.type == ProviderType.Moonbeam
+            (a) => a.type == "moon"
           )!.api as ApiPromise;
         }
       },
@@ -98,7 +99,7 @@ export function describeSuite({
           return context.providers[apiName];
         } else {
           return MoonwallContext.getContext().providers.find(
-            (a) => a.type == ProviderType.Ethers
+            (a) => a.type == "ethers"
           )!.api as WebSocketProvider;
         }
       },
@@ -107,7 +108,7 @@ export function describeSuite({
           return context.providers[apiName];
         } else {
           return MoonwallContext.getContext().providers.find(
-            (a) => a.type == ProviderType.Web3
+            (a) => a.type == "web3"
           )!.api as Web3;
         }
       },
@@ -153,7 +154,7 @@ export function describeSuite({
       );
     }
 
-    if (foundationMethods == Foundation.Dev) {
+    if (foundationMethods == "dev") {
       testCases({
         context: {
           ...context,
@@ -191,7 +192,7 @@ export function describeSuite({
         },
         it: testCase,
       });
-    } else if (foundationMethods == Foundation.Chopsticks) {
+    } else if (foundationMethods == "chopsticks") {
       testCases({
         context: {
           ...context,

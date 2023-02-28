@@ -7,7 +7,7 @@ import { ApiPromise } from "@polkadot/api";
 describeSuite({
   id: "S100",
   title: "Testing for running against wrong network",
-  foundationMethods: Foundation.Dev,
+  foundationMethods: "dev",
   testCases: ({ it, context }) => {
     let api: Web3;
     let mbApi: ApiPromise;

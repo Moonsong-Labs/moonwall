@@ -3,21 +3,21 @@ import "@polkadot/api-augment/polkadot";
 import PressToContinuePrompt from "inquirer-press-to-continue";
 import inquirer from "inquirer";
 import { MoonwallContext, runNetworkOnly } from "../internal/globalContext.js";
-import { importConfig } from "../../utils/configReader.js";
 import clear from "clear";
 import chalk from "chalk";
 import { Environment } from "../../types/config.js";
 import { executeTests } from "./runTests.js";
 import { parse } from "yaml";
 import fs from "fs/promises";
-import { Foundation } from "../../types/enum.js";
-import { globalConfig } from "../../../moonwall.config.js";
+// import { Foundation } from "../../types/enum.js";
+import { importConfigDefault } from "../../utils/configReader.js";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
 export async function runNetwork(args) {
+  // TODO: handle case where no environments to run
   process.env.TEST_ENV = args.envName;
-  const globalConfig = await importConfig("../../moonwall.config.js");
+  const globalConfig = await importConfigDefault()
   const testFileDirs = globalConfig.environments.find(
     ({ name }) => name == args.envName
   )!.testFileDir;
@@ -151,10 +151,11 @@ const reportServicePorts = async () => {
     wsPort: string;
     httpPort: string;
   }[] = [];
+  const globalConfig = await importConfigDefault()
   const config = globalConfig.environments.find(
     ({ name }) => name == process.env.TEST_ENV
   )!;
-  if (config.foundation.type == Foundation.Dev) {
+  if (config.foundation.type == "dev") {
     const ports = { wsPort: "", httpPort: "" };
     ports.wsPort =
       ctx.environment.nodes[0].args
@@ -166,7 +167,7 @@ const reportServicePorts = async () => {
         .split("=")[1] || "9933";
 
     portsList.push(ports);
-  } else if (config.foundation.type == Foundation.Chopsticks) {
+  } else if (config.foundation.type == "chopsticks") {
     portsList.push(
       ...(await Promise.all(
         config.foundation.launchSpec.map(async ({ configPath }) => {

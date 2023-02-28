@@ -6,7 +6,7 @@ import { ApiPromise } from "@polkadot/api";
 describeSuite({
   id: "D01",
   title: "Dev test suite",
-  foundationMethods: Foundation.Dev,
+  foundationMethods: "dev",
   testCases: ({ it, context }) => {
     let api: ApiPromise;
     const DUMMY_ACCOUNT = "0x11d88f59425cbc1867883fcf93614bf70e87E854";

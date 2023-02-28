@@ -10,7 +10,8 @@ import {
   BlockCreation,
   BlockCreationResponse,
 } from "../utils/contextHelpers.js";
-import { Foundation, ProviderType } from "./enum.js";
+import { ProviderType } from "./config.js";
+// import { Foundation, ProviderType } from "./enum.js";
 
 export interface CustomTest {
   (params: {
@@ -23,30 +24,61 @@ export interface CustomTest {
   }): void;
 }
 
-export type TestSuiteType<TFoundation = Foundation> =
-  TFoundation extends Foundation.Dev
-    ? {
-        id: string;
-        title: string;
-        testCases: (TestContext: DevTestContext) => void;
-        options?: Object;
-        foundationMethods?: TFoundation;
-      }
-    : TFoundation extends Foundation.Chopsticks
-    ? {
-        id: string;
-        title: string;
-        testCases: (TestContext: ChopsticksTestContext) => void;
-        options?: Object;
-        foundationMethods?: TFoundation;
-      }
-    : {
-        id: string;
-        title: string;
-        testCases: (TestContext: GenericTestContext) => void;
-        options?: Object;
-        foundationMethods?: TFoundation;
-      };
+
+// export type IFoundation = {
+//   type: "dev"
+//   launchSpec: DevLaunchSpec[]
+// } | {
+//   type: "chopsticks";
+//   rtUpgradePath?: string;
+//   launchSpec: ChopsticksLaunchSpec[];
+// } | {
+//   type: "read_only" | "fork" | "zombie" 
+// }
+export type ITestSuiteType = {
+  id: string;
+  title: string;
+  testCases: (TestContext: DevTestContext) => void;
+  options?: Object;
+  foundationMethods?: "dev";
+} |{
+  id: string;
+  title: string;
+  testCases: (TestContext: ChopsticksTestContext) => void;
+  options?: Object;
+  foundationMethods?: "chopsticks";
+}|{
+  id: string;
+  title: string;
+  testCases: (TestContext: GenericTestContext) => void;
+  options?: Object;
+  foundationMethods?: "read_only" |"fork" | "zombie" ;
+};
+
+// export type TestSuiteType<TFoundation = Foundation> =
+//   TFoundation extends Foundation.Dev
+//     ? {
+//         id: string;
+//         title: string;
+//         testCases: (TestContext: DevTestContext) => void;
+//         options?: Object;
+//         foundationMethods?: TFoundation;
+//       }
+//     : TFoundation extends Foundation.Chopsticks
+//     ? {
+//         id: string;
+//         title: string;
+//         testCases: (TestContext: ChopsticksTestContext) => void;
+//         options?: Object;
+//         foundationMethods?: TFoundation;
+//       }
+//     : {
+//         id: string;
+//         title: string;
+//         testCases: (TestContext: GenericTestContext) => void;
+//         options?: Object;
+//         foundationMethods?: TFoundation;
+//       };
 
 export interface DevTestContext {
   context: DevModeContext;

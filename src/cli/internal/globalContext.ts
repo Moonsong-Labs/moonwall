@@ -1,11 +1,11 @@
-import { MoonwallConfig } from "../../types/config";
+import { Foundation, MoonwallConfig } from "../../types/config";
 import { ChildProcess } from "child_process";
 import {
   populateProviderInterface,
   prepareProviders,
 } from "../../utils/providers.js";
 import { launchDevNode } from "./localNode.js";
-import { importConfig } from "../../utils/configReader.js";
+import {  importConfigDefault } from "../../utils/configReader.js";
 import { parseChopsticksRunCmd, parseRunCmd } from "./foundations.js";
 import { ApiPromise } from "@polkadot/api";
 import Debug from "debug";
@@ -14,7 +14,6 @@ import {
   MoonwallEnvironment,
   MoonwallProvider,
 } from "../../types/context.js";
-import { Foundation, ProviderType } from "../../types/enum.js";
 const debugSetup = Debug("global:context");
 
 export class MoonwallContext {
@@ -43,7 +42,7 @@ export class MoonwallContext {
     };
 
     switch (env.foundation.type) {
-      case Foundation.ReadOnly:
+      case "read_only":
         if (!env.connections) {
           throw new Error(
             `${env.name} env config is missing connections specification, required by foundation READ_ONLY`
@@ -57,7 +56,7 @@ export class MoonwallContext {
         );
         break;
 
-      case Foundation.Chopsticks:
+      case "chopsticks":
         blob.nodes.push(parseChopsticksRunCmd(env.foundation.launchSpec));
         blob.providers.push(...prepareProviders(env.connections!));
         this.rtUpgradePath = env.foundation.rtUpgradePath;
@@ -66,7 +65,7 @@ export class MoonwallContext {
         );
         break;
 
-      case Foundation.Dev:
+      case "dev":
         const { cmd, args } = parseRunCmd(env.foundation.launchSpec[0]);
         blob.nodes.push({
           name: env.foundation.launchSpec[0].name,
@@ -79,7 +78,7 @@ export class MoonwallContext {
           : prepareProviders([
               {
                 name: "w3",
-                type: ProviderType.Web3,
+                type: "web3",
                 endpoints: [
                   `ws://127.0.0.1:${
                     10000 + Number(process.env.VITEST_POOL_ID || 1) * 100
@@ -88,7 +87,7 @@ export class MoonwallContext {
               },
               {
                 name: "eth",
-                type: ProviderType.Ethers,
+                type: "ethers",
                 endpoints: [
                   `ws://127.0.0.1:${
                     10000 + Number(process.env.VITEST_POOL_ID || 1) * 100
@@ -97,7 +96,7 @@ export class MoonwallContext {
               },
               {
                 name: "mb",
-                type: ProviderType.Moonbeam,
+                type: "moon",
                 endpoints: [
                   `ws://127.0.0.1:${
                     10000 + Number(process.env.VITEST_POOL_ID || 1) * 100
@@ -164,7 +163,7 @@ export class MoonwallContext {
       return MoonwallContext.getContext();
     }
 
-    const globalConfig = await importConfig("../../moonwall.config.js");
+    const globalConfig = await importConfigDefault();
     const promises = this.environment.providers.map(
       async ({ name, type, connect, ws }) =>
         new Promise(async (resolve) => {
@@ -182,23 +181,23 @@ export class MoonwallContext {
     )!.foundation.type;
 
     // TODO: Do we actually need this?
-    if (this.foundation == Foundation.Dev) {
+    if (this.foundation == "dev") {
       this.genesis = (
         await (
           this.providers.find(
             ({ type }) =>
-              type == ProviderType.PolkadotJs || type == ProviderType.Moonbeam
+              type == "polkadotJs" || type =="moon"
           )!.api as ApiPromise
         ).rpc.chain.getBlockHash(0)
       ).toString();
     }
 
-    if (this.foundation == Foundation.Chopsticks) {
+    if (this.foundation == "chopsticks") {
       this.genesis = (
         await (
           this.providers.find(
             ({ type }) =>
-              type == ProviderType.PolkadotJs || type == ProviderType.Moonbeam
+              type == "polkadotJs" || type == "moon"
           )!.api as ApiPromise
         ).rpc.chain.getFinalizedHead()
       ).toString();

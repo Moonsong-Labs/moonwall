@@ -6,7 +6,7 @@ import Web3 from "web3";
 describeSuite({
   id: "w3",
   title: "Web3 test suite",
-  foundationMethods: Foundation.Dev,
+  foundationMethods: "dev",
   testCases: ({ it, context }) => {
     let web3: Web3;
 

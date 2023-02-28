@@ -19,42 +19,52 @@ const timeout = Math.floor(timePeriod / 12); // 2 hour -> 10 minute timeout
 describeSuite({
   id: "S400",
   title: "Parachain blocks should be finalized",
+  foundationMethods: "read_only",
   testCases: ({ context, it }) => {
     const api = context.getPolkadotJs();
     const web3 = context.getWeb3();
 
-    it("C100", `should have a recently finalized block`, async function () {
-      const head = await api.rpc.chain.getFinalizedHead();
-      const block = await api.rpc.chain.getBlock(head);
-      const diff = Date.now() - getBlockTime(block);
+    it({
+      id: "C100",
+      title: `should have a recently finalized block`,
+      test: async function () {
+        const head = await api.rpc.chain.getFinalizedHead();
+        const block = await api.rpc.chain.getBlock(head);
+        const diff = Date.now() - getBlockTime(block);
 
-      debug(`Last finalized block was ${diff / 1000} seconds ago`);
-      expect(diff).to.be.lessThanOrEqual(10 * 60 * 1000); // 10 minutes in milliseconds
+        debug(`Last finalized block was ${diff / 1000} seconds ago`);
+        expect(diff).to.be.lessThanOrEqual(10 * 60 * 1000); // 10 minutes in milliseconds
+      },
     });
 
-    it("C200", `should have a recent eth block`, async function () {
-      const specVersion = api.consts.system.version.specVersion.toNumber();
-      const clientVersion = (await api.rpc.system.version())
-        .toString()
-        .split("-")[0];
+    it({
+      id: "C200",
+      title: `should have a recent eth block`,
+      test: async function () {
+        const specVersion = api.consts.system.version.specVersion.toNumber();
+        const clientVersion = (await api.rpc.system.version())
+          .toString()
+          .split("-")[0];
 
-      if (specVersion < 1900 || semverLt(clientVersion, "0.27.2")) {
-        debug(
-          `ChainSpec ${specVersion}, client ${clientVersion} unsupported BlockTag, skipping.`
-        );
-        this.skip();
-      }
-      const timestamp = (await web3.eth.getBlock("latest")).timestamp;
-      const diff = BigInt(Date.now()) - timestamp * 1000n;
-      debug(`Last eth block was ${diff / 1000n} seconds ago`);
-      expect(diff < 10n * 60n * 1000n).to.be.true;
+        if (specVersion < 1900 || semverLt(clientVersion, "0.27.2")) {
+          debug(
+            `ChainSpec ${specVersion}, client ${clientVersion} unsupported BlockTag, skipping.`
+          );
+          this.skip();
+        }
+        const timestamp = (await web3.eth.getBlock("latest")).timestamp;
+        const diff = BigInt(Date.now()) - timestamp * 1000n;
+        debug(`Last eth block was ${diff / 1000n} seconds ago`);
+        expect(diff < 10n * 60n * 1000n).to.be.true;
+      },
     });
 
-    it(
-      "C300",
-      `should have only finalized blocks in the past` +
+    it({
+      id: "C300",
+      title:
+        `should have only finalized blocks in the past` +
         ` ${(timePeriod / (1000 * 60 * 60)).toFixed(2)} hours #C300`,
-      async function () {
+      test: async function () {
         this.timeout(timeout);
         const signedBlock = await api.rpc.chain.getBlock(
           await api.rpc.chain.getFinalizedHead()
@@ -92,7 +102,7 @@ describeSuite({
             .map((a) => a.number)
             .join(", ")}`
         ).to.be.empty;
-      }
-    );
+      },
+    });
   },
 });

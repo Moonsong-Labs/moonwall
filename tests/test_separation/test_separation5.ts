@@ -1,4 +1,4 @@
-import { Foundation, describeSuite } from "../../src/index.js";
+import {  describeSuite } from "../../src/index.js";
 import { parseEther } from "ethers";
 import { alith } from "../../src/cli/lib/accounts.js";
 import { ApiPromise } from "@polkadot/api";
@@ -6,7 +6,7 @@ import { ApiPromise } from "@polkadot/api";
 describeSuite({
   id: "D02",
   title: "Dev test suite 2",
-  foundationMethods: Foundation.Dev,
+  foundationMethods: "dev",
   testCases: ({ it, context }) => {
     let api: ApiPromise;
     const DUMMY_ACCOUNT = "0x11d88f59425cbc1867883fcf93614bf70e87E854";
@@ -60,7 +60,7 @@ describeSuite({
 describeSuite({
   id: "D02",
   title: "Dev test suite",
-  foundationMethods: Foundation.Dev,
+  foundationMethods: "dev",
   testCases: ({ it, context }) => {
     let api: ApiPromise;
     const DUMMY_ACCOUNT = "0x11d88f59425cbc1867883fcf93614bf70e87E854";

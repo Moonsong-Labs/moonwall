@@ -19,7 +19,6 @@ import { ethers } from "ethers";
 import { MoonwallContext } from "../cli/internal/globalContext.js";
 import { assert } from "vitest";
 import Debug from "debug";
-import { Foundation } from "../types/enum.js";
 import { createAndFinalizeBlock } from "./block.js";
 const debug = Debug("context");
 
@@ -43,7 +42,7 @@ export async function createBlock<
   >
 > {
   assert(
-    MoonwallContext.getContext().foundation == Foundation.Dev,
+    MoonwallContext.getContext().foundation == "dev",
     "createBlock should only be used on DevMode foundations"
   );
   const results: (

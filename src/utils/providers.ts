@@ -6,9 +6,8 @@ import { ApiOptions } from "@polkadot/api/types";
 import { WebSocketProvider } from "ethers";
 import { Web3BaseProvider } from "web3-types";
 import Debug from "debug";
-import { ProviderConfig } from "../types/config.js";
+import { ProviderConfig, ProviderType } from "../types/config.js";
 import { MoonwallProvider } from "../types/context.js";
-import { ProviderType } from "../types/enum.js";
 const debug = Debug("global:providers");
 
 export function prepareProviders(
@@ -20,7 +19,7 @@ export function prepareProviders(
       : endpoints[0];
 
     switch (type) {
-      case ProviderType.PolkadotJs:
+      case "polkadotJs":
         debug(`🟢  PolkadotJs provider ${name} details prepared`);
         return {
           name,
@@ -37,7 +36,7 @@ export function prepareProviders(
           ws: () => new WsProvider(url),
         };
 
-      case ProviderType.Moonbeam:
+      case "moon":
         debug(`🟢  Moonbeam provider ${name} details prepared`);
         return {
           name,
@@ -55,7 +54,7 @@ export function prepareProviders(
           ws: () => new WsProvider(url),
         };
 
-      case ProviderType.Web3:
+      case "web3":
         debug(`🟢  Web3 provider ${name} details prepared`);
         return {
           name,
@@ -69,7 +68,7 @@ export function prepareProviders(
           },
         };
 
-      case ProviderType.Ethers:
+      case "ethers":
         debug(`🟢  Ethers provider ${name} details prepared`);
         return {
           name,
@@ -98,7 +97,7 @@ export async function populateProviderInterface(
   ws?: () => void
 ) {
   switch (type) {
-    case ProviderType.PolkadotJs:
+    case "polkadotJs":
       const pjsApi = (await connect()) as ApiPromise;
       return {
         name,
@@ -113,7 +112,7 @@ export async function populateProviderInterface(
         disconnect: async () => pjsApi.disconnect(),
       };
 
-    case ProviderType.Moonbeam:
+    case "moon":
       const mbApi = (await connect()) as ApiPromise;
       return {
         name,
@@ -128,7 +127,7 @@ export async function populateProviderInterface(
         disconnect: async () => mbApi.disconnect(),
       };
 
-    case ProviderType.Ethers:
+    case "ethers":
       const ethApi = (await connect()) as WebSocketProvider;
       return {
         name,
@@ -146,7 +145,7 @@ export async function populateProviderInterface(
         },
       };
 
-    case ProviderType.Web3:
+    case "web3":
       const web3Api = (await connect()) as Web3;
       return {
         name,

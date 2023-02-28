@@ -17,12 +17,11 @@ import { EventRecord } from "@polkadot/types/interfaces/types.js";
 import { RegistryError } from "@polkadot/types-codec/types/registry";
 import { MoonwallContext } from "./globalContext.js";
 import { ApiPromise } from "@polkadot/api";
-import { ProviderType } from "../../../src/types/enum.js";
 const debug = Debug("DevTest");
 
 export async function devForkToFinalizedHead(context: MoonwallContext) {
   const api = context.providers.find(
-    ({ type }) => type == ProviderType.Moonbeam
+    ({ type }) => type == "moon"
   )!.api as ApiPromise;
 
   const finalizedHead = (await api.rpc.chain.getFinalizedHead()).toString();

@@ -11,7 +11,7 @@ import {
 describeSuite({
   id: "X1",
   title: "Basic chopsticks test",
-  foundationMethods: Foundation.Chopsticks,
+  foundationMethods: "chopsticks",
   testCases: ({ context, it }) => {
     let api: ApiPromise;
 
