@@ -23,13 +23,13 @@
     "display-reports": "pnpm exec vite preview --base __vitest__ --outDir html",
     "prepare": "npm run build",
     "compile": "rm -rf dist/* && tsc ",
-    "start": "npx ts-node ./src/cli/entrypoint.ts",
+    "start": "npx ts-node --esm ./src/cli/entrypoint.ts test dev_test",
     "lint": "npx prettier --write --ignore-path .gitignore '**/*.(yml|js|ts|json)'",
     "test-bin": "npm run compile && npm run start -- test -f tests/*.ts",
     "new-cmd-js": "npm run compile && DEBUG=smoke* npm run start -- test -t SmokeCopy",
     "bk-new-cmd": "DEBUG=global* npx ts-node ./src/cli/index.ts test -t dev_test",
     "new-cmd": "DEBUG=global* npx ts-node ./src/cli/index.ts test -t new",
-    "run-pkg": "DEBUG=global* npx moonwall test -t dev_test"
+    "run-pkg": "DEBUG=global* npx moonwall test dev_test"
   },
   "bin": {
     "moonwall": "./moonwall.mjs"
