@@ -49,7 +49,6 @@ export function describeSuite({
     let ctx: MoonwallContext;
 
     beforeAll(async function () {
-      await setTimeout(10000)
       ctx = MoonwallContext.getContext();
       if (ctx.environment.foundationType === "dev") {
         await devForkToFinalizedHead(ctx);
