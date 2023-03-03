@@ -23,7 +23,7 @@
     "display-reports": "pnpm exec vite preview --base __vitest__ --outDir html",
     "prepare": "npm run build",
     "compile": "rm -rf dist/* && tsc ",
-    "start": "npx ts-node ./src/cli/index.ts",
+    "start": "npx ts-node ./src/cli/entrypoint.ts",
     "lint": "npx prettier --write --ignore-path .gitignore '**/*.(yml|js|ts|json)'",
     "test-bin": "npm run compile && npm run start -- test -f tests/*.ts",
     "new-cmd-js": "npm run compile && DEBUG=smoke* npm run start -- test -t SmokeCopy",
