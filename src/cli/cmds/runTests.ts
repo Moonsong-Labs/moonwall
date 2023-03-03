@@ -1,10 +1,13 @@
 import "@moonbeam-network/api-augment/moonbase";
 import "@polkadot/api-augment/polkadot";
-import {  importConfigDefault } from "../../utils/configReader.js";
+import { importConfigDefault } from "../../utils/configReader.js";
 import { startVitest } from "vitest/node";
 import { UserConfig } from "vitest";
-import { MoonwallContext } from "../internal/globalContext.js";
+import { MoonwallContext, contextCreator } from "../internal/globalContext.js";
 import { Environment } from "../../types/config.js";
+import url from "url";
+import path from "path";
+import { option } from "yargs";
 
 export async function testCmd(args) {
   const globalConfig = await importConfigDefault();
@@ -12,7 +15,6 @@ export async function testCmd(args) {
     ({ name }) => name === args.envName
   )!;
   process.env.TEST_ENV = args.envName;
-
   try {
     const vitest = await executeTests(env);
     await vitest!.close();
@@ -25,6 +27,8 @@ export async function testCmd(args) {
 }
 
 export async function executeTests(env: Environment) {
+  const currDir = url.fileURLToPath(new URL(".", import.meta.url));
+  const setupPath = path.join(currDir, "..", "internal", "setupFixture");
   const options: UserConfig = {
     watch: false,
     globals: true,
@@ -32,7 +36,7 @@ export async function executeTests(env: Environment) {
     testTimeout: 10000,
 
     hookTimeout: 500000,
-    setupFiles: ["src/cli/internal/setupFixture.ts"],
+    setupFiles: [setupPath],
     include: env.include
       ? env.include
       : ["**/{test,spec,test_,test-}*{ts,mts,cts}"],
@@ -41,8 +45,11 @@ export async function executeTests(env: Environment) {
   if (env.threads && env.threads > 1) {
     options.threads = true;
     options.minThreads = env.threads;
+    // options.isolate = false
   } else {
-    options.singleThread = true
+    options.singleThread = true;
+    options.threads = false;
+    options.isolate = false
   }
 
   return await startVitest("test", env.testFileDir, options);

@@ -1,6 +1,5 @@
-import { MoonwallConfig } from "./src/index.js";
-
-export default function globalConfig(): MoonwallConfig {
+// import { MoonwallConfig } from "./src/index.js";
+export default function globalConfig()/** : MoonwallConfig */{
   return {
     label: "Global Test Config 🐯",
     defaultTestTimeout: 40000,
@@ -97,13 +96,13 @@ export default function globalConfig(): MoonwallConfig {
         include: ["**/*basic*"],
         foundation: {
           type: "chopsticks",
-          rtUpgradePath: "./moonbeam-runtime-2200.wasm",
+          rtUpgradePath: "./moonriver-runtime-2201.wasm",
           launchSpec: [
             {
               name: "mb",
               type: "parachain",
               buildBlockMode: "manual",
-              configPath: "./moonbeamChopsticks.yml",
+              configPath: "./moonriverChopsticks.yml",
             },
           ],
         },
@@ -111,14 +110,14 @@ export default function globalConfig(): MoonwallConfig {
           {
             name: "MB",
             type: "moon",
-            endpoints: ["ws://127.0.0.1:12000"],
+            endpoints: ["ws://127.0.0.1:10000"],
           },
         ],
       },
       {
         name: "dev_minimal",
         testFileDir: ["tests/test_separation"],
-        threads: 5,
+        threads: 3,
         foundation: {
           type: "dev",
           launchSpec: [

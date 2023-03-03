@@ -1,7 +1,8 @@
 import { MoonwallConfig } from "../types/config.js";
 import fs from "fs/promises";
 import path from "path";
-import { fileURLToPath } from "url";
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
 
 export async function loadConfig(path: string): Promise<MoonwallConfig> {
   if (
@@ -24,14 +25,14 @@ export async function importConfig(
   return await import(configPath);
 }
 
-export async function importConfigDefault() {
-  const filePath = path.join(process.cwd(), "moonwall.config.ts");
+export async function importConfigDefault() { 
+   const filePath = path.join(process.cwd(), "moonwall.config.mjs");
   try {
     const imp = await import(filePath);
     return imp.default();
   } catch (e) {
     console.log(e);
-    throw new Error(`File not found at ${filePath}`);
+    throw new Error(`Error importing ${filePath}`);
   }
 }
 

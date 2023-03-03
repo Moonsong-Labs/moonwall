@@ -1,6 +1,6 @@
 import { ApiPromise } from "@polkadot/api";
-import { Foundation, describeSuite } from "../../src/index.js";
-import { expect } from "vitest";
+import { describeSuite } from "../../src/index.js";
+import { expect, beforeAll } from "vitest";
 import { parseEther, formatEther } from "ethers";
 import {
   CHARLETH_ADDRESS,
@@ -31,7 +31,7 @@ describeSuite({
           `You are now connected to ${chainName} at height #${currentBlockHeight}`
         );
         expect(currentBlockHeight).toBeGreaterThan(0);
-        expect(chainName).toBe("moonbeam");
+        expect(chainName).toBe("moonriver");
       },
     });
 
@@ -108,7 +108,7 @@ describeSuite({
       id: "T5",
       title: "Do an upgrade test",
       timeout: 120000,
-      modifier: "skip",
+      // modifier: "skip",
       test: async function () {
         const rtBefore = api.consts.system.version.specVersion.toNumber();
         await context.upgradeRuntime(context);

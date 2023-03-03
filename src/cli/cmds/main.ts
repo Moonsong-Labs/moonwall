@@ -76,7 +76,7 @@ async function mainMenu(config: MoonwallConfig) {
           : chalk.dim("5) Download:              NO CONFIG FOUND"),
         value: "download",
 
-        disabled: !configPresent,
+        disabled: false,
       },
       {
         name: `6) Quit Application`,
@@ -103,8 +103,6 @@ async function mainMenu(config: MoonwallConfig) {
       await testCmd(chosenTestEnv);
       return false;
     case "download":
-      // const chosenTestEnv = await chooseTestEnv(config);
-      // await testCmd(chosenTestEnv);
       await resolveDownloadChoice();
       return false;
     case "quit":
