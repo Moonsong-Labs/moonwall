@@ -1,34 +1,45 @@
 {
-  "exclude": ["tests", "moonwall.config*"],
   "compilerOptions": {
-    "module": "ES2022",
-    "baseUrl": ".",
-    "target": "ES2021",
-    "lib": ["ES2021"],
-    "declaration": true,
-    "outDir": "./dist/",
+    "target": "esnext",
+    "module": "esnext",
+    "lib": ["esnext", "dom"],
     "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "importHelpers": false,
-    "skipLibCheck": true,
-    "removeComments": true,
-    "preserveConstEnums": true,
-    "sourceMap": true,
-    "esModuleInterop": true,
+    
+    // "strict": true, renable this oneday
+    // "strictNullChecks": true, renable this one day
     "resolveJsonModule": true,
-    "forceConsistentCasingInFileNames": true,
-    "types": ["vitest/globals"]
+    "skipDefaultLibCheck": true,
+    "skipLibCheck": true,
+    "outDir": "./dist",
+    "declaration": true,
+    "inlineSourceMap": true,
+    "experimentalDecorators": true,
+
+    // "baseUrl": ".",
+    // "lib": ["ES2021"],
+    // "declaration": true,
+    // "outDir": "./dist/",
+    // "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    // "importHelpers": false,
+    // "skipLibCheck": true,
+    // "removeComments": true,
+    // "preserveConstEnums": true,
+    // "sourceMap": true,
+    // "esModuleInterop": true,
+    // "resolveJsonModule": true,
+    // "forceConsistentCasingInFileNames": true,
+    // "types": ["node", "vitest/globals"]
   },
+  "exclude": ["tests", "moonwall.config*",    "**/dist/**",],
   "ts-node": {
-    "transpileOnly": true,
-    "esm": true,
+    // "transpileOnly": true,
+    // "esm": true,
+    "esModuleInterop": true,
     "experimentalSpecifierResolution": "node",
     "files": true,
-    "compilerOptions": {
-      "baseUrl": ".",
-      "paths": {
-        "@moonwall": ["./src/cli/index.ts"]
-      }
-    }
+    // "compilerOptions": {
+    //   "module":"CommonJS"
+    // }
   }
 }

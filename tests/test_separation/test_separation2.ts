@@ -1,5 +1,6 @@
 import { Foundation, describeSuite } from "../../src/index.js";
 import { parseEther } from "ethers";
+import { beforeAll, expect } from "vitest";
 import { alith } from "../../src/cli/lib/accounts.js";
 import { ApiPromise } from "@polkadot/api";
 

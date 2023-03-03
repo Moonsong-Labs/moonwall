@@ -9,6 +9,7 @@ import clear from "clear";
 import { runNetwork } from "./runNetwork.js";
 import { testCmd } from "./runTests.js";
 import { downloader } from "./downloader.js";
+import pkg from "../../../package.json" assert { type: "json" };
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
@@ -76,7 +77,7 @@ async function mainMenu(config: MoonwallConfig) {
           : chalk.dim("5) Download:              NO CONFIG FOUND"),
         value: "download",
 
-        disabled: !configPresent,
+        disabled: false,
       },
       {
         name: `6) Quit Application`,
@@ -103,8 +104,6 @@ async function mainMenu(config: MoonwallConfig) {
       await testCmd(chosenTestEnv);
       return false;
     case "download":
-      // const chosenTestEnv = await chooseTestEnv(config);
-      // await testCmd(chosenTestEnv);
       await resolveDownloadChoice();
       return false;
     case "quit":
@@ -136,7 +135,7 @@ async function resolveDownloadChoice() {
       name: "path",
       type: "input",
       message: `Download - where would you like it placed?`,
-      default: "./",
+      default: "./tmp",
     },
   ]);
   await downloader(args);
@@ -247,8 +246,8 @@ const printIntro = () => {
     )
   );
   console.log(
-    chalk.bgCyan.magenta(
-      "                               MOONWALL                               "
+    chalk.bgCyan.white(
+      `                            MOONWALL   V${pkg.version}                         `
     )
   );
   console.log(

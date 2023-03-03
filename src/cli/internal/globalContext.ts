@@ -9,6 +9,7 @@ import {  importConfigDefault } from "../../utils/configReader.js";
 import { parseChopsticksRunCmd, parseRunCmd } from "./foundations.js";
 import { ApiPromise } from "@polkadot/api";
 import Debug from "debug";
+import { setTimeout } from "timers/promises";
 import {
   ConnectedProvider,
   MoonwallEnvironment,

@@ -45,10 +45,10 @@ export async function downloader(args) {
   const repoName = args.artifact.includes("-runtime")
     ? "moonbeam"
     : args.artifact;
-  const binaryPath = path.join("./", args.path, binary);
+    const enteredPath = args.path ? args.path : "tmp/"
+  const binaryPath = path.join("./", enteredPath, binary);
 
   const releases = (await (await fetch(repos[repoName])).json()) as any[];
-  // console.dir(releases[1], {depth: null})
   const release = args.artifact.includes("-runtime")
     ? releases.find((release) => {
         if (args.binVersion === "latest") {
@@ -75,7 +75,9 @@ export async function downloader(args) {
 
   process.stdout.write(`Downloading ${binary} ${args.binVersion} ....`);
   const asset = args.artifact.includes("-runtime")
-    ? release.assets.find((asset) => asset.name.includes(binary))
+    ? release.assets.find(
+        (asset) => asset.name.includes(binary) && asset.name.includes("wasm")
+      )
     : release.assets.find((asset) => asset.name === binary);
   const response = await fetch(asset.browser_download_url);
   if (!response.ok) {
