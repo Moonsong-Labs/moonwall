@@ -2,10 +2,8 @@
   "name": "moonwall",
   "version": "0.1.0",
   "description": "Testing framework for the Moon family of projects",
-  "exports": "./dist/index.js",
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "exports": "./src/index.ts",
+  "module": "./src/index.ts",
   "type": "module",
   "engines": {
     "node": ">=14.16.0",

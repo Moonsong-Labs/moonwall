@@ -45,7 +45,7 @@ export default function globalConfig()/** : MoonwallConfig */{
               name: "mb",
               type: "parachain",
               buildBlockMode: "manual",
-              configPath: "./moonbeamChopsticks.yml",
+              configPath: "./configs/moonbeamChopsticks.yml",
             },
           ],
         },
@@ -67,13 +67,13 @@ export default function globalConfig()/** : MoonwallConfig */{
               name: "mb",
               type: "parachain",
               buildBlockMode: "manual",
-              configPath: "./moonriverChopsticks.yml",
+              configPath: "./configs/moonriverChopsticks.yml",
             },
             {
               name: "mb",
               type: "parachain",
               buildBlockMode: "manual",
-              configPath: "./moonbeamChopsticks.yml",
+              configPath: "./configs/moonbeamChopsticks.yml",
             },
           ],
         },
@@ -96,13 +96,13 @@ export default function globalConfig()/** : MoonwallConfig */{
         include: ["**/*basic*"],
         foundation: {
           type: "chopsticks",
-          rtUpgradePath: "./moonriver-runtime-2201.wasm",
+          rtUpgradePath: "./tmp/moonriver-runtime-2201.wasm",
           launchSpec: [
             {
               name: "mb",
               type: "parachain",
               buildBlockMode: "manual",
-              configPath: "./moonriverChopsticks.yml",
+              configPath: "./configs/moonriverChopsticks.yml",
             },
           ],
         },
@@ -123,7 +123,7 @@ export default function globalConfig()/** : MoonwallConfig */{
           launchSpec: [
             {
               name: "moonbeam",
-              binPath: "./moonbeam",
+              binPath: "./tmp/moonbeam",
             },
           ],
         },
@@ -155,7 +155,7 @@ export default function globalConfig()/** : MoonwallConfig */{
           launchSpec: [
             {
               name: "moonbeam",
-              binPath: "./moonbeam",
+              binPath: "./tmp/moonbeam",
               ports: { p2pPort: 30333, wsPort: 9944, rpcPort: 9933 },
               options: [
                 "--dev",
@@ -222,7 +222,7 @@ export default function globalConfig()/** : MoonwallConfig */{
           launchSpec: [
             {
               name: "moonbeam",
-              binPath: "./moonbeam",
+              binPath: "./tmp/moonbeam",
               ports: { p2pPort: 30333, wsPort: 9944, rpcPort: 9933 },
               options: [
                 "--dev",

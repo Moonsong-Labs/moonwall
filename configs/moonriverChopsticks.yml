@@ -1,8 +1,7 @@
-endpoint: wss://wss.api.moonbeam.network
+endpoint: wss://wss.api.moonriver.moonbeam.network
 mock-signature-host: true
-port: 12000
-block: 3060576
-db: ./db_mb.sqlite
+port: 10000
+db: ./tmp/db_mr.sqlite
 
 import-storage:
   System:

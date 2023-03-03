@@ -45,7 +45,8 @@ export async function downloader(args) {
   const repoName = args.artifact.includes("-runtime")
     ? "moonbeam"
     : args.artifact;
-  const binaryPath = path.join("./", args.path, binary);
+    const enteredPath = args.path ? args.path : "tmp/"
+  const binaryPath = path.join("./", enteredPath, binary);
 
   const releases = (await (await fetch(repos[repoName])).json()) as any[];
   const release = args.artifact.includes("-runtime")

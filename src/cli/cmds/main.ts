@@ -9,6 +9,7 @@ import clear from "clear";
 import { runNetwork } from "./runNetwork.js";
 import { testCmd } from "./runTests.js";
 import { downloader } from "./downloader.js";
+import pkg from "../../../package.json" assert { type: "json" };
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
@@ -134,7 +135,7 @@ async function resolveDownloadChoice() {
       name: "path",
       type: "input",
       message: `Download - where would you like it placed?`,
-      default: "./",
+      default: "./tmp",
     },
   ]);
   await downloader(args);
@@ -245,8 +246,8 @@ const printIntro = () => {
     )
   );
   console.log(
-    chalk.bgCyan.magenta(
-      "                               MOONWALL                               "
+    chalk.bgCyan.white(
+      `                            MOONWALL   V${pkg.version}                         `
     )
   );
   console.log(
