@@ -223,6 +223,11 @@ export class MoonwallContext {
 
   public static getContext(config?: MoonwallConfig): MoonwallContext {
     if (!MoonwallContext.instance) {
+      // Retrieves the instance from the global context if it exists.
+      if (global.moonInstance) {
+        MoonwallContext.instance = global.moonInstance;
+        return MoonwallContext.instance;
+      }
       if (!config) {
         console.error(
           "❌ Config must be provided on Global Context instantiation"

@@ -4,10 +4,12 @@ import { importConfigDefault } from "../../utils/configReader.js";
 import Debug from "debug";
 const debugSetup = Debug("global:setup");
 
-beforeAll(async () => { 
+beforeAll(async () => {
   const globalConfig = await importConfigDefault();
   if (process.env.TEST_ENV) {
     const ctx = await contextCreator(globalConfig, process.env.TEST_ENV);
+    // Only global context is allowed in some vitest specific conditions.
+    global.moonInstance = MoonwallContext.getContext();
     await Promise.all(ctx.providers.map(async ({ greet }) => greet()));
   } else {
     throw new Error(`Trouble with env ${process.env.TEST_ENV}`);
