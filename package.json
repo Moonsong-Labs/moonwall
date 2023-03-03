@@ -29,7 +29,7 @@
     "new-cmd-js": "npm run compile && DEBUG=smoke* npm run start -- test -t SmokeCopy",
     "bk-new-cmd": "DEBUG=global* npx ts-node ./src/cli/index.ts test -t dev_test",
     "new-cmd": "DEBUG=global* npx ts-node ./src/cli/index.ts test -t new",
-    "run-pkg": "DEBUG=global* npx moonwall test -t dev_test"
+    "run-pkg": "DEBUG=global* npx moonwall test dev_test"
   },
   "bin": {
     "moonwall": "./moonwall.mjs"
