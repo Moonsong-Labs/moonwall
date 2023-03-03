@@ -1,8 +1,8 @@
-import { setTimeout } from "timers/promises";
-import { MoonwallContext } from "./globalContext.js";
-import { GenericContext } from "../../types/runner.js";
-import { ApiTypes, AugmentedEvent } from "@polkadot/api/types/index.js";
-import { ApiPromise } from "@polkadot/api";
+import { setTimeout } from 'timers/promises';
+import { MoonwallContext } from './globalContext.js';
+import { GenericContext } from '../../types/runner.js';
+import { ApiTypes, AugmentedEvent } from '@polkadot/api/types/index.js';
+import { ApiPromise } from '@polkadot/api';
 
 export async function getWsFromConfig(providerName?: string) {
   return providerName
@@ -10,10 +10,7 @@ export async function getWsFromConfig(providerName?: string) {
         .environment.providers.find(({ name }) => name == providerName)
         .ws()
     : MoonwallContext.getContext()
-        .environment.providers.find(
-          ({ type }) =>
-            type == "moon" || type == "polkadotJs"
-        )
+        .environment.providers.find(({ type }) => type == 'moon' || type == 'polkadotJs')
         .ws();
 }
 
@@ -31,7 +28,7 @@ export async function sendNewBlockAndCheck(
       .map((aEvt) => {
         if (
           api.events.system.ExtrinsicSuccess.is(aEvt.event) &&
-          (aEvt.event.data as any).dispatchInfo.class.toString() !== "Normal"
+          (aEvt.event.data as any).dispatchInfo.class.toString() !== 'Normal'
         ) {
           return false;
         }
@@ -43,9 +40,8 @@ export async function sendNewBlockAndCheck(
 }
 
 export async function chopForkToFinalizedHead(context: MoonwallContext) {
-  const api = context.providers.find(
-    ({ type }) => type == "moon" || type == "polkadotJs"
-  )!.api as ApiPromise;
+  const api = context.providers.find(({ type }) => type == 'moon' || type == 'polkadotJs')!
+    .api as ApiPromise;
 
   const finalizedHead = context.genesis;
   await sendSetHeadRequest(finalizedHead);
@@ -60,19 +56,14 @@ export async function chopForkToFinalizedHead(context: MoonwallContext) {
   }
 }
 
-export async function sendSetHeadRequest(
-  newHead: string,
-  providerName?: string
-) {
-  const ws = providerName
-    ? await getWsFromConfig(providerName)
-    : await getWsFromConfig();
+export async function sendSetHeadRequest(newHead: string, providerName?: string) {
+  const ws = providerName ? await getWsFromConfig(providerName) : await getWsFromConfig();
 
-  let result = "";
+  let result = '';
 
-  await ws.isReady
+  await ws.isReady;
 
-  result = await ws.send("dev_setHead", [newHead]);
+  result = await ws.send('dev_setHead', [newHead]);
 
   await ws.disconnect();
   return result;
@@ -83,21 +74,17 @@ export async function sendNewBlockRequest(params?: {
   count?: number;
   to?: number;
 }) {
-  const ws = params
-    ? await getWsFromConfig(params.providerName)
-    : await getWsFromConfig();
+  const ws = params ? await getWsFromConfig(params.providerName) : await getWsFromConfig();
 
-  let result = "";
+  let result = '';
 
   while (!ws.isConnected) {
     await setTimeout(100);
   }
   if ((params && params.count) || (params && params.to)) {
-    result = await ws.send("dev_newBlock", [
-      { count: params.count, to: params.to },
-    ]);
+    result = await ws.send('dev_newBlock', [{ count: params.count, to: params.to }]);
   } else {
-    result = await ws.send("dev_newBlock", [{ count: 1 }]);
+    result = await ws.send('dev_newBlock', [{ count: 1 }]);
   }
   await ws.disconnect();
   return result;
@@ -109,16 +96,14 @@ export async function sendSetStorageRequest(params?: {
   method: string;
   methodParams: any[];
 }) {
-  const ws = params
-    ? await getWsFromConfig(params.providerName)
-    : await getWsFromConfig();
+  const ws = params ? await getWsFromConfig(params.providerName) : await getWsFromConfig();
 
   while (!ws.isConnected) {
     await setTimeout(100);
   }
 
-  await ws.send("dev_setStorage", [
-    { [params!.module]: { [params!.method]: params!.methodParams } },
+  await ws.send('dev_setStorage', [
+    { [params!.module]: { [params!.method]: params!.methodParams } }
   ]);
   await ws.disconnect();
 }

@@ -1,15 +1,14 @@
 {
-    "version": "2.0.0",
-    "tasks": [
-      {
-        "label": "Build",
-        "type": "shell",
-        "command": "pnpm build",
-        "presentation": {
-          "reveal": "always",
-          "panel": "new"
-        }
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build",
+      "type": "shell",
+      "command": "pnpm build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
       }
-    ]
-  }
-  
+    }
+  ]
+}

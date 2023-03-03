@@ -1,3 +1,3 @@
-#!/usr/bin/env -S node --experimental-modules --experimental-specifier-resolution=node
+#!/usr/bin/env -S node --experimental-modules --experimental-specifier-resolution=node  --experimental-wasm-modules --experimental-json-modules
 
-import './dist/src/cli/entrypoint.js'
+import './dist2/cli/entrypoint.js'

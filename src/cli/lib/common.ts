@@ -1,4 +1,4 @@
-import { BN } from "@polkadot/util";
+import { BN } from '@polkadot/util';
 
 // Sort dict by key
 export function sortObjectByKeys(o) {
@@ -94,7 +94,5 @@ export function getObjectMethods(obj) {
   do {
     Object.getOwnPropertyNames(currentObj).map((item) => properties.add(item));
   } while ((currentObj = Object.getPrototypeOf(currentObj)));
-  return [...properties.keys()].filter(
-    (item: any) => typeof obj[item] === "function"
-  );
+  return [...properties.keys()].filter((item: any) => typeof obj[item] === 'function');
 }

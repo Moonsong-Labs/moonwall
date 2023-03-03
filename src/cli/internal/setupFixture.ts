@@ -1,11 +1,11 @@
-import { afterAll, beforeAll } from "vitest";
-import { MoonwallContext, contextCreator } from "./globalContext.js";
-import { importConfigDefault } from "../../utils/configReader.js";
-import Debug from "debug";
-const debugSetup = Debug("global:setup");
+import { afterAll, beforeAll } from 'vitest';
+import { MoonwallContext, contextCreator } from './globalContext.js';
+import { importJsonConfig } from '../../utils/configReader.js';
+import Debug from 'debug';
+const debugSetup = Debug('global:setup');
 
 beforeAll(async () => {
-  const globalConfig = await importConfigDefault();
+  const globalConfig = await importJsonConfig();
   if (process.env.TEST_ENV) {
     const ctx = await contextCreator(globalConfig, process.env.TEST_ENV);
     // Only global context is allowed in some vitest specific conditions.

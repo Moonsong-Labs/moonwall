@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json.schemastore.org/swcrc",
+  "jsc": {
+    "parser": {
+      "syntax": "typescript",
+      "dynamicImport": true,
+      "importAssertions": true
+    },
+    "experimental": {
+      "keepImportAssertions": true
+    },
+    "target": "es2022",
+    "minify": {
+      "compress": false,
+      "mangle": false
+    },
+    "preserveAllComments": true
+  },
+  "module": {
+    "type": "es6",
+    "strictMode": true,
+    // Can turn these on
+    "strict": false,
+    "lazy": false
+  },
+  "minify": false,
+  "sourceMaps": false
+}

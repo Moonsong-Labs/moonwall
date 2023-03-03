@@ -1,28 +1,21 @@
-import { Foundation, MoonwallConfig } from "../../types/config";
-import { ChildProcess } from "child_process";
-import {
-  populateProviderInterface,
-  prepareProviders,
-} from "../../utils/providers.js";
-import { launchDevNode } from "./localNode.js";
-import {  importConfigDefault } from "../../utils/configReader.js";
-import { parseChopsticksRunCmd, parseRunCmd } from "./foundations.js";
-import { ApiPromise } from "@polkadot/api";
-import Debug from "debug";
-import { setTimeout } from "timers/promises";
-import {
-  ConnectedProvider,
-  MoonwallEnvironment,
-  MoonwallProvider,
-} from "../../types/context.js";
-const debugSetup = Debug("global:context");
+import { FoundationType, MoonwallConfig } from '../../types/config';
+import { ChildProcess } from 'child_process';
+import { populateProviderInterface, prepareProviders } from '../../utils/providers.js';
+import { launchDevNode } from './localNode.js';
+import { importJsonConfig } from '../../utils/configReader.js';
+import { parseChopsticksRunCmd, parseRunCmd } from './foundations.js';
+import { ApiPromise } from '@polkadot/api';
+import Debug from 'debug';
+import { setTimeout } from 'timers/promises';
+import { ConnectedProvider, MoonwallEnvironment, MoonwallProvider } from '../../types/context.js';
+const debugSetup = Debug('global:context');
 
 export class MoonwallContext {
   private static instance: MoonwallContext;
   environment: MoonwallEnvironment;
   providers: ConnectedProvider[];
   nodes: ChildProcess[];
-  foundation?: Foundation;
+  foundation?: FoundationType;
   private _finalizedHead?: string;
   rtUpgradePath?: string;
 
@@ -31,19 +24,17 @@ export class MoonwallContext {
     this.providers = [];
     this.nodes = [];
 
-    const env = config.environments.find(
-      ({ name }) => name == process.env.TEST_ENV
-    )!;
+    const env = config.environments.find(({ name }) => name == process.env.TEST_ENV)!;
     const blob = {
       name: env.name,
       context: {},
       providers: [] as MoonwallProvider[],
       nodes: [] as { name?: string; cmd: string; args: string[] }[],
-      foundationType: env.foundation.type,
+      foundationType: env.foundation.type
     };
 
     switch (env.foundation.type) {
-      case "read_only":
+      case 'read_only':
         if (!env.connections) {
           throw new Error(
             `${env.name} env config is missing connections specification, required by foundation READ_ONLY`
@@ -52,68 +43,54 @@ export class MoonwallContext {
           blob.providers = prepareProviders(env.connections);
         }
 
-        debugSetup(
-          `🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`
-        );
+        debugSetup(`🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`);
         break;
 
-      case "chopsticks":
+      case 'chopsticks':
         blob.nodes.push(parseChopsticksRunCmd(env.foundation.launchSpec));
         blob.providers.push(...prepareProviders(env.connections!));
         this.rtUpgradePath = env.foundation.rtUpgradePath;
-        debugSetup(
-          `🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`
-        );
+        debugSetup(`🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`);
         break;
 
-      case "dev":
+      case 'dev':
         const { cmd, args } = parseRunCmd(env.foundation.launchSpec[0]);
         blob.nodes.push({
           name: env.foundation.launchSpec[0].name,
           cmd,
-          args,
+          args
         });
 
         blob.providers = env.connections
           ? prepareProviders(env.connections)
           : prepareProviders([
               {
-                name: "w3",
-                type: "web3",
+                name: 'w3',
+                type: 'web3',
                 endpoints: [
-                  `ws://127.0.0.1:${
-                    10000 + Number(process.env.VITEST_POOL_ID || 1) * 100
-                  }`,
-                ],
+                  `ws://127.0.0.1:${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`
+                ]
               },
               {
-                name: "eth",
-                type: "ethers",
+                name: 'eth',
+                type: 'ethers',
                 endpoints: [
-                  `ws://127.0.0.1:${
-                    10000 + Number(process.env.VITEST_POOL_ID || 1) * 100
-                  }`,
-                ],
+                  `ws://127.0.0.1:${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`
+                ]
               },
               {
-                name: "mb",
-                type: "moon",
+                name: 'mb',
+                type: 'moon',
                 endpoints: [
-                  `ws://127.0.0.1:${
-                    10000 + Number(process.env.VITEST_POOL_ID || 1) * 100
-                  }`,
-                ],
-              },
+                  `ws://127.0.0.1:${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`
+                ]
+              }
             ]);
 
-        debugSetup(
-          `🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`
-        );
+        debugSetup(`🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`);
         break;
       default:
-        debugSetup(
-          `🚧  Foundation "${env.foundation.type}" unsupported, skipping`
-        );
+        debugSetup(`🚧  Foundation "${env.foundation.type}" unsupported, skipping`);
         return;
     }
 
@@ -124,20 +101,20 @@ export class MoonwallContext {
     if (this._finalizedHead) {
       return this._finalizedHead;
     } else {
-      return "";
+      return '';
     }
   }
 
   public set genesis(hash: string) {
     if (hash.length !== 66) {
-      throw new Error("Cannot set genesis to invalid hash");
+      throw new Error('Cannot set genesis to invalid hash');
     }
     this._finalizedHead = hash;
   }
 
   public async startNetwork() {
     if (this.nodes.length > 0) {
-      console.log("Nodes already started! Skipping command");
+      console.log('Nodes already started! Skipping command');
       return MoonwallContext.getContext();
     }
 
@@ -151,7 +128,7 @@ export class MoonwallContext {
 
   public async stopNetwork() {
     if (this.nodes.length === 0) {
-      console.log("Nodes already stopped! Skipping command");
+      console.log('Nodes already stopped! Skipping command');
       return MoonwallContext.getContext();
     }
 
@@ -160,11 +137,11 @@ export class MoonwallContext {
 
   public async connectEnvironment(environmentName: string) {
     if (this.providers.length > 0) {
-      console.log("Providers already connected! Skipping command");
+      console.log('Providers already connected! Skipping command');
       return MoonwallContext.getContext();
     }
 
-    const globalConfig = await importConfigDefault();
+    const globalConfig = await importJsonConfig();
     const promises = this.environment.providers.map(
       async ({ name, type, connect, ws }) =>
         new Promise(async (resolve) => {
@@ -172,7 +149,7 @@ export class MoonwallContext {
             ? await populateProviderInterface(name, type, connect, ws)
             : await populateProviderInterface(name, type, connect);
           this.providers.push(providerDetails);
-          resolve("");
+          resolve('');
         })
     );
     await Promise.all(promises);
@@ -182,24 +159,20 @@ export class MoonwallContext {
     )!.foundation.type;
 
     // TODO: Do we actually need this?
-    if (this.foundation == "dev") {
+    if (this.foundation == 'dev') {
       this.genesis = (
         await (
-          this.providers.find(
-            ({ type }) =>
-              type == "polkadotJs" || type =="moon"
-          )!.api as ApiPromise
+          this.providers.find(({ type }) => type == 'polkadotJs' || type == 'moon')!
+            .api as ApiPromise
         ).rpc.chain.getBlockHash(0)
       ).toString();
     }
 
-    if (this.foundation == "chopsticks") {
+    if (this.foundation == 'chopsticks') {
       this.genesis = (
         await (
-          this.providers.find(
-            ({ type }) =>
-              type == "polkadotJs" || type == "moon"
-          )!.api as ApiPromise
+          this.providers.find(({ type }) => type == 'polkadotJs' || type == 'moon')!
+            .api as ApiPromise
         ).rpc.chain.getFinalizedHead()
       ).toString();
     }
@@ -217,7 +190,7 @@ export class MoonwallContext {
     if (MoonwallContext) {
       console.dir(MoonwallContext.getContext(), { depth: 1 });
     } else {
-      console.log("Global context not created!");
+      console.log('Global context not created!');
     }
   }
 
@@ -229,9 +202,7 @@ export class MoonwallContext {
         return MoonwallContext.instance;
       }
       if (!config) {
-        console.error(
-          "❌ Config must be provided on Global Context instantiation"
-        );
+        console.error('❌ Config must be provided on Global Context instantiation');
         process.exit(1);
       }
       MoonwallContext.instance = new MoonwallContext(config);
@@ -245,7 +216,7 @@ export class MoonwallContext {
     try {
       MoonwallContext.getContext().disconnect();
     } catch {
-      console.log("🛑  All connections disconnected");
+      console.log('🛑  All connections disconnected');
     }
     MoonwallContext.getContext().nodes.forEach((process) => process.kill());
   }
