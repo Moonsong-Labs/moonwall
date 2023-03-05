@@ -17,14 +17,13 @@ Test harness for testing on Moonbeam, Moonriver and more
 
 ## Examples
 
-> :information_source: Until this package is published on NPM, it must be installed manually with `pnpm link --global`
+> :information_source: Until this package is published on NPM, it must be installed manually with `npm link` && `npm link moonwall`
+> :information_source: Use `--help` for more information about arguments for each command
 
 #### To Run Locally without global install
 ```
 npx moonwall
 ```
-
-> :information_source: Use `--help` for more information about arguments for each command
 
 ```
 npx moonwall run <ENV_NAME>
