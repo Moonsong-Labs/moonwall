@@ -1,25 +1,20 @@
-import { rpcDefinitions, types } from "moonbeam-types-bundle";
-import { ApiPromise, WsProvider } from "@polkadot/api";
-import Web3 from "web3";
-import { ethers } from "ethers";
-import { ApiOptions } from "@polkadot/api/types";
-import { WebSocketProvider } from "ethers";
-import { Web3BaseProvider } from "web3-types";
-import Debug from "debug";
-import { ProviderConfig, ProviderType } from "../types/config.js";
-import { MoonwallProvider } from "../types/context.js";
-const debug = Debug("global:providers");
+import { rpcDefinitions, types } from 'moonbeam-types-bundle';
+import { ApiPromise, WsProvider } from '@polkadot/api';
+import Web3 from 'web3';
+import { ethers } from 'ethers';
+import { WebSocketProvider } from 'ethers';
+import { Web3BaseProvider } from 'web3-types';
+import Debug from 'debug';
+import { ProviderConfig, ProviderType } from '../types/config.js';
+import { MoonwallProvider } from '../types/context.js';
+const debug = Debug('global:providers');
 
-export function prepareProviders(
-  providerConfigs: ProviderConfig[]
-): MoonwallProvider[] {
+export function prepareProviders(providerConfigs: ProviderConfig[]): MoonwallProvider[] {
   return providerConfigs.map(({ name, endpoints, type }) => {
-    const url = endpoints.includes("ENV_VAR")
-      ? process.env.WSS_URL!
-      : endpoints[0];
+    const url = endpoints.includes('ENV_VAR') ? process.env.WSS_URL! : endpoints[0];
 
     switch (type) {
-      case "polkadotJs":
+      case 'polkadotJs':
         debug(`🟢  PolkadotJs provider ${name} details prepared`);
         return {
           name,
@@ -28,15 +23,15 @@ export function prepareProviders(
             const api = await ApiPromise.create({
               provider: new WsProvider(url),
               initWasm: false,
-              noInitWarn: true,
+              noInitWarn: true
             });
             await api.isReady;
             return api;
           },
-          ws: () => new WsProvider(url),
+          ws: () => new WsProvider(url)
         };
 
-      case "moon":
+      case 'moon':
         debug(`🟢  Moonbeam provider ${name} details prepared`);
         return {
           name,
@@ -46,29 +41,28 @@ export function prepareProviders(
               provider: new WsProvider(url),
               rpc: rpcDefinitions,
               typesBundle: types,
-              noInitWarn: true,
+              noInitWarn: true
             });
             await moonApi.isReady;
             return moonApi;
           },
-          ws: () => new WsProvider(url),
+          ws: () => new WsProvider(url)
         };
 
-      case "web3":
+      case 'web3':
         debug(`🟢  Web3 provider ${name} details prepared`);
         return {
           name,
           type,
           // ws: wsProvider,
           connect: () => {
-            const wsProvider: Web3BaseProvider =
-              new Web3.providers.WebsocketProvider(url);
+            const wsProvider: Web3BaseProvider = new Web3.providers.WebsocketProvider(url);
             const ethApi = new Web3(wsProvider);
             return ethApi;
-          },
+          }
         };
 
-      case "ethers":
+      case 'ethers':
         debug(`🟢  Ethers provider ${name} details prepared`);
         return {
           name,
@@ -76,15 +70,14 @@ export function prepareProviders(
           connect: async () => {
             const ethersApi = new ethers.WebSocketProvider(url);
             return ethersApi;
-          },
+          }
         };
 
       default:
         return {
           name,
           type,
-          connect: () =>
-            console.log(`🚧  provider ${name} not yet implemented`),
+          connect: () => console.log(`🚧  provider ${name} not yet implemented`)
         };
     }
   });
@@ -97,7 +90,7 @@ export async function populateProviderInterface(
   ws?: () => void
 ) {
   switch (type) {
-    case "polkadotJs":
+    case 'polkadotJs':
       const pjsApi = (await connect()) as ApiPromise;
       return {
         name,
@@ -109,10 +102,10 @@ export async function populateProviderInterface(
               ` ${pjsApi.consts.system.version.specName.toString()} ` +
               `RT${pjsApi.consts.system.version.specVersion.toNumber()}`
           ),
-        disconnect: async () => pjsApi.disconnect(),
+        disconnect: async () => pjsApi.disconnect()
       };
 
-    case "moon":
+    case 'moon':
       const mbApi = (await connect()) as ApiPromise;
       return {
         name,
@@ -124,10 +117,10 @@ export async function populateProviderInterface(
               ` ${mbApi.consts.system.version.specName.toString()} ` +
               `RT${mbApi.consts.system.version.specVersion.toNumber()}`
           ),
-        disconnect: async () => mbApi.disconnect(),
+        disconnect: async () => mbApi.disconnect()
       };
 
-    case "ethers":
+    case 'ethers':
       const ethApi = (await connect()) as WebSocketProvider;
       return {
         name,
@@ -135,17 +128,16 @@ export async function populateProviderInterface(
         type,
         greet: async () =>
           debug(
-            `👋  Provider ${name} is connected to chain ` +
-              (await ethApi.getNetwork()).chainId
+            `👋  Provider ${name} is connected to chain ` + (await ethApi.getNetwork()).chainId
           ),
         disconnect: async () => {
           ethApi.removeAllListeners();
           ethApi.provider.destroy();
           // ethApi.destroy();
-        },
+        }
       };
 
-    case "web3":
+    case 'web3':
       const web3Api = (await connect()) as Web3;
       return {
         name,
@@ -153,16 +145,15 @@ export async function populateProviderInterface(
         type,
         greet: async () =>
           console.log(
-            `👋 Provider ${name} is connected to chain ` +
-              (await web3Api.eth.getChainId())
+            `👋 Provider ${name} is connected to chain ` + (await web3Api.eth.getChainId())
           ),
         disconnect: async () => {
           // @ts-ignore
           web3Api.currentProvider.disconnect(1000);
-        },
+        }
       };
 
     default:
-      throw new Error("UNKNOWN TYPE");
+      throw new Error('UNKNOWN TYPE');
   }
 }

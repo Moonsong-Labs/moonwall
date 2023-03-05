@@ -1,11 +1,11 @@
-import { ApiPromise } from "@polkadot/api";
-import { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types";
-import { KeyringPair } from "@polkadot/keyring/types";
-import { PalletDemocracyReferendumInfo } from "@polkadot/types/lookup";
-import { blake2AsHex } from "@polkadot/util-crypto";
-import { expect } from "chai";
-import { alith, baltathar, charleth, dorothy } from "../cli/lib/accounts.js";
-import { DevModeContext } from "../types/runner.js";
+import { ApiPromise } from '@polkadot/api';
+import { ApiTypes, SubmittableExtrinsic } from '@polkadot/api/types';
+import { KeyringPair } from '@polkadot/keyring/types';
+import { PalletDemocracyReferendumInfo } from '@polkadot/types/lookup';
+import { blake2AsHex } from '@polkadot/util-crypto';
+import { expect } from 'chai';
+import { alith, baltathar, charleth, dorothy } from '../cli/lib/accounts.js';
+import { DevModeContext } from '../types/runner.js';
 
 export const COUNCIL_MEMBERS = [baltathar, charleth, dorothy];
 export const COUNCIL_THRESHOLD = Math.ceil((COUNCIL_MEMBERS.length * 2) / 3);
@@ -25,12 +25,9 @@ export const notePreimage = async <
   proposal: Call,
   account: KeyringPair = alith
 ): Promise<string> => {
-  const encodedProposal = proposal.method.toHex() || "";
+  const encodedProposal = proposal.method.toHex() || '';
   await context.createBlock(
-    context
-      .getPolkadotJs()
-      .tx.preimage.notePreimage(encodedProposal)
-      .signAsync(account)
+    context.getPolkadotJs().tx.preimage.notePreimage(encodedProposal).signAsync(account)
   );
 
   return blake2AsHex(encodedProposal);
@@ -46,27 +43,20 @@ export const instantFastTrack = async <
   { votingPeriod, delayPeriod } = { votingPeriod: 2, delayPeriod: 0 }
 ): Promise<string> => {
   const proposalHash =
-    typeof proposal == "string"
-      ? proposal
-      : await notePreimage(context, proposal);
+    typeof proposal == 'string' ? proposal : await notePreimage(context, proposal);
 
   await execCouncilProposal(
     context,
     context.getPolkadotJs().tx.democracy.externalProposeMajority({
       Lookup: {
         hash: proposalHash,
-        len:
-          typeof proposal == "string"
-            ? proposal
-            : proposal.method.encodedLength,
-      },
+        len: typeof proposal == 'string' ? proposal : proposal.method.encodedLength
+      }
     } as any)
   );
   await execTechnicalCommitteeProposal(
     context,
-    context
-      .getPolkadotJs()
-      .tx.democracy.fastTrack(proposalHash, votingPeriod, delayPeriod)
+    context.getPolkadotJs().tx.democracy.fastTrack(proposalHash, votingPeriod, delayPeriod)
   );
   return proposalHash;
 };
@@ -97,22 +87,17 @@ export const execCouncilProposal = async <
     return proposalResult;
   }
 
-  expect(
-    proposalResult.successful,
-    `Council proposal refused: ${proposalResult?.error?.name}`
-  ).to.be.true;
+  expect(proposalResult.successful, `Council proposal refused: ${proposalResult?.error?.name}`).to
+    .be.true;
   const proposalHash = proposalResult.events
-    .find(({ event: { method } }) => method.toString() == "Proposed")
+    .find(({ event: { method } }) => method.toString() == 'Proposed')
     .event.data[2].toHex() as string;
 
   // Dorothy vote for this proposal and close it
 
   await Promise.all(
     voters.map((voter) =>
-      context
-        .getPolkadotJs()
-        .tx.councilCollective.vote(proposalHash, 0, true)
-        .signAndSend(voter)
+      context.getPolkadotJs().tx.councilCollective.vote(proposalHash, 0, true).signAndSend(voter)
     )
   );
   await context.createBlock();
@@ -124,7 +109,7 @@ export const execCouncilProposal = async <
         0,
         {
           refTime: 1_000_000_000,
-          proofSize: 0,
+          proofSize: 0
         } as any,
         lengthBound
       )
@@ -145,9 +130,7 @@ export const proposeReferendaAndDeposit = async <
 ): Promise<[Number, String]> => {
   // Fetch proposal hash
   const proposalHash =
-    typeof proposal == "string"
-      ? proposal
-      : await notePreimage(context, proposal);
+    typeof proposal == 'string' ? proposal : await notePreimage(context, proposal);
 
   // Post referenda
   const { result: proposalResult } = await context.createBlock(
@@ -158,32 +141,24 @@ export const proposeReferendaAndDeposit = async <
         {
           Lookup: {
             hash: proposalHash,
-            len:
-              typeof proposal == "string"
-                ? proposal
-                : proposal.method.encodedLength,
-          },
+            len: typeof proposal == 'string' ? proposal : proposal.method.encodedLength
+          }
         },
         { At: 0 }
       )
       .signAsync(alith)
   );
 
-  expect(
-    proposalResult.successful,
-    `Unable to post referenda: ${proposalResult?.error?.name}`
-  ).to.be.true;
+  expect(proposalResult.successful, `Unable to post referenda: ${proposalResult?.error?.name}`).to
+    .be.true;
 
   const refIndex = proposalResult.events
-    .find(({ event: { method } }) => method.toString() == "Submitted")
+    .find(({ event: { method } }) => method.toString() == 'Submitted')
     .event.data[0].toString();
 
   // Place decision deposit
   await context.createBlock(
-    context
-      .getPolkadotJs()
-      .tx.referenda.placeDecisionDeposit(refIndex)
-      .signAsync(decisionDepositer)
+    context.getPolkadotJs().tx.referenda.placeDecisionDeposit(refIndex).signAsync(decisionDepositer)
   );
 
   return [+refIndex, proposalHash];
@@ -203,7 +178,7 @@ export const dispatchAsGeneralAdmin = async <
     context.getPolkadotJs().tx.sudo.sudo(
       context.getPolkadotJs().tx.utility.dispatchAs(
         {
-          Origins: "GeneralAdmin",
+          Origins: 'GeneralAdmin'
         } as any,
         call
       )
@@ -225,11 +200,11 @@ export const maximizeConvictionVotingOf = async (
       .getPolkadotJs()
       .tx.convictionVoting.vote(refIndex as any, {
         Standard: {
-          vote: { aye: true, conviction: "Locked6x" },
+          vote: { aye: true, conviction: 'Locked6x' },
           balance: await (
             await context.getPolkadotJs().query.system.account(alith.address)
-          ).data.free,
-        },
+          ).data.free
+        }
       })
       .paymentInfo(alith)
   ).partialFee;
@@ -241,11 +216,11 @@ export const maximizeConvictionVotingOf = async (
         .getPolkadotJs()
         .tx.convictionVoting.vote(refIndex as any, {
           Standard: {
-            vote: { aye: true, conviction: "Locked6x" },
+            vote: { aye: true, conviction: 'Locked6x' },
             balance: await (
               await context.getPolkadotJs().query.system.account(voter.address)
-            ).data.free.sub(fee),
-          },
+            ).data.free.sub(fee)
+          }
         })
         .signAsync(voter)
     )
@@ -269,9 +244,7 @@ export const execTechnicalCommitteeProposal = async <
   // Alith submit the proposal to the council (and therefore implicitly votes for)
   let lengthBound = polkadotCall.encodedLength;
   const { result: proposalResult } = await context.createBlock(
-    context
-      .getPolkadotJs()
-      .tx.techCommitteeCollective.propose(threshold, polkadotCall, lengthBound)
+    context.getPolkadotJs().tx.techCommitteeCollective.propose(threshold, polkadotCall, lengthBound)
   );
 
   if (threshold <= 1) {
@@ -279,28 +252,20 @@ export const execTechnicalCommitteeProposal = async <
     return proposalResult;
   }
 
-  expect(
-    proposalResult.successful,
-    `Council proposal refused: ${proposalResult?.error?.name}`
-  ).to.be.true;
+  expect(proposalResult.successful, `Council proposal refused: ${proposalResult?.error?.name}`).to
+    .be.true;
   const proposalHash = proposalResult.events
-    .find(({ event: { method } }) => method.toString() == "Proposed")
+    .find(({ event: { method } }) => method.toString() == 'Proposed')
     .event.data[2].toHex() as string;
 
   // Get proposal count
-  const proposalCount = await context
-    .getPolkadotJs()
-    .query.techCommitteeCollective.proposalCount();
+  const proposalCount = await context.getPolkadotJs().query.techCommitteeCollective.proposalCount();
 
   await context.createBlock(
     voters.map((voter) =>
       context
         .getPolkadotJs()
-        .tx.techCommitteeCollective.vote(
-          proposalHash,
-          Number(proposalCount) - 1,
-          true
-        )
+        .tx.techCommitteeCollective.vote(proposalHash, Number(proposalCount) - 1, true)
         .signAsync(voter)
     )
   );
@@ -312,7 +277,7 @@ export const execTechnicalCommitteeProposal = async <
         Number(proposalCount) - 1,
         {
           refTime: 1_000_000_000,
-          proofSize: 0,
+          proofSize: 0
         } as any,
         lengthBound
       )
@@ -321,14 +286,9 @@ export const execTechnicalCommitteeProposal = async <
   return closeResult;
 };
 
-export const executeProposalWithCouncil = async (
-  api: ApiPromise,
-  encodedHash: string
-) => {
+export const executeProposalWithCouncil = async (api: ApiPromise, encodedHash: string) => {
   let nonce = (await api.rpc.system.accountNextIndex(alith.address)).toNumber();
-  let referendumNextIndex = (
-    await api.query.democracy.referendumCount()
-  ).toNumber();
+  let referendumNextIndex = (await api.query.democracy.referendumCount()).toNumber();
 
   // process.stdout.write(
   //   `Sending council motion (${encodedHash} ` +
@@ -343,9 +303,7 @@ export const executeProposalWithCouncil = async (
   let fastTrack = api.tx.democracy.fastTrack(encodedHash, 1, 0);
   const voteAmount = 1n * 10n ** BigInt(api.registry.chainDecimals[0]);
 
-  process.stdout.write(
-    `Sending motion + fast-track + vote for ${encodedHash}...`
-  );
+  process.stdout.write(`Sending motion + fast-track + vote for ${encodedHash}...`);
   await Promise.all([
     api.tx.councilCollective
       .propose(1, external, external.length)
@@ -357,24 +315,21 @@ export const executeProposalWithCouncil = async (
       .vote(referendumNextIndex, {
         Standard: {
           balance: voteAmount,
-          vote: { aye: true, conviction: 1 },
-        },
+          vote: { aye: true, conviction: 1 }
+        }
       })
-      .signAndSend(alith, { nonce: nonce++ }),
+      .signAndSend(alith, { nonce: nonce++ })
   ]);
   process.stdout.write(`✅\n`);
 
-  process.stdout.write(
-    `Waiting for referendum [${referendumNextIndex}] to be executed...`
-  );
+  process.stdout.write(`Waiting for referendum [${referendumNextIndex}] to be executed...`);
   let referenda: PalletDemocracyReferendumInfo = null;
   while (!referenda) {
     referenda = (await api.query.democracy.referendumInfoOf.entries())
       .find(
         (ref) =>
           ref[1].unwrap().isFinished &&
-          api.registry.createType("u32", ref[0].toU8a().slice(-4)).toNumber() ==
-            referendumNextIndex
+          api.registry.createType('u32', ref[0].toU8a().slice(-4)).toNumber() == referendumNextIndex
       )?.[1]
       .unwrap();
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -385,17 +340,12 @@ export const executeProposalWithCouncil = async (
   }
 };
 
-export const cancelReferendaWithCouncil = async (
-  api: ApiPromise,
-  refIndex: number
-) => {
+export const cancelReferendaWithCouncil = async (api: ApiPromise, refIndex: number) => {
   const proposal = api.tx.democracy.cancelReferendum(refIndex);
   const encodedProposal = proposal.method.toHex();
   const encodedHash = blake2AsHex(encodedProposal);
 
   let nonce = (await api.rpc.system.accountNextIndex(alith.address)).toNumber();
-  await api.tx.democracy
-    .notePreimage(encodedProposal)
-    .signAndSend(alith, { nonce: nonce++ });
+  await api.tx.democracy.notePreimage(encodedProposal).signAndSend(alith, { nonce: nonce++ });
   await executeProposalWithCouncil(api, encodedHash);
 };

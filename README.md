@@ -4,7 +4,9 @@ Test harness for testing on Moonbeam, Moonriver and more
 
 ## Installation
 
-Run `pnpm i` to install all dependencies
+- `pnpm i` to install all dependencies.
+- `pnpm build` to build the application locally.
+- `npx moonwall` to run the application
 
 ## Functions
 
@@ -17,16 +19,22 @@ Run `pnpm i` to install all dependencies
 
 > :information_source: Until this package is published on NPM, it must be installed manually with `pnpm link --global`
 
+#### To Run Locally without global install
 ```
-pnpm exec moonwall
+npx moonwall
+```
+
+> :information_source: Use `--help` for more information about arguments for each command
+
+```
+npx moonwall run <ENV_NAME>
 ```
 
 ```
-pnpm exec moonwall run dev_test
+npx moonwall test <ENV_NAME>
 ```
 
 ```
-pnpm exec moonwall test chop_test
+npx moonwall downalod <ARTIFACT NAME> <VERSION> <PATH>
 ```
-
 

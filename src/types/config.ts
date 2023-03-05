@@ -14,18 +14,21 @@ export type Environment = {
   threads?: number;
 };
 
-export type IFoundation = {
-  type: "dev"
-  launchSpec: DevLaunchSpec[]
-} | {
-  type: "chopsticks";
-  rtUpgradePath?: string;
-  launchSpec: ChopsticksLaunchSpec[];
-} | {
-  type: "read_only" | "fork" | "zombie" 
-}
+export type IFoundation =
+  | {
+      type: 'dev';
+      launchSpec: DevLaunchSpec[];
+    }
+  | {
+      type: 'chopsticks';
+      rtUpgradePath?: string;
+      launchSpec: ChopsticksLaunchSpec[];
+    }
+  | {
+      type: 'read_only' | 'fork' | 'zombie';
+    };
 
-export type FoundationType = IFoundation["type"]
+export type FoundationType = IFoundation['type'];
 
 export interface GenericLaunchSpec {
   name: string;
@@ -36,10 +39,10 @@ export interface GenericLaunchSpec {
 export interface ChopsticksLaunchSpec extends GenericLaunchSpec {
   configPath: string;
   wsPort?: number; // Quirk of Chopsticks is that port option  only for single mode not xcm
-  type?: "relaychain" | "parachain";
+  type?: 'relaychain' | 'parachain';
   wasmOverride?: string;
   // buildBlockMode only supported for single mode chopsticks
-  buildBlockMode?: "batch" | "manual" | "instant";
+  buildBlockMode?: 'batch' | 'manual' | 'instant';
 }
 
 export interface DevLaunchSpec extends GenericLaunchSpec {
@@ -57,11 +60,6 @@ export interface ProviderConfig {
   endpoints: string[];
 }
 
-export type Foundation = "read_only" | "dev" | "fork" | "zombie" | "chopsticks";
+// export type Foundation = "read_only" | "dev" | "fork" | "zombie" | "chopsticks";
 
-export type ProviderType =
-  | "polkadotJs"
-  | "ethers"
-  | "web3"
-  | "moon"
-  | "unknown";
+export type ProviderType = 'polkadotJs' | 'ethers' | 'web3' | 'moon' | 'unknown';

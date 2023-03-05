@@ -1,17 +1,14 @@
-import { ApiPromise } from "@polkadot/api";
-import { BlockHash, RuntimeDispatchInfo } from "@polkadot/types/interfaces";
-import { SpWeightsWeightV2Weight } from "@polkadot/types/lookup";
-import { u32, u64, u128, Option } from "@polkadot/types";
+import { ApiPromise } from '@polkadot/api';
+import { BlockHash, RuntimeDispatchInfo } from '@polkadot/types/interfaces';
+import { SpWeightsWeightV2Weight } from '@polkadot/types/lookup';
+import { u32, u64, u128, Option } from '@polkadot/types';
 
-import type {
-  Block,
-  AccountId20,
-} from "@polkadot/types/interfaces/runtime/types";
-import type { TxWithEvent } from "@polkadot/api-derive/types";
-import type { ITuple } from "@polkadot/types-codec/types";
-import Bottleneck from "bottleneck";
-import Debug from "debug";
-const debug = Debug("test:blocks");
+import type { Block, AccountId20 } from '@polkadot/types/interfaces/runtime/types';
+import type { TxWithEvent } from '@polkadot/api-derive/types';
+import type { ITuple } from '@polkadot/types-codec/types';
+import Bottleneck from 'bottleneck';
+import Debug from 'debug';
+const debug = Debug('test:blocks');
 export async function createAndFinalizeBlock(
   api: ApiPromise,
   parentHash?: string,
@@ -27,7 +24,7 @@ export async function createAndFinalizeBlock(
 
   return {
     duration: Date.now() - startTime,
-    hash: block.toJSON().hash as string, // toString doesn't work for block hashes
+    hash: block.toJSON().hash as string // toString doesn't work for block hashes
   };
 }
 
@@ -67,7 +64,7 @@ export const getBlockExtrinsic = async (
   const apiAt = await api.at(blockHash);
   const [{ block }, records] = await Promise.all([
     api.rpc.chain.getBlock(blockHash),
-    apiAt.query.system.events(),
+    apiAt.query.system.events()
   ]);
   const extIndex = block.extrinsics.findIndex(
     (ext) => ext.method.section == section && ext.method.method == method
@@ -75,33 +72,26 @@ export const getBlockExtrinsic = async (
   const extrinsic = extIndex > -1 ? block.extrinsics[extIndex] : null;
 
   const events = records
-    .filter(
-      ({ phase }) =>
-        phase.isApplyExtrinsic && phase.asApplyExtrinsic.eq(extIndex)
-    )
+    .filter(({ phase }) => phase.isApplyExtrinsic && phase.asApplyExtrinsic.eq(extIndex))
     .map(({ event }) => event);
   const resultEvent = events.find(
     (event) =>
-      event.section === "system" &&
-      (event.method === "ExtrinsicSuccess" ||
-        event.method === "ExtrinsicFailed")
+      event.section === 'system' &&
+      (event.method === 'ExtrinsicSuccess' || event.method === 'ExtrinsicFailed')
   );
   return { block, extrinsic, events, resultEvent };
 };
 
 export const getBlockTime = (signedBlock: any) =>
   signedBlock.block.extrinsics
-    .find((item) => item.method.section == "timestamp")
+    .find((item) => item.method.section == 'timestamp')
     .method.args[0].toNumber();
 
 export const checkBlockFinalized = async (api: ApiPromise, number: number) => {
   return {
     number,
-    finalized: (
-      await api.rpc.moon.isBlockFinalized(
-        await api.rpc.chain.getBlockHash(number)
-      )
-    ).isTrue,
+    finalized: (await api.rpc.moon.isBlockFinalized(await api.rpc.chain.getBlockHash(number)))
+      .isTrue
   };
 };
 
@@ -132,11 +122,7 @@ export const fetchHistoricBlockNum = async (
   );
 };
 
-export const getBlockArray = async (
-  api: ApiPromise,
-  timePeriod: number,
-  limiter?: Bottleneck
-) => {
+export const getBlockArray = async (api: ApiPromise, timePeriod: number, limiter?: Bottleneck) => {
   /**  
   @brief Returns an sequential array of block numbers from a given period of time in the past
   @param api Connected ApiPromise to perform queries on
@@ -147,12 +133,8 @@ export const getBlockArray = async (
   if (limiter == null) {
     limiter = new Bottleneck({ maxConcurrent: 10, minTime: 100 });
   }
-  const finalizedHead = await limiter.schedule(() =>
-    api.rpc.chain.getFinalizedHead()
-  );
-  const signedBlock = await limiter.schedule(() =>
-    api.rpc.chain.getBlock(finalizedHead)
-  );
+  const finalizedHead = await limiter.schedule(() => api.rpc.chain.getFinalizedHead());
+  const signedBlock = await limiter.schedule(() => api.rpc.chain.getBlock(finalizedHead));
 
   const lastBlockNumber = signedBlock.block.header.number.toNumber();
   const lastBlockTime = getBlockTime(signedBlock);
@@ -170,20 +152,16 @@ export const getBlockArray = async (
 };
 
 export function extractWeight(
-  weightV1OrV2:
-    | u64
-    | Option<u64>
-    | SpWeightsWeightV2Weight
-    | Option<SpWeightsWeightV2Weight>
+  weightV1OrV2: u64 | Option<u64> | SpWeightsWeightV2Weight | Option<SpWeightsWeightV2Weight>
 ) {
-  if ("isSome" in weightV1OrV2) {
+  if ('isSome' in weightV1OrV2) {
     const weight = weightV1OrV2.unwrap();
-    if ("refTime" in weight) {
+    if ('refTime' in weight) {
       return weight.refTime.unwrap();
     }
     return weight;
   }
-  if ("refTime" in weightV1OrV2) {
+  if ('refTime' in weightV1OrV2) {
     return weightV1OrV2.refTime.unwrap();
   }
   return weightV1OrV2;
@@ -202,15 +180,15 @@ export function extractPreimageDeposit(
         readonly len: Option<u32>;
       }
 ) {
-  const deposit = "deposit" in request ? request.deposit : request;
-  if ("isSome" in deposit) {
+  const deposit = 'deposit' in request ? request.deposit : request;
+  if ('isSome' in deposit) {
     return {
       accountId: deposit.unwrap()[0].toHex(),
-      amount: deposit.unwrap()[1],
+      amount: deposit.unwrap()[1]
     };
   }
   return {
     accountId: deposit[0].toHex(),
-    amount: deposit[1],
+    amount: deposit[1]
   };
 }
