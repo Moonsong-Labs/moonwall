@@ -3,15 +3,22 @@ import '@polkadot/api-augment/polkadot';
 import { importJsonConfig } from '../../utils/configReader.js';
 import { startVitest } from 'vitest/node';
 import { UserConfig } from 'vitest';
-import { MoonwallContext, contextCreator } from '../internal/globalContext.js';
+import { MoonwallContext } from '../internal/globalContext.js';
 import { Environment } from '../../types/config.js';
 import url from 'url';
 import path from 'path';
-import { option } from 'yargs';
+import chalk from 'chalk';
 
 export async function testCmd(args) {
   const globalConfig = await importJsonConfig();
   const env = globalConfig.environments.find(({ name }) => name === args.envName)!;
+
+  if (!!!env) {
+    throw new Error(
+      `No environment found in config for: ${chalk.bgWhiteBright.blackBright(args.envName)}`
+    );
+  }
+
   process.env.TEST_ENV = args.envName;
   try {
     const vitest = await executeTests(env);

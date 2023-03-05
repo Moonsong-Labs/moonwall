@@ -95,14 +95,19 @@ async function mainMenu(config: MoonwallConfig) {
       return false;
     case 'run':
       const chosenRunEnv = await chooseRunEnv(config);
-      await runNetwork(chosenRunEnv);
+      if (chosenRunEnv.envName !== 'back') {
+        await runNetwork(chosenRunEnv);
+      }
       return false;
     case 'test':
       const chosenTestEnv = await chooseTestEnv(config);
-      await testCmd(chosenTestEnv);
+      if (chosenTestEnv.envName !== 'back') {
+        await testCmd(chosenTestEnv);
+      }
       return false;
     case 'download':
       await resolveDownloadChoice();
+
       return false;
     case 'quit':
       return await resolveQuitChoice();
@@ -110,33 +115,68 @@ async function mainMenu(config: MoonwallConfig) {
 }
 
 async function resolveDownloadChoice() {
-  const args = await inquirer.prompt([
-    {
+  while (true) {
+    const firstChoice = await inquirer.prompt({
       name: 'artifact',
       type: 'list',
       message: `Download - which artifact?`,
-      choices: ['moonbeam', 'polkadot', 'moonbase-runtime', 'moonriver-runtime', 'moonbeam-runtime']
-    },
-    {
-      name: 'binVersion',
-      type: 'input',
-      default: 'latest',
-      message: `Download - which version?`
-    },
-    {
-      name: 'path',
-      type: 'input',
-      message: `Download - where would you like it placed?`,
-      default: './tmp'
+      choices: [
+        'moonbeam',
+        'polkadot',
+        'moonbase-runtime',
+        'moonriver-runtime',
+        'moonbeam-runtime',
+        new inquirer.Separator(),
+        'Back'
+      ]
+    });
+    if (firstChoice.artifact === 'Back') {
+      return;
     }
-  ]);
-  await downloader(args);
-  await inquirer.prompt({
-    name: 'NetworkStarted',
-    type: 'press-to-continue',
-    anyKey: true,
-    pressToContinueMessage: `✅ ${args.artifact} has been downloaded. Press any key to continue...\n`
-  });
+
+    const otherChoices = await inquirer.prompt([
+      {
+        name: 'binVersion',
+        type: 'input',
+        default: 'latest',
+        message: `Download - which version?`
+      },
+      {
+        name: 'path',
+        type: 'input',
+        message: `Download - where would you like it placed?`,
+        default: './tmp'
+      }
+    ]);
+
+    const result = await inquirer.prompt({
+      name: 'continue',
+      type: 'confirm',
+      message: `You are about to download ${chalk.bgWhite.blackBright(
+        firstChoice.artifact
+      )} v-${chalk.bgWhite.blackBright(otherChoices.binVersion)} to: ${chalk.bgWhite.blackBright(
+        otherChoices.path
+      )}.\n Would you like to continue? `,
+      default: true
+    });
+
+    if (result.continue === false) {
+      continue;
+    }
+
+    await downloader({
+      artifact: firstChoice.artifact,
+      binVersion: otherChoices.binVersion,
+      path: otherChoices.path
+    });
+    await inquirer.prompt({
+      name: 'NetworkStarted',
+      type: 'press-to-continue',
+      anyKey: true,
+      pressToContinueMessage: `✅ ${firstChoice.artifact} has been downloaded. Press any key to continue...\n`
+    });
+    return;
+  }
 }
 
 const chooseTestEnv = async (config: MoonwallConfig) => {
@@ -147,7 +187,7 @@ const chooseTestEnv = async (config: MoonwallConfig) => {
       disabled: false
     }))
     .sort((a, b) => (a.name > b.name ? -1 : +1));
-
+  envs.push(...([new inquirer.Separator(), { name: 'Back', value: 'back' }] as any));
   const result = await inquirer.prompt({
     name: 'envName',
     message: 'Select a environment to run',
@@ -173,7 +213,9 @@ const chooseRunEnv = async (config: MoonwallConfig) => {
   const choices = [
     ...envs.filter(({ disabled }) => disabled === false).sort((a, b) => (a.name > b.name ? 1 : -1)),
     new inquirer.Separator(),
-    ...envs.filter(({ disabled }) => disabled === true).sort((a, b) => (a.name > b.name ? 1 : -1))
+    ...envs.filter(({ disabled }) => disabled === true).sort((a, b) => (a.name > b.name ? 1 : -1)),
+    new inquirer.Separator(),
+    { name: 'Back', value: 'back' }
   ];
 
   const result = await inquirer.prompt({

@@ -2,6 +2,7 @@ import { ChildProcess, spawn } from 'child_process';
 import { MoonwallContext } from './globalContext.js';
 import chalk from 'chalk';
 import Debug from 'debug';
+import { existsSync } from 'fs';
 const debugNode = Debug('global:node');
 
 export async function launchDevNode(
@@ -9,6 +10,10 @@ export async function launchDevNode(
   args: string[],
   name: string
 ): Promise<ChildProcess> {
+  if (cmd.includes('moonbeam') && !existsSync(cmd)) {
+    throw new Error(`No file found at: ${cmd}`);
+  }
+
   let runningNode: ChildProcess;
 
   const onProcessExit = () => {
@@ -37,6 +42,7 @@ export async function launchDevNode(
     } else {
       console.error(err);
     }
+
     process.exit(1);
   });
 

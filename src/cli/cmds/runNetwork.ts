@@ -15,7 +15,6 @@ import { importJsonConfig } from '../../utils/configReader.js';
 inquirer.registerPrompt('press-to-continue', PressToContinuePrompt);
 
 export async function runNetwork(args) {
-  // TODO: handle case where no environments to run
   process.env.TEST_ENV = args.envName;
   const globalConfig = await importJsonConfig();
   const testFileDirs = globalConfig.environments.find(
