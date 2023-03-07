@@ -1,11 +1,30 @@
 {
   "name": "moonwall",
+  "type": "module",
   "version": "0.1.0",
   "description": "Testing framework for the Moon family of projects",
-  "exports": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "type": "module",
+  "author": "timbrinded",
+  "license": "ISC",
+  "homepage": "https://github.com/Moonsong-Labs/moonwall#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Moonsong-Labs/moonwall.git",
+    "directory": "packages/moonwall"
+  },
+  "bugs": {
+    "url": "https://github.com/Moonsong-Labs/moonwall/issues"
+  },
+  "keywords": [
+    "moonwall",
+    "moonbeam",
+    "moondance",
+    "polkadot",
+    "kusama",
+    "substrate"
+  ],
+  "exports": "./dist/src/index.js",
+  "module": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
   "engines": {
     "node": ">=14.16.0",
     "pnpm": ">=7"
@@ -19,33 +38,32 @@
     "*.cjs"
   ],
   "scripts": {
-    "build": "rimraf dist && npx swc --config-file .swcrc src -d dist",
+    "quick-build": "npx rimraf dist && npx swc --config-file .swcrc src -d dist/src",
+    "quick-start": "pnpm quick-build && npx moonwall",
+    "build": "npx rimraf dist && tsc",
+    "start": "pnpm build && npx moonwall",
     "prepublish": "pnpm run build",
     "display-reports": "pnpm exec vite preview --base __vitest__ --outDir html",
     "prepare": "pnpm build",
     "compile": "pnpm build ",
-    "start": "npx ts-node --esm ./src/cli/entrypoint.ts test dev_test",
     "lint": "npx prettier --write --ignore-path .gitignore '**/*.(yml|js|ts|json)'",
-    "run-pkg": "DEBUG=global* npx moonwall test dev_test"
+    "test": "moonwall"
   },
   "bin": {
     "moonwall": "./moonwall.mjs"
   },
-  "author": "timbrinded",
-  "license": "ISC",
   "dependencies": {
     "@acala-network/chopsticks": "^0.4.2",
     "@moonbeam-network/api-augment": "^0.2100.0",
-    "@polkadot/api": "^9.14.2",
-    "@polkadot/api-augment": "^9.14.2",
-    "@polkadot/api-derive": "^9.14.2",
-    "@polkadot/keyring": "^10.4.2",
-    "@polkadot/types": "^9.14.2",
-    "@polkadot/types-codec": "^9.14.2",
-    "@polkadot/util": "^10.4.2",
-    "@polkadot/util-crypto": "^10.4.2",
-    "@types/chai": "^4.3.4",
-    "@types/node": "^18.14.0",
+    "@polkadot/api": "^10.0.1",
+    "@polkadot/api-augment": "^10.0.1",
+    "@polkadot/api-derive": "^10.0.1",
+    "@polkadot/keyring": "^11.0.1",
+    "@polkadot/types": "^10.0.1",
+    "@polkadot/types-codec": "^10.0.1",
+    "@polkadot/util": "^11.0.1",
+    "@polkadot/util-crypto": "^11.0.1",
+    "@types/node": "^18.14.6",
     "@types/yargs": "^17.0.22",
     "bottleneck": "^2.19.5",
     "chalk": "^5.2.0",
@@ -54,10 +72,11 @@
     "colors": "^1.4.0",
     "debug": "^4.3.4",
     "dotenv": "^16.0.3",
-    "ethers": "^6.0.5",
+    "ethers": "^6.0.8",
     "inquirer": "^8.2.5",
     "inquirer-press-to-continue": "^1.1.4",
     "moonbeam-types-bundle": "^2.0.10",
+    "moonwall": "workspace:*",
     "node-fetch": "^3.3.0",
     "prettier": "^2.8.4",
     "semver": "^7.3.8",
@@ -84,7 +103,8 @@
   },
   "pnpm": {
     "overrides": {
-      "@polkadot/util": "$@polkadot/util"
+      "@polkadot/util": "$@polkadot/util",
+      "moonwall": "workspace:*"
     }
   }
 }

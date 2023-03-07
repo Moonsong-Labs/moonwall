@@ -4,9 +4,26 @@ Test harness for testing on Moonbeam, Moonriver and more
 
 ## Installation
 
-- `pnpm i` to install all dependencies.
-- `pnpm build` to build the application locally.
-- `npx moonwall` to run the application
+### NPM Installation
+```
+npm -g i @moonsong-labs/moonwall
+```
+
+> :warning: This package is not yet published as a public npm repository. You can follow the local steps below to use it before then.
+
+### Local Installation
+
+> Package manager `pnpm` is required for this repo. You can install it with `npm install -g pnpm` or otherwise following [their instructions](https://pnpm.io/installation).
+
+1. `pnpm i` to install all dependencies.
+2. `pnpm build` to build the application locally.
+3. `pnpm start` to check that the application runs
+4. (In your project dir) `npm i <path_to_moonwall_repo>` to locally add moonwall to your other repo
+
+From here you can import the items you need from moonwall package in your code:
+```
+import { describeSuite , beforeAll, expect, ALITH_ADDRESS } from "moonwall";
+```
 
 ## Functions
 
@@ -17,11 +34,9 @@ Test harness for testing on Moonbeam, Moonriver and more
 
 ## Examples
 
-> :information_source: Until this package is published on NPM, it must be installed manually with `npm link` && `npm link moonwall`
-
 > :information_source: Use `--help` for more information about arguments for each command
 
-#### To Run Locally without global install
+#### Usage
 ```
 npx moonwall
 ```

@@ -113,9 +113,10 @@
       ]
     },
     {
-      "name": "dev_minimal",
+      "name": "dev_multi",
       "testFileDir": ["tests/test_separation"],
-      "threads": 3,
+      "threads": 5,
+      "html": true,
       "foundation": {
         "type": "dev",
         "launchSpec": [

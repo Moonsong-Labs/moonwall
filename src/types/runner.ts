@@ -2,7 +2,7 @@ import { ApiPromise } from '@polkadot/api';
 import { WebSocketProvider } from 'ethers';
 import Web3 from 'web3';
 import { ApiTypes, AugmentedEvent, SubmittableExtrinsic } from '@polkadot/api/types/index.js';
-import { BlockCreation, BlockCreationResponse } from '../utils/contextHelpers.js';
+import { BlockCreation, BlockCreationResponse } from '../cli/internal/contextHelpers.js';
 import { ProviderType } from './config.js';
 // import { Foundation, ProviderType } from "./enum.js";
 

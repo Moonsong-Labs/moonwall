@@ -9,7 +9,6 @@ import { Environment } from '../../types/config.js';
 import { executeTests } from './runTests.js';
 import { parse } from 'yaml';
 import fs from 'fs/promises';
-// import { Foundation } from "../../types/enum.js";
 import { importJsonConfig } from '../../utils/configReader.js';
 
 inquirer.registerPrompt('press-to-continue', PressToContinuePrompt);

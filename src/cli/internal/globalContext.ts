@@ -1,6 +1,6 @@
 import { FoundationType, MoonwallConfig } from '../../types/config';
 import { ChildProcess } from 'child_process';
-import { populateProviderInterface, prepareProviders } from '../../utils/providers.js';
+import { populateProviderInterface, prepareProviders } from './providers.js';
 import { launchDevNode } from './localNode.js';
 import { importJsonConfig } from '../../utils/configReader.js';
 import { parseChopsticksRunCmd, parseRunCmd } from './foundations.js';

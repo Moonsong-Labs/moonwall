@@ -3,14 +3,14 @@ import { AddressOrPair, ApiTypes, SubmittableExtrinsic } from '@polkadot/api/typ
 import { GenericExtrinsic } from '@polkadot/types/extrinsic';
 import { DispatchError, DispatchInfo, Event, EventRecord } from '@polkadot/types/interfaces';
 import { AnyTuple, RegistryError } from '@polkadot/types/types';
-import { customWeb3Request } from '../cli/internal/providers.js';
-import { ALITH_PRIVATE_KEY, alith } from '../cli/lib/accounts.js';
+import { customWeb3Request } from '../../utils/providers.js';
+import { ALITH_PRIVATE_KEY, alith } from '../lib/accounts.js';
 import Web3 from 'web3';
 import { ethers } from 'ethers';
-import { MoonwallContext } from '../cli/internal/globalContext.js';
+import { MoonwallContext } from './globalContext.js';
 import { assert } from 'vitest';
 import Debug from 'debug';
-import { createAndFinalizeBlock } from './block.js';
+import { createAndFinalizeBlock } from '../../utils/block.js';
 const debug = Debug('context');
 
 export async function createBlock<

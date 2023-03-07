@@ -11,7 +11,7 @@ import { ChopsticksContext, GenericContext, ITestSuiteType } from '../types/runn
 import { MoonwallContext, contextCreator } from '../cli/internal/globalContext.js';
 
 import { ConnectedProvider } from '../types/context.js';
-import { BlockCreation } from './contextHelpers.js';
+import { BlockCreation } from '../cli/internal/contextHelpers.js';
 import {
   createDevBlock,
   createDevBlockCheckEvents,

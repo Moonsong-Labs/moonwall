@@ -1,3 +1,4 @@
+import '@polkadot/api-augment';
 import { ApiPromise } from '@polkadot/api';
 import { describeSuite } from '../../src/index.js';
 import { expect, beforeAll } from 'vitest';
@@ -43,6 +44,7 @@ describeSuite({
     it({
       id: 'T3',
       title: 'Skips multiple blocks ',
+      timeout: 20000,
       test: async function () {
         const currentBlock = (await api.rpc.chain.getHeader()).number.toNumber();
         await context.createBlock({ count: 3 });

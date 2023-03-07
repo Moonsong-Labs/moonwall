@@ -34,14 +34,3 @@ export async function importJsonConfig(): Promise<MoonwallConfig> {
     throw new Error(`Error import config at ${filePath}`);
   }
 }
-
-// export async function importConfigDefault() {
-//    const filePath = path.join(process.cwd(), "moonwall.config.mjs");
-//   try {
-//     const imp = await import(filePath);
-//     return imp.default();
-//   } catch (e) {
-//     console.log(e);
-//     throw new Error(`Error importing ${filePath}`);
-//   }
-// }

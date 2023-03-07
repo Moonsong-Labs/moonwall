@@ -1,6 +1,6 @@
-import { BlockCreation, ExtrinsicCreation, extractError } from '../../utils/contextHelpers.js';
+import { BlockCreation, ExtrinsicCreation, extractError } from './contextHelpers.js';
 import { ApiTypes, AugmentedEvent, SubmittableExtrinsic } from '@polkadot/api/types/index.js';
-import { customWeb3Request } from './providers.js';
+import { customWeb3Request } from '../../utils/providers.js';
 import { GenericContext } from '../../utils/runner-functions.js';
 import Debug from 'debug';
 import { alith } from '../lib/accounts.js';

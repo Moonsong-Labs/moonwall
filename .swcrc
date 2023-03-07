@@ -19,7 +19,6 @@
   "module": {
     "type": "es6",
     "strictMode": true,
-    // Can turn these on
     "strict": false,
     "lazy": false
   },

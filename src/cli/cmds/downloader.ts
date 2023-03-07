@@ -9,7 +9,7 @@ import fetch from 'node-fetch';
 import chalk from 'chalk';
 import semver from 'semver';
 import { SingleBar } from 'cli-progress';
-import { runTask } from '../../utils/runner.js';
+import { runTask } from '../internal/runner.js';
 
 const supportedBinaries = [
   'moonbeam',
