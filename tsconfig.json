@@ -10,13 +10,26 @@
     "allowSyntheticDefaultImports": true,
     "importHelpers": false,
     "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
     "removeComments": true,
     "preserveConstEnums": true,
     "sourceMap": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "strict": false //renable this oneday
+    "strict": false, //renable this oneday
+    "paths": {
+      "moonwall": ["./packages/moonwall/src/index.ts"],
+      "#types": ["./packages/moonwall/src/index.ts"],
+      "moonwall/utils": ["./packages/utils/src/index.ts"],
+      "moonwall/utils/*": ["./packages/utils/src/*"]
+      // "moonwall/config": ["./packages/config/index.ts"] // TODO: Refactor Config generators into separate pkg
+    }
   },
-  "include": ["./src/**/*"],
-  "exclude": ["tests", "moonwall.config*", "**/dist/**"]
+  "include": ["packages/moonwall/src/**/*"],
+  "exclude": [
+    "./tests/**",
+    "**/dist/**",
+    "./packages/*/*.d.ts",
+    "./packages/*/*.d.cts"
+  ]
 }
