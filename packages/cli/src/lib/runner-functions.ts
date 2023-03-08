@@ -16,9 +16,7 @@ import {
   GenericContext,
   ITestSuiteType,
 } from "../types/runner.js";
-import { MoonwallContext, contextCreator } from "./globalContext.js";
-
-import { ConnectedProvider } from "../types/context.js";
+import { MoonwallContext } from "./globalContext.js";
 import { BlockCreation } from "./contextHelpers.js";
 import {
   createDevBlock,
@@ -31,7 +29,6 @@ import {
   sendNewBlockRequest,
   sendSetStorageRequest,
 } from "../internal/chopsticksHelpers.js";
-import { importConfig } from "./configReader.js";
 import { ProviderType } from "../types/config.js";
 
 const debug = Debug("test:setup");

@@ -33,4 +33,5 @@ export type Node = {
   cmd: string;
   args: string[];
   rtUpgradePath?: string;
+  launch?: boolean
 };

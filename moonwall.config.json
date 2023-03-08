@@ -97,6 +97,7 @@
           {
             "name": "mb",
             "type": "parachain",
+            "launch": false,
             "buildBlockMode": "manual",
             "configPath": "./configs/moonbeamChopsticks.yml"
           }
@@ -109,6 +110,22 @@
           "endpoints": ["ws://127.0.0.1:12000"]
         }
       ]
+    },
+    {
+      "name": "chopsticks_network_only",
+      "testFileDir": [],
+      "foundation": {
+        "type": "chopsticks",
+        "launchSpec": [
+          {
+            "name": "mb",
+            "type": "parachain",
+            "buildBlockMode": "manual",
+            "configPath": "./configs/moonbeamChopsticks.yml"
+          }
+        ]
+      },
+      "connections": []
     },
     {
       "name": "chopsticks_xcm",
@@ -252,6 +269,7 @@
         "launchSpec": [
           {
             "name": "moonbeam",
+            "running": false,
             "binPath": "./tmp/moonbeam",
             "ports": { "p2pPort": 30333, "wsPort": 9944, "rpcPort": 9933 },
             "options": [
@@ -285,6 +303,21 @@
           "endpoints": ["ws://127.0.0.1:9944"]
         }
       ]
+    },
+    {
+      "name": "dev_network_only",
+      "testFileDir": [],
+      "foundation": {
+        "type": "dev",
+        "launchSpec": [
+          {
+            "name": "moonbeam",
+            "running": true,
+            "binPath": "./tmp/moonbeam"
+          }
+        ]
+      },
+      "connections": []
     }
   ]
 }

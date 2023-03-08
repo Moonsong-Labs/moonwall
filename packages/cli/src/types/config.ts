@@ -32,6 +32,7 @@ export type FoundationType = IFoundation["type"];
 
 export interface GenericLaunchSpec {
   name: string;
+  running?: boolean;
   options?: string[];
 }
 
@@ -60,11 +61,4 @@ export interface ProviderConfig {
   endpoints: string[];
 }
 
-// export type Foundation = "read_only" | "dev" | "fork" | "zombie" | "chopsticks";
-
-export type ProviderType =
-  | "polkadotJs"
-  | "ethers"
-  | "web3"
-  | "moon"
-  | "unknown";
+export type ProviderType = "polkadotJs" | "ethers" | "web3" | "moon" | "unknown";

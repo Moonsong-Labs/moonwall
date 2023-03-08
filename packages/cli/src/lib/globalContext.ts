@@ -4,7 +4,7 @@ import {
   populateProviderInterface,
   prepareProviders,
 } from "../internal/providers.js";
-import { launchDevNode } from "../internal/localNode.js";
+import { launchNode } from "../internal/localNode.js";
 import { importJsonConfig } from "./configReader.js";
 import { parseChopsticksRunCmd, parseRunCmd } from "../internal/foundations.js";
 import { ApiPromise } from "@polkadot/api";
@@ -37,7 +37,7 @@ export class MoonwallContext {
       name: env.name,
       context: {},
       providers: [] as MoonwallProvider[],
-      nodes: [] as { name?: string; cmd: string; args: string[] }[],
+      nodes: [] as { name?: string; cmd: string; args: string[], launch: boolean }[],
       foundationType: env.foundation.type,
     };
 
@@ -66,11 +66,12 @@ export class MoonwallContext {
         break;
 
       case "dev":
-        const { cmd, args } = parseRunCmd(env.foundation.launchSpec[0]);
+        const { cmd, args, launch } = parseRunCmd(env.foundation.launchSpec[0]);
         blob.nodes.push({
           name: env.foundation.launchSpec[0].name,
           cmd,
           args,
+          launch
         });
 
         blob.providers = env.connections
@@ -139,11 +140,10 @@ export class MoonwallContext {
       console.log("Nodes already started! Skipping command");
       return MoonwallContext.getContext();
     }
-
     const nodes = MoonwallContext.getContext().environment.nodes;
 
-    const promises = nodes.map(async ({ cmd, args, name }) => {
-      return this.nodes.push(await launchDevNode(cmd, args, name!));
+    const promises = nodes.map(async ({ cmd, args, name, launch }) => {
+      return launch && this.nodes.push(await launchNode(cmd, args, name!));
     });
     await Promise.all(promises);
   }

@@ -5,6 +5,7 @@ import {
 } from "../types/config";
 
 export function parseRunCmd(launchSpec: DevLaunchSpec) {
+  const launch = !!!launchSpec.running? true: launchSpec.running
   const cmd = launchSpec.binPath;
   let args = launchSpec.options
     ? [...launchSpec.options]
@@ -50,13 +51,15 @@ export function parseRunCmd(launchSpec: DevLaunchSpec) {
       }`
     );
   }
-  return { cmd, args };
+  return { cmd, args, launch };
 }
 
 export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
   cmd: string;
   args: string[];
+  launch: boolean
 } {
+  const launch = !!!launchSpecs[0].running? true: launchSpecs[0].running
   if (launchSpecs.length === 1) {
     const chopsticksCmd = "node";
     const chopsticksArgs = [
@@ -82,6 +85,7 @@ export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
     return {
       cmd: chopsticksCmd,
       args: chopsticksArgs,
+      launch
     };
   }
 
@@ -105,6 +109,7 @@ export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
   return {
     cmd: chopsticksCmd,
     args: chopsticksArgs,
+    launch
     // rtUpgradePath: launchSpecs[0].rtUpgradePath
     //   ? launchSpecs[0].rtUpgradePath
     //   : "",

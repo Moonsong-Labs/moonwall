@@ -5,7 +5,7 @@ import Debug from "debug";
 import { existsSync } from "fs";
 const debugNode = Debug("global:node");
 
-export async function launchDevNode(
+export async function launchNode(
   cmd: string,
   args: string[],
   name: string
