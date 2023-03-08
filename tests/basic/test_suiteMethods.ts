@@ -1,4 +1,4 @@
-import { describeSuite, expect } from "moonwall";
+import { describeSuite, expect } from "@moonwall/cli";
 import { setTimeout } from "timers/promises";
 
 describeSuite({

@@ -1,6 +1,11 @@
-import { beforeAll, describeSuite, MoonwallContext, expect } from "moonwall";
+import {
+  beforeAll,
+  describeSuite,
+  MoonwallContext,
+  expect,
+} from "@moonwall/cli";
 import { Contract, WebSocketProvider, formatUnits } from "ethers";
-import { xcAssetAbi } from "../../src/cli/lib/moonbeamConsts.js";
+import { xcAssetAbi } from "@moonwall/util";
 import Debug from "debug";
 const debug = Debug("test:eth");
 

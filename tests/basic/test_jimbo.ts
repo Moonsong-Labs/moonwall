@@ -1,4 +1,4 @@
-import { expect, describeSuite, beforeAll } from "moonwall";
+import { expect, describeSuite, beforeAll } from "@moonwall/cli";
 
 describeSuite({
   id: "B04",

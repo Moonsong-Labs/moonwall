@@ -1,12 +1,5 @@
-import {
-  BALTATHAR_ADDRESS,
-  CHARLETH_ADDRESS,
-  alith,
-  beforeAll,
-  describeSuite,
-  expect,
-  alithSigner,
-} from "moonwall";
+import { beforeAll, describeSuite, expect, alithSigner } from "@moonwall/cli";
+import { BALTATHAR_ADDRESS, CHARLETH_ADDRESS, alith } from "@moonwall/util";
 import { parseEther } from "ethers";
 import { BN } from "@polkadot/util";
 

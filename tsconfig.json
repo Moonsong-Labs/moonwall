@@ -16,16 +16,13 @@
     "sourceMap": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "strict": false, //renable this oneday
-    "paths": {
-      "moonwall": ["./packages/moonwall/src/index.ts"],
-      "#types": ["./packages/moonwall/src/index.ts"],
-      "moonwall/utils": ["./packages/utils/src/index.ts"],
-      "moonwall/utils/*": ["./packages/utils/src/*"]
-      // "moonwall/config": ["./packages/config/index.ts"] // TODO: Refactor Config generators into separate pkg
-    }
+    "strict": false //renable this oneday
+    // "paths": {
+    //   "@moonwall/cli": ["./packages/cli/src/index.ts"],
+    //   "@moonwall/util": ["./packages/util/src/index.ts"],
+    // }
   },
-  "include": ["packages/moonwall/src/**/*"],
+  "include": ["packages/cli/src/**/*"],
   "exclude": [
     "./tests/**",
     "**/dist/**",

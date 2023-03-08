@@ -1,6 +1,6 @@
 import { expect } from "chai";
-import { Foundation, describeSuite } from "../../src/index.js";
-import { ALITH_ADDRESS } from "../../src/cli/lib/accounts.js";
+import { beforeAll, describeSuite } from "@moonwall/cli";
+import { ALITH_ADDRESS } from "@moonwall/util";
 import Web3 from "web3";
 import { ApiPromise } from "@polkadot/api";
 

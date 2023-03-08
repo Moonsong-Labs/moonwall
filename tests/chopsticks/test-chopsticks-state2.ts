@@ -1,4 +1,5 @@
-import { ApiPromise, describeSuite, alith, beforeAll, expect } from "moonwall";
+import { ApiPromise, describeSuite, beforeAll, expect } from "@moonwall/cli";
+import { alith } from "@moonwall/util";
 import { parseEther, formatEther } from "ethers";
 
 describeSuite({

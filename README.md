@@ -20,9 +20,10 @@ npm -g i @moonsong-labs/moonwall
 3. `pnpm start` to check that the application runs
 4. (In your project dir) `npm i <path_to_moonwall_repo>` to locally add moonwall to your other repo
 
-From here you can import the items you need from moonwall package in your code:
+From here you can import the items you need from moonwall packages in your code:
 ```
-import { describeSuite , beforeAll, expect, ALITH_ADDRESS } from "moonwall";
+import { describeSuite , beforeAll, expect, ALITH_ADDRESS } from "@moonwall/cli";
+import { ALITH_ADDRESS } from "@moonwall/util";
 ```
 
 ## Functions

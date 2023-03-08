@@ -1,4 +1,4 @@
-import { beforeAll, expect, describeSuite, ApiPromise } from "moonwall";
+import { beforeAll, expect, describeSuite, ApiPromise } from "@moonwall/cli";
 const isntMoonriver = process.env.MW_RT_TYPE !== "moonriver";
 const isntFutureRT = Number(process.env.MW_RT_VERSION) < 5000;
 

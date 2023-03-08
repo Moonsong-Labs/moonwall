@@ -45,7 +45,7 @@
             "name": "mb",
             "type": "parachain",
             "buildBlockMode": "manual",
-            "configPath": "./configs/moonbeamChopsticks.yml"
+            "configPath": "./configs/moonriverChopsticks.yml"
           }
         ]
       },
@@ -53,7 +53,7 @@
         {
           "name": "MB",
           "type": "moon",
-          "endpoints": ["ws://127.0.0.1:12000"]
+          "endpoints": ["ws://127.0.0.1:10000"]
         }
       ]
     },

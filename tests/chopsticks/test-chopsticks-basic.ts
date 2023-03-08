@@ -1,12 +1,5 @@
-import {
-  CHARLETH_ADDRESS,
-  ETHAN_ADDRESS,
-  alith,
-  describeSuite,
-  ApiPromise,
-  expect,
-  beforeAll,
-} from "moonwall";
+import { describeSuite, ApiPromise, expect, beforeAll } from "@moonwall/cli";
+import { CHARLETH_ADDRESS, ETHAN_ADDRESS, alith } from "@moonwall/util";
 import { parseEther, formatEther } from "ethers";
 
 describeSuite({

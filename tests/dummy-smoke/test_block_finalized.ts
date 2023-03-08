@@ -1,12 +1,11 @@
 import Bottleneck from "bottleneck";
 import semverLt from "semver/functions/lt.js";
+import { expect, describeSuite } from "@moonwall/cli";
 import {
-  expect,
-  describeSuite,
   checkBlockFinalized,
   fetchHistoricBlockNum,
   getBlockTime,
-} from "moonwall";
+} from "@moonwall/util";
 import Debug from "debug";
 const debug = Debug("smoke:block-finalized");
 const timePeriod = process.env.TIME_PERIOD

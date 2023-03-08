@@ -1,6 +1,6 @@
 import { expect, beforeAll } from "vitest";
-import { Foundation, describeSuite } from "../../src/index.js";
-import { xcAssetAbi } from "../../src/cli/lib/moonbeamConsts.js";
+import { describeSuite } from "@moonwall/cli";
+import { xcAssetAbi } from "@moonwall/util";
 import Web3 from "web3";
 
 describeSuite({
