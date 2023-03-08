@@ -97,7 +97,7 @@
           {
             "name": "mb",
             "type": "parachain",
-            "launch": false,
+            "running": false,
             "buildBlockMode": "manual",
             "configPath": "./configs/moonbeamChopsticks.yml"
           }
@@ -164,12 +164,29 @@
       "name": "dev_multi",
       "testFileDir": ["tests/test_separation"],
       "threads": 5,
-      "html": true,
+      "html": false,
       "foundation": {
         "type": "dev",
         "launchSpec": [
           {
             "name": "moonbeam",
+            "running": true,
+            "binPath": "./tmp/moonbeam"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dev_seq",
+      "testFileDir": ["tests/test_separation"],
+      "threads": 1,
+      "html": false,
+      "foundation": {
+        "type": "dev",
+        "launchSpec": [
+          {
+            "name": "moonbeam",
+            "running": true,
             "binPath": "./tmp/moonbeam"
           }
         ]

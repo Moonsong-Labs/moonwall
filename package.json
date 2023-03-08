@@ -7,12 +7,12 @@
   "description": "Testing framework for the Moon family of projects",
   "scripts": {
     "build": "pnpm -r --filter='./packages/**' run build",
-    "lint": "pnpx prettier --write --ignore-path .gitignore '**/*.(yml|js|ts|json)'",
+    "lint": "pnpm exec prettier --write --ignore-path .gitignore '**/*.(yml|js|ts|json)'",
     "release": "",
     "start": "pnpm exec moonwall",
     "display-reports": "pnpm exec vite preview --base __vitest__ --outDir html",
-    "test": "pnpm exec moonwall test 'dev_multi basic chopsticks' ",
-    "typecheck": "pnpx tsc --noEmit"
+    "test": "pnpm exec moonwall test 'dev_multi basic chopsticks dev_seq' ",
+    "typecheck": "pnpm exec tsc --noEmit"
   },
   "devDependencies": {
     "@acala-network/chopsticks": "^0.5.2",

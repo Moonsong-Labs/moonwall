@@ -50,8 +50,9 @@ export async function executeTests(env: Environment): Promise<Vitest> {
     options.minThreads = env.threads;
   } else {
     // options.singleThread = true;
-    options.threads = false;
-    // options.isolate = false;
+    options.minThreads = 1;
+    options.maxThreads = 1;
+    // options.threads = false;
   }
   try {
     const folders = env.testFileDir.map((folder) =>

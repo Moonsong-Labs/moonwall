@@ -61,4 +61,9 @@ export interface ProviderConfig {
   endpoints: string[];
 }
 
-export type ProviderType = "polkadotJs" | "ethers" | "web3" | "moon" | "unknown";
+export type ProviderType =
+  | "polkadotJs"
+  | "ethers"
+  | "web3"
+  | "moon"
+  | "unknown";

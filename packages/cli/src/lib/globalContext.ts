@@ -17,7 +17,7 @@ import {
 const debugSetup = Debug("global:context");
 
 export class MoonwallContext {
-  private static instance: MoonwallContext;
+  private static instance: MoonwallContext | undefined;
   environment: MoonwallEnvironment;
   providers: ConnectedProvider[];
   nodes: ChildProcess[];
@@ -37,7 +37,12 @@ export class MoonwallContext {
       name: env.name,
       context: {},
       providers: [] as MoonwallProvider[],
-      nodes: [] as { name?: string; cmd: string; args: string[], launch: boolean }[],
+      nodes: [] as {
+        name?: string;
+        cmd: string;
+        args: string[];
+        launch: boolean;
+      }[],
       foundationType: env.foundation.type,
     };
 
@@ -71,7 +76,7 @@ export class MoonwallContext {
           name: env.foundation.launchSpec[0].name,
           cmd,
           args,
-          launch
+          launch,
         });
 
         blob.providers = env.connections
@@ -141,7 +146,6 @@ export class MoonwallContext {
       return MoonwallContext.getContext();
     }
     const nodes = MoonwallContext.getContext().environment.nodes;
-
     const promises = nodes.map(async ({ cmd, args, name, launch }) => {
       return launch && this.nodes.push(await launchNode(cmd, args, name!));
     });
@@ -202,6 +206,10 @@ export class MoonwallContext {
     }
   }
 
+  public async wipeNodes() {
+    this.nodes = [];
+  }
+
   public async disconnect(providerName?: string) {
     if (providerName) {
       this.providers.find(({ name }) => name === providerName)!.disconnect();
@@ -239,12 +247,16 @@ export class MoonwallContext {
   }
 
   public static destroy() {
+    const ctx = MoonwallContext.getContext();
     try {
-      MoonwallContext.getContext().disconnect();
+      ctx.disconnect();
     } catch {
       console.log("🛑  All connections disconnected");
     }
-    MoonwallContext.getContext().nodes.forEach((process) => process.kill());
+    ctx.nodes.forEach((process) => {
+      debugSetup(`Test finished, killing process ${process.pid}`);
+      process.kill();
+    });
   }
 }
 

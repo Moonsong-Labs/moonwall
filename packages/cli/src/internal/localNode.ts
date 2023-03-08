@@ -17,10 +17,10 @@ export async function launchNode(
   let runningNode: ChildProcess;
 
   const onProcessExit = () => {
-    runningNode.kill();
+    runningNode && runningNode.kill();
   };
   const onProcessInterrupt = () => {
-    process.exit(2);
+    runningNode && runningNode.kill();
   };
 
   process.once("exit", onProcessExit);

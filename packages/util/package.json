@@ -38,12 +38,12 @@
     "*.cjs"
   ],
   "scripts": {
-    "build": "pnpx rimraf dist && tsc ",
-    "typecheck": "pnpx tsc --noEmit",
+    "build": "pnpm exec rimraf dist && tsc ",
+    "typecheck": "pnpm exec tsc --noEmit",
     "prepublish": "pnpm run build",
     "prepare": "pnpm build",
     "compile": "pnpm build ",
-    "lint": "pnpx prettier --write --ignore-path .gitignore '**/*.(yml|js|ts|json)'"
+    "lint": "pnpm exec prettier --write --ignore-path .gitignore '**/*.(yml|js|ts|json)'"
   },
   "dependencies": {
     "@acala-network/chopsticks": "^0.5.1",
