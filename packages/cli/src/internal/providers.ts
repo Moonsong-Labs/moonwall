@@ -3,7 +3,6 @@ import { ApiPromise, WsProvider } from "@polkadot/api";
 import Web3 from "web3";
 import { ethers } from "ethers";
 import { WebSocketProvider } from "ethers";
-import { Web3BaseProvider } from "web3-types";
 import Debug from "debug";
 import { ProviderConfig, ProviderType } from "../types/config.js";
 import { MoonwallProvider } from "../types/context.js";
@@ -58,9 +57,8 @@ export function prepareProviders(
         return {
           name,
           type,
-          // ws: wsProvider,
           connect: () => {
-            const wsProvider: Web3BaseProvider =
+            const wsProvider =
               new Web3.providers.WebsocketProvider(url);
             const ethApi = new Web3(wsProvider);
             return ethApi;
@@ -142,7 +140,6 @@ export async function populateProviderInterface(
         disconnect: async () => {
           ethApi.removeAllListeners();
           ethApi.provider.destroy();
-          // ethApi.destroy();
         },
       };
 
