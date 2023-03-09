@@ -49,7 +49,7 @@
     "lint": "pnpm exec prettier --write --ignore-path .gitignore '**/*.(yml|js|ts|json)'"
   },
   "dependencies": {
-    "@acala-network/chopsticks": "^0.5.1",
+    "@acala-network/chopsticks": "^0.5.2",
     "@moonwall/util": "workspace:*",
     "@polkadot/api": "^10.0.1",
     "@polkadot/api-augment": "^10.0.1",
@@ -72,10 +72,11 @@
     "inquirer-press-to-continue": "^1.1.4",
     "moonbeam-types-bundle": "^2.0.10",
     "node-fetch": "^3.3.0",
+    "node-segfault-handler": "^1.4.2",
     "prettier": "^2.8.4",
     "semver": "^7.3.8",
     "ts-node": "^10.9.1",
-    "vitest": "^0.29.2",
+    "vitest": "^0.28.5",
     "web3": "4.0.1-alpha.5",
     "ws": "^8.12.1",
     "yaml": "^2.2.1",
@@ -89,8 +90,13 @@
   },
   "pnpm": {
     "overrides": {
-      "@polkadot/util": "$@polkadot/util",
-      "@moonwall/util": "workspace:*"
+      "@moonwall/util": "workspace:*",
+      "@polkadot/rpc-provider": "$@polkadot/rpc-provider",
+      "@polkadot/util": "$@polkadot/rpc-provider",
+      "@polkadot/keyring": "$@polkadot/rpc-provider",
+      "@polkadot/util-crypto": "$@polkadot/api",
+      "@polkadot/api": "$@polkadot/api",
+      "@polkadot/types": "$@polkadot/api"
     }
   }
 }

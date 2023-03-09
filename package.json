@@ -11,7 +11,7 @@
     "release": "",
     "start": "pnpm exec moonwall",
     "display-reports": "pnpm exec vite preview --base __vitest__ --outDir html",
-    "test": "pnpm exec moonwall test 'dev_multi basic chopsticks dev_seq' ",
+    "test": "pnpm exec moonwall test basic;sleep 1; pnpm exec moonwall test chopsticks;sleep 1; pnpm exec moonwall test dev_seq;sleep 1; pnpm exec moonwall test chop_state_test ",
     "typecheck": "pnpm exec tsc --noEmit"
   },
   "devDependencies": {
@@ -22,10 +22,6 @@
     "@polkadot/api-augment": "^10.0.1",
     "@polkadot/api-derive": "^10.0.1",
     "@polkadot/keyring": "^11.0.1",
-    "@polkadot/types": "^10.0.1",
-    "@polkadot/types-codec": "^10.0.1",
-    "@polkadot/util": "^11.0.1",
-    "@polkadot/util-crypto": "^11.0.1",
     "@types/node": "^18.14.6",
     "pnpm": "7.23.0",
     "rimraf": "^4.3.1",
@@ -35,7 +31,12 @@
     "overrides": {
       "@moonwall/cli": "workspace:*",
       "@moonwall/util": "workspace:*",
-      "@polkadot/util": "$@polkadot/util"
+      "@polkadot/util": "$@polkadot/keyring",
+      "@polkadot/api": "$@polkadot/api",
+      "@polkadot/types": "$@polkadot/api"
     }
+  },
+  "dependencies": {
+    "@polkadot/rpc-provider": "^10.0.1"
   }
 }

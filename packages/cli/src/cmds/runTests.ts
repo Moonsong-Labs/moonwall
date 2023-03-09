@@ -1,5 +1,7 @@
+import segfaultHandler from "node-segfault-handler"
 import { importJsonConfig } from "../lib/configReader.js";
 import { startVitest } from "vitest/node";
+import { setTimeout } from "timers/promises";
 import { UserConfig, Vitest } from "vitest";
 import { MoonwallContext } from "../lib/globalContext.js";
 import { Environment } from "../types/config.js";
@@ -8,6 +10,7 @@ import path from "path";
 import chalk from "chalk";
 
 export async function testCmd(envName) {
+  segfaultHandler.registerHandler()
   const globalConfig = await importJsonConfig();
   const env = globalConfig.environments.find(({ name }) => name === envName)!;
 
@@ -22,7 +25,7 @@ export async function testCmd(envName) {
   process.env.TEST_ENV = envName;
   try {
     const vitest = await executeTests(env);
-    await vitest!.close();
+    await vitest.close();
   } catch (e) {
     console.error(e);
     MoonwallContext.destroy();
@@ -37,7 +40,7 @@ export async function executeTests(env: Environment): Promise<Vitest> {
     globals: true,
     reporters: env.html ? ["verbose", "html"] : ["verbose"],
     testTimeout: 10000,
-
+// deps:{experimentalOptimizer:{}},
     hookTimeout: 500000,
     setupFiles: [setupPath],
     include: env.include
@@ -49,10 +52,10 @@ export async function executeTests(env: Environment): Promise<Vitest> {
     options.threads = true;
     options.minThreads = env.threads;
   } else {
-    // options.singleThread = true;
+    // Even when running tests sequentially, we still want it in multi-threaded 
+    // mode for its state separation properties
     options.minThreads = 1;
     options.maxThreads = 1;
-    // options.threads = false;
   }
   try {
     const folders = env.testFileDir.map((folder) =>

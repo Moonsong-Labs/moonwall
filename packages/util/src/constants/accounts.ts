@@ -1,5 +1,4 @@
-import { Keyring } from "@polkadot/api";
-import { KeyringPair } from "@polkadot/keyring/types.js";
+import { Keyring } from "@polkadot/keyring";
 
 import {
   DEFAULT_GENESIS_BALANCE,
@@ -81,7 +80,7 @@ export const charleth = keyringEth.addFromUri(CHARLETH_PRIVATE_KEY);
 export const dorothy = keyringEth.addFromUri(DOROTHY_PRIVATE_KEY);
 export const ethan = keyringEth.addFromUri(ETHAN_PRIVATE_KEY);
 export const faith = keyringEth.addFromUri(FAITH_PRIVATE_KEY);
-export const goliath: KeyringPair = keyringEth.addFromUri(GOLIATH_PRIVATE_KEY);
+export const goliath = keyringEth.addFromUri(GOLIATH_PRIVATE_KEY);
 
 // deprecated
 export const gerald = keyringEth.addFromUri(GERALD_PRIVATE_KEY);

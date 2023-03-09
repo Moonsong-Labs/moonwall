@@ -5,7 +5,7 @@ import {
   RuntimeDispatchInfo,
   Event,
 } from "@polkadot/types/interfaces";
-import { SpWeightsWeightV2Weight } from "@polkadot/types/lookup";
+import { FrameSystemEventRecord, SpWeightsWeightV2Weight } from "@polkadot/types/lookup";
 import { u32, u64, u128, Option, GenericExtrinsic } from "@polkadot/types";
 import type {
   Block,
@@ -76,7 +76,7 @@ export const getBlockExtrinsic = async (
   const extIndex = block.extrinsics.findIndex(
     (ext) => ext.method.section == section && ext.method.method == method
   );
-  const extrinsic: GenericExtrinsic =
+  const extrinsic =
     extIndex > -1 ? block.extrinsics[extIndex] : null;
   const events = records
     .filter(
@@ -174,11 +174,7 @@ export const getBlockArray = async (
 };
 
 export function extractWeight(
-  weightV1OrV2:
-    | u64
-    | Option<u64>
-    | SpWeightsWeightV2Weight
-    | Option<SpWeightsWeightV2Weight>
+  weightV1OrV2: u64 | Option<u64> | SpWeightsWeightV2Weight | Option<SpWeightsWeightV2Weight>
 ) {
   if ("isSome" in weightV1OrV2) {
     const weight = weightV1OrV2.unwrap();

@@ -3,7 +3,6 @@ import { expect } from "vitest";
 import { ApiPromise } from "@polkadot/api";
 import { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types";
 import { KeyringPair } from "@polkadot/keyring/types";
-import { ISubmittableResult } from "@polkadot/types/types/extrinsic.js";
 import { PalletDemocracyReferendumInfo } from "@polkadot/types/lookup";
 import { blake2AsHex } from "@polkadot/util-crypto";
 import { alith, baltathar, charleth, dorothy } from "@moonwall/util";

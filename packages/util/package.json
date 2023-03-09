@@ -46,15 +46,15 @@
     "lint": "pnpm exec prettier --write --ignore-path .gitignore '**/*.(yml|js|ts|json)'"
   },
   "dependencies": {
-    "@acala-network/chopsticks": "^0.5.1",
+    "@acala-network/chopsticks": "^0.5.2",
     "@polkadot/api": "^10.0.1",
     "@polkadot/api-augment": "^10.0.1",
     "@polkadot/api-derive": "^10.0.1",
     "@polkadot/keyring": "^11.0.1",
+    "@polkadot/rpc-provider": "^10.0.1",
     "@polkadot/types": "^10.0.1",
     "@polkadot/types-codec": "^10.0.1",
     "@polkadot/util": "^11.0.1",
-    "@polkadot/util-crypto": "^11.0.1",
     "@types/node": "^18.14.6",
     "@types/yargs": "^17.0.22",
     "bottleneck": "^2.19.5",
@@ -73,13 +73,8 @@
     "semver": "^7.3.8",
     "ts-node": "^10.9.1",
     "vite": "^4.1.4",
-    "vitest": "^0.29.2",
+    "vitest": "^0.28.5",
     "web3": "4.0.1-alpha.5",
-    "web3-core": "^1.8.2",
-    "web3-core-helpers": "^1.8.2",
-    "web3-core-subscriptions": "^1.8.2",
-    "web3-eth": "^1.8.2",
-    "web3-types": "0.1.1-alpha.4",
     "ws": "^8.12.1",
     "yaml": "^2.2.1",
     "yargs": "^17.7.1"
@@ -92,7 +87,12 @@
   },
   "pnpm": {
     "overrides": {
-      "@polkadot/util": "$@polkadot/util"
+      "@polkadot/rpc-provider": "$@polkadot/rpc-provider",
+      "@polkadot/keyring": "$@polkadot/keyring",
+      "@polkadot/util": "$@polkadot/util",
+      "@polkadot/util-crypto": "$@polkadot/util",
+      "@polkadot/api": "$@polkadot/api",
+      "@polkadot/types": "$@polkadot/api"
     }
   }
 }
