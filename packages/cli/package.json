@@ -22,11 +22,11 @@
     "kusama",
     "substrate"
   ],
-  "exports": "./dist/src/index.js",
-  "module": "./dist/src/index.js",
-  "types": "./dist/src/index.d.ts",
+  "exports": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "bin": {
-    "moonwall": "./moonwall.mjs"
+    "moonwall": "./dist/moonwall.mjs"
   },
   "engines": {
     "node": ">=14.16.0",
@@ -41,12 +41,12 @@
     "*.cjs"
   ],
   "scripts": {
-    "build": "pnpm exec rimraf dist && tsc ",
+    "build": "pnpm exec rimraf dist && tsup src --format cjs,esm --dts ",
     "typecheck": "pnpm exec tsc --noEmit",
     "prepublish": "pnpm run build",
     "prepare": "pnpm build",
     "compile": "pnpm build ",
-    "lint": "pnpm exec prettier --write --ignore-path .gitignore '**/*.(yml|js|ts|json)'"
+    "lint": "tsc"
   },
   "dependencies": {
     "@acala-network/chopsticks": "^0.5.2",
@@ -76,7 +76,8 @@
     "prettier": "^2.8.4",
     "semver": "^7.3.8",
     "ts-node": "^10.9.1",
-    "vitest": "^0.28.5",
+    "tsup": "^6.6.3",
+    "vitest": "^0.29.2",
     "web3": "4.0.1-alpha.5",
     "ws": "^8.12.1",
     "yaml": "^2.2.1",

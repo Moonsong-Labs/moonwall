@@ -16,11 +16,9 @@
     "sourceMap": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
+    "noEmit": true,
+    "noUncheckedIndexedAccess": true,
     "strict": false //renable this oneday
-    // "paths": {
-    //   "@moonwall/cli": ["./packages/cli/src/index.ts"],
-    //   "@moonwall/util": ["./packages/util/src/index.ts"],
-    // }
   },
   "include": ["packages/cli/src/**/*"],
   "exclude": [

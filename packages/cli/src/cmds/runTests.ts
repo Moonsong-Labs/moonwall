@@ -1,4 +1,4 @@
-import segfaultHandler from "node-segfault-handler"
+import segfaultHandler from "node-segfault-handler";
 import { importJsonConfig } from "../lib/configReader.js";
 import { startVitest } from "vitest/node";
 import { setTimeout } from "timers/promises";
@@ -10,7 +10,7 @@ import path from "path";
 import chalk from "chalk";
 
 export async function testCmd(envName) {
-  segfaultHandler.registerHandler()
+  segfaultHandler.registerHandler();
   const globalConfig = await importJsonConfig();
   const env = globalConfig.environments.find(({ name }) => name === envName)!;
 
@@ -34,13 +34,13 @@ export async function testCmd(envName) {
 
 export async function executeTests(env: Environment): Promise<Vitest> {
   const currDir = url.fileURLToPath(new URL(".", import.meta.url));
-  const setupPath = path.join(currDir, "..", "internal", "setupFixture");
+  const setupPath = path.join(currDir, "internal", "setupFixture");
   const options: UserConfig = {
     watch: false,
     globals: true,
     reporters: env.html ? ["verbose", "html"] : ["verbose"],
     testTimeout: 10000,
-// deps:{experimentalOptimizer:{}},
+    // deps:{experimentalOptimizer:{}},
     hookTimeout: 500000,
     setupFiles: [setupPath],
     include: env.include
@@ -52,7 +52,7 @@ export async function executeTests(env: Environment): Promise<Vitest> {
     options.threads = true;
     options.minThreads = env.threads;
   } else {
-    // Even when running tests sequentially, we still want it in multi-threaded 
+    // Even when running tests sequentially, we still want it in multi-threaded
     // mode for its state separation properties
     options.minThreads = 1;
     options.maxThreads = 1;

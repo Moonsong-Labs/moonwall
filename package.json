@@ -7,7 +7,8 @@
   "description": "Testing framework for the Moon family of projects",
   "scripts": {
     "build": "pnpm -r --filter='./packages/**' run build",
-    "lint": "pnpm exec prettier --write --ignore-path .gitignore '**/*.(yml|js|ts|json)'",
+    "prettier": "pnpm exec prettier --write --ignore-path .gitignore '**/*.(yml|js|ts|json)'",
+    "lint": "pnpm -r --filter='./packages/**' run lint",
     "release": "",
     "start": "pnpm exec moonwall",
     "display-reports": "pnpm exec vite preview --base __vitest__ --outDir html",
@@ -37,6 +38,7 @@
     }
   },
   "dependencies": {
+    "@changesets/cli": "^2.26.0",
     "@polkadot/rpc-provider": "^10.0.1"
   }
 }

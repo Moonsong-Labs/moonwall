@@ -12,7 +12,7 @@
       "args": [
         "--experimental-modules",
         "--experimental-specifier-resolution=node",
-        "./dist/src/entrypoint.js",
+        "./dist/entrypoint.js",
         "test",
         "dev_test"
       ],

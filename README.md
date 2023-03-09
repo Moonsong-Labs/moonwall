@@ -6,10 +6,9 @@ Test harness for testing on Moonbeam, Moonriver and more
 
 ### NPM Installation
 ```
-npm -g i @moonsong-labs/moonwall
+pnpm -g i @moonwall/cli
 ```
-
-> :warning: This package is not yet published as a public npm repository. You can follow the local steps below to use it before then.
+> Or whichever way you prefer to install via your favourite package manager
 
 ### Local Installation
 
@@ -33,24 +32,15 @@ import { ALITH_ADDRESS } from "@moonwall/util";
 - Test: Executes tests, and runs a network if neccesary.
 - Download: Gets node binaries for polkadot, moonbeam from GH.
 
-## Examples
-
 > :information_source: Use `--help` for more information about arguments for each command
 
-#### Usage
-```
-npx moonwall
-```
+### Usage Examples
 
-```
-npx moonwall run <ENV_NAME>
-```
+- `moonwall` : If you have globally installed moonwall, here is the most minimal entrypoint
 
-```
-npx moonwall test <ENV_NAME>
-```
+- `pnpx moonwall run <ENV_NAME>` : To download and run the latest moonwall binary from npm.js repository, and run a network specified in your config file.
 
-```
-npx moonwall downalod <ARTIFACT NAME> <VERSION> <PATH>
-```
+- `pnpm exec moonwall test <ENV_NAME>` : To run the locally compiled version of the binary, to start network and run tests against it.
+
+- `pnpm moonwall download <ARTIFACT NAME> <VERSION> <PATH>` : To run the locally compiled version of the binary, to download an artifact directly from github.
 
