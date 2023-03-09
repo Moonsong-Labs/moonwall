@@ -58,8 +58,7 @@ export function prepareProviders(
           name,
           type,
           connect: () => {
-            const wsProvider =
-              new Web3.providers.WebsocketProvider(url);
+            const wsProvider = new Web3.providers.WebsocketProvider(url);
             const ethApi = new Web3(wsProvider);
             return ethApi;
           },

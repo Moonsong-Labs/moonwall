@@ -22,8 +22,13 @@ jobs:
       - name: Create Release Pull Request
         id: changesets
         uses: changesets/action@v1
+<<<<<<< HEAD
         with:
           publish: pnpm run build
+=======
+        #         with: #re-enable when more stable
+        #           publish: pnpm run build
+>>>>>>> 0587219 (Updated READMEs)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

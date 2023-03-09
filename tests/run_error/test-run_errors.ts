@@ -1,5 +1,15 @@
-import { describeSuite, ApiPromise, expect, beforeAll } from "@moonsong-labs/moonwall-cli";
-import { ALITH_ADDRESS, CHARLETH_ADDRESS, ETHAN_ADDRESS, alith } from "@moonsong-labs/moonwall-util";
+import {
+  describeSuite,
+  ApiPromise,
+  expect,
+  beforeAll,
+} from "@moonsong-labs/moonwall-cli";
+import {
+  ALITH_ADDRESS,
+  CHARLETH_ADDRESS,
+  ETHAN_ADDRESS,
+  alith,
+} from "@moonsong-labs/moonwall-util";
 import Web3 from "web3";
 
 describeSuite({

@@ -5,8 +5,8 @@ import { setTimeout } from "timers/promises";
 import { UserConfig, Vitest } from "vitest";
 import { MoonwallContext } from "../lib/globalContext.js";
 import { Environment } from "../types/config.js";
-import { dirname } from 'path'
-import { fileURLToPath } from 'url'
+import { dirname } from "path";
+import { fileURLToPath } from "url";
 import path from "path";
 import chalk from "chalk";
 
@@ -16,7 +16,11 @@ export async function testCmd(envName) {
   const env = globalConfig.environments.find(({ name }) => name === envName)!;
 
   if (!!!env) {
-    throw new Error(`No environment found in config for: ${chalk.bgWhiteBright.blackBright(envName)}`);
+    throw new Error(
+      `No environment found in config for: ${chalk.bgWhiteBright.blackBright(
+        envName
+      )}`
+    );
   }
 
   process.env.TEST_ENV = envName;
@@ -30,10 +34,10 @@ export async function testCmd(envName) {
 }
 
 export async function executeTests(env: Environment): Promise<Vitest> {
-
-  const _dirname = typeof __dirname !== 'undefined'
-  ? __dirname
-  : dirname(fileURLToPath(import.meta.url))
+  const _dirname =
+    typeof __dirname !== "undefined"
+      ? __dirname
+      : dirname(fileURLToPath(import.meta.url));
 
   const setupPath = path.join(_dirname, "internal", "setupFixture");
   const options: UserConfig = {
@@ -44,7 +48,9 @@ export async function executeTests(env: Environment): Promise<Vitest> {
     // deps:{experimentalOptimizer:{}},
     hookTimeout: 500000,
     setupFiles: [setupPath],
-    include: env.include ? env.include : ["**/{test,spec,test_,test-}*{ts,mts,cts}"],
+    include: env.include
+      ? env.include
+      : ["**/{test,spec,test_,test-}*{ts,mts,cts}"],
   };
 
   if (env.threads && env.threads > 1) {
@@ -57,7 +63,9 @@ export async function executeTests(env: Environment): Promise<Vitest> {
     options.maxThreads = 1;
   }
   try {
-    const folders = env.testFileDir.map((folder) => path.join("/", folder, "/"));
+    const folders = env.testFileDir.map((folder) =>
+      path.join("/", folder, "/")
+    );
     return await startVitest("test", folders, options);
   } catch (e) {
     throw new Error(e);

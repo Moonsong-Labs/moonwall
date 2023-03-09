@@ -6,11 +6,3 @@ find the full documentation for it [in our repository](https://github.com/change
 
 We have a quick list of common questions to get you started engaging with this project in
 [our documentation](https://github.com/changesets/changesets/blob/main/docs/common-questions.md)
-
-# Contribution Guide
-
-1. Run the tests/ build that you need until you're happy
-2. Run the `changeset` cli and follow the wizard
-3. Add the random-named `.md` file with the changes this PR will have
-4. Push and Enrich PR with additional details
-
