@@ -1,6 +1,6 @@
 # @moonwall/cli
 
-## 1.0.0
+## 0.2.0
 
 ### Major Changes
 
@@ -12,4 +12,4 @@
 ### Patch Changes
 
 - Updated dependencies [84fee94]
-  - @moonwall/util@1.0.0
+  - @moonwall/util@0.2.0
