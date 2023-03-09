@@ -1,5 +1,5 @@
 {
-  "name": "@moonwall/cli",
+  "name": "@moonsong-labs/moonwall-cli",
   "type": "module",
   "version": "0.2.0",
   "description": "Testing framework for the Moon family of projects",
@@ -50,7 +50,7 @@
   },
   "dependencies": {
     "@acala-network/chopsticks": "^0.5.2",
-    "@moonwall/util": "workspace:*",
+    "@moonsong-labs/moonwall-util": "workspace:*",
     "@polkadot/api": "^10.0.1",
     "@polkadot/api-augment": "^10.0.1",
     "@polkadot/api-derive": "^10.0.1",
@@ -92,7 +92,7 @@
   },
   "pnpm": {
     "overrides": {
-      "@moonwall/util": "workspace:*",
+      "@moonsong-labs/moonwall-util": "workspace:*",
       "@polkadot/rpc-provider": "$@polkadot/rpc-provider",
       "@polkadot/util": "$@polkadot/rpc-provider",
       "@polkadot/keyring": "$@polkadot/rpc-provider",
@@ -100,5 +100,8 @@
       "@polkadot/api": "$@polkadot/api",
       "@polkadot/types": "$@polkadot/api"
     }
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

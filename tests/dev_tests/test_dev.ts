@@ -1,5 +1,5 @@
-import { beforeAll, describeSuite, expect, alithSigner } from "@moonwall/cli";
-import { BALTATHAR_ADDRESS, CHARLETH_ADDRESS, alith } from "@moonwall/util";
+import { describeSuite, ApiPromise, expect, beforeAll } from "@moonsong-labs/moonwall-cli";
+import { CHARLETH_ADDRESS, ETHAN_ADDRESS, alith } from "@moonsong-labs/moonwall-util";
 import { parseEther } from "ethers";
 import { BN } from "@polkadot/util";
 

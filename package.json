@@ -1,5 +1,5 @@
 {
-  "name": "@moonwall/monorepo",
+  "name": "@moonsong-labs/moonwall-monorepo",
   "type": "module",
   "version": "0.2.0",
   "private": true,
@@ -18,8 +18,8 @@
   "devDependencies": {
     "@acala-network/chopsticks": "^0.5.2",
     "@changesets/cli": "^2.26.0",
-    "@moonwall/cli": "workspace:*",
-    "@moonwall/util": "workspace:*",
+    "@moonsong-labs/moonwall-cli": "workspace:*",
+    "@moonsong-labs/moonwall-util": "workspace:*",
     "@polkadot/api": "^10.0.1",
     "@polkadot/api-augment": "^10.0.1",
     "@polkadot/api-derive": "^10.0.1",
@@ -31,8 +31,8 @@
   },
   "pnpm": {
     "overrides": {
-      "@moonwall/cli": "workspace:*",
-      "@moonwall/util": "workspace:*",
+      "@moonsong-labs/moonwall-cli": "workspace:*",
+      "@moonsong-labs/moonwall-util": "workspace:*",
       "@polkadot/util": "$@polkadot/keyring",
       "@polkadot/api": "$@polkadot/api",
       "@polkadot/types": "$@polkadot/api"

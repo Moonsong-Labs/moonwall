@@ -21,8 +21,8 @@ pnpm -g i @moonwall/cli
 
 From here you can import the items you need from moonwall packages in your code:
 ```
-import { describeSuite , beforeAll, expect, ALITH_ADDRESS } from "@moonwall/cli";
-import { ALITH_ADDRESS } from "@moonwall/util";
+import { describeSuite , beforeAll, expect, ALITH_ADDRESS } from "@moonsong-labs/moonwall-cli";
+import { ALITH_ADDRESS } from "@moonsong-labs/moonwall-util";
 ```
 
 ## Functions

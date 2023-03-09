@@ -1,11 +1,6 @@
-import {
-  beforeAll,
-  describeSuite,
-  MoonwallContext,
-  expect,
-} from "@moonwall/cli";
 import { Contract, WebSocketProvider, formatUnits } from "ethers";
-import { xcAssetAbi } from "@moonwall/util";
+import { describeSuite, ApiPromise, expect, beforeAll, MoonwallContext } from "@moonsong-labs/moonwall-cli";
+import { CHARLETH_ADDRESS, ETHAN_ADDRESS, alith,xcAssetAbi } from "@moonsong-labs/moonwall-util";
 import Debug from "debug";
 const debug = Debug("test:eth");
 
@@ -14,7 +9,7 @@ describeSuite({
   title: "Ethers test suite",
   foundationMethods: "read_only",
   testCases: ({ it, context }) => {
-    let api: WebSocketProvider;
+    let api;
 
     beforeAll(() => {
       console.log("Should be before each tc");

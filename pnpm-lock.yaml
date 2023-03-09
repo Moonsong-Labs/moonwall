@@ -1,8 +1,8 @@
 lockfileVersion: 5.4
 
 overrides:
-  '@moonwall/cli': workspace:*
-  '@moonwall/util': workspace:*
+  '@moonsong-labs/moonwall-cli': workspace:*
+  '@moonsong-labs/moonwall-util': workspace:*
   '@polkadot/util': ^11.0.1
   '@polkadot/api': ^10.0.1
   '@polkadot/types': ^10.0.1
@@ -13,8 +13,8 @@ importers:
     specifiers:
       '@acala-network/chopsticks': ^0.5.2
       '@changesets/cli': ^2.26.0
-      '@moonwall/cli': workspace:*
-      '@moonwall/util': workspace:*
+      '@moonsong-labs/moonwall-cli': workspace:*
+      '@moonsong-labs/moonwall-util': workspace:*
       '@polkadot/api': ^10.0.1
       '@polkadot/api-augment': ^10.0.1
       '@polkadot/api-derive': ^10.0.1
@@ -29,8 +29,8 @@ importers:
     devDependencies:
       '@acala-network/chopsticks': 0.5.9
       '@changesets/cli': 2.26.0
-      '@moonwall/cli': link:packages/cli
-      '@moonwall/util': link:packages/util
+      '@moonsong-labs/moonwall-cli': link:packages/cli
+      '@moonsong-labs/moonwall-util': link:packages/util
       '@polkadot/api': 10.0.1
       '@polkadot/api-augment': 10.0.1
       '@polkadot/api-derive': 10.0.1
@@ -43,7 +43,7 @@ importers:
   packages/cli:
     specifiers:
       '@acala-network/chopsticks': ^0.5.2
-      '@moonwall/util': workspace:*
+      '@moonsong-labs/moonwall-util': workspace:*
       '@polkadot/api': ^10.0.1
       '@polkadot/api-augment': ^10.0.1
       '@polkadot/api-derive': ^10.0.1
@@ -82,7 +82,7 @@ importers:
       yargs: ^17.7.1
     dependencies:
       '@acala-network/chopsticks': 0.5.9_debug@4.3.4+ts-node@10.9.1
-      '@moonwall/util': link:../util
+      '@moonsong-labs/moonwall-util': link:../util
       '@polkadot/api': 10.0.1
       '@polkadot/api-augment': 10.0.1
       '@polkadot/api-derive': 10.0.1

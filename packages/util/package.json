@@ -1,5 +1,5 @@
 {
-  "name": "@moonwall/util",
+  "name": "@moonsong-labs/moonwall-util",
   "type": "module",
   "version": "0.2.0",
   "description": "Testing framework for the Moon family of projects",
@@ -100,5 +100,8 @@
       "@polkadot/api": "$@polkadot/api",
       "@polkadot/types": "$@polkadot/api"
     }
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

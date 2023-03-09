@@ -17,7 +17,7 @@ import {
   ALITH_PRIVATE_KEY,
   alith,
   createAndFinalizeBlock,
-} from "@moonwall/util";
+} from "@moonsong-labs/moonwall-util";
 import Web3 from "web3";
 import { ethers } from "ethers";
 import { MoonwallContext } from "./globalContext.js";

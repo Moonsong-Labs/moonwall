@@ -10,7 +10,7 @@ import {
   cancelReferendaWithCouncil,
   executeProposalWithCouncil,
 } from "./governance.js";
-import { alith } from "@moonwall/util";
+import { alith } from "@moonsong-labs/moonwall-util";
 import { ChopsticksContext } from "../types/runner.js";
 import { getRuntimeWasm } from "./binaries.js";
 

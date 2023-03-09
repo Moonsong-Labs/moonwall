@@ -12,7 +12,7 @@ import {
   customWeb3Request,
   alith,
   createAndFinalizeBlock,
-} from "@moonwall/util";
+} from "@moonsong-labs/moonwall-util";
 import { GenericContext } from "../lib/runner-functions.js";
 import Debug from "debug";
 import { EventRecord } from "@polkadot/types/interfaces/types.js";
