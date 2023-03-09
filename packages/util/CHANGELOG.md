@@ -1,5 +1,11 @@
 # @moonwall/util
 
+## 0.2.1
+
+### Patch Changes
+
+- 23cc154: Updated READMEs and contribution guide
+
 ## 0.2.0
 
 ### Major Changes

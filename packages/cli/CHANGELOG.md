@@ -1,5 +1,13 @@
 # @moonwall/cli
 
+## 0.2.1
+
+### Patch Changes
+
+- 23cc154: Updated READMEs and contribution guide
+- Updated dependencies [23cc154]
+  - @moonsong-labs/moonwall-util@0.2.1
+
 ## 0.2.0
 
 ### Major Changes
