@@ -25,4 +25,4 @@ jobs:
         with:
           publish: pnpm run build
         env:
-          GITHUB_TOKEN: ${{ secrets.CHANGESET_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
