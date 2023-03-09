@@ -1,4 +1,3 @@
-import "@polkadot/api-augment";
 import { expect } from "vitest";
 import { ApiPromise } from "@polkadot/api";
 import { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types";
@@ -12,6 +11,7 @@ import {
   dorothy,
 } from "@moonsong-labs/moonwall-util";
 import { DevModeContext } from "../types/runner.js";
+import "@polkadot/api-augment";
 
 export const COUNCIL_MEMBERS = [baltathar, charleth, dorothy];
 export const COUNCIL_THRESHOLD = Math.ceil((COUNCIL_MEMBERS.length * 2) / 3);
@@ -233,7 +233,7 @@ export const maximizeConvictionVotingOf = async (
         Standard: {
           vote: { aye: true, conviction: "Locked6x" },
           balance: await (
-            await context.getPolkadotJs().query.system.account(alith.address)
+            await context.getPolkadotJs().query.system.account(alith.address) as any
           ).data.free,
         },
       })
