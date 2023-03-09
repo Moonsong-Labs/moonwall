@@ -1,25 +1,24 @@
-import { expect } from 'chai';
-import { describeSuite } from '../../src/index.js';
+import { describeSuite, expect } from "@moonwall/cli";
 
 describeSuite({
-  id: 'P200',
-  title: 'Tests that are using the production APIs',
+  id: "B01",
+  title: "Tests that are using the production APIs",
+  foundationMethods: "read_only",
   testCases: ({ context, it }) => {
-    it('T01', 'Passing Test', async function () {
-      console.log(
-        (
-          await context.providers['MB'].query.system.account(
-            '0x1C86E56007FCBF759348dcF0479596a9857Ba105'
-          )
-        ).toHuman()
-      );
-      console.log(context.providers['MB'].consts.system.version.specName.toString());
-      console.log(context.providers['DOT'].consts.system.version.specName.toString());
-      expect(true).to.be.true;
+    it({
+      id: "T01",
+      title: "Passing Test",
+      test: async function () {
+        expect(true).to.be.true;
+      },
     });
 
-    it('T02', 'Skipped test', function () {
-      expect(true).to.be.true;
+    it({
+      id: "T02",
+      title: "another passing test",
+      test: function () {
+        expect("true").to.contain("true");
+      },
     });
-  }
+  },
 });

@@ -3,7 +3,62 @@
   "defaultTestTimeout": 40000,
   "environments": [
     {
-      "name": "mb_skip",
+      "name": "basic",
+      "testFileDir": ["tests/basic/"],
+      "foundation": {
+        "type": "read_only"
+      },
+      "connections": []
+    },
+    {
+      "name": "chopsticks",
+      "testFileDir": ["tests/chopsticks/"],
+      "include": ["**/*basic*"],
+      "foundation": {
+        "type": "chopsticks",
+        "rtUpgradePath": "./tmp/moonriver-runtime-2201.wasm",
+        "launchSpec": [
+          {
+            "name": "mb",
+            "type": "parachain",
+            "buildBlockMode": "manual",
+            "configPath": "./configs/moonriverChopsticks.yml"
+          }
+        ]
+      },
+      "connections": [
+        {
+          "name": "MB",
+          "type": "moon",
+          "endpoints": ["ws://127.0.0.1:10000"]
+        }
+      ]
+    },
+    {
+      "name": "chopsticks_state",
+      "testFileDir": ["tests/chopsticks/"],
+      "include": ["**/*state*"],
+      "foundation": {
+        "type": "chopsticks",
+        "launchSpec": [
+          {
+            "name": "mb",
+            "type": "parachain",
+            "buildBlockMode": "manual",
+            "configPath": "./configs/moonriverChopsticks.yml"
+          }
+        ]
+      },
+      "connections": [
+        {
+          "name": "MB",
+          "type": "moon",
+          "endpoints": ["ws://127.0.0.1:10000"]
+        }
+      ]
+    },
+    {
+      "name": "moonbeam_smoke",
       "testFileDir": ["tests/dummy-smoke/"],
       "include": ["**/*conditional*"],
       "foundation": {
@@ -18,7 +73,7 @@
       ]
     },
     {
-      "name": "mr_run",
+      "name": "moonriver_smoke",
       "testFileDir": ["tests/dummy-smoke/"],
       "include": ["**/*conditional*"],
       "foundation": {
@@ -42,6 +97,7 @@
           {
             "name": "mb",
             "type": "parachain",
+            "running": false,
             "buildBlockMode": "manual",
             "configPath": "./configs/moonbeamChopsticks.yml"
           }
@@ -54,6 +110,22 @@
           "endpoints": ["ws://127.0.0.1:12000"]
         }
       ]
+    },
+    {
+      "name": "chopsticks_network_only",
+      "testFileDir": [],
+      "foundation": {
+        "type": "chopsticks",
+        "launchSpec": [
+          {
+            "name": "mb",
+            "type": "parachain",
+            "buildBlockMode": "manual",
+            "configPath": "./configs/moonbeamChopsticks.yml"
+          }
+        ]
+      },
+      "connections": []
     },
     {
       "name": "chopsticks_xcm",
@@ -89,38 +161,32 @@
       ]
     },
     {
-      "name": "chop_test",
-      "testFileDir": ["tests/chopsticks/"],
-      "include": ["**/*basic*"],
-      "foundation": {
-        "type": "chopsticks",
-        "rtUpgradePath": "./tmp/moonriver-runtime-2201.wasm",
-        "launchSpec": [
-          {
-            "name": "mb",
-            "type": "parachain",
-            "buildBlockMode": "manual",
-            "configPath": "./configs/moonriverChopsticks.yml"
-          }
-        ]
-      },
-      "connections": [
-        {
-          "name": "MB",
-          "type": "moon",
-          "endpoints": ["ws://127.0.0.1:10000"]
-        }
-      ]
-    },
-    {
-      "name": "dev_minimal",
+      "name": "dev_multi",
       "testFileDir": ["tests/test_separation"],
-      "threads": 3,
+      "threads": 5,
+      "html": false,
       "foundation": {
         "type": "dev",
         "launchSpec": [
           {
             "name": "moonbeam",
+            "running": true,
+            "binPath": "./tmp/moonbeam"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dev_seq",
+      "testFileDir": ["tests/test_separation"],
+      "threads": 1,
+      "html": false,
+      "foundation": {
+        "type": "dev",
+        "launchSpec": [
+          {
+            "name": "moonbeam",
+            "running": true,
             "binPath": "./tmp/moonbeam"
           }
         ]
@@ -220,6 +286,7 @@
         "launchSpec": [
           {
             "name": "moonbeam",
+            "running": false,
             "binPath": "./tmp/moonbeam",
             "ports": { "p2pPort": 30333, "wsPort": 9944, "rpcPort": 9933 },
             "options": [
@@ -253,6 +320,21 @@
           "endpoints": ["ws://127.0.0.1:9944"]
         }
       ]
+    },
+    {
+      "name": "dev_network_only",
+      "testFileDir": [],
+      "foundation": {
+        "type": "dev",
+        "launchSpec": [
+          {
+            "name": "moonbeam",
+            "running": true,
+            "binPath": "./tmp/moonbeam"
+          }
+        ]
+      },
+      "connections": []
     }
   ]
 }

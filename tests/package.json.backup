@@ -1,0 +1,46 @@
+{
+  "name": "@moonwall/tests",
+  "type": "module",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Testing framework for the Moon family of projects",
+  "author": "timbrinded",
+  "license": "ISC",
+  "engines": {
+    "node": ">=14.16.0",
+    "pnpm": ">=7"
+  },
+  "scripts": {
+    "test": "moonwall test 'dev_multi basic chopsticks' "
+  },
+  "devDependencies": {
+    "@acala-network/chopsticks": "^0.5.1",
+    "@moonbeam-network/api-augment": "^0.2100.0",
+    "@moonwall/cli": "workspace:*",
+    "@moonwall/util": "workspace:*",
+    "@polkadot/api": "^10.0.1",
+    "@polkadot/api-augment": "^10.0.1",
+    "@polkadot/api-derive": "^10.0.1",
+    "@polkadot/keyring": "^11.0.1",
+    "@polkadot/types": "^10.0.1",
+    "@polkadot/types-codec": "^10.0.1",
+    "@polkadot/util": "^11.0.1",
+    "@polkadot/util-crypto": "^11.0.1",
+    "@types/debug": "^4.1.7",
+    "bottleneck": "^2.19.5",
+    "ethers": "^6.0.8",
+    "semver": "^7.3.8",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.8.4",
+    "web3": "4.0.1-alpha.5"
+  },
+  "dependencies": {
+    "@types/node": "^18.14.6"
+  },
+  "pnpm": {
+    "overrides": {
+      "@moonwall/cli": "workspace:*",
+      "@moonwall/util": "workspace:*"
+    }
+  }
+}

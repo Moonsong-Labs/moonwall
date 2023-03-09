@@ -1,27 +1,35 @@
-import { describeSuite } from '../../src/index.js';
-import { setTimeout } from 'timers/promises';
-import { expect } from 'vitest';
+import { describeSuite, expect } from "@moonwall/cli";
+import { setTimeout } from "timers/promises";
 
 describeSuite({
-  id: 'T100',
-  title: 'New Test Suite',
-  testCases: function (it) {
-    it('Sample test', () => {
-      expect(true).to.be.true;
+  id: "B06",
+  title: "New Test Suite",
+  foundationMethods: "read_only",
+  testCases: function ({ it }) {
+    it({
+      id: "T01",
+      title: "Sample test",
+      test: () => {
+        expect(true).to.be.true;
+      },
     });
 
-    it('Skipped test', function () {
-      this.skip();
-      expect(true).to.be.true;
+    it({
+      id: "T02",
+      title: "Skipped test",
+      modifier: "skip",
+      test: function () {
+        expect(true).to.be.true;
+      },
     });
 
-    it('Failing test', () => {
-      expect(false).to.be.true;
+    it({
+      id: "T03",
+      title: "Long test",
+      test: async function () {
+        await setTimeout(5000);
+        expect(true).to.be.true;
+      },
     });
-
-    it('Long test', async function () {
-      await setTimeout(5000);
-      expect(true).to.be.true;
-    });
-  }
+  },
 });

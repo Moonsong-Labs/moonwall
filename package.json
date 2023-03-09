@@ -1,90 +1,44 @@
 {
-  "name": "moonwall",
-  "version": "0.1.0",
-  "description": "Testing framework for the Moon family of projects",
-  "exports": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "name": "@moonwall/monorepo",
   "type": "module",
-  "engines": {
-    "node": ">=14.16.0",
-    "pnpm": ">=7"
-  },
-  "files": [
-    "dist",
-    "bin",
-    "*.d.ts",
-    "*.d.cts",
-    "*.mjs",
-    "*.cjs"
-  ],
+  "version": "0.2.0",
+  "private": true,
+  "packageManager": "pnpm@7.23.0",
+  "description": "Testing framework for the Moon family of projects",
   "scripts": {
-    "build": "rimraf dist && npx swc --config-file .swcrc src -d dist",
-    "prepublish": "pnpm run build",
+    "build": "pnpm -r --filter='./packages/**' run build",
+    "prettier": "pnpm exec prettier --write --ignore-path .gitignore '**/*.(yml|js|ts|json)'",
+    "lint": "pnpm -r --filter='./packages/**' run lint",
+    "release": "",
+    "start": "pnpm exec moonwall",
     "display-reports": "pnpm exec vite preview --base __vitest__ --outDir html",
-    "prepare": "pnpm build",
-    "compile": "pnpm build ",
-    "start": "npx ts-node --esm ./src/cli/entrypoint.ts test dev_test",
-    "lint": "npx prettier --write --ignore-path .gitignore '**/*.(yml|js|ts|json)'",
-    "run-pkg": "DEBUG=global* npx moonwall test dev_test"
-  },
-  "bin": {
-    "moonwall": "./moonwall.mjs"
-  },
-  "author": "timbrinded",
-  "license": "ISC",
-  "dependencies": {
-    "@acala-network/chopsticks": "^0.4.2",
-    "@moonbeam-network/api-augment": "^0.2100.0",
-    "@polkadot/api": "^9.14.2",
-    "@polkadot/api-augment": "^9.14.2",
-    "@polkadot/api-derive": "^9.14.2",
-    "@polkadot/keyring": "^10.4.2",
-    "@polkadot/types": "^9.14.2",
-    "@polkadot/types-codec": "^9.14.2",
-    "@polkadot/util": "^10.4.2",
-    "@polkadot/util-crypto": "^10.4.2",
-    "@types/chai": "^4.3.4",
-    "@types/node": "^18.14.0",
-    "@types/yargs": "^17.0.22",
-    "bottleneck": "^2.19.5",
-    "chalk": "^5.2.0",
-    "clear": "^0.1.0",
-    "cli-progress": "^3.12.0",
-    "colors": "^1.4.0",
-    "debug": "^4.3.4",
-    "dotenv": "^16.0.3",
-    "ethers": "^6.0.5",
-    "inquirer": "^8.2.5",
-    "inquirer-press-to-continue": "^1.1.4",
-    "moonbeam-types-bundle": "^2.0.10",
-    "node-fetch": "^3.3.0",
-    "prettier": "^2.8.4",
-    "semver": "^7.3.8",
-    "ts-node": "^10.9.1",
-    "vite": "^4.1.4",
-    "vitest": "^0.29.2",
-    "web3": "4.0.1-alpha.5",
-    "web3-core": "^1.8.2",
-    "web3-core-helpers": "^1.8.2",
-    "web3-core-subscriptions": "^1.8.2",
-    "web3-eth": "^1.8.2",
-    "web3-types": "0.1.1-alpha.4",
-    "ws": "^8.12.1",
-    "yaml": "^2.2.1",
-    "yargs": "^17.7.1"
+    "test": "pnpm exec moonwall test basic;sleep 1; pnpm exec moonwall test chopsticks;sleep 1; pnpm exec moonwall test dev_seq;sleep 1; pnpm exec moonwall test chop_state_test ",
+    "typecheck": "pnpm exec tsc --noEmit"
   },
   "devDependencies": {
-    "@swc/cli": "^0.1.62",
-    "@swc/core": "^1.3.37",
-    "@types/debug": "^4.1.7",
-    "@vitest/ui": "^0.28.5",
-    "regenerator-runtime": "^0.13.11",
-    "typescript": "5.0.0-dev.20230215"
+    "@acala-network/chopsticks": "^0.5.2",
+    "@moonwall/cli": "workspace:*",
+    "@moonwall/util": "workspace:*",
+    "@polkadot/api": "^10.0.1",
+    "@polkadot/api-augment": "^10.0.1",
+    "@polkadot/api-derive": "^10.0.1",
+    "@polkadot/keyring": "^11.0.1",
+    "@types/node": "^18.14.6",
+    "pnpm": "7.23.0",
+    "rimraf": "^4.3.1",
+    "typescript": "^4.9.5"
   },
   "pnpm": {
     "overrides": {
-      "@polkadot/util": "$@polkadot/util"
+      "@moonwall/cli": "workspace:*",
+      "@moonwall/util": "workspace:*",
+      "@polkadot/util": "$@polkadot/keyring",
+      "@polkadot/api": "$@polkadot/api",
+      "@polkadot/types": "$@polkadot/api"
     }
+  },
+  "dependencies": {
+    "@changesets/cli": "^2.26.0",
+    "@polkadot/rpc-provider": "^10.0.1"
   }
 }

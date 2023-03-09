@@ -1,17 +1,25 @@
-import { expect } from 'chai';
-import { describeSuite } from '../../src/index.js';
+import { describeSuite, expect } from "@moonwall/cli";
 
 describeSuite({
-  id: 'T100',
-  title: 'New Test Suite',
+  id: "B03",
+  title: "New Test Suite",
+  foundationMethods: "read_only",
   testCases: ({ it }) => {
-    it('T01', 'Passing Test', function () {
-      expect(true).to.be.true;
+    it({
+      id: "T01",
+      title: "Passing Test",
+      test: function () {
+        expect(true).to.be.true;
+      },
     });
 
-    it('T02', 'Skipped test', function () {
-      this.skip();
-      expect(false).to.be.true;
+    it({
+      id: "T02",
+      title: "Skipped test",
+      modifier: "skip",
+      test: function () {
+        expect(false).to.be.true;
+      },
     });
-  }
+  },
 });
