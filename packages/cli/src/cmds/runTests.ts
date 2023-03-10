@@ -1,4 +1,3 @@
-import segfaultHandler from "node-segfault-handler";
 import { importJsonConfig } from "../lib/configReader.js";
 import { startVitest } from "vitest/node";
 import { setTimeout } from "timers/promises";
@@ -11,7 +10,6 @@ import path from "path";
 import chalk from "chalk";
 
 export async function testCmd(envName) {
-  segfaultHandler.registerHandler();
   const globalConfig = await importJsonConfig();
   const env = globalConfig.environments.find(({ name }) => name === envName)!;
 

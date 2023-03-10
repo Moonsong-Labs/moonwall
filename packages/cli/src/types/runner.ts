@@ -1,4 +1,4 @@
-import "@polkadot/api-augment"
+import "@polkadot/api-augment";
 import { ApiPromise } from "@polkadot/api";
 import { WebSocketProvider } from "ethers";
 import Web3 from "web3";

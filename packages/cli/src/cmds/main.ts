@@ -136,6 +136,7 @@ async function resolveDownloadChoice() {
         "moonbeam-runtime",
         new inquirer.Separator(),
         "Back",
+        new inquirer.Separator(),
       ],
     });
     if (firstChoice.artifact === "Back") {
@@ -198,7 +199,11 @@ const chooseTestEnv = async (config: MoonwallConfig) => {
     }))
     .sort((a, b) => (a.name > b.name ? -1 : +1));
   envs.push(
-    ...([new inquirer.Separator(), { name: "Back", value: "back" }] as any)
+    ...([
+      new inquirer.Separator(),
+      { name: "Back", value: "back" },
+      new inquirer.Separator(),
+    ] as any)
   );
   const result = await inquirer.prompt({
     name: "envName",
@@ -234,6 +239,7 @@ const chooseRunEnv = async (config: MoonwallConfig) => {
       .sort((a, b) => (a.name > b.name ? 1 : -1)),
     new inquirer.Separator(),
     { name: "Back", value: "back" },
+    new inquirer.Separator(),
   ];
 
   const result = await inquirer.prompt({

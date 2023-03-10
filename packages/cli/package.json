@@ -58,7 +58,6 @@
     "@polkadot/types": "^10.0.1",
     "@polkadot/types-codec": "^10.0.1",
     "@polkadot/util": "^11.0.1",
-    "@polkadot/util-crypto": "^11.0.1",
     "@types/node": "^18.14.6",
     "@types/yargs": "^17.0.22",
     "bottleneck": "^2.19.5",
@@ -72,7 +71,6 @@
     "inquirer-press-to-continue": "^1.1.4",
     "moonbeam-types-bundle": "^2.0.10",
     "node-fetch": "^3.3.0",
-    "node-segfault-handler": "^1.4.2",
     "prettier": "^2.8.4",
     "semver": "^7.3.8",
     "ts-node": "^10.9.1",
@@ -96,7 +94,6 @@
       "@polkadot/rpc-provider": "$@polkadot/rpc-provider",
       "@polkadot/util": "$@polkadot/rpc-provider",
       "@polkadot/keyring": "$@polkadot/rpc-provider",
-      "@polkadot/util-crypto": "$@polkadot/api",
       "@polkadot/api": "$@polkadot/api",
       "@polkadot/types": "$@polkadot/api"
     }

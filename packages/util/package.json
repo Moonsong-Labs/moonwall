@@ -93,10 +93,7 @@
   },
   "pnpm": {
     "overrides": {
-      "@polkadot/rpc-provider": "$@polkadot/rpc-provider",
       "@polkadot/keyring": "$@polkadot/keyring",
-      "@polkadot/util": "$@polkadot/util",
-      "@polkadot/util-crypto": "$@polkadot/util",
       "@polkadot/api": "$@polkadot/api",
       "@polkadot/types": "$@polkadot/api"
     }

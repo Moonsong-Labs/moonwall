@@ -233,7 +233,9 @@ export const maximizeConvictionVotingOf = async (
         Standard: {
           vote: { aye: true, conviction: "Locked6x" },
           balance: await (
-            await context.getPolkadotJs().query.system.account(alith.address) as any
+            (await context
+              .getPolkadotJs()
+              .query.system.account(alith.address)) as any
           ).data.free,
         },
       })

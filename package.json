@@ -22,10 +22,12 @@
     "@changesets/cli": "^2.26.0",
     "@moonsong-labs/moonwall-cli": "workspace:*",
     "@moonsong-labs/moonwall-util": "workspace:*",
+    "@polkadot/rpc-provider": "^10.0.1",
     "@polkadot/api": "^10.0.1",
     "@polkadot/api-augment": "^10.0.1",
     "@polkadot/api-derive": "^10.0.1",
     "@polkadot/keyring": "^11.0.1",
+    "@polkadot/util-crypto": "^11.0.1",
     "@types/node": "^18.14.6",
     "pnpm": "7.23.0",
     "rimraf": "^4.3.1",
@@ -35,12 +37,11 @@
     "overrides": {
       "@moonsong-labs/moonwall-cli": "workspace:*",
       "@moonsong-labs/moonwall-util": "workspace:*",
-      "@polkadot/util": "$@polkadot/keyring",
+      "@polkadot/util-crypto": "$@polkadot/util-crypto",
+      "@polkadot/rpc-provider": "$@polkadot/rpc-provider",
+      "@polkadot/util": "$@polkadot/util-crypto",
       "@polkadot/api": "$@polkadot/api",
       "@polkadot/types": "$@polkadot/api"
     }
-  },
-  "dependencies": {
-    "@polkadot/rpc-provider": "^10.0.1"
   }
 }
