@@ -1,5 +1,14 @@
 # @moonwall/cli
 
+## 0.2.2
+
+### Patch Changes
+
+- 780429f: Tidied package exports
+  - No longer wrapping `ApiPromise` so that it can be augmented as required in test projects
+- Updated dependencies [780429f]
+  - @moonsong-labs/moonwall-util@0.2.2
+
 ## 0.2.1
 
 ### Patch Changes
