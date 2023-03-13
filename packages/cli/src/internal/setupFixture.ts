@@ -19,5 +19,8 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  MoonwallContext.destroy();
+  if (process.env.RECYCLE !== "true") {
+    await MoonwallContext.destroy();
+    delete global.moonInstance;
+  }
 });

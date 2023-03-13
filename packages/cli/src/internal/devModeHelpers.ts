@@ -15,6 +15,7 @@ import {
 } from "@moonsong-labs/moonwall-util";
 import { GenericContext } from "../lib/runner-functions.js";
 import Debug from "debug";
+import { setTimeout } from "timers/promises";
 import { EventRecord } from "@polkadot/types/interfaces/types.js";
 import { RegistryError } from "@polkadot/types-codec/types/registry";
 import { MoonwallContext } from "../lib/globalContext.js";
@@ -24,13 +25,14 @@ const debug = Debug("DevTest");
 export async function devForkToFinalizedHead(context: MoonwallContext) {
   const api = context.providers.find(({ type }) => type == "moon")!
     .api as ApiPromise;
-
-  const finalizedHead = (await api.rpc.chain.getFinalizedHead()).toString();
+  const finalizedHead = context.genesis;
   await api.rpc.engine.createBlock(true, true, finalizedHead);
   while (true) {
     const newHead = (await api.rpc.chain.getFinalizedHead()).toString();
-    await new Promise((resolve) => setTimeout(resolve, 50));
-    if (newHead !== finalizedHead) {
+    if (newHead == finalizedHead) {
+      await setTimeout(100);
+    } else {
+      context.genesis = newHead;
       break;
     }
   }
@@ -176,7 +178,7 @@ export async function createDevBlock<
 
   // Adds extra time to avoid empty transaction when querying it
   if (results.find((r) => r.type == "eth")) {
-    await new Promise((resolve) => setTimeout(resolve, 2));
+    await setTimeout(2);
   }
   return {
     block: blockResult,

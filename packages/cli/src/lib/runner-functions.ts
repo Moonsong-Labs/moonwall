@@ -1,4 +1,4 @@
-import { describe, it, beforeAll } from "vitest";
+import { describe, it, beforeAll, afterAll } from "vitest";
 import { setTimeout } from "timers/promises";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { WebSocketProvider } from "ethers";
@@ -50,6 +50,8 @@ export function describeSuite({
         await chopForkToFinalizedHead(ctx);
       }
     });
+
+    afterAll(async function () {});
 
     const context: GenericContext = {
       providers: {},

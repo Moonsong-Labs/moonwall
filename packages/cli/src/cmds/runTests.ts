@@ -8,6 +8,7 @@ import { dirname } from "path";
 import { fileURLToPath } from "url";
 import path from "path";
 import chalk from "chalk";
+import { option } from "yargs";
 
 export async function testCmd(envName) {
   const globalConfig = await importJsonConfig();
@@ -46,19 +47,22 @@ export async function executeTests(env: Environment): Promise<Vitest> {
     // deps:{experimentalOptimizer:{}},
     hookTimeout: 500000,
     setupFiles: [setupPath],
+    useAtomics: false,
+    threads: true,
     include: env.include
       ? env.include
       : ["**/{test,spec,test_,test-}*{ts,mts,cts}"],
   };
 
-  if (env.threads && env.threads > 1) {
-    options.threads = true;
+  if (env.threads && env.threads > 1 && process.env.SINGLE_THREAD !== "true") {
     options.minThreads = env.threads;
   } else {
     // Even when running tests sequentially, we still want it in multi-threaded
     // mode for its state separation properties
-    options.minThreads = 1;
-    options.maxThreads = 1;
+
+    options.isolate = true;
+    options.threads = false;
+    process.env.RECYCLE = "true";
   }
   try {
     const folders = env.testFileDir.map((folder) =>

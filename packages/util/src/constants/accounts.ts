@@ -1,5 +1,4 @@
 import { Keyring } from "@polkadot/keyring";
-
 import {
   DEFAULT_GENESIS_BALANCE,
   DEFAULT_GENESIS_MAPPING,

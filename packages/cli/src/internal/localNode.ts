@@ -3,6 +3,7 @@ import { MoonwallContext } from "../lib/globalContext.js";
 import chalk from "chalk";
 import Debug from "debug";
 import { existsSync } from "fs";
+import { resolveArgs } from "ethers/types/contract/contract.js";
 const debugNode = Debug("global:node");
 
 export async function launchNode(

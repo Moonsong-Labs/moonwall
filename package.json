@@ -18,18 +18,19 @@
     "typecheck": "pnpm exec tsc --noEmit"
   },
   "devDependencies": {
-    "@acala-network/chopsticks": "^0.5.2",
+    "@acala-network/chopsticks": "^0.5.10",
     "@changesets/cli": "^2.26.0",
     "@moonsong-labs/moonwall-cli": "workspace:*",
     "@moonsong-labs/moonwall-util": "workspace:*",
-    "@polkadot/rpc-provider": "^10.0.1",
     "@polkadot/api": "^10.0.1",
     "@polkadot/api-augment": "^10.0.1",
     "@polkadot/api-derive": "^10.0.1",
     "@polkadot/keyring": "^11.0.1",
+    "@polkadot/rpc-provider": "^10.0.1",
     "@polkadot/util-crypto": "^11.0.1",
     "@types/node": "^18.14.6",
     "pnpm": "7.23.0",
+    "prettier": "^2.8.4",
     "rimraf": "^4.3.1",
     "typescript": "^4.9.5"
   },
@@ -43,5 +44,8 @@
       "@polkadot/api": "$@polkadot/api",
       "@polkadot/types": "$@polkadot/api"
     }
+  },
+  "dependencies": {
+    "ethers": "^6.0.8"
   }
 }

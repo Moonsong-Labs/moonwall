@@ -1,17 +1,14 @@
-import {
-  describeSuite,
-  ApiPromise,
-  expect,
-  beforeAll,
-} from "@moonsong-labs/moonwall-cli";
+import { describeSuite, expect, beforeAll } from "@moonsong-labs/moonwall-cli";
 import {
   CHARLETH_ADDRESS,
   ETHAN_ADDRESS,
   alith,
 } from "@moonsong-labs/moonwall-util";
 import { parseEther } from "ethers";
+import { ApiPromise } from "@polkadot/api";
+import "@polkadot/api-augment";
 describeSuite({
-  id: "D02",
+  id: "D21",
   title: "Dev test suite 2",
   foundationMethods: "dev",
   testCases: ({ it, context }) => {
@@ -26,6 +23,14 @@ describeSuite({
       id: "E01",
       title: "Balance starts at 0",
       test: async function () {
+        console.log("test case");
+        console.log(
+          (
+            await api.query.system.account(
+              "0x11d88f59425cbc1867883fcf93614bf70e87E854"
+            )
+          ).toHuman()
+        );
         const balanceBefore = (await api.query.system.account(DUMMY_ACCOUNT))
           .data.free;
         expect(balanceBefore.toString()).toEqual("0");
@@ -65,8 +70,8 @@ describeSuite({
 });
 
 describeSuite({
-  id: "D02",
-  title: "Dev test suite",
+  id: "D22",
+  title: "Dev test suite2",
   foundationMethods: "dev",
   testCases: ({ it, context }) => {
     let api: ApiPromise;

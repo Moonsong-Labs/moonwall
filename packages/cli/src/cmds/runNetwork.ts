@@ -195,5 +195,6 @@ const resolveInfoChoice = async (env: Environment) => {
 
 const resolveTestChoice = async (env: Environment) => {
   // TODO: force this to be singlethreaded since we are executing in the CLI
+  process.env.SINGLE_THREAD = "true";
   return await executeTests(env);
 };

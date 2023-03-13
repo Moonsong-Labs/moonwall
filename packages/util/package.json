@@ -47,7 +47,7 @@
     "lint": "tsc"
   },
   "dependencies": {
-    "@acala-network/chopsticks": "^0.5.2",
+    "@acala-network/chopsticks": "^0.5.10",
     "@polkadot/api": "^10.0.1",
     "@polkadot/api-augment": "^10.0.1",
     "@polkadot/api-derive": "^10.0.1",

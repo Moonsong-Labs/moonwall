@@ -1,15 +1,12 @@
-import {
-  describeSuite,
-  ApiPromise,
-  expect,
-  beforeAll,
-} from "@moonsong-labs/moonwall-cli";
+import { describeSuite, expect, beforeAll } from "@moonsong-labs/moonwall-cli";
 import {
   CHARLETH_ADDRESS,
   ETHAN_ADDRESS,
   alith,
 } from "@moonsong-labs/moonwall-util";
 import { parseEther } from "ethers";
+import { ApiPromise } from "@polkadot/api";
+import "@polkadot/api-augment";
 
 describeSuite({
   id: "D01",

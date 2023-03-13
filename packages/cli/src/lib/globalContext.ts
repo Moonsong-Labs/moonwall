@@ -4,6 +4,7 @@ import {
   populateProviderInterface,
   prepareProviders,
 } from "../internal/providers.js";
+import { setTimeout } from "timers/promises";
 import { launchNode } from "../internal/localNode.js";
 import { importJsonConfig } from "./configReader.js";
 import { parseChopsticksRunCmd, parseRunCmd } from "../internal/foundations.js";
@@ -213,8 +214,10 @@ export class MoonwallContext {
   public async disconnect(providerName?: string) {
     if (providerName) {
       this.providers.find(({ name }) => name === providerName)!.disconnect();
+      this.providers.filter(({ name }) => name !== providerName);
     } else {
       await Promise.all(this.providers.map((prov) => prov.disconnect()));
+      this.providers = [];
     }
   }
 
@@ -246,17 +249,25 @@ export class MoonwallContext {
     return MoonwallContext.instance;
   }
 
-  public static destroy() {
+  public static async destroy() {
     const ctx = MoonwallContext.getContext();
     try {
       ctx.disconnect();
     } catch {
       console.log("🛑  All connections disconnected");
     }
-    ctx.nodes.forEach((process) => {
-      debugSetup(`Test finished, killing process ${process.pid}`);
-      process.kill();
+    const promises = ctx.nodes.map((process) => {
+      return new Promise((resolve) => {
+        process.kill();
+        if (process.killed) {
+          resolve(`process ${process.pid} killed`);
+        }
+      });
     });
+
+    console.log(await Promise.all(promises));
+    // console.dir(promises, { depth: 1 });
+    // console.log(await promises[0])
   }
 }
 
