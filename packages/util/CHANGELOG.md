@@ -1,5 +1,13 @@
 # @moonwall/util
 
+## 0.2.3
+
+### Patch Changes
+
+- 470a9d0: SegFault BugFix
+  - Changed usage of Vitest to remove segfaults
+    :information_source: N.B. Bug fix means state separation has been affected. Fix for this is coming next
+
 ## 0.2.2
 
 ### Patch Changes
