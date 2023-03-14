@@ -1,7 +1,7 @@
 {
   "name": "@moonsong-labs/moonwall-cli",
   "type": "module",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "Testing framework for the Moon family of projects",
   "author": "timbrinded",
   "license": "ISC",
@@ -45,7 +45,7 @@
     "typecheck": "pnpm exec tsc --noEmit",
     "prepublish": "pnpm run build",
     "prepare": "pnpm build",
-    "schema":"typescript-json-schema ./src/types/config.ts MoonwallConfig > config_schema.json",
+    "schema": "typescript-json-schema ./src/types/config.ts MoonwallConfig > config_schema.json",
     "compile": "pnpm build ",
     "lint": "tsc"
   },
