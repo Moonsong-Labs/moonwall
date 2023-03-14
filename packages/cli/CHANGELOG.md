@@ -1,5 +1,16 @@
 # @moonwall/cli
 
+## 0.2.5
+
+### Patch Changes
+
+- f628150: Disabled auto-forking
+
+  Fork-To-Genesis function has been disabled for the time being until we fix it downstream
+
+- Updated dependencies [f628150]
+  - @moonsong-labs/moonwall-util@0.2.5
+
 ## 0.2.4
 
 ### Patch Changes
