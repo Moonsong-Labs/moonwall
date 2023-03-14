@@ -1,4 +1,5 @@
 {
+  "$schema": "https://raw.githubusercontent.com/Moonsong-Labs/moonwall/main/packages/cli/config_schema.json",
   "label": "Global Test Config 🐯",
   "defaultTestTimeout": 40000,
   "environments": [
@@ -8,7 +9,8 @@
       "foundation": {
         "type": "read_only"
       },
-      "connections": []
+      "connections":[
+      ]
     },
     {
       "name": "chopsticks",

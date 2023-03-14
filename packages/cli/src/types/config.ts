@@ -1,4 +1,5 @@
 export type MoonwallConfig = {
+  $schema: string
   label: string;
   defaultTestTimeout: number;
   environments: Environment[];
