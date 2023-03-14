@@ -1,5 +1,13 @@
 # @moonwall/util
 
+## 0.2.4
+
+### Patch Changes
+
+- e33abc6: README change
+
+  - Demo for CI, slight wording change
+
 ## 0.2.3
 
 ### Patch Changes
