@@ -1,6 +1,6 @@
 ## Description
 
-Test harness for testing on Moonbeam, Moonriver and more
+Test framework for testing on Moonbeam, Moonriver and more
 
 ## Installation
 
