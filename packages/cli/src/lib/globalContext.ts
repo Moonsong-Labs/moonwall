@@ -1,20 +1,13 @@
 import { FoundationType, MoonwallConfig } from "../types/config";
 import { ChildProcess } from "node:child_process";
-import {
-  populateProviderInterface,
-  prepareProviders,
-} from "../internal/providers.js";
+import { populateProviderInterface, prepareProviders } from "../internal/providers.js";
 import { setTimeout } from "timers/promises";
 import { launchNode } from "../internal/localNode.js";
 import { importJsonConfig } from "./configReader.js";
 import { parseChopsticksRunCmd, parseRunCmd } from "../internal/foundations.js";
 import { ApiPromise } from "@polkadot/api";
 import Debug from "debug";
-import {
-  ConnectedProvider,
-  MoonwallEnvironment,
-  MoonwallProvider,
-} from "../types/context.js";
+import { ConnectedProvider, MoonwallEnvironment, MoonwallProvider } from "../types/context.js";
 const debugSetup = Debug("global:context");
 
 export class MoonwallContext {
@@ -31,9 +24,7 @@ export class MoonwallContext {
     this.providers = [];
     this.nodes = [];
 
-    const env = config.environments.find(
-      ({ name }) => name == process.env.TEST_ENV
-    )!;
+    const env = config.environments.find(({ name }) => name == process.env.TEST_ENV)!;
     const blob = {
       name: env.name,
       context: {},
@@ -57,18 +48,14 @@ export class MoonwallContext {
           blob.providers = prepareProviders(env.connections);
         }
 
-        debugSetup(
-          `🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`
-        );
+        debugSetup(`🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`);
         break;
 
       case "chopsticks":
         blob.nodes.push(parseChopsticksRunCmd(env.foundation.launchSpec));
         blob.providers.push(...prepareProviders(env.connections!));
         this.rtUpgradePath = env.foundation.rtUpgradePath;
-        debugSetup(
-          `🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`
-        );
+        debugSetup(`🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`);
         break;
 
       case "dev":
@@ -86,40 +73,24 @@ export class MoonwallContext {
               {
                 name: "w3",
                 type: "web3",
-                endpoints: [
-                  `ws://127.0.0.1:${
-                    10000 + Number(process.env.VITEST_POOL_ID || 1) * 100
-                  }`,
-                ],
+                endpoints: [`ws://127.0.0.1:${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`],
               },
               {
                 name: "eth",
                 type: "ethers",
-                endpoints: [
-                  `ws://127.0.0.1:${
-                    10000 + Number(process.env.VITEST_POOL_ID || 1) * 100
-                  }`,
-                ],
+                endpoints: [`ws://127.0.0.1:${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`],
               },
               {
                 name: "mb",
                 type: "moon",
-                endpoints: [
-                  `ws://127.0.0.1:${
-                    10000 + Number(process.env.VITEST_POOL_ID || 1) * 100
-                  }`,
-                ],
+                endpoints: [`ws://127.0.0.1:${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`],
               },
             ]);
 
-        debugSetup(
-          `🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`
-        );
+        debugSetup(`🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`);
         break;
       default:
-        debugSetup(
-          `🚧  Foundation "${env.foundation.type}" unsupported, skipping`
-        );
+        debugSetup(`🚧  Foundation "${env.foundation.type}" unsupported, skipping`);
         return;
     }
 
@@ -181,17 +152,13 @@ export class MoonwallContext {
     );
     await Promise.all(promises);
 
-    this.foundation = globalConfig.environments.find(
-      ({ name }) => name == environmentName
-    )!.foundation.type;
+    this.foundation = globalConfig.environments.find(({ name }) => name == environmentName)!.foundation.type;
 
     // TODO: Do we actually need this?
     if (this.foundation == "dev") {
       this.genesis = (
         await (
-          this.providers.find(
-            ({ type }) => type == "polkadotJs" || type == "moon"
-          )!.api as ApiPromise
+          this.providers.find(({ type }) => type == "polkadotJs" || type == "moon")!.api as ApiPromise
         ).rpc.chain.getBlockHash(0)
       ).toString();
     }
@@ -199,9 +166,7 @@ export class MoonwallContext {
     if (this.foundation == "chopsticks") {
       this.genesis = (
         await (
-          this.providers.find(
-            ({ type }) => type == "polkadotJs" || type == "moon"
-          )!.api as ApiPromise
+          this.providers.find(({ type }) => type == "polkadotJs" || type == "moon")!.api as ApiPromise
         ).rpc.chain.getFinalizedHead()
       ).toString();
     }
@@ -237,9 +202,7 @@ export class MoonwallContext {
         return MoonwallContext.instance;
       }
       if (!config) {
-        console.error(
-          "❌ Config must be provided on Global Context instantiation"
-        );
+        console.error("❌ Config must be provided on Global Context instantiation");
         process.exit(1);
       }
       MoonwallContext.instance = new MoonwallContext(config);
@@ -265,9 +228,7 @@ export class MoonwallContext {
       });
     });
 
-    console.log(await Promise.all(promises));
-    // console.dir(promises, { depth: 1 });
-    // console.log(await promises[0])
+    await Promise.all(promises);
   }
 }
 

@@ -4,8 +4,8 @@ import { parseEther } from "ethers";
 import { BN } from "@polkadot/util";
 
 describeSuite({
-  id: "D01",
-  title: "Dev test suite",
+  id: "D02",
+  title: "Dev test suite2",
   foundationMethods: "dev",
   testCases: ({ it, context }) => {
     let api;
@@ -65,11 +65,9 @@ describeSuite({
       test: async function () {
         const signer = alithSigner(api);
         const balanceBefore = (await polkadotJs.query.system.account(BALTATHAR_ADDRESS)).data.free;
-
         await signer.sendTransaction({
           to: BALTATHAR_ADDRESS,
           value: parseEther("1.0"),
-          nonce: await signer.getNonce(),
         });
         await context.createBlock();
 

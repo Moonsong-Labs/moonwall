@@ -1,5 +1,4 @@
 import { describe, it, beforeAll, afterAll } from "vitest";
-import { setTimeout } from "timers/promises";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { WebSocketProvider } from "ethers";
 import Web3 from "web3";
@@ -45,7 +44,7 @@ export function describeSuite({
     beforeAll(async function () {
       ctx = MoonwallContext.getContext();
       if (ctx.environment.foundationType === "dev") {
-        await devForkToFinalizedHead(ctx);
+        // await devForkToFinalizedHead(ctx); // TODO: Implement way of cleanly forking to fresh state
       } else if (ctx.environment.foundationType === "chopsticks") {
         await chopForkToFinalizedHead(ctx);
       }
@@ -109,12 +108,6 @@ export function describeSuite({
         }
       },
     };
-
-    // if (ctx) {
-    //   ctx.providers.forEach((a: ConnectedProvider) => {
-    //     context.providers[a.name] = a.api;
-    //   });
-    // }
 
     function testCase(params: {
       id: string;
