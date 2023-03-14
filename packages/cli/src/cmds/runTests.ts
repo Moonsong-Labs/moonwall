@@ -42,12 +42,11 @@ export async function executeTests(env: Environment): Promise<Vitest> {
     include: env.include ? env.include : ["**/{test,spec,test_,test-}*{ts,mts,cts}"],
   };
 
-  if (env.threads && env.threads > 1 && process.env.SINGLE_THREAD !== "true") {
-    options.minThreads = env.threads;
-  } else {
+  if (!env.multiThreads || process.env.SINGLE_THREAD === "true") {
+    // process.env.RECYCLE = "true";
     options.threads = false;
-    process.env.RECYCLE = "true";
   }
+
   try {
     const folders = env.testFileDir.map((folder) => path.join("/", folder, "/"));
     return await startVitest("test", folders, options);

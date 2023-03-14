@@ -1,7 +1,9 @@
-import { describeSuite, expect, beforeAll } from "@moonsong-labs/moonwall-cli";
+import { describeSuite, expect } from "@moonsong-labs/moonwall-cli";
+import { getCurrentSuite } from "vitest/suite";
 import { CHARLETH_ADDRESS, BALTATHAR_ADDRESS, alithSigner, alith } from "@moonsong-labs/moonwall-util";
 import { parseEther } from "ethers";
 import { BN } from "@polkadot/util";
+import { beforeEach, beforeAll } from "vitest";
 
 describeSuite({
   id: "D01",
@@ -12,10 +14,10 @@ describeSuite({
     let w3;
     let polkadotJs;
 
-    beforeAll(() => {
+    beforeAll(async () => {
+      polkadotJs = context.getMoonbeam();
       api = context.getEthers();
       w3 = context.getWeb3();
-      polkadotJs = context.getMoonbeam();
     });
 
     it({

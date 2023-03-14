@@ -163,7 +163,7 @@
     {
       "name": "dev_multi",
       "testFileDir": ["tests/test_separation"],
-      "threads": 5,
+      "multiThreads": true,
       "html": false,
       "foundation": {
         "type": "dev",
@@ -179,7 +179,7 @@
     {
       "name": "dev_seq",
       "testFileDir": ["tests/test_separation"],
-      "threads": 1,
+      "multiThreads": false,
       "html": false,
       "foundation": {
         "type": "dev",

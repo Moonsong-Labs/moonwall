@@ -14,7 +14,7 @@
     "changeset:version": "changeset version",
     "start": "pnpm exec moonwall",
     "display-reports": "pnpm exec vite preview --base __vitest__ --outDir html",
-    "test": "pnpm exec moonwall test basic;sleep 1; pnpm exec moonwall test chopsticks;sleep 1; pnpm exec moonwall test dev_seq;sleep 1; pnpm exec moonwall test chop_state_test ",
+    "test": "pnpm exec moonwall test 'basic chopsticks dev_seq chop_state_test'",
     "typecheck": "pnpm exec tsc --noEmit"
   },
   "devDependencies": {
@@ -29,10 +29,13 @@
     "@polkadot/rpc-provider": "^10.0.1",
     "@polkadot/util-crypto": "^11.0.1",
     "@types/node": "^18.14.6",
+    "@vitest/utils": "^0.29.2",
+    "node-gyp-build": "^4.6.0",
     "pnpm": "7.23.0",
     "prettier": "^2.8.4",
     "rimraf": "^4.3.1",
-    "typescript": "^4.9.5"
+    "typescript": "^4.9.5",
+    "vitest": "^0.29.2"
   },
   "pnpm": {
     "overrides": {

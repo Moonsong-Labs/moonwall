@@ -15,9 +15,7 @@ inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 export async function runNetwork(args) {
   process.env.TEST_ENV = args.envName;
   const globalConfig = await importJsonConfig();
-  const testFileDirs = globalConfig.environments.find(
-    ({ name }) => name == args.envName
-  )!.testFileDir;
+  const testFileDirs = globalConfig.environments.find(({ name }) => name == args.envName)!.testFileDir;
 
   const questions = [
     {
@@ -35,9 +33,7 @@ export async function runNetwork(args) {
     {
       name: "MenuChoice",
       type: "list",
-      message:
-        `Environment : ${chalk.bgGray.cyanBright(args.envName)}\n` +
-        "Please select a choice: ",
+      message: `Environment : ${chalk.bgGray.cyanBright(args.envName)}\n` + "Please select a choice: ",
       default: 0,
       pageSize: 10,
       choices: [
@@ -82,64 +78,49 @@ export async function runNetwork(args) {
     },
   ];
 
-  try {
-    await runNetworkOnly(globalConfig);
-    clear();
-    const portsList = await reportServicePorts();
+  await runNetworkOnly(globalConfig);
+  clear();
+  const portsList = await reportServicePorts();
 
-    portsList.forEach((ports) =>
-      console.log(
-        `  🖥️   https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0.0.1%3A${ports.wsPort}`
-      )
-    );
+  portsList.forEach((ports) =>
+    console.log(`  🖥️   https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0.0.1%3A${ports.wsPort}`)
+  );
 
-    await inquirer.prompt(
-      questions.find(({ name }) => name == "NetworkStarted")
-    );
+  await inquirer.prompt(questions.find(({ name }) => name == "NetworkStarted"));
 
-    mainloop: while (true) {
-      const choice = await inquirer.prompt(
-        questions.find(({ name }) => name == "MenuChoice")
-      );
-      const env = globalConfig.environments.find(
-        ({ name }) => name === args.envName
-      )!;
+  mainloop: while (true) {
+    const choice = await inquirer.prompt(questions.find(({ name }) => name == "MenuChoice"));
+    const env = globalConfig.environments.find(({ name }) => name === args.envName)!;
 
-      switch (choice.MenuChoice) {
-        case 1:
-          /// TODO: Add ability to listen to logs of started node (dev or chopsticks)
-          console.log("I'm chilling");
-          break;
+    switch (choice.MenuChoice) {
+      case 1:
+        /// TODO: Add ability to listen to logs of started node (dev or chopsticks)
+        console.log("I'm chilling");
+        break;
 
-        case 2:
-          resolveInfoChoice(env);
-          await reportServicePorts();
-          break;
+      case 2:
+        resolveInfoChoice(env);
+        await reportServicePorts();
+        break;
 
-        case 3:
-          await resolveTestChoice(env);
-          break;
+      case 3:
+        await resolveTestChoice(env);
+        break;
 
-        case 4:
-          const quit = await inquirer.prompt(
-            questions.find(({ name }) => name == "Quit")
-          );
-          if (quit.Quit === true) {
-            break mainloop;
-          }
-          break;
-        default:
-          throw new Error("invalid value");
-      }
+      case 4:
+        const quit = await inquirer.prompt(questions.find(({ name }) => name == "Quit"));
+        if (quit.Quit === true) {
+          break mainloop;
+        }
+        break;
+      default:
+        throw new Error("invalid value");
     }
-
-    MoonwallContext.destroy();
-    console.log(`Goodbye! 👋`);
-    process.exit(0);
-  } catch (e) {
-    console.error(e);
-    process.exit(1);
   }
+
+  MoonwallContext.destroy();
+  console.log(`Goodbye! 👋`);
+  process.exit(0);
 }
 
 const reportServicePorts = async () => {
@@ -149,19 +130,11 @@ const reportServicePorts = async () => {
     httpPort: string;
   }[] = [];
   const globalConfig = await importJsonConfig();
-  const config = globalConfig.environments.find(
-    ({ name }) => name == process.env.TEST_ENV
-  )!;
+  const config = globalConfig.environments.find(({ name }) => name == process.env.TEST_ENV)!;
   if (config.foundation.type == "dev") {
     const ports = { wsPort: "", httpPort: "" };
-    ports.wsPort =
-      ctx.environment.nodes[0].args
-        .find((a) => a.includes("ws-port"))!
-        .split("=")[1] || "9944";
-    ports.httpPort =
-      ctx.environment.nodes[0].args
-        .find((a) => a.includes("rpc-port"))!
-        .split("=")[1] || "9933";
+    ports.wsPort = ctx.environment.nodes[0].args.find((a) => a.includes("ws-port"))!.split("=")[1] || "9944";
+    ports.httpPort = ctx.environment.nodes[0].args.find((a) => a.includes("rpc-port"))!.split("=")[1] || "9933";
 
     portsList.push(ports);
   } else if (config.foundation.type == "chopsticks") {
@@ -178,9 +151,7 @@ const reportServicePorts = async () => {
     );
   }
   portsList.forEach((ports) =>
-    console.log(
-      `  🌐  Node has started, listening on ports - Websocket: ${ports.wsPort} and HTTP: ${ports.httpPort}`
-    )
+    console.log(`  🌐  Node has started, listening on ports - Websocket: ${ports.wsPort} and HTTP: ${ports.httpPort}`)
   );
 
   return portsList;
@@ -194,7 +165,6 @@ const resolveInfoChoice = async (env: Environment) => {
 };
 
 const resolveTestChoice = async (env: Environment) => {
-  // TODO: force this to be singlethreaded since we are executing in the CLI
-  process.env.SINGLE_THREAD = "true";
+  process.env.RECYCLE = "true";
   return await executeTests(env);
 };

@@ -1,6 +1,5 @@
 import {
   describeSuite,
-  ApiPromise,
   expect,
   beforeAll,
 } from "@moonsong-labs/moonwall-cli";
@@ -10,6 +9,8 @@ import {
   alith,
 } from "@moonsong-labs/moonwall-util";
 import { parseEther, formatEther } from "ethers";
+import { ApiPromise } from "@polkadot/api";
+import "@polkadot/api-augment"
 
 describeSuite({
   id: "X1",
