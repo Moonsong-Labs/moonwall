@@ -18,19 +18,22 @@ export async function generateConfig() {
       if (proceed.Confirm === false) {
         continue;
       }
+
+      const JSONBlob = JSON.stringify(
+        createConfig({
+          label: answers.Label,
+          timeout: answers.Timeout,
+          environmentName: answers.EnvironmentName,
+          foundation: answers.EnvironmentFoundation,
+          testDir: answers.EnvironmentTestDir,
+        }),
+        null,
+        3
+      )
+      
       await fs.writeFile(
         "moonwall.config.json",
-        JSON.stringify(
-          createConfig({
-            label: answers.Label,
-            timeout: answers.Timeout,
-            environmentName: answers.EnvironmentName,
-            foundation: answers.EnvironmentFoundation,
-            testDir: answers.EnvironmentTestDir,
-          }),
-          null,
-          3
-        ),
+        JSONBlob,
         "utf-8"
       );
       // await fs.writeFile("moonwall.config.ts", getBody(answers), "utf-8");
@@ -114,6 +117,7 @@ export function createConfig(options: {
   testDir: string;
 }): MoonwallConfig {
   return {
+    $schema: "https://raw.githubusercontent.com/Moonsong-Labs/moonwall/main/packages/cli/config_schema.json",
     label: options.label,
     defaultTestTimeout: options.timeout,
     environments: [
