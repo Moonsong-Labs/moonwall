@@ -1,5 +1,11 @@
 # @moonwall/util
 
+## 0.2.6
+
+### Patch Changes
+
+- 0c48562: Added JSON schema
+
 ## 0.2.5
 
 ### Patch Changes

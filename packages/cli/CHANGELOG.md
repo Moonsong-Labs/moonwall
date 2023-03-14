@@ -1,5 +1,14 @@
 # @moonwall/cli
 
+## 0.2.6
+
+### Patch Changes
+
+- 474ac96: Added proper state separation between testFiles (multi or sequential)
+- 0c48562: Added JSON schema
+- Updated dependencies [0c48562]
+  - @moonsong-labs/moonwall-util@0.2.6
+
 ## 0.2.5
 
 ### Patch Changes
