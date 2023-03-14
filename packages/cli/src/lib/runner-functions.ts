@@ -29,7 +29,7 @@ export function describeSuite({ id, title, testCases, foundationMethods }: ITest
     const globalConfig = await importJsonConfig();
     ctx = await contextCreator(globalConfig, process.env.TEST_ENV);
     // if (ctx.environment.foundationType === "dev") {
-    //   // await devForkToFinalizedHead(ctx); // TODO: Implement way of cleanly forking to fresh state
+    // //   // await devForkToFinalizedHead(ctx); // TODO: Implement way of cleanly forking to fresh state
     // } else if (ctx.environment.foundationType === "chopsticks") {
     //   await chopForkToFinalizedHead(ctx);
     // }
