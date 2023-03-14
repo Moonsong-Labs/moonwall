@@ -11,7 +11,7 @@ export type Environment = {
   foundation: IFoundation;
   include?: string[];
   connections?: ProviderConfig[];
-  threads?: number;
+  multiThreads?: boolean;
 };
 
 export type IFoundation =

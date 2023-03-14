@@ -113,7 +113,8 @@ export class MoonwallContext {
   }
 
   public async startNetwork() {
-    if (this.nodes.length > 0) {
+    const activeNodes = this.nodes.filter((node)=>!node.killed)
+    if (activeNodes.length > 0) {
       console.log("Nodes already started! Skipping command");
       return MoonwallContext.getContext();
     }
@@ -131,6 +132,7 @@ export class MoonwallContext {
     }
 
     this.nodes.forEach((node) => node.kill());
+    await this.wipeNodes()
   }
 
   public async connectEnvironment(environmentName: string) {
@@ -194,16 +196,17 @@ export class MoonwallContext {
     }
   }
 
-  public static getContext(config?: MoonwallConfig): MoonwallContext {
-    if (!MoonwallContext.instance) {
+  public static getContext(config?: MoonwallConfig, force: boolean = false): MoonwallContext|undefined {
+    if (!MoonwallContext.instance || force) {
       // Retrieves the instance from the global context if it exists.
-      if (global.moonInstance) {
+      if (global.moonInstance && !force) {
         MoonwallContext.instance = global.moonInstance;
         return MoonwallContext.instance;
       }
       if (!config) {
         console.error("❌ Config must be provided on Global Context instantiation");
-        process.exit(1);
+        // process.exit(2);
+        return undefined
       }
       MoonwallContext.instance = new MoonwallContext(config);
 
@@ -229,6 +232,7 @@ export class MoonwallContext {
     });
 
     await Promise.all(promises);
+    // delete MoonwallContext.instance
   }
 }
 
