@@ -1,5 +1,12 @@
 # @moonwall/cli
 
+## 0.2.9
+
+### Patch Changes
+
+- Updated dependencies [463e2af]
+  - @moonsong-labs/moonwall-util@0.2.8
+
 ## 0.2.8
 
 ### Patch Changes

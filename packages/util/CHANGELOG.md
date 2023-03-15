@@ -1,5 +1,11 @@
 # @moonwall/util
 
+## 0.2.8
+
+### Patch Changes
+
+- 463e2af: Included new Utils file
+
 ## 0.2.7
 
 ### Patch Changes
