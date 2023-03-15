@@ -13,19 +13,13 @@ export async function runTask(
   },
   title?: string
 ): Promise<string> {
-  debug(
-    `${
-      title ? `Title: ${title}\n` : ""
-    }Running task on directory ${cwd}: ${cmd}\n`
-  );
+  debug(`${title ? `Title: ${title}\n` : ""}Running task on directory ${cwd}: ${cmd}\n`);
   try {
     const result = await execAsync(cmd, { cwd, env });
     return result.stdout;
   } catch (error) {
     console.log(error);
-    debug(
-      `Caught exception in command execution. Error[${error.status}] ${error.message}\n`
-    );
+    debug(`Caught exception in command execution. Error[${error.status}] ${error.message}\n`);
     throw error;
   }
 }
@@ -38,11 +32,7 @@ export async function spawnTask(
   },
   title?: string
 ): Promise<ChildProcessWithoutNullStreams> {
-  debug(
-    `${
-      title ? `Title: ${title}\n` : ""
-    }Running task on directory ${process.cwd()}: ${cmd}\n`
-  );
+  debug(`${title ? `Title: ${title}\n` : ""}Running task on directory ${process.cwd()}: ${cmd}\n`);
   try {
     const process = child_process.spawn(
       cmd.split(" ")[0],
@@ -58,9 +48,7 @@ export async function spawnTask(
     return process;
   } catch (error) {
     console.log(error);
-    debug(
-      `Caught exception in command execution. Error[${error.status}] ${error.message}\n`
-    );
+    debug(`Caught exception in command execution. Error[${error.status}] ${error.message}\n`);
     throw error;
   }
 }

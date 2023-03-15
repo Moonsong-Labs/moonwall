@@ -5,8 +5,6 @@ import Web3 from "web3";
 import { ApiTypes, AugmentedEvent, SubmittableExtrinsic } from "@polkadot/api/types/index.js";
 import { BlockCreation, BlockCreationResponse } from "../lib/contextHelpers.js";
 import { ProviderType } from "./config.js";
-import { File, HookCleanupCallback, HookListener, Suite } from "vitest";
-// import { Foundation, ProviderType } from "./enum.js";
 
 export interface CustomTest {
   (params: {
@@ -14,27 +12,23 @@ export interface CustomTest {
     title: string;
     test: () => void;
     modifier?: "only" | "skip";
-    skipIf?: boolean;
+    minRtVersion?: number;
+    chainType?: "moonriver" | "moonbeam" | "moonbase";
+    notChainType?: "moonbeam" | "moonriver" | "moonbase"
     timeout?: number;
   }): void;
 }
 
-// export type IFoundation = {
-//   type: "dev"
-//   launchSpec: DevLaunchSpec[]
-// } | {
-//   type: "chopsticks";
-//   rtUpgradePath?: string;
-//   launchSpec: ChopsticksLaunchSpec[];
-// } | {
-//   type: "read_only" | "fork" | "zombie"
-// }
+// TODO: make chaintype/rt filters dependent on foundation type and a type itself
 export type ITestSuiteType =
   | {
       id: string;
       title: string;
       testCases: (TestContext: DevTestContext) => void;
       options?: Object;
+      minRtVersion?: number;
+      chainType?: "moonbeam" | "moonriver" | "moonbase";
+      notChainType?: "moonbeam" | "moonriver" | "moonbase";
       foundationMethods: "dev";
     }
   | {
@@ -42,12 +36,18 @@ export type ITestSuiteType =
       title: string;
       testCases: (TestContext: ChopsticksTestContext) => void;
       options?: Object;
+      minRtVersion?: number;
+      chainType?: "moonbeam" | "moonriver" | "moonbase";
+      notChainType?: "moonbeam" | "moonriver" | "moonbase";
       foundationMethods: "chopsticks";
     }
   | {
       id: string;
       title: string;
       testCases: (TestContext: GenericTestContext) => void;
+      minRtVersion?: number;
+      chainType?: "moonbeam" | "moonriver" | "moonbase";
+      notChainType?: "moonbeam" | "moonriver" | "moonbase";
       options?: Object;
       foundationMethods: "read_only" | "fork" | "zombie";
     };
@@ -55,19 +55,16 @@ export type ITestSuiteType =
 export interface DevTestContext {
   context: DevModeContext;
   it: CustomTest;
-  beforeAll: (fn: HookListener<[Suite | File], HookCleanupCallback>, timeout?: number) => void;
 }
 
 export interface ChopsticksTestContext {
   context: ChopsticksContext;
   it: CustomTest;
-  beforeAll: (fn: HookListener<[Suite | File], HookCleanupCallback>, timeout?: number) => void;
 }
 
 export interface GenericTestContext {
   context: GenericContext;
   it: CustomTest;
-  beforeAll: (fn: HookListener<[Suite | File], HookCleanupCallback>, timeout?: number) => void;
 }
 
 export interface GenericContext {

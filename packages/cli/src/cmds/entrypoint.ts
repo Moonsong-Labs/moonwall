@@ -19,8 +19,7 @@ yargs(hideBin(process.argv))
     (yargs) => {
       return yargs
         .positional("artifact", {
-          describe:
-            "Name of artifact to download\n[ moonbeam | polkadot | *-runtime ]",
+          describe: "Name of artifact to download\n[ moonbeam | polkadot | *-runtime ]",
         })
         .positional("bin-version", {
           describe: "Artifact version to download",
@@ -51,17 +50,25 @@ yargs(hideBin(process.argv))
     `test <envName>`,
     "Run tests for a given Environment",
     (yargs) => {
-      return yargs.positional("envName", {
-        describe: "Network environment to run tests against",
-        array: true,
-        string: true,
-      });
+      return yargs
+        .positional("envName", {
+          describe: "Network environment to run tests against",
+          array: true,
+          string: true,
+        })
+        .options({
+          GrepTest: {
+            type: "string",
+            alias: "g",
+            description: "Pattern to grep test ID/Description to run",
+          },
+        });
     },
     async (args) => {
       const envList = (args.envName as any).split(" ");
       const testRuns = [];
       for (const env of envList) {
-        testRuns.push(await testCmd(env));
+        testRuns.push(await testCmd(env, { testNamePattern: args.GrepTest }));
       }
       await Promise.all(testRuns);
     }

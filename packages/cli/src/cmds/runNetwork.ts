@@ -13,9 +13,11 @@ import { importJsonConfig } from "../lib/configReader.js";
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
 export async function runNetwork(args) {
-  process.env.TEST_ENV = args.envName;
+  process.env.MOON_TEST_ENV = args.envName;
   const globalConfig = await importJsonConfig();
-  const testFileDirs = globalConfig.environments.find(({ name }) => name == args.envName)!.testFileDir;
+  const testFileDirs = globalConfig.environments.find(
+    ({ name }) => name == args.envName
+  )!.testFileDir;
 
   const questions = [
     {
@@ -33,7 +35,8 @@ export async function runNetwork(args) {
     {
       name: "MenuChoice",
       type: "list",
-      message: `Environment : ${chalk.bgGray.cyanBright(args.envName)}\n` + "Please select a choice: ",
+      message:
+        `Environment : ${chalk.bgGray.cyanBright(args.envName)}\n` + "Please select a choice: ",
       default: 0,
       pageSize: 10,
       choices: [
@@ -54,8 +57,19 @@ export async function runNetwork(args) {
           short: "test",
         },
         {
-          name: "Quit:      Close network and quit the application",
+          name:
+            testFileDirs.length > 0
+              ? "GrepTest:  Execute individual test(s) based on grepping the name / ID (" +
+                chalk.bgGrey.cyanBright(testFileDirs) +
+                ")"
+              : chalk.dim("Test:    NO TESTS SPECIFIED"),
           value: 4,
+          disabled: testFileDirs.length > 0 ? false : true,
+          short: "test",
+        },
+        {
+          name: "Quit:      Close network and quit the application",
+          value: 5,
           short: "quit",
         },
         new inquirer.Separator(),
@@ -108,6 +122,9 @@ export async function runNetwork(args) {
         break;
 
       case 4:
+        await resolveGrepChoice(env);
+
+      case 5:
         const quit = await inquirer.prompt(questions.find(({ name }) => name == "Quit"));
         if (quit.Quit === true) {
           break mainloop;
@@ -130,11 +147,13 @@ const reportServicePorts = async () => {
     httpPort: string;
   }[] = [];
   const globalConfig = await importJsonConfig();
-  const config = globalConfig.environments.find(({ name }) => name == process.env.TEST_ENV)!;
+  const config = globalConfig.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
   if (config.foundation.type == "dev") {
     const ports = { wsPort: "", httpPort: "" };
-    ports.wsPort = ctx.environment.nodes[0].args.find((a) => a.includes("ws-port"))!.split("=")[1] || "9944";
-    ports.httpPort = ctx.environment.nodes[0].args.find((a) => a.includes("rpc-port"))!.split("=")[1] || "9933";
+    ports.wsPort =
+      ctx.environment.nodes[0].args.find((a) => a.includes("ws-port"))!.split("=")[1] || "9944";
+    ports.httpPort =
+      ctx.environment.nodes[0].args.find((a) => a.includes("rpc-port"))!.split("=")[1] || "9933";
 
     portsList.push(ports);
   } else if (config.foundation.type == "chopsticks") {
@@ -151,7 +170,9 @@ const reportServicePorts = async () => {
     );
   }
   portsList.forEach((ports) =>
-    console.log(`  🌐  Node has started, listening on ports - Websocket: ${ports.wsPort} and HTTP: ${ports.httpPort}`)
+    console.log(
+      `  🌐  Node has started, listening on ports - Websocket: ${ports.wsPort} and HTTP: ${ports.httpPort}`
+    )
   );
 
   return portsList;
@@ -164,7 +185,17 @@ const resolveInfoChoice = async (env: Environment) => {
   console.dir(env, { depth: null });
 };
 
+const resolveGrepChoice = async (env: Environment) => {
+  const choice = await inquirer.prompt({
+    name: "grep",
+    type: "input",
+    message: `What pattern would you like to filter for (ID/Title): `,
+    default: "D01T01",
+  });
+  return await executeTests(env, { testNamePattern: choice.grep });
+};
+
 const resolveTestChoice = async (env: Environment) => {
-  process.env.RECYCLE = "true";
+  process.env.MOON_RECYCLE = "true";
   return await executeTests(env);
 };

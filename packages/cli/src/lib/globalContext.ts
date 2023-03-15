@@ -24,7 +24,7 @@ export class MoonwallContext {
     this.providers = [];
     this.nodes = [];
 
-    const env = config.environments.find(({ name }) => name == process.env.TEST_ENV)!;
+    const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
     const blob = {
       name: env.name,
       context: {},

@@ -19,7 +19,7 @@ describeSuite({
     });
 
     it({
-      id: "E01",
+      id: "T01",
       title: "Checking that launched node can create blocks",
       test: async function () {
         const block = (await polkadotJs.rpc.chain.getBlock()).block.header.number.toNumber();
@@ -30,7 +30,7 @@ describeSuite({
     });
 
     it({
-      id: "E02",
+      id: "T02",
       title: "Checking that substrate txns possible",
       timeout: 20000,
       test: async function () {
@@ -46,7 +46,7 @@ describeSuite({
     });
 
     it({
-      id: "E03",
+      id: "T03",
       title: "Checking that sudo can be used",
       test: async function () {
         await context.createBlock();
@@ -60,7 +60,7 @@ describeSuite({
     });
 
     it({
-      id: "E04",
+      id: "T04",
       title: "Can send Ethers txns",
       test: async function () {
         const signer = alithSigner(api);
@@ -77,7 +77,7 @@ describeSuite({
     });
 
     it({
-      id: "E05",
+      id: "T05",
       title: "Testing out Create block and listen for event",
       // modifier: "only",
       timeout: 30000,

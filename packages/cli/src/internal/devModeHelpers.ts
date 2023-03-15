@@ -78,7 +78,7 @@ export async function createDevBlock<
     | { type: "sub"; hash: string }
   )[] = [];
 
-  const api = context.getMoonbeam() || context.getPolkadotJs();
+  const api = context.getSubstrateApi()
   const txs =
     transactions == undefined
       ? []

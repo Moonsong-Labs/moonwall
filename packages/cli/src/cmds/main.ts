@@ -10,6 +10,8 @@ import { runNetwork } from "./runNetwork.js";
 import { testCmd } from "./runTests.js";
 import { downloader } from "./downloader.js";
 import pkg from "../../package.json" assert { type: "json" };
+import { SemVer, gt, lt, lte } from "semver";
+import fetch from "node-fetch";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
@@ -22,7 +24,7 @@ export async function main() {
       console.log(e);
     }
     clear();
-    printIntro();
+    await printIntro();
     if (await mainMenu(globalConfig)) {
       break;
     } else {
@@ -30,7 +32,7 @@ export async function main() {
     }
   }
 
-  console.log(`Goodbye! 👋`);
+  process.stdout.write(`Goodbye! 👋\n`);
   process.exit(0);
 }
 
@@ -41,7 +43,7 @@ async function mainMenu(config: MoonwallConfig) {
     type: "list",
     message: `Main Menu - Please select one of the following:`,
     default: 0,
-    pageSize: 10,
+    pageSize: 12,
     choices: [
       {
         name: !configPresent
@@ -163,9 +165,7 @@ async function resolveDownloadChoice() {
       type: "confirm",
       message: `You are about to download ${chalk.bgWhite.blackBright(
         firstChoice.artifact
-      )} v-${chalk.bgWhite.blackBright(
-        otherChoices.binVersion
-      )} to: ${chalk.bgWhite.blackBright(
+      )} v-${chalk.bgWhite.blackBright(otherChoices.binVersion)} to: ${chalk.bgWhite.blackBright(
         otherChoices.path
       )}.\n Would you like to continue? `,
       default: true,
@@ -198,17 +198,12 @@ const chooseTestEnv = async (config: MoonwallConfig) => {
       disabled: false,
     }))
     .sort((a, b) => (a.name > b.name ? -1 : +1));
-  envs.push(
-    ...([
-      new inquirer.Separator(),
-      { name: "Back", value: "back" },
-      new inquirer.Separator(),
-    ] as any)
-  );
+  envs.push(...([new inquirer.Separator(), { name: "Back", value: "back" }, new inquirer.Separator()] as any));
   const result = await inquirer.prompt({
     name: "envName",
     message: "Select a environment to run",
     type: "list",
+    pageSize: 12,
     choices: envs,
   });
 
@@ -221,22 +216,16 @@ const chooseRunEnv = async (config: MoonwallConfig) => {
     if (a.foundation.type === "dev" || a.foundation.type === "chopsticks") {
       result.name = `Env: ${a.name}     (${a.foundation.type})`;
     } else {
-      result.name = chalk.dim(
-        `Env: ${a.name} (${a.foundation.type})     NO NETWORK TO RUN`
-      );
+      result.name = chalk.dim(`Env: ${a.name} (${a.foundation.type})     NO NETWORK TO RUN`);
       result.disabled = true;
     }
     return result;
   });
 
   const choices = [
-    ...envs
-      .filter(({ disabled }) => disabled === false)
-      .sort((a, b) => (a.name > b.name ? 1 : -1)),
+    ...envs.filter(({ disabled }) => disabled === false).sort((a, b) => (a.name > b.name ? 1 : -1)),
     new inquirer.Separator(),
-    ...envs
-      .filter(({ disabled }) => disabled === true)
-      .sort((a, b) => (a.name > b.name ? 1 : -1)),
+    ...envs.filter(({ disabled }) => disabled === true).sort((a, b) => (a.name > b.name ? 1 : -1)),
     new inquirer.Separator(),
     { name: "Back", value: "back" },
     new inquirer.Separator(),
@@ -246,6 +235,7 @@ const chooseRunEnv = async (config: MoonwallConfig) => {
     name: "envName",
     message: "Select a environment to run",
     type: "list",
+    pageSize: 12,
     choices,
   });
 
@@ -262,7 +252,13 @@ const resolveQuitChoice = async () => {
   return result.Quit;
 };
 
-const printIntro = () => {
+const printIntro = async () => {
+  const currentVersion = new SemVer(pkg.version);
+
+  const resp = await fetch("https://registry.npmjs.org/@moonsong-labs/moonwall-cli/latest");
+  const json = await resp.json();
+  const npmVersion = new SemVer(json["version"]);
+
   const logo =
     chalk.cyan(`\n                                                                                                                  
                                       ####################                      
@@ -290,21 +286,27 @@ const printIntro = () => {
                                                                                 
                       ****  *****************************                       
                                                                                                                                                               
-`);
-  console.log(logo);
-  console.log(
-    colors.rainbow(
-      "======================================================================"
-    )
+\n`);
+  process.stdout.write(logo);
+  process.stdout.write(
+    colors.rainbow("================================================================================\n")
   );
-  console.log(
-    chalk.bgCyan.white(
-      `                            MOONWALL   V${pkg.version}                         `
-    )
-  );
-  console.log(
-    colors.rainbow(
-      "======================================================================\n"
-    )
+
+  if (lt(currentVersion, npmVersion)) {
+    process.stdout.write(
+      chalk.bgCyan.white(
+        `                 MOONWALL   V${currentVersion.version}   (New version ${npmVersion.version} available!)             \n`
+      )
+    );
+  } else {
+    process.stdout.write(
+      chalk.bgCyan.white(
+        `                                MOONWALL  V${currentVersion.version}                                \n`
+      )
+    );
+  }
+
+  process.stdout.write(
+    colors.rainbow("================================================================================\n")
   );
 };

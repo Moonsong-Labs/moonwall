@@ -8,7 +8,11 @@ import { upgradeRuntimeChopsticks } from "./upgrade.js";
 import { ChopsticksContext, GenericContext, ITestSuiteType } from "../types/runner.js";
 import { MoonwallContext, contextCreator } from "./globalContext.js";
 import { BlockCreation } from "./contextHelpers.js";
-import { createDevBlock, createDevBlockCheckEvents, devForkToFinalizedHead } from "../internal/devModeHelpers.js";
+import {
+  createDevBlock,
+  createDevBlockCheckEvents,
+  devForkToFinalizedHead,
+} from "../internal/devModeHelpers.js";
 import {
   chopForkToFinalizedHead,
   sendNewBlockAndCheck,
@@ -17,22 +21,41 @@ import {
 } from "../internal/chopsticksHelpers.js";
 import { ProviderType } from "../types/config.js";
 import { importJsonConfig } from "./configReader.js";
-
 const debug = Debug("test:setup");
+const RT_VERSION = Number(process.env.MOON_RTVERSION);
+const RT_NAME = process.env.MOON_RTNAME;
 
 // This should be refactored to use the vitest runner API for better integration
 // https://vitest.dev/advanced/runner.html
-export function describeSuite({ id, title, testCases, foundationMethods }: ITestSuiteType) {
+export function describeSuite({
+  id,
+  title,
+  testCases,
+  foundationMethods,
+  minRtVersion,
+  chainType,
+  notChainType,
+}: ITestSuiteType) {
   let ctx: MoonwallContext;
+
+  if (
+    (minRtVersion && minRtVersion > RT_VERSION) ||
+    (chainType && chainType !== RT_NAME) ||
+    (notChainType && notChainType === RT_NAME)
+  ) {
+    describe.skip(`🗃️  #${id} ${title}`);
+    return
+  }
 
   beforeAll(async function () {
     const globalConfig = await importJsonConfig();
-    ctx = await contextCreator(globalConfig, process.env.TEST_ENV);
-    // if (ctx.environment.foundationType === "dev") {
-    // //   // await devForkToFinalizedHead(ctx); // TODO: Implement way of cleanly forking to fresh state
-    // } else if (ctx.environment.foundationType === "chopsticks") {
-    //   await chopForkToFinalizedHead(ctx);
-    // }
+    ctx = await contextCreator(globalConfig, process.env.MOON_TEST_ENV);
+
+    if (ctx.environment.foundationType === "dev") {
+      //   // await devForkToFinalizedHead(ctx); // TODO: Implement way of cleanly forking to fresh state
+    } else if (ctx.environment.foundationType === "chopsticks") {
+      // await chopForkToFinalizedHead(ctx); // TODO: Implement way of cleanly forking to fresh state
+    }
   });
 
   afterAll(async function () {
@@ -49,7 +72,8 @@ export function describeSuite({ id, title, testCases, foundationMethods }: ITest
         } else if (options && options.type) {
           return ctx.providers.find((a) => a.type == options.type)!.api as ApiPromise;
         } else {
-          return ctx.providers.find((a) => a.type == "moon" || a.type == "polkadotJs")!.api as ApiPromise;
+          return ctx.providers.find((a) => a.type == "moon" || a.type == "polkadotJs")!
+            .api as ApiPromise;
         }
       },
       getPolkadotJs: (apiName?: string): ApiPromise => {
@@ -87,15 +111,25 @@ export function describeSuite({ id, title, testCases, foundationMethods }: ITest
       title: string;
       test: () => void;
       modifier?: TestCaseModifier;
-      skipIf?: boolean;
+      minRtVersion?: number;
+      chainType?: "moonbeam" | "moonriver" | "moonbase";
+      notChainType?: "moonbeam" | "moonriver" | "moonbase";
+      // networkName?: string; TODO: Implement this
       timeout?: number;
     }) {
       if (params.modifier) {
-        it[params.modifier](`📁  #${id.concat(params.id)} ${params.title}`, params.test, params.timeout);
+        it[params.modifier](
+          `📁  #${id.concat(params.id)} ${params.title}`,
+          params.test,
+          params.timeout
+        );
         return;
       }
-
-      if (params.skipIf) {
+      if (
+        (params.minRtVersion && params.minRtVersion > RT_VERSION) ||
+        (params.chainType && params.chainType !== RT_NAME) ||
+        (params.notChainType && params.notChainType === RT_NAME)
+      ) {
         it.skip(`📁  #${id.concat(params.id)} ${params.title}`, params.test, params.timeout);
         return;
       }
@@ -134,7 +168,6 @@ export function describeSuite({ id, title, testCases, foundationMethods }: ITest
           ) => await createDevBlockCheckEvents(context, expectedEvents, transactions, options),
         },
         it: testCase,
-        beforeAll,
       });
     } else if (foundationMethods == "chopsticks") {
       testCases({
@@ -144,17 +177,20 @@ export function describeSuite({ id, title, testCases, foundationMethods }: ITest
             await sendNewBlockRequest(params),
           createBlockAndCheck: async (expectedEvents: AugmentedEvent<ApiTypes>[]) =>
             await sendNewBlockAndCheck(context, expectedEvents),
-          setStorage: async (params?: { providerName?: string; module: string; method: string; methodParams: any[] }) =>
-            await sendSetStorageRequest(params),
+          setStorage: async (params?: {
+            providerName?: string;
+            module: string;
+            method: string;
+            methodParams: any[];
+          }) => await sendSetStorageRequest(params),
           upgradeRuntime: async (chCtx: ChopsticksContext) => {
             await upgradeRuntimeChopsticks(chCtx, ctx.rtUpgradePath!);
           },
         },
         it: testCase,
-        beforeAll,
       });
     } else {
-      testCases({ context, it: testCase, beforeAll });
+      testCases({ context, it: testCase });
     }
   });
 }

@@ -5,6 +5,7 @@ import "@polkadot/api-augment";
 describeSuite({
   id: "R01",
   title: "Sample suite that only runs on Moonriver chains",
+  minRtVersion: 2200,
   foundationMethods: "read_only",
   testCases: ({ it, context }) => {
     let api: ApiPromise;

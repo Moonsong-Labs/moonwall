@@ -24,7 +24,7 @@ export interface ConnectedProvider {
   type: ProviderType;
   api: ApiPromise | WebSocketProvider | Web3;
   disconnect: () => Promise<void>;
-  greet: () => Promise<void> | void;
+  greet: () => Promise<void> | void | { rtName: string; rtVersion: number };
 }
 
 export type Node = {

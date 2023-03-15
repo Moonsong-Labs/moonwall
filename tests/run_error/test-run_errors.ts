@@ -1,15 +1,6 @@
-import {
-  describeSuite,
-  ApiPromise,
-  expect,
-  beforeAll,
-} from "@moonsong-labs/moonwall-cli";
-import {
-  ALITH_ADDRESS,
-  CHARLETH_ADDRESS,
-  ETHAN_ADDRESS,
-  alith,
-} from "@moonsong-labs/moonwall-util";
+import { describeSuite, expect, beforeAll } from "@moonsong-labs/moonwall-cli";
+import { ALITH_ADDRESS, CHARLETH_ADDRESS, ETHAN_ADDRESS, alith } from "@moonsong-labs/moonwall-util";
+import { ApiPromise } from "@polkadot/api";
 import Web3 from "web3";
 
 describeSuite({
@@ -22,16 +13,15 @@ describeSuite({
 
     beforeAll(() => {
       api = context.getWeb3();
-      mbApi = context.getMoonbeam();
+      mbApi = context.getSubstrateApi();
     });
 
     it({
       id: "E01",
       title: "Calling chain data",
+      minRtVersion: 3000,
       test: async function () {
-        console.log(
-          `The latest block is ${(await api.eth.getBlock("latest")).number}`
-        );
+        console.log(`The latest block is ${(await api.eth.getBlock("latest")).number}`);
         const bal = Number(await api.eth.getBalance(ALITH_ADDRESS));
         expect(bal).to.be.greaterThan(0);
       },
@@ -42,6 +32,7 @@ describeSuite({
       title: "Create block",
       test: async function () {
         await context.createBlock();
+        expect((await mbApi.rpc.chain.getBlock()).block.header.number.toNumber()).toBeGreaterThan(0);
       },
     });
   },
