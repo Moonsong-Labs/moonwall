@@ -4,16 +4,14 @@ import {
   BlockHash,
   RuntimeDispatchInfo,
   Event,
+  Extrinsic,
+  RuntimeDispatchInfoV1,
+  DispatchError,
+  DispatchInfo,
 } from "@polkadot/types/interfaces";
-import {
-  FrameSystemEventRecord,
-  SpWeightsWeightV2Weight,
-} from "@polkadot/types/lookup";
+import { FrameSystemEventRecord, SpWeightsWeightV2Weight } from "@polkadot/types/lookup";
 import { u32, u64, u128, Option, GenericExtrinsic } from "@polkadot/types";
-import type {
-  Block,
-  AccountId20,
-} from "@polkadot/types/interfaces/runtime/types";
+import type { Block, AccountId20 } from "@polkadot/types/interfaces/runtime/types";
 import type { TxWithEvent } from "@polkadot/api-derive/types";
 import type { ITuple } from "@polkadot/types-codec/types";
 import Bottleneck from "bottleneck";
@@ -81,16 +79,12 @@ export const getBlockExtrinsic = async (
   );
   const extrinsic = extIndex > -1 ? block.extrinsics[extIndex] : null;
   const events = records
-    .filter(
-      ({ phase }) =>
-        phase.isApplyExtrinsic && phase.asApplyExtrinsic.eq(extIndex)
-    )
+    .filter(({ phase }) => phase.isApplyExtrinsic && phase.asApplyExtrinsic.eq(extIndex))
     .map(({ event }) => event);
   const resultEvent = events.find(
     (event) =>
       event.section === "system" &&
-      (event.method === "ExtrinsicSuccess" ||
-        event.method === "ExtrinsicFailed")
+      (event.method === "ExtrinsicSuccess" || event.method === "ExtrinsicFailed")
   );
   return { block, extrinsic, events, resultEvent };
 };
@@ -104,9 +98,7 @@ export const checkBlockFinalized = async (api: ApiPromise, number: number) => {
   return {
     number,
     finalized: (
-      await (api.rpc as any).moon.isBlockFinalized(
-        await api.rpc.chain.getBlockHash(number)
-      )
+      await (api.rpc as any).moon.isBlockFinalized(await api.rpc.chain.getBlockHash(number))
     ).isTrue,
   };
 };
@@ -138,11 +130,7 @@ export const fetchHistoricBlockNum = async (
   );
 };
 
-export const getBlockArray = async (
-  api: ApiPromise,
-  timePeriod: number,
-  limiter?: Bottleneck
-) => {
+export const getBlockArray = async (api: ApiPromise, timePeriod: number, limiter?: Bottleneck) => {
   /**  
   @brief Returns an sequential array of block numbers from a given period of time in the past
   @param api Connected ApiPromise to perform queries on
@@ -153,12 +141,8 @@ export const getBlockArray = async (
   if (limiter == null) {
     limiter = new Bottleneck({ maxConcurrent: 10, minTime: 100 });
   }
-  const finalizedHead = await limiter.schedule(() =>
-    api.rpc.chain.getFinalizedHead()
-  );
-  const signedBlock = await limiter.schedule(() =>
-    api.rpc.chain.getBlock(finalizedHead)
-  );
+  const finalizedHead = await limiter.schedule(() => api.rpc.chain.getFinalizedHead());
+  const signedBlock = await limiter.schedule(() => api.rpc.chain.getBlock(finalizedHead));
 
   const lastBlockNumber = signedBlock.block.header.number.toNumber();
   const lastBlockTime = getBlockTime(signedBlock);
@@ -176,11 +160,7 @@ export const getBlockArray = async (
 };
 
 export function extractWeight(
-  weightV1OrV2:
-    | u64
-    | Option<u64>
-    | SpWeightsWeightV2Weight
-    | Option<SpWeightsWeightV2Weight>
+  weightV1OrV2: u64 | Option<u64> | SpWeightsWeightV2Weight | Option<SpWeightsWeightV2Weight>
 ) {
   if ("isSome" in weightV1OrV2) {
     const weight = weightV1OrV2.unwrap();
@@ -219,4 +199,33 @@ export function extractPreimageDeposit(
     accountId: deposit[0].toHex(),
     amount: deposit[1],
   };
+}
+
+export function mapExtrinsics(
+  extrinsics: Extrinsic[],
+  records: FrameSystemEventRecord[],
+  fees?: RuntimeDispatchInfo[] | RuntimeDispatchInfoV1[]
+): TxWithEventAndFee[] {
+  return extrinsics.map((extrinsic, index): TxWithEventAndFee => {
+    let dispatchError: DispatchError | undefined;
+    let dispatchInfo: DispatchInfo | undefined;
+
+    const events = records
+      .filter(({ phase }) => phase.isApplyExtrinsic && phase.asApplyExtrinsic.eq(index))
+      .map(({ event }) => {
+        if (event.section === "system") {
+          if (event.method === "ExtrinsicSuccess") {
+            dispatchInfo = event.data[0] as any as DispatchInfo;
+          } else if (event.method === "ExtrinsicFailed") {
+            dispatchError = event.data[0] as any as DispatchError;
+            dispatchInfo = event.data[1] as any as DispatchInfo;
+          }
+        }
+
+        return event as any;
+      });
+    // TODO: Fix below to work with new weights
+    //@ts-expect-error
+    return { dispatchError, dispatchInfo, events, extrinsic, fee: fees ? fees[index] : undefined };
+  });
 }
