@@ -1,5 +1,11 @@
 # @moonwall/util
 
+## 0.2.7
+
+### Patch Changes
+
+- 515c38e: QoL - Added logging utils
+
 ## 0.2.6
 
 ### Patch Changes
