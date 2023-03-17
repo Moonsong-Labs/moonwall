@@ -1,5 +1,11 @@
 # @moonwall/cli
 
+## 0.2.11
+
+### Patch Changes
+
+- d3fba82: Fix
+
 ## 0.2.10
 
 ### Patch Changes
