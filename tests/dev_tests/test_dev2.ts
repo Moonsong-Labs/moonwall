@@ -2,6 +2,7 @@ import { describeSuite, expect, beforeAll } from "@moonsong-labs/moonwall-cli";
 import { CHARLETH_ADDRESS, BALTATHAR_ADDRESS, alithSigner, alith } from "@moonsong-labs/moonwall-util";
 import { parseEther } from "ethers";
 import { BN } from "@polkadot/util";
+import { ApiPromise } from "@polkadot/api";
 
 describeSuite({
   id: "D02",
@@ -10,7 +11,7 @@ describeSuite({
   testCases: ({ it, context }) => {
     let api;
     let w3;
-    let polkadotJs;
+    let polkadotJs: ApiPromise;
 
     beforeAll(() => {
       api = context.getEthers();
@@ -52,6 +53,8 @@ describeSuite({
         await context.createBlock();
         const tx = polkadotJs.tx.rootTesting.fillBlock(60 * 10 ** 7);
         await polkadotJs.tx.sudo.sudo(tx).signAndSend(alith);
+
+        polkadotJs
 
         await context.createBlock();
         const blockFill = await polkadotJs.query.system.blockWeight();

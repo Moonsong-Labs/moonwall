@@ -1,9 +1,11 @@
+import "@moonbeam-network/api-augment"
 import { describeSuite, expect } from "@moonsong-labs/moonwall-cli";
 import { getCurrentSuite } from "vitest/suite";
 import { CHARLETH_ADDRESS, BALTATHAR_ADDRESS, alithSigner, alith } from "@moonsong-labs/moonwall-util";
 import { parseEther } from "ethers";
 import { BN } from "@polkadot/util";
 import { beforeEach, beforeAll } from "vitest";
+import { ApiPromise } from "@polkadot/api";
 
 describeSuite({
   id: "D01",
@@ -12,7 +14,7 @@ describeSuite({
   testCases: ({ it, context }) => {
     let api;
     let w3;
-    let polkadotJs;
+    let polkadotJs: ApiPromise;
 
     beforeAll(async () => {
       polkadotJs = context.getMoonbeam();
@@ -39,7 +41,6 @@ describeSuite({
         const balanceBefore = (await polkadotJs.query.system.account(BALTATHAR_ADDRESS)).data.free;
 
         await polkadotJs.tx.balances.transfer(BALTATHAR_ADDRESS, parseEther("2")).signAndSend(alith);
-
         await context.createBlock();
 
         const balanceAfter = (await polkadotJs.query.system.account(BALTATHAR_ADDRESS)).data.free;

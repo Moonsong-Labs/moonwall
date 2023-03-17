@@ -1,3 +1,5 @@
+import "@moonbeam-network/api-augment";
+
 export * from "./functions/block.js";
 export * from "./functions/common.js";
 export * from "./functions/providers.js";

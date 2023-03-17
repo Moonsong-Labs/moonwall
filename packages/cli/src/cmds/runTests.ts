@@ -3,8 +3,6 @@ import { startVitest } from "vitest/node";
 import { UserConfig, Vitest } from "vitest";
 import { MoonwallContext, contextCreator } from "../lib/globalContext.js";
 import { Environment } from "../types/config.js";
-import { dirname } from "path";
-import { fileURLToPath } from "url";
 import path from "path";
 import chalk from "chalk";
 
@@ -50,17 +48,12 @@ export async function executeTests(env: Environment, additionalArgs?: {}): Promi
     await ctx.disconnect();
   }
 
-  const _dirname =
-    typeof __dirname !== "undefined" ? __dirname : dirname(fileURLToPath(import.meta.url));
-
-  const setupPath = path.join(_dirname, "internal", "setupFixture");
   const options: UserConfig = {
     watch: false,
     globals: true,
     reporters: env.html ? ["verbose", "html"] : ["verbose"],
     testTimeout: 10000,
     hookTimeout: 500000,
-    setupFiles: [setupPath],
     useAtomics: false,
     passWithNoTests: false,
     threads: true,

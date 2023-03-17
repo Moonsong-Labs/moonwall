@@ -1,3 +1,4 @@
+import "@moonbeam-network/api-augment";
 export const SPECS_PATH = `./moonbeam-test-specs`;
 
 export const DEBUG_MODE = process.env.DEBUG_MODE || false;

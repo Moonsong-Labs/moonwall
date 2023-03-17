@@ -1,4 +1,3 @@
-import "@polkadot/api-augment/polkadot";
 import PressToContinuePrompt from "inquirer-press-to-continue";
 import inquirer from "inquirer";
 import { MoonwallContext, runNetworkOnly } from "../lib/globalContext.js";

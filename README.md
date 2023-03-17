@@ -1,4 +1,5 @@
 ## Description
+![moonwall](./moonwall.jpg)
 
 Test framework for testing on Moonbeam, Moonriver and more
 
@@ -34,13 +35,17 @@ import { ALITH_ADDRESS } from "@moonsong-labs/moonwall-util";
 
 > :information_source: Use `--help` for more information about arguments for each command
 
-### Usage Examples
+### Usage Examples (non-exhaustive)
 
 - `moonwall` : If you have globally installed moonwall, here is the most minimal entrypoint
 
-- `pnpx moonwall run <ENV_NAME>` : To download and run the latest moonwall binary from npm.js repository, and run a network specified in your config file.
+- `pnpm moonwall` : This can be used if locally installed, and will launch the main menu..
+
+- `pnpx @moonsong-labs/moonwall-cli run <ENV_NAME>` : To download and run the latest moonwall binary from npm.js repository, and run a network specified in your config file.
 
 - `pnpm exec moonwall test <ENV_NAME>` : To run the locally compiled version of the binary, to start network and run tests against it.
 
 - `pnpm moonwall download <ARTIFACT NAME> <VERSION> <PATH>` : To run the locally compiled version of the binary, to download an artifact directly from github.
 
+
+The combinations are endless, for more information you can see the pnpm docs [here](https://pnpm.io/cli/run).

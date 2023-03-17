@@ -1,3 +1,4 @@
+import "@moonbeam-network/api-augment";
 import { ApiPromise } from "@polkadot/api";
 import {
   AddressOrPair,
@@ -101,7 +102,7 @@ export async function createBlock<
   // We retrieve the events for that block
   const allRecords: EventRecord[] = (await (
     await pjsApi.at(blockResult.hash)
-  ).query.system.events()) as any;
+  ).query.system.events());
   // We retrieve the block (including the extrinsics)
   const blockData = await pjsApi.rpc.chain.getBlock(blockResult.hash);
 

@@ -3,7 +3,7 @@ import { MoonwallContext } from "../lib/globalContext.js";
 import { GenericContext } from "../types/runner.js";
 import { ApiTypes, AugmentedEvent } from "@polkadot/api/types/index.js";
 import { ApiPromise, WsProvider } from "@polkadot/api";
-import { FrameSystemEventRecord } from "@polkadot/types/lookup.js";
+import { FrameSystemEventRecord } from "@polkadot/types/lookup";
 
 export async function getWsFromConfig(
   providerName?: string

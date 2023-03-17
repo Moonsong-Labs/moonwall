@@ -1,4 +1,4 @@
-import "@polkadot/api-augment";
+import "@moonbeam-network/api-augment/moonbase";
 import { ApiPromise } from "@polkadot/api";
 import {
   BlockHash,
@@ -98,7 +98,7 @@ export const checkBlockFinalized = async (api: ApiPromise, number: number) => {
   return {
     number,
     finalized: (
-      await (api.rpc as any).moon.isBlockFinalized(await api.rpc.chain.getBlockHash(number))
+      await api.rpc.moon.isBlockFinalized(await api.rpc.chain.getBlockHash(number))
     ).isTrue,
   };
 };
@@ -215,14 +215,14 @@ export function mapExtrinsics(
       .map(({ event }) => {
         if (event.section === "system") {
           if (event.method === "ExtrinsicSuccess") {
-            dispatchInfo = event.data[0] as any as DispatchInfo;
+            dispatchInfo = event.data[0] as DispatchInfo;
           } else if (event.method === "ExtrinsicFailed") {
-            dispatchError = event.data[0] as any as DispatchError;
-            dispatchInfo = event.data[1] as any as DispatchInfo;
+            dispatchError = event.data[0] as DispatchError;
+            dispatchInfo = event.data[1] as DispatchInfo;
           }
         }
 
-        return event as any;
+        return event;
       });
     // TODO: Fix below to work with new weights
     //@ts-expect-error

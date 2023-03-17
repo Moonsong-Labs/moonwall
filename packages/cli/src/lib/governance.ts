@@ -11,7 +11,6 @@ import {
   dorothy,
 } from "@moonsong-labs/moonwall-util";
 import { DevModeContext } from "../types/runner.js";
-import "@polkadot/api-augment";
 
 export const COUNCIL_MEMBERS = [baltathar, charleth, dorothy];
 export const COUNCIL_THRESHOLD = Math.ceil((COUNCIL_MEMBERS.length * 2) / 3);
@@ -66,7 +65,7 @@ export const instantFastTrack = async <
             ? proposal
             : proposal.method.encodedLength,
       },
-    } as any)
+    })
   );
   await execTechnicalCommitteeProposal(
     context,
@@ -131,7 +130,7 @@ export const execCouncilProposal = async <
         {
           refTime: 1_000_000_000,
           proofSize: 0,
-        } as any,
+        },
         lengthBound
       )
       .signAsync(dorothy)
@@ -229,13 +228,13 @@ export const maximizeConvictionVotingOf = async (
   const fee = (
     await context
       .getPolkadotJs()
-      .tx.convictionVoting.vote(refIndex as any, {
+      .tx.convictionVoting.vote(refIndex, {
         Standard: {
           vote: { aye: true, conviction: "Locked6x" },
           balance: await (
             (await context
               .getPolkadotJs()
-              .query.system.account(alith.address)) as any
+              .query.system.account(alith.address))
           ).data.free,
         },
       })
@@ -247,7 +246,7 @@ export const maximizeConvictionVotingOf = async (
     voters.map(async (voter) =>
       context
         .getPolkadotJs()
-        .tx.convictionVoting.vote(refIndex as any, {
+        .tx.convictionVoting.vote(refIndex, {
           Standard: {
             vote: { aye: true, conviction: "Locked6x" },
             balance: await (
@@ -321,7 +320,7 @@ export const execTechnicalCommitteeProposal = async <
         {
           refTime: 1_000_000_000,
           proofSize: 0,
-        } as any,
+        },
         lengthBound
       )
       .signAsync(baltathar)

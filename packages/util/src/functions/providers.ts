@@ -1,3 +1,4 @@
+import "@moonbeam-network/api-augment";
 import Web3 from "web3";
 import { Log } from "web3-core";
 import { JsonRpcResponse } from "web3-core-helpers";

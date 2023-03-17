@@ -1,18 +1,6 @@
-import {
-  BlockCreation,
-  ExtrinsicCreation,
-  extractError,
-} from "../lib/contextHelpers.js";
-import {
-  ApiTypes,
-  AugmentedEvent,
-  SubmittableExtrinsic,
-} from "@polkadot/api/types/index.js";
-import {
-  customWeb3Request,
-  alith,
-  createAndFinalizeBlock,
-} from "@moonsong-labs/moonwall-util";
+import { BlockCreation, ExtrinsicCreation, extractError } from "../lib/contextHelpers.js";
+import { ApiTypes, AugmentedEvent, SubmittableExtrinsic } from "@polkadot/api/types";
+import { customWeb3Request, alith, createAndFinalizeBlock } from "@moonsong-labs/moonwall-util";
 import { GenericContext } from "../lib/runner-functions.js";
 import Debug from "debug";
 import { setTimeout } from "timers/promises";
@@ -23,8 +11,7 @@ import { ApiPromise } from "@polkadot/api";
 const debug = Debug("DevTest");
 
 export async function devForkToFinalizedHead(context: MoonwallContext) {
-  const api = context.providers.find(({ type }) => type == "moon")!
-    .api as ApiPromise;
+  const api = context.providers.find(({ type }) => type == "moon")!.api as ApiPromise;
   const finalizedHead = context.genesis;
   await api.rpc.engine.createBlock(true, true, finalizedHead);
   while (true) {
@@ -73,28 +60,17 @@ export async function createDevBlock<
     | Promise<string>,
   Calls extends Call | Call[]
 >(context: GenericContext, transactions?: Calls, options: BlockCreation = {}) {
-  const results: (
-    | { type: "eth"; hash: string }
-    | { type: "sub"; hash: string }
-  )[] = [];
+  const results: ({ type: "eth"; hash: string } | { type: "sub"; hash: string })[] = [];
 
-  const api = context.getSubstrateApi()
+  const api = context.getSubstrateApi();
   const txs =
-    transactions == undefined
-      ? []
-      : Array.isArray(transactions)
-      ? transactions
-      : [transactions];
+    transactions == undefined ? [] : Array.isArray(transactions) ? transactions : [transactions];
   for await (const call of txs) {
     if (typeof call == "string") {
       // Ethereum
       results.push({
         type: "eth",
-        hash: (
-          await customWeb3Request(context.getWeb3(), "eth_sendRawTransaction", [
-            call,
-          ])
-        ).result,
+        hash: (await customWeb3Request(context.getWeb3(), "eth_sendRawTransaction", [call])).result,
       });
     } else if (call.isSigned) {
       const tx = api.tx(call);
@@ -133,9 +109,7 @@ export async function createDevBlock<
   }
 
   // We retrieve the events for that block
-  const allRecords: EventRecord[] = (await (
-    await api.at(blockResult.hash)
-  ).query.system.events()) as any;
+  const allRecords: EventRecord[] = await (await api.at(blockResult.hash)).query.system.events();
   // We retrieve the block (including the extrinsics)
   const blockData = await api.rpc.chain.getBlock(blockResult.hash);
 
@@ -151,21 +125,14 @@ export async function createDevBlock<
                 data[2].toString() == result.hash
             )
             ?.phase?.asApplyExtrinsic?.toNumber()
-        : blockData.block.extrinsics.findIndex(
-            (ext) => ext.hash.toHex() == result.hash
-          );
+        : blockData.block.extrinsics.findIndex((ext) => ext.hash.toHex() == result.hash);
     // We retrieve the events associated with the extrinsic
     const events = allRecords.filter(
-      ({ phase }) =>
-        phase.isApplyExtrinsic &&
-        phase.asApplyExtrinsic.toNumber() === extrinsicIndex
+      ({ phase }) => phase.isApplyExtrinsic && phase.asApplyExtrinsic.toNumber() === extrinsicIndex
     );
     const failure = extractError(events);
     return {
-      extrinsic:
-        extrinsicIndex! >= 0
-          ? blockData.block.extrinsics[extrinsicIndex!]
-          : null,
+      extrinsic: extrinsicIndex! >= 0 ? blockData.block.extrinsics[extrinsicIndex!] : null,
       events,
       error:
         failure &&

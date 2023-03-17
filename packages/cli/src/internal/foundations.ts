@@ -2,7 +2,7 @@ import {
   ChopsticksLaunchSpec,
   DevLaunchSpec,
   GenericLaunchSpec,
-} from "../types/config";
+} from "../types/config.js";
 
 export function parseRunCmd(launchSpec: DevLaunchSpec) {
   const launch = !!!launchSpec.running ? true : launchSpec.running;

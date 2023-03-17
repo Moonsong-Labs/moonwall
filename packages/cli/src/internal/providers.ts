@@ -6,7 +6,6 @@ import { WebSocketProvider } from "ethers";
 import Debug from "debug";
 import { ProviderConfig, ProviderType } from "../types/config.js";
 import { MoonwallProvider } from "../types/context.js";
-import "@polkadot/api-augment";
 const debug = Debug("global:providers");
 
 export function prepareProviders(providerConfigs: ProviderConfig[]): MoonwallProvider[] {

@@ -1,3 +1,5 @@
+import "@moonbeam-network/api-augment";
+
 export * from "./lib/runner-functions.js";
 export * from "./lib/configReader.js";
 export * from "./lib/binaries.js";

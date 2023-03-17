@@ -1,3 +1,4 @@
+import "@moonbeam-network/api-augment";
 import { BN } from "@polkadot/util";
 
 // Sort dict by key
@@ -63,11 +64,11 @@ class Perthing {
     var mod = dm.div.negative !== 0 ? dm.mod.isub(num) : dm.mod;
 
     var half = num.ushrn(1);
-    var r2 = num.andln(1) as any;
+    var r2 = num.andln(1);
     var cmp = mod.cmp(half);
 
     // Round down
-    if (cmp <= 0 || (r2 === 1 && cmp === 0)) return dm.div;
+    if (cmp <= 0 || (r2 === new BN(1) && cmp === 0)) return dm.div;
 
     // Round up
     return dm.div.negative !== 0 ? dm.div.isubn(1) : dm.div.iaddn(1);
