@@ -1,5 +1,21 @@
 # @moonwall/cli
 
+## 0.2.10
+
+### Patch Changes
+
+- b53d5e2: Added Types Back!
+
+  Moonbeam Types have been added back to the library, so you can use them in your test files when you import the api-augment package.
+  E.g.
+
+  ```
+  import "@moonbeam-network/api-augment"
+  ```
+
+- Updated dependencies [b53d5e2]
+  - @moonsong-labs/moonwall-util@0.2.9
+
 ## 0.2.9
 
 ### Patch Changes
