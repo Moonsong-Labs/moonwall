@@ -1,3 +1,4 @@
+import "@moonbeam-network/api-augment"
 import path from "path";
 import fs from "fs";
 import child_process from "child_process";

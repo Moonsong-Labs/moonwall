@@ -1,3 +1,4 @@
+import "@moonbeam-network/api-augment"
 import { describe, it, beforeAll, afterAll, File } from "vitest";
 import { ApiPromise } from "@polkadot/api";
 import { WebSocketProvider } from "ethers";

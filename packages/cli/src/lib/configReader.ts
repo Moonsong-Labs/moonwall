@@ -1,8 +1,7 @@
+import "@moonbeam-network/api-augment"
 import { MoonwallConfig } from "../types/config.js";
 import fs from "fs/promises";
 import path from "path";
-import { dirname } from "path";
-import { fileURLToPath } from "url";
 
 export async function loadConfig(path: string): Promise<MoonwallConfig> {
   if (

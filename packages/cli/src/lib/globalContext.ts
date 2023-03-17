@@ -1,7 +1,7 @@
+import "@moonbeam-network/api-augment"
 import { FoundationType, MoonwallConfig } from "../types/config";
 import { ChildProcess } from "node:child_process";
 import { populateProviderInterface, prepareProviders } from "../internal/providers.js";
-import { setTimeout } from "timers/promises";
 import { launchNode } from "../internal/localNode.js";
 import { importJsonConfig } from "./configReader.js";
 import { parseChopsticksRunCmd, parseRunCmd } from "../internal/foundations.js";

@@ -1,3 +1,4 @@
+import "@moonbeam-network/api-augment"
 import { expect } from "vitest";
 import { ApiPromise } from "@polkadot/api";
 import { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types";
