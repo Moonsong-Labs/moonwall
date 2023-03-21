@@ -4,6 +4,7 @@ import Web3 from "web3";
 import { ApiTypes, AugmentedEvent, SubmittableExtrinsic } from "@polkadot/api/types/index.js";
 import { BlockCreation, BlockCreationResponse } from "../lib/contextHelpers.js";
 import { ProviderType } from "./config.js";
+import { Debugger } from "debug";
 
 export interface CustomTest {
   (params: {
@@ -54,16 +55,19 @@ export type ITestSuiteType =
 export interface DevTestContext {
   context: DevModeContext;
   it: CustomTest;
+  log: Debugger
 }
 
 export interface ChopsticksTestContext {
   context: ChopsticksContext;
   it: CustomTest;
+  log: Debugger
 }
 
 export interface GenericTestContext {
   context: GenericContext;
   it: CustomTest;
+  log: Debugger
 }
 
 export interface GenericContext {

@@ -11,7 +11,7 @@ describeSuite({
   id: "D01",
   title: "Dev test suite",
   foundationMethods: "dev",
-  testCases: ({ it, context }) => {
+  testCases: ({ it, context, log }) => {
     let api;
     let w3;
     let polkadotJs: ApiPromise;
@@ -29,6 +29,7 @@ describeSuite({
         const block = (await polkadotJs.rpc.chain.getBlock()).block.header.number.toNumber();
         await context.createBlock();
         const block2 = (await polkadotJs.rpc.chain.getBlock()).block.header.number.toNumber();
+        log(`Previous block #${block}, new block #${block2}`)
         expect(block2).to.be.greaterThan(block);
       },
     });

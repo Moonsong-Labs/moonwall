@@ -30,22 +30,26 @@ export async function executeTests(env: Environment, additionalArgs?: {}): Promi
   const globalConfig = await importJsonConfig();
 
   if (env.foundation.type === "read_only") {
-    const ctx = await contextCreator(globalConfig, process.env.MOON_TEST_ENV);
-    const chainData = ctx.providers
-      .filter((provider) => provider.type == "moon" || provider.type == "polkadotJs")
-      .map((provider) => {
-        return {
-          [provider.name]: {
-            rtName: (provider.greet() as any).rtName,
-            rtVersion: (provider.greet() as any).rtVersion,
-          },
-        };
-      });
-    // TODO: Extend/develop this feature to respect para/relay chain specifications
-    const { rtVersion, rtName } = Object.values(chainData[0])[0];
-    process.env.MOON_RTVERSION = rtVersion;
-    process.env.MOON_RTNAME = rtName;
-    await ctx.disconnect();
+    try{
+      const ctx = await contextCreator(globalConfig, process.env.MOON_TEST_ENV);
+      const chainData = ctx.providers
+        .filter((provider) => provider.type == "moon" || provider.type == "polkadotJs")
+        .map((provider) => {
+          return {
+            [provider.name]: {
+              rtName: (provider.greet() as any).rtName,
+              rtVersion: (provider.greet() as any).rtVersion,
+            },
+          };
+        });
+      // TODO: Extend/develop this feature to respect para/relay chain specifications
+      const { rtVersion, rtName } = Object.values(chainData[0])[0];
+      process.env.MOON_RTVERSION = rtVersion;
+      process.env.MOON_RTNAME = rtName;
+      await ctx.disconnect();
+    } catch {
+    // No chain to test against
+    }
   }
 
   const options: UserConfig = {

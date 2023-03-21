@@ -1,6 +1,14 @@
 import "@moonbeam-network/api-augment";
 import { ApiPromise } from "@polkadot/api";
 import { mapExtrinsics } from "./block.js";
+import Debug from "debug"
+
+export function setupLogger(name: string){
+  const debug = Debug(`test:${name}`)
+  Debug.enable("test:*")
+  Debug.log = console.info.bind(console)
+  return debug
+}
 
 export function log(...msg: any[]) {
   if (process.argv && process.argv[2] && process.argv[2] === "--printlogs") {

@@ -4,9 +4,9 @@ describeSuite({
   id: "B04",
   title: "This is a jimbo test suite",
   foundationMethods: "read_only",
-  testCases: function ({ it }) {
+  testCases: function ({ it, log }) {
     beforeAll(function () {
-      console.log("this is test setup");
+      log("this is test setup");
     });
 
     it({

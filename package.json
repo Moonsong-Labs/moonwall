@@ -20,6 +20,8 @@
   "devDependencies": {
     "@acala-network/chopsticks": "^0.5.10",
     "@changesets/cli": "^2.26.0",
+    "debug": "^4.3.4",
+    "ethers": "^6.1.0",
     "@moonbeam-network/api-augment": "^0.2201.0",
     "@moonsong-labs/moonwall-cli": "workspace:*",
     "@moonsong-labs/moonwall-util": "workspace:*",
@@ -48,8 +50,5 @@
       "@polkadot/api": "$@polkadot/api",
       "@polkadot/types": "$@polkadot/api"
     }
-  },
-  "dependencies": {
-    "ethers": "^6.1.0"
   }
 }

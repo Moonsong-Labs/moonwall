@@ -1,18 +1,22 @@
 import { expect, describeSuite, beforeAll } from "@moonsong-labs/moonwall-cli";
+import { setupLogger } from "@moonsong-labs/moonwall-util";
 
 describeSuite({
   id: "B02",
   title: "This is a timbo test suite",
   foundationMethods: "read_only",
-  testCases: function ({ it }) {
+  testCases: function ({ it, log }) {
+    const anotherLogger = setupLogger("additional");
+
     beforeAll(function () {
-      console.log("this is test setup");
+      log("Test suite setup");
     });
 
     it({
       id: "T01",
       title: "This is a bool test case",
       test: function () {
+        log("hello");
         expect(true).to.be.true;
       },
     });
@@ -21,6 +25,7 @@ describeSuite({
       id: "T02",
       title: "This is a number test case",
       test: function () {
+        anotherLogger("Test case log")
         expect(1_332_323_221).to.be.greaterThan(1000000);
       },
     });

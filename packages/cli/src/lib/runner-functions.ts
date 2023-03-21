@@ -1,10 +1,9 @@
-import "@moonbeam-network/api-augment"
+import "@moonbeam-network/api-augment";
 import { describe, it, beforeAll, afterAll, File } from "vitest";
 import { ApiPromise } from "@polkadot/api";
 import { WebSocketProvider } from "ethers";
 import Web3 from "web3";
 import { ApiTypes, AugmentedEvent, SubmittableExtrinsic } from "@polkadot/api/types/index.js";
-import Debug from "debug";
 import { upgradeRuntimeChopsticks } from "./upgrade.js";
 import { ChopsticksContext, GenericContext, ITestSuiteType } from "../types/runner.js";
 import { MoonwallContext, contextCreator } from "./globalContext.js";
@@ -22,7 +21,9 @@ import {
 } from "../internal/chopsticksHelpers.js";
 import { ProviderType } from "../types/config.js";
 import { importJsonConfig } from "./configReader.js";
-const debug = Debug("test:setup");
+import Debug from "debug";
+
+
 const RT_VERSION = Number(process.env.MOON_RTVERSION);
 const RT_NAME = process.env.MOON_RTNAME;
 
@@ -45,7 +46,7 @@ export function describeSuite({
     (notChainType && notChainType === RT_NAME)
   ) {
     describe.skip(`🗃️  #${id} ${title}`);
-    return
+    return;
   }
 
   beforeAll(async function () {
@@ -57,6 +58,8 @@ export function describeSuite({
     } else if (ctx.environment.foundationType === "chopsticks") {
       // await chopForkToFinalizedHead(ctx); // TODO: Implement way of cleanly forking to fresh state
     }
+
+
   });
 
   afterAll(async function () {
@@ -107,7 +110,14 @@ export function describeSuite({
       },
     };
 
-    function testCase(params: {
+    const logger = () => {
+        const debug = Debug(`test:${process.env.MOON_TEST_ENV}`)
+        Debug.enable("test:*")
+        Debug.log = console.info.bind(console)
+        return debug
+    }
+
+    const testCase = (params: {
       id: string;
       title: string;
       test: () => void;
@@ -117,7 +127,7 @@ export function describeSuite({
       notChainType?: "moonbeam" | "moonriver" | "moonbase";
       // networkName?: string; TODO: Implement this
       timeout?: number;
-    }) {
+    }) => {
       if (params.modifier) {
         it[params.modifier](
           `📁  #${id.concat(params.id)} ${params.title}`,
@@ -136,7 +146,7 @@ export function describeSuite({
       }
 
       it(`📁  #${id.concat(params.id)} ${params.title}`, params.test, params.timeout);
-    }
+    };
 
     if (foundationMethods == "dev") {
       testCases({
@@ -169,6 +179,7 @@ export function describeSuite({
           ) => await createDevBlockCheckEvents(context, expectedEvents, transactions, options),
         },
         it: testCase,
+        log: logger(),
       });
     } else if (foundationMethods == "chopsticks") {
       testCases({
@@ -189,12 +200,14 @@ export function describeSuite({
           },
         },
         it: testCase,
+        log: logger(),
       });
     } else {
-      testCases({ context, it: testCase });
+      testCases({ context, it: testCase, log: logger() });
     }
   });
 }
+
 export { GenericContext };
 
 // TODO: Extend to include skipIf() and runIf()

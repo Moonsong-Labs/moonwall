@@ -9,7 +9,6 @@ export type MoonwallEnvironment = {
   providers: MoonwallProvider[];
   foundationType: FoundationType;
   nodes: Node[];
-  context: any;
 };
 
 export interface MoonwallProvider {
