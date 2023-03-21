@@ -1,5 +1,12 @@
 # @moonwall/cli
 
+## 0.2.13
+
+### Patch Changes
+
+- b243e2a: Fix
+  - Small fix to GHA
+
 ## 0.2.12
 
 ### Patch Changes
