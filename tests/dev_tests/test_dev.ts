@@ -1,11 +1,19 @@
-import "@moonbeam-network/api-augment"
+import "@moonbeam-network/api-augment";
 import { describeSuite, expect } from "@moonsong-labs/moonwall-cli";
 import { getCurrentSuite } from "vitest/suite";
-import { CHARLETH_ADDRESS, BALTATHAR_ADDRESS, alithSigner, alith } from "@moonsong-labs/moonwall-util";
+import {
+  CHARLETH_ADDRESS,
+  BALTATHAR_ADDRESS,
+  alithSigner,
+  alith,
+  faith,
+  ALITH_ADDRESS,
+} from "@moonsong-labs/moonwall-util";
 import { parseEther } from "ethers";
 import { BN } from "@polkadot/util";
 import { beforeEach, beforeAll } from "vitest";
 import { ApiPromise } from "@polkadot/api";
+import { ReadableStreamDefaultReader } from "stream/web";
 
 describeSuite({
   id: "D01",
@@ -29,7 +37,7 @@ describeSuite({
         const block = (await polkadotJs.rpc.chain.getBlock()).block.header.number.toNumber();
         await context.createBlock();
         const block2 = (await polkadotJs.rpc.chain.getBlock()).block.header.number.toNumber();
-        log(`Previous block #${block}, new block #${block2}`)
+        log(`Previous block #${block}, new block #${block2}`);
         expect(block2).to.be.greaterThan(block);
       },
     });
@@ -41,7 +49,9 @@ describeSuite({
       test: async function () {
         const balanceBefore = (await polkadotJs.query.system.account(BALTATHAR_ADDRESS)).data.free;
 
-        await polkadotJs.tx.balances.transfer(BALTATHAR_ADDRESS, parseEther("2")).signAndSend(alith);
+        await polkadotJs.tx.balances
+          .transfer(BALTATHAR_ADDRESS, parseEther("2"))
+          .signAndSend(alith);
         await context.createBlock();
 
         const balanceAfter = (await polkadotJs.query.system.account(BALTATHAR_ADDRESS)).data.free;
@@ -88,27 +98,38 @@ describeSuite({
       // modifier: "only",
       timeout: 30000,
       test: async function () {
-        const expectedEvents = [
+        const expectEvents = [
           polkadotJs.events.system.ExtrinsicSuccess,
           polkadotJs.events.balances.Transfer,
-          // polkadotJs.events.authorFilter.EligibleUpdated
+          // polkadotJs.events.authorFilter.EligibleUpdated,
         ];
 
-        const { match, events } = await context.createBlockAndCheck(
-          expectedEvents,
-          polkadotJs.tx.balances.transfer(CHARLETH_ADDRESS, parseEther("3"))
+        await context.createBlock(
+          polkadotJs.tx.balances.transfer(CHARLETH_ADDRESS, parseEther("3")),
+          { expectEvents, logger: log }
         );
-        // maybe: reponse has methods for asserts
-        // maybe: add options to createBlock for asserts of events/storages etc
+      },
+    });
 
-        expect(match).toStrictEqual(true);
-        // expect(
-        //   events.some(
-        //     (evt) =>
-        //       polkadotJs.events.balances.Transfer.is(evt.event) &&
-        //       evt.event.data.amount.toString() == parseEther("3")
-        //   )
-        // ).toStrictEqual(true);
+    it({
+      id: "T06",
+      title: "Testing out Create block and analyse failures",
+      modifier: "only",
+      timeout: 30000,
+      test: async function () {
+        const { result } = await context.createBlock(
+          polkadotJs.tx.balances.forceTransfer(
+            BALTATHAR_ADDRESS,
+            CHARLETH_ADDRESS,
+            parseEther("3")
+          ),
+          { allowFailures: true, logger: log }
+        );
+
+        expect(
+          result.events.find((evt) => polkadotJs.events.system.ExtrinsicFailed.is(evt.event)),
+          "No Event found in block"
+        ).toBeTruthy();
       },
     });
   },

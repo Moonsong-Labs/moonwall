@@ -85,27 +85,17 @@ describeSuite({
       // modifier: "only",
       timeout: 30000,
       test: async function () {
-        const expectedEvents = [
+        const expectEvents = [
           polkadotJs.events.system.ExtrinsicSuccess,
           polkadotJs.events.balances.Transfer,
           // polkadotJs.events.authorFilter.EligibleUpdated
         ];
 
-        const { match, events } = await context.createBlockAndCheck(
-          expectedEvents,
-          polkadotJs.tx.balances.transfer(CHARLETH_ADDRESS, parseEther("3"))
+        await context.createBlock(
+          polkadotJs.tx.balances.transfer(CHARLETH_ADDRESS, parseEther("3")),
+          { expectEvents }
         );
-        // maybe: reponse has methods for asserts
-        // maybe: add options to createBlock for asserts of events/storages etc
 
-        expect(match).toStrictEqual(true);
-        // expect(
-        //   events.some(
-        //     (evt) =>
-        //       polkadotJs.events.balances.Transfer.is(evt.event) &&
-        //       evt.event.data.amount.toString() == parseEther("3")
-        //   )
-        // ).toStrictEqual(true);
       },
     });
   },

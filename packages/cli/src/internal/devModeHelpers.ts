@@ -8,6 +8,8 @@ import { EventRecord } from "@polkadot/types/interfaces/types.js";
 import { RegistryError } from "@polkadot/types-codec/types/registry";
 import { MoonwallContext } from "../lib/globalContext.js";
 import { ApiPromise } from "@polkadot/api";
+import { assert } from "vitest";
+import chalk from "chalk";
 const debug = Debug("DevTest");
 
 export async function devForkToFinalizedHead(context: MoonwallContext) {
@@ -25,32 +27,6 @@ export async function devForkToFinalizedHead(context: MoonwallContext) {
   }
 }
 
-export async function createDevBlockCheckEvents<
-  ApiType extends ApiTypes,
-  Call extends
-    | SubmittableExtrinsic<ApiType>
-    | Promise<SubmittableExtrinsic<ApiType>>
-    | string
-    | Promise<string>,
-  Calls extends Call | Call[]
->(
-  context: GenericContext,
-  expectedEvents: AugmentedEvent<ApiType>[],
-  transactions?: Calls,
-  options: BlockCreation = {}
-) {
-  const { result } = await createDevBlock(context, transactions, options);
-  const actualEvents = result.events;
-  return {
-    events: actualEvents,
-    match: expectedEvents.every((eEvt) => {
-      return actualEvents
-        .map((aEvt) => eEvt.is(aEvt.event))
-        .reduce((acc, curr) => acc || curr, false);
-    }),
-  };
-}
-
 export async function createDevBlock<
   ApiType extends ApiTypes,
   Call extends
@@ -59,7 +35,7 @@ export async function createDevBlock<
     | string
     | Promise<string>,
   Calls extends Call | Call[]
->(context: GenericContext, transactions?: Calls, options: BlockCreation = {}) {
+>(context: GenericContext, transactions?: Calls, options: BlockCreation = { allowFailures: true }) {
   const results: ({ type: "eth"; hash: string } | { type: "sub"; hash: string })[] = [];
 
   const api = context.getSubstrateApi();
@@ -147,6 +123,37 @@ export async function createDevBlock<
   if (results.find((r) => r.type == "eth")) {
     await setTimeout(2);
   }
+
+  const actualEvents = result.flatMap((resp) => resp.events);
+
+  if (options.expectEvents && options.expectEvents.length > 0) {
+    const match = options.expectEvents.every((eEvt) => {
+      const found = actualEvents
+        .map((aEvt) => eEvt.is(aEvt.event))
+        .reduce((acc, curr) => acc || curr, false);
+      if (!found) {
+        options.logger
+          ? options.logger(
+              `Event ${chalk.bgWhiteBright.blackBright(eEvt.meta.name)} not present in block`
+            )
+          : console.error(
+              `Event ${chalk.bgWhiteBright.blackBright(eEvt.meta.name)} not present in block`
+            );
+      }
+      return found;
+    });
+    assert(match, "Expected events not present in block");
+  }
+
+  if (!options.allowFailures) {
+    actualEvents.forEach((event) => {
+      assert(
+        !api.events.system.ExtrinsicFailed.is(event.event),
+        "ExtrinsicFailed event detected, enable 'allowFailures' if this is expected."
+      );
+    });
+  }
+
   return {
     block: blockResult,
     result: Array.isArray(transactions) ? result : (result[0] as any),

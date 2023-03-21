@@ -4,18 +4,17 @@ import { GenericContext } from "../types/runner.js";
 import { ApiTypes, AugmentedEvent } from "@polkadot/api/types/index.js";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { FrameSystemEventRecord } from "@polkadot/types/lookup";
+import { ChopsticksBlockCreation } from "../lib/contextHelpers.js";
+import chalk from "chalk";
+import { assert } from "vitest";
 
-export async function getWsFromConfig(
-  providerName?: string
-): Promise<WsProvider> {
+export async function getWsFromConfig(providerName?: string): Promise<WsProvider> {
   return providerName
     ? MoonwallContext.getContext()
         .environment.providers.find(({ name }) => name == providerName)
         .ws()
     : MoonwallContext.getContext()
-        .environment.providers.find(
-          ({ type }) => type == "moon" || type == "polkadotJs"
-        )
+        .environment.providers.find(({ type }) => type == "moon" || type == "polkadotJs")
         .ws();
 }
 
@@ -47,10 +46,49 @@ export async function sendNewBlockAndCheck(
   return { match, events: actualEvents };
 }
 
+export async function createChopsticksBlock(
+  context: GenericContext,
+  options: ChopsticksBlockCreation = { allowFailures: false }
+) {
+  const result = await sendNewBlockRequest(options);
+  const apiAt = await context.getSubstrateApi().at(result);
+  const actualEvents = await apiAt.query.system.events();
+
+  if (options && options.expectEvents) {
+    const match = options.expectEvents.every((eEvt) => {
+      const found = actualEvents
+        .map((aEvt) => eEvt.is(aEvt.event))
+        .reduce((acc, curr) => acc || curr, false);
+      if (!found) {
+        options.logger
+          ? options.logger(
+              `Event ${chalk.bgWhiteBright.blackBright(eEvt.meta.name)} not present in block`
+            )
+          : console.error(
+              `Event ${chalk.bgWhiteBright.blackBright(eEvt.meta.name)} not present in block`
+            );
+      }
+      return found;
+    });
+    assert(match, "Expected events not present in block");
+  }
+
+  if (options && options.allowFailures === true) {
+    // Skip ExtrinsicFailure Asserts
+  } else {
+    actualEvents.forEach((event) => {
+      assert(
+        !context.getSubstrateApi().events.system.ExtrinsicFailed.is(event.event),
+        "ExtrinsicFailed event detected, enable 'allowFailures' if this is expected."
+      );
+    });
+  }
+  return { result };
+}
+
 export async function chopForkToFinalizedHead(context: MoonwallContext) {
-  const api = context.providers.find(
-    ({ type }) => type == "moon" || type == "polkadotJs"
-  )!.api as ApiPromise;
+  const api = context.providers.find(({ type }) => type == "moon" || type == "polkadotJs")!
+    .api as ApiPromise;
 
   const finalizedHead = context.genesis;
   await sendSetHeadRequest(finalizedHead);
@@ -65,13 +103,8 @@ export async function chopForkToFinalizedHead(context: MoonwallContext) {
   }
 }
 
-export async function sendSetHeadRequest(
-  newHead: string,
-  providerName?: string
-) {
-  const ws = providerName
-    ? await getWsFromConfig(providerName)
-    : await getWsFromConfig();
+export async function sendSetHeadRequest(newHead: string, providerName?: string) {
+  const ws = providerName ? await getWsFromConfig(providerName) : await getWsFromConfig();
 
   let result = "";
 
@@ -88,9 +121,7 @@ export async function sendNewBlockRequest(params?: {
   count?: number;
   to?: number;
 }) {
-  const ws = params
-    ? await getWsFromConfig(params.providerName)
-    : await getWsFromConfig();
+  const ws = params ? await getWsFromConfig(params.providerName) : await getWsFromConfig();
 
   let result = "";
 
@@ -98,9 +129,7 @@ export async function sendNewBlockRequest(params?: {
     await setTimeout(100);
   }
   if ((params && params.count) || (params && params.to)) {
-    result = await ws.send("dev_newBlock", [
-      { count: params.count, to: params.to },
-    ]);
+    result = await ws.send("dev_newBlock", [{ count: params.count, to: params.to }]);
   } else {
     result = await ws.send("dev_newBlock", [{ count: 1 }]);
   }
@@ -114,9 +143,7 @@ export async function sendSetStorageRequest(params?: {
   method: string;
   methodParams: any[];
 }) {
-  const ws = params
-    ? await getWsFromConfig(params.providerName)
-    : await getWsFromConfig();
+  const ws = params ? await getWsFromConfig(params.providerName) : await getWsFromConfig();
 
   while (!ws.isConnected) {
     await setTimeout(100);

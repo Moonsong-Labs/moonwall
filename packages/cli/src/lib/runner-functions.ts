@@ -1,5 +1,5 @@
 import "@moonbeam-network/api-augment";
-import { describe, it, beforeAll, afterAll, File } from "vitest";
+import { describe, it, beforeAll, afterAll, File, assert } from "vitest";
 import { ApiPromise } from "@polkadot/api";
 import { WebSocketProvider } from "ethers";
 import Web3 from "web3";
@@ -7,22 +7,19 @@ import { ApiTypes, AugmentedEvent, SubmittableExtrinsic } from "@polkadot/api/ty
 import { upgradeRuntimeChopsticks } from "./upgrade.js";
 import { ChopsticksContext, GenericContext, ITestSuiteType } from "../types/runner.js";
 import { MoonwallContext, contextCreator } from "./globalContext.js";
-import { BlockCreation } from "./contextHelpers.js";
-import {
-  createDevBlock,
-  createDevBlockCheckEvents,
-  devForkToFinalizedHead,
-} from "../internal/devModeHelpers.js";
+import { BlockCreation, ChopsticksBlockCreation } from "./contextHelpers.js";
+import { createDevBlock, devForkToFinalizedHead } from "../internal/devModeHelpers.js";
 import {
   chopForkToFinalizedHead,
+  createChopsticksBlock,
   sendNewBlockAndCheck,
   sendNewBlockRequest,
   sendSetStorageRequest,
 } from "../internal/chopsticksHelpers.js";
 import { ProviderType } from "../types/config.js";
 import { importJsonConfig } from "./configReader.js";
-import Debug from "debug";
-
+import Debug, { Debugger } from "debug";
+import chalk from "chalk";
 
 const RT_VERSION = Number(process.env.MOON_RTVERSION);
 const RT_NAME = process.env.MOON_RTNAME;
@@ -58,8 +55,6 @@ export function describeSuite({
     } else if (ctx.environment.foundationType === "chopsticks") {
       // await chopForkToFinalizedHead(ctx); // TODO: Implement way of cleanly forking to fresh state
     }
-
-
   });
 
   afterAll(async function () {
@@ -111,11 +106,12 @@ export function describeSuite({
     };
 
     const logger = () => {
-        const debug = Debug(`test:${process.env.MOON_TEST_ENV}`)
-        Debug.enable("test:*")
-        Debug.log = console.info.bind(console)
-        return debug
-    }
+      process.env.DEBUG_COLORS = "1";
+      const debug = Debug(`test:${process.env.MOON_TEST_ENV}`);
+      Debug.enable("test:*");
+      Debug.log = console.info.bind(console);
+      return debug;
+    };
 
     const testCase = (params: {
       id: string;
@@ -164,19 +160,6 @@ export function describeSuite({
             transactions?: Calls,
             options: BlockCreation = {}
           ) => await createDevBlock(context, transactions, options),
-          createBlockAndCheck: async <
-            ApiType extends ApiTypes,
-            Call extends
-              | SubmittableExtrinsic<ApiType>
-              | Promise<SubmittableExtrinsic<ApiType>>
-              | string
-              | Promise<string>,
-            Calls extends Call | Call[]
-          >(
-            expectedEvents: AugmentedEvent<ApiType>[],
-            transactions?: Calls,
-            options: BlockCreation = {}
-          ) => await createDevBlockCheckEvents(context, expectedEvents, transactions, options),
         },
         it: testCase,
         log: logger(),
@@ -185,10 +168,8 @@ export function describeSuite({
       testCases({
         context: {
           ...context,
-          createBlock: async (params?: { providerName?: string; count?: number; to?: number }) =>
-            await sendNewBlockRequest(params),
-          createBlockAndCheck: async (expectedEvents: AugmentedEvent<ApiTypes>[]) =>
-            await sendNewBlockAndCheck(context, expectedEvents),
+          createBlock: async (options: ChopsticksBlockCreation = {}) =>
+            await createChopsticksBlock(context, options),
           setStorage: async (params?: {
             providerName?: string;
             module: string;

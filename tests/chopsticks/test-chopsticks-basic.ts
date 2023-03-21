@@ -1,8 +1,13 @@
 import { describeSuite, expect, beforeAll } from "@moonsong-labs/moonwall-cli";
-import { CHARLETH_ADDRESS, ETHAN_ADDRESS, alith } from "@moonsong-labs/moonwall-util";
+import {
+  BALTATHAR_ADDRESS,
+  CHARLETH_ADDRESS,
+  ETHAN_ADDRESS,
+  alith,
+} from "@moonsong-labs/moonwall-util";
 import { parseEther, formatEther } from "ethers";
 import { ApiPromise } from "@polkadot/api";
-import "@moonbeam-network/api-augment"
+import "@moonbeam-network/api-augment";
 
 describeSuite({
   id: "X1",
@@ -102,9 +107,9 @@ describeSuite({
 
     it({
       id: "T6",
-      title: "Check the createBlockAndCheck fn",
+      title: "Create block and check events",
       test: async function () {
-        const events = [
+        const expectEvents = [
           api.events.system.ExtrinsicSuccess,
           api.events.balances.Transfer,
           api.events.system.NewAccount,
@@ -112,8 +117,26 @@ describeSuite({
         ];
 
         await api.tx.balances.transfer(CHARLETH_ADDRESS, parseEther("3")).signAndSend(alith);
-        const { match } = await context.createBlockAndCheck(events);
-        expect(match).toStrictEqual(true);
+        await context.createBlock({ expectEvents, logger: log });
+      },
+    });
+
+    it({
+      id: "T7",
+      title: "Create block, allow failures and check events",
+      test: async function () {
+        await api.tx.balances
+          .forceTransfer(BALTATHAR_ADDRESS, CHARLETH_ADDRESS, parseEther("3"))
+          .signAndSend(alith);
+        // await api.tx.balances.transfer(CHARLETH_ADDRESS, parseEther("3")).signAndSend(alith);
+        const { result } = await context.createBlock({ allowFailures: true });
+
+        const apiAt = await api.at(result);
+        const events = await apiAt.query.system.events();
+        expect(
+          events.find((evt) => api.events.system.ExtrinsicFailed.is(evt.event)),
+          "No Event found in block"
+        ).toBeTruthy();
       },
     });
   },
