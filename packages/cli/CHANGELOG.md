@@ -1,5 +1,19 @@
 # @moonwall/cli
 
+## 0.2.14
+
+### Patch Changes
+
+- 1db25dd: ## Extended CreateBlock
+
+  CreateBlock for `Chopsticks` and `Dev` have been updated so taken new options
+
+  - `allowFailures` (Default: false): Will turn off checking for ExtrinsicFailure events
+  - `expectEvents` : Takes an array of events, and will verify if the block contains all of those events listed or not.
+
+- Updated dependencies [1db25dd]
+  - @moonsong-labs/moonwall-util@0.2.11
+
 ## 0.2.13
 
 ### Patch Changes
