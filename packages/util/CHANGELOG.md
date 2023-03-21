@@ -1,5 +1,14 @@
 # @moonwall/util
 
+## 0.2.10
+
+### Patch Changes
+
+- d968780: Added Loggers
+
+  - Added `log()` method to test cases
+  - Added `setupLogger()` utility function
+
 ## 0.2.9
 
 ### Patch Changes

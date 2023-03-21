@@ -1,5 +1,17 @@
 # @moonwall/cli
 
+## 0.2.12
+
+### Patch Changes
+
+- d968780: Added Loggers
+
+  - Added `log()` method to test cases
+  - Added `setupLogger()` utility function
+
+- Updated dependencies [d968780]
+  - @moonsong-labs/moonwall-util@0.2.10
+
 ## 0.2.11
 
 ### Patch Changes
