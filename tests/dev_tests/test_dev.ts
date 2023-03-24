@@ -114,7 +114,6 @@ describeSuite({
     it({
       id: "T06",
       title: "Testing out Create block and analyse failures",
-      modifier: "only",
       timeout: 30000,
       test: async function () {
         const { result } = await context.createBlock(

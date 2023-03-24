@@ -213,7 +213,7 @@ const chooseTestEnv = async (config: MoonwallConfig) => {
 const chooseRunEnv = async (config: MoonwallConfig) => {
   const envs = config.environments.map((a) => {
     const result = { name: "", value: a.name, disabled: false };
-    if (a.foundation.type === "dev" || a.foundation.type === "chopsticks") {
+    if (a.foundation.type === "dev" || a.foundation.type === "chopsticks"|| a.foundation.type === "zombie") {
       result.name = `Env: ${a.name}     (${a.foundation.type})`;
     } else {
       result.name = chalk.dim(`Env: ${a.name} (${a.foundation.type})     NO NETWORK TO RUN`);

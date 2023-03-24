@@ -1,8 +1,12 @@
 import {
   ChopsticksLaunchSpec,
   DevLaunchSpec,
-  GenericLaunchSpec,
+  ZombieLaunchSpec,
 } from "../types/config.js";
+
+export function parseZombieCmd(launchSpec: ZombieLaunchSpec) {
+  return { cmd: launchSpec.configPath };
+}
 
 export function parseRunCmd(launchSpec: DevLaunchSpec) {
   const launch = !!!launchSpec.running ? true : launchSpec.running;
@@ -39,17 +43,9 @@ export function parseRunCmd(launchSpec: DevLaunchSpec) {
       args.push(`--rpc-port=${ports.rpcPort}`);
     }
   } else {
-    args.push(
-      `--port=${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100 + 2}`
-    );
-    args.push(
-      `--ws-port=${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`
-    );
-    args.push(
-      `--rpc-port=${
-        10000 + (Number(process.env.VITEST_POOL_ID || 1) * 100 + 1)
-      }`
-    );
+    args.push(`--port=${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100 + 2}`);
+    args.push(`--ws-port=${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`);
+    args.push(`--rpc-port=${10000 + (Number(process.env.VITEST_POOL_ID || 1) * 100 + 1)}`);
   }
   return { cmd, args, launch };
 }
@@ -68,9 +64,7 @@ export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
       `--config=${launchSpecs[0].configPath}`,
     ];
 
-    const mode = launchSpecs[0].buildBlockMode
-      ? launchSpecs[0].buildBlockMode
-      : "manual";
+    const mode = launchSpecs[0].buildBlockMode ? launchSpecs[0].buildBlockMode : "manual";
     const num = mode == "batch" ? 0 : mode == "instant" ? 1 : 2;
     chopsticksArgs.push(`--build-block-mode=${num}`);
 
@@ -90,10 +84,7 @@ export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
   }
 
   const chopsticksCmd = "node";
-  const chopsticksArgs = [
-    "node_modules/@acala-network/chopsticks/chopsticks.js",
-    "xcm",
-  ];
+  const chopsticksArgs = ["node_modules/@acala-network/chopsticks/chopsticks.js", "xcm"];
 
   launchSpecs.forEach((spec) => {
     const type = spec.type ? spec.type : "parachain";

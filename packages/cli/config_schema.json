@@ -117,11 +117,24 @@
                 },
                 {
                     "properties": {
+                        "launchSpec": {
+                            "$ref": "#/definitions/ZombieLaunchSpec"
+                        },
+                        "type": {
+                            "enum": [
+                                "zombie"
+                            ],
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                {
+                    "properties": {
                         "type": {
                             "enum": [
                                 "fork",
-                                "read_only",
-                                "zombie"
+                                "read_only"
                             ],
                             "type": "string"
                         }
@@ -156,9 +169,32 @@
                 "web3"
             ],
             "type": "string"
+        },
+        "ZombieLaunchSpec": {
+            "properties": {
+                "configPath": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "options": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "running": {
+                    "type": "boolean"
+                }
+            },
+            "type": "object"
         }
     },
     "properties": {
+        "$schema": {
+            "type": "string"
+        },
         "defaultTestTimeout": {
             "type": "number"
         },

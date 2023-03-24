@@ -1,13 +1,15 @@
-import "@moonbeam-network/api-augment"
+import "@moonbeam-network/api-augment";
 import { FoundationType, MoonwallConfig } from "../types/config";
 import { ChildProcess } from "node:child_process";
 import { populateProviderInterface, prepareProviders } from "../internal/providers.js";
 import { launchNode } from "../internal/localNode.js";
 import { importJsonConfig } from "./configReader.js";
-import { parseChopsticksRunCmd, parseRunCmd } from "../internal/foundations.js";
+import { parseChopsticksRunCmd, parseRunCmd, parseZombieCmd } from "../internal/foundations.js";
 import { ApiPromise } from "@polkadot/api";
+import zombie, { Network } from "@zombienet/orchestrator";
 import Debug from "debug";
 import { ConnectedProvider, MoonwallEnvironment, MoonwallProvider } from "../types/context.js";
+import fs from "node:fs";
 const debugSetup = Debug("global:context");
 
 export class MoonwallContext {
@@ -16,6 +18,7 @@ export class MoonwallContext {
   providers: ConnectedProvider[];
   nodes: ChildProcess[];
   foundation?: FoundationType;
+  zombieNetwork?: Network;
   private _finalizedHead?: string;
   rtUpgradePath?: string;
 
@@ -73,22 +76,41 @@ export class MoonwallContext {
               {
                 name: "w3",
                 type: "web3",
-                endpoints: [`ws://127.0.0.1:${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`],
+                endpoints: [
+                  `ws://127.0.0.1:${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`,
+                ],
               },
               {
                 name: "eth",
                 type: "ethers",
-                endpoints: [`ws://127.0.0.1:${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`],
+                endpoints: [
+                  `ws://127.0.0.1:${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`,
+                ],
               },
               {
                 name: "mb",
                 type: "moon",
-                endpoints: [`ws://127.0.0.1:${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`],
+                endpoints: [
+                  `ws://127.0.0.1:${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`,
+                ],
               },
             ]);
 
         debugSetup(`🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`);
         break;
+
+      case "zombie":
+        const { cmd: zombieConfig } = parseZombieCmd(env.foundation.launchSpec[0]);
+        blob.nodes.push({
+          name: env.foundation.launchSpec[0].name,
+          cmd: zombieConfig,
+          args: [],
+          launch: true,
+        });
+
+        debugSetup(`🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`);
+        break;
+
       default:
         debugSetup(`🚧  Foundation "${env.foundation.type}" unsupported, skipping`);
         return;
@@ -113,26 +135,44 @@ export class MoonwallContext {
   }
 
   public async startNetwork() {
-    const activeNodes = this.nodes.filter((node)=>!node.killed)
+    const activeNodes = this.nodes.filter((node) => !node.killed);
     if (activeNodes.length > 0) {
       console.log("Nodes already started! Skipping command");
       return MoonwallContext.getContext();
     }
     const nodes = MoonwallContext.getContext().environment.nodes;
+
+    if (this.environment.foundationType === "zombie") {
+      console.log("🧟 Spawning zombie nodes ...");
+      const buffer = fs.readFileSync(nodes[0].cmd, "utf-8");
+      const path = JSON.parse(buffer);
+      const network = await zombie.start("", path);
+      /// TODO Populate providers config
+      this.environment.providers = prepareProviders([
+        {
+          name: "w3",
+          type: "web3",
+          endpoints: [network.nodesByName.alith.wsUri],
+        },
+        {
+          name: "eth",
+          type: "ethers",
+          endpoints: [network.nodesByName.alith.wsUri],
+        },
+        {
+          name: "mb",
+          type: "moon",
+          endpoints: [network.nodesByName.alith.wsUri],
+        },
+      ]);
+      this.zombieNetwork = network;
+      return;
+    }
+
     const promises = nodes.map(async ({ cmd, args, name, launch }) => {
       return launch && this.nodes.push(await launchNode(cmd, args, name!));
     });
     await Promise.all(promises);
-  }
-
-  public async stopNetwork() {
-    if (this.nodes.length === 0) {
-      console.log("Nodes already stopped! Skipping command");
-      return MoonwallContext.getContext();
-    }
-
-    this.nodes.forEach((node) => node.kill());
-    await this.wipeNodes()
   }
 
   public async connectEnvironment(environmentName: string) {
@@ -154,13 +194,16 @@ export class MoonwallContext {
     );
     await Promise.all(promises);
 
-    this.foundation = globalConfig.environments.find(({ name }) => name == environmentName)!.foundation.type;
+    this.foundation = globalConfig.environments.find(
+      ({ name }) => name == environmentName
+    )!.foundation.type;
 
     // TODO: Do we actually need this?
     if (this.foundation == "dev") {
       this.genesis = (
         await (
-          this.providers.find(({ type }) => type == "polkadotJs" || type == "moon")!.api as ApiPromise
+          this.providers.find(({ type }) => type == "polkadotJs" || type == "moon")!
+            .api as ApiPromise
         ).rpc.chain.getBlockHash(0)
       ).toString();
     }
@@ -168,14 +211,11 @@ export class MoonwallContext {
     if (this.foundation == "chopsticks") {
       this.genesis = (
         await (
-          this.providers.find(({ type }) => type == "polkadotJs" || type == "moon")!.api as ApiPromise
+          this.providers.find(({ type }) => type == "polkadotJs" || type == "moon")!
+            .api as ApiPromise
         ).rpc.chain.getFinalizedHead()
       ).toString();
     }
-  }
-
-  public async wipeNodes() {
-    this.nodes = [];
   }
 
   public async disconnect(providerName?: string) {
@@ -196,7 +236,10 @@ export class MoonwallContext {
     }
   }
 
-  public static getContext(config?: MoonwallConfig, force: boolean = false): MoonwallContext|undefined {
+  public static getContext(
+    config?: MoonwallConfig,
+    force: boolean = false
+  ): MoonwallContext | undefined {
     if (!MoonwallContext.instance || force) {
       // Retrieves the instance from the global context if it exists.
       if (global.moonInstance && !force) {
@@ -206,7 +249,7 @@ export class MoonwallContext {
       if (!config) {
         console.error("❌ Config must be provided on Global Context instantiation");
         // process.exit(2);
-        return undefined
+        return undefined;
       }
       MoonwallContext.instance = new MoonwallContext(config);
 
@@ -231,8 +274,12 @@ export class MoonwallContext {
       });
     });
 
-    await Promise.all(promises);
-    // delete MoonwallContext.instance
+    await Promise.all(promises);  
+
+    if (!!ctx.zombieNetwork) {
+      console.log("🪓  Killing zombie nodes");
+      await ctx.zombieNetwork.stop();
+    }
   }
 }
 
