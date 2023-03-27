@@ -8,11 +8,15 @@ import chalk from "chalk";
 
 export async function testCmd(envName: string, additionalArgs?: {}) {
   const globalConfig = await importJsonConfig();
+
   const env = globalConfig.environments.find(({ name }) => name === envName)!;
 
   if (!!!env) {
+    const envList = globalConfig.environments.map((env) => env.name);
     throw new Error(
-      `No environment found in config for: ${chalk.bgWhiteBright.blackBright(envName)}`
+      `No environment found in config for: ${chalk.bgWhiteBright.blackBright(
+        envName
+      )}\n Environments defined in config are: ${envList}\n`
     );
   }
 
@@ -30,7 +34,7 @@ export async function executeTests(env: Environment, additionalArgs?: {}): Promi
   const globalConfig = await importJsonConfig();
 
   if (env.foundation.type === "read_only") {
-    try{
+    try {
       const ctx = await contextCreator(globalConfig, process.env.MOON_TEST_ENV);
       const chainData = ctx.providers
         .filter((provider) => provider.type == "moon" || provider.type == "polkadotJs")
@@ -48,7 +52,7 @@ export async function executeTests(env: Environment, additionalArgs?: {}): Promi
       process.env.MOON_RTNAME = rtName;
       await ctx.disconnect();
     } catch {
-    // No chain to test against
+      // No chain to test against
     }
   }
 
