@@ -43,7 +43,7 @@ export async function createBlock<
       // Ethereum
       results.push({
         type: "eth",
-        hash: (await customWeb3Request(w3Api, "eth_sendRawTransaction", [call])).result,
+        hash: (await customWeb3Request(w3Api, "eth_sendRawTransaction", [call])as any).result,
       });
     } else if (call.isSigned) {
       const tx = pjsApi.tx(call);

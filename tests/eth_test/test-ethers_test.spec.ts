@@ -1,7 +1,6 @@
 import { Contract, WebSocketProvider, formatUnits } from "ethers";
 import {
   describeSuite,
-  ApiPromise,
   expect,
   beforeAll,
   MoonwallContext,
@@ -12,18 +11,17 @@ import {
   alith,
   xcAssetAbi,
 } from "@moonsong-labs/moonwall-util";
-import Debug from "debug";
-const debug = Debug("test:eth");
+
 
 describeSuite({
   id: "S01",
   title: "Ethers test suite",
   foundationMethods: "read_only",
-  testCases: ({ it, context }) => {
+  testCases: ({ it, context, log }) => {
     let api;
 
     beforeAll(() => {
-      console.log("Should be before each tc");
+      log("Should be before each tc");
       api = context.getEthers();
     });
 
@@ -50,7 +48,7 @@ describeSuite({
         console.log(
           `The latest block is ${(await api.getBlock("latest"))!.number}`
         );
-        debug(MoonwallContext.getContext().providers);
+        log(MoonwallContext.getContext()!.providers);
         expect(2).toBeGreaterThan(0);
       },
     });
@@ -59,10 +57,10 @@ describeSuite({
       id: "T4",
       title: "Calling chain data",
       test: async function () {
-        console.log(
+        log(
           `The latest block is ${(await api.getBlock("latest"))!.number}`
         );
-        console.log(
+        log(
           `The latest safe block is ${(await api.getBlock("safe"))!.number}`
         );
         const bal = Number(
@@ -79,7 +77,7 @@ describeSuite({
         const address = "0xFFFFFFfFea09FB06d082fd1275CD48b191cbCD1d";
         const contract = new Contract(address, xcAssetAbi, api);
         const totalSupply = Number(await contract.totalSupply());
-        console.log(
+        log(
           `Total supply of ${await contract.symbol()} is ${formatUnits(
             totalSupply,
             await contract.decimals()

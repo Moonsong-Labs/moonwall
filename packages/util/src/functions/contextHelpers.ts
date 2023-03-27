@@ -1,17 +1,8 @@
 import "@moonbeam-network/api-augment";
 import { ApiPromise } from "@polkadot/api";
-import {
-  AddressOrPair,
-  ApiTypes,
-  SubmittableExtrinsic,
-} from "@polkadot/api/types";
+import { AddressOrPair, ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types";
 import { GenericExtrinsic } from "@polkadot/types/extrinsic";
-import {
-  DispatchError,
-  DispatchInfo,
-  Event,
-  EventRecord,
-} from "@polkadot/types/interfaces";
+import { DispatchError, DispatchInfo, Event, EventRecord } from "@polkadot/types/interfaces";
 import { AnyTuple, RegistryError } from "@polkadot/types/types";
 import { customWeb3Request } from "./providers.js";
 import { ALITH_PRIVATE_KEY, alith } from "../constants/accounts.js";
@@ -35,29 +26,16 @@ export async function createBlock<
   pjsApi: ApiPromise,
   transactions?: Calls,
   options: BlockCreation = {}
-): Promise<
-  BlockCreationResponse<
-    ApiType,
-    Calls extends Call[] ? Awaited<Call>[] : Awaited<Call>
-  >
-> {
-  const results: (
-    | { type: "eth"; hash: string }
-    | { type: "sub"; hash: string }
-  )[] = [];
+): Promise<BlockCreationResponse<ApiType, Calls extends Call[] ? Awaited<Call>[] : Awaited<Call>>> {
+  const results: ({ type: "eth"; hash: string } | { type: "sub"; hash: string })[] = [];
   const txs =
-    transactions == undefined
-      ? []
-      : Array.isArray(transactions)
-      ? transactions
-      : [transactions];
+    transactions == undefined ? [] : Array.isArray(transactions) ? transactions : [transactions];
   for await (const call of txs) {
     if (typeof call == "string") {
       // Ethereum
       results.push({
         type: "eth",
-        hash: (await customWeb3Request(w3Api, "eth_sendRawTransaction", [call]))
-          .result,
+        hash: ((await customWeb3Request(w3Api, "eth_sendRawTransaction", [call])) as any).result,
       });
     } else if (call.isSigned) {
       const tx = pjsApi.tx(call);
@@ -85,11 +63,7 @@ export async function createBlock<
   }
 
   const { parentHash, finalize } = options;
-  const blockResult = await createAndFinalizeBlock(
-    pjsApi,
-    parentHash,
-    finalize
-  );
+  const blockResult = await createAndFinalizeBlock(pjsApi, parentHash, finalize);
 
   // No need to extract events if no transactions
   if (results.length == 0) {
@@ -100,9 +74,7 @@ export async function createBlock<
   }
 
   // We retrieve the events for that block
-  const allRecords: EventRecord[] = (await (
-    await pjsApi.at(blockResult.hash)
-  ).query.system.events());
+  const allRecords: EventRecord[] = await (await pjsApi.at(blockResult.hash)).query.system.events();
   // We retrieve the block (including the extrinsics)
   const blockData = await pjsApi.rpc.chain.getBlock(blockResult.hash);
 
@@ -118,24 +90,18 @@ export async function createBlock<
                 data[2].toString() == result.hash
             )
             ?.phase?.asApplyExtrinsic?.toNumber()
-        : blockData.block.extrinsics.findIndex(
-            (ext) => ext.hash.toHex() == result.hash
-          );
+        : blockData.block.extrinsics.findIndex((ext) => ext.hash.toHex() == result.hash);
     // We retrieve the events associated with the extrinsic
     const events = allRecords.filter(
-      ({ phase }) =>
-        phase.isApplyExtrinsic &&
-        phase.asApplyExtrinsic.toNumber() === extrinsicIndex
+      ({ phase }) => phase.isApplyExtrinsic && phase.asApplyExtrinsic.toNumber() === extrinsicIndex
     );
     const failure = extractError(events);
     return {
-      extrinsic:
-        extrinsicIndex >= 0 ? blockData.block.extrinsics[extrinsicIndex] : null,
+      extrinsic: extrinsicIndex >= 0 ? blockData.block.extrinsics[extrinsicIndex] : null,
       events,
       error:
         failure &&
-        ((failure.isModule &&
-          pjsApi.registry.findMetaError(failure.asModule)) ||
+        ((failure.isModule && pjsApi.registry.findMetaError(failure.asModule)) ||
           ({ name: failure.toString() } as RegistryError)),
       successful: extrinsicIndex !== undefined && !failure,
       hash: result.hash,
@@ -159,10 +125,7 @@ export interface BlockCreation {
 
 export interface BlockCreationResponse<
   ApiType extends ApiTypes,
-  Call extends
-    | SubmittableExtrinsic<ApiType>
-    | string
-    | (SubmittableExtrinsic<ApiType> | string)[]
+  Call extends SubmittableExtrinsic<ApiType> | string | (SubmittableExtrinsic<ApiType> | string)[]
 > {
   block: {
     duration: number;
@@ -196,9 +159,7 @@ export function filterAndApply<T>(
   onFound: (record: EventRecord) => T
 ): T[] {
   return events
-    .filter(
-      ({ event }) => section === event.section && methods.includes(event.method)
-    )
+    .filter(({ event }) => section === event.section && methods.includes(event.method))
     .map((record) => onFound(record));
 }
 
@@ -210,35 +171,19 @@ export function getDispatchError({
   return dispatchError as DispatchError;
 }
 
-function getDispatchInfo({
-  event: { data, method },
-}: EventRecord): DispatchInfo {
-  return method === "ExtrinsicSuccess"
-    ? (data[0] as DispatchInfo)
-    : (data[1] as DispatchInfo);
+function getDispatchInfo({ event: { data, method } }: EventRecord): DispatchInfo {
+  return method === "ExtrinsicSuccess" ? (data[0] as DispatchInfo) : (data[1] as DispatchInfo);
 }
 
-export function extractError(
-  events: EventRecord[] = []
-): DispatchError | undefined {
-  return filterAndApply(
-    events,
-    "system",
-    ["ExtrinsicFailed"],
-    getDispatchError
-  )[0];
+export function extractError(events: EventRecord[] = []): DispatchError | undefined {
+  return filterAndApply(events, "system", ["ExtrinsicFailed"], getDispatchError)[0];
 }
 
 export function isExtrinsicSuccessful(events: EventRecord[] = []): boolean {
-  return (
-    filterAndApply(events, "system", ["ExtrinsicSuccess"], () => true).length >
-    0
-  );
+  return filterAndApply(events, "system", ["ExtrinsicSuccess"], () => true).length > 0;
 }
 
-export function extractInfo(
-  events: EventRecord[] = []
-): DispatchInfo | undefined {
+export function extractInfo(events: EventRecord[] = []): DispatchInfo | undefined {
   return filterAndApply(
     events,
     "system",
