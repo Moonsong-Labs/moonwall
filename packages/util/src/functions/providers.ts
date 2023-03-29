@@ -1,5 +1,5 @@
 import "@moonbeam-network/api-augment";
-import Web3, { JsonRpcResponse, Log } from "web3";
+import { Web3, JsonRpcResponse, Log } from "web3";
 import { alith } from "../constants/accounts.js";
 import { MIN_GAS_PRICE } from "../constants/chain.js";
 

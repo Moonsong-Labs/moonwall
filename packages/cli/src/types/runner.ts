@@ -1,6 +1,6 @@
 import { ApiPromise } from "@polkadot/api";
-import { WebSocketProvider } from "ethers";
-import Web3 from "web3";
+import { Signer } from "ethers";
+import {Web3} from "web3";
 import { ApiTypes, AugmentedEvent, SubmittableExtrinsic } from "@polkadot/api/types/index.js";
 import { BlockCreation, BlockCreationResponse, ChopsticksBlockCreation } from "../lib/contextHelpers.js";
 import { ProviderType } from "./config.js";
@@ -72,11 +72,9 @@ export interface GenericTestContext {
 
 export interface GenericContext {
   providers: Object;
-  getPolkadotJs: ([name]?: string) => ApiPromise;
   getSubstrateApi: (options?: { apiName?: string; type?: ProviderType }) => ApiPromise;
-  getMoonbeam: ([name]?: string) => ApiPromise;
-  getEthers: ([name]?: string) => WebSocketProvider;
-  getWeb3: ([name]?: string) => Web3;
+  ethersSigner: ([name]?: string) => Signer;
+  web3: ([name]?: string) => Web3;
 }
 
 export interface ChopsticksContext extends GenericContext {

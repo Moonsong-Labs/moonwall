@@ -1,4 +1,4 @@
-import { Contract, WebSocketProvider, formatUnits } from "ethers";
+import { Contract, Signer, formatUnits } from "ethers";
 import {
   describeSuite,
   expect,
@@ -6,9 +6,6 @@ import {
   MoonwallContext,
 } from "@moonsong-labs/moonwall-cli";
 import {
-  CHARLETH_ADDRESS,
-  ETHAN_ADDRESS,
-  alith,
   xcAssetAbi,
 } from "@moonsong-labs/moonwall-util";
 
@@ -18,11 +15,11 @@ describeSuite({
   title: "Ethers test suite",
   foundationMethods: "read_only",
   testCases: ({ it, context, log }) => {
-    let api;
+    let api: Signer
 
     beforeAll(() => {
       log("Should be before each tc");
-      api = context.getEthers();
+      api = context.ethersSigner()
     });
 
     it({
@@ -46,7 +43,7 @@ describeSuite({
       title: "this is a test case3",
       test: async function () {
         console.log(
-          `The latest block is ${(await api.getBlock("latest"))!.number}`
+          `The latest block is ${(await api.provider!.getBlock("latest"))!.number}`
         );
         log(MoonwallContext.getContext()!.providers);
         expect(2).toBeGreaterThan(0);
@@ -58,13 +55,13 @@ describeSuite({
       title: "Calling chain data",
       test: async function () {
         log(
-          `The latest block is ${(await api.getBlock("latest"))!.number}`
+          `The latest block is ${(await api.provider!.getBlock("latest"))!.number}`
         );
         log(
-          `The latest safe block is ${(await api.getBlock("safe"))!.number}`
+          `The latest safe block is ${(await api.provider!.getBlock("safe"))!.number}`
         );
         const bal = Number(
-          await api.getBalance("0x506172656E740000000000000000000000000000")
+          await api.provider!.getBalance("0x506172656E740000000000000000000000000000")
         );
         expect(bal).to.be.greaterThan(0);
       },

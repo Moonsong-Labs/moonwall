@@ -1,7 +1,7 @@
-import { describeSuite, expect, beforeAll } from "@moonsong-labs/moonwall-cli";
-import { ALITH_ADDRESS, CHARLETH_ADDRESS, ETHAN_ADDRESS, alith } from "@moonsong-labs/moonwall-util";
-import { ApiPromise } from "@polkadot/api";
-import Web3 from "web3";
+import { describeSuite, expect, beforeAll, ApiPromise, Web3 } from "@moonsong-labs/moonwall-cli";
+import {
+  ALITH_ADDRESS,
+} from "@moonsong-labs/moonwall-util";
 
 describeSuite({
   id: "S100",
@@ -12,7 +12,7 @@ describeSuite({
     let mbApi: ApiPromise;
 
     beforeAll(() => {
-      api = context.getWeb3();
+      api = context.web3();
       mbApi = context.getSubstrateApi();
     });
 
@@ -32,7 +32,9 @@ describeSuite({
       title: "Create block",
       test: async function () {
         await context.createBlock();
-        expect((await mbApi.rpc.chain.getBlock()).block.header.number.toNumber()).toBeGreaterThan(0);
+        expect((await mbApi.rpc.chain.getBlock()).block.header.number.toNumber()).toBeGreaterThan(
+          0
+        );
       },
     });
   },

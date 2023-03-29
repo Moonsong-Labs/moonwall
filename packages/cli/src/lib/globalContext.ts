@@ -242,7 +242,6 @@ export class MoonwallContext {
     });
 
     await Promise.all(promises);
-    // delete MoonwallContext.instance
   }
 }
 

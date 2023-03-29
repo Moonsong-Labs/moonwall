@@ -1,8 +1,8 @@
 import "@moonbeam-network/api-augment";
 import { describe, it, beforeAll, afterAll, File, assert } from "vitest";
 import { ApiPromise } from "@polkadot/api";
-import { WebSocketProvider } from "ethers";
-import Web3 from "web3";
+import { Signer } from "ethers";
+import {Web3} from "web3";
 import { ApiTypes, AugmentedEvent, SubmittableExtrinsic } from "@polkadot/api/types/index.js";
 import { upgradeRuntimeChopsticks } from "./upgrade.js";
 import { ChopsticksContext, GenericContext, ITestSuiteType } from "../types/runner.js";
@@ -75,28 +75,14 @@ export function describeSuite({
             .api as ApiPromise;
         }
       },
-      getPolkadotJs: (apiName?: string): ApiPromise => {
+      ethersSigner: (apiName?: string): Signer => {
         if (apiName) {
           return context.providers[apiName];
         } else {
-          return ctx.providers.find((a) => a.type == "polkadotJs")!.api as ApiPromise;
+          return ctx.providers.find((a) => a.type == "ethers")!.api as Signer;
         }
       },
-      getMoonbeam: (apiName?: string): ApiPromise => {
-        if (apiName) {
-          return context.providers[apiName];
-        } else {
-          return ctx.providers.find((a) => a.type == "moon")!.api as ApiPromise;
-        }
-      },
-      getEthers: (apiName?: string): WebSocketProvider => {
-        if (apiName) {
-          return context.providers[apiName];
-        } else {
-          return ctx.providers.find((a) => a.type == "ethers")!.api as WebSocketProvider;
-        }
-      },
-      getWeb3: (apiName?: string): Web3 => {
+      web3: (apiName?: string): Web3 => {
         if (apiName) {
           return context.providers[apiName];
         } else {

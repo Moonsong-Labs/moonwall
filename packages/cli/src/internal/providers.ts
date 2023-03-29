@@ -2,13 +2,12 @@ import { rpcDefinitions, types } from "moonbeam-types-bundle";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { Web3 } from "web3";
 import { WebSocketProvider as Web3ProviderWs } from "web3-providers-ws";
-import { setTimeout } from "timers/promises";
-import { ethers } from "ethers";
-import { WebSocketProvider } from "ethers";
+import { ethers, Signer, Wallet } from "ethers";
 import Debug from "debug";
 import { ProviderConfig, ProviderType } from "../types/config.js";
 import { MoonwallProvider } from "../types/context.js";
 import chalk from "chalk";
+import { ALITH_PRIVATE_KEY } from "@moonsong-labs/moonwall-util";
 const debug = Debug("global:providers");
 
 export function prepareProviders(providerConfigs: ProviderConfig[]): MoonwallProvider[] {
@@ -78,9 +77,9 @@ export function prepareProviders(providerConfigs: ProviderConfig[]): MoonwallPro
         return {
           name,
           type,
-          connect: async () => {
-            const ethersApi = new ethers.WebSocketProvider(url);
-            return ethersApi;
+          connect: () => {
+            const provider = new ethers.WebSocketProvider(url);
+             return new Wallet(ALITH_PRIVATE_KEY, provider);
           },
         };
 
@@ -97,7 +96,7 @@ export function prepareProviders(providerConfigs: ProviderConfig[]): MoonwallPro
 export async function populateProviderInterface(
   name: string,
   type: ProviderType,
-  connect: () => Promise<ApiPromise> | Promise<WebSocketProvider> | Web3 | void
+  connect: () => Promise<ApiPromise> | Signer | Web3 | void
 ) {
   switch (type) {
     case "polkadotJs":
@@ -141,17 +140,16 @@ export async function populateProviderInterface(
       };
 
     case "ethers":
-      const ethApi = (await connect()) as WebSocketProvider;
+      const ethApi = (await connect()) as Signer;
       return {
         name,
         api: ethApi,
         type,
         greet: async () =>
           debug(
-            `👋  Provider ${name} is connected to chain ` + (await ethApi.getNetwork()).chainId
+            `👋  Provider ${name} is connected to chain ` + (await ethApi.provider.getNetwork()).chainId
           ),
         disconnect: async () => {
-          ethApi.removeAllListeners();
           ethApi.provider.destroy();
         },
       };
@@ -167,8 +165,7 @@ export async function populateProviderInterface(
             `👋 Provider ${name} is connected to chain ` + (await web3Api.eth.getChainId())
           ),
         disconnect: async () => {
-          web3Api.removeAllListeners();
-          web3Api.currentProvider.disconnect(1012);
+          web3Api.currentProvider.disconnect();
         },
       };
 

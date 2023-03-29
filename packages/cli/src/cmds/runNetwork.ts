@@ -134,7 +134,7 @@ export async function runNetwork(args) {
     }
   }
 
-  MoonwallContext.destroy();
+  await MoonwallContext.destroy();
   console.log(`Goodbye! 👋`);
   process.exit(0);
 }

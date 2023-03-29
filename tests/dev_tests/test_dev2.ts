@@ -1,22 +1,28 @@
-import { describeSuite, expect, beforeAll } from "@moonsong-labs/moonwall-cli";
-import { CHARLETH_ADDRESS, BALTATHAR_ADDRESS, alithSigner, alith } from "@moonsong-labs/moonwall-util";
+import "@moonbeam-network/api-augment";
+import {
+  describeSuite,
+  expect,
+  beforeAll,
+  ApiPromise,
+  Signer,
+  Web3,
+} from "@moonsong-labs/moonwall-cli";
+import { CHARLETH_ADDRESS, BALTATHAR_ADDRESS, alith } from "@moonsong-labs/moonwall-util";
 import { parseEther } from "ethers";
 import { BN } from "@polkadot/util";
-import { ApiPromise } from "@polkadot/api";
-
 describeSuite({
   id: "D02",
   title: "Dev test suite2",
   foundationMethods: "dev",
   testCases: ({ it, context }) => {
-    let api;
-    let w3;
+    let signer: Signer;
+    let w3: Web3;
     let polkadotJs: ApiPromise;
 
     beforeAll(() => {
-      api = context.getEthers();
-      w3 = context.getWeb3();
-      polkadotJs = context.getMoonbeam();
+      signer = context.ethersSigner();
+      w3 = context.web3();
+      polkadotJs = context.getSubstrateApi();
     });
 
     it({
@@ -66,7 +72,6 @@ describeSuite({
       id: "T04",
       title: "Can send Ethers txns",
       test: async function () {
-        const signer = alithSigner(api);
         const balanceBefore = (await polkadotJs.query.system.account(BALTATHAR_ADDRESS)).data.free;
         await signer.sendTransaction({
           to: BALTATHAR_ADDRESS,

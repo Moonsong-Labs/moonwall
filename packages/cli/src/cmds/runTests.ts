@@ -22,15 +22,15 @@ export async function testCmd(envName: string, additionalArgs?: {}) {
 
   process.env.MOON_TEST_ENV = envName;
   try {
-    const vitest = await executeTests(env, additionalArgs);
-    await vitest.close();
+    await executeTests(env, additionalArgs);
   } catch (e) {
     console.error(e);
-    MoonwallContext.destroy();
+    await MoonwallContext.destroy();
+    process.exit(1);
   }
 }
 
-export async function executeTests(env: Environment, additionalArgs?: {}): Promise<Vitest> {
+export async function executeTests(env: Environment, additionalArgs?: {}): Promise<void> {
   const globalConfig = await importJsonConfig();
 
   if (env.foundation.type === "read_only") {
@@ -75,8 +75,9 @@ export async function executeTests(env: Environment, additionalArgs?: {}): Promi
 
   try {
     const folders = env.testFileDir.map((folder) => path.join("/", folder, "/"));
-    return await startVitest("test", folders, { ...options, ...additionalArgs });
+    await startVitest("test", folders, { ...options, ...additionalArgs });
   } catch (e) {
-    throw new Error(e);
+    console.error(e);
+    process.exit(1);
   }
 }

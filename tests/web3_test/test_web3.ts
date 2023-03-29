@@ -1,4 +1,4 @@
-import { describeSuite, expect, beforeAll } from "@moonsong-labs/moonwall-cli";
+import { describeSuite, expect, beforeAll, Web3 } from "@moonsong-labs/moonwall-cli";
 import { xcAssetAbi } from "@moonsong-labs/moonwall-util";
 
 describeSuite({
@@ -6,10 +6,10 @@ describeSuite({
   title: "Web3 test suite",
   foundationMethods: "read_only",
   testCases: ({ it, context }) => {
-    let web3;
+    let web3: Web3;
 
     beforeAll(() => {
-      web3 = context.getWeb3();
+      web3 = context.web3();
     });
 
     it({

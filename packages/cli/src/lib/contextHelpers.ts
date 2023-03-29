@@ -6,11 +6,10 @@ import { DispatchError, DispatchInfo, Event, EventRecord } from "@polkadot/types
 import { AnyTuple, RegistryError } from "@polkadot/types/types";
 import {
   customWeb3Request,
-  ALITH_PRIVATE_KEY,
   alith,
-  createAndFinalizeBlock,
+  createAndFinalizeBlock
 } from "@moonsong-labs/moonwall-util";
-import Web3 from "web3";
+import {Web3} from "web3";
 import { ethers } from "ethers";
 import { MoonwallContext } from "./globalContext.js";
 import { assert } from "vitest";
@@ -213,10 +212,3 @@ export function extractInfo(events: EventRecord[] = []): DispatchInfo | undefine
     getDispatchInfo
   )[0];
 }
-
-// Ethers
-export const alithSigner = (context: ethers.Provider) => {
-  const signer = new ethers.Wallet(ALITH_PRIVATE_KEY, context);
-  signer.connect(context);
-  return signer;
-};

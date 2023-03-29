@@ -63,12 +63,8 @@ yargs(hideBin(process.argv))
         });
     },
     async (args) => {
-      const envList = (args.envName as any).split(" ");
-      const testRuns = [];
-      for (const env of envList) {
-        testRuns.push(await testCmd(env, { testNamePattern: args.GrepTest }));
-      }
-      await Promise.all(testRuns);
+      await testCmd(args.envName.toString(), { testNamePattern: args.GrepTest });
+      process.exit(0)
     }
   )
   .command(
@@ -81,6 +77,7 @@ yargs(hideBin(process.argv))
     },
     async (argv) => {
       await runNetwork(argv as any);
+      process.exit(0)
     }
   )
   .command("*", "Run the guided walkthrough", async () => {
