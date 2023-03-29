@@ -1,4 +1,4 @@
-import "@moonbeam-network/api-augment"
+import "@moonbeam-network/api-augment";
 import { FoundationType, MoonwallConfig } from "../types/config";
 import { ChildProcess } from "node:child_process";
 import { populateProviderInterface, prepareProviders } from "../internal/providers.js";
@@ -73,17 +73,23 @@ export class MoonwallContext {
               {
                 name: "w3",
                 type: "web3",
-                endpoints: [`ws://127.0.0.1:${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`],
+                endpoints: [
+                  `ws://127.0.0.1:${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`,
+                ],
               },
               {
                 name: "eth",
                 type: "ethers",
-                endpoints: [`ws://127.0.0.1:${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`],
+                endpoints: [
+                  `ws://127.0.0.1:${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`,
+                ],
               },
               {
                 name: "mb",
                 type: "moon",
-                endpoints: [`ws://127.0.0.1:${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`],
+                endpoints: [
+                  `ws://127.0.0.1:${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`,
+                ],
               },
             ]);
 
@@ -113,7 +119,7 @@ export class MoonwallContext {
   }
 
   public async startNetwork() {
-    const activeNodes = this.nodes.filter((node)=>!node.killed)
+    const activeNodes = this.nodes.filter((node) => !node.killed);
     if (activeNodes.length > 0) {
       console.log("Nodes already started! Skipping command");
       return MoonwallContext.getContext();
@@ -132,7 +138,7 @@ export class MoonwallContext {
     }
 
     this.nodes.forEach((node) => node.kill());
-    await this.wipeNodes()
+    await this.wipeNodes();
   }
 
   public async connectEnvironment(environmentName: string) {
@@ -143,24 +149,24 @@ export class MoonwallContext {
 
     const globalConfig = await importJsonConfig();
     const promises = this.environment.providers.map(
-      async ({ name, type, connect, ws }) =>
+      async ({ name, type, connect }) =>
         new Promise(async (resolve) => {
-          const providerDetails = ws
-            ? await populateProviderInterface(name, type, connect, ws)
-            : await populateProviderInterface(name, type, connect);
-          this.providers.push(providerDetails);
+          this.providers.push(await populateProviderInterface(name, type, connect));
           resolve("");
         })
     );
     await Promise.all(promises);
 
-    this.foundation = globalConfig.environments.find(({ name }) => name == environmentName)!.foundation.type;
+    this.foundation = globalConfig.environments.find(
+      ({ name }) => name == environmentName
+    )!.foundation.type;
 
     // TODO: Do we actually need this?
     if (this.foundation == "dev") {
       this.genesis = (
         await (
-          this.providers.find(({ type }) => type == "polkadotJs" || type == "moon")!.api as ApiPromise
+          this.providers.find(({ type }) => type == "polkadotJs" || type == "moon")!
+            .api as ApiPromise
         ).rpc.chain.getBlockHash(0)
       ).toString();
     }
@@ -168,7 +174,8 @@ export class MoonwallContext {
     if (this.foundation == "chopsticks") {
       this.genesis = (
         await (
-          this.providers.find(({ type }) => type == "polkadotJs" || type == "moon")!.api as ApiPromise
+          this.providers.find(({ type }) => type == "polkadotJs" || type == "moon")!
+            .api as ApiPromise
         ).rpc.chain.getFinalizedHead()
       ).toString();
     }
@@ -196,7 +203,10 @@ export class MoonwallContext {
     }
   }
 
-  public static getContext(config?: MoonwallConfig, force: boolean = false): MoonwallContext|undefined {
+  public static getContext(
+    config?: MoonwallConfig,
+    force: boolean = false
+  ): MoonwallContext | undefined {
     if (!MoonwallContext.instance || force) {
       // Retrieves the instance from the global context if it exists.
       if (global.moonInstance && !force) {
@@ -206,7 +216,7 @@ export class MoonwallContext {
       if (!config) {
         console.error("❌ Config must be provided on Global Context instantiation");
         // process.exit(2);
-        return undefined
+        return undefined;
       }
       MoonwallContext.instance = new MoonwallContext(config);
 

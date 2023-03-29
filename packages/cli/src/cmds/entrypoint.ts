@@ -48,7 +48,7 @@ yargs(hideBin(process.argv))
     }
   )
   .command(
-    `test <envName>`,
+    `test <envName> [GrepTest]`,
     "Run tests for a given Environment",
     (yargs) => {
       return yargs
@@ -57,12 +57,9 @@ yargs(hideBin(process.argv))
           array: true,
           string: true,
         })
-        .options({
-          GrepTest: {
-            type: "string",
-            alias: "g",
-            description: "Pattern to grep test ID/Description to run",
-          },
+        .positional("GrepTest", {
+          type: "string",
+          description: "Pattern to grep test ID/Description to run",
         });
     },
     async (args) => {

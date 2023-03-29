@@ -1,19 +1,15 @@
 import "@moonbeam-network/api-augment";
 import { describeSuite, expect } from "@moonsong-labs/moonwall-cli";
-import { getCurrentSuite } from "vitest/suite";
 import {
   CHARLETH_ADDRESS,
   BALTATHAR_ADDRESS,
   alithSigner,
   alith,
-  faith,
-  ALITH_ADDRESS,
 } from "@moonsong-labs/moonwall-util";
 import { parseEther } from "ethers";
 import { BN } from "@polkadot/util";
 import { beforeEach, beforeAll } from "vitest";
 import { ApiPromise } from "@polkadot/api";
-import { ReadableStreamDefaultReader } from "stream/web";
 
 describeSuite({
   id: "D01",
@@ -114,7 +110,7 @@ describeSuite({
     it({
       id: "T06",
       title: "Testing out Create block and analyse failures",
-      modifier: "only",
+      // modifier: "only",
       timeout: 30000,
       test: async function () {
         const { result } = await context.createBlock(

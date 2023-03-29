@@ -1,5 +1,4 @@
-import Web3 from "web3";
-import { JsonRpcResponse } from "web3-core-helpers";
+import Web3, { JsonRpcResponse } from "web3";
 import { AccessListish } from "ethers";
 import { Debugger } from "debug";
 

@@ -43,7 +43,7 @@ export async function createBlock<
       // Ethereum
       results.push({
         type: "eth",
-        hash: (await customWeb3Request(w3Api, "eth_sendRawTransaction", [call])).result,
+        hash: (await customWeb3Request(w3Api, "eth_sendRawTransaction", [call])as any).result,
       });
     } else if (call.isSigned) {
       const tx = pjsApi.tx(call);
@@ -84,7 +84,7 @@ export async function createBlock<
   // We retrieve the events for that block
   const allRecords: EventRecord[] = (await (
     await pjsApi.at(blockResult.hash)
-  ).query.system.events()) as any;
+  ).query.system.events());
   // We retrieve the block (including the extrinsics)
   const blockData = await pjsApi.rpc.chain.getBlock(blockResult.hash);
 
