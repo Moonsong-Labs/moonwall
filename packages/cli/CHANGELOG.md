@@ -1,5 +1,20 @@
 # @moonwall/cli
 
+## 0.3.1
+
+### Patch Changes
+
+- e27c8e8: Refactoring names and types
+  - Added dependent types to moonwall-cli to make version tracking easier
+  - Web3 and Ethers now close quickly
+  - More straight forward to get Connection APIs from tests
+- 322988c: Added Progress bar
+
+  - Added Progress bar to artifact downloader. Potentially quite useful for users with slow connections, and if we need to download bigger files in the future.
+
+- Updated dependencies [e27c8e8]
+  - @moonsong-labs/moonwall-util@0.3.1
+
 ## 0.3.0
 
 ### Minor Changes

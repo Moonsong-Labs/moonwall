@@ -1,5 +1,14 @@
 # @moonwall/util
 
+## 0.3.1
+
+### Patch Changes
+
+- e27c8e8: Refactoring names and types
+  - Added dependent types to moonwall-cli to make version tracking easier
+  - Web3 and Ethers now close quickly
+  - More straight forward to get Connection APIs from tests
+
 ## 0.3.0
 
 ### Minor Changes
