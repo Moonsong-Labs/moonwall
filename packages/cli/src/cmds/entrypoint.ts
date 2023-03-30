@@ -6,7 +6,7 @@ import { testCmd } from "./runTests.js";
 import { runNetwork } from "./runNetwork.js";
 import { generateConfig } from "./generateConfig.js";
 import { main } from "./main.js";
-import { downloader } from "./downloader.js";
+import { fetchArtifact } from "./fetchArtifact.js";
 
 yargs(hideBin(process.argv))
   .usage("Usage: $0")
@@ -44,7 +44,7 @@ yargs(hideBin(process.argv))
         });
     },
     async (argv) => {
-      await downloader(argv as any);
+      await fetchArtifact(argv as any);
     }
   )
   .command(

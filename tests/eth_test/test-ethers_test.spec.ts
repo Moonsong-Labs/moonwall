@@ -1,8 +1,9 @@
-import { Contract, Signer, formatUnits } from "ethers";
 import {
   describeSuite,
   expect,
   beforeAll,
+  Signer,
+  ethers,
   MoonwallContext,
 } from "@moonsong-labs/moonwall-cli";
 import {
@@ -72,10 +73,10 @@ describeSuite({
       title: "Calling contract methods",
       test: async function () {
         const address = "0xFFFFFFfFea09FB06d082fd1275CD48b191cbCD1d";
-        const contract = new Contract(address, xcAssetAbi, api);
+        const contract = new ethers.Contract(address, xcAssetAbi, api);
         const totalSupply = Number(await contract.totalSupply());
         log(
-          `Total supply of ${await contract.symbol()} is ${formatUnits(
+          `Total supply of ${await contract.symbol()} is ${ethers.formatUnits(
             totalSupply,
             await contract.decimals()
           )}`

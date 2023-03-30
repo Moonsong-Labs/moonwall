@@ -8,7 +8,7 @@ import colors from "colors";
 import clear from "clear";
 import { runNetwork } from "./runNetwork.js";
 import { testCmd } from "./runTests.js";
-import { downloader } from "./downloader.js";
+import { fetchArtifact } from "./fetchArtifact.js";
 import pkg from "../../package.json" assert { type: "json" };
 import { SemVer, gt, lt, lte } from "semver";
 import fetch from "node-fetch";
@@ -175,7 +175,7 @@ async function resolveDownloadChoice() {
       continue;
     }
 
-    await downloader({
+    await fetchArtifact({
       artifact: firstChoice.artifact,
       binVersion: otherChoices.binVersion,
       path: otherChoices.path,
@@ -184,7 +184,7 @@ async function resolveDownloadChoice() {
       name: "NetworkStarted",
       type: "press-to-continue",
       anyKey: true,
-      pressToContinueMessage: `✅ ${firstChoice.artifact} has been downloaded. Press any key to continue...\n`,
+      pressToContinueMessage: `✅ Artifact has been downloaded. Press any key to continue...\n`,
     });
     return;
   }
