@@ -13,7 +13,7 @@
   - Added Progress bar to artifact downloader. Potentially quite useful for users with slow connections, and if we need to download bigger files in the future.
 
 - Updated dependencies [e27c8e8]
-  - @moonsong-labs/moonwall-util@0.3.1
+  - @moonwall/util@0.3.1
 
 ## 0.3.0
 
@@ -34,7 +34,7 @@
 ### Patch Changes
 
 - Updated dependencies [b8fb424]
-  - @moonsong-labs/moonwall-util@0.3.0
+  - @moonwall/util@0.3.0
 
 ## 0.2.14
 
@@ -48,7 +48,7 @@
   - `expectEvents` : Takes an array of events, and will verify if the block contains all of those events listed or not.
 
 - Updated dependencies [1db25dd]
-  - @moonsong-labs/moonwall-util@0.2.11
+  - @moonwall/util@0.2.11
 
 ## 0.2.13
 
@@ -67,7 +67,7 @@
   - Added `setupLogger()` utility function
 
 - Updated dependencies [d968780]
-  - @moonsong-labs/moonwall-util@0.2.10
+  - @moonwall/util@0.2.10
 
 ## 0.2.11
 
@@ -89,21 +89,21 @@
   ```
 
 - Updated dependencies [b53d5e2]
-  - @moonsong-labs/moonwall-util@0.2.9
+  - @moonwall/util@0.2.9
 
 ## 0.2.9
 
 ### Patch Changes
 
 - Updated dependencies [463e2af]
-  - @moonsong-labs/moonwall-util@0.2.8
+  - @moonwall/util@0.2.8
 
 ## 0.2.8
 
 ### Patch Changes
 
 - Updated dependencies [515c38e]
-  - @moonsong-labs/moonwall-util@0.2.7
+  - @moonwall/util@0.2.7
 
 ## 0.2.7
 
@@ -129,7 +129,7 @@
 - 474ac96: Added proper state separation between testFiles (multi or sequential)
 - 0c48562: Added JSON schema
 - Updated dependencies [0c48562]
-  - @moonsong-labs/moonwall-util@0.2.6
+  - @moonwall/util@0.2.6
 
 ## 0.2.5
 
@@ -140,14 +140,14 @@
   Fork-To-Genesis function has been disabled for the time being until we fix it downstream
 
 - Updated dependencies [f628150]
-  - @moonsong-labs/moonwall-util@0.2.5
+  - @moonwall/util@0.2.5
 
 ## 0.2.4
 
 ### Patch Changes
 
 - Updated dependencies [e33abc6]
-  - @moonsong-labs/moonwall-util@0.2.4
+  - @moonwall/util@0.2.4
 
 ## 0.2.3
 
@@ -157,7 +157,7 @@
   - Changed usage of Vitest to remove segfaults
     :information_source: N.B. Bug fix means state separation has been affected. Fix for this is coming next
 - Updated dependencies [470a9d0]
-  - @moonsong-labs/moonwall-util@0.2.3
+  - @moonwall/util@0.2.3
 
 ## 0.2.2
 
@@ -166,7 +166,7 @@
 - 780429f: Tidied package exports
   - No longer wrapping `ApiPromise` so that it can be augmented as required in test projects
 - Updated dependencies [780429f]
-  - @moonsong-labs/moonwall-util@0.2.2
+  - @moonwall/util@0.2.2
 
 ## 0.2.1
 
@@ -174,7 +174,7 @@
 
 - 23cc154: Updated READMEs and contribution guide
 - Updated dependencies [23cc154]
-  - @moonsong-labs/moonwall-util@0.2.1
+  - @moonwall/util@0.2.1
 
 ## 0.2.0
 

@@ -1,5 +1,5 @@
-import { expect, describeSuite, beforeAll, ApiPromise, ethers } from "@moonsong-labs/moonwall-cli";
-import { BALTATHAR_ADDRESS, alith } from "@moonsong-labs/moonwall-util";
+import { expect, describeSuite, beforeAll, ApiPromise, ethers } from "@moonwall/cli";
+import { BALTATHAR_ADDRESS, alith } from "@moonwall/util";
 import "@moonbeam-network/api-augment";
 
 describeSuite({

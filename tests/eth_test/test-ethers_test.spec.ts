@@ -5,10 +5,10 @@ import {
   Signer,
   ethers,
   MoonwallContext,
-} from "@moonsong-labs/moonwall-cli";
+} from "@moonwall/cli";
 import {
   xcAssetAbi,
-} from "@moonsong-labs/moonwall-util";
+} from "@moonwall/util";
 
 
 describeSuite({

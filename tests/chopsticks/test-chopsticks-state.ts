@@ -1,5 +1,5 @@
-import { describeSuite, expect, beforeAll } from "@moonsong-labs/moonwall-cli";
-import { alith } from "@moonsong-labs/moonwall-util";
+import { describeSuite, expect, beforeAll } from "@moonwall/cli";
+import { alith } from "@moonwall/util";
 import { parseEther } from "ethers";
 import { ApiPromise } from "@polkadot/api";
 import "@polkadot/api-augment";

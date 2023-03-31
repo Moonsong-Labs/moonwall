@@ -1,5 +1,5 @@
-import { describeSuite, expect, beforeAll, Web3 } from "@moonsong-labs/moonwall-cli";
-import { xcAssetAbi } from "@moonsong-labs/moonwall-util";
+import { describeSuite, expect, beforeAll, Web3 } from "@moonwall/cli";
+import { xcAssetAbi } from "@moonwall/util";
 
 describeSuite({
   id: "W3",

@@ -22,8 +22,8 @@ pnpm -g i @moonwall/cli
 
 From here you can import the items you need from moonwall packages in your code:
 ```
-import { describeSuite , beforeAll, expect, ALITH_ADDRESS } from "@moonsong-labs/moonwall-cli";
-import { ALITH_ADDRESS } from "@moonsong-labs/moonwall-util";
+import { describeSuite , beforeAll, expect, ALITH_ADDRESS } from "@moonwall/cli";
+import { ALITH_ADDRESS } from "@moonwall/util";
 ```
 
 ## Functions
@@ -41,7 +41,7 @@ import { ALITH_ADDRESS } from "@moonsong-labs/moonwall-util";
 
 - `pnpm moonwall` : This can be used if locally installed, and will launch the main menu..
 
-- `pnpx @moonsong-labs/moonwall-cli run <ENV_NAME>` : To download and run the latest moonwall binary from npm.js repository, and run a network specified in your config file.
+- `pnpx @moonwall/cli run <ENV_NAME>` : To download and run the latest moonwall binary from npm.js repository, and run a network specified in your config file.
 
 - `pnpm exec moonwall test <ENV_NAME>` : To run the locally compiled version of the binary, to start network and run tests against it.
 

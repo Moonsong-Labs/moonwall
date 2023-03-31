@@ -7,7 +7,7 @@ import { KeyringPair } from "@polkadot/keyring/types";
 import { blake2AsHex } from "@polkadot/util-crypto";
 import { sha256 } from "ethers";
 import { cancelReferendaWithCouncil, executeProposalWithCouncil } from "./governance.js";
-import { alith } from "@moonsong-labs/moonwall-util";
+import { alith } from "@moonwall/util";
 import { ChopsticksContext } from "../types/runner.js";
 import { getRuntimeWasm } from "./binaries.js";
 

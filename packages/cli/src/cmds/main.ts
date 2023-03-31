@@ -261,7 +261,7 @@ const resolveQuitChoice = async () => {
 const printIntro = async () => {
   const currentVersion = new SemVer(pkg.version);
 
-  const resp = await fetch("https://registry.npmjs.org/@moonsong-labs/moonwall-cli/latest");
+  const resp = await fetch("https://registry.npmjs.org/@moonwall/cli/latest");
   const json = await resp.json();
   const npmVersion = new SemVer(json["version"]);
 

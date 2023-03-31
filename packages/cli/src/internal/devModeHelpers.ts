@@ -1,6 +1,6 @@
 import { BlockCreation, ExtrinsicCreation, extractError } from "../lib/contextHelpers.js";
 import { ApiTypes, AugmentedEvent, SubmittableExtrinsic } from "@polkadot/api/types";
-import { customWeb3Request, alith, createAndFinalizeBlock } from "@moonsong-labs/moonwall-util";
+import { customWeb3Request, alith, createAndFinalizeBlock } from "@moonwall/util";
 import { GenericContext } from "../lib/runner-functions.js";
 import Debug from "debug";
 import { setTimeout } from "timers/promises";

@@ -7,7 +7,7 @@ import Debug from "debug";
 import { ProviderConfig, ProviderType } from "../types/config.js";
 import { MoonwallProvider } from "../types/context.js";
 import chalk from "chalk";
-import { ALITH_PRIVATE_KEY } from "@moonsong-labs/moonwall-util";
+import { ALITH_PRIVATE_KEY } from "@moonwall/util";
 const debug = Debug("global:providers");
 
 export function prepareProviders(providerConfigs: ProviderConfig[]): MoonwallProvider[] {
