@@ -8,7 +8,7 @@ import colors from "colors";
 import clear from "clear";
 import { runNetwork } from "./runNetwork.js";
 import { testCmd } from "./runTests.js";
-import { downloader } from "./downloader.js";
+import { fetchArtifact } from "./fetchArtifact.js";
 import pkg from "../../package.json" assert { type: "json" };
 import { SemVer, gt, lt, lte } from "semver";
 import fetch from "node-fetch";
@@ -47,34 +47,34 @@ async function mainMenu(config: MoonwallConfig) {
     choices: [
       {
         name: !configPresent
-          ? "1) Initialise:               Generate a new Moonwall Config File."
-          : chalk.dim("1) Initialise:           ✅  CONFIG ALREADY GENERATED"),
+          ? "1) Initialise:                         Generate a new Moonwall Config File."
+          : chalk.dim("1) Initialise:                       ✅  CONFIG ALREADY GENERATED"),
         value: "init",
         disabled: configPresent,
       },
       {
         name: configPresent
-          ? `2) Run Network:            Run a network from specified environments.`
-          : chalk.dim("2) Run Network:            NO CONFIG FOUND"),
+          ? `2) Network Launcher & Toolbox:         Launch network, access tools: tail logs, interactive tests etc.`
+          : chalk.dim("2) Network Launcher & Toolbox            NO CONFIG FOUND"),
         value: "run",
         disabled: !configPresent,
       },
       {
         name: configPresent
-          ? "3) Run Tests:              Execute a test pack, spinning up a network if needed."
-          : chalk.dim("3) Run Tests:              NO CONFIG FOUND"),
+          ? "3) Test Suite Execution:               Run automated tests, start network if needed."
+          : chalk.dim("3) Test Suite Execution:             NO CONFIG FOUND"),
         value: "test",
 
         disabled: !configPresent,
       },
       {
-        name: chalk.dim("4) Batch-Run Tests:      🏗️  NOT YET IMPLEMENTED "),
+        name: chalk.dim("4) Batch-Run Tests:                  🏗️  NOT YET IMPLEMENTED "),
         value: "batch",
 
         disabled: true,
       },
       {
-        name: "5) Download:               Download node binaries or runtime wasms.",
+        name: "5) Artifact Downloader:                Fetch artifacts from GitHub repos.",
         value: "download",
 
         disabled: false,
@@ -175,7 +175,7 @@ async function resolveDownloadChoice() {
       continue;
     }
 
-    await downloader({
+    await fetchArtifact({
       artifact: firstChoice.artifact,
       binVersion: otherChoices.binVersion,
       path: otherChoices.path,
@@ -184,7 +184,7 @@ async function resolveDownloadChoice() {
       name: "NetworkStarted",
       type: "press-to-continue",
       anyKey: true,
-      pressToContinueMessage: `✅ ${firstChoice.artifact} has been downloaded. Press any key to continue...\n`,
+      pressToContinueMessage: `✅ Artifact has been downloaded. Press any key to continue...\n`,
     });
     return;
   }
@@ -198,7 +198,13 @@ const chooseTestEnv = async (config: MoonwallConfig) => {
       disabled: false,
     }))
     .sort((a, b) => (a.name > b.name ? -1 : +1));
-  envs.push(...([new inquirer.Separator(), { name: "Back", value: "back" }, new inquirer.Separator()] as any));
+  envs.push(
+    ...([
+      new inquirer.Separator(),
+      { name: "Back", value: "back" },
+      new inquirer.Separator(),
+    ] as any)
+  );
   const result = await inquirer.prompt({
     name: "envName",
     message: "Select a environment to run",
@@ -289,7 +295,9 @@ const printIntro = async () => {
 \n`);
   process.stdout.write(logo);
   process.stdout.write(
-    colors.rainbow("================================================================================\n")
+    colors.rainbow(
+      "================================================================================\n"
+    )
   );
 
   if (lt(currentVersion, npmVersion)) {
@@ -307,6 +315,8 @@ const printIntro = async () => {
   }
 
   process.stdout.write(
-    colors.rainbow("================================================================================\n")
+    colors.rainbow(
+      "================================================================================\n"
+    )
   );
 };

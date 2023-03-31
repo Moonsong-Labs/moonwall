@@ -28,7 +28,7 @@ export const notePreimage = async <
 ): Promise<string> => {
   const encodedProposal = proposal.method.toHex() || "";
   await context.createBlock(
-    context.getPolkadotJs().tx.preimage.notePreimage(encodedProposal).signAsync(account)
+    context.getSubstrateApi().tx.preimage.notePreimage(encodedProposal).signAsync(account)
   );
 
   return blake2AsHex(encodedProposal);
@@ -48,7 +48,7 @@ export const instantFastTrack = async <
 
   await execCouncilProposal(
     context,
-    context.getPolkadotJs().tx.democracy.externalProposeMajority({
+    context.getSubstrateApi().tx.democracy.externalProposeMajority({
       Lookup: {
         hash: proposalHash,
         len: typeof proposal == "string" ? proposal : proposal.method.encodedLength,
@@ -57,7 +57,7 @@ export const instantFastTrack = async <
   );
   await execTechnicalCommitteeProposal(
     context,
-    context.getPolkadotJs().tx.democracy.fastTrack(proposalHash, votingPeriod, delayPeriod)
+    context.getSubstrateApi().tx.democracy.fastTrack(proposalHash, votingPeriod, delayPeriod)
   );
   return proposalHash;
 };
@@ -78,7 +78,7 @@ export const execCouncilProposal = async <
   let lengthBound = polkadotCall.method.encodedLength;
   const { result: proposalResult } = await context.createBlock(
     context
-      .getPolkadotJs()
+      .getSubstrateApi()
       .tx.councilCollective.propose(threshold, polkadotCall, lengthBound)
       .signAsync(charleth)
   );
@@ -98,13 +98,13 @@ export const execCouncilProposal = async <
 
   await Promise.all(
     voters.map((voter) =>
-      context.getPolkadotJs().tx.councilCollective.vote(proposalHash, 0, true).signAndSend(voter)
+      context.getSubstrateApi().tx.councilCollective.vote(proposalHash, 0, true).signAndSend(voter)
     )
   );
   await context.createBlock();
   return await context.createBlock(
     context
-      .getPolkadotJs()
+      .getSubstrateApi()
       .tx.councilCollective.close(
         proposalHash,
         0,
@@ -136,7 +136,7 @@ export const proposeReferendaAndDeposit = async <
   // Post referenda
   const { result: proposalResult } = await context.createBlock(
     context
-      .getPolkadotJs()
+      .getSubstrateApi()
       .tx.referenda.submit(
         origin,
         {
@@ -159,7 +159,7 @@ export const proposeReferendaAndDeposit = async <
 
   // Place decision deposit
   await context.createBlock(
-    context.getPolkadotJs().tx.referenda.placeDecisionDeposit(refIndex).signAsync(decisionDepositer)
+    context.getSubstrateApi().tx.referenda.placeDecisionDeposit(refIndex).signAsync(decisionDepositer)
   );
 
   return [+refIndex, proposalHash];
@@ -176,8 +176,8 @@ export const dispatchAsGeneralAdmin = async <
 ) => {
   // Post referenda
   await context.createBlock(
-    context.getPolkadotJs().tx.sudo.sudo(
-      context.getPolkadotJs().tx.utility.dispatchAs(
+    context.getSubstrateApi().tx.sudo.sudo(
+      context.getSubstrateApi().tx.utility.dispatchAs(
         {
           Origins: "GeneralAdmin",
         } as any,
@@ -198,11 +198,11 @@ export const maximizeConvictionVotingOf = async (
   // We need to have enough to pay for fee
   const fee = (
     await context
-      .getPolkadotJs()
+      .getSubstrateApi()
       .tx.convictionVoting.vote(refIndex, {
         Standard: {
           vote: { aye: true, conviction: "Locked6x" },
-          balance: (await context.getPolkadotJs().query.system.account(alith.address) as any).data.free,
+          balance: (await context.getSubstrateApi().query.system.account(alith.address) as any).data.free,
         },
       })
       .paymentInfo(alith)
@@ -212,12 +212,12 @@ export const maximizeConvictionVotingOf = async (
   await context.createBlock(
     voters.map(async (voter) =>
       context
-        .getPolkadotJs()
+        .getSubstrateApi()
         .tx.convictionVoting.vote(refIndex, {
           Standard: {
             vote: { aye: true, conviction: "Locked6x" },
             balance: await (
-              await context.getPolkadotJs().query.system.account(voter.address)
+              await context.getSubstrateApi().query.system.account(voter.address)
             ).data.free.sub(fee),
           },
         })
@@ -243,7 +243,7 @@ export const execTechnicalCommitteeProposal = async <
   // Alith submit the proposal to the council (and therefore implicitly votes for)
   let lengthBound = polkadotCall.encodedLength;
   const { result: proposalResult } = await context.createBlock(
-    context.getPolkadotJs().tx.techCommitteeCollective.propose(threshold, polkadotCall, lengthBound)
+    context.getSubstrateApi().tx.techCommitteeCollective.propose(threshold, polkadotCall, lengthBound)
   );
 
   if (threshold <= 1) {
@@ -258,19 +258,19 @@ export const execTechnicalCommitteeProposal = async <
     .event.data[2].toHex() as string;
 
   // Get proposal count
-  const proposalCount = await context.getPolkadotJs().query.techCommitteeCollective.proposalCount();
+  const proposalCount = await context.getSubstrateApi().query.techCommitteeCollective.proposalCount();
 
   await context.createBlock(
     voters.map((voter) =>
       context
-        .getPolkadotJs()
+        .getSubstrateApi()
         .tx.techCommitteeCollective.vote(proposalHash, Number(proposalCount) - 1, true)
         .signAsync(voter)
     )
   );
   const { result: closeResult } = await context.createBlock(
     context
-      .getPolkadotJs()
+      .getSubstrateApi()
       .tx.techCommitteeCollective.close(
         proposalHash,
         Number(proposalCount) - 1,

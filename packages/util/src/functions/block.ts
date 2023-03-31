@@ -17,6 +17,7 @@ import type { ITuple } from "@polkadot/types-codec/types";
 import Bottleneck from "bottleneck";
 import Debug from "debug";
 const debug = Debug("test:blocks");
+
 export async function createAndFinalizeBlock(
   api: ApiPromise,
   parentHash?: string,
@@ -97,9 +98,8 @@ export const getBlockTime = (signedBlock: any) =>
 export const checkBlockFinalized = async (api: ApiPromise, number: number) => {
   return {
     number,
-    finalized: (
-      await api.rpc.moon.isBlockFinalized(await api.rpc.chain.getBlockHash(number))
-    ).isTrue,
+    finalized: (await api.rpc.moon.isBlockFinalized(await api.rpc.chain.getBlockHash(number)))
+      .isTrue,
   };
 };
 
@@ -154,7 +154,6 @@ export const getBlockArray = async (api: ApiPromise, timePeriod: number, limiter
     lastBlockNumber,
     firstBlockTime
   )) as number;
-
   const length = lastBlockNumber - firstBlockNumber;
   return Array.from({ length }, (_, i) => firstBlockNumber + i);
 };
@@ -177,13 +176,13 @@ export function extractWeight(
 
 export function extractPreimageDeposit(
   request:
-    | Option<ITuple<[AccountId20, u128]>>
+    | Option<ITuple<any>>
     | {
-        readonly deposit: ITuple<[AccountId20, u128]>;
+        readonly deposit: ITuple<any>;
         readonly len: u32;
       }
     | {
-        readonly deposit: Option<ITuple<[AccountId20, u128]>>;
+        readonly deposit: Option<ITuple<any>>;
         readonly count: u32;
         readonly len: Option<u32>;
       }

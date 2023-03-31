@@ -1,30 +1,26 @@
-import { Contract, WebSocketProvider, formatUnits } from "ethers";
 import {
   describeSuite,
-  ApiPromise,
   expect,
   beforeAll,
+  Signer,
+  ethers,
   MoonwallContext,
 } from "@moonsong-labs/moonwall-cli";
 import {
-  CHARLETH_ADDRESS,
-  ETHAN_ADDRESS,
-  alith,
   xcAssetAbi,
 } from "@moonsong-labs/moonwall-util";
-import Debug from "debug";
-const debug = Debug("test:eth");
+
 
 describeSuite({
   id: "S01",
   title: "Ethers test suite",
   foundationMethods: "read_only",
-  testCases: ({ it, context }) => {
-    let api;
+  testCases: ({ it, context, log }) => {
+    let api: Signer
 
     beforeAll(() => {
-      console.log("Should be before each tc");
-      api = context.getEthers();
+      log("Should be before each tc");
+      api = context.ethersSigner()
     });
 
     it({
@@ -48,9 +44,9 @@ describeSuite({
       title: "this is a test case3",
       test: async function () {
         console.log(
-          `The latest block is ${(await api.getBlock("latest"))!.number}`
+          `The latest block is ${(await api.provider!.getBlock("latest"))!.number}`
         );
-        debug(MoonwallContext.getContext().providers);
+        log(MoonwallContext.getContext()!.providers);
         expect(2).toBeGreaterThan(0);
       },
     });
@@ -59,14 +55,14 @@ describeSuite({
       id: "T4",
       title: "Calling chain data",
       test: async function () {
-        console.log(
-          `The latest block is ${(await api.getBlock("latest"))!.number}`
+        log(
+          `The latest block is ${(await api.provider!.getBlock("latest"))!.number}`
         );
-        console.log(
-          `The latest safe block is ${(await api.getBlock("safe"))!.number}`
+        log(
+          `The latest safe block is ${(await api.provider!.getBlock("safe"))!.number}`
         );
         const bal = Number(
-          await api.getBalance("0x506172656E740000000000000000000000000000")
+          await api.provider!.getBalance("0x506172656E740000000000000000000000000000")
         );
         expect(bal).to.be.greaterThan(0);
       },
@@ -77,10 +73,10 @@ describeSuite({
       title: "Calling contract methods",
       test: async function () {
         const address = "0xFFFFFFfFea09FB06d082fd1275CD48b191cbCD1d";
-        const contract = new Contract(address, xcAssetAbi, api);
+        const contract = new ethers.Contract(address, xcAssetAbi, api);
         const totalSupply = Number(await contract.totalSupply());
-        console.log(
-          `Total supply of ${await contract.symbol()} is ${formatUnits(
+        log(
+          `Total supply of ${await contract.symbol()} is ${ethers.formatUnits(
             totalSupply,
             await contract.decimals()
           )}`

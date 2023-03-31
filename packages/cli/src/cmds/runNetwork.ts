@@ -1,4 +1,5 @@
 import PressToContinuePrompt from "inquirer-press-to-continue";
+import { setTimeout } from "timers/promises";
 import inquirer from "inquirer";
 import { MoonwallContext, runNetworkOnly } from "../lib/globalContext.js";
 import clear from "clear";
@@ -40,6 +41,11 @@ export async function runNetwork(args) {
       pageSize: 10,
       choices: [
         {
+          name: "Tail:      Print the logs of the current running node to this console",
+          value: 1,
+          short: "tail",
+        },
+        {
           name: `Info:      Display Information about this environment ${args.envName}`,
           value: 2,
           short: "info",
@@ -71,13 +77,6 @@ export async function runNetwork(args) {
           value: 5,
           short: "quit",
         },
-        new inquirer.Separator(),
-        {
-          name: chalk.dim("Chill:   🏗️  Not Yet Implemented"),
-          value: 1,
-          disabled: true,
-          short: "chill",
-        },
       ],
       filter(val) {
         return val;
@@ -107,8 +106,9 @@ export async function runNetwork(args) {
 
     switch (choice.MenuChoice) {
       case 1:
-        /// TODO: Add ability to listen to logs of started node (dev or chopsticks)
-        console.log("I'm chilling");
+        clear();
+        await resolveTailChoice();
+        clear();
         break;
 
       case 2:
@@ -202,4 +202,65 @@ const resolveGrepChoice = async (env: Environment) => {
 const resolveTestChoice = async (env: Environment) => {
   process.env.MOON_RECYCLE = "true";
   return await executeTests(env);
+};
+
+const resolveTailChoice = async () => {
+  const ui = new inquirer.ui.BottomBar();
+
+  await new Promise(async (resolve) => {
+    const runningNode = MoonwallContext.getContext().nodes[0];
+    const onData = (chunk: any) => ui.log.write(chunk.toString());
+    runningNode.stderr!.on("data", onData);
+    runningNode.stdout!.on("data", onData);
+    inquirer
+      .prompt({
+        name: "exitTail",
+        type: "press-to-continue",
+        anyKey: true,
+        pressToContinueMessage: " Press any key to stop tailing logs and go back  ↩️",
+      })
+      .then(() => {
+        runningNode.stderr!.off("data", onData);
+        runningNode.stdout!.off("data", onData);
+        resolve("");
+      });
+
+    // TODO: Extend W.I.P below so support interactive tests whilst tailing logs
+
+    // ui.updateBottomBar(
+    //   `Press ${chalk.bgWhite.bgBlack("Q")} to go back, or ${chalk.bgWhite.bgBlack(
+    //     "T"
+    //   )} to execute tests ...`
+    // );
+    // inquirer
+    //   .prompt({
+    //     name: "char",
+    //     type: "input",
+    //     filter(val: string) {
+    //       const choice = val.toUpperCase();
+    //       switch (choice) {
+    //         case "Q":
+    //           runningNode.stderr!.off("data", onData);
+    //           runningNode.stdout!.off("data", onData);
+    //           return;
+
+    //         case "T":
+    //           new Promise(async (resolve)=>{
+    //             const globalConfig = await importJsonConfig();
+    //             const env = globalConfig.environments.find(
+    //               ({ name }) => name === process.env.MOON_TEST_ENV
+    //             )!;
+    //             await resolveTestChoice(env);
+    //             resolve(true)
+    //           })
+    //           break;
+
+    //         default:
+    //           ui.updateBottomBar(`Invalid input: ${chalk.redBright(choice)}/n`);
+    //           break;
+    //       }
+    //     },
+    //   })
+    //   .then(() => resolve(true));
+  });
 };

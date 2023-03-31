@@ -183,12 +183,9 @@ export class MoonwallContext {
 
     const globalConfig = await importJsonConfig();
     const promises = this.environment.providers.map(
-      async ({ name, type, connect, ws }) =>
+      async ({ name, type, connect }) =>
         new Promise(async (resolve) => {
-          const providerDetails = ws
-            ? await populateProviderInterface(name, type, connect, ws)
-            : await populateProviderInterface(name, type, connect);
-          this.providers.push(providerDetails);
+          this.providers.push(await populateProviderInterface(name, type, connect));
           resolve("");
         })
     );

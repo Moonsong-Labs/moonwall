@@ -6,7 +6,7 @@ import { testCmd } from "./runTests.js";
 import { runNetwork } from "./runNetwork.js";
 import { generateConfig } from "./generateConfig.js";
 import { main } from "./main.js";
-import { downloader } from "./downloader.js";
+import { fetchArtifact } from "./fetchArtifact.js";
 
 yargs(hideBin(process.argv))
   .usage("Usage: $0")
@@ -44,11 +44,11 @@ yargs(hideBin(process.argv))
         });
     },
     async (argv) => {
-      await downloader(argv as any);
+      await fetchArtifact(argv as any);
     }
   )
   .command(
-    `test <envName>`,
+    `test <envName> [GrepTest]`,
     "Run tests for a given Environment",
     (yargs) => {
       return yargs
@@ -57,21 +57,14 @@ yargs(hideBin(process.argv))
           array: true,
           string: true,
         })
-        .options({
-          GrepTest: {
-            type: "string",
-            alias: "g",
-            description: "Pattern to grep test ID/Description to run",
-          },
+        .positional("GrepTest", {
+          type: "string",
+          description: "Pattern to grep test ID/Description to run",
         });
     },
     async (args) => {
-      const envList = (args.envName as any).split(" ");
-      const testRuns = [];
-      for (const env of envList) {
-        testRuns.push(await testCmd(env, { testNamePattern: args.GrepTest }));
-      }
-      await Promise.all(testRuns);
+      await testCmd(args.envName.toString(), { testNamePattern: args.GrepTest });
+      process.exit(0)
     }
   )
   .command(
@@ -84,6 +77,7 @@ yargs(hideBin(process.argv))
     },
     async (argv) => {
       await runNetwork(argv as any);
+      process.exit(0)
     }
   )
   .command("*", "Run the guided walkthrough", async () => {

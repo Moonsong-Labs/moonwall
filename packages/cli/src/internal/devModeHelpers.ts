@@ -46,7 +46,7 @@ export async function createDevBlock<
       // Ethereum
       results.push({
         type: "eth",
-        hash: (await customWeb3Request(context.getWeb3(), "eth_sendRawTransaction", [call])).result,
+        hash: (await customWeb3Request(context.web3(), "eth_sendRawTransaction", [call]) as any).result,
       });
     } else if (call.isSigned) {
       const tx = api.tx(call);

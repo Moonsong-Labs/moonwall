@@ -6,11 +6,10 @@ import { DispatchError, DispatchInfo, Event, EventRecord } from "@polkadot/types
 import { AnyTuple, RegistryError } from "@polkadot/types/types";
 import {
   customWeb3Request,
-  ALITH_PRIVATE_KEY,
   alith,
-  createAndFinalizeBlock,
+  createAndFinalizeBlock
 } from "@moonsong-labs/moonwall-util";
-import Web3 from "web3";
+import {Web3} from "web3";
 import { ethers } from "ethers";
 import { MoonwallContext } from "./globalContext.js";
 import { assert } from "vitest";
@@ -43,7 +42,7 @@ export async function createBlock<
       // Ethereum
       results.push({
         type: "eth",
-        hash: (await customWeb3Request(w3Api, "eth_sendRawTransaction", [call])).result,
+        hash: (await customWeb3Request(w3Api, "eth_sendRawTransaction", [call])as any).result,
       });
     } else if (call.isSigned) {
       const tx = pjsApi.tx(call);
@@ -84,7 +83,7 @@ export async function createBlock<
   // We retrieve the events for that block
   const allRecords: EventRecord[] = (await (
     await pjsApi.at(blockResult.hash)
-  ).query.system.events()) as any;
+  ).query.system.events());
   // We retrieve the block (including the extrinsics)
   const blockData = await pjsApi.rpc.chain.getBlock(blockResult.hash);
 
@@ -213,10 +212,3 @@ export function extractInfo(events: EventRecord[] = []): DispatchInfo | undefine
     getDispatchInfo
   )[0];
 }
-
-// Ethers
-export const alithSigner = (context: ethers.Provider) => {
-  const signer = new ethers.Wallet(ALITH_PRIVATE_KEY, context);
-  signer.connect(context);
-  return signer;
-};
