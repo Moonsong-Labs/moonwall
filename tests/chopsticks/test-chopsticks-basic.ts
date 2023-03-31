@@ -1,10 +1,10 @@
-import { describeSuite, expect, beforeAll } from "@moonsong-labs/moonwall-cli";
+import { describeSuite, expect, beforeAll } from "@moonwall/cli";
 import {
   BALTATHAR_ADDRESS,
   CHARLETH_ADDRESS,
   ETHAN_ADDRESS,
   alith,
-} from "@moonsong-labs/moonwall-util";
+} from "@moonwall/util";
 import { parseEther, formatEther } from "ethers";
 import { ApiPromise } from "@polkadot/api";
 import "@moonbeam-network/api-augment";

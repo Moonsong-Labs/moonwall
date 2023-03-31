@@ -7,8 +7,8 @@ import {
   ApiPromise,
   Signer,
   Web3,
-} from "@moonsong-labs/moonwall-cli";
-import { CHARLETH_ADDRESS, BALTATHAR_ADDRESS, alith } from "@moonsong-labs/moonwall-util";
+} from "@moonwall/cli";
+import { CHARLETH_ADDRESS, BALTATHAR_ADDRESS, alith } from "@moonwall/util";
 import { parseEther } from "ethers";
 import { BN } from "@polkadot/util";
 

@@ -8,7 +8,7 @@ import {
   customWeb3Request,
   alith,
   createAndFinalizeBlock
-} from "@moonsong-labs/moonwall-util";
+} from "@moonwall/util";
 import {Web3} from "web3";
 import { ethers } from "ethers";
 import { MoonwallContext } from "./globalContext.js";

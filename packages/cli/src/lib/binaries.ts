@@ -3,7 +3,7 @@ import path from "path";
 import fs from "fs";
 import child_process from "child_process";
 
-import { OVERRIDE_RUNTIME_PATH } from "@moonsong-labs/moonwall-util";
+import { OVERRIDE_RUNTIME_PATH } from "@moonwall/util";
 
 export const BINARY_DIRECTORY = process.env.BINARY_DIRECTORY || "binaries";
 export const RUNTIME_DIRECTORY = process.env.RUNTIME_DIRECTORY || "runtimes";

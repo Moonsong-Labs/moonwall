@@ -1,8 +1,8 @@
 lockfileVersion: '6.0'
 
 overrides:
-  '@moonsong-labs/moonwall-cli': workspace:*
-  '@moonsong-labs/moonwall-util': workspace:*
+  '@moonwall/cli': workspace:*
+  '@moonwall/util': workspace:*
   '@polkadot/util-crypto': ^11.1.2
   '@polkadot/rpc-provider': ^10.2.1
   '@polkadot/util': ^11.1.2
@@ -22,10 +22,10 @@ importers:
       '@moonbeam-network/api-augment':
         specifier: ^0.2201.0
         version: 0.2201.0
-      '@moonsong-labs/moonwall-cli':
+      '@moonwall/cli':
         specifier: workspace:*
         version: link:packages/cli
-      '@moonsong-labs/moonwall-util':
+      '@moonwall/util':
         specifier: workspace:*
         version: link:packages/util
       '@polkadot/api':
@@ -85,7 +85,7 @@ importers:
       '@moonbeam-network/api-augment':
         specifier: ^0.2201.0
         version: 0.2201.0
-      '@moonsong-labs/moonwall-util':
+      '@moonwall/util':
         specifier: workspace:*
         version: link:../util
       '@polkadot/api':

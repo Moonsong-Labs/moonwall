@@ -1,5 +1,5 @@
-import { expect, describeSuite, beforeAll } from "@moonsong-labs/moonwall-cli";
-import { setupLogger } from "@moonsong-labs/moonwall-util";
+import { expect, describeSuite, beforeAll } from "@moonwall/cli";
+import { setupLogger } from "@moonwall/util";
 
 describeSuite({
   id: "B02",
