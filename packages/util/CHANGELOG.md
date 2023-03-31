@@ -1,5 +1,13 @@
 # @moonwall/util
 
+## 0.4.0
+
+### Minor Changes
+
+- 738e30d: Renamed NPM packages
+
+  - Renamed packages to improve developer sanity from having to type it out every file
+
 ## 0.3.1
 
 ### Patch Changes
