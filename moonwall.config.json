@@ -4,13 +4,26 @@
   "defaultTestTimeout": 40000,
   "environments": [
     {
+      "name": "zombie_test",
+      "testFileDir": ["tests/zombie"],
+      "multiThreads": false,
+      "foundation": {
+        "type": "zombie",
+        "launchSpec": [
+          {
+            "name": "zombienet",
+            "configPath": "./configs/zombie.json"
+          }
+        ]
+      }
+    },
+    {
       "name": "basic",
       "testFileDir": ["tests/basic/"],
       "foundation": {
         "type": "read_only"
       },
-      "connections":[
-      ]
+      "connections": []
     },
     {
       "name": "chopsticks",
@@ -24,7 +37,6 @@
             "name": "mb",
             "type": "parachain",
             "buildBlockMode": "manual",
-            
             "configPath": "./configs/moonriverChopsticks.yml"
           }
         ]

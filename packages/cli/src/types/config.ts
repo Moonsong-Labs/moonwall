@@ -25,9 +25,16 @@ export type IFoundation =
       rtUpgradePath?: string;
       launchSpec: ChopsticksLaunchSpec[];
     }
+    |
+    {
+      type: "zombie",
+      launchSpec: ZombieLaunchSpec;
+    }
   | {
-      type: "read_only" | "fork" | "zombie";
+      type: "read_only" | "fork";
     };
+
+
 
 export type FoundationType = IFoundation["type"];
 
@@ -35,6 +42,10 @@ export interface GenericLaunchSpec {
   name: string;
   running?: boolean;
   options?: string[];
+}
+
+export interface ZombieLaunchSpec extends GenericLaunchSpec {
+  configPath: string;
 }
 
 // TODO: Separate single chopsticks network and multi chopsticks into separate interfaces

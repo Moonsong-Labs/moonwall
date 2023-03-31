@@ -133,7 +133,6 @@ export async function runNetwork(args) {
         throw new Error("invalid value");
     }
   }
-
   await MoonwallContext.destroy();
   console.log(`Goodbye! 👋`);
   process.exit(0);
@@ -167,6 +166,12 @@ const reportServicePorts = async () => {
         })
       ))
     );
+  } else if (config.foundation.type == "zombie") {
+    // TODO: Remove alith hardcoding
+    const wsPort = ctx.zombieNetwork.nodesByName.alith.wsUri.split("ws://127.0.0.1:")[1];
+    const httpPort = ctx.zombieNetwork.nodesByName.alith.multiAddress.split("/")[4];
+    const ports = { wsPort, httpPort };
+    portsList.push(ports);
   }
   portsList.forEach((ports) =>
     console.log(

@@ -9,8 +9,6 @@ export async function generateConfig() {
   while (true) {
     if (await fs.access("moonwall.config.json").catch(() => true)) {
       const answers = await inquirer.prompt(generateQuestions);
-      // console.dir(answers, { depth: null });
-
       const proceed = await inquirer.prompt(
         questions.find(({ name }) => name === "Confirm")
       );
