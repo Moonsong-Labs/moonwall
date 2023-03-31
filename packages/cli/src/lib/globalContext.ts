@@ -3,6 +3,7 @@ import { FoundationType, MoonwallConfig } from "../types/config";
 import { ChildProcess } from "node:child_process";
 import { populateProviderInterface, prepareProviders } from "../internal/providers.js";
 import { launchNode } from "../internal/localNode.js";
+import { setTimeout } from "node:timers/promises";
 import { importJsonConfig } from "./configReader.js";
 import { parseChopsticksRunCmd, parseRunCmd, parseZombieCmd } from "../internal/foundations.js";
 import { ApiPromise } from "@polkadot/api";
@@ -11,6 +12,19 @@ import Debug from "debug";
 import { ConnectedProvider, MoonwallEnvironment, MoonwallProvider } from "../types/context.js";
 import fs from "node:fs";
 const debugSetup = Debug("global:context");
+
+export const contextCreator = async (config: MoonwallConfig, env: string) => {
+  const ctx = MoonwallContext.getContext(config);
+  await runNetworkOnly(config);
+  await ctx.connectEnvironment(env);
+  return ctx;
+};
+
+export const runNetworkOnly = async (config: MoonwallConfig) => {
+  const ctx = MoonwallContext.getContext(config);
+  await ctx.startNetwork();
+};
+
 
 export class MoonwallContext {
   private static instance: MoonwallContext | undefined;
@@ -135,6 +149,11 @@ export class MoonwallContext {
   }
 
   public async startNetwork() {
+    if (process.env.MOON_RECYCLE == "true") {
+      debugSetup("Network has already been started, skipping command");
+      return MoonwallContext.getContext();
+    }
+
     const activeNodes = this.nodes.filter((node) => !node.killed);
     if (activeNodes.length > 0) {
       console.log("Nodes already started! Skipping command");
@@ -147,24 +166,8 @@ export class MoonwallContext {
       const buffer = fs.readFileSync(nodes[0].cmd, "utf-8");
       const path = JSON.parse(buffer);
       const network = await zombie.start("", path);
-      /// TODO Populate providers config
-      this.environment.providers = prepareProviders([
-        {
-          name: "w3",
-          type: "web3",
-          endpoints: [network.nodesByName.alith.wsUri],
-        },
-        {
-          name: "eth",
-          type: "ethers",
-          endpoints: [network.nodesByName.alith.wsUri],
-        },
-        {
-          name: "mb",
-          type: "moon",
-          endpoints: [network.nodesByName.alith.wsUri],
-        },
-      ]);
+      process.env.MOON_RELAY_WSS = network.nodesByName.alice.wsUri;
+      process.env.MOON_PARA_WSS = network.nodesByName.alith.wsUri;
       this.zombieNetwork = network;
       return;
     }
@@ -176,6 +179,32 @@ export class MoonwallContext {
   }
 
   public async connectEnvironment(environmentName: string) {
+    // TODO: Explicitly communicate (DOCs and console) this is done automatically
+    if (this.environment.foundationType == "zombie") {
+      this.environment.providers = prepareProviders([
+        {
+          name: "w3",
+          type: "web3",
+          endpoints: [process.env.MOON_PARA_WSS],
+        },
+        {
+          name: "eth",
+          type: "ethers",
+          endpoints: [process.env.MOON_PARA_WSS],
+        },
+        {
+          name: "mb",
+          type: "moon",
+          endpoints: [process.env.MOON_PARA_WSS],
+        },
+        {
+          name: "relay",
+          type: "polkadotJs",
+          endpoints: [process.env.MOON_RELAY_WSS],
+        },
+      ]);
+    }
+
     if (this.providers.length > 0) {
       console.log("Providers already connected! Skipping command");
       return MoonwallContext.getContext();
@@ -212,6 +241,21 @@ export class MoonwallContext {
             .api as ApiPromise
         ).rpc.chain.getFinalizedHead()
       ).toString();
+    }
+
+    if (this.foundation == "zombie") {
+      const paraApi = this.providers.find((a) => a.type == "moon").api as ApiPromise;
+      const relayApi = this.providers.find((a) => a.type == "polkadotJs").api as ApiPromise;
+
+      while ((await relayApi.rpc.chain.getBlock()).block.header.number.toNumber() == 0) {
+        await setTimeout(500);
+      }
+      console.log("🎡  RelayChain producing blocks, waiting for parachain...");
+
+      while ((await paraApi.rpc.chain.getBlock()).block.header.number.toNumber() == 0) {
+        await setTimeout(500);
+      }
+      console.log("🎠  Parachain producing blocks, continuing ");
     }
   }
 
@@ -271,7 +315,7 @@ export class MoonwallContext {
       });
     });
 
-    await Promise.all(promises);  
+    await Promise.all(promises);
 
     if (!!ctx.zombieNetwork) {
       console.log("🪓  Killing zombie nodes");
@@ -280,14 +324,3 @@ export class MoonwallContext {
   }
 }
 
-export const contextCreator = async (config: MoonwallConfig, env: string) => {
-  const ctx = MoonwallContext.getContext(config);
-  await runNetworkOnly(config);
-  await ctx.connectEnvironment(env);
-  return ctx;
-};
-
-export const runNetworkOnly = async (config: MoonwallConfig) => {
-  const ctx = MoonwallContext.getContext(config);
-  await ctx.startNetwork();
-};

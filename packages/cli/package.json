@@ -64,6 +64,7 @@
     "@types/cli-progress": "^3.11.0",
     "@types/node": "^18.15.10",
     "@types/yargs": "^17.0.23",
+    "@zombienet/orchestrator": "^0.0.34",
     "bottleneck": "^2.19.5",
     "chalk": "^5.2.0",
     "clear": "^0.1.0",
