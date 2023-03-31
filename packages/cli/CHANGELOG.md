@@ -1,5 +1,13 @@
 # @moonwall/cli
 
+## 0.4.1
+
+### Patch Changes
+
+- 01dcefe: Fixed ethers export
+- Updated dependencies [01dcefe]
+  - @moonwall/util@0.4.1
+
 ## 0.4.0
 
 ### Minor Changes
