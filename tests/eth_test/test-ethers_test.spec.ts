@@ -1,26 +1,17 @@
-import {
-  describeSuite,
-  expect,
-  beforeAll,
-  Signer,
-  ethers,
-  MoonwallContext,
-} from "@moonwall/cli";
-import {
-  xcAssetAbi,
-} from "@moonwall/util";
-
+import { describeSuite, expect, beforeAll, Signer, MoonwallContext } from "@moonwall/cli";
+import { xcAssetAbi } from "@moonwall/util";
+import { ethers } from "ethers";
 
 describeSuite({
   id: "S01",
   title: "Ethers test suite",
   foundationMethods: "read_only",
   testCases: ({ it, context, log }) => {
-    let api: Signer
+    let api: Signer;
 
     beforeAll(() => {
       log("Should be before each tc");
-      api = context.ethersSigner()
+      api = context.ethersSigner();
     });
 
     it({
@@ -43,9 +34,7 @@ describeSuite({
       id: "T3",
       title: "this is a test case3",
       test: async function () {
-        console.log(
-          `The latest block is ${(await api.provider!.getBlock("latest"))!.number}`
-        );
+        console.log(`The latest block is ${(await api.provider!.getBlock("latest"))!.number}`);
         log(MoonwallContext.getContext()!.providers);
         expect(2).toBeGreaterThan(0);
       },
@@ -55,12 +44,8 @@ describeSuite({
       id: "T4",
       title: "Calling chain data",
       test: async function () {
-        log(
-          `The latest block is ${(await api.provider!.getBlock("latest"))!.number}`
-        );
-        log(
-          `The latest safe block is ${(await api.provider!.getBlock("safe"))!.number}`
-        );
+        log(`The latest block is ${(await api.provider!.getBlock("latest"))!.number}`);
+        log(`The latest safe block is ${(await api.provider!.getBlock("safe"))!.number}`);
         const bal = Number(
           await api.provider!.getBalance("0x506172656E740000000000000000000000000000")
         );

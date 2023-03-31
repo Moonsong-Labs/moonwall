@@ -10,6 +10,6 @@ export * from "./types/context.js";
 export * from "./types/runner.js";
 
 export { beforeAll, beforeEach, afterAll, afterEach, expect } from "vitest";
-export { ethers, Signer, WebSocketProvider as EthersWsProvider } from "ethers";
+export type { Signer } from "ethers";
 export { Web3, WebSocketProvider as Web3WsProvider } from "web3";
 export { ApiPromise, WsProvider } from "@polkadot/api";
