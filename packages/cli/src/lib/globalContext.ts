@@ -113,9 +113,9 @@ export class MoonwallContext {
         break;
 
       case "zombie":
-        const { cmd: zombieConfig } = parseZombieCmd(env.foundation.launchSpec[0]);
+        const { cmd: zombieConfig } = parseZombieCmd(env.foundation.zombieSpec);
         blob.nodes.push({
-          name: env.foundation.launchSpec[0].name,
+          name: env.foundation.zombieSpec.name,
           cmd: zombieConfig,
           args: [],
           launch: true,
