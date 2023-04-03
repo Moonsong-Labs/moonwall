@@ -22,7 +22,7 @@ describeSuite({
     let polkadotJs: ApiPromise;
 
     beforeAll(async () => {
-      polkadotJs = context.getSubstrateApi();
+      polkadotJs = context.substrateApi();
       signer = context.ethersSigner();
       w3 = context.web3();
     });

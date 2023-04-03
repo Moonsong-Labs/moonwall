@@ -12,8 +12,8 @@ describeSuite({
     let relayApi: ApiPromise;
 
     beforeAll(() => {
-      paraApi = context.getSubstrateApi({ type: "moon" });
-      relayApi = context.getSubstrateApi({ type: "polkadotJs" });
+      paraApi = context.substrateApi({ type: "moon" });
+      relayApi = context.substrateApi({ type: "polkadotJs" });
     });
 
     it({

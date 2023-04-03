@@ -65,7 +65,7 @@ export function describeSuite({
     const context: GenericContext = {
       providers: {},
 
-      getSubstrateApi: (options?: { apiName?: string; type?: ProviderType }): ApiPromise => {
+      substrateApi: (options?: { apiName?: string; type?: ProviderType }): ApiPromise => {
         if (options && options.apiName) {
           return context.providers[options.apiName];
         } else if (options && options.type) {
