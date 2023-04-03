@@ -1,7 +1,7 @@
 import { importJsonConfig } from "../lib/configReader.js";
 import { startVitest } from "vitest/node";
-import { UserConfig, Vitest } from "vitest";
-import { MoonwallContext, contextCreator } from "../lib/globalContext.js";
+import { UserConfig } from "vitest";
+import { contextCreator } from "../lib/globalContext.js";
 import { Environment } from "../types/config.js";
 import path from "path";
 import chalk from "chalk";
@@ -24,9 +24,7 @@ export async function testCmd(envName: string, additionalArgs?: {}) {
   try {
     await executeTests(env, additionalArgs);
   } catch (e) {
-    console.error(e);
-    await MoonwallContext.destroy();
-    process.exit(1);
+    throw new Error(e)
   }
 }
 

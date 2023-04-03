@@ -1,16 +1,13 @@
 import { ChildProcess, spawn } from "child_process";
 import chalk from "chalk";
 import Debug from "debug";
-import { existsSync } from "fs";
+import { checkExists } from "./files.js";
 const debugNode = Debug("global:node");
 
 export async function launchNode(cmd: string, args: string[], name: string): Promise<ChildProcess> {
-  if (cmd.includes("moonbeam") && !existsSync(cmd)) {
-    throw new Error(
-      `No binary file found at location: ${cmd} \n Are you sure your ${chalk.bgWhiteBright.blackBright(
-        "moonwall.config.json"
-      )} file has the correct "binPath" in launchSpec?`
-    );
+
+  if (cmd.includes("moonbeam")){
+    await checkExists(cmd)
   }
 
   let runningNode: ChildProcess;

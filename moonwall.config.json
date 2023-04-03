@@ -9,7 +9,7 @@
       "multiThreads": false,
       "foundation": {
         "type": "zombie",
-        "launchSpec": {
+        "zombieSpec": {
           "name": "zombienet",
           "configPath": "./configs/zombie.json"
         }
