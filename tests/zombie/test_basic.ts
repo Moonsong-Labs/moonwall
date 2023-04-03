@@ -1,4 +1,5 @@
-import { expect, describeSuite, beforeAll, ApiPromise, ethers } from "@moonwall/cli";
+import { expect, describeSuite, beforeAll, ApiPromise } from "@moonwall/cli";
+import { ethers } from "ethers";
 import { BALTATHAR_ADDRESS, alith } from "@moonwall/util";
 import "@moonbeam-network/api-augment";
 
@@ -11,34 +12,42 @@ describeSuite({
     let relayApi: ApiPromise;
 
     beforeAll(() => {
-      paraApi = context.getSubstrateApi({ type: "moon" });
-      relayApi = context.getSubstrateApi({ type: "polkadotJs" });
+      paraApi = context.substrateApi({ type: "moon" });
+      relayApi = context.substrateApi({ type: "polkadotJs" });
     });
 
     it({
       id: "T01",
-      title: "This is a version test case",
+      title: "Check relaychain api correctly connected",
       test: function () {
         const rt = relayApi.consts.system.version.specVersion.toNumber();
         expect(rt).to.be.greaterThan(0);
+
+        const network = relayApi.consts.system.version.specName.toString();
+        expect(network).to.contain("rococo");
       },
     });
 
     it({
       id: "T02",
-      title: "This is a network name test case",
+      title: "Check relaychain api correctly connected",
       test: function () {
         const network = paraApi.consts.system.version.specName.toString();
         expect(network).to.contain("moonbase");
+
+        const rt = paraApi.consts.system.version.specVersion.toNumber();
+        expect(rt).to.be.greaterThan(0);
       },
     });
 
     it({
       id: "T03",
-      title: "This is a network txn test case",
+      title: "Can connect to parachain and execute a transaction",
       timeout: 60000,
       test: async function () {
         const balBefore = (await paraApi.query.system.account(BALTATHAR_ADDRESS)).data.free;
+
+        log("Please wait, this will take at least 30s for transaction to complete")
 
         await new Promise((resolve) => {
           paraApi.tx.balances

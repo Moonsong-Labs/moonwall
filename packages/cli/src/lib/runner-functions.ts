@@ -47,9 +47,9 @@ export function describeSuite({
   }
 
   beforeAll(async function () {
+
     const globalConfig = await importJsonConfig();
     ctx = await contextCreator(globalConfig, process.env.MOON_TEST_ENV);
-
     if (ctx.environment.foundationType === "dev") {
       //   // await devForkToFinalizedHead(ctx); // TODO: Implement way of cleanly forking to fresh state
     } else if (ctx.environment.foundationType === "chopsticks") {
@@ -65,7 +65,7 @@ export function describeSuite({
     const context: GenericContext = {
       providers: {},
 
-      getSubstrateApi: (options?: { apiName?: string; type?: ProviderType }): ApiPromise => {
+      substrateApi: (options?: { apiName?: string; type?: ProviderType }): ApiPromise => {
         if (options && options.apiName) {
           return context.providers[options.apiName];
         } else if (options && options.type) {

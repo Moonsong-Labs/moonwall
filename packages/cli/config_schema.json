@@ -117,14 +117,14 @@
                 },
                 {
                     "properties": {
-                        "launchSpec": {
-                            "$ref": "#/definitions/ZombieLaunchSpec"
-                        },
                         "type": {
                             "enum": [
                                 "zombie"
                             ],
                             "type": "string"
+                        },
+                        "zombieSpec": {
+                            "$ref": "#/definitions/ZombieLaunchSpec"
                         }
                     },
                     "type": "object"

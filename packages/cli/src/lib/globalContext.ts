@@ -11,6 +11,7 @@ import zombie, { Network } from "@zombienet/orchestrator";
 import Debug from "debug";
 import { ConnectedProvider, MoonwallEnvironment, MoonwallProvider } from "../types/context.js";
 import fs from "node:fs";
+import { checkExists } from "../internal/files.js";
 const debugSetup = Debug("global:context");
 
 export const contextCreator = async (config: MoonwallConfig, env: string) => {
@@ -24,7 +25,6 @@ export const runNetworkOnly = async (config: MoonwallConfig) => {
   const ctx = MoonwallContext.getContext(config);
   await ctx.startNetwork();
 };
-
 
 export class MoonwallContext {
   private static instance: MoonwallContext | undefined;
@@ -114,9 +114,9 @@ export class MoonwallContext {
         break;
 
       case "zombie":
-        const { cmd: zombieConfig } = parseZombieCmd(env.foundation.launchSpec[0]);
+        const { cmd: zombieConfig } = parseZombieCmd(env.foundation.zombieSpec);
         blob.nodes.push({
-          name: env.foundation.launchSpec[0].name,
+          name: env.foundation.zombieSpec.name,
           cmd: zombieConfig,
           args: [],
           launch: true,
@@ -164,8 +164,16 @@ export class MoonwallContext {
     if (this.environment.foundationType === "zombie") {
       console.log("🧟 Spawning zombie nodes ...");
       const buffer = fs.readFileSync(nodes[0].cmd, "utf-8");
-      const path = JSON.parse(buffer);
-      const network = await zombie.start("", path);
+      const zombieConfig: zombie.LaunchConfig = JSON.parse(buffer);
+      const relayBinPath = zombieConfig.relaychain.default_command
+      await checkExists(relayBinPath)
+
+      const promises = zombieConfig.parachains.map((para)=>{
+        checkExists(para.collator.command)
+      })
+      await Promise.all(promises)
+
+      const network = await zombie.start("", zombieConfig, { silent: true });
       process.env.MOON_RELAY_WSS = network.nodesByName.alice.wsUri;
       process.env.MOON_PARA_WSS = network.nodesByName.alith.wsUri;
       this.zombieNetwork = network;
@@ -323,4 +331,3 @@ export class MoonwallContext {
     }
   }
 }
-

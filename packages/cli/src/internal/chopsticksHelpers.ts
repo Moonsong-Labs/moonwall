@@ -26,7 +26,7 @@ export async function sendNewBlockAndCheck(
   events: FrameSystemEventRecord[];
 }> {
   const newBlock = await sendNewBlockRequest();
-  const api = context.getSubstrateApi();
+  const api = context.substrateApi();
   const apiAt = await api.at(newBlock);
 
   const actualEvents = await apiAt.query.system.events();
@@ -51,7 +51,7 @@ export async function createChopsticksBlock(
   options: ChopsticksBlockCreation = { allowFailures: false }
 ) {
   const result = await sendNewBlockRequest(options);
-  const apiAt = await context.getSubstrateApi().at(result);
+  const apiAt = await context.substrateApi().at(result);
   const actualEvents = await apiAt.query.system.events();
 
   if (options && options.expectEvents) {
@@ -78,7 +78,7 @@ export async function createChopsticksBlock(
   } else {
     actualEvents.forEach((event) => {
       assert(
-        !context.getSubstrateApi().events.system.ExtrinsicFailed.is(event.event),
+        !context.substrateApi().events.system.ExtrinsicFailed.is(event.event),
         "ExtrinsicFailed event detected, enable 'allowFailures' if this is expected."
       );
     });

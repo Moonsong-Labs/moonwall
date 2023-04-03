@@ -20,7 +20,7 @@ describeSuite({
     let web3: Web3;
 
     beforeAll(() => {
-      api = context.getSubstrateApi();
+      api = context.substrateApi();
       web3 = context.web3();
     });
 

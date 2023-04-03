@@ -17,7 +17,7 @@ describeSuite({
     let api: ApiPromise;
 
     beforeAll(() => {
-      api = context.getSubstrateApi({type: "moon"})
+      api = context.substrateApi({type: "moon"})
     });
 
     it({

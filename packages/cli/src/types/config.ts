@@ -28,7 +28,7 @@ export type IFoundation =
     |
     {
       type: "zombie",
-      launchSpec: ZombieLaunchSpec;
+      zombieSpec: ZombieLaunchSpec;
     }
   | {
       type: "read_only" | "fork";

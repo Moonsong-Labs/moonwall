@@ -11,7 +11,7 @@ describeSuite({
     let api: ApiPromise;
 
     beforeAll(() => {
-      api = context.getSubstrateApi();
+      api = context.substrateApi();
     });
 
     it({
