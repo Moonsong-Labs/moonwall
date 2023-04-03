@@ -1,5 +1,5 @@
-import  { Web3,JsonRpcResponse } from "web3";
-import { AccessListish } from "ethers";
+import { Web3, JsonRpcResponse } from "web3";
+import { AccessListish, ContractFactory } from "ethers";
 import { Debugger } from "debug";
 
 /**
@@ -29,6 +29,21 @@ export interface TransactionOptions {
   value?: string | number;
   data?: string;
   accessList?: AccessListish;
+}
+
+export const DEFAULT_TRANSACTION = {};
+
+/**
+ * @name ContractCreation
+ * @description Contract creation options
+ * @param byteCode: Bytecode of the contract
+ * @param abi: ABI of the contract
+ * @param arguments: Arguments of the contract
+ */
+export interface ContractCreation {
+  byteCode: string;
+  abi: any;
+  arguments?: any[];
 }
 
 /**
@@ -98,7 +113,7 @@ export class EthTester {
    * });
    */
   genSignedTransaction = async (
-    options: TransactionOptions,
+    options: TransactionOptions = DEFAULT_TRANSACTION,
     txType?: "Legacy" | "EIP2930" | "EIP1559"
   ): Promise<string> => {
     const type = txType || this.defaultType;
@@ -253,12 +268,30 @@ export class EthTester {
   genSignedTransfer = async (
     to: string,
     value: number | string | BigInt,
-    options: TransactionOptions
+    options: TransactionOptions = DEFAULT_TRANSACTION
   ): Promise<string> => {
     return await this.genSignedTransaction({
       ...options,
       value: value.toString(),
       to,
+    });
+  };
+
+  /**
+   * @name genSignedContractDeployment
+   * @description Generates a signed contract deployment transaction
+   * @param contractCreation Contract creation object
+   * @param options Transaction options
+   * @returns Signed transaction
+   */
+  genSignedContractDeployment = async (
+    contractCreation: ContractCreation,
+    options: TransactionOptions = DEFAULT_TRANSACTION
+  ): Promise<string> => {
+    const factory = new ContractFactory(contractCreation.abi, contractCreation.byteCode);
+    return await this.genSignedTransaction({
+      ...options,
+      data: (await factory.getDeployTransaction(...contractCreation.arguments)).data,
     });
   };
 
