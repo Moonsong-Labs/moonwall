@@ -25,7 +25,6 @@ export const runNetworkOnly = async (config: MoonwallConfig) => {
   await ctx.startNetwork();
 };
 
-
 export class MoonwallContext {
   private static instance: MoonwallContext | undefined;
   environment: MoonwallEnvironment;
@@ -165,7 +164,7 @@ export class MoonwallContext {
       console.log("🧟 Spawning zombie nodes ...");
       const buffer = fs.readFileSync(nodes[0].cmd, "utf-8");
       const path = JSON.parse(buffer);
-      const network = await zombie.start("", path);
+      const network = await zombie.start("", path, { silent: true });
       process.env.MOON_RELAY_WSS = network.nodesByName.alice.wsUri;
       process.env.MOON_PARA_WSS = network.nodesByName.alith.wsUri;
       this.zombieNetwork = network;
@@ -323,4 +322,3 @@ export class MoonwallContext {
     }
   }
 }
-
