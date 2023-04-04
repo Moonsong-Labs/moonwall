@@ -1,5 +1,4 @@
 import PressToContinuePrompt from "inquirer-press-to-continue";
-import { setTimeout } from "timers/promises";
 import inquirer from "inquirer";
 import { MoonwallContext, runNetworkOnly } from "../lib/globalContext.js";
 import clear from "clear";
@@ -8,7 +7,9 @@ import { Environment } from "../types/config.js";
 import { executeTests } from "./runTests.js";
 import { parse } from "yaml";
 import fs from "fs/promises";
+import { createReadStream, stat } from "node:fs";
 import { importJsonConfig } from "../lib/configReader.js";
+import { ReadStream, watch } from "fs";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
@@ -94,8 +95,8 @@ export async function runNetwork(args) {
   clear();
   const portsList = await reportServicePorts();
 
-  portsList.forEach((ports) =>
-    console.log(`  🖥️   https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0.0.1%3A${ports.wsPort}`)
+  portsList.forEach((port) =>
+    console.log(`  🖥️   https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0.0.1%3A${port}`)
   );
 
   await inquirer.prompt(questions.find(({ name }) => name == "NetworkStarted"));
@@ -112,8 +113,7 @@ export async function runNetwork(args) {
         break;
 
       case 2:
-        resolveInfoChoice(env);
-        await reportServicePorts();
+        await resolveInfoChoice(env);
         break;
 
       case 3:
@@ -140,42 +140,29 @@ export async function runNetwork(args) {
 
 const reportServicePorts = async () => {
   const ctx = MoonwallContext.getContext();
-  const portsList: {
-    wsPort: string;
-    httpPort: string;
-  }[] = [];
+  const portsList: string[] = [];
   const globalConfig = await importJsonConfig();
   const config = globalConfig.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
   if (config.foundation.type == "dev") {
-    const ports = { wsPort: "", httpPort: "" };
-    ports.wsPort =
-      ctx.environment.nodes[0].args.find((a) => a.includes("ws-port"))!.split("=")[1] || "9944";
-    ports.httpPort =
-      ctx.environment.nodes[0].args.find((a) => a.includes("rpc-port"))!.split("=")[1] || "9933";
-
-    portsList.push(ports);
+    const port =  ctx.environment.nodes[0].args.find((a) => a.includes("ws-port"))!.split("=")[1] || "9944";
+    portsList.push(port);
   } else if (config.foundation.type == "chopsticks") {
     portsList.push(
       ...(await Promise.all(
         config.foundation.launchSpec.map(async ({ configPath }) => {
           const yaml = parse((await fs.readFile(configPath)).toString());
-          return {
-            wsPort: yaml.port || "8000",
-            httpPort: "<🏗️  NOT YET IMPLEMENTED>",
-          };
+          return  yaml.port || "8000"
         })
       ))
     );
   } else if (config.foundation.type == "zombie") {
     // TODO: Remove alith hardcoding
     const wsPort = ctx.zombieNetwork.nodesByName.alith.wsUri.split("ws://127.0.0.1:")[1];
-    const httpPort = ctx.zombieNetwork.nodesByName.alith.multiAddress.split("/")[4];
-    const ports = { wsPort, httpPort };
-    portsList.push(ports);
+    portsList.push(wsPort);
   }
-  portsList.forEach((ports) =>
+  portsList.forEach((port) =>
     console.log(
-      `  🌐  Node has started, listening on ports - Websocket: ${ports.wsPort} and HTTP: ${ports.httpPort}`
+      `  🌐  Node has started, listening on ports - Websocket: ${port}`
     )
   );
 
@@ -187,6 +174,10 @@ const resolveInfoChoice = async (env: Environment) => {
   console.dir(MoonwallContext.getContext().environment, { depth: null });
   console.log(chalk.bgWhite.blackBright("Launch Spec in Config File:"));
   console.dir(env, { depth: null });
+  const portsList = await reportServicePorts();
+  portsList.forEach((port) =>
+    console.log(`  🖥️   https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0.0.1%3A${port}`)
+  );
 };
 
 const resolveGrepChoice = async (env: Environment) => {
@@ -208,22 +199,70 @@ const resolveTailChoice = async () => {
   const ui = new inquirer.ui.BottomBar();
 
   await new Promise(async (resolve) => {
-    const runningNode = MoonwallContext.getContext().nodes[0];
+    const ctx = MoonwallContext.getContext();
     const onData = (chunk: any) => ui.log.write(chunk.toString());
-    runningNode.stderr!.on("data", onData);
-    runningNode.stdout!.on("data", onData);
-    inquirer
-      .prompt({
-        name: "exitTail",
-        type: "press-to-continue",
-        anyKey: true,
-        pressToContinueMessage: " Press any key to stop tailing logs and go back  ↩️",
-      })
-      .then(() => {
-        runningNode.stderr!.off("data", onData);
-        runningNode.stdout!.off("data", onData);
-        resolve("");
+
+    if (ctx.foundation == "zombie") {
+      const logPath = process.env.MOON_COLLATOR_LOG;
+      let currentReadPosition = 0;
+
+      const readLog = () => {
+        stat(logPath, (err, stats) => {
+          if (err) {
+            console.error("Error reading log: ", err);
+            return;
+          }
+
+          const newReadPosition = stats.size;
+
+          if (newReadPosition > currentReadPosition) {
+            const stream = createReadStream(logPath, {
+              start: currentReadPosition,
+              end: newReadPosition,
+            });
+            stream.on("data", onData);
+            stream.on("end", () => {
+              currentReadPosition = newReadPosition;
+            });
+          }
+        });
+      };
+
+      const watcher = watch(logPath, (eventType) => {
+        if (eventType === "change") {
+          readLog();
+        }
       });
+
+      readLog();
+      inquirer
+        .prompt({
+          name: "exitTail",
+          type: "press-to-continue",
+          anyKey: true,
+          pressToContinueMessage: " Press any key to stop tailing logs and go back  ↩️",
+        })
+        .then(() => {
+          watcher.close();
+          resolve("");
+        });
+    } else {
+      const runningNode = ctx.nodes[0];
+      runningNode.stderr!.on("data", onData);
+      runningNode.stdout!.on("data", onData);
+      inquirer
+        .prompt({
+          name: "exitTail",
+          type: "press-to-continue",
+          anyKey: true,
+          pressToContinueMessage: " Press any key to stop tailing logs and go back  ↩️",
+        })
+        .then(() => {
+          runningNode.stderr!.off("data", onData);
+          runningNode.stdout!.off("data", onData);
+          resolve("");
+        });
+    }
 
     // TODO: Extend W.I.P below so support interactive tests whilst tailing logs
 

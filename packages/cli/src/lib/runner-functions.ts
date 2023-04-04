@@ -65,7 +65,7 @@ export function describeSuite({
     const context: GenericContext = {
       providers: {},
 
-      substrateApi: (options?: { apiName?: string; type?: ProviderType }): ApiPromise => {
+      polkadotJs: (options?: { apiName?: string; type?: ProviderType }): ApiPromise => {
         if (options && options.apiName) {
           return context.providers[options.apiName];
         } else if (options && options.type) {

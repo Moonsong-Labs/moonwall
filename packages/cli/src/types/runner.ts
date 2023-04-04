@@ -72,7 +72,7 @@ export interface GenericTestContext {
 
 export interface GenericContext {
   providers: Object;
-  substrateApi: (options?: { apiName?: string; type?: ProviderType }) => ApiPromise;
+  polkadotJs: (options?: { apiName?: string; type?: ProviderType }) => ApiPromise;
   ethersSigner: ([name]?: string) => Signer;
   web3: ([name]?: string) => Web3;
 }

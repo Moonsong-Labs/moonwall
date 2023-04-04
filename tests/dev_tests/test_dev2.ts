@@ -22,7 +22,7 @@ describeSuite({
     beforeAll(() => {
       signer = context.ethersSigner();
       w3 = context.web3();
-      polkadotJs = context.substrateApi();
+      polkadotJs = context.polkadotJs();
     });
 
     it({

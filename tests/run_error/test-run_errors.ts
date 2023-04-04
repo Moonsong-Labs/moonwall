@@ -13,7 +13,7 @@ describeSuite({
 
     beforeAll(() => {
       api = context.web3();
-      mbApi = context.substrateApi();
+      mbApi = context.polkadotJs();
     });
 
     it({

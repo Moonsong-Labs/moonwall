@@ -20,7 +20,7 @@ describeSuite({
     let web3: Web3;
 
     beforeAll(() => {
-      api = context.substrateApi();
+      api = context.polkadotJs();
       web3 = context.web3();
     });
 
