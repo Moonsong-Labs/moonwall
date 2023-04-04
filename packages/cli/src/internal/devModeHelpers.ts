@@ -38,7 +38,7 @@ export async function createDevBlock<
 >(context: GenericContext, transactions?: Calls, options: BlockCreation = { allowFailures: true }) {
   const results: ({ type: "eth"; hash: string } | { type: "sub"; hash: string })[] = [];
 
-  const api = context.substrateApi();
+  const api = context.polkadotJs();
   const txs =
     transactions == undefined ? [] : Array.isArray(transactions) ? transactions : [transactions];
   for await (const call of txs) {

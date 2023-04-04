@@ -11,7 +11,7 @@ describeSuite({
     let api: ApiPromise;
 
     beforeAll(() => {
-      api = context.substrateApi();
+      api = context.polkadotJs();
     });
 
     it({

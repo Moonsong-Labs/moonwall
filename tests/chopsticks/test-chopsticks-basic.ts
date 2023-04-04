@@ -17,7 +17,7 @@ describeSuite({
     let api: ApiPromise;
 
     beforeAll(() => {
-      api = context.substrateApi({type: "moon"})
+      api = context.polkadotJs({type: "moon"})
     });
 
     it({
