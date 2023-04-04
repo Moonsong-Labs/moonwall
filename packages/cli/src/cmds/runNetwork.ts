@@ -1,5 +1,4 @@
 import PressToContinuePrompt from "inquirer-press-to-continue";
-import { setTimeout } from "timers/promises";
 import inquirer from "inquirer";
 import { MoonwallContext, runNetworkOnly } from "../lib/globalContext.js";
 import clear from "clear";
@@ -8,7 +7,9 @@ import { Environment } from "../types/config.js";
 import { executeTests } from "./runTests.js";
 import { parse } from "yaml";
 import fs from "fs/promises";
+import { createReadStream, stat } from "node:fs";
 import { importJsonConfig } from "../lib/configReader.js";
+import { ReadStream, watch } from "fs";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
@@ -208,22 +209,70 @@ const resolveTailChoice = async () => {
   const ui = new inquirer.ui.BottomBar();
 
   await new Promise(async (resolve) => {
-    const runningNode = MoonwallContext.getContext().nodes[0];
+    const ctx = MoonwallContext.getContext();
     const onData = (chunk: any) => ui.log.write(chunk.toString());
-    runningNode.stderr!.on("data", onData);
-    runningNode.stdout!.on("data", onData);
-    inquirer
-      .prompt({
-        name: "exitTail",
-        type: "press-to-continue",
-        anyKey: true,
-        pressToContinueMessage: " Press any key to stop tailing logs and go back  ↩️",
-      })
-      .then(() => {
-        runningNode.stderr!.off("data", onData);
-        runningNode.stdout!.off("data", onData);
-        resolve("");
+
+    if (ctx.foundation == "zombie") {
+      const logPath = process.env.MOON_COLLATOR_LOG;
+      let currentReadPosition = 0;
+
+      const readLog = () => {
+        stat(logPath, (err, stats) => {
+          if (err) {
+            console.error("Error reading log: ", err);
+            return;
+          }
+
+          const newReadPosition = stats.size;
+
+          if (newReadPosition > currentReadPosition) {
+            const stream = createReadStream(logPath, {
+              start: currentReadPosition,
+              end: newReadPosition,
+            });
+            stream.on("data", onData);
+            stream.on("end", () => {
+              currentReadPosition = newReadPosition;
+            });
+          }
+        });
+      };
+
+      const watcher = watch(logPath, (eventType) => {
+        if (eventType === "change") {
+          readLog();
+        }
       });
+
+      readLog();
+      inquirer
+        .prompt({
+          name: "exitTail",
+          type: "press-to-continue",
+          anyKey: true,
+          pressToContinueMessage: " Press any key to stop tailing logs and go back  ↩️",
+        })
+        .then(() => {
+          watcher.close();
+          resolve("");
+        });
+    } else {
+      const runningNode = ctx.nodes[0];
+      runningNode.stderr!.on("data", onData);
+      runningNode.stdout!.on("data", onData);
+      inquirer
+        .prompt({
+          name: "exitTail",
+          type: "press-to-continue",
+          anyKey: true,
+          pressToContinueMessage: " Press any key to stop tailing logs and go back  ↩️",
+        })
+        .then(() => {
+          runningNode.stderr!.off("data", onData);
+          runningNode.stdout!.off("data", onData);
+          resolve("");
+        });
+    }
 
     // TODO: Extend W.I.P below so support interactive tests whilst tailing logs
 

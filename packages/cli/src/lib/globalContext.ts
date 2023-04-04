@@ -12,12 +12,13 @@ import Debug from "debug";
 import { ConnectedProvider, MoonwallEnvironment, MoonwallProvider } from "../types/context.js";
 import fs from "node:fs";
 import { checkExists } from "../internal/files.js";
+import { checkZombieBins, getZombieConfig } from "../internal/zombieHelpers.js";
 const debugSetup = Debug("global:context");
 
 export const contextCreator = async (config: MoonwallConfig, env: string) => {
   const ctx = MoonwallContext.getContext(config);
   await runNetworkOnly(config);
-  await ctx.connectEnvironment(env);
+  await ctx.connectEnvironment();
   return ctx;
 };
 
@@ -54,6 +55,7 @@ export class MoonwallContext {
       }[],
       foundationType: env.foundation.type,
     };
+    this.foundation =  env.foundation.type
 
     switch (env.foundation.type) {
       case "read_only":
@@ -163,19 +165,17 @@ export class MoonwallContext {
 
     if (this.environment.foundationType === "zombie") {
       console.log("🧟 Spawning zombie nodes ...");
-      const buffer = fs.readFileSync(nodes[0].cmd, "utf-8");
-      const zombieConfig: zombie.LaunchConfig = JSON.parse(buffer);
-      const relayBinPath = zombieConfig.relaychain.default_command
-      await checkExists(relayBinPath)
 
-      const promises = zombieConfig.parachains.map((para)=>{
-        checkExists(para.collator.command)
-      })
-      await Promise.all(promises)
+      const zombieConfig = getZombieConfig(nodes[0].cmd)
+
+      await checkZombieBins(zombieConfig)     
 
       const network = await zombie.start("", zombieConfig, { silent: true });
       process.env.MOON_RELAY_WSS = network.nodesByName.alice.wsUri;
       process.env.MOON_PARA_WSS = network.nodesByName.alith.wsUri;
+      // TODO: infer parachain network based on another param
+      process.env.MOON_COLLATOR_LOG = `${network.tmpDir}/${zombieConfig.parachains[0].collator.name}.log`
+      console.log(network)
       this.zombieNetwork = network;
       return;
     }
@@ -186,7 +186,7 @@ export class MoonwallContext {
     await Promise.all(promises);
   }
 
-  public async connectEnvironment(environmentName: string) {
+  public async connectEnvironment() {
     // TODO: Explicitly communicate (DOCs and console) this is done automatically
     if (this.environment.foundationType == "zombie") {
       this.environment.providers = prepareProviders([
@@ -218,7 +218,6 @@ export class MoonwallContext {
       return MoonwallContext.getContext();
     }
 
-    const globalConfig = await importJsonConfig();
     const promises = this.environment.providers.map(
       async ({ name, type, connect }) =>
         new Promise(async (resolve) => {
@@ -227,10 +226,6 @@ export class MoonwallContext {
         })
     );
     await Promise.all(promises);
-
-    this.foundation = globalConfig.environments.find(
-      ({ name }) => name == environmentName
-    )!.foundation.type;
 
     // TODO: Do we actually need this?
     if (this.foundation == "dev") {
