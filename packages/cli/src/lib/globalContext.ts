@@ -175,7 +175,6 @@ export class MoonwallContext {
       process.env.MOON_PARA_WSS = network.nodesByName.alith.wsUri;
       // TODO: infer parachain network based on another param
       process.env.MOON_COLLATOR_LOG = `${network.tmpDir}/${zombieConfig.parachains[0].collator.name}.log`
-      console.log(network)
       this.zombieNetwork = network;
       return;
     }
