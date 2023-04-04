@@ -291,7 +291,7 @@ export class EthTester {
     const factory = new ContractFactory(contractCreation.abi, contractCreation.byteCode);
     return await this.genSignedTransaction({
       ...options,
-      data: (await factory.getDeployTransaction(...contractCreation.arguments)).data,
+      data: (await factory.getDeployTransaction(...(contractCreation.arguments || []))).data,
     });
   };
 
@@ -305,24 +305,28 @@ export class EthTester {
     rawTransaction: string | PromiseLike<string>
   ): Promise<JsonRpcResponse> => {
     return new Promise<JsonRpcResponse>(async (resolve, reject) => {
-      if (typeof this.web3.currentProvider == "string") {
-        reject("Web3 provider is not a valid provider");
-        return;
-      }
-      (this.web3.currentProvider as any).send(
-        {
-          jsonrpc: "2.0",
-          id: 1,
-          method: "eth_sendRawTransaction",
-          params: [await rawTransaction],
-        },
-        (error, result) => {
-          if (error) {
-            reject(`Failed to send signed transaction: ${error.message || error.toString()}`);
-          }
-          resolve(result as JsonRpcResponse);
+      try {
+        if (typeof this.web3.currentProvider == "string") {
+          reject("Web3 provider is not a valid provider");
+          return;
         }
-      );
+        (this.web3.currentProvider as any).send(
+          {
+            jsonrpc: "2.0",
+            id: 1,
+            method: "eth_sendRawTransaction",
+            params: [await rawTransaction],
+          },
+          (error, result) => {
+            if (error) {
+              reject(`Failed to send signed transaction: ${error.message || error.toString()}`);
+            }
+            resolve(result as JsonRpcResponse);
+          }
+        );
+      } catch (e) {
+        reject(e);
+      }
     });
   };
 }
