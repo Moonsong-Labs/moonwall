@@ -1,5 +1,14 @@
 # @moonwall/cli
 
+## 0.4.3
+
+### Patch Changes
+
+- 0cb5d7a: Zombienet logging
+
+  - Added the ability to tail with zombienet
+  - Changed the `.substrateApi()` getter on context to the more familiar `.polkadotJs()`
+
 ## 0.4.2
 
 ### Patch Changes
