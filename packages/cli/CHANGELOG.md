@@ -1,5 +1,14 @@
 # @moonwall/cli
 
+## 0.4.4
+
+### Patch Changes
+
+- a13ae96: CI updates and Zombie Fixes
+
+  - Test failures should bubble up to CI correctly now
+  - Zombienet now supports multiple collators
+
 ## 0.4.3
 
 ### Patch Changes
