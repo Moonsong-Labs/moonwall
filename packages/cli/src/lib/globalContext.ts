@@ -55,7 +55,7 @@ export class MoonwallContext {
       }[],
       foundationType: env.foundation.type,
     };
-    this.foundation =  env.foundation.type
+    this.foundation = env.foundation.type;
 
     switch (env.foundation.type) {
       case "read_only":
@@ -166,15 +166,18 @@ export class MoonwallContext {
     if (this.environment.foundationType === "zombie") {
       console.log("🧟 Spawning zombie nodes ...");
 
-      const zombieConfig = getZombieConfig(nodes[0].cmd)
+      const zombieConfig = getZombieConfig(nodes[0].cmd);
 
-      await checkZombieBins(zombieConfig)     
+      await checkZombieBins(zombieConfig);
 
       const network = await zombie.start("", zombieConfig, { silent: true });
+
       process.env.MOON_RELAY_WSS = network.nodesByName.alice.wsUri;
       process.env.MOON_PARA_WSS = network.nodesByName.alith.wsUri;
       // TODO: infer parachain network based on another param
-      process.env.MOON_COLLATOR_LOG = `${network.tmpDir}/${zombieConfig.parachains[0].collator.name}.log`
+      process.env.MOON_COLLATOR_LOG = zombieConfig.parachains[0].collator
+        ? `${network.tmpDir}/${zombieConfig.parachains[0].collator.name}.log`
+        : `${network.tmpDir}/${zombieConfig.parachains[0].collators[0].name}.log`;
       this.zombieNetwork = network;
       return;
     }

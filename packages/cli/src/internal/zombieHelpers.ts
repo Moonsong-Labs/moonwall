@@ -7,7 +7,17 @@ export async function checkZombieBins(config: LaunchConfig) {
   await checkExists(relayBinPath);
 
   const promises = config.parachains.map((para) => {
-    checkExists(para.collator.command);
+    if (para.collator) {
+      checkExists(para.collator.command);
+    }
+
+
+  
+    if (para.collators) {
+      para.collators.forEach((coll) => {
+        checkExists(coll.command);
+      });
+    }
   });
   await Promise.all(promises);
 }

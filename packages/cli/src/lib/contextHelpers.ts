@@ -10,7 +10,6 @@ import {
   createAndFinalizeBlock
 } from "@moonwall/util";
 import {Web3} from "web3";
-import { ethers } from "ethers";
 import { MoonwallContext } from "./globalContext.js";
 import { assert } from "vitest";
 import Debug, { Debugger } from "debug";

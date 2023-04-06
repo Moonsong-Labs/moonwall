@@ -16,6 +16,18 @@
       }
     },
     {
+      "name": "para_test",
+      "testFileDir": ["tests/zombie"],
+      "multiThreads": false,
+      "foundation": {
+        "type": "zombie",
+        "zombieSpec": {
+          "name": "zombienet",
+          "configPath": "./configs/para_network.json"
+        }
+      }
+    },
+    {
       "name": "basic",
       "testFileDir": ["tests/basic/"],
       "foundation": {

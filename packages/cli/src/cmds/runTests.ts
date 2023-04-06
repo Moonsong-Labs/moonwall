@@ -3,6 +3,7 @@ import { startVitest } from "vitest/node";
 import { UserConfig } from "vitest";
 import { contextCreator } from "../lib/globalContext.js";
 import { Environment } from "../types/config.js";
+import fs from "node:fs";
 import path from "path";
 import chalk from "chalk";
 
@@ -21,14 +22,20 @@ export async function testCmd(envName: string, additionalArgs?: {}) {
   }
 
   process.env.MOON_TEST_ENV = envName;
-  try {
-    await executeTests(env, additionalArgs);
-  } catch (e) {
-    throw new Error(e)
+
+  const result = await executeTests(env, additionalArgs);
+  const buffer = fs.readFileSync(result.cache.results.getCachePath(), "utf-8");
+  const { results } = JSON.parse(buffer);
+  const failed = results.map((result) => result[1].failed).filter((status) => status === true);
+
+  if (failed.length > 0) {
+    process.exit(1);
+  } else {
+    process.exit(0);
   }
 }
 
-export async function executeTests(env: Environment, additionalArgs?: {}): Promise<void> {
+export async function executeTests(env: Environment, additionalArgs?: {}) {
   const globalConfig = await importJsonConfig();
 
   if (env.foundation.type === "read_only") {
@@ -73,7 +80,7 @@ export async function executeTests(env: Environment, additionalArgs?: {}): Promi
 
   try {
     const folders = env.testFileDir.map((folder) => path.join("/", folder, "/"));
-    await startVitest("test", folders, { ...options, ...additionalArgs });
+    return await startVitest("test", folders, { ...options, ...additionalArgs });
   } catch (e) {
     console.error(e);
     process.exit(1);
