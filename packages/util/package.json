@@ -1,7 +1,7 @@
 {
   "name": "@moonwall/util",
   "type": "module",
-  "version": "0.4.2",
+  "version": "0.4.5",
   "description": "Testing framework for the Moon family of projects",
   "author": "timbrinded",
   "license": "ISC",
