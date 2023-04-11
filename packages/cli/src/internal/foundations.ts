@@ -105,9 +105,6 @@ export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
   return {
     cmd: chopsticksCmd,
     args: chopsticksArgs,
-    launch,
-    // rtUpgradePath: launchSpecs[0].rtUpgradePath
-    //   ? launchSpecs[0].rtUpgradePath
-    //   : "",
+    launch
   };
 }

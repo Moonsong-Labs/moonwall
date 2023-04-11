@@ -1,5 +1,5 @@
 import "@moonbeam-network/api-augment";
-import fs, { readFileSync } from "fs";
+import fs, { readFileSync, existsSync } from "fs";
 import chalk from "chalk";
 import type { WeightV2 } from "@polkadot/types/interfaces";
 import { ApiPromise } from "@polkadot/api";
@@ -21,6 +21,9 @@ export interface UpgradePreferences {
 }
 
 export async function upgradeRuntimeChopsticks(context: ChopsticksContext, path: string) {
+  if (!!!existsSync(path)) {
+    throw new Error("Runtime wasm not found at path: " + path);
+  }
   const rtWasm = readFileSync(path);
   const rtHex = `0x${rtWasm.toString("hex")}`;
   const rtHash = blake2AsHex(rtHex);
