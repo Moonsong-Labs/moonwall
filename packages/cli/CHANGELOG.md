@@ -1,5 +1,11 @@
 # @moonwall/cli
 
+## 0.4.6
+
+### Patch Changes
+
+- 43c5d7c: Minor Fix
+
 ## 0.4.5
 
 ### Patch Changes
