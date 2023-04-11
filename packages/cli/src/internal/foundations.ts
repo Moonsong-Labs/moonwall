@@ -1,11 +1,16 @@
-import {
-  ChopsticksLaunchSpec,
-  DevLaunchSpec,
-  ZombieLaunchSpec,
-} from "../types/config.js";
+import chalk from "chalk";
+import { ChopsticksLaunchSpec, DevLaunchSpec, ZombieLaunchSpec } from "../types/config.js";
 
 export function parseZombieCmd(launchSpec: ZombieLaunchSpec) {
-  return { cmd: launchSpec.configPath };
+  if (!!launchSpec) {
+    return { cmd: launchSpec.configPath };
+  } else {
+    throw new Error(
+      `No ZombieSpec found in config. \n Are you sure your ${chalk.bgWhiteBright.blackBright(
+        "moonwall.config.json"
+      )} file has the correct "configPath" in zombieSpec?`
+    );
+  }
 }
 
 export function parseRunCmd(launchSpec: DevLaunchSpec) {

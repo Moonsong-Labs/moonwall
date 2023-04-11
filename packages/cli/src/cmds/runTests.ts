@@ -23,10 +23,8 @@ export async function testCmd(envName: string, additionalArgs?: {}) {
 
   process.env.MOON_TEST_ENV = envName;
 
-  const result = await executeTests(env, additionalArgs);
-  const buffer = fs.readFileSync(result.cache.results.getCachePath(), "utf-8");
-  const { results } = JSON.parse(buffer);
-  const failed = results.map((result) => result[1].failed).filter((status) => status === true);
+  const vitest = await executeTests(env, additionalArgs);
+  const failed = vitest.state.getFiles().filter((file) => file.result.state === "fail");
 
   if (failed.length > 0) {
     process.exit(1);
