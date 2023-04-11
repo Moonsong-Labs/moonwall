@@ -1,5 +1,13 @@
 # @moonwall/util
 
+## 0.4.5
+
+### Patch Changes
+
+- 1d006b2: Minor Fixes
+  - Refactored test fails for CI
+  - Improved ZombieNet error messaging #51
+
 ## 0.4.2
 
 ### Patch Changes
