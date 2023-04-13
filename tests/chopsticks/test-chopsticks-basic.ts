@@ -23,7 +23,6 @@ describeSuite({
     it({
       id: "T1",
       title: "Query the chain",
-      modifier: "only",
       test: async function () {
         const chainName = api.consts.system.version.specName.toString();
         const currentBlockHeight = (await api.rpc.chain.getHeader()).number.toNumber();
