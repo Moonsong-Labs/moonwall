@@ -178,7 +178,7 @@ export function describeSuite({
         context: {
           ...context,
           waitBlock: async (
-            blocksToWaitFor: number,
+            blocksToWaitFor: number = 1,
             chain: ZombieNodeType = "parachain",
             timeout: number = 60000
           ) => {
@@ -221,6 +221,50 @@ export function describeSuite({
             }
 
             await upgradeRuntime(api, options);
+          },
+        },
+        it: testCase,
+        log: logger(),
+      });
+    } else if (foundationMethods == "read_only") {
+      testCases({
+        context: {
+          ...context,
+          waitBlock: async (
+            blocksToWaitFor: number = 1,
+            chainName?: string,
+            timeout: number = 60000
+          ) => {
+            setTimeout(() => {
+              throw new Error(
+                `${timeout / 1000} s timeout exceeded whilst waiting for ${blocksToWaitFor} blocks`
+              );
+            }, timeout);
+
+            const ctx = MoonwallContext.getContext();
+            const provider = chainName
+              ? ctx.providers.find((prov) => prov.name === chainName  && (prov.type === "moon" || prov.type === "polkadotJs"))
+              : ctx.providers.find((prov) => prov.type === "moon" || prov.type === "polkadotJs")
+            
+            if (!!!provider) {
+              throw new Error("No PolkadotJs api found in provider config");
+            } 
+
+            const api = provider.api as ApiPromise;
+
+            const currentBlockNumber = (
+              await api.rpc.chain.getBlock()
+            ).block.header.number.toNumber();
+
+            while (true) {
+              await new Promise((resolve) => setTimeout(resolve, 100));
+              const newBlockNumber = (
+                await api.rpc.chain.getBlock()
+              ).block.header.number.toNumber();
+              if (newBlockNumber >= currentBlockNumber + blocksToWaitFor) {
+                break;
+              }
+            }
           },
         },
         it: testCase,

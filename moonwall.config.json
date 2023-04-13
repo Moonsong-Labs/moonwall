@@ -285,6 +285,11 @@
           "name": "w3",
           "type": "web3",
           "endpoints": ["wss://moonbeam.api.onfinality.io/public-ws"]
+        },
+        {
+          "name": "MB",
+          "type": "moon",
+          "endpoints": ["wss://moonbeam.api.onfinality.io/public-ws"]
         }
       ]
     },

@@ -72,9 +72,9 @@ describeSuite({
       id: "T04",
       title: "Perform a runtime upgrade",
       timeout: 600000,
-      modifier: "only",
+      // modifier: "only",
       test: async function () {
-        // await context.upgradeRuntime()
+        await context.upgradeRuntime()
         log((await relayApi.rpc.chain.getBlock()).block.header.number.toNumber())
         await context.waitBlock(10, "relaychain", 2000)
         log((await relayApi.rpc.chain.getBlock()).block.header.number.toNumber())

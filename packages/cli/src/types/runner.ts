@@ -56,7 +56,17 @@ export type ITestSuiteType =
       notChainType?: "moonbeam" | "moonriver" | "moonbase";
     }
   | {
-      foundationMethods: "read_only" | "fork";
+      foundationMethods: "read_only";
+      id: string;
+      title: string;
+      testCases: (TestContext: ReadOnlyTestContext) => void;
+      minRtVersion?: number;
+      chainType?: "moonbeam" | "moonriver" | "moonbase";
+      notChainType?: "moonbeam" | "moonriver" | "moonbase";
+      options?: Object;
+    }
+  | {
+      foundationMethods: "fork";
       id: string;
       title: string;
       testCases: (TestContext: GenericTestContext) => void;
@@ -68,6 +78,12 @@ export type ITestSuiteType =
 
 export interface DevTestContext {
   context: DevModeContext;
+  it: CustomTest;
+  log: Debugger;
+}
+
+export interface ReadOnlyTestContext {
+  context: ReadOnlyContext;
   it: CustomTest;
   log: Debugger;
 }
@@ -97,9 +113,13 @@ export interface GenericContext {
   web3: ([name]?: string) => Web3;
 }
 
+export interface ReadOnlyContext extends GenericContext {
+  waitBlock: (blocksToWaitFor?: number,chain?: string, timeout?: number) => Promise<void>;
+}
+
 export interface ZombieContext extends GenericContext {
   upgradeRuntime: (logger?: Debugger) => Promise<void>;
-  waitBlock: (blocksToWaitFor: number, chain?: ZombieNodeType, timeout?: number) => Promise<void>;
+  waitBlock: (blocksToWaitFor?: number, chain?: ZombieNodeType, timeout?: number) => Promise<void>;
 }
 
 export interface ChopsticksContext extends GenericContext {
