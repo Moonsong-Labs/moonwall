@@ -1,5 +1,15 @@
 # @moonwall/cli
 
+## 0.4.7
+
+### Patch Changes
+
+- 06830cd: Fixes
+  - [#67](https://github.com/Moonsong-Labs/moonwall/issues/67)
+  - [#59](https://github.com/Moonsong-Labs/moonwall/issues/59)
+- Updated dependencies [06830cd]
+  - @moonwall/util@0.4.7
+
 ## 0.4.6
 
 ### Patch Changes
