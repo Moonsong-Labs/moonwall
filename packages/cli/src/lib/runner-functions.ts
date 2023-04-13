@@ -1,11 +1,16 @@
 import "@moonbeam-network/api-augment";
 import { describe, it, beforeAll, afterAll, File, assert } from "vitest";
-import { ApiPromise } from "@polkadot/api";
+import { ApiPromise, WsProvider } from "@polkadot/api";
 import { Signer } from "ethers";
-import {Web3} from "web3";
+import { Web3 } from "web3";
 import { ApiTypes, AugmentedEvent, SubmittableExtrinsic } from "@polkadot/api/types/index.js";
-import { upgradeRuntimeChopsticks } from "./upgrade.js";
-import { ChopsticksContext, GenericContext, ITestSuiteType } from "../types/runner.js";
+import { UpgradePreferences, upgradeRuntime, upgradeRuntimeChopsticks } from "./upgrade.js";
+import {
+  ChopsticksContext,
+  GenericContext,
+  ITestSuiteType,
+  ZombieContext,
+} from "../types/runner.js";
 import { MoonwallContext, contextCreator } from "./globalContext.js";
 import { BlockCreation, ChopsticksBlockCreation } from "./contextHelpers.js";
 import { createDevBlock, devForkToFinalizedHead } from "../internal/devModeHelpers.js";
@@ -16,7 +21,7 @@ import {
   sendNewBlockRequest,
   sendSetStorageRequest,
 } from "../internal/chopsticksHelpers.js";
-import { ProviderType } from "../types/config.js";
+import { ProviderType, ZombieNodeType } from "../types/config.js";
 import { importJsonConfig } from "./configReader.js";
 import Debug, { Debugger } from "debug";
 import chalk from "chalk";
@@ -47,7 +52,6 @@ export function describeSuite({
   }
 
   beforeAll(async function () {
-
     const globalConfig = await importJsonConfig();
     ctx = await contextCreator(globalConfig, process.env.MOON_TEST_ENV);
     if (ctx.environment.foundationType === "dev") {
@@ -164,6 +168,103 @@ export function describeSuite({
           }) => await sendSetStorageRequest(params),
           upgradeRuntime: async (chCtx: ChopsticksContext) => {
             await upgradeRuntimeChopsticks(chCtx, ctx.rtUpgradePath!);
+          },
+        },
+        it: testCase,
+        log: logger(),
+      });
+    } else if (foundationMethods == "zombie") {
+      testCases({
+        context: {
+          ...context,
+          waitBlock: async (
+            blocksToWaitFor: number = 1,
+            chain: ZombieNodeType = "parachain",
+            timeout: number = 60000
+          ) => {
+            setTimeout(() => {
+              throw new Error(
+                `${timeout / 1000} s timeout exceeded whilst waiting for ${blocksToWaitFor} blocks`
+              );
+            }, timeout);
+
+            const ctx = MoonwallContext.getContext();
+            const api = ctx.providers.find((prov) => prov.name === chain).api as ApiPromise;
+            const currentBlockNumber = (
+              await api.rpc.chain.getBlock()
+            ).block.header.number.toNumber();
+
+            while (true) {
+              await new Promise((resolve) => setTimeout(resolve, 1000));
+              const newBlockNumber = (
+                await api.rpc.chain.getBlock()
+              ).block.header.number.toNumber();
+              if (newBlockNumber >= currentBlockNumber + blocksToWaitFor) {
+                break;
+              }
+            }
+          },
+          upgradeRuntime: async (logger?: Debugger) => {
+            const ctx = MoonwallContext.getContext();
+            const api = ctx.providers.find((prov) => prov.name === "para").api as ApiPromise;
+
+            const options: UpgradePreferences = {
+              runtimeName: "moonbase",
+              runtimeTag: "local",
+              localPath: ctx.rtUpgradePath!,
+              useGovernance: false,
+              // waitMigration: true,
+            };
+
+            if (logger) {
+              options.logger = logger;
+            }
+
+            await upgradeRuntime(api, options);
+          },
+        },
+        it: testCase,
+        log: logger(),
+      });
+    } else if (foundationMethods == "read_only") {
+      testCases({
+        context: {
+          ...context,
+          waitBlock: async (
+            blocksToWaitFor: number = 1,
+            chainName?: string,
+            timeout: number = 60000
+          ) => {
+            setTimeout(() => {
+              throw new Error(
+                `${timeout / 1000} s timeout exceeded whilst waiting for ${blocksToWaitFor} blocks`
+              );
+            }, timeout);
+
+            const ctx = MoonwallContext.getContext();
+            const provider = chainName
+              ? ctx.providers.find((prov) => prov.name === chainName  && (prov.type === "moon" || prov.type === "polkadotJs"))
+              : ctx.providers.find((prov) => prov.type === "moon" || prov.type === "polkadotJs")
+            
+            if (!!!provider) {
+              throw new Error("No PolkadotJs api found in provider config");
+            } 
+
+            const api = provider.api as ApiPromise;
+
+            const currentBlockNumber = (
+              await api.rpc.chain.getBlock()
+            ).block.header.number.toNumber();
+
+            while (true) {
+              await new Promise((resolve) => setTimeout(resolve, 100));
+              const newBlockNumber = (
+                await api.rpc.chain.getBlock()
+              ).block.header.number.toNumber();
+              if (newBlockNumber >= currentBlockNumber + blocksToWaitFor) {
+                break;
+              }
+            }
           },
         },
         it: testCase,

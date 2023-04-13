@@ -124,6 +124,7 @@ export class MoonwallContext {
           args: [],
           launch: true,
         });
+        this.rtUpgradePath = env.foundation.rtUpgradePath;
 
         debugSetup(`🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`);
         break;
@@ -204,12 +205,12 @@ export class MoonwallContext {
           endpoints: [process.env.MOON_PARA_WSS],
         },
         {
-          name: "mb",
+          name: "parachain",
           type: "moon",
           endpoints: [process.env.MOON_PARA_WSS],
         },
         {
-          name: "relay",
+          name: "relaychain",
           type: "polkadotJs",
           endpoints: [process.env.MOON_RELAY_WSS],
         },
@@ -253,6 +254,7 @@ export class MoonwallContext {
       const paraApi = this.providers.find((a) => a.type == "moon").api as ApiPromise;
       const relayApi = this.providers.find((a) => a.type == "polkadotJs").api as ApiPromise;
 
+      // TODO: Create promise that rejects if timeout is reached
       while ((await relayApi.rpc.chain.getBlock()).block.header.number.toNumber() == 0) {
         await setTimeout(500);
       }

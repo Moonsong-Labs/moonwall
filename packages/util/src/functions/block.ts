@@ -79,7 +79,7 @@ export const getBlockExtrinsic = async (
     (ext) => ext.method.section == section && ext.method.method == method
   );
   const extrinsic = extIndex > -1 ? block.extrinsics[extIndex] : null;
-  const events = records
+  const events =( records as any)
     .filter(({ phase }) => phase.isApplyExtrinsic && phase.asApplyExtrinsic.eq(extIndex))
     .map(({ event }) => event);
   const resultEvent = events.find(
@@ -98,7 +98,7 @@ export const getBlockTime = (signedBlock: any) =>
 export const checkBlockFinalized = async (api: ApiPromise, number: number) => {
   return {
     number,
-    finalized: (await api.rpc.moon.isBlockFinalized(await api.rpc.chain.getBlockHash(number)))
+    finalized: (await (api as any).rpc.moon.isBlockFinalized(await api.rpc.chain.getBlockHash(number)))
       .isTrue,
   };
 };

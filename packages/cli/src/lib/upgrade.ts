@@ -10,6 +10,7 @@ import { cancelReferendaWithCouncil, executeProposalWithCouncil } from "./govern
 import { alith } from "@moonwall/util";
 import { ChopsticksContext } from "../types/runner.js";
 import { getRuntimeWasm } from "./binaries.js";
+import { Debugger } from "debug";
 
 export interface UpgradePreferences {
   runtimeName: "moonbase" | "moonriver" | "moonbeam";
@@ -18,6 +19,7 @@ export interface UpgradePreferences {
   waitMigration?: boolean;
   useGovernance?: boolean;
   localPath?: string;
+  logger?: Debugger;
 }
 
 export async function upgradeRuntimeChopsticks(context: ChopsticksContext, path: string) {
@@ -49,6 +51,14 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
     ...preferences,
   };
   return new Promise<number>(async (resolve, reject) => {
+    const log = (text: string) => {
+      if (options.logger) {
+        return options.logger(text);
+      } else {
+        return;
+      }
+    };
+
     try {
       const code = fs
         .readFileSync(
@@ -56,6 +66,7 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
         )
         .toString();
 
+      log("Checking if upgrade is needed...");
       const existingCode = await api.rpc.state.getStorage(":code");
       if (existingCode.toString() == code) {
         reject(
@@ -65,14 +76,19 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
         );
       }
 
+      log("Getting nonce...");
+
       let nonce = (await api.rpc.system.accountNextIndex(options.from.address)).toNumber();
 
+      log("Getting weight...");
       if (options.useGovernance) {
+        log("Using governance...");
         // We just prepare the proposals
         let proposal = api.tx.parachainSystem.authorizeUpgrade(blake2AsHex(code));
         let encodedProposal = proposal.method.toHex();
         let encodedHash = blake2AsHex(encodedProposal);
 
+        log("Checking if preimage already exists...");
         // Check if already in governance
         const preImageExists =
           api.query.preimage && (await api.query.preimage.statusFor(encodedHash));
@@ -80,16 +96,16 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
           !api.query.preimage && ((await api.query.democracy.preimages(encodedHash)) as any);
 
         if (api.query.preimage && preImageExists.isSome && preImageExists.unwrap().isRequested) {
-          process.stdout.write(`Preimage ${encodedHash} already exists !\n`);
+          log(`Preimage ${encodedHash} already exists !\n`);
         } else if (
           // TODO: remove support for democracy preimage support after 2000
           !api.query.preimage &&
           democracyPreImageExists.isSome &&
           democracyPreImageExists.unwrap().isAvailable
         ) {
-          process.stdout.write(`Preimage ${encodedHash} already exists !\n`);
+          log(`Preimage ${encodedHash} already exists !\n`);
         } else {
-          process.stdout.write(
+          log(
             `Registering preimage (${sha256(Buffer.from(code))} [~${Math.floor(
               code.length / 1024
             )} kb])...`
@@ -104,7 +120,7 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
               .notePreimage(encodedProposal)
               .signAndSend(options.from, { nonce: nonce++ });
           }
-          process.stdout.write(`✅\n`);
+          log(`Complete ✅`);
         }
 
         // Check if already in referendum
@@ -132,20 +148,20 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
               )?.[0];
 
         if (referendaIndex !== null && referendaIndex !== undefined) {
-          process.stdout.write(`Vote for upgrade already in referendum, cancelling it.\n`);
+          log(`Vote for upgrade already in referendum, cancelling it.`);
           await cancelReferendaWithCouncil(api, referendaIndex);
         }
         await executeProposalWithCouncil(api, encodedHash);
 
         // Needs to retrieve nonce after those governance calls
         nonce = (await api.rpc.system.accountNextIndex(options.from.address)).toNumber();
-        process.stdout.write(`Enacting authorized upgrade...`);
+        log(`Enacting authorized upgrade...`);
         await api.tx.parachainSystem
           .enactAuthorizedUpgrade(code)
           .signAndSend(options.from, { nonce: nonce++ });
-        process.stdout.write(`✅\n`);
+        log(`Complete ✅`);
       } else {
-        process.stdout.write(
+        log(
           `Sending sudo.setCode (${sha256(Buffer.from(code))} [~${Math.floor(
             code.length / 1024
           )} kb])...`
@@ -162,16 +178,16 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
                 }
           )
           .signAndSend(options.from, { nonce: nonce++ });
-        process.stdout.write(`✅\n`);
+        log(`✅`);
       }
 
-      process.stdout.write(`Waiting to apply new runtime (${chalk.red(`~4min`)})...`);
+      log(`Waiting to apply new runtime (${chalk.red(`~4min`)})...`);
       let isInitialVersion = true;
       const unsub = await api.rpc.state.subscribeRuntimeVersion(async (version) => {
         if (!isInitialVersion) {
           const blockNumber = (await api.rpc.chain.getHeader()).number.toNumber();
-          console.log(
-            `✅ [${version.implName}-${version.specVersion} ${existingCode
+          log(
+            `Complete ✅ [${version.implName}-${version.specVersion} ${existingCode
               .toString()
               .slice(0, 6)}...] [#${blockNumber}]`
           );

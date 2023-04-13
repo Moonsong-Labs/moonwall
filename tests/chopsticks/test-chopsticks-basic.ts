@@ -29,6 +29,7 @@ describeSuite({
         log(`You are now connected to ${chainName} at height #${currentBlockHeight}`);
         expect(currentBlockHeight).toBeGreaterThan(0);
         expect(chainName).toBe("moonriver");
+        log(JSON.stringify(await api.rpc.state.getStorage(":code")).slice(0,20))
       },
     });
 

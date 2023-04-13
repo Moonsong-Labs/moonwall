@@ -65,7 +65,7 @@ export async function executeTests(env: Environment, additionalArgs?: {}) {
     reporters: env.html ? ["verbose", "html"] : ["verbose"],
     testTimeout: 10000,
     hookTimeout: 500000,
-    useAtomics: false,
+    useAtomics: true,
     passWithNoTests: false,
     threads: true,
     include: env.include ? env.include : ["**/{test,spec,test_,test-}*{ts,mts,cts}"],
@@ -73,6 +73,7 @@ export async function executeTests(env: Environment, additionalArgs?: {}) {
 
   if (!env.multiThreads || process.env.MOON_SINGLE_THREAD === "true") {
     // process.env.MOON_RECYCLE = "true";
+    options.useAtomics = false;
     options.threads = false;
   }
 

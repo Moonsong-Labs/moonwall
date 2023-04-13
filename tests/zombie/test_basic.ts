@@ -30,8 +30,8 @@ describeSuite({
 
     it({
       id: "T02",
-      title: "Check relaychain api correctly connected",
-      test: function () {
+      title: "Check parachain api correctly connected",
+      test: async function () {
         const network = paraApi.consts.system.version.specName.toString();
         expect(network).to.contain("moonbase");
 
@@ -65,6 +65,19 @@ describeSuite({
 
         const balAfter = (await paraApi.query.system.account(BALTATHAR_ADDRESS)).data.free;
         expect(balBefore.lt(balAfter)).to.be.true;
+      },
+    });
+
+    it({
+      id: "T04",
+      title: "Perform a runtime upgrade",
+      timeout: 600000,
+      modifier: "skip",
+      test: async function () {
+        await context.upgradeRuntime()
+        log((await relayApi.rpc.chain.getBlock()).block.header.number.toNumber())
+        await context.waitBlock(5, "relaychain", 40000)
+        log((await relayApi.rpc.chain.getBlock()).block.header.number.toNumber())
       },
     });
   },

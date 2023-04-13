@@ -6,9 +6,9 @@
     {
       "name": "zombie_test",
       "testFileDir": ["tests/zombie"],
-      "multiThreads": false,
       "foundation": {
         "type": "zombie",
+        "rtUpgradePath": "./tmp/moonbase-runtime-2201.wasm",
         "zombieSpec": {
           "name": "zombienet",
           "configPath": "./configs/zombie.json"
@@ -41,7 +41,7 @@
       "include": ["**/*basic*"],
       "foundation": {
         "type": "chopsticks",
-        "rtUpgradePath": "./tmp/moonriver-runtime-2201.wasm",
+        "rtUpgradePath": "./tmp/moonriver_runtime.compact.compressed.wasm",
         "launchSpec": [
           {
             "name": "mb",
@@ -284,6 +284,11 @@
         {
           "name": "w3",
           "type": "web3",
+          "endpoints": ["wss://moonbeam.api.onfinality.io/public-ws"]
+        },
+        {
+          "name": "MB",
+          "type": "moon",
           "endpoints": ["wss://moonbeam.api.onfinality.io/public-ws"]
         }
       ]
