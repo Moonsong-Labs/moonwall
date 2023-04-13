@@ -1,5 +1,13 @@
 # @moonwall/cli
 
+## 0.4.8
+
+### Patch Changes
+
+- dc3a085: Typo
+- Updated dependencies [dc3a085]
+  - @moonwall/util@0.4.8
+
 ## 0.4.7
 
 ### Patch Changes

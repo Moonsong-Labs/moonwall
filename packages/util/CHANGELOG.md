@@ -1,5 +1,11 @@
 # @moonwall/util
 
+## 0.4.8
+
+### Patch Changes
+
+- dc3a085: Typo
+
 ## 0.4.7
 
 ### Patch Changes
