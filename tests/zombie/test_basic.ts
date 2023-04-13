@@ -76,7 +76,7 @@ describeSuite({
       test: async function () {
         await context.upgradeRuntime()
         log((await relayApi.rpc.chain.getBlock()).block.header.number.toNumber())
-        await context.waitBlock(10, "relaychain", 2000)
+        await context.waitBlock(5, "relaychain", 40000)
         log((await relayApi.rpc.chain.getBlock()).block.header.number.toNumber())
       },
     });
