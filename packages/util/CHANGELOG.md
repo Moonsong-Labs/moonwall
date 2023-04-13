@@ -1,5 +1,13 @@
 # @moonwall/util
 
+## 0.4.7
+
+### Patch Changes
+
+- 06830cd: Fixes
+  - [#67](https://github.com/Moonsong-Labs/moonwall/issues/67)
+  - [#59](https://github.com/Moonsong-Labs/moonwall/issues/59)
+
 ## 0.4.5
 
 ### Patch Changes
