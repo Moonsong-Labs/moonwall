@@ -1,5 +1,5 @@
 export type MoonwallConfig = {
-  $schema: string
+  $schema: string;
   label: string;
   defaultTestTimeout: number;
   environments: Environment[];
@@ -25,16 +25,14 @@ export type IFoundation =
       rtUpgradePath?: string;
       launchSpec: ChopsticksLaunchSpec[];
     }
-    |
-    {
-      type: "zombie",
+  | {
+      type: "zombie";
+      rtUpgradePath?: string;
       zombieSpec: ZombieLaunchSpec;
     }
   | {
       type: "read_only" | "fork";
     };
-
-
 
 export type FoundationType = IFoundation["type"];
 
@@ -73,9 +71,6 @@ export interface ProviderConfig {
   endpoints: string[];
 }
 
-export type ProviderType =
-  | "polkadotJs"
-  | "ethers"
-  | "web3"
-  | "moon"
-  | "unknown";
+export type ProviderType = "polkadotJs" | "ethers" | "web3" | "moon" | "unknown";
+
+export type ZombieNodeType = "relaychain" | "parachain";

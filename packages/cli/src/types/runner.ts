@@ -1,9 +1,13 @@
 import { ApiPromise } from "@polkadot/api";
 import { Signer } from "ethers";
-import {Web3} from "web3";
+import { Web3 } from "web3";
 import { ApiTypes, AugmentedEvent, SubmittableExtrinsic } from "@polkadot/api/types/index.js";
-import { BlockCreation, BlockCreationResponse, ChopsticksBlockCreation } from "../lib/contextHelpers.js";
-import { ProviderType } from "./config.js";
+import {
+  BlockCreation,
+  BlockCreationResponse,
+  ChopsticksBlockCreation,
+} from "../lib/contextHelpers.js";
+import { ProviderType, ZombieNodeType } from "./config.js";
 import { Debugger } from "debug";
 
 export interface CustomTest {
@@ -22,6 +26,7 @@ export interface CustomTest {
 // TODO: make chaintype/rt filters dependent on foundation type and a type itself
 export type ITestSuiteType =
   | {
+      foundationMethods: "dev";
       id: string;
       title: string;
       testCases: (TestContext: DevTestContext) => void;
@@ -29,9 +34,9 @@ export type ITestSuiteType =
       minRtVersion?: number;
       chainType?: "moonbeam" | "moonriver" | "moonbase";
       notChainType?: "moonbeam" | "moonriver" | "moonbase";
-      foundationMethods: "dev";
     }
   | {
+      foundationMethods: "chopsticks";
       id: string;
       title: string;
       testCases: (TestContext: ChopsticksTestContext) => void;
@@ -39,9 +44,19 @@ export type ITestSuiteType =
       minRtVersion?: number;
       chainType?: "moonbeam" | "moonriver" | "moonbase";
       notChainType?: "moonbeam" | "moonriver" | "moonbase";
-      foundationMethods: "chopsticks";
     }
   | {
+      foundationMethods: "zombie";
+      id: string;
+      title: string;
+      testCases: (TestContext: ZombieTestContext) => void;
+      options?: Object;
+      minRtVersion?: number;
+      chainType?: "moonbeam" | "moonriver" | "moonbase";
+      notChainType?: "moonbeam" | "moonriver" | "moonbase";
+    }
+  | {
+      foundationMethods: "read_only" | "fork";
       id: string;
       title: string;
       testCases: (TestContext: GenericTestContext) => void;
@@ -49,7 +64,6 @@ export type ITestSuiteType =
       chainType?: "moonbeam" | "moonriver" | "moonbase";
       notChainType?: "moonbeam" | "moonriver" | "moonbase";
       options?: Object;
-      foundationMethods: "read_only" | "fork" | "zombie";
     };
 
 export interface DevTestContext {
@@ -60,6 +74,12 @@ export interface DevTestContext {
 
 export interface ChopsticksTestContext {
   context: ChopsticksContext;
+  it: CustomTest;
+  log: Debugger;
+}
+
+export interface ZombieTestContext {
+  context: ZombieContext;
   it: CustomTest;
   log: Debugger;
 }
@@ -75,6 +95,11 @@ export interface GenericContext {
   polkadotJs: (options?: { apiName?: string; type?: ProviderType }) => ApiPromise;
   ethersSigner: ([name]?: string) => Signer;
   web3: ([name]?: string) => Web3;
+}
+
+export interface ZombieContext extends GenericContext {
+  upgradeRuntime: (logger?: Debugger) => Promise<void>;
+  waitBlock: (blocksToWaitFor: number, chain?: ZombieNodeType, timeout?: number) => Promise<void>;
 }
 
 export interface ChopsticksContext extends GenericContext {

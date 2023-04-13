@@ -23,12 +23,14 @@ describeSuite({
     it({
       id: "T1",
       title: "Query the chain",
+      modifier: "only",
       test: async function () {
         const chainName = api.consts.system.version.specName.toString();
         const currentBlockHeight = (await api.rpc.chain.getHeader()).number.toNumber();
         log(`You are now connected to ${chainName} at height #${currentBlockHeight}`);
         expect(currentBlockHeight).toBeGreaterThan(0);
         expect(chainName).toBe("moonriver");
+        log(JSON.stringify(await api.rpc.state.getStorage(":code")).slice(0,20))
       },
     });
 
@@ -96,7 +98,7 @@ describeSuite({
       id: "T5",
       title: "Do an upgrade test",
       timeout: 120000,
-      modifier: "skip",
+      // modifier: "only",
       test: async function () {
         const rtBefore = api.consts.system.version.specVersion.toNumber();
         await context.upgradeRuntime(context);

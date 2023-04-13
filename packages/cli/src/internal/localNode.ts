@@ -32,8 +32,8 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
   runningNode.on("error", (err) => {
     if ((err as any).errno == "ENOENT") {
       console.error(
-        `\x1b[31mMissing Moonbeam binary at` +
-          `(${cmd}).\nPlease compile the Moonbeam project\x1b[0m`
+        `\x1b[31mMissing Local binary at` +
+          `(${cmd}).\nPlease compile the project\x1b[0m`
       );
     } else {
       console.error(err);
@@ -45,7 +45,7 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
   const binaryLogs: any[] = [];
   await new Promise<void>((resolve, reject) => {
     const timer = setTimeout(() => {
-      console.error(chalk.redBright("Failed to start Moonbeam Test Node."));
+      console.error(chalk.redBright("Failed to start Test Node."));
       console.error(`Command: ${cmd} ${args.join(" ")}`);
       console.error(`Logs:`);
       console.error(binaryLogs.map((chunk) => chunk.toString()).join("\n"));
