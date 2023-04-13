@@ -206,7 +206,7 @@ export function describeSuite({
           },
           upgradeRuntime: async (logger?: Debugger) => {
             const ctx = MoonwallContext.getContext();
-            const api = ctx.providers.find((prov) => prov.name === "para").api as ApiPromise;
+            const api = ctx.providers.find((prov) => prov.name === "parachain").api as ApiPromise;
 
             const options: UpgradePreferences = {
               runtimeName: "moonbase",
