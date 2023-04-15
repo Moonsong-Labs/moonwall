@@ -74,10 +74,10 @@ describeSuite({
       timeout: 600000,
       modifier: "skip",
       test: async function () {
-        await context.upgradeRuntime()
-        log((await relayApi.rpc.chain.getBlock()).block.header.number.toNumber())
-        await context.waitBlock(5, "relaychain", 40000)
-        log((await relayApi.rpc.chain.getBlock()).block.header.number.toNumber())
+        await context.upgradeRuntime(log)
+        log((await paraApi.rpc.chain.getBlock()).block.header.number.toNumber())
+        await context.waitBlock(5, "parachain")
+        log((await paraApi.rpc.chain.getBlock()).block.header.number.toNumber())
       },
     });
   },

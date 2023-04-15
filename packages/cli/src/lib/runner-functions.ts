@@ -179,15 +179,8 @@ export function describeSuite({
           ...context,
           waitBlock: async (
             blocksToWaitFor: number = 1,
-            chain: ZombieNodeType = "parachain",
-            timeout: number = 60000
+            chain: ZombieNodeType = "parachain"
           ) => {
-            setTimeout(() => {
-              throw new Error(
-                `${timeout / 1000} s timeout exceeded whilst waiting for ${blocksToWaitFor} blocks`
-              );
-            }, timeout);
-
             const ctx = MoonwallContext.getContext();
             const api = ctx.providers.find((prov) => prov.name === chain).api as ApiPromise;
             const currentBlockNumber = (
@@ -232,15 +225,8 @@ export function describeSuite({
           ...context,
           waitBlock: async (
             blocksToWaitFor: number = 1,
-            chainName?: string,
-            timeout: number = 60000
+            chainName?: string
           ) => {
-            setTimeout(() => {
-              throw new Error(
-                `${timeout / 1000} s timeout exceeded whilst waiting for ${blocksToWaitFor} blocks`
-              );
-            }, timeout);
-
             const ctx = MoonwallContext.getContext();
             const provider = chainName
               ? ctx.providers.find((prov) => prov.name === chainName  && (prov.type === "moon" || prov.type === "polkadotJs"))

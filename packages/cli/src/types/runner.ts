@@ -114,12 +114,12 @@ export interface GenericContext {
 }
 
 export interface ReadOnlyContext extends GenericContext {
-  waitBlock: (blocksToWaitFor?: number,chain?: string, timeout?: number) => Promise<void>;
+  waitBlock: (blocksToWaitFor?: number,chain?: string) => Promise<void>;
 }
 
 export interface ZombieContext extends GenericContext {
   upgradeRuntime: (logger?: Debugger) => Promise<void>;
-  waitBlock: (blocksToWaitFor?: number, chain?: ZombieNodeType, timeout?: number) => Promise<void>;
+  waitBlock: (blocksToWaitFor?: number, chain?: ZombieNodeType) => Promise<void>;
 }
 
 export interface ChopsticksContext extends GenericContext {

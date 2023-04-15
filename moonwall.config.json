@@ -4,6 +4,18 @@
   "defaultTestTimeout": 40000,
   "environments": [
     {
+      "name": "zombie_wasm",
+      "testFileDir": ["tests/zombie"],
+      "foundation": {
+        "type": "zombie",
+        "rtUpgradePath": "./tmp/moonbase-runtime-2301.wasm",
+        "zombieSpec": {
+          "name": "zombienet",
+          "configPath": "./configs/zombieOverride.json"
+        }
+      }
+    },
+    {
       "name": "zombie_test",
       "testFileDir": ["tests/zombie"],
       "foundation": {
