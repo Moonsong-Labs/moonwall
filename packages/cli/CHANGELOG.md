@@ -1,5 +1,11 @@
 # @moonwall/cli
 
+## 0.4.9
+
+### Patch Changes
+
+- 3a870d4: Removed timeout for waitblock
+
 ## 0.4.8
 
 ### Patch Changes
