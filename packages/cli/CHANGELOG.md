@@ -1,5 +1,12 @@
 # @moonwall/cli
 
+## 0.4.10
+
+### Patch Changes
+
+- 7d78a5a: Added Zombie UpdateNetwork options
+  - small change to allow custom upgradeNetwork options for zombie networks
+
 ## 0.4.9
 
 ### Patch Changes
