@@ -9,6 +9,7 @@ import {
 } from "../lib/contextHelpers.js";
 import { ProviderType, ZombieNodeType } from "./config.js";
 import { Debugger } from "debug";
+import { KeyringPair } from "@polkadot/keyring/types.js";
 
 export interface CustomTest {
   (params: {
@@ -106,6 +107,16 @@ export interface GenericTestContext {
   log: Debugger;
 }
 
+export interface UpgradePreferences {
+  runtimeName?: "moonbase" | "moonriver" | "moonbeam";
+  runtimeTag?: "local" | string;
+  from?: KeyringPair;
+  waitMigration?: boolean;
+  useGovernance?: boolean;
+  localPath?: string;
+  logger?: Debugger;
+}
+
 export interface GenericContext {
   providers: Object;
   polkadotJs: (options?: { apiName?: string; type?: ProviderType }) => ApiPromise;
@@ -118,7 +129,7 @@ export interface ReadOnlyContext extends GenericContext {
 }
 
 export interface ZombieContext extends GenericContext {
-  upgradeRuntime: (logger?: Debugger) => Promise<void>;
+  upgradeRuntime: (options: UpgradePreferences) => Promise<void>;
   waitBlock: (blocksToWaitFor?: number, chain?: ZombieNodeType) => Promise<void>;
 }
 

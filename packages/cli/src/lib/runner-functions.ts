@@ -4,11 +4,12 @@ import { ApiPromise, WsProvider } from "@polkadot/api";
 import { Signer } from "ethers";
 import { Web3 } from "web3";
 import { ApiTypes, AugmentedEvent, SubmittableExtrinsic } from "@polkadot/api/types/index.js";
-import { UpgradePreferences, upgradeRuntime, upgradeRuntimeChopsticks } from "./upgrade.js";
+import { upgradeRuntime, upgradeRuntimeChopsticks } from "./upgrade.js";
 import {
   ChopsticksContext,
   GenericContext,
   ITestSuiteType,
+  UpgradePreferences,
   ZombieContext,
 } from "../types/runner.js";
 import { MoonwallContext, contextCreator } from "./globalContext.js";
@@ -177,10 +178,7 @@ export function describeSuite({
       testCases({
         context: {
           ...context,
-          waitBlock: async (
-            blocksToWaitFor: number = 1,
-            chain: ZombieNodeType = "parachain"
-          ) => {
+          waitBlock: async (blocksToWaitFor: number = 1, chain: ZombieNodeType = "parachain") => {
             const ctx = MoonwallContext.getContext();
             const api = ctx.providers.find((prov) => prov.name === chain).api as ApiPromise;
             const currentBlockNumber = (
@@ -197,23 +195,23 @@ export function describeSuite({
               }
             }
           },
-          upgradeRuntime: async (logger?: Debugger) => {
+          upgradeRuntime: async (options?: UpgradePreferences) => {
             const ctx = MoonwallContext.getContext();
             const api = ctx.providers.find((prov) => prov.name === "parachain").api as ApiPromise;
 
-            const options: UpgradePreferences = {
-              runtimeName: "moonbase",
-              runtimeTag: "local",
-              localPath: ctx.rtUpgradePath!,
-              useGovernance: false,
-              // waitMigration: true,
+            const params: UpgradePreferences = {
+              runtimeName: options.runtimeName || "moonbase",
+              runtimeTag: options.runtimeTag || "local",
+              localPath: options.localPath || ctx.rtUpgradePath!,
+              useGovernance: options.useGovernance || false,
+              waitMigration: options.waitMigration || true,
             };
 
-            if (logger) {
-              options.logger = logger;
+            if (options.logger) {
+              params.logger = options.logger;
             }
 
-            await upgradeRuntime(api, options);
+            await upgradeRuntime(api, params);
           },
         },
         it: testCase,
@@ -223,18 +221,18 @@ export function describeSuite({
       testCases({
         context: {
           ...context,
-          waitBlock: async (
-            blocksToWaitFor: number = 1,
-            chainName?: string
-          ) => {
+          waitBlock: async (blocksToWaitFor: number = 1, chainName?: string) => {
             const ctx = MoonwallContext.getContext();
             const provider = chainName
-              ? ctx.providers.find((prov) => prov.name === chainName  && (prov.type === "moon" || prov.type === "polkadotJs"))
-              : ctx.providers.find((prov) => prov.type === "moon" || prov.type === "polkadotJs")
-            
+              ? ctx.providers.find(
+                  (prov) =>
+                    prov.name === chainName && (prov.type === "moon" || prov.type === "polkadotJs")
+                )
+              : ctx.providers.find((prov) => prov.type === "moon" || prov.type === "polkadotJs");
+
             if (!!!provider) {
               throw new Error("No PolkadotJs api found in provider config");
-            } 
+            }
 
             const api = provider.api as ApiPromise;
 

@@ -6,3 +6,4 @@ downloads/*
 *.wasm
 moonbeam
 polkadot
+geth

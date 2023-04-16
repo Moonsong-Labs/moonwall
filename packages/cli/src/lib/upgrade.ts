@@ -3,24 +3,12 @@ import fs, { readFileSync, existsSync } from "fs";
 import chalk from "chalk";
 import type { WeightV2 } from "@polkadot/types/interfaces";
 import { ApiPromise } from "@polkadot/api";
-import { KeyringPair } from "@polkadot/keyring/types";
 import { blake2AsHex } from "@polkadot/util-crypto";
 import { sha256 } from "ethers";
 import { cancelReferendaWithCouncil, executeProposalWithCouncil } from "./governance.js";
 import { alith } from "@moonwall/util";
-import { ChopsticksContext } from "../types/runner.js";
+import { ChopsticksContext, UpgradePreferences } from "../types/runner.js";
 import { getRuntimeWasm } from "./binaries.js";
-import { Debugger } from "debug";
-
-export interface UpgradePreferences {
-  runtimeName: "moonbase" | "moonriver" | "moonbeam";
-  runtimeTag: "local" | string;
-  from?: KeyringPair;
-  waitMigration?: boolean;
-  useGovernance?: boolean;
-  localPath?: string;
-  logger?: Debugger;
-}
 
 export async function upgradeRuntimeChopsticks(context: ChopsticksContext, path: string) {
   if (!!!existsSync(path)) {
