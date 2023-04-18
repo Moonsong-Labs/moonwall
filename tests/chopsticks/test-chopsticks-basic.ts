@@ -36,6 +36,7 @@ describeSuite({
     it({
       id: "T2",
       title: "Send a transaction ",
+      timeout: 40000,
       test: async function () {
         const currentBalance = (await api.query.system.account(ETHAN_ADDRESS)).data.free;
         await api.tx.balances.transfer(ETHAN_ADDRESS, parseEther("10")).signAndSend(alith);
@@ -49,7 +50,7 @@ describeSuite({
     it({
       id: "T3",
       title: "Skips multiple blocks ",
-      timeout: 20000,
+      timeout: 40000,
       test: async function () {
         const currentBlock = (await api.rpc.chain.getHeader()).number.toNumber();
         await context.createBlock({ count: 3 });

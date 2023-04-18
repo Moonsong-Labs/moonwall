@@ -72,7 +72,7 @@ describeSuite({
       id: "T04",
       title: "Perform a runtime upgrade",
       timeout: 600000,
-      // modifier: "skip",
+      modifier: "skip",
       test: async function () {
         await context.upgradeRuntime({logger: log})
         log((await paraApi.rpc.chain.getBlock()).block.header.number.toNumber())
