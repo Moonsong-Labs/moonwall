@@ -1,5 +1,11 @@
 # @moonwall/cli
 
+## 0.4.11
+
+### Patch Changes
+
+- a516f22: arm64 support
+
 ## 0.4.10
 
 ### Patch Changes
