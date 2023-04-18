@@ -14,7 +14,7 @@ export async function checkExists(path: string) {
 
   const binArch = await getBinaryArchitecture(path);
   const currentArch = os.arch();
-  if (binArch !== currentArch) {
+  if (binArch !== currentArch && binArch !== "unknown") {
     throw new Error(
       `The binary architecture ${chalk.bgWhiteBright.blackBright(
         binArch
@@ -32,6 +32,7 @@ export async function checkExists(path: string) {
 async function getBinaryArchitecture(filePath) {
   return new Promise((resolve, reject) => {
     const architectureMap = {
+      0x0: "unknown",
       0x03: "x86",
       0x3e: "x64",
       0xb7: "arm64",

@@ -64,11 +64,8 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
         );
       }
 
-      log("Getting nonce...");
-
       let nonce = (await api.rpc.system.accountNextIndex(options.from.address)).toNumber();
 
-      log("Getting weight...");
       if (options.useGovernance) {
         log("Using governance...");
         // We just prepare the proposals
