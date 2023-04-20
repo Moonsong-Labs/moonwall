@@ -2,6 +2,7 @@ import "@moonbeam-network/api-augment";
 import { ApiPromise } from "@polkadot/api";
 import { mapExtrinsics } from "./block.js";
 import Debug from "debug"
+import { Extrinsic } from "@polkadot/types/interfaces/types.js";
 
 export function setupLogger(name: string){
   const debug = Debug(`test:${name}`)
@@ -31,7 +32,7 @@ export const printEvents = async (api: ApiPromise, blockHash?: string) => {
   const { block } = await api.rpc.chain.getBlock(blockHash);
   const allRecords = (await apiAt.query.system.events()) as any;
 
-  const txsWithEvents = mapExtrinsics(block.extrinsics, allRecords);
+  const txsWithEvents = mapExtrinsics(block.extrinsics as unknown as Extrinsic[], allRecords);
 
   console.log(`===== Block #${block.header.number.toString()}: ${blockHash}`);
   console.log(block.header.toHuman());

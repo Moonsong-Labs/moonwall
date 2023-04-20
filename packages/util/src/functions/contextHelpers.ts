@@ -1,4 +1,5 @@
 import "@moonbeam-network/api-augment";
+import "@polkadot/api-augment"
 import { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types";
 import { GenericExtrinsic } from "@polkadot/types/extrinsic";
 import { DispatchError, DispatchInfo, EventRecord } from "@polkadot/types/interfaces";

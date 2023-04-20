@@ -22,8 +22,15 @@
     "kusama",
     "substrate"
   ],
-  "exports": "./dist/index.js",
-  "module": "./dist/index.mjs",
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "module": "./dist/index.js",
+  "main": "./dist/index.cjs",
   "types": "./dist/index.d.ts",
   "bin": {
     "moonwall": "./moonwall.mjs"
@@ -41,17 +48,18 @@
     "*.cjs"
   ],
   "scripts": {
-    "build": "pnpm exec rimraf dist && tsup src --format cjs,esm --dts ",
+    "build": "pnpm exec rimraf dist && tsup src --format cjs,esm",
+    "generate-types": "tsup src --format cjs,esm --dts && pnpm schema",
     "watch": "tsup src --format cjs,esm --dts --watch",
     "typecheck": "pnpm exec tsc --noEmit",
-    "prepublish": "pnpm run build",
+    "prepublish": "pnpm run build && pnpm run generate-types && pnpm typecheck",
     "prepare": "pnpm build",
     "schema": "typescript-json-schema ./src/types/config.ts MoonwallConfig > config_schema.json",
     "compile": "pnpm build ",
     "lint": "tsc"
   },
   "dependencies": {
-    "@acala-network/chopsticks": "^0.5.10",
+    "@acala-network/chopsticks": "^0.6.0",
     "@moonbeam-network/api-augment": "^0.2201.0",
     "@moonwall/util": "workspace:*",
     "@polkadot/api": "^10.2.1",
@@ -62,8 +70,8 @@
     "@polkadot/types-codec": "^10.2.1",
     "@polkadot/util": "^11.1.2",
     "@types/cli-progress": "^3.11.0",
-    "@types/node": "^18.15.10",
-    "@types/yargs": "^17.0.23",
+    "@types/node": "^18.15.12",
+    "@types/yargs": "^17.0.24",
     "@zombienet/orchestrator": "^0.0.34",
     "bottleneck": "^2.19.5",
     "chalk": "^5.2.0",
@@ -78,7 +86,7 @@
     "moonbeam-types-bundle": "^2.0.10",
     "node-fetch": "^3.3.1",
     "prettier": "^2.8.7",
-    "semver": "^7.3.8",
+    "semver": "^7.5.0",
     "superagent": "^8.0.9",
     "ts-node": "^10.9.1",
     "tsup": "^6.7.0",
