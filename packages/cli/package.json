@@ -52,14 +52,14 @@
     "generate-types": "tsup src --format cjs,esm --dts && pnpm schema",
     "watch": "tsup src --format cjs,esm --dts --watch",
     "typecheck": "pnpm exec tsc --noEmit",
-    "prepublish": "pnpm run build && pnpm run generate-types",
+    "prepublish": "pnpm run build && pnpm run generate-types && pnpm typecheck",
     "prepare": "pnpm build",
     "schema": "typescript-json-schema ./src/types/config.ts MoonwallConfig > config_schema.json",
     "compile": "pnpm build ",
     "lint": "tsc"
   },
   "dependencies": {
-    "@acala-network/chopsticks": "^0.5.10",
+    "@acala-network/chopsticks": "^0.6.0",
     "@moonbeam-network/api-augment": "^0.2201.0",
     "@moonwall/util": "workspace:*",
     "@polkadot/api": "^10.2.1",
