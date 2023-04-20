@@ -22,9 +22,15 @@
     "kusama",
     "substrate"
   ],
-  "exports": "./dist/index.js",
-  "main": "dist/index.js",
-  "module": "./dist/index.mjs",
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "main": "dist/index.cjs",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "engines": {
     "node": ">=14.16.0",

@@ -117,6 +117,9 @@
                 },
                 {
                     "properties": {
+                        "rtUpgradePath": {
+                            "type": "string"
+                        },
                         "type": {
                             "enum": [
                                 "zombie"
