@@ -1,4 +1,5 @@
 import "@moonbeam-network/api-augment/moonbase";
+import "@polkadot/api-augment";
 import { ApiPromise } from "@polkadot/api";
 import {
   BlockHash,
@@ -79,7 +80,7 @@ export const getBlockExtrinsic = async (
     (ext) => ext.method.section == section && ext.method.method == method
   );
   const extrinsic = extIndex > -1 ? block.extrinsics[extIndex] : null;
-  const events =( records as any)
+  const events = (records as any)
     .filter(({ phase }) => phase.isApplyExtrinsic && phase.asApplyExtrinsic.eq(extIndex))
     .map(({ event }) => event);
   const resultEvent = events.find(
@@ -98,8 +99,9 @@ export const getBlockTime = (signedBlock: any) =>
 export const checkBlockFinalized = async (api: ApiPromise, number: number) => {
   return {
     number,
-    finalized: (await (api as any).rpc.moon.isBlockFinalized(await api.rpc.chain.getBlockHash(number)))
-      .isTrue,
+    finalized: (
+      await (api as any).rpc.moon.isBlockFinalized(await api.rpc.chain.getBlockHash(number))
+    ).isTrue,
   };
 };
 
@@ -159,7 +161,7 @@ export const getBlockArray = async (api: ApiPromise, timePeriod: number, limiter
 };
 
 export function extractWeight(
-  weightV1OrV2: u64 | Option<u64> | SpWeightsWeightV2Weight | Option<SpWeightsWeightV2Weight>
+  weightV1OrV2: u64 | Option<u64> | SpWeightsWeightV2Weight | Option<any>
 ) {
   if ("isSome" in weightV1OrV2) {
     const weight = weightV1OrV2.unwrap();
