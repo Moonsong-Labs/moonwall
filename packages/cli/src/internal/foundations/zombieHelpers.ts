@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import { LaunchConfig } from "@zombienet/orchestrator";
-import { checkExists } from "./files.js";
+import { checkExists } from "../files.js";
 import chalk from "chalk";
 
 export async function checkZombieBins(config: LaunchConfig) {

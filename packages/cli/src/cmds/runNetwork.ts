@@ -10,6 +10,8 @@ import fs from "fs/promises";
 import { createReadStream, stat } from "node:fs";
 import { importJsonConfig } from "../lib/configReader.js";
 import { ReadStream, watch } from "fs";
+import { ApiPromise } from "@polkadot/api";
+import { sendNewBlockRequest } from "../internal/foundations/chopsticksHelpers.js";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
@@ -19,6 +21,8 @@ export async function runNetwork(args) {
   const testFileDirs = globalConfig.environments.find(
     ({ name }) => name == args.envName
   )!.testFileDir;
+  const foundation = globalConfig.environments.find(({ name }) => name == args.envName)!.foundation
+    .type;
 
   const questions = [
     {
@@ -53,12 +57,23 @@ export async function runNetwork(args) {
         },
         {
           name:
+            foundation !== "dev"
+              ? `Not applicable for foundation type (${chalk.bgGrey.cyanBright(foundation)})`
+              : `Command:   Run command on network (e.g. createBlock) (${chalk.bgGrey.cyanBright(
+                  foundation
+                )})`,
+          value: 3,
+          short: "cmd",
+          disabled: foundation !== "dev",
+        },
+        {
+          name:
             testFileDirs.length > 0
               ? "Test:      Execute tests registered for this environment   (" +
                 chalk.bgGrey.cyanBright(testFileDirs) +
                 ")"
               : chalk.dim("Test:    NO TESTS SPECIFIED"),
-          value: 3,
+          value: 4,
           disabled: testFileDirs.length > 0 ? false : true,
           short: "test",
         },
@@ -69,13 +84,14 @@ export async function runNetwork(args) {
                 chalk.bgGrey.cyanBright(testFileDirs) +
                 ")"
               : chalk.dim("Test:    NO TESTS SPECIFIED"),
-          value: 4,
+          value: 5,
           disabled: testFileDirs.length > 0 ? false : true,
-          short: "test",
+          short: "grep",
         },
+        new inquirer.Separator(),
         {
           name: "Quit:      Close network and quit the application",
-          value: 5,
+          value: 6,
           short: "quit",
         },
       ],
@@ -117,13 +133,17 @@ export async function runNetwork(args) {
         break;
 
       case 3:
-        await resolveTestChoice(env);
+        await resolveCommandChoice();
         break;
 
       case 4:
-        await resolveGrepChoice(env);
+        await resolveTestChoice(env);
+        break;
 
       case 5:
+        await resolveGrepChoice(env);
+
+      case 6:
         const quit = await inquirer.prompt(questions.find(({ name }) => name == "Quit"));
         if (quit.Quit === true) {
           break mainloop;
@@ -144,14 +164,15 @@ const reportServicePorts = async () => {
   const globalConfig = await importJsonConfig();
   const config = globalConfig.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
   if (config.foundation.type == "dev") {
-    const port =  ctx.environment.nodes[0].args.find((a) => a.includes("ws-port"))!.split("=")[1] || "9944";
+    const port =
+      ctx.environment.nodes[0].args.find((a) => a.includes("ws-port"))!.split("=")[1] || "9944";
     portsList.push(port);
   } else if (config.foundation.type == "chopsticks") {
     portsList.push(
       ...(await Promise.all(
         config.foundation.launchSpec.map(async ({ configPath }) => {
           const yaml = parse((await fs.readFile(configPath)).toString());
-          return  yaml.port || "8000"
+          return yaml.port || "8000";
         })
       ))
     );
@@ -161,12 +182,60 @@ const reportServicePorts = async () => {
     portsList.push(wsPort);
   }
   portsList.forEach((port) =>
-    console.log(
-      `  🌐  Node has started, listening on ports - Websocket: ${port}`
-    )
+    console.log(`  🌐  Node has started, listening on ports - Websocket: ${port}`)
   );
 
   return portsList;
+};
+
+const resolveCommandChoice = async () => {
+  const choice = await inquirer.prompt({
+    name: "cmd",
+    type: "list",
+    choices: [
+      { name: "1️⃣  Create Block", value: "createblock" },
+      { name: "2️⃣  Create Unfinalized Block", value: "createUnfinalizedBlock" },
+      { name: "🔢 Create N Blocks", value: "createNBlocks" },
+    ],
+    message: `What command would you like to run? `,
+    default: "createBlock",
+  });
+
+  const ctx = await MoonwallContext.getContext().connectEnvironment();
+  const api = ctx.providers.find((a) => a.type == "moon" || a.type == "polkadotJs")
+    .api as ApiPromise;
+
+  switch (choice.cmd) {
+    case "createblock":
+      // ctx.foundation == "dev"
+        await api.rpc.engine.createBlock(true, true)
+        // : ctx.foundation == "chopsticks"
+        // ? await sendNewBlockRequest()
+        // : undefined;
+      break;
+
+    case "createUnfinalizedBlock":
+      await api.rpc.engine.createBlock(true, false);
+      break;
+
+    case "createNBlocks":
+      const result = await new inquirer.prompt({
+        name: "n",
+        type: "number",
+        message: `How many blocks? `,
+      });
+
+      const executeSequentially = async (remaining: number) => {
+        if (remaining === 0) {
+          return;
+        }
+        await api.rpc.engine.createBlock(true, true);
+        await executeSequentially(remaining - 1);
+      };
+
+      await executeSequentially(result.n);
+      break;
+  }
 };
 
 const resolveInfoChoice = async (env: Environment) => {

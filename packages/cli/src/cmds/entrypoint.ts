@@ -4,9 +4,9 @@ import { hideBin } from "yargs/helpers";
 import { setTimeout } from "timers/promises";
 import { testCmd } from "./runTests.js";
 import { runNetwork } from "./runNetwork.js";
-import { generateConfig } from "./initialisation.js";
+import { generateConfig } from "../internal/cmdFunctions/initialisation.js";
 import { main } from "./main.js";
-import { fetchArtifact } from "./fetchArtifact.js";
+import { fetchArtifact } from "../internal/cmdFunctions/fetchArtifact.js";
 
 yargs(hideBin(process.argv))
   .usage("Usage: $0")

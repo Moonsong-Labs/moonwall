@@ -2,7 +2,7 @@ import inquirer from "inquirer";
 import PressToContinuePrompt from "inquirer-press-to-continue";
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 import fs from "fs/promises";
-import { FoundationType, MoonwallConfig } from "../types/config.js";
+import { FoundationType, MoonwallConfig } from "../../types/config.js";
 import { option } from "yargs";
 
 export async function createFolders(){

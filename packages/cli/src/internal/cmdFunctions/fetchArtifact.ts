@@ -3,8 +3,8 @@ import path from "path";
 import fetch from "node-fetch";
 import semver from "semver";
 import chalk from "chalk";
-import { runTask } from "../internal/runner.js";
-import { downloader } from "../internal/downloader.js";
+import { runTask } from "../runner.js";
+import { downloader } from "./downloader.js";
 
 const supportedBinaries = [
   "moonbeam",
