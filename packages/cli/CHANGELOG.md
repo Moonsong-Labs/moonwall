@@ -1,5 +1,16 @@
 # @moonwall/cli
 
+## 0.4.12
+
+### Patch Changes
+
+- 99d24bf: Small additions
+  - [#79](https://github.com/Moonsong-Labs/moonwall/issues/79)
+  - [#56](https://github.com/Moonsong-Labs/moonwall/issues/56)
+  - [#61](https://github.com/Moonsong-Labs/moonwall/issues/61)
+- Updated dependencies [99d24bf]
+  - @moonwall/util@0.4.12
+
 ## 0.4.11
 
 ### Patch Changes
