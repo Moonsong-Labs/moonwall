@@ -1,12 +1,5 @@
 import "@moonbeam-network/api-augment";
-import {
-  describeSuite,
-  expect,
-  beforeAll,
-  ApiPromise,
-  Signer,
-  Web3,
-} from "@moonwall/cli";
+import { describeSuite, expect, beforeAll, ApiPromise, Signer, Web3 } from "@moonwall/cli";
 import { CHARLETH_ADDRESS, BALTATHAR_ADDRESS, alith } from "@moonwall/util";
 import { parseEther } from "ethers";
 import { BN } from "@polkadot/util";
@@ -43,7 +36,9 @@ describeSuite({
       test: async function () {
         const balanceBefore = (await polkadotJs.query.system.account(BALTATHAR_ADDRESS)).data.free;
 
-        await polkadotJs.tx.balances.transfer(BALTATHAR_ADDRESS, parseEther("2")).signAndSend(alith);
+        await polkadotJs.tx.balances
+          .transfer(BALTATHAR_ADDRESS, parseEther("2"))
+          .signAndSend(alith);
 
         await context.createBlock();
 
@@ -60,7 +55,7 @@ describeSuite({
         const tx = polkadotJs.tx.rootTesting.fillBlock(60 * 10 ** 7);
         await polkadotJs.tx.sudo.sudo(tx).signAndSend(alith);
 
-        polkadotJs
+        polkadotJs;
 
         await context.createBlock();
         const blockFill = await polkadotJs.query.system.blockWeight();
@@ -100,7 +95,6 @@ describeSuite({
           polkadotJs.tx.balances.transfer(CHARLETH_ADDRESS, parseEther("3")),
           { expectEvents }
         );
-
       },
     });
   },

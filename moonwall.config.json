@@ -12,7 +12,7 @@
         "zombieSpec": {
           "name": "zombienet",
           "configPath": "./configs/zombieOverride.json",
-          "overwriteCouncilAlith": true 
+          "overwriteCouncilAlith": true
         }
       }
     },

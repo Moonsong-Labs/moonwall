@@ -12,8 +12,6 @@ export async function checkZombieBins(config: LaunchConfig) {
       checkExists(para.collator.command);
     }
 
-
-  
     if (para.collators) {
       para.collators.forEach((coll) => {
         checkExists(coll.command);
@@ -32,7 +30,6 @@ export function getZombieConfig(path: string) {
       )} file has the correct "configPath" in zombieSpec?`
     );
   }
-
 
   const buffer = fs.readFileSync(path, "utf-8");
   return JSON.parse(buffer) as LaunchConfig;

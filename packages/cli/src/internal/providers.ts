@@ -79,7 +79,7 @@ export function prepareProviders(providerConfigs: ProviderConfig[]): MoonwallPro
           type,
           connect: () => {
             const provider = new ethers.WebSocketProvider(url);
-             return new Wallet(ALITH_PRIVATE_KEY, provider);
+            return new Wallet(ALITH_PRIVATE_KEY, provider);
           },
         };
 
@@ -147,7 +147,8 @@ export async function populateProviderInterface(
         type,
         greet: async () =>
           debug(
-            `👋  Provider ${name} is connected to chain ` + (await ethApi.provider.getNetwork()).chainId
+            `👋  Provider ${name} is connected to chain ` +
+              (await ethApi.provider.getNetwork()).chainId
           ),
         disconnect: async () => {
           ethApi.provider.destroy();

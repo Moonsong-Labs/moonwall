@@ -19,7 +19,7 @@
     ]
   },
   "parachains": [
-    { 
+    {
       "chain": "moonbase-local",
       "chain_spec_path": "tmp/moonbase-test-spec-plain.json",
       "id": 2000,

@@ -14,7 +14,7 @@ describeSuite({
     const RANDOM_ADDRESS = "0x08dF22c93BCb4cFFE20bFc1F0c1Ad6fA75e7DFf6";
 
     beforeAll(() => {
-      api = context.polkadotJs()
+      api = context.polkadotJs();
     });
 
     it({

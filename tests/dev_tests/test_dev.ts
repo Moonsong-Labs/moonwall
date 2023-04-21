@@ -1,12 +1,5 @@
 import "@moonbeam-network/api-augment";
-import {
-  describeSuite,
-  expect,
-  beforeAll,
-  ApiPromise,
-  Signer,
-  Web3,
-} from "@moonwall/cli";
+import { describeSuite, expect, beforeAll, ApiPromise, Signer, Web3 } from "@moonwall/cli";
 import { CHARLETH_ADDRESS, BALTATHAR_ADDRESS, alith, baltathar } from "@moonwall/util";
 import { parseEther } from "ethers";
 import { BN } from "@polkadot/util";
@@ -35,8 +28,6 @@ describeSuite({
         const block2 = (await polkadotJs.rpc.chain.getBlock()).block.header.number.toNumber();
         log(`Previous block #${block}, new block #${block2}`);
         expect(block2).to.be.greaterThan(block);
-
-      
       },
     });
 

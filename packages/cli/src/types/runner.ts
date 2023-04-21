@@ -125,7 +125,7 @@ export interface GenericContext {
 }
 
 export interface ReadOnlyContext extends GenericContext {
-  waitBlock: (blocksToWaitFor?: number,chain?: string) => Promise<void>;
+  waitBlock: (blocksToWaitFor?: number, chain?: string) => Promise<void>;
 }
 
 export interface ZombieContext extends GenericContext {

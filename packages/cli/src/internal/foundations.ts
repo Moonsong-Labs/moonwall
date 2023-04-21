@@ -105,6 +105,6 @@ export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
   return {
     cmd: chopsticksCmd,
     args: chopsticksArgs,
-    launch
+    launch,
   };
 }

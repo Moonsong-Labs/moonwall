@@ -64,7 +64,7 @@ yargs(hideBin(process.argv))
     },
     async (args) => {
       await testCmd(args.envName.toString(), { testNamePattern: args.GrepTest });
-      process.exit(0)
+      process.exit(0);
     }
   )
   .command(
@@ -77,7 +77,7 @@ yargs(hideBin(process.argv))
     },
     async (argv) => {
       await runNetwork(argv as any);
-      process.exit(0)
+      process.exit(0);
     }
   )
   .command("*", "Run the guided walkthrough", async () => {

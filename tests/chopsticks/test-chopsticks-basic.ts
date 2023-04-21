@@ -1,10 +1,5 @@
 import { describeSuite, expect, beforeAll } from "@moonwall/cli";
-import {
-  BALTATHAR_ADDRESS,
-  CHARLETH_ADDRESS,
-  ETHAN_ADDRESS,
-  alith,
-} from "@moonwall/util";
+import { BALTATHAR_ADDRESS, CHARLETH_ADDRESS, ETHAN_ADDRESS, alith } from "@moonwall/util";
 import { parseEther, formatEther } from "ethers";
 import { ApiPromise } from "@polkadot/api";
 import "@moonbeam-network/api-augment";
@@ -17,7 +12,7 @@ describeSuite({
     let api: ApiPromise;
 
     beforeAll(() => {
-      api = context.polkadotJs({type: "moon"})
+      api = context.polkadotJs({ type: "moon" });
     });
 
     it({
@@ -29,7 +24,7 @@ describeSuite({
         log(`You are now connected to ${chainName} at height #${currentBlockHeight}`);
         expect(currentBlockHeight).toBeGreaterThan(0);
         expect(chainName).toBe("moonriver");
-        log(JSON.stringify(await api.rpc.state.getStorage(":code")).slice(0,20))
+        log(JSON.stringify(await api.rpc.state.getStorage(":code")).slice(0, 20));
       },
     });
 

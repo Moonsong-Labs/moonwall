@@ -1,4 +1,4 @@
-import "@moonbeam-network/api-augment"
+import "@moonbeam-network/api-augment";
 import { MoonwallConfig } from "../types/config.js";
 import fs from "fs/promises";
 import path from "path";
@@ -18,9 +18,7 @@ export async function loadConfig(path: string): Promise<MoonwallConfig> {
   return json;
 }
 
-export async function importConfig(
-  configPath: string
-): Promise<MoonwallConfig> {
+export async function importConfig(configPath: string): Promise<MoonwallConfig> {
   return await import(configPath);
 }
 

@@ -1,4 +1,4 @@
-import { describeSuite, expect, beforeAll , beforeEach} from "@moonwall/cli";
+import { describeSuite, expect, beforeAll, beforeEach } from "@moonwall/cli";
 import { CHARLETH_ADDRESS, ETHAN_ADDRESS, alith } from "@moonwall/util";
 import { parseEther } from "ethers";
 import { ApiPromise } from "@polkadot/api";
@@ -15,7 +15,7 @@ describeSuite({
     beforeAll(() => {
       api = context.polkadotJs();
     });
-    
+
     it({
       id: "E01",
       title: "Balance starts at 0",

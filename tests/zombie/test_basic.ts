@@ -47,7 +47,7 @@ describeSuite({
       test: async function () {
         const balBefore = (await paraApi.query.system.account(BALTATHAR_ADDRESS)).data.free;
 
-        log("Please wait, this will take at least 30s for transaction to complete")
+        log("Please wait, this will take at least 30s for transaction to complete");
 
         await new Promise((resolve) => {
           paraApi.tx.balances
@@ -74,10 +74,10 @@ describeSuite({
       timeout: 600000,
       modifier: "skip",
       test: async function () {
-        await context.upgradeRuntime({logger: log})
-        log((await paraApi.rpc.chain.getBlock()).block.header.number.toNumber())
-        await context.waitBlock(5, "parachain")
-        log((await paraApi.rpc.chain.getBlock()).block.header.number.toNumber())
+        await context.upgradeRuntime({ logger: log });
+        log((await paraApi.rpc.chain.getBlock()).block.header.number.toNumber());
+        await context.waitBlock(5, "parachain");
+        log((await paraApi.rpc.chain.getBlock()).block.header.number.toNumber());
       },
     });
   },
