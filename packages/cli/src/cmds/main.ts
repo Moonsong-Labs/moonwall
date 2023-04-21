@@ -3,7 +3,7 @@ import inquirer from "inquirer";
 import PressToContinuePrompt from "inquirer-press-to-continue";
 import { importJsonConfig } from "../lib/configReader.js";
 import { MoonwallConfig } from "../types/config.js";
-import { generateConfig } from "./generateConfig.js";
+import { createFolders, generateConfig } from "./initialisation.js";
 import colors from "colors";
 import clear from "clear";
 import { runNetwork } from "./runNetwork.js";
@@ -94,6 +94,7 @@ async function mainMenu(config: MoonwallConfig) {
   switch (answers.MenuChoice) {
     case "init":
       await generateConfig();
+      await createFolders()
       return false;
     case "run":
       const chosenRunEnv = await chooseRunEnv(config);

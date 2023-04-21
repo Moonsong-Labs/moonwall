@@ -5,6 +5,13 @@ import fs from "fs/promises";
 import { FoundationType, MoonwallConfig } from "../types/config.js";
 import { option } from "yargs";
 
+export async function createFolders(){
+  await fs.mkdir("scripts").catch(() => "scripts folder already exists, skipping")
+  await fs.mkdir("tests").catch(() => "tests folder already exists, skipping")
+  await fs.mkdir("tmp").catch(() => "tmp folder already exists, skipping")
+}
+
+
 export async function generateConfig() {
   while (true) {
     if (await fs.access("moonwall.config.json").catch(() => true)) {

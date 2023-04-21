@@ -19,7 +19,6 @@
     "typecheck": "pnpm -r --filter='./packages/**' run typecheck"
   },
   "devDependencies": {
-    "@acala-network/chopsticks": "^0.6.0",
     "@changesets/cli": "^2.26.1",
     "@moonbeam-network/api-augment": "^0.2201.0",
     "@moonwall/cli": "workspace:*",
@@ -34,7 +33,7 @@
     "@vitest/utils": "^0.29.8",
     "debug": "^4.3.4",
     "ethers": "^6.2.3",
-    "node-gyp-build": "^4.6.0",
+    "@mapbox/node-pre-gyp": "^1.0.10",
     "pnpm": "7.23.0",
     "prettier": "^2.8.7",
     "rimraf": "^4.4.1",
