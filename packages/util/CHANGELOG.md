@@ -1,5 +1,14 @@
 # @moonwall/util
 
+## 0.4.12
+
+### Patch Changes
+
+- 99d24bf: Small additions
+  - [#79](https://github.com/Moonsong-Labs/moonwall/issues/79)
+  - [#56](https://github.com/Moonsong-Labs/moonwall/issues/56)
+  - [#61](https://github.com/Moonsong-Labs/moonwall/issues/61)
+
 ## 0.4.8
 
 ### Patch Changes
