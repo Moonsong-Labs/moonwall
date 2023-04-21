@@ -8,7 +8,7 @@ import colors from "colors";
 import clear from "clear";
 import { runNetwork } from "./runNetwork.js";
 import { testCmd } from "./runTests.js";
-import { fetchArtifact } from "./fetchArtifact.js";
+import { fetchArtifact, getVersions } from "./fetchArtifact.js";
 import pkg from "../../package.json" assert { type: "json" };
 import { SemVer, gt, lt, lte } from "semver";
 import fetch from "node-fetch";
@@ -74,7 +74,7 @@ async function mainMenu(config: MoonwallConfig) {
         disabled: true,
       },
       {
-        name: "5) Artifact Downloader:                Fetch artifacts from GitHub repos.",
+        name: "5) Artifact Downloader:                Fetch artifacts (x86) from GitHub repos.",
         value: "download",
 
         disabled: false,
@@ -94,7 +94,7 @@ async function mainMenu(config: MoonwallConfig) {
   switch (answers.MenuChoice) {
     case "init":
       await generateConfig();
-      await createFolders()
+      await createFolders();
       return false;
     case "run":
       const chosenRunEnv = await chooseRunEnv(config);
@@ -146,28 +146,36 @@ async function resolveDownloadChoice() {
       return;
     }
 
-    const otherChoices = await inquirer.prompt([
-      {
-        name: "binVersion",
-        type: "input",
-        default: "latest",
-        message: `Download - which version?`,
-      },
-      {
-        name: "path",
-        type: "input",
-        message: `Download - where would you like it placed?`,
-        default: "./tmp",
-      },
-    ]);
+    const versions = await getVersions(
+      firstChoice.artifact,
+      firstChoice.artifact.includes("runtime")
+    );
+
+    const chooseversion = await inquirer.prompt({
+      name: "binVersion",
+      type: "list",
+      default: "latest",
+      message: `Download - which version?`,
+      choices: [...versions, new inquirer.Separator(), "Back", new inquirer.Separator()],
+    });
+
+    if (chooseversion.binVersion === "Back") {
+      continue;
+    }
+    const chooseLocation = await inquirer.prompt({
+      name: "path",
+      type: "input",
+      message: `Download - where would you like it placed?`,
+      default: "./tmp",
+    });
 
     const result = await inquirer.prompt({
       name: "continue",
       type: "confirm",
       message: `You are about to download ${chalk.bgWhite.blackBright(
         firstChoice.artifact
-      )} v-${chalk.bgWhite.blackBright(otherChoices.binVersion)} to: ${chalk.bgWhite.blackBright(
-        otherChoices.path
+      )} v-${chalk.bgWhite.blackBright(chooseversion.binVersion)} to: ${chalk.bgWhite.blackBright(
+        chooseLocation.path
       )}.\n Would you like to continue? `,
       default: true,
     });
@@ -178,8 +186,8 @@ async function resolveDownloadChoice() {
 
     await fetchArtifact({
       artifact: firstChoice.artifact,
-      binVersion: otherChoices.binVersion,
-      path: otherChoices.path,
+      binVersion: chooseversion.binVersion,
+      path: chooseLocation.path,
     });
     await inquirer.prompt({
       name: "NetworkStarted",
@@ -220,7 +228,11 @@ const chooseTestEnv = async (config: MoonwallConfig) => {
 const chooseRunEnv = async (config: MoonwallConfig) => {
   const envs = config.environments.map((a) => {
     const result = { name: "", value: a.name, disabled: false };
-    if (a.foundation.type === "dev" || a.foundation.type === "chopsticks"|| a.foundation.type === "zombie") {
+    if (
+      a.foundation.type === "dev" ||
+      a.foundation.type === "chopsticks" ||
+      a.foundation.type === "zombie"
+    ) {
       result.name = `Env: ${a.name}     (${a.foundation.type})`;
     } else {
       result.name = chalk.dim(`Env: ${a.name} (${a.foundation.type})     NO NETWORK TO RUN`);

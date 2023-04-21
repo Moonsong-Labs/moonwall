@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "path";
 import fetch from "node-fetch";
+import semver from "semver";
 import chalk from "chalk";
 import { runTask } from "../internal/runner.js";
 import { downloader } from "../internal/downloader.js";
@@ -69,4 +70,21 @@ export async function fetchArtifact(args) {
     await fs.chmod(binaryPath, "755");
     process.stdout.write(` ${chalk.green("done")} ✓\n`);
   }
+}
+
+export async function getVersions(name: string, runtime: boolean = false) {
+  const repoName = name
+    .replace("-runtime", "")
+    .replace("moonbase", "moonbeam")
+    .replace("moonriver", "moonbeam");
+  const releases = (await (await fetch(repos[repoName])).json()) as any[];
+  const versions = releases
+    .map((release) => release.tag_name.replace("v", "").split("-rc")[0])
+    .filter(
+      (version) =>
+        (runtime && version.includes("runtime")) || (!runtime && !version.includes("runtime"))
+    )
+    .map((version) => version.replace("runtime-", ""));
+  const set = new Set(versions);
+  return runtime ? [...set] : [...set].sort((a, b) => semver.rcompare(a, b));
 }
