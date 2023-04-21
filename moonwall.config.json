@@ -297,12 +297,12 @@
         {
           "name": "w3",
           "type": "web3",
-          "endpoints": ["wss://moonbeam.api.onfinality.io/public-ws"]
+          "endpoints": ["wss://wss.api.moonbeam.network"]
         },
         {
           "name": "MB",
           "type": "moon",
-          "endpoints": ["wss://moonbeam.api.onfinality.io/public-ws"]
+          "endpoints": ["wss://wss.api.moonbeam.network"]
         }
       ]
     },
@@ -317,7 +317,7 @@
         {
           "name": "eth",
           "type": "ethers",
-          "endpoints": ["wss://moonbeam.api.onfinality.io/public-ws"]
+          "endpoints": ["wss://wss.api.moonbeam.network"]
         }
       ]
     },

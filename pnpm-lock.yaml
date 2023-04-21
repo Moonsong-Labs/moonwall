@@ -291,14 +291,8 @@ importers:
         specifier: ^0.29.8
         version: 0.29.8(@vitest/ui@0.28.5)
       web3:
-        specifier: 4.0.1-rc.1
-        version: 4.0.1-rc.1
-      web3-core:
-        specifier: 4.0.1-rc.1
-        version: 4.0.1-rc.1
-      web3-eth:
-        specifier: 4.0.1-rc.1
-        version: 4.0.1-rc.1
+        specifier: 4.0.1-rc.0
+        version: 4.0.1-rc.0
       ws:
         specifier: ^8.13.0
         version: 8.13.0
@@ -6548,32 +6542,6 @@ packages:
       web3-providers-http: 4.0.1-rc.1
       web3-providers-ipc: 4.0.1-rc.1
       web3-providers-ws: 4.0.1-rc.0
-      web3-rpc-methods: 1.0.0-rc.1
-      web3-types: 1.0.0-rc.1
-      web3-utils: 4.0.1-rc.1
-      web3-validator: 1.0.0-rc.1
-    transitivePeerDependencies:
-      - bufferutil
-      - encoding
-      - utf-8-validate
-    dev: false
-
-  /web3@4.0.1-rc.1:
-    resolution: {integrity: sha512-86ot77U+Dxwc3kx8WNDYFB020mf8TCy9R0CXlOGPzmMWSEonBrE1VLwJxECDICMPxXhlmxpXYbvmOojBzMzIbw==}
-    engines: {node: '>=14.0.0', npm: '>=6.12.0'}
-    dependencies:
-      web3-core: 4.0.1-rc.1
-      web3-errors: 1.0.0-rc.1
-      web3-eth: 4.0.1-rc.1
-      web3-eth-abi: 4.0.1-rc.1
-      web3-eth-accounts: 4.0.1-rc.1
-      web3-eth-contract: 4.0.1-rc.1
-      web3-eth-ens: 4.0.1-rc.1
-      web3-eth-iban: 4.0.1-rc.1
-      web3-eth-personal: 4.0.1-rc.1
-      web3-net: 4.0.1-rc.1
-      web3-providers-http: 4.0.1-rc.1
-      web3-providers-ws: 4.0.1-rc.1
       web3-rpc-methods: 1.0.0-rc.1
       web3-types: 1.0.0-rc.1
       web3-utils: 4.0.1-rc.1
