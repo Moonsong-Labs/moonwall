@@ -12,7 +12,7 @@ import Debug from "debug";
 import { ConnectedProvider, MoonwallEnvironment, MoonwallProvider } from "../types/context.js";
 import fs from "node:fs";
 import { checkExists } from "../internal/files.js";
-import { checkZombieBins, getZombieConfig } from "../internal/zombieHelpers.js";
+import { checkZombieBins, getZombieConfig } from "../internal/foundations/zombieHelpers.js";
 import chalk from "chalk";
 const debugSetup = Debug("global:context");
 
@@ -190,7 +190,7 @@ export class MoonwallContext {
     await Promise.all(promises);
   }
 
-  public async connectEnvironment() {
+  public async connectEnvironment(): Promise<MoonwallContext> {
     // TODO: Explicitly communicate (DOCs and console) this is done automatically
     if (this.environment.foundationType == "zombie") {
       this.environment.providers = prepareProviders([
@@ -218,7 +218,6 @@ export class MoonwallContext {
     }
 
     if (this.providers.length > 0) {
-      console.log("Providers already connected! Skipping command");
       return MoonwallContext.getContext();
     }
 
@@ -265,6 +264,8 @@ export class MoonwallContext {
       }
       console.log("🎠  Parachain producing blocks, continuing ");
     }
+
+    return MoonwallContext.getContext();
   }
 
   public async disconnect(providerName?: string) {

@@ -2,16 +2,20 @@ import inquirer from "inquirer";
 import PressToContinuePrompt from "inquirer-press-to-continue";
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 import fs from "fs/promises";
-import { FoundationType, MoonwallConfig } from "../types/config.js";
+import { FoundationType, MoonwallConfig } from "../../types/config.js";
 import { option } from "yargs";
+
+export async function createFolders() {
+  await fs.mkdir("scripts").catch(() => "scripts folder already exists, skipping");
+  await fs.mkdir("tests").catch(() => "tests folder already exists, skipping");
+  await fs.mkdir("tmp").catch(() => "tmp folder already exists, skipping");
+}
 
 export async function generateConfig() {
   while (true) {
     if (await fs.access("moonwall.config.json").catch(() => true)) {
       const answers = await inquirer.prompt(generateQuestions);
-      const proceed = await inquirer.prompt(
-        questions.find(({ name }) => name === "Confirm")
-      );
+      const proceed = await inquirer.prompt(questions.find(({ name }) => name === "Confirm"));
 
       if (proceed.Confirm === false) {
         continue;
@@ -27,13 +31,9 @@ export async function generateConfig() {
         }),
         null,
         3
-      )
-      
-      await fs.writeFile(
-        "moonwall.config.json",
-        JSONBlob,
-        "utf-8"
       );
+
+      await fs.writeFile("moonwall.config.json", JSONBlob, "utf-8");
       // await fs.writeFile("moonwall.config.ts", getBody(answers), "utf-8");
       break;
     } else {
@@ -88,15 +88,13 @@ const questions = [
   {
     name: "Confirm",
     type: "confirm",
-    message:
-      "Would you like to generate this config? (no to restart from beginning)",
+    message: "Would you like to generate this config? (no to restart from beginning)",
   },
   {
     name: "Success",
     type: "press-to-continue",
     anyKey: true,
-    pressToContinueMessage:
-      "📄 moonwall.config.ts has been generated. Press any key to exit  ✅\n",
+    pressToContinueMessage: "📄 moonwall.config.ts has been generated. Press any key to exit  ✅\n",
   },
   {
     name: "Failure",
@@ -115,7 +113,8 @@ export function createConfig(options: {
   testDir: string;
 }): MoonwallConfig {
   return {
-    $schema: "https://raw.githubusercontent.com/Moonsong-Labs/moonwall/main/packages/cli/config_schema.json",
+    $schema:
+      "https://raw.githubusercontent.com/Moonsong-Labs/moonwall/main/packages/cli/config_schema.json",
     label: options.label,
     defaultTestTimeout: options.timeout,
     environments: [

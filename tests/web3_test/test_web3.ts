@@ -28,7 +28,7 @@ describeSuite({
       id: "T2",
       title: "Calling contract methods",
       test: async function () {
-        const address = "0xFFFFFFfFea09FB06d082fd1275CD48b191cbCD1d";
+        const address = "0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080";
         const contract = new web3.eth.Contract(xcAssetAbi, address);
         const totalSupply = Number(await contract.methods.totalSupply().call());
         log(await contract.methods.symbol().call());

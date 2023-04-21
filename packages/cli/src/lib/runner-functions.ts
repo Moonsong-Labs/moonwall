@@ -14,14 +14,14 @@ import {
 } from "../types/runner.js";
 import { MoonwallContext, contextCreator } from "./globalContext.js";
 import { BlockCreation, ChopsticksBlockCreation } from "./contextHelpers.js";
-import { createDevBlock, devForkToFinalizedHead } from "../internal/devModeHelpers.js";
+import { createDevBlock, devForkToFinalizedHead } from "../internal/foundations/devModeHelpers.js";
 import {
   chopForkToFinalizedHead,
   createChopsticksBlock,
   sendNewBlockAndCheck,
   sendNewBlockRequest,
   sendSetStorageRequest,
-} from "../internal/chopsticksHelpers.js";
+} from "../internal/foundations/chopsticksHelpers.js";
 import { ProviderType, ZombieNodeType } from "../types/config.js";
 import { importJsonConfig } from "./configReader.js";
 import Debug, { Debugger } from "debug";

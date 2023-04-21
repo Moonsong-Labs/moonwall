@@ -59,7 +59,7 @@
     "lint": "tsc"
   },
   "dependencies": {
-    "@acala-network/chopsticks": "^0.6.0",
+    "@acala-network/chopsticks": "^0.6.1",
     "@moonbeam-network/api-augment": "^0.2201.0",
     "@moonwall/util": "workspace:*",
     "@polkadot/api": "^10.2.1",
@@ -107,11 +107,11 @@
   "pnpm": {
     "overrides": {
       "@moonwall/util": "workspace:*",
-      "@polkadot/rpc-provider": "$@polkadot/rpc-provider",
-      "@polkadot/util": "$@polkadot/rpc-provider",
-      "@polkadot/keyring": "$@polkadot/rpc-provider",
-      "@polkadot/api": "$@polkadot/api",
-      "@polkadot/types": "$@polkadot/api"
+      "@polkadot/rpc-provider": "$@moonwall/util",
+      "@polkadot/util": "$@moonwall/util",
+      "@polkadot/keyring": "$@moonwall/util",
+      "@polkadot/api": "$@moonwall/util",
+      "@polkadot/types": "$@moonwall/util"
     }
   },
   "publishConfig": {

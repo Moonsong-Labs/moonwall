@@ -4,12 +4,8 @@ import { AddressOrPair, ApiTypes, AugmentedEvent, SubmittableExtrinsic } from "@
 import { GenericExtrinsic } from "@polkadot/types/extrinsic";
 import { DispatchError, DispatchInfo, Event, EventRecord } from "@polkadot/types/interfaces";
 import { AnyTuple, RegistryError } from "@polkadot/types/types";
-import {
-  customWeb3Request,
-  alith,
-  createAndFinalizeBlock
-} from "@moonwall/util";
-import {Web3} from "web3";
+import { customWeb3Request, alith, createAndFinalizeBlock } from "@moonwall/util";
+import { Web3 } from "web3";
 import { MoonwallContext } from "./globalContext.js";
 import { assert } from "vitest";
 import Debug, { Debugger } from "debug";
@@ -41,7 +37,7 @@ export async function createBlock<
       // Ethereum
       results.push({
         type: "eth",
-        hash: (await customWeb3Request(w3Api, "eth_sendRawTransaction", [call])as any).result,
+        hash: ((await customWeb3Request(w3Api, "eth_sendRawTransaction", [call])) as any).result,
       });
     } else if (call.isSigned) {
       const tx = pjsApi.tx(call);
@@ -80,9 +76,7 @@ export async function createBlock<
   }
 
   // We retrieve the events for that block
-  const allRecords: EventRecord[] = (await (
-    await pjsApi.at(blockResult.hash)
-  ).query.system.events());
+  const allRecords: EventRecord[] = await (await pjsApi.at(blockResult.hash)).query.system.events();
   // We retrieve the block (including the extrinsics)
   const blockData = await pjsApi.rpc.chain.getBlock(blockResult.hash);
 

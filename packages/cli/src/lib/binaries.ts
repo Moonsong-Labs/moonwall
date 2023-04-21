@@ -1,4 +1,4 @@
-import "@moonbeam-network/api-augment"
+import "@moonbeam-network/api-augment";
 import path from "path";
 import fs from "fs";
 import child_process from "child_process";
@@ -9,10 +9,7 @@ export const BINARY_DIRECTORY = process.env.BINARY_DIRECTORY || "binaries";
 export const RUNTIME_DIRECTORY = process.env.RUNTIME_DIRECTORY || "runtimes";
 export const SPECS_DIRECTORY = process.env.SPECS_DIRECTORY || "specs";
 
-export async function getGithubReleaseBinary(
-  url: string,
-  binaryPath: string
-): Promise<string> {
+export async function getGithubReleaseBinary(url: string, binaryPath: string): Promise<string> {
   if (!fs.existsSync(binaryPath)) {
     console.log(`     Missing ${binaryPath} locally, downloading it...`);
     child_process.execSync(
@@ -27,9 +24,7 @@ export async function getGithubReleaseBinary(
 }
 
 // Downloads the binary and return the filepath
-export async function getMoonbeamReleaseBinary(
-  binaryTag: string
-): Promise<string> {
+export async function getMoonbeamReleaseBinary(binaryTag: string): Promise<string> {
   const binaryPath = path.join(BINARY_DIRECTORY, `moonbeam-${binaryTag}`);
   return getGithubReleaseBinary(
     `https://github.com/PureStake/moonbeam/releases/download/${binaryTag}/moonbeam`,
@@ -37,9 +32,7 @@ export async function getMoonbeamReleaseBinary(
   );
 }
 
-export async function getPolkadotReleaseBinary(
-  binaryTag: string
-): Promise<string> {
+export async function getPolkadotReleaseBinary(binaryTag: string): Promise<string> {
   const binaryPath = path.join(BINARY_DIRECTORY, `polkadot-${binaryTag}`);
   return getGithubReleaseBinary(
     `https://github.com/paritytech/polkadot/releases/download/${binaryTag}/polkadot`,
@@ -56,9 +49,7 @@ export async function getTagSha8(binaryTag: string): Promise<string> {
   return sha.slice(0, 8);
 }
 
-export async function getMoonbeamDockerBinary(
-  binaryTag: string
-): Promise<string> {
+export async function getMoonbeamDockerBinary(binaryTag: string): Promise<string> {
   const sha8 = await getTagSha8(binaryTag);
   const binaryPath = path.join(BINARY_DIRECTORY, `moonbeam-${sha8}`);
   if (!fs.existsSync(binaryPath)) {
@@ -84,10 +75,7 @@ export async function getRuntimeWasm(
   runtimeTag: "local" | string,
   localPath?: string
 ): Promise<string> {
-  const runtimePath = path.join(
-    RUNTIME_DIRECTORY,
-    `${runtimeName}-${runtimeTag}.wasm`
-  );
+  const runtimePath = path.join(RUNTIME_DIRECTORY, `${runtimeName}-${runtimeTag}.wasm`);
 
   if (!fs.existsSync(RUNTIME_DIRECTORY)) {
     fs.mkdirSync(RUNTIME_DIRECTORY, { recursive: true });
@@ -97,8 +85,7 @@ export async function getRuntimeWasm(
     const builtRuntimePath = localPath
       ? localPath
       : path.join(
-          OVERRIDE_RUNTIME_PATH ||
-            `../target/release/wbuild/${runtimeName}-runtime/`,
+          OVERRIDE_RUNTIME_PATH || `../target/release/wbuild/${runtimeName}-runtime/`,
           `${runtimeName}_runtime.compact.compressed.wasm`
         );
 
@@ -140,10 +127,7 @@ async function generateSpecs(
   runtimeName: "moonbase-local" | "moonriver-local" | "moonbeam-local",
   raw: boolean
 ) {
-  const specPath = path.join(
-    SPECS_DIRECTORY,
-    `${runtimeName}-${raw ? "raw" : "plain"}-specs.json`
-  );
+  const specPath = path.join(SPECS_DIRECTORY, `${runtimeName}-${raw ? "raw" : "plain"}-specs.json`);
   child_process.execSync(
     `mkdir -p ${path.dirname(specPath)} && ` +
       `${binaryPath} build-spec --chain ${runtimeName} ` +

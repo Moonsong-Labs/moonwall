@@ -3,11 +3,7 @@ import { Web3, JsonRpcResponse, Log } from "web3";
 import { alith } from "../constants/accounts.js";
 import { MIN_GAS_PRICE } from "../constants/chain.js";
 
-export async function customWeb3Request(
-  web3: Web3,
-  method: string,
-  params: any[]
-) {
+export async function customWeb3Request(web3: Web3, method: string, params: any[]) {
   return new Promise<JsonRpcResponse>((resolve, reject) => {
     (web3.currentProvider as any).send(
       {
@@ -22,9 +18,7 @@ export async function customWeb3Request(
             `Failed to send custom request (${method} (${params
               .map((p) => {
                 const str = p.toString();
-                return str.length > 128
-                  ? `${str.slice(0, 96)}...${str.slice(-28)}`
-                  : str;
+                return str.length > 128 ? `${str.slice(0, 96)}...${str.slice(-28)}` : str;
               })
               .join(",")})): ${error.message || error.toString()}`
           );

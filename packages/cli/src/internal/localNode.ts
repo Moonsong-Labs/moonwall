@@ -5,9 +5,8 @@ import { checkExists } from "./files.js";
 const debugNode = Debug("global:node");
 
 export async function launchNode(cmd: string, args: string[], name: string): Promise<ChildProcess> {
-
-  if (cmd.includes("moonbeam")){
-    await checkExists(cmd)
+  if (cmd.includes("moonbeam")) {
+    await checkExists(cmd);
   }
 
   let runningNode: ChildProcess;
@@ -32,8 +31,7 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
   runningNode.on("error", (err) => {
     if ((err as any).errno == "ENOENT") {
       console.error(
-        `\x1b[31mMissing Local binary at` +
-          `(${cmd}).\nPlease compile the project\x1b[0m`
+        `\x1b[31mMissing Local binary at` + `(${cmd}).\nPlease compile the project\x1b[0m`
       );
     } else {
       console.error(err);
