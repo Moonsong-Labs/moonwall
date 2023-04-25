@@ -11,8 +11,7 @@
         "rtUpgradePath": "./tmp/moonbase-runtime-2301.wasm",
         "zombieSpec": {
           "name": "zombienet",
-          "configPath": "./configs/zombieOverride.json",
-          "overwriteCouncilAlith": true
+          "configPath": "./configs/zombieOverride.json"
         }
       }
     },
@@ -23,7 +22,8 @@
         "type": "zombie",
         "zombieSpec": {
           "name": "zombienet",
-          "configPath": "./configs/zombieMulti.json"
+          "configPath": "./configs/zombieMulti.json",
+          "monitoredNode": "alice"
         }
       },
       "connections": [

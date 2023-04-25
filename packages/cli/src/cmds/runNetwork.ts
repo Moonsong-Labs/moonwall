@@ -113,7 +113,7 @@ export async function runNetwork(args) {
   clear();
   const portsList = await reportServicePorts();
 
-  portsList.forEach((port) =>
+  portsList.forEach(({ port }) =>
     console.log(`  🖥️   https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0.0.1%3A${port}`)
   );
 
@@ -162,29 +162,35 @@ export async function runNetwork(args) {
 
 const reportServicePorts = async () => {
   const ctx = MoonwallContext.getContext();
-  const portsList: string[] = [];
+  const portsList: { port: string; name: string }[] = [];
   const globalConfig = await importJsonConfig();
   const config = globalConfig.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
   if (config.foundation.type == "dev") {
     const port =
       ctx.environment.nodes[0].args.find((a) => a.includes("ws-port"))!.split("=")[1] || "9944";
-    portsList.push(port);
+    portsList.push({ port, name: "dev" });
   } else if (config.foundation.type == "chopsticks") {
     portsList.push(
       ...(await Promise.all(
-        config.foundation.launchSpec.map(async ({ configPath }) => {
+        config.foundation.launchSpec.map(async ({ configPath, name }) => {
           const yaml = parse((await fs.readFile(configPath)).toString());
-          return yaml.port || "8000";
+          return { name, port: yaml.port || "8000" };
         })
       ))
     );
   } else if (config.foundation.type == "zombie") {
-    // TODO: Remove alith hardcoding
-    const wsPort = ctx.zombieNetwork.nodesByName.alith.wsUri.split("ws://127.0.0.1:")[1];
-    portsList.push(wsPort);
+    ctx.zombieNetwork.relay.forEach(({ wsUri, name }) => {
+      portsList.push({ name, port: wsUri.split("ws://127.0.0.1:")[1] });
+    });
+
+    Object.keys(ctx.zombieNetwork.paras).forEach((paraId) => {
+      ctx.zombieNetwork.paras[paraId].nodes.forEach(({ wsUri, name }) => {
+        portsList.push({ name, port: wsUri.split("ws://127.0.0.1:")[1] });
+      });
+    });
   }
-  portsList.forEach((port) =>
-    console.log(`  🌐  Node has started, listening on ports - Websocket: ${port}`)
+  portsList.forEach(({ name, port }) =>
+    console.log(`  🌐  Node ${name} has started, listening on ports - Websocket: ${port}`)
   );
 
   return portsList;
@@ -284,7 +290,7 @@ const resolveInfoChoice = async (env: Environment) => {
   console.log(chalk.bgWhite.blackBright("Launch Spec in Config File:"));
   console.dir(env, { depth: null });
   const portsList = await reportServicePorts();
-  portsList.forEach((port) =>
+  portsList.forEach(({ port }) =>
     console.log(`  🖥️   https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0.0.1%3A${port}`)
   );
 };
@@ -312,7 +318,7 @@ const resolveTailChoice = async () => {
     const onData = (chunk: any) => ui.log.write(chunk.toString());
 
     if (ctx.foundation == "zombie") {
-      const logPath = process.env.MOON_COLLATOR_LOG;
+      const logPath = process.env.MOON_MONITORED_NODE;
       let currentReadPosition = 0;
 
       const readLog = () => {

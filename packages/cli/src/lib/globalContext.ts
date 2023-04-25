@@ -167,17 +167,28 @@ export class MoonwallContext {
 
     if (this.environment.foundationType === "zombie") {
       console.log("🧟 Spawning zombie nodes ...");
-
+      const config = await importJsonConfig();
+      const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
       const zombieConfig = getZombieConfig(nodes[0].cmd);
 
       await checkZombieBins(zombieConfig);
 
       const network = await zombie.start("", zombieConfig, { silent: true });
+      if (this.environment.providers.length > 0) {
+        process.env.MOON_RELAY_WSS = network.nodesByName.alice.wsUri;
+        process.env.MOON_PARA_WSS = network.nodesByName.alith.wsUri;
+      }
 
-      process.env.MOON_RELAY_WSS = network.nodesByName.alice.wsUri;
-      process.env.MOON_PARA_WSS = network.nodesByName.alith.wsUri;
-      // TODO: infer parachain network based on another param
-      process.env.MOON_COLLATOR_LOG = zombieConfig.parachains[0].collator
+      if (
+        env.foundation.type == "zombie" &&
+        env.foundation.zombieSpec.monitoredNode &&
+        env.foundation.zombieSpec.monitoredNode in network.nodesByName
+      ) {
+        process.env.MOON_MONITORED_NODE = `${network.tmpDir}/${env.foundation.zombieSpec.monitoredNode}.log`;
+        console.log(`${network.tmpDir}/${env.foundation.zombieSpec.monitoredNode}.log`);
+      }
+
+      process.env.MOON_MONITORED_NODE = zombieConfig.parachains[0].collator
         ? `${network.tmpDir}/${zombieConfig.parachains[0].collator.name}.log`
         : `${network.tmpDir}/${zombieConfig.parachains[0].collators[0].name}.log`;
       this.zombieNetwork = network;
