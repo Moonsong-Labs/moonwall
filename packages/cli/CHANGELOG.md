@@ -1,5 +1,17 @@
 # @moonwall/cli
 
+## 0.5.0
+
+### Minor Changes
+
+- c288ebf: Tansii support
+
+### Patch Changes
+
+- 80473ae: Multi Zombie
+- Updated dependencies [c288ebf]
+  - @moonwall/util@0.5.0
+
 ## 0.4.12
 
 ### Patch Changes
