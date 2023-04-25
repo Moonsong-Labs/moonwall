@@ -72,7 +72,7 @@ export function describeSuite({
 
       polkadotJs: (options?: { apiName?: string; type?: ProviderType }): ApiPromise => {
         if (options && options.apiName) {
-          return context.providers[options.apiName];
+          return ctx.providers.find((a) => a.name == options.apiName)!.api as ApiPromise;
         } else if (options && options.type) {
           return ctx.providers.find((a) => a.type == options.type)!.api as ApiPromise;
         } else {
@@ -82,14 +82,14 @@ export function describeSuite({
       },
       ethersSigner: (apiName?: string): Signer => {
         if (apiName) {
-          return context.providers[apiName];
+          return ctx.providers.find((a) => a.name == apiName)!.api as Signer;
         } else {
           return ctx.providers.find((a) => a.type == "ethers")!.api as Signer;
         }
       },
       web3: (apiName?: string): Web3 => {
         if (apiName) {
-          return context.providers[apiName];
+          return ctx.providers.find((a) => a.name == apiName)!.api as Web3;
         } else {
           return ctx.providers.find((a) => a.type == "web3")!.api as Web3;
         }

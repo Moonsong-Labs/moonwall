@@ -193,28 +193,33 @@ export class MoonwallContext {
   public async connectEnvironment(): Promise<MoonwallContext> {
     // TODO: Explicitly communicate (DOCs and console) this is done automatically
     if (this.environment.foundationType == "zombie") {
-      this.environment.providers = prepareProviders([
-        {
-          name: "w3",
-          type: "web3",
-          endpoints: [process.env.MOON_PARA_WSS],
-        },
-        {
-          name: "eth",
-          type: "ethers",
-          endpoints: [process.env.MOON_PARA_WSS],
-        },
-        {
-          name: "parachain",
-          type: "moon",
-          endpoints: [process.env.MOON_PARA_WSS],
-        },
-        {
-          name: "relaychain",
-          type: "polkadotJs",
-          endpoints: [process.env.MOON_RELAY_WSS],
-        },
-      ]);
+      const config = await importJsonConfig();
+      const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
+
+      this.environment.providers = env.connections
+        ? prepareProviders(env.connections)
+        : prepareProviders([
+            {
+              name: "w3",
+              type: "web3",
+              endpoints: [process.env.MOON_PARA_WSS],
+            },
+            {
+              name: "eth",
+              type: "ethers",
+              endpoints: [process.env.MOON_PARA_WSS],
+            },
+            {
+              name: "parachain",
+              type: "moon",
+              endpoints: [process.env.MOON_PARA_WSS],
+            },
+            {
+              name: "relaychain",
+              type: "polkadotJs",
+              endpoints: [process.env.MOON_RELAY_WSS],
+            },
+          ]);
     }
 
     if (this.providers.length > 0) {
@@ -250,19 +255,36 @@ export class MoonwallContext {
     }
 
     if (this.foundation == "zombie") {
-      const paraApi = this.providers.find((a) => a.type == "moon").api as ApiPromise;
-      const relayApi = this.providers.find((a) => a.type == "polkadotJs").api as ApiPromise;
+      const promises = this.providers
+        .filter(({ type }) => type == "polkadotJs" || type == "moon")
+        .map(async (provider) => {
+          return await new Promise(async (resolve) => {
+            console.log(`⏲️  Waiting for chain ${provider.name} to produce blocks...`);
+            while (
+              (
+                await (provider.api as ApiPromise).rpc.chain.getBlock()
+              ).block.header.number.toNumber() == 0
+            ) {
+              await setTimeout(500);
+            }
+            console.log(`✅ Chain ${provider.name} producing blocks, continuing`);
+            resolve("");
+          });
+        });
 
-      // TODO: Create promise that rejects if timeout is reached
-      while ((await relayApi.rpc.chain.getBlock()).block.header.number.toNumber() == 0) {
-        await setTimeout(500);
-      }
-      console.log("🎡  RelayChain producing blocks, waiting for parachain...");
+      await Promise.all(promises);
+      // const paraApi = this.providers.find((a) => a.type == "moon").api as ApiPromise;
+      // const relayApi = this.providers.find((a) => a.type == "polkadotJs").api as ApiPromise;
 
-      while ((await paraApi.rpc.chain.getBlock()).block.header.number.toNumber() == 0) {
-        await setTimeout(500);
-      }
-      console.log("🎠  Parachain producing blocks, continuing ");
+      // while ((await relayApi.rpc.chain.getBlock()).block.header.number.toNumber() == 0) {
+      //   await setTimeout(500);
+      // }
+      // console.log("🎡  RelayChain producing blocks, waiting for parachain...");
+
+      // while ((await paraApi.rpc.chain.getBlock()).block.header.number.toNumber() == 0) {
+      //   await setTimeout(500);
+      // }
+      // console.log("🎠  Parachain producing blocks, continuing ");
     }
 
     return MoonwallContext.getContext();

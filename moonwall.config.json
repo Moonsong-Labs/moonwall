@@ -17,6 +17,29 @@
       }
     },
     {
+      "name": "zombie_multi_para",
+      "testFileDir": ["tests/multizombie"],
+      "foundation": {
+        "type": "zombie",
+        "zombieSpec": {
+          "name": "zombienet",
+          "configPath": "./configs/zombieMulti.json"
+        }
+      },
+      "connections": [
+        {
+          "name": "para1",
+          "type": "polkadotJs",
+          "endpoints": ["ws://127.0.0.1:33345"]
+        },
+        {
+          "name": "para2",
+          "type": "polkadotJs",
+          "endpoints": ["ws://127.0.0.1:22345"]
+        }
+      ]
+    },
+    {
       "name": "zombie_test",
       "testFileDir": ["tests/zombie"],
       "foundation": {
