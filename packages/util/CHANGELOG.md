@@ -1,5 +1,11 @@
 # @moonwall/util
 
+## 0.5.0
+
+### Minor Changes
+
+- c288ebf: Tansii support
+
 ## 0.4.12
 
 ### Patch Changes
