@@ -174,7 +174,7 @@ export class MoonwallContext {
       await checkZombieBins(zombieConfig);
 
       const network = await zombie.start("", zombieConfig, { silent: true });
-      if (this.environment.providers) {
+      if (!!!this.environment.providers) {
         process.env.MOON_RELAY_WSS = network.nodesByName.alice.wsUri;
         process.env.MOON_PARA_WSS = network.nodesByName.alith.wsUri;
       }
