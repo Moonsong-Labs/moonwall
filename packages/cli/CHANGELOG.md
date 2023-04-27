@@ -1,5 +1,11 @@
 # @moonwall/cli
 
+## 0.5.2
+
+### Patch Changes
+
+- 40e7868: Fix waitblock for zombie
+
 ## 0.5.1
 
 ### Patch Changes
