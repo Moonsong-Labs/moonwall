@@ -25,6 +25,8 @@ describeSuite({
         const network = para1Api.consts.system.version.specName.toString();
         log(network);
         // expect(network).to.contain("rococo");
+
+        context.waitBlock(2, "para1");
       },
     });
 

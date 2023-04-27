@@ -178,7 +178,7 @@ export function describeSuite({
       testCases({
         context: {
           ...context,
-          waitBlock: async (blocksToWaitFor: number = 1, chain: ZombieNodeType = "parachain") => {
+          waitBlock: async (blocksToWaitFor: number = 1, chain: string = "parachain") => {
             const ctx = MoonwallContext.getContext();
             const api = ctx.providers.find((prov) => prov.name === chain).api as ApiPromise;
             const currentBlockNumber = (

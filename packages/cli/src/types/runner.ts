@@ -130,7 +130,7 @@ export interface ReadOnlyContext extends GenericContext {
 
 export interface ZombieContext extends GenericContext {
   upgradeRuntime: (options?: UpgradePreferences) => Promise<void>;
-  waitBlock: (blocksToWaitFor?: number, chain?: ZombieNodeType) => Promise<void>;
+  waitBlock: (blocksToWaitFor?: number, chain?: string) => Promise<void>;
 }
 
 export interface ChopsticksContext extends GenericContext {
