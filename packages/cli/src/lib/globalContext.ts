@@ -174,7 +174,10 @@ export class MoonwallContext {
       await checkZombieBins(zombieConfig);
 
       const network = await zombie.start("", zombieConfig, { silent: true });
-      if (!!!this.environment.providers) {
+      if (
+        (this.environment.providers && this.environment.providers.length < 1) ||
+        !!!this.environment.providers
+      ) {
         process.env.MOON_RELAY_WSS = network.nodesByName.alice.wsUri;
         process.env.MOON_PARA_WSS = network.nodesByName.alith.wsUri;
       }
@@ -283,18 +286,6 @@ export class MoonwallContext {
         });
 
       await Promise.all(promises);
-      // const paraApi = this.providers.find((a) => a.type == "moon").api as ApiPromise;
-      // const relayApi = this.providers.find((a) => a.type == "polkadotJs").api as ApiPromise;
-
-      // while ((await relayApi.rpc.chain.getBlock()).block.header.number.toNumber() == 0) {
-      //   await setTimeout(500);
-      // }
-      // console.log("🎡  RelayChain producing blocks, waiting for parachain...");
-
-      // while ((await paraApi.rpc.chain.getBlock()).block.header.number.toNumber() == 0) {
-      //   await setTimeout(500);
-      // }
-      // console.log("🎠  Parachain producing blocks, continuing ");
     }
 
     return MoonwallContext.getContext();

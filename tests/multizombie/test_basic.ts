@@ -18,15 +18,17 @@ describeSuite({
     it({
       id: "T01",
       title: "Check para1 api correctly connected",
-      test: function () {
+      timeout: 30000,
+      test:async function  () {
         const rt = para1Api.consts.system.version.specVersion.toNumber();
         expect(rt).to.be.greaterThan(0);
 
         const network = para1Api.consts.system.version.specName.toString();
         log(network);
         // expect(network).to.contain("rococo");
-
-        context.waitBlock(2, "para1");
+        console.log((await para2Api.rpc.chain.getBlock()).block.header.number.toNumber());
+        await context.waitBlock(2, "para1");
+        console.log((await para2Api.rpc.chain.getBlock()).block.header.number.toNumber());
       },
     });
 
