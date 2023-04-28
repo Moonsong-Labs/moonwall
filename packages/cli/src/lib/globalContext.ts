@@ -177,7 +177,7 @@ export class MoonwallContext {
       const network = await zombie.start("", zombieConfig, { silent: true });
 
       process.env.MOON_RELAY_WSS = network.relay[0].wsUri;
-      process.env.MOON_PARA_WSS = network.paras[Object.keys(network.paras)[0]].nodes[0].wsUri;
+      process.env.MOON_PARA_WSS = Object.values(network.paras)[0].nodes[0].wsUri
 
       if (
         env.foundation.type == "zombie" &&
