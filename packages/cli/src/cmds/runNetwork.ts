@@ -18,6 +18,18 @@ inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 export async function runNetwork(args) {
   process.env.MOON_TEST_ENV = args.envName;
   const globalConfig = await importJsonConfig();
+
+  const env = globalConfig.environments.find(({ name }) => name === args.envName)!;
+
+  if (!!!env) {
+    const envList = globalConfig.environments.map((env) => env.name);
+    throw new Error(
+      `No environment found in config for: ${chalk.bgWhiteBright.blackBright(
+        args.envName
+      )}\n Environments defined in config are: ${envList}\n`
+    );
+  }
+
   const testFileDirs = globalConfig.environments.find(
     ({ name }) => name == args.envName
   )!.testFileDir;

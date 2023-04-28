@@ -14,6 +14,7 @@ import fs from "node:fs";
 import { checkExists } from "../internal/files.js";
 import { checkZombieBins, getZombieConfig } from "../internal/foundations/zombieHelpers.js";
 import chalk from "chalk";
+import { net } from "web3";
 const debugSetup = Debug("global:context");
 
 export const contextCreator = async (config: MoonwallConfig, env: string) => {
@@ -174,13 +175,9 @@ export class MoonwallContext {
       await checkZombieBins(zombieConfig);
 
       const network = await zombie.start("", zombieConfig, { silent: true });
-      if (
-        (this.environment.providers && this.environment.providers.length < 1) ||
-        !!!this.environment.providers
-      ) {
-        process.env.MOON_RELAY_WSS = network.nodesByName.alice.wsUri;
-        process.env.MOON_PARA_WSS = network.nodesByName.alith.wsUri;
-      }
+
+      process.env.MOON_RELAY_WSS = network.relay[0].wsUri;
+      process.env.MOON_PARA_WSS = network.paras[Object.keys(network.paras)[0]].nodes[0].wsUri;
 
       if (
         env.foundation.type == "zombie" &&
