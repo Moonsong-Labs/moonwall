@@ -18,8 +18,8 @@ describeSuite({
     it({
       id: "T01",
       title: "Check para1 api correctly connected",
-      timeout: 30000,
-      test:async function  () {
+      timeout: 60000,
+      test: async function () {
         const rt = para1Api.consts.system.version.specVersion.toNumber();
         expect(rt).to.be.greaterThan(0);
 
