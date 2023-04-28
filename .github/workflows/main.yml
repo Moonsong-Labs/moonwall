@@ -108,3 +108,26 @@ jobs:
           pnpm moonwall download polkadot latest ./tmp
       - name: Run standard zombie test
         run: pnpm moonwall test zombie_test
+
+  test_multi_zombie:
+    runs-on: ubuntu-latest
+    needs: ["build"]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 7
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+          cache: "pnpm"
+      - name: Build like before
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm run lint && pnpm run build
+      - name: Download binaries
+        run: |
+          pnpm moonwall download moonbeam latest ./tmp
+          pnpm moonwall download polkadot latest ./tmp
+      - name: Run multi zombie test
+        run: pnpm moonwall test zombie_multi_para
