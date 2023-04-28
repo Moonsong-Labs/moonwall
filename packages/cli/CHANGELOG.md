@@ -1,5 +1,11 @@
 # @moonwall/cli
 
+## 0.5.3
+
+### Patch Changes
+
+- 2973246: Fix for tansii
+
 ## 0.5.2
 
 ### Patch Changes
