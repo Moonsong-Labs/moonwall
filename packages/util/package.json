@@ -55,16 +55,16 @@
     "lint": "tsc"
   },
   "dependencies": {
-    "@moonbeam-network/api-augment": "^0.2201.0",
-    "@polkadot/api": "^10.2.1",
-    "@polkadot/api-augment": "^10.2.1",
-    "@polkadot/api-derive": "^10.2.1",
-    "@polkadot/keyring": "^11.1.2",
-    "@polkadot/rpc-provider": "^10.2.1",
-    "@polkadot/types": "^10.2.1",
-    "@polkadot/types-codec": "^10.2.1",
-    "@polkadot/util": "^11.1.2",
-    "@types/node": "^18.15.11",
+    "@moonbeam-network/api-augment": "^0.2301.0",
+    "@polkadot/api": "^10.5.1",
+    "@polkadot/api-augment": "^10.5.1",
+    "@polkadot/api-derive": "^10.5.1",
+    "@polkadot/keyring": "^12.1.2",
+    "@polkadot/rpc-provider": "^10.5.1",
+    "@polkadot/types": "^10.5.1",
+    "@polkadot/types-codec": "^10.5.1",
+    "@polkadot/util": "^12.1.2",
+    "@types/node": "^18.16.3",
     "@types/yargs": "^17.0.24",
     "bottleneck": "^2.19.5",
     "chalk": "^5.2.0",
@@ -78,22 +78,22 @@
     "inquirer-press-to-continue": "^1.1.4",
     "moonbeam-types-bundle": "^2.0.10",
     "node-fetch": "^3.3.1",
-    "prettier": "^2.8.7",
+    "prettier": "^2.8.8",
     "semver": "^7.5.0",
     "ts-node": "^10.9.1",
-    "vite": "^4.3.0",
-    "vitest": "^0.29.8",
+    "vite": "^4.3.4",
+    "vitest": "^0.30.1",
     "web3": "4.0.1-rc.0",
     "ws": "^8.13.0",
-    "yaml": "^2.2.1",
-    "yargs": "^17.7.1"
+    "yaml": "^2.2.2",
+    "yargs": "^17.7.2"
   },
   "devDependencies": {
     "@types/debug": "^4.1.7",
-    "@vitest/ui": "^0.28.5",
+    "@vitest/ui": "^0.30.1",
     "regenerator-runtime": "^0.13.11",
     "tsup": "^6.7.0",
-    "typescript": "^4.9.5"
+    "typescript": "^5.0.4"
   },
   "pnpm": {
     "overrides": {
