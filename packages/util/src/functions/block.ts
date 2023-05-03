@@ -12,7 +12,7 @@ import {
 } from "@polkadot/types/interfaces";
 import { FrameSystemEventRecord, SpWeightsWeightV2Weight } from "@polkadot/types/lookup";
 import { u32, u64, u128, Option, GenericExtrinsic } from "@polkadot/types";
-import type { Block, AccountId20 } from "@polkadot/types/interfaces/runtime/types";
+import type { Block, AccountId20, SignedBlock } from "@polkadot/types/interfaces/runtime/types";
 import type { TxWithEvent } from "@polkadot/api-derive/types";
 import type { ITuple } from "@polkadot/types-codec/types";
 import Bottleneck from "bottleneck";
@@ -70,7 +70,12 @@ export const getBlockExtrinsic = async (
   blockHash: string | BlockHash,
   section: string,
   method: string
-) => {
+): Promise<{
+  block: SignedBlock | any;
+  extrinsic: Extrinsic | null | any;
+  events: Event[];
+  resultEvent: Event | undefined;
+}> => {
   const apiAt = await api.at(blockHash);
   const [{ block }, records] = await Promise.all([
     api.rpc.chain.getBlock(blockHash),
