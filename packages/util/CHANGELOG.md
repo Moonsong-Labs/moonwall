@@ -1,5 +1,12 @@
 # @moonwall/util
 
+## 0.5.4
+
+### Patch Changes
+
+- 426d058: Updated Packages
+  - Loads of dependency upgrades which hopefully fixes lots of things (maybe it will break things?)
+
 ## 0.5.0
 
 ### Minor Changes

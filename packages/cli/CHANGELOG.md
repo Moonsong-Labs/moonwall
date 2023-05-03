@@ -1,5 +1,14 @@
 # @moonwall/cli
 
+## 0.5.4
+
+### Patch Changes
+
+- 426d058: Updated Packages
+  - Loads of dependency upgrades which hopefully fixes lots of things (maybe it will break things?)
+- Updated dependencies [426d058]
+  - @moonwall/util@0.5.4
+
 ## 0.5.3
 
 ### Patch Changes
