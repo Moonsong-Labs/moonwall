@@ -48,7 +48,7 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
       console.error(`Logs:`);
       console.error(binaryLogs.map((chunk) => chunk.toString()).join("\n"));
       reject("Failed to launch node");
-    }, 10000);
+    }, 60000);
 
     const onData = async (chunk: any) => {
       debugNode(chunk.toString());
