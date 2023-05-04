@@ -1,6 +1,6 @@
 import "@moonbeam-network/api-augment";
 import { FoundationType, MoonwallConfig } from "../types/config";
-import { ChildProcess } from "node:child_process";
+import { ChildProcess, exec } from "node:child_process";
 import { populateProviderInterface, prepareProviders } from "../internal/providers.js";
 import { launchNode } from "../internal/localNode.js";
 import { setTimeout } from "node:timers/promises";
@@ -186,6 +186,21 @@ export class MoonwallContext {
       ) {
         process.env.MOON_MONITORED_NODE = `${network.tmpDir}/${env.foundation.zombieSpec.monitoredNode}.log`;
       }
+
+      const processIds = Object.values((network.client as any).processMap)
+        .filter((item) => item["pid"])
+        .map((process) => process["pid"]);
+
+      const onProcessExit = () => {
+        exec(`kill -9 ${processIds.join(" ")}`, (error) => {
+          if (error) {
+            console.error(`Error killing process: ${error.message}`);
+          }
+        });
+      };
+
+      process.once("exit", onProcessExit);
+      process.once("SIGINT", onProcessExit);
 
       process.env.MOON_MONITORED_NODE = zombieConfig.parachains[0].collator
         ? `${network.tmpDir}/${zombieConfig.parachains[0].collator.name}.log`
