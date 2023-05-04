@@ -59,7 +59,7 @@
     "lint": "tsc"
   },
   "dependencies": {
-    "@acala-network/chopsticks": "^0.6.3",
+    "@acala-network/chopsticks": "^0.6.4",
     "@moonbeam-network/api-augment": "^0.2301.0",
     "@moonwall/util": "workspace:*",
     "@polkadot/api": "^10.5.1",
@@ -72,7 +72,7 @@
     "@types/cli-progress": "^3.11.0",
     "@types/node": "^18.16.3",
     "@types/yargs": "^17.0.24",
-    "@zombienet/orchestrator": "^0.0.36",
+    "@zombienet/orchestrator": "^0.0.38",
     "bottleneck": "^2.19.5",
     "chalk": "^5.2.0",
     "clear": "^0.1.0",
@@ -90,7 +90,7 @@
     "superagent": "^8.0.9",
     "ts-node": "^10.9.1",
     "tsup": "^6.7.0",
-    "vitest": "^0.30.1",
+    "vitest": "^0.31.0",
     "web3": "4.0.1-rc.0",
     "web3-providers-ws": "4.0.1-rc.0",
     "ws": "^8.13.0",
