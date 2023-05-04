@@ -1,5 +1,15 @@
 # @moonwall/util
 
+## 0.5.5
+
+### Patch Changes
+
+- 3cff27f: Updated PKG Vers
+
+  Fix for:
+
+  - [#43](https://github.com/Moonsong-Labs/moonwall/issues/43)
+
 ## 0.5.4
 
 ### Patch Changes
