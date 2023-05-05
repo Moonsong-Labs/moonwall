@@ -1,5 +1,13 @@
 # @moonwall/cli
 
+## 0.5.8
+
+### Patch Changes
+
+- bb2ff9e: Changed to peer deps
+- Updated dependencies [bb2ff9e]
+  - @moonwall/util@0.5.8
+
 ## 0.5.7
 
 ### Patch Changes

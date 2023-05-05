@@ -1,5 +1,11 @@
 # @moonwall/util
 
+## 0.5.8
+
+### Patch Changes
+
+- bb2ff9e: Changed to peer deps
+
 ## 0.5.5
 
 ### Patch Changes
