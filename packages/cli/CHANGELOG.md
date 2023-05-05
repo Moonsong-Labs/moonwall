@@ -1,5 +1,11 @@
 # @moonwall/cli
 
+## 0.5.7
+
+### Patch Changes
+
+- 58cdb79: fixing types
+
 ## 0.5.6
 
 ### Patch Changes
