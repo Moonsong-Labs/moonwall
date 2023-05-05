@@ -1,8 +1,10 @@
 import "@moonbeam-network/api-augment";
-import { describeSuite, expect, beforeAll, ApiPromise, Signer, Web3 } from "@moonwall/cli";
+import { describeSuite, expect, beforeAll } from "@moonwall/cli";
 import { CHARLETH_ADDRESS, BALTATHAR_ADDRESS, alith, baltathar } from "@moonwall/util";
-import { parseEther } from "ethers";
+import { Signer, parseEther } from "ethers";
 import { BN } from "@polkadot/util";
+import Web3 from "web3";
+import { ApiPromise } from "@polkadot/api";
 
 describeSuite({
   id: "D01",
