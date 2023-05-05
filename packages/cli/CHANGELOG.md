@@ -1,5 +1,11 @@
 # @moonwall/cli
 
+## 0.5.11
+
+### Patch Changes
+
+- c595a25: attempt to fix logs
+
 ## 0.5.10
 
 ### Patch Changes
