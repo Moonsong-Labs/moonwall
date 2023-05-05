@@ -1,5 +1,11 @@
 # @moonwall/cli
 
+## 0.5.6
+
+### Patch Changes
+
+- 35a89d6: Added ApiDecoration to exported types
+
 ## 0.5.5
 
 ### Patch Changes
