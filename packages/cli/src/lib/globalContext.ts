@@ -284,8 +284,8 @@ export class MoonwallContext {
         .filter(
           ({ name }) =>
             env.foundation.type == "zombie" &&
-            env.foundation.zombieSpec.skipBlockCheck &&
-            !env.foundation.zombieSpec.skipBlockCheck.includes(name)
+            (!env.foundation.zombieSpec.skipBlockCheck ||
+              !env.foundation.zombieSpec.skipBlockCheck.includes(name))
         )
         .map(async (provider) => {
           return await new Promise(async (resolve) => {
