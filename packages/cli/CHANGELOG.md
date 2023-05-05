@@ -1,5 +1,13 @@
 # @moonwall/cli
 
+## 0.5.10
+
+### Patch Changes
+
+- a9314cf: removed annoying logging lines
+- Updated dependencies [a9314cf]
+  - @moonwall/util@0.5.10
+
 ## 0.5.9
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @moonwall/util
 
+## 0.5.10
+
+### Patch Changes
+
+- a9314cf: removed annoying logging lines
+
 ## 0.5.9
 
 ### Patch Changes
