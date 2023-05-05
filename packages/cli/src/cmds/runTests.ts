@@ -63,7 +63,7 @@ export async function executeTests(env: Environment, additionalArgs?: {}) {
   const options: UserConfig = {
     watch: false,
     globals: true,
-    reporters: env.html ? ["verbose", "html"] : ["verbose"],
+    reporters: env.reporters ? env.reporters : ["default"],
     testTimeout: 10000,
     hookTimeout: 500000,
     useAtomics: true,

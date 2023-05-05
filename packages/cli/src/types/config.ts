@@ -6,7 +6,7 @@ export type MoonwallConfig = {
 };
 
 export type Environment = {
-  html?: boolean;
+  reporters?: string[]
   name: string;
   testFileDir: string[];
   foundation: IFoundation;
