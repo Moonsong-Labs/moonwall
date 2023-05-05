@@ -235,3 +235,13 @@ export function mapExtrinsics(
     return { dispatchError, dispatchInfo, events, extrinsic, fee: fees ? fees[index] : undefined };
   });
 }
+
+export const checkTimeSliceForUpgrades = async (
+  api: ApiPromise,
+  blockNumbers: number[],
+  currentVersion: u32
+) => {
+  const apiAt = await api.at(await api.rpc.chain.getBlockHash(blockNumbers[0]));
+  const onChainRt = (await apiAt.query.system.lastRuntimeUpgrade()).unwrap().specVersion;
+  return { result: !onChainRt.eq(currentVersion), specVersion: onChainRt };
+};
