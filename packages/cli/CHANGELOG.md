@@ -1,5 +1,11 @@
 # @moonwall/cli
 
+## 0.5.12
+
+### Patch Changes
+
+- 54bd2f7: change config to use reporters
+
 ## 0.5.11
 
 ### Patch Changes
