@@ -70,6 +70,9 @@ export async function executeTests(env: Environment, additionalArgs?: {}) {
     passWithNoTests: false,
     threads: true,
     include: env.include ? env.include : ["**/{test,spec,test_,test-}*{ts,mts,cts}"],
+    onConsoleLog(log, type) {
+      if (log.trim() == "" || log.trim() == "<empty line>") return false;
+    },
   };
 
   if (!env.multiThreads || process.env.MOON_SINGLE_THREAD === "true") {
