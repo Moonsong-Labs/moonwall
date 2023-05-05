@@ -1,228 +1,251 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "definitions": {
-    "ChopsticksLaunchSpec": {
-      "properties": {
-        "buildBlockMode": {
-          "enum": ["batch", "instant", "manual"],
-          "type": "string"
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "ChopsticksLaunchSpec": {
+            "properties": {
+                "buildBlockMode": {
+                    "enum": [
+                        "batch",
+                        "instant",
+                        "manual"
+                    ],
+                    "type": "string"
+                },
+                "configPath": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "options": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "running": {
+                    "type": "boolean"
+                },
+                "type": {
+                    "enum": [
+                        "parachain",
+                        "relaychain"
+                    ],
+                    "type": "string"
+                },
+                "wasmOverride": {
+                    "type": "string"
+                },
+                "wsPort": {
+                    "type": "number"
+                }
+            },
+            "type": "object"
         },
-        "configPath": {
-          "type": "string"
+        "DevLaunchSpec": {
+            "properties": {
+                "binPath": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "options": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "ports": {
+                    "properties": {
+                        "p2pPort": {
+                            "type": "number"
+                        },
+                        "rpcPort": {
+                            "type": "number"
+                        },
+                        "wsPort": {
+                            "type": "number"
+                        }
+                    },
+                    "type": "object"
+                },
+                "running": {
+                    "type": "boolean"
+                }
+            },
+            "type": "object"
         },
-        "name": {
-          "type": "string"
+        "IFoundation": {
+            "anyOf": [
+                {
+                    "properties": {
+                        "launchSpec": {
+                            "items": {
+                                "$ref": "#/definitions/DevLaunchSpec"
+                            },
+                            "type": "array"
+                        },
+                        "type": {
+                            "enum": [
+                                "dev"
+                            ],
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                {
+                    "properties": {
+                        "launchSpec": {
+                            "items": {
+                                "$ref": "#/definitions/ChopsticksLaunchSpec"
+                            },
+                            "type": "array"
+                        },
+                        "rtUpgradePath": {
+                            "type": "string"
+                        },
+                        "type": {
+                            "enum": [
+                                "chopsticks"
+                            ],
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                {
+                    "properties": {
+                        "rtUpgradePath": {
+                            "type": "string"
+                        },
+                        "type": {
+                            "enum": [
+                                "zombie"
+                            ],
+                            "type": "string"
+                        },
+                        "zombieSpec": {
+                            "$ref": "#/definitions/ZombieLaunchSpec"
+                        }
+                    },
+                    "type": "object"
+                },
+                {
+                    "properties": {
+                        "type": {
+                            "enum": [
+                                "fork",
+                                "read_only"
+                            ],
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                }
+            ]
         },
-        "options": {
-          "items": {
+        "ProviderConfig": {
+            "properties": {
+                "endpoints": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/ProviderType"
+                }
+            },
+            "type": "object"
+        },
+        "ProviderType": {
+            "enum": [
+                "ethers",
+                "moon",
+                "polkadotJs",
+                "unknown",
+                "web3"
+            ],
             "type": "string"
-          },
-          "type": "array"
         },
-        "running": {
-          "type": "boolean"
-        },
-        "type": {
-          "enum": ["parachain", "relaychain"],
-          "type": "string"
-        },
-        "wasmOverride": {
-          "type": "string"
-        },
-        "wsPort": {
-          "type": "number"
+        "ZombieLaunchSpec": {
+            "properties": {
+                "configPath": {
+                    "type": "string"
+                },
+                "monitoredNode": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "options": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "running": {
+                    "type": "boolean"
+                }
+            },
+            "type": "object"
         }
-      },
-      "type": "object"
     },
-    "DevLaunchSpec": {
-      "properties": {
-        "binPath": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "options": {
-          "items": {
+    "properties": {
+        "$schema": {
             "type": "string"
-          },
-          "type": "array"
         },
-        "ports": {
-          "properties": {
-            "p2pPort": {
-              "type": "number"
-            },
-            "rpcPort": {
-              "type": "number"
-            },
-            "wsPort": {
-              "type": "number"
-            }
-          },
-          "type": "object"
+        "defaultTestTimeout": {
+            "type": "number"
         },
-        "running": {
-          "type": "boolean"
-        }
-      },
-      "type": "object"
-    },
-    "IFoundation": {
-      "anyOf": [
-        {
-          "properties": {
-            "launchSpec": {
-              "items": {
-                "$ref": "#/definitions/DevLaunchSpec"
-              },
-              "type": "array"
-            },
-            "type": {
-              "enum": ["dev"],
-              "type": "string"
-            }
-          },
-          "type": "object"
-        },
-        {
-          "properties": {
-            "launchSpec": {
-              "items": {
-                "$ref": "#/definitions/ChopsticksLaunchSpec"
-              },
-              "type": "array"
-            },
-            "rtUpgradePath": {
-              "type": "string"
-            },
-            "type": {
-              "enum": ["chopsticks"],
-              "type": "string"
-            }
-          },
-          "type": "object"
-        },
-        {
-          "properties": {
-            "rtUpgradePath": {
-              "type": "string"
-            },
-            "type": {
-              "enum": ["zombie"],
-              "type": "string"
-            },
-            "zombieSpec": {
-              "$ref": "#/definitions/ZombieLaunchSpec"
-            }
-          },
-          "type": "object"
-        },
-        {
-          "properties": {
-            "type": {
-              "enum": ["fork", "read_only"],
-              "type": "string"
-            }
-          },
-          "type": "object"
-        }
-      ]
-    },
-    "ProviderConfig": {
-      "properties": {
-        "endpoints": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
-        "name": {
-          "type": "string"
-        },
-        "type": {
-          "$ref": "#/definitions/ProviderType"
-        }
-      },
-      "type": "object"
-    },
-    "ProviderType": {
-      "enum": ["ethers", "moon", "polkadotJs", "unknown", "web3"],
-      "type": "string"
-    },
-    "ZombieLaunchSpec": {
-      "properties": {
-        "configPath": {
-          "type": "string"
-        },
-        "monitoredNode": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "options": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
-        "running": {
-          "type": "boolean"
-        }
-      },
-      "type": "object"
-    }
-  },
-  "properties": {
-    "$schema": {
-      "type": "string"
-    },
-    "defaultTestTimeout": {
-      "type": "number"
-    },
-    "environments": {
-      "items": {
-        "properties": {
-          "connections": {
+        "environments": {
             "items": {
-              "$ref": "#/definitions/ProviderConfig"
+                "properties": {
+                    "connections": {
+                        "items": {
+                            "$ref": "#/definitions/ProviderConfig"
+                        },
+                        "type": "array"
+                    },
+                    "foundation": {
+                        "$ref": "#/definitions/IFoundation"
+                    },
+                    "html": {
+                        "type": "boolean"
+                    },
+                    "include": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "multiThreads": {
+                        "type": "boolean"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "testFileDir": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    }
+                },
+                "type": "object"
             },
             "type": "array"
-          },
-          "foundation": {
-            "$ref": "#/definitions/IFoundation"
-          },
-          "html": {
-            "type": "boolean"
-          },
-          "include": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "multiThreads": {
-            "type": "boolean"
-          },
-          "name": {
-            "type": "string"
-          },
-          "testFileDir": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          }
         },
-        "type": "object"
-      },
-      "type": "array"
+        "label": {
+            "type": "string"
+        }
     },
-    "label": {
-      "type": "string"
-    }
-  },
-  "type": "object"
+    "type": "object"
 }
+

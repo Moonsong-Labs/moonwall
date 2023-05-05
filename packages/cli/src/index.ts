@@ -13,4 +13,4 @@ export { beforeAll, beforeEach, afterAll, afterEach, expect } from "vitest";
 export type { Signer } from "ethers";
 export { Web3, WebSocketProvider as Web3WsProvider } from "web3";
 export { ApiPromise, WsProvider } from "@polkadot/api";
-export { ApiDecoration } from "@polkadot/api/types";
+export type { ApiDecoration } from "@polkadot/api/types";
