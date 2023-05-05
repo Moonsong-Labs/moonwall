@@ -71,7 +71,7 @@ export async function executeTests(env: Environment, additionalArgs?: {}) {
     threads: true,
     include: env.include ? env.include : ["**/{test,spec,test_,test-}*{ts,mts,cts}"],
     onConsoleLog(log, type) {
-      if (log.trim() == "" || log.trim() == "<empty line>") return false;
+      if (type == "stderr" && (log.trim() == "" || log.trim() == "<empty line>")) return false;
     },
   };
 
