@@ -23,7 +23,8 @@
         "zombieSpec": {
           "name": "zombienet",
           "configPath": "./configs/zombieMulti.json",
-          "monitoredNode": "alice"
+          "monitoredNode": "alice",
+          "skipBlockCheck": [ "para2"]
         }
       },
       "connections": [

@@ -45,6 +45,7 @@ export interface GenericLaunchSpec {
 export interface ZombieLaunchSpec extends GenericLaunchSpec {
   configPath: string;
   monitoredNode?: string;
+  skipBlockCheck?: string[];
 }
 
 // TODO: Separate single chopsticks network and multi chopsticks into separate interfaces

@@ -216,11 +216,10 @@ export class MoonwallContext {
   }
 
   public async connectEnvironment(): Promise<MoonwallContext> {
+    const config = await importJsonConfig();
+    const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
     // TODO: Explicitly communicate (DOCs and console) this is done automatically
     if (this.environment.foundationType == "zombie") {
-      const config = await importJsonConfig();
-      const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
-
       this.environment.providers = env.connections
         ? prepareProviders(env.connections)
         : prepareProviders([
@@ -282,6 +281,7 @@ export class MoonwallContext {
     if (this.foundation == "zombie") {
       const promises = this.providers
         .filter(({ type }) => type == "polkadotJs" || type == "moon")
+        .filter(({ name }) =>  env.foundation.type == "zombie" && !env.foundation.zombieSpec.skipBlockCheck.includes(name))
         .map(async (provider) => {
           return await new Promise(async (resolve) => {
             console.log(`⏲️  Waiting for chain ${provider.name} to produce blocks...`);
