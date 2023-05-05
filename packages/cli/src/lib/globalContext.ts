@@ -281,7 +281,7 @@ export class MoonwallContext {
     if (this.foundation == "zombie") {
       const promises = this.providers
         .filter(({ type }) => type == "polkadotJs" || type == "moon")
-        .filter(({ name }) =>  env.foundation.type == "zombie" && !env.foundation.zombieSpec.skipBlockCheck.includes(name))
+        .filter(({ name }) =>  env.foundation.type == "zombie" && env.foundation.zombieSpec.skipBlockCheck &&!env.foundation.zombieSpec.skipBlockCheck.includes(name))
         .map(async (provider) => {
           return await new Promise(async (resolve) => {
             console.log(`⏲️  Waiting for chain ${provider.name} to produce blocks...`);
