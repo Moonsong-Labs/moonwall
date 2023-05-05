@@ -1,5 +1,13 @@
 # @moonwall/cli
 
+## 0.5.9
+
+### Patch Changes
+
+- 0686a87: added blockCheck skip for zombie tests
+- Updated dependencies [0686a87]
+  - @moonwall/util@0.5.9
+
 ## 0.5.8
 
 ### Patch Changes
