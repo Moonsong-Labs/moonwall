@@ -103,7 +103,6 @@
   "devDependencies": {
     "@moonbeam-network/api-augment": "^0.2301.0",
     "@moonwall/util": "workspace:*",
-    "@vitest/ui": "^0.28.5",
     "@polkadot/api": "^10.5.1",
     "@polkadot/api-augment": "^10.5.1",
     "@polkadot/api-derive": "^10.5.1",
@@ -111,6 +110,8 @@
     "@polkadot/types": "^10.5.1",
     "@polkadot/types-codec": "^10.5.1",
     "@polkadot/util": "^12.1.2",
+    "@vitest/ui": "^0.28.5",
+    "esbuild-plugin-alias": "^0.2.1",
     "ethers": "^6.3.0",
     "regenerator-runtime": "^0.13.11",
     "typescript": "^5.0.4",
