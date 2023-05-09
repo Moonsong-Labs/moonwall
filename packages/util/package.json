@@ -24,9 +24,9 @@
   ],
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "require": "./dist/index.cjs",
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "import": "./dist/index.js"
     }
   },
   "main": "dist/index.cjs",
@@ -45,8 +45,8 @@
     "*.cjs"
   ],
   "scripts": {
-    "build": "pnpm exec rimraf dist && tsup src --format cjs,esm",
-    "generate-types": "tsup src --format cjs,esm --dts",
+    "build": "pnpm exec rimraf dist && tsup src --format cjs,esm --config tsup.config.ts && pnpm generate-types",
+    "generate-types": "tsup src --format cjs,esm --dts --config tsup.config.ts",
     "watch": "tsup src --format cjs,esm --dts --watch",
     "typecheck": "pnpm exec tsc --noEmit",
     "prepublish": "pnpm run build && pnpm run generate-types && pnpm typecheck",
@@ -80,26 +80,26 @@
   },
   "peerDependencies": {
     "@moonbeam-network/api-augment": "^0.2301.0",
-    "@polkadot/api": "^10.5.1",
-    "@polkadot/api-augment": "^10.5.1",
-    "@polkadot/api-derive": "^10.5.1",
+    "@polkadot/api": "^10.6.1",
+    "@polkadot/api-augment": "^10.6.1",
+    "@polkadot/api-derive": "^10.6.1",
     "@polkadot/keyring": "^12.1.2",
-    "@polkadot/rpc-provider": "^10.5.1",
-    "@polkadot/types": "^10.5.1",
-    "@polkadot/types-codec": "^10.5.1",
+    "@polkadot/rpc-provider": "^10.6.1",
+    "@polkadot/types": "^10.6.1",
+    "@polkadot/types-codec": "^10.6.1",
     "@polkadot/util": "^12.1.2",
     "ethers": "^6.3.0",
     "web3": "4.0.1-rc.0"
   },
   "devDependencies": {
     "@moonbeam-network/api-augment": "^0.2301.0",
-    "@polkadot/api": "^10.5.1",
-    "@polkadot/api-augment": "^10.5.1",
-    "@polkadot/api-derive": "^10.5.1",
+    "@polkadot/api": "^10.6.1",
+    "@polkadot/api-augment": "^10.6.1",
+    "@polkadot/api-derive": "^10.6.1",
     "@polkadot/keyring": "^12.1.2",
-    "@polkadot/rpc-provider": "^10.5.1",
-    "@polkadot/types": "^10.5.1",
-    "@polkadot/types-codec": "^10.5.1",
+    "@polkadot/rpc-provider": "^10.6.1",
+    "@polkadot/types": "^10.6.1",
+    "@polkadot/types-codec": "^10.6.1",
     "@polkadot/util": "^12.1.2",
     "@vitest/ui": "^0.30.1",
     "ethers": "^6.3.0",
