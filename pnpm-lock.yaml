@@ -55,9 +55,6 @@ importers:
       debug:
         specifier: ^4.3.4
         version: 4.3.4(supports-color@8.1.1)
-      esbuild-plugin-alias:
-        specifier: ^0.2.1
-        version: 0.2.1
       ethers:
         specifier: ^6.3.0
         version: 6.3.0
@@ -75,7 +72,7 @@ importers:
         version: 5.0.4
       vitest:
         specifier: ^0.31.0
-        version: 0.31.0(@vitest/ui@0.28.5)
+        version: 0.31.0(@vitest/ui@0.30.1)
 
   packages/cli:
     dependencies:
@@ -188,9 +185,6 @@ importers:
       '@vitest/ui':
         specifier: ^0.28.5
         version: 0.28.5
-      esbuild-plugin-alias:
-        specifier: ^0.2.1
-        version: 0.2.1
       ethers:
         specifier: ^6.3.0
         version: 6.3.0
@@ -309,9 +303,6 @@ importers:
       '@vitest/ui':
         specifier: ^0.30.1
         version: 0.30.1
-      esbuild-plugin-alias:
-        specifier: ^0.2.1
-        version: 0.2.1
       ethers:
         specifier: ^6.3.0
         version: 6.3.0
@@ -2757,10 +2748,6 @@ packages:
       is-symbol: 1.0.4
     dev: true
 
-  /esbuild-plugin-alias@0.2.1:
-    resolution: {integrity: sha512-jyfL/pwPqaFXyKnj8lP8iLk6Z0m099uXR45aSN8Av1XD4vhvQutxxPzgA2bTcAwQpa1zCXDcWOlhFgyP3GKqhQ==}
-    dev: true
-
   /esbuild@0.17.18:
     resolution: {integrity: sha512-z1lix43jBs6UKjcZVKOw2xx69ffE2aG0PygLL5qJ9OS/gy0Ewd1gW/PUQIOIQGXBHWNywSc0floSKoMFF8aK2w==}
     engines: {node: '>=12'}
@@ -3772,7 +3759,6 @@ packages:
       chalk: 2.4.2
       diff-match-patch: 1.0.5
     dev: false
-    bundledDependencies: []
 
   /jsonfile@4.0.0:
     resolution: {integrity: sha512-m6F1R3z8jjlf2imQHS2Qez5sjKWQzbuuhuJ/FKYFRZvPE3PuHcSMVZzfsLhGVOkfd20obL5SWEBew5ShlquNxg==}
@@ -4208,7 +4194,7 @@ packages:
     resolution: {integrity: sha512-QDk/ktioLqDQCOLUu/+FyyF3UYWdKOqqa6q1vwI75pdKBg5elNpRXugEC1irzkLolTanvMRc2rO+qarT9ijjyg==}
     dependencies:
       '@polkadot/api': 10.5.1
-      typescript: 4.9.5
+      typescript: 4.8.4
     transitivePeerDependencies:
       - bufferutil
       - supports-color
@@ -5872,13 +5858,6 @@ packages:
     resolution: {integrity: sha512-QCh+85mCy+h0IGff8r5XWzOVSbBO+KfeYrMQh7NJ58QujwcE22u+NUSmUxqF+un70P9GXKxa2HCNiTTMJknyjQ==}
     engines: {node: '>=4.2.0'}
     hasBin: true
-    dev: true
-
-  /typescript@4.9.5:
-    resolution: {integrity: sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==}
-    engines: {node: '>=4.2.0'}
-    hasBin: true
-    dev: false
 
   /typescript@5.0.4:
     resolution: {integrity: sha512-cW9T5W9xY37cc+jfEnaUvX91foxtHkza3Nw3wkoF4sSlKn0MONdkdEndig/qPBWXNkmplh3NzayQzCiHM4/hqw==}
@@ -6079,6 +6058,7 @@ packages:
       - sugarss
       - supports-color
       - terser
+    dev: false
 
   /vitest@0.31.0(@vitest/ui@0.30.1):
     resolution: {integrity: sha512-JwWJS9p3GU9GxkG7eBSmr4Q4x4bvVBSswaCFf1PBNHiPx00obfhHRJfgHcnI0ffn+NMlIh9QGvG75FlaIBdKGA==}
@@ -6144,7 +6124,6 @@ packages:
       - sugarss
       - supports-color
       - terser
-    dev: false
 
   /w3c-xmlserializer@4.0.0:
     resolution: {integrity: sha512-d+BFHzbiCx6zGfz0HyQ6Rg69w9k19nviJspaj4yNscGjrHu94sVP+aRm75yEbCh+r2/yR+7q6hux9LVtbuTGBw==}
