@@ -1,5 +1,13 @@
 # @moonwall/cli
 
+## 0.5.15
+
+### Patch Changes
+
+- 7e3ed8c: Removed pointless logging spam
+- Updated dependencies [7e3ed8c]
+  - @moonwall/util@0.5.15
+
 ## 0.5.14
 
 ### Patch Changes

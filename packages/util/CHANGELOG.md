@@ -1,5 +1,11 @@
 # @moonwall/util
 
+## 0.5.15
+
+### Patch Changes
+
+- 7e3ed8c: Removed pointless logging spam
+
 ## 0.5.14
 
 ### Patch Changes
