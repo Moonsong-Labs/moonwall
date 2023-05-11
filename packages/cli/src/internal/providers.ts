@@ -11,7 +11,7 @@ import { ALITH_PRIVATE_KEY } from "@moonwall/util";
 const debug = Debug("global:providers");
 
 export function prepareProviders(providerConfigs: ProviderConfig[]): MoonwallProvider[] {
-  return providerConfigs.map(({ name, endpoints, type }) => {
+  return providerConfigs.map(({ name, endpoints, type, rpc }) => {
     const url = endpoints.includes("ENV_VAR") ? process.env.WSS_URL! : endpoints[0];
 
     switch (type) {
@@ -21,11 +21,17 @@ export function prepareProviders(providerConfigs: ProviderConfig[]): MoonwallPro
           name,
           type,
           connect: async () => {
-            const api = await ApiPromise.create({
+            const options = {
               provider: new WsProvider(url),
               initWasm: false,
               noInitWarn: true,
-            });
+            };
+
+            if (!!rpc) {
+              options["rpc"] = rpc;
+            }
+
+            const api = await ApiPromise.create(options);
             await api.isReady;
             return api;
           },
@@ -38,12 +44,18 @@ export function prepareProviders(providerConfigs: ProviderConfig[]): MoonwallPro
           name,
           type,
           connect: async () => {
-            const moonApi = await ApiPromise.create({
+            const options = {
               provider: new WsProvider(url),
               rpc: rpcDefinitions,
               typesBundle: types,
               noInitWarn: true,
-            });
+            };
+
+            if (!!rpc) {
+              options["rpc"] = { ...rpc };
+            }
+
+            const moonApi = await ApiPromise.create(options);
             await moonApi.isReady;
             return moonApi;
           },

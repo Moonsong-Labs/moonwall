@@ -4,7 +4,7 @@ overrides:
   '@moonwall/cli': workspace:*
   '@moonwall/util': workspace:*
   '@polkadot/util-crypto': ^12.1.2
-  '@polkadot/rpc-provider': ^10.5.1
+  '@polkadot/rpc-provider': ^10.6.1
   '@polkadot/util': ^12.1.2
   '@polkadot/api': ^10.6.1
   '@polkadot/types': ^10.6.1
@@ -32,17 +32,17 @@ importers:
         specifier: ^10.6.1
         version: 10.6.1
       '@polkadot/api-augment':
-        specifier: ^10.5.1
+        specifier: ^10.6.1
         version: 10.6.1
       '@polkadot/api-derive':
-        specifier: ^10.5.1
+        specifier: ^10.6.1
         version: 10.6.1
       '@polkadot/keyring':
         specifier: ^12.1.2
         version: 12.1.2(@polkadot/util-crypto@12.1.2)(@polkadot/util@12.1.2)
       '@polkadot/rpc-provider':
-        specifier: ^10.5.1
-        version: 10.5.1
+        specifier: ^10.6.1
+        version: 10.6.1
       '@polkadot/util-crypto':
         specifier: ^12.1.2
         version: 12.1.2(@polkadot/util@12.1.2)
@@ -289,8 +289,8 @@ importers:
         specifier: ^12.1.2
         version: 12.1.2(@polkadot/util-crypto@12.1.2)(@polkadot/util@12.1.2)
       '@polkadot/rpc-provider':
-        specifier: ^10.5.1
-        version: 10.5.1
+        specifier: ^10.6.1
+        version: 10.6.1
       '@polkadot/types':
         specifier: ^10.6.1
         version: 10.6.1
@@ -1144,7 +1144,7 @@ packages:
       '@polkadot/keyring': 12.1.2(@polkadot/util-crypto@12.1.2)(@polkadot/util@12.1.2)
       '@polkadot/rpc-augment': 10.6.1
       '@polkadot/rpc-core': 10.6.1
-      '@polkadot/rpc-provider': 10.5.1
+      '@polkadot/rpc-provider': 10.6.1
       '@polkadot/types': 10.6.1
       '@polkadot/types-augment': 10.6.1
       '@polkadot/types-codec': 10.6.1
@@ -1198,7 +1198,7 @@ packages:
     engines: {node: '>=16'}
     dependencies:
       '@polkadot/rpc-augment': 10.6.1
-      '@polkadot/rpc-provider': 10.5.1
+      '@polkadot/rpc-provider': 10.6.1
       '@polkadot/types': 10.6.1
       '@polkadot/util': 12.1.2
       rxjs: 7.8.1
@@ -1208,13 +1208,13 @@ packages:
       - supports-color
       - utf-8-validate
 
-  /@polkadot/rpc-provider@10.5.1:
-    resolution: {integrity: sha512-XwzCHJx4Qw9tQ10kHnefelic5JRcsxNJRdRYHaNb5AEoHOFDqC5wXgy5N45wQLXrQW+ktj5HkHEPH5r3N1DWTw==}
+  /@polkadot/rpc-provider@10.6.1:
+    resolution: {integrity: sha512-4tkNgHQJ6/2HnK68kscgO5JhitWNwnQUPFIAhtkIjKec9mu9hzjRS8XzouvYoYO93Cfhf7fD0E5gF0akKLRBRg==}
     engines: {node: '>=16'}
     dependencies:
       '@polkadot/keyring': 12.1.2(@polkadot/util-crypto@12.1.2)(@polkadot/util@12.1.2)
       '@polkadot/types': 10.6.1
-      '@polkadot/types-support': 10.5.1
+      '@polkadot/types-support': 10.6.1
       '@polkadot/util': 12.1.2
       '@polkadot/util-crypto': 12.1.2(@polkadot/util@12.1.2)
       '@polkadot/x-fetch': 12.1.2
@@ -1225,7 +1225,7 @@ packages:
       nock: 13.3.1
       tslib: 2.5.0
     optionalDependencies:
-      '@substrate/connect': 0.7.24
+      '@substrate/connect': 0.7.26
     transitivePeerDependencies:
       - bufferutil
       - supports-color
@@ -1267,8 +1267,8 @@ packages:
       '@polkadot/util': 12.1.2
       tslib: 2.5.0
 
-  /@polkadot/types-support@10.5.1:
-    resolution: {integrity: sha512-sHjfqiHDtYcnKWpgRIZApKdtgXiROulzrG+NXhVmeMAQY6Eaq0jo1nNy5PXv6Lj5EVGjHfB5dIdgo/gSotJEzw==}
+  /@polkadot/types-support@10.6.1:
+    resolution: {integrity: sha512-nEMWzvuTZfeLxBs4FVdJZkuoO51DJYnSzPzNpoa1N7VOcteInR75rnkdHUbh4IF6AoKmc+yL7Uro8i66wRkQNg==}
     engines: {node: '>=16'}
     dependencies:
       '@polkadot/util': 12.1.2
@@ -1514,13 +1514,13 @@ packages:
     resolution: {integrity: sha512-161JhCC1csjH3GE5mPLEd7HbWtwNSPJBg3p1Ksz9SFlTzj/bgEwudiRN2y5i0MoLGCIJRYKyKGMxVnd29PzNjg==}
     optional: true
 
-  /@substrate/connect@0.7.24:
-    resolution: {integrity: sha512-vF82taiM0yME+ibiJgEv0xn/NZd9TQ4atXk1AQCe2z82SEKzw0Lwx9ZLFEOvlgnh+Nc2EtQi7y4cXJ+48rOqxw==}
+  /@substrate/connect@0.7.26:
+    resolution: {integrity: sha512-uuGSiroGuKWj1+38n1kY5HReer5iL9bRwPCzuoLtqAOmI1fGI0hsSI2LlNQMAbfRgr7VRHXOk5MTuQf5ulsFRw==}
     requiresBuild: true
     dependencies:
       '@substrate/connect-extension-protocol': 1.0.1
       eventemitter3: 4.0.7
-      smoldot: 1.0.2
+      smoldot: 1.0.4
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -3759,6 +3759,7 @@ packages:
       chalk: 2.4.2
       diff-match-patch: 1.0.5
     dev: false
+    bundledDependencies: []
 
   /jsonfile@4.0.0:
     resolution: {integrity: sha512-m6F1R3z8jjlf2imQHS2Qez5sjKWQzbuuhuJ/FKYFRZvPE3PuHcSMVZzfsLhGVOkfd20obL5SWEBew5ShlquNxg==}
@@ -5208,8 +5209,8 @@ packages:
       yargs: 15.4.1
     dev: true
 
-  /smoldot@1.0.2:
-    resolution: {integrity: sha512-IHhMzvXwyl6I5GA4JvfzM2OOp9wBO06AmjqT4nCoNms5PiLe74f/A+jIZIJKyY6eBhMpmECizyfeTneHO2wMFQ==}
+  /smoldot@1.0.4:
+    resolution: {integrity: sha512-N3TazI1C4GGrseFH/piWyZCCCRJTRx2QhDfrUKRT4SzILlW5m8ayZ3QTKICcz1C/536T9cbHHJyP7afxI6Mi1A==}
     dependencies:
       pako: 2.1.0
       ws: 8.13.0

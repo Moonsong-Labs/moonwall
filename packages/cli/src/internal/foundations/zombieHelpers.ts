@@ -1,20 +1,23 @@
 import fs from "node:fs";
 import { LaunchConfig } from "@zombienet/orchestrator";
-import { checkExists } from "../files.js";
+import { checkAccess, checkExists } from "../files.js";
 import chalk from "chalk";
 
 export async function checkZombieBins(config: LaunchConfig) {
   const relayBinPath = config.relaychain.default_command;
   await checkExists(relayBinPath);
+  checkAccess(relayBinPath);
 
   const promises = config.parachains.map((para) => {
     if (para.collator) {
       checkExists(para.collator.command);
+      checkAccess(para.collator.command);
     }
 
     if (para.collators) {
       para.collators.forEach((coll) => {
         checkExists(coll.command);
+        checkAccess(coll.command);
       });
     }
   });

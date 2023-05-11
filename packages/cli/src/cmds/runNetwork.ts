@@ -8,7 +8,7 @@ import { executeTests } from "./runTests.js";
 import { parse } from "yaml";
 import fs from "fs/promises";
 import { createReadStream, stat } from "node:fs";
-import { importJsonConfig } from "../lib/configReader.js";
+import { importJsonConfig, loadEnvVars } from "../lib/configReader.js";
 import { watch } from "fs";
 import { ApiPromise } from "@polkadot/api";
 import WebSocket from "ws";
@@ -18,9 +18,8 @@ inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 export async function runNetwork(args) {
   process.env.MOON_TEST_ENV = args.envName;
   const globalConfig = await importJsonConfig();
-
   const env = globalConfig.environments.find(({ name }) => name === args.envName)!;
-
+  await loadEnvVars();
   if (!!!env) {
     const envList = globalConfig.environments.map((env) => env.name);
     throw new Error(

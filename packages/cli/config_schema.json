@@ -146,6 +146,49 @@
                 }
             ]
         },
+        "IRpcBundle": {
+            "additionalProperties": {
+                "$ref": "#/definitions/IRpcModule"
+            },
+            "type": "object"
+        },
+        "IRpcMethod": {
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "params": {
+                    "items": {
+                        "$ref": "#/definitions/IRpcParam"
+                    },
+                    "type": "array"
+                },
+                "type": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "IRpcModule": {
+            "additionalProperties": {
+                "$ref": "#/definitions/IRpcMethod"
+            },
+            "type": "object"
+        },
+        "IRpcParam": {
+            "properties": {
+                "isOptional": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
         "ProviderConfig": {
             "properties": {
                 "endpoints": {
@@ -156,6 +199,9 @@
                 },
                 "name": {
                     "type": "string"
+                },
+                "rpc": {
+                    "$ref": "#/definitions/IRpcBundle"
                 },
                 "type": {
                     "$ref": "#/definitions/ProviderType"
@@ -216,6 +262,12 @@
                     "connections": {
                         "items": {
                             "$ref": "#/definitions/ProviderConfig"
+                        },
+                        "type": "array"
+                    },
+                    "envVars": {
+                        "items": {
+                            "type": "string"
                         },
                         "type": "array"
                     },

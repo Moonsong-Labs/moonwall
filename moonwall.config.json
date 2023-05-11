@@ -346,13 +346,14 @@
     {
       "name": "dev_test",
       "testFileDir": ["tests/dev_tests"],
+      "envVars": ["DEBUG_COLORS=1", "TIMBO_TEST_ENV='TIMBO timbo timbo'"],
       "foundation": {
         "type": "dev",
         "launchSpec": [
           {
             "name": "moonbeam",
             "running": false,
-            "binPath": "./tmp/moonbeam",
+            "binPath": "tmp/moonbeam",
             "ports": { "p2pPort": 30333, "wsPort": 9944, "rpcPort": 9933 },
             "options": [
               "--dev",
@@ -382,7 +383,21 @@
         {
           "name": "pjs",
           "type": "moon",
-          "endpoints": ["ws://127.0.0.1:9944"]
+          "endpoints": ["ws://127.0.0.1:9944"],
+          "rpc": {
+            "moon": {
+              "isTxFinalized": {
+                "description": "Just a test method",
+                "params": [
+                  {
+                    "name": "txHash",
+                    "type": "Hash"
+                  }
+                ],
+                "type": "bool"
+              }
+            }
+          }
         }
       ]
     },
