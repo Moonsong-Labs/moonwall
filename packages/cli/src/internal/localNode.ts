@@ -1,12 +1,13 @@
 import { ChildProcess, spawn } from "child_process";
 import chalk from "chalk";
 import Debug from "debug";
-import { checkExists } from "./files.js";
+import { checkAccess, checkExists } from "./files.js";
 const debugNode = Debug("global:node");
 
 export async function launchNode(cmd: string, args: string[], name: string): Promise<ChildProcess> {
   if (cmd.includes("moonbeam")) {
     await checkExists(cmd);
+    checkAccess(cmd);
   }
 
   let runningNode: ChildProcess;
@@ -36,7 +37,6 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
     } else {
       console.error(err);
     }
-
     process.exit(1);
   });
 

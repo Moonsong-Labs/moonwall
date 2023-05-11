@@ -7,14 +7,10 @@ import { setTimeout } from "node:timers/promises";
 import { importJsonConfig } from "./configReader.js";
 import { parseChopsticksRunCmd, parseRunCmd, parseZombieCmd } from "../internal/foundations.js";
 import { ApiPromise } from "@polkadot/api";
-import zombie, { LaunchConfig, Network } from "@zombienet/orchestrator";
+import zombie, { Network } from "@zombienet/orchestrator";
 import Debug from "debug";
 import { ConnectedProvider, MoonwallEnvironment, MoonwallProvider } from "../types/context.js";
-import fs from "node:fs";
-import { checkExists } from "../internal/files.js";
 import { checkZombieBins, getZombieConfig } from "../internal/foundations/zombieHelpers.js";
-import chalk from "chalk";
-import { net } from "web3";
 const debugSetup = Debug("global:context");
 
 export const contextCreator = async (config: MoonwallConfig, env: string) => {

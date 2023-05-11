@@ -29,6 +29,15 @@ export async function checkExists(path: string) {
   return true;
 }
 
+export function checkAccess(path: string) {
+  try {
+    fs.accessSync(path, fs.constants.X_OK);
+  } catch (err) {
+    console.error(`The file ${path} is not executable`);
+    throw new Error(`The file at ${path} , lacks execute permissions.`);
+  }
+}
+
 async function getBinaryArchitecture(filePath) {
   return new Promise((resolve, reject) => {
     const architectureMap = {
