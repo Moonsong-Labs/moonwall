@@ -5,6 +5,8 @@
 
 Added custom RPC support
 
+[#105](https://github.com/Moonsong-Labs/moonwall/issues/105)
+
 As described [here](https://polkadot.js.org/docs/api/start/rpc.custom/) we can now added custom RPC methods in the `moonwall.config.json` file.
 
 This can be done by adding the Module and Method details to the provider config as specified in connections:
