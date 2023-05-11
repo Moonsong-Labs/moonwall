@@ -14,6 +14,7 @@ export type Environment = {
   include?: string[];
   connections?: ProviderConfig[];
   multiThreads?: boolean;
+  defaultEthTxnStyle?: EthTransactionType;
 };
 
 export type IFoundation =
@@ -34,6 +35,8 @@ export type IFoundation =
   | {
       type: "read_only" | "fork";
     };
+
+export type EthTransactionType = "Legacy" | "EIP2930" | "EIP1559";
 
 export type FoundationType = IFoundation["type"];
 

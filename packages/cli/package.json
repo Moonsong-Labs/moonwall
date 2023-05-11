@@ -87,7 +87,7 @@
     "yargs": "^17.7.2"
   },
   "peerDependencies": {
-    "@moonbeam-network/api-augment": "^0.2301.0",
+    "@moonbeam-network/api-augment": "^0.2302.0",
     "@moonwall/util": "workspace:*",
     "@polkadot/api": "^10.6.1",
     "@polkadot/api-augment": "^10.6.1",
@@ -101,7 +101,7 @@
     "web3-providers-ws": "4.0.1-rc.0"
   },
   "devDependencies": {
-    "@moonbeam-network/api-augment": "^0.2301.0",
+    "@moonbeam-network/api-augment": "^0.2302.0",
     "@moonwall/util": "workspace:*",
     "@polkadot/api": "^10.6.1",
     "@polkadot/api-augment": "^10.6.1",

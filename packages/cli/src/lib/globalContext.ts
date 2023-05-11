@@ -1,5 +1,5 @@
 import "@moonbeam-network/api-augment";
-import { FoundationType, MoonwallConfig } from "../types/config";
+import { EthTransactionType, FoundationType, MoonwallConfig } from "../types/config";
 import { ChildProcess, exec } from "node:child_process";
 import { populateProviderInterface, prepareProviders } from "../internal/providers.js";
 import { launchNode } from "../internal/localNode.js";
@@ -34,6 +34,7 @@ export class MoonwallContext {
   zombieNetwork?: Network;
   private _finalizedHead?: string;
   rtUpgradePath?: string;
+  defaultEthTxnStyle?: EthTransactionType;
 
   constructor(config: MoonwallConfig) {
     this.environment;
@@ -76,6 +77,10 @@ export class MoonwallContext {
         break;
 
       case "dev":
+        if (env.defaultEthTxnStyle) {
+          this.defaultEthTxnStyle = env.defaultEthTxnStyle;
+        }
+
         const { cmd, args, launch } = parseRunCmd(env.foundation.launchSpec[0]);
         blob.nodes.push({
           name: env.foundation.launchSpec[0].name,

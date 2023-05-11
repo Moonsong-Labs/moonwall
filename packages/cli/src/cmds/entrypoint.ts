@@ -1,3 +1,4 @@
+import "../internal/logging.js";
 import "@moonbeam-network/api-augment";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
