@@ -219,6 +219,12 @@
                         },
                         "type": "array"
                     },
+                    "envVars": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
                     "foundation": {
                         "$ref": "#/definitions/IFoundation"
                     },

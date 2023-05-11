@@ -33,3 +33,13 @@ export async function importJsonConfig(): Promise<MoonwallConfig> {
     throw new Error(`Error import config at ${filePath}`);
   }
 }
+
+export async function loadEnvVars(): Promise<void> {
+  const globalConfig = await importJsonConfig();
+  const env = globalConfig.environments.find(({ name }) => name === process.env.MOON_TEST_ENV)!;
+  env.envVars &&
+    env.envVars.forEach((envVar) => {
+      const [key, value] = envVar.split("=");
+      process.env[key] = value;
+    });
+}

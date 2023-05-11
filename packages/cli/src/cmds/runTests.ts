@@ -1,4 +1,4 @@
-import { importJsonConfig } from "../lib/configReader.js";
+import { importJsonConfig, loadEnvVars } from "../lib/configReader.js";
 import { startVitest } from "vitest/node";
 import { UserConfig } from "vitest";
 import { contextCreator } from "../lib/globalContext.js";
@@ -9,9 +9,9 @@ import chalk from "chalk";
 
 export async function testCmd(envName: string, additionalArgs?: {}) {
   const globalConfig = await importJsonConfig();
-
   const env = globalConfig.environments.find(({ name }) => name === envName)!;
-
+  process.env.MOON_TEST_ENV = envName;
+  await loadEnvVars();
   if (!!!env) {
     const envList = globalConfig.environments.map((env) => env.name);
     throw new Error(
@@ -20,8 +20,6 @@ export async function testCmd(envName: string, additionalArgs?: {}) {
       )}\n Environments defined in config are: ${envList}\n`
     );
   }
-
-  process.env.MOON_TEST_ENV = envName;
 
   const vitest = await executeTests(env, additionalArgs);
   const failed = vitest.state.getFiles().filter((file) => file.result.state === "fail");

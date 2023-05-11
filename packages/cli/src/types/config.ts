@@ -9,6 +9,7 @@ export type Environment = {
   reporters?: string[];
   name: string;
   testFileDir: string[];
+  envVars?: string[];
   foundation: IFoundation;
   include?: string[];
   connections?: ProviderConfig[];
