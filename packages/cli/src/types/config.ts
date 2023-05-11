@@ -72,8 +72,29 @@ export interface ProviderConfig {
   name: string;
   type: ProviderType;
   endpoints: string[];
+  rpc?: IRpcBundle;
 }
 
 export type ProviderType = "polkadotJs" | "ethers" | "web3" | "moon" | "unknown";
 
 export type ZombieNodeType = "relaychain" | "parachain";
+
+export interface IRpcParam {
+  name: string;
+  type: string;
+  isOptional?: boolean;
+}
+
+export interface IRpcMethod {
+  description: string;
+  params: IRpcParam[];
+  type: string;
+}
+
+export interface IRpcModule {
+  [methodName: string]: IRpcMethod;
+}
+
+export interface IRpcBundle {
+  [moduleName: string]: IRpcModule;
+}

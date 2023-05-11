@@ -383,7 +383,21 @@
         {
           "name": "pjs",
           "type": "moon",
-          "endpoints": ["ws://127.0.0.1:9944"]
+          "endpoints": ["ws://127.0.0.1:9944"],
+          "rpc": {
+            "moon": {
+              "isTxFinalized": {
+                "description": "Just a test method",
+                "params": [
+                  {
+                    "name": "txHash",
+                    "type": "Hash"
+                  }
+                ],
+                "type": "bool"
+              }
+            }
+          }
         }
       ]
     },
