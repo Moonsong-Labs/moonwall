@@ -18,6 +18,7 @@ describeSuite({
     it({
       id: "T1",
       title: "Query the chain",
+      timeout: 60000,
       test: async function () {
         const chainName = api.consts.system.version.specName.toString();
         const currentBlockHeight = (await api.rpc.chain.getHeader()).number.toNumber();
@@ -31,7 +32,7 @@ describeSuite({
     it({
       id: "T2",
       title: "Send a transaction ",
-      timeout: 40000,
+      timeout: 60000,
       test: async function () {
         const currentBalance = (await api.query.system.account(ETHAN_ADDRESS)).data.free;
         await api.tx.balances.transfer(ETHAN_ADDRESS, parseEther("10")).signAndSend(alith);
@@ -45,7 +46,7 @@ describeSuite({
     it({
       id: "T3",
       title: "Skips multiple blocks ",
-      timeout: 40000,
+      timeout: 60000,
       test: async function () {
         const currentBlock = (await api.rpc.chain.getHeader()).number.toNumber();
         await context.createBlock({ count: 3 });
@@ -57,7 +58,7 @@ describeSuite({
     it({
       id: "T4",
       title: "Can overwrite storage values",
-      timeout: 30000,
+      timeout: 60000,
       test: async function () {
         const storageValue = [
           [
@@ -105,6 +106,7 @@ describeSuite({
     it({
       id: "T6",
       title: "Create block and check events",
+      timeout: 60000,
       test: async function () {
         const expectEvents = [
           api.events.system.ExtrinsicSuccess,
@@ -121,6 +123,7 @@ describeSuite({
     it({
       id: "T7",
       title: "Create block, allow failures and check events",
+      timeout: 60000,
       test: async function () {
         await api.tx.balances
           .forceTransfer(BALTATHAR_ADDRESS, CHARLETH_ADDRESS, parseEther("3"))

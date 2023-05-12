@@ -40,6 +40,9 @@
         "binPath": {
           "type": "string"
         },
+        "disableDefaultEthProviders": {
+          "type": "boolean"
+        },
         "name": {
           "type": "string"
         },

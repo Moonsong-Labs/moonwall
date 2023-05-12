@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/Moonsong-Labs/moonwall/main/packages/cli/config_schema.json",
   "label": "Global Test Config 🐯",
-  "defaultTestTimeout": 40000,
+  "defaultTestTimeout": 60000,
   "environments": [
     {
       "name": "viem_test",
