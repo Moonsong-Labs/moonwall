@@ -1,5 +1,11 @@
 # @moonwall/cli
 
+## 0.5.16
+
+### Patch Changes
+
+- 881b0e3: Added Viem as provider type
+
 ## 0.5.15
 
 ### Patch Changes
