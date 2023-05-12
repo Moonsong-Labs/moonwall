@@ -1,5 +1,11 @@
 # @moonwall/cli
 
+## 0.5.18
+
+### Patch Changes
+
+- fb6c6bc: Fix
+
 ## 0.5.17
 
 ### Patch Changes
