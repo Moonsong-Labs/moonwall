@@ -50,5 +50,8 @@
       "@polkadot/api": "$@polkadot/api",
       "@polkadot/types": "$@polkadot/api"
     }
+  },
+  "dependencies": {
+    "viem": "^0.3.21"
   }
 }

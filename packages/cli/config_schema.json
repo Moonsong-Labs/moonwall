@@ -198,7 +198,7 @@
       "type": "object"
     },
     "ProviderType": {
-      "enum": ["ethers", "moon", "polkadotJs", "unknown", "web3"],
+      "enum": ["ethers", "moon", "polkadotJs", "unknown", "viemPublic", "viemWallet", "web3"],
       "type": "string"
     },
     "ZombieLaunchSpec": {

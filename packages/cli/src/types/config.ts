@@ -78,7 +78,17 @@ export interface ProviderConfig {
   rpc?: IRpcBundle;
 }
 
-export type ProviderType = "polkadotJs" | "ethers" | "web3" | "moon" | "unknown";
+// TODO: Make Provider Sub-types (for viem and polkadot.js)
+export type ProviderType =
+  | "polkadotJs"
+  | "ethers"
+  | "web3"
+  | "moon"
+  | "unknown"
+  | "viemPublic"
+  | "viemWallet";
+
+export type ViemClientType = "public" | "wallet";
 
 export type ZombieNodeType = "relaychain" | "parachain";
 

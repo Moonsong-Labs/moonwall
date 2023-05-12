@@ -2,6 +2,7 @@ import { ApiPromise, WsProvider } from "@polkadot/api";
 import { Signer } from "ethers";
 import { Web3 } from "web3";
 import { FoundationType, ProviderType } from "./config.js";
+import { PublicViem, WalletViem } from "./runner.js";
 
 export type MoonwallEnvironment = {
   name: string;
@@ -13,14 +14,14 @@ export type MoonwallEnvironment = {
 export interface MoonwallProvider {
   name: string;
   type: ProviderType;
-  connect: () => Promise<ApiPromise> | Signer | Web3 | void;
+  connect: () => Promise<ApiPromise> | Signer | Web3 | PublicViem | WalletViem | void;
   ws?: () => WsProvider;
 }
 
 export interface ConnectedProvider {
   name: string;
   type: ProviderType;
-  api: ApiPromise | Signer | Web3;
+  api: ApiPromise | Signer | Web3 | PublicViem | WalletViem;
   disconnect: () => Promise<void>;
   greet: () => Promise<void> | void | { rtName: string; rtVersion: number };
 }

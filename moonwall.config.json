@@ -4,6 +4,25 @@
   "defaultTestTimeout": 40000,
   "environments": [
     {
+      "name": "viem_test",
+      "testFileDir": ["tests/viem"],
+      "foundation": {
+        "type": "read_only"
+      },
+      "connections": [
+        {
+          "name": "public",
+          "type": "viemPublic",
+          "endpoints": ["wss://wss.api.moonbeam.network"]
+        },
+        {
+          "name": "wallet",
+          "type": "viemWallet",
+          "endpoints": ["wss://wss.api.moonbeam.network"]
+        }
+      ]
+    },
+    {
       "name": "zombie_wasm",
       "testFileDir": ["tests/zombie"],
       "foundation": {

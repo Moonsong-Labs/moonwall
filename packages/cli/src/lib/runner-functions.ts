@@ -9,7 +9,10 @@ import {
   ChopsticksContext,
   GenericContext,
   ITestSuiteType,
+  PublicViem,
   UpgradePreferences,
+  ViemApiMap,
+  WalletViem,
   ZombieContext,
 } from "../types/runner.js";
 import { MoonwallContext, contextCreator } from "./globalContext.js";
@@ -22,10 +25,9 @@ import {
   sendNewBlockRequest,
   sendSetStorageRequest,
 } from "../internal/foundations/chopsticksHelpers.js";
-import { ProviderType, ZombieNodeType } from "../types/config.js";
+import { ProviderType, ViemClientType, ZombieNodeType } from "../types/config.js";
 import { importJsonConfig } from "./configReader.js";
 import Debug, { Debugger } from "debug";
-import chalk from "chalk";
 
 const RT_VERSION = Number(process.env.MOON_RTVERSION);
 const RT_NAME = process.env.MOON_RTNAME;
@@ -71,30 +73,25 @@ export function describeSuite({
     const context: GenericContext = {
       providers: {},
 
-      polkadotJs: (options?: { apiName?: string; type?: ProviderType }): ApiPromise => {
-        if (options && options.apiName) {
-          return ctx.providers.find((a) => a.name == options.apiName)!.api as ApiPromise;
-        } else if (options && options.type) {
-          return ctx.providers.find((a) => a.type == options.type)!.api as ApiPromise;
-        } else {
-          return ctx.providers.find((a) => a.type == "moon" || a.type == "polkadotJs")!
-            .api as ApiPromise;
-        }
-      },
-      ethersSigner: (apiName?: string): Signer => {
-        if (apiName) {
-          return ctx.providers.find((a) => a.name == apiName)!.api as Signer;
-        } else {
-          return ctx.providers.find((a) => a.type == "ethers")!.api as Signer;
-        }
-      },
-      web3: (apiName?: string): Web3 => {
-        if (apiName) {
-          return ctx.providers.find((a) => a.name == apiName)!.api as Web3;
-        } else {
-          return ctx.providers.find((a) => a.type == "web3")!.api as Web3;
-        }
-      },
+      viemClient: <T extends ViemClientType>(subType: T): ViemApiMap[T] =>
+        subType === "public"
+          ? (ctx.providers.find((prov) => prov.type == "viemPublic").api as ViemApiMap[T])
+          : (ctx.providers.find((prov) => prov.type == "viemWallet").api as ViemApiMap[T]),
+      polkadotJs: (options?: { apiName?: string; type?: ProviderType }): ApiPromise =>
+        options && options.apiName
+          ? (ctx.providers.find((a) => a.name == options.apiName)!.api as ApiPromise)
+          : options && options.type
+          ? (ctx.providers.find((a) => a.type == options.type)!.api as ApiPromise)
+          : (ctx.providers.find((a) => a.type == "moon" || a.type == "polkadotJs")!
+              .api as ApiPromise),
+      ethersSigner: (apiName?: string): Signer =>
+        apiName
+          ? (ctx.providers.find((a) => a.name == apiName)!.api as Signer)
+          : (ctx.providers.find((a) => a.type == "ethers")!.api as Signer),
+      web3: (apiName?: string): Web3 =>
+        apiName
+          ? (ctx.providers.find((a) => a.name == apiName)!.api as Web3)
+          : (ctx.providers.find((a) => a.type == "web3")!.api as Web3),
     };
 
     const logger = () => {
