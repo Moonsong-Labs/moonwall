@@ -1,325 +1,296 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "definitions": {
-        "ChopsticksLaunchSpec": {
-            "properties": {
-                "buildBlockMode": {
-                    "enum": [
-                        "batch",
-                        "instant",
-                        "manual"
-                    ],
-                    "type": "string"
-                },
-                "configPath": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "options": {
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": "array"
-                },
-                "running": {
-                    "type": "boolean"
-                },
-                "type": {
-                    "enum": [
-                        "parachain",
-                        "relaychain"
-                    ],
-                    "type": "string"
-                },
-                "wasmOverride": {
-                    "type": "string"
-                },
-                "wsPort": {
-                    "type": "number"
-                }
-            },
-            "type": "object"
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "ChopsticksLaunchSpec": {
+      "properties": {
+        "buildBlockMode": {
+          "enum": ["batch", "instant", "manual"],
+          "type": "string"
         },
-        "DevLaunchSpec": {
-            "properties": {
-                "binPath": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "options": {
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": "array"
-                },
-                "ports": {
-                    "properties": {
-                        "p2pPort": {
-                            "type": "number"
-                        },
-                        "rpcPort": {
-                            "type": "number"
-                        },
-                        "wsPort": {
-                            "type": "number"
-                        }
-                    },
-                    "type": "object"
-                },
-                "running": {
-                    "type": "boolean"
-                }
-            },
-            "type": "object"
+        "configPath": {
+          "type": "string"
         },
-        "EthTransactionType": {
-            "enum": [
-                "EIP1559",
-                "EIP2930",
-                "Legacy"
-            ],
+        "name": {
+          "type": "string"
+        },
+        "options": {
+          "items": {
             "type": "string"
+          },
+          "type": "array"
         },
-        "IFoundation": {
-            "anyOf": [
-                {
-                    "properties": {
-                        "launchSpec": {
-                            "items": {
-                                "$ref": "#/definitions/DevLaunchSpec"
-                            },
-                            "type": "array"
-                        },
-                        "type": {
-                            "enum": [
-                                "dev"
-                            ],
-                            "type": "string"
-                        }
-                    },
-                    "type": "object"
-                },
-                {
-                    "properties": {
-                        "launchSpec": {
-                            "items": {
-                                "$ref": "#/definitions/ChopsticksLaunchSpec"
-                            },
-                            "type": "array"
-                        },
-                        "rtUpgradePath": {
-                            "type": "string"
-                        },
-                        "type": {
-                            "enum": [
-                                "chopsticks"
-                            ],
-                            "type": "string"
-                        }
-                    },
-                    "type": "object"
-                },
-                {
-                    "properties": {
-                        "rtUpgradePath": {
-                            "type": "string"
-                        },
-                        "type": {
-                            "enum": [
-                                "zombie"
-                            ],
-                            "type": "string"
-                        },
-                        "zombieSpec": {
-                            "$ref": "#/definitions/ZombieLaunchSpec"
-                        }
-                    },
-                    "type": "object"
-                },
-                {
-                    "properties": {
-                        "type": {
-                            "enum": [
-                                "fork",
-                                "read_only"
-                            ],
-                            "type": "string"
-                        }
-                    },
-                    "type": "object"
-                }
-            ]
+        "running": {
+          "type": "boolean"
         },
-        "IRpcBundle": {
-            "additionalProperties": {
-                "$ref": "#/definitions/IRpcModule"
-            },
-            "type": "object"
+        "type": {
+          "enum": ["parachain", "relaychain"],
+          "type": "string"
         },
-        "IRpcMethod": {
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "params": {
-                    "items": {
-                        "$ref": "#/definitions/IRpcParam"
-                    },
-                    "type": "array"
-                },
-                "type": {
-                    "type": "string"
-                }
-            },
-            "type": "object"
+        "wasmOverride": {
+          "type": "string"
         },
-        "IRpcModule": {
-            "additionalProperties": {
-                "$ref": "#/definitions/IRpcMethod"
-            },
-            "type": "object"
-        },
-        "IRpcParam": {
-            "properties": {
-                "isOptional": {
-                    "type": "boolean"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "type": {
-                    "type": "string"
-                }
-            },
-            "type": "object"
-        },
-        "ProviderConfig": {
-            "properties": {
-                "endpoints": {
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": "array"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "rpc": {
-                    "$ref": "#/definitions/IRpcBundle"
-                },
-                "type": {
-                    "$ref": "#/definitions/ProviderType"
-                }
-            },
-            "type": "object"
-        },
-        "ProviderType": {
-            "enum": [
-                "ethers",
-                "moon",
-                "polkadotJs",
-                "unknown",
-                "viemPublic",
-                "viemWallet",
-                "web3"
-            ],
-            "type": "string"
-        },
-        "ZombieLaunchSpec": {
-            "properties": {
-                "configPath": {
-                    "type": "string"
-                },
-                "monitoredNode": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "options": {
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": "array"
-                },
-                "running": {
-                    "type": "boolean"
-                },
-                "skipBlockCheck": {
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": "array"
-                }
-            },
-            "type": "object"
+        "wsPort": {
+          "type": "number"
         }
+      },
+      "type": "object"
     },
-    "properties": {
-        "$schema": {
+    "DevLaunchSpec": {
+      "properties": {
+        "binPath": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "options": {
+          "items": {
             "type": "string"
+          },
+          "type": "array"
         },
-        "defaultTestTimeout": {
-            "type": "number"
+        "ports": {
+          "properties": {
+            "p2pPort": {
+              "type": "number"
+            },
+            "rpcPort": {
+              "type": "number"
+            },
+            "wsPort": {
+              "type": "number"
+            }
+          },
+          "type": "object"
         },
-        "environments": {
+        "running": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "EthTransactionType": {
+      "enum": ["EIP1559", "EIP2930", "Legacy"],
+      "type": "string"
+    },
+    "IFoundation": {
+      "anyOf": [
+        {
+          "properties": {
+            "launchSpec": {
+              "items": {
+                "$ref": "#/definitions/DevLaunchSpec"
+              },
+              "type": "array"
+            },
+            "type": {
+              "enum": ["dev"],
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        {
+          "properties": {
+            "launchSpec": {
+              "items": {
+                "$ref": "#/definitions/ChopsticksLaunchSpec"
+              },
+              "type": "array"
+            },
+            "rtUpgradePath": {
+              "type": "string"
+            },
+            "type": {
+              "enum": ["chopsticks"],
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        {
+          "properties": {
+            "rtUpgradePath": {
+              "type": "string"
+            },
+            "type": {
+              "enum": ["zombie"],
+              "type": "string"
+            },
+            "zombieSpec": {
+              "$ref": "#/definitions/ZombieLaunchSpec"
+            }
+          },
+          "type": "object"
+        },
+        {
+          "properties": {
+            "type": {
+              "enum": ["fork", "read_only"],
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      ]
+    },
+    "IRpcBundle": {
+      "additionalProperties": {
+        "$ref": "#/definitions/IRpcModule"
+      },
+      "type": "object"
+    },
+    "IRpcMethod": {
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "params": {
+          "items": {
+            "$ref": "#/definitions/IRpcParam"
+          },
+          "type": "array"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "IRpcModule": {
+      "additionalProperties": {
+        "$ref": "#/definitions/IRpcMethod"
+      },
+      "type": "object"
+    },
+    "IRpcParam": {
+      "properties": {
+        "isOptional": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "ProviderConfig": {
+      "properties": {
+        "endpoints": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "name": {
+          "type": "string"
+        },
+        "rpc": {
+          "$ref": "#/definitions/IRpcBundle"
+        },
+        "type": {
+          "$ref": "#/definitions/ProviderType"
+        }
+      },
+      "type": "object"
+    },
+    "ProviderType": {
+      "enum": ["ethers", "moon", "polkadotJs", "unknown", "viemPublic", "viemWallet", "web3"],
+      "type": "string"
+    },
+    "ZombieLaunchSpec": {
+      "properties": {
+        "configPath": {
+          "type": "string"
+        },
+        "monitoredNode": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "options": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "running": {
+          "type": "boolean"
+        },
+        "skipBlockCheck": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "defaultTestTimeout": {
+      "type": "number"
+    },
+    "environments": {
+      "items": {
+        "properties": {
+          "connections": {
             "items": {
-                "properties": {
-                    "connections": {
-                        "items": {
-                            "$ref": "#/definitions/ProviderConfig"
-                        },
-                        "type": "array"
-                    },
-                    "defaultEthTxnStyle": {
-                        "$ref": "#/definitions/EthTransactionType"
-                    },
-                    "envVars": {
-                        "items": {
-                            "type": "string"
-                        },
-                        "type": "array"
-                    },
-                    "foundation": {
-                        "$ref": "#/definitions/IFoundation"
-                    },
-                    "include": {
-                        "items": {
-                            "type": "string"
-                        },
-                        "type": "array"
-                    },
-                    "multiThreads": {
-                        "type": "boolean"
-                    },
-                    "name": {
-                        "type": "string"
-                    },
-                    "reporters": {
-                        "items": {
-                            "type": "string"
-                        },
-                        "type": "array"
-                    },
-                    "testFileDir": {
-                        "items": {
-                            "type": "string"
-                        },
-                        "type": "array"
-                    }
-                },
-                "type": "object"
+              "$ref": "#/definitions/ProviderConfig"
             },
             "type": "array"
-        },
-        "label": {
+          },
+          "defaultEthTxnStyle": {
+            "$ref": "#/definitions/EthTransactionType"
+          },
+          "envVars": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "foundation": {
+            "$ref": "#/definitions/IFoundation"
+          },
+          "include": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "multiThreads": {
+            "type": "boolean"
+          },
+          "name": {
             "type": "string"
-        }
+          },
+          "reporters": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "testFileDir": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
     },
-    "type": "object"
+    "label": {
+      "type": "string"
+    }
+  },
+  "type": "object"
 }
-

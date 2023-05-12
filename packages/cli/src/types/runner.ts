@@ -129,11 +129,9 @@ export interface UpgradePreferences {
 }
 
 // TODO: Make this a typehelper based on input chain
-type ViemChain = typeof moonbeam  ;
+type ViemChain = typeof moonbeam;
 
-
-
-export type PublicViem = PublicClient<Transport, Chain, true>
+export type PublicViem = PublicClient<Transport, Chain, true>;
 
 export interface WalletViem extends WalletClient<Transport, Chain, Account, true> {}
 

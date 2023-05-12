@@ -36,7 +36,6 @@ export async function getDevProviderPath() {
     : `http://127.0.0.1:${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`;
 }
 
-
 export async function createDevBlock<
   ApiType extends ApiTypes,
   Call extends

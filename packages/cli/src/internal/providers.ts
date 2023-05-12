@@ -216,8 +216,36 @@ export async function populateProviderInterface(
           web3Api.currentProvider.disconnect();
         },
       };
+    case "viemPublic":
+      const pubClient = (await connect()) as PublicViem;
+      return {
+        name,
+        api: pubClient,
+        type,
+        greet: async () =>
+          console.log(
+            `👋 Provider ${name} is connected to chain ` + (await pubClient.getChainId())
+          ),
+        disconnect: async () => {
+          // TODO: add disconnect
+        },
+      };
 
-      //TODO ADD VIEM
+    case "viemWallet":
+      const wallClient = (await connect()) as WalletViem;
+      return {
+        name,
+        api: wallClient,
+        type,
+        greet: async () =>
+          console.log(
+            `👋 Provider ${name} is connected to chain ` + (await wallClient.getChainId())
+          ),
+        disconnect: async () => {
+          //TODO: add disconnect
+        },
+      };
+    //TODO ADD VIEM
 
     default:
       throw new Error("UNKNOWN TYPE");

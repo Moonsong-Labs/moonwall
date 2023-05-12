@@ -82,6 +82,8 @@ jobs:
           pnpm run lint && pnpm run build
       - name: Run standard ethers run
         run: pnpm moonwall test eth_test
+      - name: Run standard viem run
+        run: pnpm moonwall test viem_test
       #  disabled until web3.js fix their stuff
       # - name: Run standard web3 run
       # run: pnpm moonwall test web3_test
