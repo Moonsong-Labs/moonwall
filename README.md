@@ -1,5 +1,5 @@
 ## Description
-![moonwall](./moonwall.jpg)
+![moonwall](./moonwall.png)
 
 Test framework for testing on Moonbeam, Moonriver and more
 

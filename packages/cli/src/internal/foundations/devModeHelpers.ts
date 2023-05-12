@@ -10,6 +10,7 @@ import { MoonwallContext } from "../../lib/globalContext.js";
 import { ApiPromise } from "@polkadot/api";
 import { assert } from "vitest";
 import chalk from "chalk";
+import { importJsonConfig } from "../../lib/configReader.js";
 const debug = Debug("DevTest");
 
 export async function devForkToFinalizedHead(context: MoonwallContext) {
@@ -26,6 +27,15 @@ export async function devForkToFinalizedHead(context: MoonwallContext) {
     }
   }
 }
+
+export async function getDevProviderPath() {
+  const globalConfig = await importJsonConfig();
+  const env = globalConfig.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
+  return env.connections
+    ? env.connections[0].endpoints[0].replace("ws://", "http://")
+    : `http://127.0.0.1:${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`;
+}
+
 
 export async function createDevBlock<
   ApiType extends ApiTypes,

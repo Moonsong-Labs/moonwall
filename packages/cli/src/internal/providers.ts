@@ -8,11 +8,23 @@ import { ProviderConfig, ProviderType } from "../types/config.js";
 import { MoonwallProvider } from "../types/context.js";
 import chalk from "chalk";
 import { ALITH_PRIVATE_KEY } from "@moonwall/util";
+import {
+  PublicClient,
+  Transport,
+  createPublicClient,
+  createWalletClient,
+  http,
+  webSocket,
+} from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+import { moonbeam, moonbaseAlpha, moonriver, Chain } from "viem/chains";
+import { PublicViem, WalletViem } from "../types/runner.js";
 const debug = Debug("global:providers");
 
 export function prepareProviders(providerConfigs: ProviderConfig[]): MoonwallProvider[] {
   return providerConfigs.map(({ name, endpoints, type, rpc }) => {
     const url = endpoints.includes("ENV_VAR") ? process.env.WSS_URL! : endpoints[0];
+    const privateKey = process.env.MOON_PRIV_KEY || ALITH_PRIVATE_KEY;
 
     switch (type) {
       case "polkadotJs":
@@ -91,8 +103,31 @@ export function prepareProviders(providerConfigs: ProviderConfig[]): MoonwallPro
           type,
           connect: () => {
             const provider = new ethers.WebSocketProvider(url);
-            return new Wallet(ALITH_PRIVATE_KEY, provider);
+            return new Wallet(privateKey, provider);
           },
+        };
+
+      case "viemPublic":
+        debug(`🟢  Viem Public provider ${name} details prepared`);
+        return {
+          name,
+          type,
+          connect: () =>
+            createPublicClient({
+              chain: moonbeam,
+              transport: url.includes("ws") ? webSocket(url) : http(url),
+            }),
+        };
+
+      case "viemWallet":
+        return {
+          name,
+          type,
+          connect: () =>
+            createWalletClient({
+              account: privateKeyToAccount(privateKey as `0x${string}`),
+              transport: url.includes("ws") ? webSocket(url) : http(url),
+            }),
         };
 
       default:
@@ -108,7 +143,7 @@ export function prepareProviders(providerConfigs: ProviderConfig[]): MoonwallPro
 export async function populateProviderInterface(
   name: string,
   type: ProviderType,
-  connect: () => Promise<ApiPromise> | Signer | Web3 | void
+  connect: () => Promise<ApiPromise> | Signer | Web3 | PublicViem | WalletViem | void
 ) {
   switch (type) {
     case "polkadotJs":
@@ -181,6 +216,8 @@ export async function populateProviderInterface(
           web3Api.currentProvider.disconnect();
         },
       };
+
+      //TODO ADD VIEM
 
     default:
       throw new Error("UNKNOWN TYPE");

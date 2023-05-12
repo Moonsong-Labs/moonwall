@@ -7,9 +7,20 @@ import {
   BlockCreationResponse,
   ChopsticksBlockCreation,
 } from "../lib/contextHelpers.js";
-import { ProviderType, ZombieNodeType } from "./config.js";
+import { ProviderType, ViemClientType, ZombieNodeType } from "./config.js";
 import { Debugger } from "debug";
 import { KeyringPair } from "@polkadot/keyring/types.js";
+import {
+  Account,
+  HttpTransport,
+  PublicClient,
+  Transport,
+  WalletClient,
+  WebSocketTransport,
+  http,
+  webSocket,
+} from "viem";
+import { Chain, moonbaseAlpha, moonbeam } from "viem/chains";
 
 export interface CustomTest {
   (params: {
@@ -117,8 +128,23 @@ export interface UpgradePreferences {
   logger?: Debugger;
 }
 
+// TODO: Make this a typehelper based on input chain
+type ViemChain = typeof moonbeam  ;
+
+
+
+export type PublicViem = PublicClient<Transport, Chain, true>
+
+export interface WalletViem extends WalletClient<Transport, Chain, Account, true> {}
+
+export interface ViemApiMap {
+  public: PublicViem;
+  wallet: WalletViem;
+}
+
 export interface GenericContext {
   providers: Object;
+  viemClient: <T extends ViemClientType>(subType: T) => ViemApiMap[T];
   polkadotJs: (options?: { apiName?: string; type?: ProviderType }) => ApiPromise;
   ethersSigner: ([name]?: string) => Signer;
   web3: ([name]?: string) => Web3;
