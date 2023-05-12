@@ -116,7 +116,7 @@
     "regenerator-runtime": "^0.13.11",
     "typescript": "^5.0.4",
     "typescript-json-schema": "^0.55.0",
-    "viem": "^0.3.21",
+    "viem": "^0.3.22",
     "web3": "4.0.1-rc.0",
     "web3-providers-ws": "4.0.1-rc.0"
   },

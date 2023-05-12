@@ -91,7 +91,8 @@ export class MoonwallContext {
 
         blob.providers = env.connections
           ? prepareProviders(env.connections)
-          : prepareProviders([
+          : !env.foundation.launchSpec[0].disableDefaultEthProviders
+          ? prepareProviders([
               {
                 name: "w3",
                 type: "web3",
@@ -109,6 +110,15 @@ export class MoonwallContext {
               {
                 name: "mb",
                 type: "moon",
+                endpoints: [
+                  `ws://127.0.0.1:${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`,
+                ],
+              },
+            ])
+          : prepareProviders([
+              {
+                name: "w3",
+                type: "web3",
                 endpoints: [
                   `ws://127.0.0.1:${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`,
                 ],
