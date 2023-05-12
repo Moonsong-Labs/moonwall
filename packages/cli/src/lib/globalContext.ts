@@ -1,5 +1,10 @@
 import "@moonbeam-network/api-augment";
-import { EthTransactionType, FoundationType, MoonwallConfig } from "../types/config";
+import {
+  EthTransactionType,
+  FoundationType,
+  MoonwallConfig,
+  ProviderConfig,
+} from "../types/config";
 import { ChildProcess, exec } from "node:child_process";
 import { populateProviderInterface, prepareProviders } from "../internal/providers.js";
 import { launchNode } from "../internal/localNode.js";
@@ -24,6 +29,38 @@ export const runNetworkOnly = async (config: MoonwallConfig) => {
   const ctx = MoonwallContext.getContext(config);
   await ctx.startNetwork();
 };
+
+export const vitestAutoUrl = `ws://127.0.0.1:${
+  10000 + Number(process.env.VITEST_POOL_ID || 1) * 100
+}`;
+
+const defaultConnections: ProviderConfig[] = [
+  {
+    name: "w3",
+    type: "web3",
+    endpoints: [vitestAutoUrl],
+  },
+  {
+    name: "eth",
+    type: "ethers",
+    endpoints: [vitestAutoUrl],
+  },
+  {
+    name: "public",
+    type: "viemPublic",
+    endpoints: [vitestAutoUrl],
+  },
+  {
+    name: "wallet",
+    type: "viemWallet",
+    endpoints: [vitestAutoUrl],
+  },
+  {
+    name: "mb",
+    type: "moon",
+    endpoints: [vitestAutoUrl],
+  },
+];
 
 export class MoonwallContext {
   private static instance: MoonwallContext | undefined;
@@ -91,37 +128,13 @@ export class MoonwallContext {
 
         blob.providers = env.connections
           ? prepareProviders(env.connections)
-          : !env.foundation.launchSpec[0].disableDefaultEthProviders
-          ? prepareProviders([
-              {
-                name: "w3",
-                type: "web3",
-                endpoints: [
-                  `ws://127.0.0.1:${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`,
-                ],
-              },
-              {
-                name: "eth",
-                type: "ethers",
-                endpoints: [
-                  `ws://127.0.0.1:${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`,
-                ],
-              },
-              {
-                name: "mb",
-                type: "moon",
-                endpoints: [
-                  `ws://127.0.0.1:${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`,
-                ],
-              },
-            ])
+          : !!!env.foundation.launchSpec[0].disableDefaultEthProviders
+          ? prepareProviders(defaultConnections)
           : prepareProviders([
               {
-                name: "w3",
-                type: "web3",
-                endpoints: [
-                  `ws://127.0.0.1:${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`,
-                ],
+                name: "node",
+                type: "polkadotJs",
+                endpoints: [vitestAutoUrl],
               },
             ]);
 
