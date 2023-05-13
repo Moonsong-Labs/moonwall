@@ -6,6 +6,7 @@
     {
       "name": "viem_test",
       "testFileDir": ["tests/viem"],
+      "envVars": [""],
       "foundation": {
         "type": "read_only"
       },
@@ -366,6 +367,7 @@
       "name": "dev_test",
       "testFileDir": ["tests/dev_tests"],
       "envVars": ["DEBUG_COLORS=1", "TIMBO_TEST_ENV='TIMBO timbo timbo'"],
+      "reporters": ["verbose"],
       "foundation": {
         "type": "dev",
         "launchSpec": [
@@ -397,6 +399,16 @@
         {
           "name": "w3",
           "type": "web3",
+          "endpoints": ["ws://127.0.0.1:9944"]
+        },
+        {
+          "name": "wallet",
+          "type": "viemWallet",
+          "endpoints": ["ws://127.0.0.1:9944"]
+        },
+        {
+          "name": "public",
+          "type": "viemPublic",
           "endpoints": ["ws://127.0.0.1:9944"]
         },
         {

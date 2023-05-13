@@ -5,6 +5,8 @@ import { Signer, parseEther } from "ethers";
 import { BN } from "@polkadot/util";
 import Web3 from "web3";
 import { ApiPromise } from "@polkadot/api";
+import { formatEther, getContract } from "viem";
+import { bytecode, tokenAbi } from "../_test_data/token.js";
 
 describeSuite({
   id: "D01",
@@ -120,6 +122,124 @@ describeSuite({
           "No Event found in block"
         ).toBeTruthy();
       },
+    });
+
+    it({
+      id: "T07",
+      title: "Can send viem txns",
+      test: async function () {
+        const balanceBefore = await context
+          .viemClient("public")
+          .getBalance({ address: BALTATHAR_ADDRESS });
+        await context.viemClient("wallet").sendTransaction({
+          to: BALTATHAR_ADDRESS,
+          value: parseEther("1.0"),
+        });
+
+        await context.createBlock();
+
+        const balanceAfter = await context
+          .viemClient("public")
+          .getBalance({ address: BALTATHAR_ADDRESS });
+        log(`Baltahaar balance before: ${formatEther(balanceBefore)}`);
+        log(`Baltahaar balance after: ${formatEther(balanceAfter)}`);
+        expect(balanceBefore < balanceAfter).to.be.true;
+      },
+    });
+
+    it({
+      id: "T08",
+      title: "It can deploy a contract",
+      test: async function () {
+        const hash = await context.viemClient("wallet").deployContract({
+          abi: tokenAbi,
+          bytecode,
+        });
+
+        await context.createBlock();
+        log(`Deployed contract with hash ${hash}`);
+        const receipt = await context.viemClient("public").getTransactionReceipt({ hash });
+        expect(receipt.status).to.be.toStrictEqual("success");
+      },
+    });
+
+    it({
+      id: "T09",
+      title: "It can write-interact with a contract",
+      test: async function () {
+        const hash = await context.viemClient("wallet").deployContract({
+          abi: tokenAbi,
+          bytecode,
+        });
+        await context.createBlock();
+        const { contractAddress } = await context
+          .viemClient("public")
+          .getTransactionReceipt({ hash });
+        log(`Deployed contract at ${contractAddress}`);
+
+        const contractInstance = getContract({
+          abi: tokenAbi,
+          address: contractAddress!,
+          publicClient: context.viemClient("public"),
+        });
+
+        const symbol = await contractInstance.read.symbol();
+        const balBefore = (await contractInstance.read.balanceOf([BALTATHAR_ADDRESS])) as bigint;
+
+        await context
+          .viemClient("wallet")
+          .writeContract({
+            abi: tokenAbi,
+            address: contractAddress!,
+            functionName: "transfer",
+            args: [BALTATHAR_ADDRESS, parseEther("2.0")],
+          });
+        await context.createBlock();
+
+        const balanceAfter = (await contractInstance.read.balanceOf([BALTATHAR_ADDRESS])) as bigint;
+        log(`Baltahaar balance before: ${formatEther(balBefore)} ${symbol}`);
+        log(`Baltahaar balance after: ${formatEther(balanceAfter)} ${symbol}`);
+        expect(balBefore < balanceAfter).to.be.true;
+      },
+    });
+    it({
+      // TODO
+      id: "T10",
+      title: "It can sign a message and decrypt it",
+      test: async function () {},
+    });
+    it({
+      // TODO
+      id: "T11",
+      title: "It can calculate the gas cost of a contract interaction",
+      test: async function () {},
+    });
+    it({
+      // TODO
+      id: "T12",
+      title: "It can calculate the gas cost of a simple balance transfer",
+      test: async function () {},
+    });
+
+    it({
+      // TODO
+      id: "T13",
+      title: "It can simulate a contract interation",
+      test: async function () {},
+    });
+
+    it({
+      // TODO
+      id: "T14",
+      title: "It can decode an error result",
+      test: async function () {},
+    });
+
+    it({
+      // TODO
+      id: "T15",
+      title: "It can decode an event log",
+      test: async function () {},
     });
   },
 });
