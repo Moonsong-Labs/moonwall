@@ -1,12 +1,31 @@
 import "@moonbeam-network/api-augment";
-import { describeSuite, expect, beforeAll } from "@moonwall/cli";
-import { CHARLETH_ADDRESS, BALTATHAR_ADDRESS, alith, baltathar } from "@moonwall/util";
+import { describeSuite, expect, beforeAll, getDevChain } from "@moonwall/cli";
+import {
+  CHARLETH_ADDRESS,
+  BALTATHAR_ADDRESS,
+  alith,
+  baltathar,
+  ALITH_ADDRESS,
+  BALTATHAR_PRIVATE_KEY,
+  CHARLETH_PRIVATE_KEY,
+} from "@moonwall/util";
 import { Signer, parseEther } from "ethers";
 import { BN } from "@polkadot/util";
 import Web3 from "web3";
 import { ApiPromise } from "@polkadot/api";
-import { formatEther, getContract } from "viem";
+import {
+  createWalletClient,
+  decodeErrorResult,
+  decodeEventLog,
+  formatEther,
+  formatGwei,
+  formatUnits,
+  getContract,
+  http,
+  verifyMessage,
+} from "viem";
 import { bytecode, tokenAbi } from "../_test_data/token.js";
+import { privateKeyToAccount } from "viem/accounts";
 
 describeSuite({
   id: "D01",
@@ -186,14 +205,12 @@ describeSuite({
         const symbol = await contractInstance.read.symbol();
         const balBefore = (await contractInstance.read.balanceOf([BALTATHAR_ADDRESS])) as bigint;
 
-        await context
-          .viemClient("wallet")
-          .writeContract({
-            abi: tokenAbi,
-            address: contractAddress!,
-            functionName: "transfer",
-            args: [BALTATHAR_ADDRESS, parseEther("2.0")],
-          });
+        await context.viemClient("wallet").writeContract({
+          abi: tokenAbi,
+          address: contractAddress!,
+          functionName: "transfer",
+          args: [BALTATHAR_ADDRESS, parseEther("2.0")],
+        });
         await context.createBlock();
 
         const balanceAfter = (await contractInstance.read.balanceOf([BALTATHAR_ADDRESS])) as bigint;
@@ -203,43 +220,134 @@ describeSuite({
       },
     });
     it({
-      // TODO
       id: "T10",
-      title: "It can sign a message and decrypt it",
-      test: async function () {},
+      title: "It can sign a message",
+      test: async function () {
+        const string = "Boom Boom Lemon";
+        const signature = await context.viemClient("wallet").signMessage({ message: string });
+        const valid = await verifyMessage({ address: ALITH_ADDRESS, message: string, signature });
+        log(`Signature: ${signature}`);
+        expect(signature.length).to.be.greaterThan(0);
+        expect(valid).to.be.true;
+      },
     });
     it({
-      // TODO
       id: "T11",
       title: "It can calculate the gas cost of a contract interaction",
-      test: async function () {},
+      test: async function () {
+        const hash = await context.viemClient("wallet").deployContract({
+          abi: tokenAbi,
+          bytecode,
+        });
+        await context.createBlock();
+        const { contractAddress } = await context
+          .viemClient("public")
+          .getTransactionReceipt({ hash });
+        log(`Deployed contract at ${contractAddress}`);
+
+        const gas = await context.viemClient("public").estimateContractGas({
+          abi: tokenAbi,
+          address: contractAddress!,
+          functionName: "transfer",
+          args: [BALTATHAR_ADDRESS, parseEther("2.0")],
+          account: ALITH_ADDRESS,
+        });
+
+        log(`Gas cost to transfer tokens is ${formatGwei(gas)} gwei`);
+        expect(gas > 0n).to.be.true;
+      },
     });
     it({
-      // TODO
       id: "T12",
       title: "It can calculate the gas cost of a simple balance transfer",
-      test: async function () {},
+      test: async function () {
+        const gas = await context
+          .viemClient("public")
+          .estimateGas({ account: ALITH_ADDRESS, to: BALTATHAR_ADDRESS, value: parseEther("1.0") });
+
+        log(`Gas cost to transfer system balance is ${formatGwei(gas)} gwei`);
+        expect(gas > 0n).to.be.true;
+      },
     });
 
     it({
-      // TODO
       id: "T13",
       title: "It can simulate a contract interation",
-      test: async function () {},
+      test: async function () {
+        const hash = await context.viemClient("wallet").deployContract({
+          abi: tokenAbi,
+          bytecode,
+        });
+        await context.createBlock();
+        const { contractAddress } = await context
+          .viemClient("public")
+          .getTransactionReceipt({ hash });
+
+        const { result } = await context.viemClient("public").simulateContract({
+          account: ALITH_ADDRESS,
+          abi: tokenAbi,
+          address: contractAddress!,
+          functionName: "transfer",
+          args: [BALTATHAR_ADDRESS, parseEther("2.0")],
+        });
+
+        expect(result).to.be.true;
+      },
     });
 
     it({
-      // TODO
       id: "T14",
       title: "It can decode an error result",
-      test: async function () {},
+      test: async function () {
+        const errorData =
+          ("0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000" +
+            "00000000000000002645524332303a207472616e7366657220616d6f756e7420657863656" +
+            "564732062616c616e63650000000000000000000000000000000000000000000000000000") as `0x${string}`;
+
+        const value = decodeErrorResult({ abi: tokenAbi, data: errorData });
+
+        expect(value.args![0]).to.contains("ERC20: transfer amount exceeds balance");
+      },
     });
 
     it({
-      // TODO
       id: "T15",
       title: "It can decode an event log",
-      test: async function () {},
+      test: async function () {
+        const hash = await context.viemClient("wallet").deployContract({
+          abi: tokenAbi,
+          bytecode,
+        });
+        await context.createBlock();
+        const { contractAddress } = await context
+          .viemClient("public")
+          .getTransactionReceipt({ hash });
+        log(`Deployed contract at ${contractAddress}`);
+
+        const contractInstance = getContract({
+          abi: tokenAbi,
+          address: contractAddress!,
+          publicClient: context.viemClient("public"),
+        });
+
+        const txHash = await context.viemClient("wallet").writeContract({
+          abi: tokenAbi,
+          address: contractAddress!,
+          functionName: "transfer",
+          args: [BALTATHAR_ADDRESS, parseEther("2.0")],
+        });
+        await context.createBlock();
+
+        await context.createBlock();
+
+        const {logs} = await context.viemClient("public").getTransactionReceipt({ hash: txHash });
+        
+        const decoded = decodeEventLog({abi: tokenAbi, data: logs[0].data, topics: logs[0].topics})
+
+
+        expect(decoded.eventName).to.equal("Transfer");
+        expect((decoded.args as any).from).to.equal(ALITH_ADDRESS);
+      },
     });
   },
 });

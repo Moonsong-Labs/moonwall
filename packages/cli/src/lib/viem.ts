@@ -1,5 +1,5 @@
 import { Chain } from "viem";
-import { MoonwallContext } from "../lib/globalContext.js";
+import { MoonwallContext } from "./globalContext.js";
 
 export async function getDevChain(url: string) {
   const httpUrl = url.replace("ws", "http");
