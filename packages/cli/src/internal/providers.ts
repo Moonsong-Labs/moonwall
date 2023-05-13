@@ -19,7 +19,7 @@ import {
 import { privateKeyToAccount } from "viem/accounts";
 import { moonbeam, moonbaseAlpha, moonriver, Chain } from "viem/chains";
 import { PublicViem, WalletViem } from "../types/runner.js";
-import {  getDevChain } from "../lib/viem.js";
+import { getDevChain } from "../lib/viem.js";
 const debug = Debug("global:providers");
 
 export function prepareProviders(providerConfigs: ProviderConfig[]): MoonwallProvider[] {
@@ -144,7 +144,13 @@ export function prepareProviders(providerConfigs: ProviderConfig[]): MoonwallPro
 export async function populateProviderInterface(
   name: string,
   type: ProviderType,
-  connect: () => Promise<ApiPromise> | Signer | Web3 | Promise<PublicViem> | Promise<WalletViem> | void
+  connect: () =>
+    | Promise<ApiPromise>
+    | Signer
+    | Web3
+    | Promise<PublicViem>
+    | Promise<WalletViem>
+    | void
 ) {
   switch (type) {
     case "polkadotJs":
