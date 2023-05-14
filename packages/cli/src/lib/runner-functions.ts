@@ -34,6 +34,21 @@ const RT_NAME = process.env.MOON_RTNAME;
 
 // This should be refactored to use the vitest runner API for better integration
 // https://vitest.dev/advanced/runner.html
+
+/**
+ * Defines a suite of tests based on provided parameters.
+ *
+ * @param {object} params - The parameters for the test suite.
+ * @param {string} params.id - A unique identifier for the test suite.
+ * @param {string} params.title - The title of the test suite.
+ * @param {function} params.testCases - A function that defines the individual test cases of the suite.
+ * @param {string} params.foundationMethods - Determines the foundation methods to use for the test suite.
+ * @param {number} [params.minRtVersion] - The minimum runtime version required for the test suite.
+ * @param {string} [params.chainType] - Specifies the type of blockchain ("moonbeam", "moonriver", or "moonbase") that the test suite is designed for.
+ * @param {string} [params.notChainType] - Specifies the type(s) of blockchain that the test suite should not run on.
+ *
+ * @returns {void} - No return value. The function is used for side effects (defining test suites).
+ */
 export function describeSuite({
   id,
   title,
@@ -258,7 +273,7 @@ export function describeSuite({
   });
 }
 
-export { GenericContext };
+// export { GenericContext };
 
 // TODO: Extend to include skipIf() and runIf()
 export type TestCaseModifier = "only" | "skip";

@@ -39,7 +39,7 @@
     "rimraf": "^4.4.1",
     "typescript": "^5.0.4",
     "vitest": "^0.31.0",
-    "viem": "^0.3.22"
+    "viem": "^0.3.24"
   },
   "pnpm": {
     "overrides": {

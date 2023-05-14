@@ -71,8 +71,8 @@ importers:
         specifier: ^5.0.4
         version: 5.0.4
       viem:
-        specifier: ^0.3.22
-        version: 0.3.22(typescript@5.0.4)
+        specifier: ^0.3.24
+        version: 0.3.24(typescript@5.0.4)
       vitest:
         specifier: ^0.31.0
         version: 0.31.0(@vitest/ui@0.30.1)
@@ -201,8 +201,8 @@ importers:
         specifier: ^0.55.0
         version: 0.55.0
       viem:
-        specifier: ^0.3.22
-        version: 0.3.22(typescript@5.0.4)
+        specifier: ^0.3.24
+        version: 0.3.24(typescript@5.0.4)
       web3:
         specifier: 4.0.1-rc.0
         version: 4.0.1-rc.0
@@ -4289,7 +4289,7 @@ packages:
     resolution: {integrity: sha512-QDk/ktioLqDQCOLUu/+FyyF3UYWdKOqqa6q1vwI75pdKBg5elNpRXugEC1irzkLolTanvMRc2rO+qarT9ijjyg==}
     dependencies:
       '@polkadot/api': 10.7.1
-      typescript: 4.8.4
+      typescript: 4.9.5
     transitivePeerDependencies:
       - bufferutil
       - supports-color
@@ -5953,6 +5953,13 @@ packages:
     resolution: {integrity: sha512-QCh+85mCy+h0IGff8r5XWzOVSbBO+KfeYrMQh7NJ58QujwcE22u+NUSmUxqF+un70P9GXKxa2HCNiTTMJknyjQ==}
     engines: {node: '>=4.2.0'}
     hasBin: true
+    dev: true
+
+  /typescript@4.9.5:
+    resolution: {integrity: sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==}
+    engines: {node: '>=4.2.0'}
+    hasBin: true
+    dev: false
 
   /typescript@5.0.4:
     resolution: {integrity: sha512-cW9T5W9xY37cc+jfEnaUvX91foxtHkza3Nw3wkoF4sSlKn0MONdkdEndig/qPBWXNkmplh3NzayQzCiHM4/hqw==}
@@ -6037,8 +6044,8 @@ packages:
       spdx-expression-parse: 3.0.1
     dev: true
 
-  /viem@0.3.22(typescript@5.0.4):
-    resolution: {integrity: sha512-nnueiZTcUz1aHrUiVkRiLNT1+h2HAt1eGlKJQ8faDuvUn1mA0f8Cax1Z1CxhwkAhVZ8HqrebZifdJobPuLPZ0A==}
+  /viem@0.3.24(typescript@5.0.4):
+    resolution: {integrity: sha512-Oa2FgJ4mswl1I6nPPnyBnt+9+8w4/xcw4XjB1q115g9JJOqX8Ic9nq4Z31lDAonjtCca+K7u1M30t1lFXafqFg==}
     dependencies:
       '@adraffy/ens-normalize': 1.9.0
       '@noble/curves': 1.0.0

@@ -2,6 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
     "ChopsticksLaunchSpec": {
+      "description": "A launch specification object for the \"chopsticks\" foundation type.",
       "properties": {
         "buildBlockMode": {
           "enum": ["batch", "instant", "manual"],
@@ -36,6 +37,7 @@
       "type": "object"
     },
     "DevLaunchSpec": {
+      "description": "A launch specification object for the \"dev\" foundation type.",
       "properties": {
         "binPath": {
           "type": "string"
@@ -73,6 +75,7 @@
       "type": "object"
     },
     "EthTransactionType": {
+      "description": "The type of Ethereum transaction. Can be \"Legacy\", \"EIP2930\", or \"EIP1559\".",
       "enum": ["EIP1559", "EIP2930", "Legacy"],
       "type": "string"
     },
@@ -135,15 +138,18 @@
           },
           "type": "object"
         }
-      ]
+      ],
+      "description": "The foundation configuration for the environment. It can be of several types including \"dev\", \"chopsticks\", \"zombie\", \"read_only\", or \"fork\"."
     },
     "IRpcBundle": {
       "additionalProperties": {
         "$ref": "#/definitions/IRpcModule"
       },
+      "description": "Interface for defining RPC bundles. \nIt is a dictionary where each key is a module name and the value is an IRpcModule.",
       "type": "object"
     },
     "IRpcMethod": {
+      "description": "Interface for defining RPC methods.",
       "properties": {
         "description": {
           "type": "string"
@@ -164,9 +170,11 @@
       "additionalProperties": {
         "$ref": "#/definitions/IRpcMethod"
       },
+      "description": "Interface for defining RPC modules. \nIt is a dictionary where each key is a method name and the value is an IRpcMethod.",
       "type": "object"
     },
     "IRpcParam": {
+      "description": "Interface for defining RPC parameters.",
       "properties": {
         "isOptional": {
           "type": "boolean"
@@ -181,6 +189,7 @@
       "type": "object"
     },
     "ProviderConfig": {
+      "description": "The configuration object for a provider.",
       "properties": {
         "endpoints": {
           "items": {
@@ -201,10 +210,12 @@
       "type": "object"
     },
     "ProviderType": {
+      "description": "The type of provider. Can be \"polkadotJs\", \"ethers\", \"web3\", \"moon\", \"unknown\", \"viemPublic\", or \"viemWallet\".",
       "enum": ["ethers", "moon", "polkadotJs", "unknown", "viemPublic", "viemWallet", "web3"],
       "type": "string"
     },
     "ZombieLaunchSpec": {
+      "description": "A launch specification object for the \"zombie\" foundation type.",
       "properties": {
         "configPath": {
           "type": "string"
@@ -234,6 +245,7 @@
       "type": "object"
     }
   },
+  "description": "The main configuration object for Moonwall.",
   "properties": {
     "$schema": {
       "type": "string"
@@ -243,6 +255,7 @@
     },
     "environments": {
       "items": {
+        "description": "The environment configuration for testing.",
         "properties": {
           "connections": {
             "items": {

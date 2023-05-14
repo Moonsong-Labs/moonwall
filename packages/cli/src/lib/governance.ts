@@ -8,9 +8,9 @@ import { blake2AsHex } from "@polkadot/util-crypto";
 import { alith, baltathar, charleth, dorothy } from "@moonwall/util";
 import { DevModeContext } from "../types/runner.js";
 
-export const COUNCIL_MEMBERS = [baltathar, charleth, dorothy];
+export const COUNCIL_MEMBERS: KeyringPair[] = [baltathar, charleth, dorothy];
 export const COUNCIL_THRESHOLD = Math.ceil((COUNCIL_MEMBERS.length * 2) / 3);
-export const TECHNICAL_COMMITTEE_MEMBERS = [alith, baltathar];
+export const TECHNICAL_COMMITTEE_MEMBERS: KeyringPair[] = [alith, baltathar];
 export const TECHNICAL_COMMITTEE_THRESHOLD = Math.ceil(
   (TECHNICAL_COMMITTEE_MEMBERS.length * 2) / 3
 );
@@ -193,7 +193,7 @@ export const dispatchAsGeneralAdmin = async <
 export const maximizeConvictionVotingOf = async (
   context: DevModeContext,
   voters: KeyringPair[],
-  refIndex: Number
+  refIndex: number
 ) => {
   // We need to have enough to pay for fee
   const fee = (
