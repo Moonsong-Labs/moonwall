@@ -145,7 +145,7 @@
       "additionalProperties": {
         "$ref": "#/definitions/IRpcModule"
       },
-      "description": "Interface for defining RPC bundles. \nIt is a dictionary where each key is a module name and the value is an IRpcModule.",
+      "description": "Interface for defining RPC bundles.\nIt is a dictionary where each key is a module name and the value is an IRpcModule.",
       "type": "object"
     },
     "IRpcMethod": {
@@ -170,7 +170,7 @@
       "additionalProperties": {
         "$ref": "#/definitions/IRpcMethod"
       },
-      "description": "Interface for defining RPC modules. \nIt is a dictionary where each key is a method name and the value is an IRpcMethod.",
+      "description": "Interface for defining RPC modules.\nIt is a dictionary where each key is a method name and the value is an IRpcMethod.",
       "type": "object"
     },
     "IRpcParam": {

@@ -3,4 +3,7 @@
 "@moonwall/cli": patch
 ---
 
-viem helpers
+## Viem helpers
+
+- Added viem helpers
+- Added JSDoc annotations

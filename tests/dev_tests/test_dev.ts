@@ -231,6 +231,8 @@ describeSuite({
         const signature = await context.viemClient("wallet").signMessage({ message: string });
         const valid = await verifyMessage({ address: ALITH_ADDRESS, message: string, signature });
         log(`Signature: ${signature}`);
+
+        context.ethersSigner();
         expect(signature.length).to.be.greaterThan(0);
         expect(valid).to.be.true;
       },
