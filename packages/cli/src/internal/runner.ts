@@ -17,9 +17,10 @@ export async function runTask(
   try {
     const result = await execAsync(cmd, { cwd, env });
     return result.stdout;
-  } catch (error) {
-    console.log(error);
-    debug(`Caught exception in command execution. Error[${error.status}] ${error.message}\n`);
+  } catch (error: any) {
+    const status = error.status ? `[${error.status}]` : "[Unknown Status]";
+    const message = error.message ? `${error.message}` : "No Error Message";
+    debug(`Caught exception in command execution. Error[${status}] ${message}`);
     throw error;
   }
 }
@@ -46,9 +47,10 @@ export async function spawnTask(
       }
     );
     return process;
-  } catch (error) {
-    console.log(error);
-    debug(`Caught exception in command execution. Error[${error.status}] ${error.message}\n`);
+  } catch (error: any) {
+    const status = error.status ? `[${error.status}]` : "[Unknown Status]";
+    const message = error.message ? `${error.message}` : "No Error Message";
+    debug(`Caught exception in command execution. Error[${status}] ${message}\n`);
     throw error;
   }
 }

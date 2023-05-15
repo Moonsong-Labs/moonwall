@@ -59,6 +59,6 @@ export async function downloader(url: string, outputPath: string): Promise<void>
     fs.writeFileSync(outputPath, fs.readFileSync(tempPath));
     fs.rmSync(tempPath);
   } catch (e) {
-    throw new Error(e);
+    throw e;
   }
 }

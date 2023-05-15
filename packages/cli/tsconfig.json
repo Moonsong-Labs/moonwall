@@ -17,8 +17,10 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "noEmit": true,
-    "noUncheckedIndexedAccess": true,
-    "strict": false //renable this oneday
+    "strict": true,
+    // TODO: Remove the following to eliminate tech-debt
+    "noImplicitAny": false,
+    "strictNullChecks": false
   },
   "include": ["./src/**/*.ts"],
   "exclude": ["./tests/**", "**/dist/**", "./packages/*/*.d.ts", "./packages/*/*.d.cts"]
