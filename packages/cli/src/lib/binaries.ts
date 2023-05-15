@@ -44,7 +44,6 @@ export async function getTagSha8(binaryTag: string): Promise<string> {
   const sha = child_process.execSync(`git rev-list -1 ${binaryTag}`).toString();
   if (!sha) {
     throw new Error(`Invalid runtime tag ${binaryTag}`);
-    return;
   }
   return sha.slice(0, 8);
 }

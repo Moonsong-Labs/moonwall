@@ -19,6 +19,7 @@ import {
 import { privateKeyToAccount } from "viem/accounts";
 import { moonbeam, moonbaseAlpha, moonriver, Chain } from "viem/chains";
 import { PublicViem, WalletViem } from "../types/runner.js";
+import { getDevChain } from "../lib/viem.js";
 const debug = Debug("global:providers");
 
 export function prepareProviders(providerConfigs: ProviderConfig[]): MoonwallProvider[] {
@@ -112,10 +113,9 @@ export function prepareProviders(providerConfigs: ProviderConfig[]): MoonwallPro
         return {
           name,
           type,
-          connect: () =>
+          connect: async () =>
             createPublicClient({
-              chain: moonbeam,
-              transport: url.includes("ws") ? webSocket(url) : http(url),
+              transport: http(url.replace("ws", "http")),
             }),
         };
 
@@ -123,10 +123,11 @@ export function prepareProviders(providerConfigs: ProviderConfig[]): MoonwallPro
         return {
           name,
           type,
-          connect: () =>
+          connect: async () =>
             createWalletClient({
+              chain: await getDevChain(url),
               account: privateKeyToAccount(privateKey as `0x${string}`),
-              transport: url.includes("ws") ? webSocket(url) : http(url),
+              transport: http(url.replace("ws", "http")),
             }),
         };
 
@@ -143,7 +144,13 @@ export function prepareProviders(providerConfigs: ProviderConfig[]): MoonwallPro
 export async function populateProviderInterface(
   name: string,
   type: ProviderType,
-  connect: () => Promise<ApiPromise> | Signer | Web3 | PublicViem | WalletViem | void
+  connect: () =>
+    | Promise<ApiPromise>
+    | Signer
+    | Web3
+    | Promise<PublicViem>
+    | Promise<WalletViem>
+    | void
 ) {
   switch (type) {
     case "polkadotJs":
@@ -195,10 +202,10 @@ export async function populateProviderInterface(
         greet: async () =>
           debug(
             `👋  Provider ${name} is connected to chain ` +
-              (await ethApi.provider.getNetwork()).chainId
+              (await ethApi.provider!.getNetwork()).chainId
           ),
         disconnect: async () => {
-          ethApi.provider.destroy();
+          ethApi.provider!.destroy();
         },
       };
 
@@ -213,7 +220,7 @@ export async function populateProviderInterface(
             `👋 Provider ${name} is connected to chain ` + (await web3Api.eth.getChainId())
           ),
         disconnect: async () => {
-          web3Api.currentProvider.disconnect();
+          web3Api.currentProvider!.disconnect();
         },
       };
     case "viemPublic":

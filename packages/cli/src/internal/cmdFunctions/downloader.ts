@@ -31,6 +31,11 @@ export async function downloader(url: string, outputPath: string): Promise<void>
   let transferredBytes = 0;
 
   const response = await fetch(url);
+
+  if (!response.body) {
+    throw new Error("No response body");
+  }
+
   const readStream = response.body;
 
   readStream.pipe(writeStream);
@@ -59,6 +64,6 @@ export async function downloader(url: string, outputPath: string): Promise<void>
     fs.writeFileSync(outputPath, fs.readFileSync(tempPath));
     fs.rmSync(tempPath);
   } catch (e) {
-    throw new Error(e);
+    throw e;
   }
 }

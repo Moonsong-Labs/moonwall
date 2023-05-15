@@ -28,12 +28,44 @@ import {
 import { ProviderType, ViemClientType, ZombieNodeType } from "../types/config.js";
 import { importJsonConfig } from "./configReader.js";
 import Debug, { Debugger } from "debug";
+import { error } from "console";
+import { ConnectedProvider } from "../types/context.js";
 
 const RT_VERSION = Number(process.env.MOON_RTVERSION);
 const RT_NAME = process.env.MOON_RTNAME;
 
 // This should be refactored to use the vitest runner API for better integration
 // https://vitest.dev/advanced/runner.html
+
+/**
+ *  * Defines a suite of tests based on provided parameters.
+ *
+ * @param {object} params - The setup parameters for the test suite.
+ * @param {string} params.id - A unique identifier for the test suite (e.g. D03).
+ * @param {string} params.title - The title of the test suite (e.g. 'Fee calculation: congestion handling').
+ * @param {function} params.testCases - A callback function that houses the individual test cases of this suite.
+ * @param {string} params.foundationMethods - Explicitly specify which foundation these tests will run against reveal which methods to make available.
+ * @param {number} [params.minRtVersion] - The minimum runtime version required for the test suite, otherwise will be skipped.
+ * @param {string} [params.chainType] - The required runtime name required for the test suite, otherwise will be skipped.
+ * @param {string} [params.notChainType] - The runtime name to not run against this test suite, otherwise will not be skipped.
+ *
+ * @returns {void} - No explicit return value, this function results is wrapped and handled by the vitest instance.
+ * @example
+ *      describeSuite({
+ *        id: "D01",
+ *        title: "Sample test suite",
+ *        foundationMethods: "dev",
+ *        testCases: ({ it, context, log }) => {
+ *          it({
+ *            id: "T01",
+ *            title: "Sample test case",
+ *            test: async function () {
+ *              expect(true).to.be.true;
+ *            },
+ *          });
+ *        },
+ *      });
+ */
 export function describeSuite({
   id,
   title,
@@ -42,7 +74,7 @@ export function describeSuite({
   minRtVersion,
   chainType,
   notChainType,
-}: ITestSuiteType) {
+}: ITestSuiteType): void {
   let ctx: MoonwallContext;
 
   if (
@@ -56,6 +88,11 @@ export function describeSuite({
 
   beforeAll(async function () {
     const globalConfig = await importJsonConfig();
+
+    if (!process.env.MOON_TEST_ENV) {
+      throw new error("MOON_TEST_ENV not set");
+    }
+
     ctx = await contextCreator(globalConfig, process.env.MOON_TEST_ENV);
 
     if (ctx.environment.foundationType === "dev") {
@@ -73,10 +110,20 @@ export function describeSuite({
     const context: GenericContext = {
       providers: {},
 
-      viemClient: <T extends ViemClientType>(subType: T): ViemApiMap[T] =>
-        subType === "public"
-          ? (ctx.providers.find((prov) => prov.type == "viemPublic").api as ViemApiMap[T])
-          : (ctx.providers.find((prov) => prov.type == "viemWallet").api as ViemApiMap[T]),
+      viemClient: <T extends ViemClientType>(subType: T): ViemApiMap[T] => {
+        let provider: ConnectedProvider | undefined;
+        if (subType === "public") {
+          provider = ctx.providers.find((prov) => prov.type == "viemPublic");
+        } else {
+          provider = ctx.providers.find((prov) => prov.type == "viemWallet");
+        }
+
+        if (!provider) {
+          throw new Error(`Provider of type '${subType}' not found`);
+        }
+
+        return provider.api as ViemApiMap[T];
+      },
       polkadotJs: (options?: { apiName?: string; type?: ProviderType }): ApiPromise =>
         options && options.apiName
           ? (ctx.providers.find((a) => a.name == options.apiName)!.api as ApiPromise)
@@ -178,7 +225,13 @@ export function describeSuite({
           ...context,
           waitBlock: async (blocksToWaitFor: number = 1, chain: string = "parachain") => {
             const ctx = MoonwallContext.getContext();
-            const api = ctx.providers.find((prov) => prov.name === chain).api as ApiPromise;
+            const provider = ctx.providers.find((prov) => prov.name === chain);
+
+            if (!!!provider) {
+              throw new Error(`Provider '${chain}' not found`);
+            }
+
+            const api = provider.api as ApiPromise;
             const currentBlockNumber = (
               await api.rpc.chain.getBlock()
             ).block.header.number.toNumber();
@@ -193,9 +246,14 @@ export function describeSuite({
               }
             }
           },
-          upgradeRuntime: async (options?: UpgradePreferences) => {
+          upgradeRuntime: async (options: UpgradePreferences = {}) => {
             const ctx = MoonwallContext.getContext();
-            const api = ctx.providers.find((prov) => prov.name === "parachain").api as ApiPromise;
+            const provider = ctx.providers.find((prov) => prov.name === "parachain");
+
+            if (!!!provider) {
+              throw new Error(`Provider 'parachain' not found`);
+            }
+            const api = provider.api as ApiPromise;
 
             const params: UpgradePreferences = {
               runtimeName: options.runtimeName || "moonbase",
@@ -258,7 +316,7 @@ export function describeSuite({
   });
 }
 
-export { GenericContext };
+// export { GenericContext };
 
 // TODO: Extend to include skipIf() and runIf()
 export type TestCaseModifier = "only" | "skip";

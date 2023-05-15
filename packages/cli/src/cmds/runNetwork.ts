@@ -190,12 +190,12 @@ const reportServicePorts = async () => {
       ))
     );
   } else if (config.foundation.type == "zombie") {
-    ctx.zombieNetwork.relay.forEach(({ wsUri, name }) => {
+    ctx.zombieNetwork!.relay.forEach(({ wsUri, name }) => {
       portsList.push({ name, port: wsUri.split("ws://127.0.0.1:")[1] });
     });
 
-    Object.keys(ctx.zombieNetwork.paras).forEach((paraId) => {
-      ctx.zombieNetwork.paras[paraId].nodes.forEach(({ wsUri, name }) => {
+    Object.keys(ctx.zombieNetwork!.paras).forEach((paraId) => {
+      ctx.zombieNetwork!.paras[paraId].nodes.forEach(({ wsUri, name }) => {
         portsList.push({ name, port: wsUri.split("ws://127.0.0.1:")[1] });
       });
     });
@@ -223,7 +223,7 @@ const resolveCommandChoice = async () => {
   });
 
   const ctx = await MoonwallContext.getContext().connectEnvironment();
-  const api = ctx.providers.find((a) => a.type == "moon" || a.type == "polkadotJs")
+  const api = ctx.providers.find((a) => a.type == "moon" || a.type == "polkadotJs")!
     .api as ApiPromise;
   const globalConfig = await importJsonConfig();
   const config = globalConfig.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
@@ -329,7 +329,7 @@ const resolveTailChoice = async () => {
     const onData = (chunk: any) => ui.log.write(chunk.toString());
 
     if (ctx.foundation == "zombie") {
-      const logPath = process.env.MOON_MONITORED_NODE;
+      const logPath = process.env.MOON_MONITORED_NODE!;
       let currentReadPosition = 0;
 
       const readLog = () => {

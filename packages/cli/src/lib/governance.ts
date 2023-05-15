@@ -8,9 +8,9 @@ import { blake2AsHex } from "@polkadot/util-crypto";
 import { alith, baltathar, charleth, dorothy } from "@moonwall/util";
 import { DevModeContext } from "../types/runner.js";
 
-export const COUNCIL_MEMBERS = [baltathar, charleth, dorothy];
+export const COUNCIL_MEMBERS: KeyringPair[] = [baltathar, charleth, dorothy];
 export const COUNCIL_THRESHOLD = Math.ceil((COUNCIL_MEMBERS.length * 2) / 3);
-export const TECHNICAL_COMMITTEE_MEMBERS = [alith, baltathar];
+export const TECHNICAL_COMMITTEE_MEMBERS: KeyringPair[] = [alith, baltathar];
 export const TECHNICAL_COMMITTEE_THRESHOLD = Math.ceil(
   (TECHNICAL_COMMITTEE_MEMBERS.length * 2) / 3
 );
@@ -88,10 +88,10 @@ export const execCouncilProposal = async <
     return proposalResult;
   }
 
-  expect(proposalResult.successful, `Council proposal refused: ${proposalResult?.error?.name}`).to
+  expect(proposalResult!.successful, `Council proposal refused: ${proposalResult?.error?.name}`).to
     .be.true;
-  const proposalHash = proposalResult.events
-    .find(({ event: { method } }) => method.toString() == "Proposed")
+  const proposalHash = proposalResult!.events
+    .find(({ event: { method } }) => method.toString() == "Proposed")!
     .event.data[2].toHex() as string;
 
   // Dorothy vote for this proposal and close it
@@ -150,11 +150,11 @@ export const proposeReferendaAndDeposit = async <
       .signAsync(alith)
   );
 
-  expect(proposalResult.successful, `Unable to post referenda: ${proposalResult?.error?.name}`).to
+  expect(proposalResult!.successful, `Unable to post referenda: ${proposalResult?.error?.name}`).to
     .be.true;
 
-  const refIndex = proposalResult.events
-    .find(({ event: { method } }) => method.toString() == "Submitted")
+  const refIndex = proposalResult!.events
+    .find(({ event: { method } }) => method.toString() == "Submitted")!
     .event.data[0].toString();
 
   // Place decision deposit
@@ -193,7 +193,7 @@ export const dispatchAsGeneralAdmin = async <
 export const maximizeConvictionVotingOf = async (
   context: DevModeContext,
   voters: KeyringPair[],
-  refIndex: Number
+  refIndex: number
 ) => {
   // We need to have enough to pay for fee
   const fee = (
@@ -252,10 +252,10 @@ export const execTechnicalCommitteeProposal = async <
     return proposalResult;
   }
 
-  expect(proposalResult.successful, `Council proposal refused: ${proposalResult?.error?.name}`).to
+  expect(proposalResult!.successful, `Council proposal refused: ${proposalResult?.error?.name}`).to
     .be.true;
-  const proposalHash = proposalResult.events
-    .find(({ event: { method } }) => method.toString() == "Proposed")
+  const proposalHash = proposalResult!.events
+    .find(({ event: { method } }) => method.toString() == "Proposed")!
     .event.data[2].toHex() as string;
 
   // Get proposal count
@@ -323,7 +323,7 @@ export const executeProposalWithCouncil = async (api: ApiPromise, encodedHash: s
   process.stdout.write(`✅\n`);
 
   process.stdout.write(`Waiting for referendum [${referendumNextIndex}] to be executed...`);
-  let referenda: PalletDemocracyReferendumInfo = null;
+  let referenda: PalletDemocracyReferendumInfo | undefined;
   while (!referenda) {
     referenda = (await api.query.democracy.referendumInfoOf.entries())
       .find(

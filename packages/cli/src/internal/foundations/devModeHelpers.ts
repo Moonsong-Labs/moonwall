@@ -1,7 +1,8 @@
+import "@moonbeam-network/api-augment";
+import "@polkadot/api-augment";
 import { BlockCreation, ExtrinsicCreation, extractError } from "../../lib/contextHelpers.js";
 import { ApiTypes, AugmentedEvent, SubmittableExtrinsic } from "@polkadot/api/types";
 import { customWeb3Request, alith, createAndFinalizeBlock } from "@moonwall/util";
-import { GenericContext } from "../../lib/runner-functions.js";
 import Debug from "debug";
 import { setTimeout } from "timers/promises";
 import { EventRecord } from "@polkadot/types/interfaces/types.js";
@@ -11,6 +12,7 @@ import { ApiPromise } from "@polkadot/api";
 import { assert } from "vitest";
 import chalk from "chalk";
 import { importJsonConfig } from "../../lib/configReader.js";
+import { GenericContext } from "../../types/runner.js";
 const debug = Debug("DevTest");
 
 export async function devForkToFinalizedHead(context: MoonwallContext) {
@@ -45,6 +47,17 @@ export async function createDevBlock<
     | Promise<string>,
   Calls extends Call | Call[]
 >(context: GenericContext, transactions?: Calls, options: BlockCreation = { allowFailures: true }) {
+  let containsViem: boolean;
+  let originalBlockNumber: bigint;
+
+  try {
+    const pubClient = context.viemClient("public");
+    containsViem = true;
+    originalBlockNumber = await pubClient.getBlockNumber();
+  } catch {
+    containsViem = false;
+  }
+
   const results: ({ type: "eth"; hash: string } | { type: "sub"; hash: string })[] = [];
 
   const api = context.polkadotJs();
@@ -129,9 +142,22 @@ export async function createDevBlock<
     };
   });
 
-  // Adds extra time to avoid empty transaction when querying it
-  if (results.find((r) => r.type == "eth")) {
-    await setTimeout(2);
+  // Avoiding race condition by ensuring ethereum block is created
+  if (containsViem) {
+    await new Promise((resolve, reject) => {
+      const pubClient = context.viemClient("public");
+
+      const unwatch = pubClient.watchBlockNumber({
+        onBlockNumber: (blockNum) => {
+          if (blockNum > originalBlockNumber) {
+            unwatch();
+            resolve("success");
+          }
+        },
+      });
+    });
+  } else if (results.find((r) => r.type == "eth")) {
+    await setTimeout(10);
   }
 
   const actualEvents = result.flatMap((resp) => resp.events);

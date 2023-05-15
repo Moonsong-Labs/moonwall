@@ -11,14 +11,15 @@
     "importHelpers": false,
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "removeComments": true,
+    "removeComments": false,
     "preserveConstEnums": true,
     "sourceMap": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "noEmit": true,
-    "noUncheckedIndexedAccess": true,
-    "strict": false //renable this oneday
+    "strict": true,
+    // TODO: Remove the following to eliminate tech-debt
+    "noImplicitAny": false
   },
   "include": ["./src/**/*.ts"],
   "exclude": ["./tests/**", "**/dist/**", "./packages/*/*.d.ts", "./packages/*/*.d.cts"]

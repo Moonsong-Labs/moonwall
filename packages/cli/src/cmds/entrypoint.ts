@@ -64,8 +64,14 @@ yargs(hideBin(process.argv))
         });
     },
     async (args) => {
-      await testCmd(args.envName.toString(), { testNamePattern: args.GrepTest });
-      process.exit(0);
+      if (args.envName) {
+        await testCmd(args.envName.toString(), { testNamePattern: args.GrepTest });
+        process.exit(0);
+      } else {
+        console.log("❌ No environment specified");
+        console.log(`👉 Run 'pnpm moonwall test --help' for more information`);
+        process.exit(1);
+      }
     }
   )
   .command(

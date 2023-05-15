@@ -64,17 +64,17 @@ const defaultConnections: ProviderConfig[] = [
 
 export class MoonwallContext {
   private static instance: MoonwallContext | undefined;
-  environment: MoonwallEnvironment;
+  environment!: MoonwallEnvironment;
   providers: ConnectedProvider[];
   nodes: ChildProcess[];
-  foundation?: FoundationType;
+  foundation: FoundationType;
   zombieNetwork?: Network;
   private _finalizedHead?: string;
   rtUpgradePath?: string;
   defaultEthTxnStyle?: EthTransactionType;
 
   constructor(config: MoonwallConfig) {
-    this.environment;
+    // this.environment;
     this.providers = [];
     this.nodes = [];
 
@@ -212,8 +212,8 @@ export class MoonwallContext {
       }
 
       const processIds = Object.values((network.client as any).processMap)
-        .filter((item) => item["pid"])
-        .map((process) => process["pid"]);
+        .filter((item) => item!["pid"])
+        .map((process) => process!["pid"]);
 
       const onProcessExit = () => {
         exec(`kill -9 ${processIds.join(" ")}`, (error) => {
@@ -228,7 +228,7 @@ export class MoonwallContext {
 
       process.env.MOON_MONITORED_NODE = zombieConfig.parachains[0].collator
         ? `${network.tmpDir}/${zombieConfig.parachains[0].collator.name}.log`
-        : `${network.tmpDir}/${zombieConfig.parachains[0].collators[0].name}.log`;
+        : `${network.tmpDir}/${zombieConfig.parachains[0].collators![0].name}.log`;
       this.zombieNetwork = network;
       return;
     }
@@ -242,6 +242,8 @@ export class MoonwallContext {
   public async connectEnvironment(): Promise<MoonwallContext> {
     const config = await importJsonConfig();
     const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
+    const MOON_PARA_WSS = process.env.MOON_PARA_WSS || "error";
+    const MOON_RELAY_WSS = process.env.MOON_RELAY_WSS || "error";
     // TODO: Explicitly communicate (DOCs and console) this is done automatically
     if (this.environment.foundationType == "zombie") {
       this.environment.providers = env.connections
@@ -250,22 +252,22 @@ export class MoonwallContext {
             {
               name: "w3",
               type: "web3",
-              endpoints: [process.env.MOON_PARA_WSS],
+              endpoints: [MOON_PARA_WSS],
             },
             {
               name: "eth",
               type: "ethers",
-              endpoints: [process.env.MOON_PARA_WSS],
+              endpoints: [MOON_PARA_WSS],
             },
             {
               name: "parachain",
               type: "moon",
-              endpoints: [process.env.MOON_PARA_WSS],
+              endpoints: [MOON_PARA_WSS],
             },
             {
               name: "relaychain",
               type: "polkadotJs",
-              endpoints: [process.env.MOON_RELAY_WSS],
+              endpoints: [MOON_RELAY_WSS],
             },
           ]);
     }
@@ -350,20 +352,17 @@ export class MoonwallContext {
     }
   }
 
-  public static getContext(
-    config?: MoonwallConfig,
-    force: boolean = false
-  ): MoonwallContext | undefined {
+  public static getContext(config?: MoonwallConfig, force: boolean = false): MoonwallContext {
     if (!MoonwallContext.instance || force) {
       // Retrieves the instance from the global context if it exists.
-      if (global.moonInstance && !force) {
-        MoonwallContext.instance = global.moonInstance;
-        return MoonwallContext.instance;
-      }
+      // if (global.moonInstance && !force) {
+      //   MoonwallContext.instance = global.moonInstance;
+      //   return MoonwallContext.instance;
+      // }
       if (!config) {
         console.error("❌ Config must be provided on Global Context instantiation");
-        // process.exit(2);
-        return undefined;
+        process.exit(2);
+        // return undefined;
       }
       MoonwallContext.instance = new MoonwallContext(config);
 
