@@ -91,7 +91,7 @@ export async function createBlock<
                 method == "Executed" &&
                 data[2].toString() == result.hash
             )
-            ?.phase?.asApplyExtrinsic?.toNumber()
+            ?.phase?.asApplyExtrinsic?.toNumber()!
         : blockData.block.extrinsics.findIndex((ext) => ext.hash.toHex() == result.hash);
     // We retrieve the events associated with the extrinsic
     const events = allRecords.filter(
@@ -146,14 +146,14 @@ export interface BlockCreationResponse<
     hash: string;
   };
   result: Call extends (string | SubmittableExtrinsic<ApiType>)[]
-    ? ExtrinsicCreation[]
-    : ExtrinsicCreation;
+    ? ExtrinsicCreation[] | null
+    : ExtrinsicCreation | null;
 }
 
 export interface ExtrinsicCreation {
-  extrinsic: GenericExtrinsic<AnyTuple>;
+  extrinsic: GenericExtrinsic<AnyTuple> | null;
   events: EventRecord[];
-  error: RegistryError;
+  error: RegistryError | undefined;
   successful: boolean;
   hash: string;
 }

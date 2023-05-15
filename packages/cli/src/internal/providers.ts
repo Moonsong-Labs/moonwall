@@ -202,10 +202,10 @@ export async function populateProviderInterface(
         greet: async () =>
           debug(
             `👋  Provider ${name} is connected to chain ` +
-              (await ethApi.provider.getNetwork()).chainId
+              (await ethApi.provider!.getNetwork()).chainId
           ),
         disconnect: async () => {
-          ethApi.provider.destroy();
+          ethApi.provider!.destroy();
         },
       };
 
@@ -220,7 +220,7 @@ export async function populateProviderInterface(
             `👋 Provider ${name} is connected to chain ` + (await web3Api.eth.getChainId())
           ),
         disconnect: async () => {
-          web3Api.currentProvider.disconnect();
+          web3Api.currentProvider!.disconnect();
         },
       };
     case "viemPublic":

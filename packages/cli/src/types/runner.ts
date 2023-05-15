@@ -239,7 +239,7 @@ export interface ReadOnlyContext extends GenericContext {
  * ZombieContext - Interface that extends from GenericContext and includes methods for upgrading runtime and waiting a certain number of blocks.
  */
 export interface ZombieContext extends GenericContext {
-  upgradeRuntime: (options?: UpgradePreferences) => Promise<void>;
+  upgradeRuntime: (options: UpgradePreferences) => Promise<void>;
   waitBlock: (blocksToWaitFor?: number, chain?: string) => Promise<void>;
 }
 

@@ -50,15 +50,15 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
     try {
       const code = fs
         .readFileSync(
-          await getRuntimeWasm(options.runtimeName, options.runtimeTag, options.localPath)
+          await getRuntimeWasm(options.runtimeName!, options.runtimeTag!, options.localPath)
         )
         .toString();
 
       log("Checking if upgrade is needed...");
       const existingCode = await api.rpc.state.getStorage(":code");
-      if (existingCode.toString() == code) {
+      if (existingCode!.toString() == code) {
         reject(
-          `Runtime upgrade with same code: ${existingCode.toString().slice(0, 20)} vs ${code
+          `Runtime upgrade with same code: ${existingCode!.toString().slice(0, 20)} vs ${code
             .toString()
             .slice(0, 20)}`
         );
@@ -83,10 +83,8 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
         if (api.query.preimage && preImageExists.isSome && preImageExists.unwrap().isRequested) {
           log(`Preimage ${encodedHash} already exists !\n`);
         } else if (
-          // TODO: remove support for democracy preimage support after 2000
           !api.query.preimage &&
-          democracyPreImageExists.isSome &&
-          democracyPreImageExists.unwrap().isAvailable
+          democracyPreImageExists
         ) {
           log(`Preimage ${encodedHash} already exists !\n`);
         } else {
@@ -172,15 +170,15 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
         if (!isInitialVersion) {
           const blockNumber = (await api.rpc.chain.getHeader()).number.toNumber();
           log(
-            `Complete ✅ [${version.implName}-${version.specVersion} ${existingCode
+            `Complete ✅ [${version.implName}-${version.specVersion} ${existingCode!
               .toString()
               .slice(0, 6)}...] [#${blockNumber}]`
           );
           unsub();
           const newCode = await api.rpc.state.getStorage(":code");
-          if (newCode.toString() != code) {
+          if (newCode!.toString() != code) {
             reject(
-              `Unexpected new code: ${newCode.toString().slice(0, 20)} vs ${code
+              `Unexpected new code: ${newCode!.toString().slice(0, 20)} vs ${code
                 .toString()
                 .slice(0, 20)}`
             );

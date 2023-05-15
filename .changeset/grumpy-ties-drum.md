@@ -7,3 +7,4 @@
 
 - Added viem helpers
 - Added JSDoc annotations
+- Added strict types to cli pkg

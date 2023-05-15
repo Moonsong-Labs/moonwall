@@ -88,10 +88,10 @@ export const execCouncilProposal = async <
     return proposalResult;
   }
 
-  expect(proposalResult.successful, `Council proposal refused: ${proposalResult?.error?.name}`).to
+  expect(proposalResult!.successful, `Council proposal refused: ${proposalResult?.error?.name}`).to
     .be.true;
-  const proposalHash = proposalResult.events
-    .find(({ event: { method } }) => method.toString() == "Proposed")
+  const proposalHash = proposalResult!.events
+    .find(({ event: { method } }) => method.toString() == "Proposed")!
     .event.data[2].toHex() as string;
 
   // Dorothy vote for this proposal and close it
@@ -150,11 +150,11 @@ export const proposeReferendaAndDeposit = async <
       .signAsync(alith)
   );
 
-  expect(proposalResult.successful, `Unable to post referenda: ${proposalResult?.error?.name}`).to
+  expect(proposalResult!.successful, `Unable to post referenda: ${proposalResult?.error?.name}`).to
     .be.true;
 
-  const refIndex = proposalResult.events
-    .find(({ event: { method } }) => method.toString() == "Submitted")
+  const refIndex = proposalResult!.events
+    .find(({ event: { method } }) => method.toString() == "Submitted")!
     .event.data[0].toString();
 
   // Place decision deposit
@@ -252,10 +252,10 @@ export const execTechnicalCommitteeProposal = async <
     return proposalResult;
   }
 
-  expect(proposalResult.successful, `Council proposal refused: ${proposalResult?.error?.name}`).to
+  expect(proposalResult!.successful, `Council proposal refused: ${proposalResult?.error?.name}`).to
     .be.true;
-  const proposalHash = proposalResult.events
-    .find(({ event: { method } }) => method.toString() == "Proposed")
+  const proposalHash = proposalResult!.events
+    .find(({ event: { method } }) => method.toString() == "Proposed")!
     .event.data[2].toHex() as string;
 
   // Get proposal count
@@ -323,7 +323,7 @@ export const executeProposalWithCouncil = async (api: ApiPromise, encodedHash: s
   process.stdout.write(`✅\n`);
 
   process.stdout.write(`Waiting for referendum [${referendumNextIndex}] to be executed...`);
-  let referenda: PalletDemocracyReferendumInfo = null;
+  let referenda: PalletDemocracyReferendumInfo | undefined;
   while (!referenda) {
     referenda = (await api.query.democracy.referendumInfoOf.entries())
       .find(

@@ -9,13 +9,39 @@ import chalk from "chalk";
 import { assert } from "vitest";
 
 export async function getWsFromConfig(providerName?: string): Promise<WsProvider> {
-  return providerName
-    ? MoonwallContext.getContext()
-        .environment.providers.find(({ name }) => name == providerName)
-        .ws()
-    : MoonwallContext.getContext()
-        .environment.providers.find(({ type }) => type == "moon" || type == "polkadotJs")
-        .ws();
+  if (providerName) {
+    const provider = MoonwallContext.getContext().environment.providers.find(
+      ({ name }) => name == providerName
+    );
+
+    if (typeof provider == "undefined") {
+      throw new Error(`Cannot find provider ${chalk.bgWhiteBright.blackBright(providerName)}`);
+    }
+
+    if (!!!provider.ws) {
+      throw new Error("Provider does not have an attached ws() property ");
+    }
+
+    return provider.ws();
+  } else {
+    const provider = MoonwallContext.getContext().environment.providers.find(
+      ({ type }) => type == "moon" || type == "polkadotJs"
+    );
+
+    if (typeof provider == "undefined") {
+      throw new Error(
+        `Cannot find providers of type ${chalk.bgWhiteBright.blackBright(
+          "moon"
+        )} or ${chalk.bgWhiteBright.blackBright("polkadotJs")}`
+      );
+    }
+
+    if (!!!provider.ws) {
+      throw new Error("Provider does not have an attached ws() property ");
+    }
+
+    return provider.ws();
+  }
 }
 
 export async function sendNewBlockAndCheck(

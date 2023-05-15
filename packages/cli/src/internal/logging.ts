@@ -3,8 +3,8 @@ const blockList = ["has multiple versions, ensure that there is only one install
 
 process.stderr.write = (
   chunk: string | Uint8Array,
-  encodingOrCallback?: BufferEncoding | ((error?: Error | null) => void),
-  callback?: (error?: Error | null) => void
+  encodingOrCallback?: BufferEncoding | ((error?: Error | undefined) => void),
+  callback?: (error?: Error | undefined) => void
 ): boolean => {
   let shouldWrite = true;
   if (typeof chunk === "string") {

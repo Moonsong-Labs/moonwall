@@ -12,6 +12,7 @@ import { fetchArtifact, getVersions } from "../internal/cmdFunctions/fetchArtifa
 import pkg from "../../package.json" assert { type: "json" };
 import { SemVer, gt, lt, lte } from "semver";
 import fetch from "node-fetch";
+import { AnyJson } from "@polkadot/types-codec/types/helpers.js";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
@@ -274,9 +275,22 @@ const resolveQuitChoice = async () => {
 const printIntro = async () => {
   const currentVersion = new SemVer(pkg.version);
 
-  const resp = await fetch("https://registry.npmjs.org/@moonwall/cli/latest");
-  const json = await resp.json();
-  const npmVersion = new SemVer(json["version"]);
+  interface NpmResponse {
+    version: string;
+  }
+
+  let npmVersion = "";
+  try {
+    const resp = await fetch("https://registry.npmjs.org/@moonwall/cli/latest");
+    if (!resp.ok) {
+      throw new Error("Network response was not ok");
+    }
+    const json = (await resp.json()) as NpmResponse;
+    npmVersion = new SemVer(json.version).version;
+  } catch (error) {
+    npmVersion = "unknown";
+    console.error(`Fetch Error: ${error}`);
+  }
 
   const logo =
     chalk.cyan(`\n                                                                                                                  
@@ -316,7 +330,7 @@ const printIntro = async () => {
   if (lt(currentVersion, npmVersion)) {
     process.stdout.write(
       chalk.bgCyan.white(
-        `                 MOONWALL   V${currentVersion.version}   (New version ${npmVersion.version} available!)             \n`
+        `                 MOONWALL   V${currentVersion.version}   (New version ${npmVersion} available!)             \n`
       )
     );
   } else {

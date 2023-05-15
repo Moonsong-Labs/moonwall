@@ -19,8 +19,7 @@
     "noEmit": true,
     "strict": true,
     // TODO: Remove the following to eliminate tech-debt
-    "noImplicitAny": false,
-    "strictNullChecks": false
+    "noImplicitAny": false
   },
   "include": ["./src/**/*.ts"],
   "exclude": ["./tests/**", "**/dist/**", "./packages/*/*.d.ts", "./packages/*/*.d.cts"]
