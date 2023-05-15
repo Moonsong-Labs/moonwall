@@ -352,10 +352,7 @@ export class MoonwallContext {
     }
   }
 
-  public static getContext(
-    config?: MoonwallConfig,
-    force: boolean = false
-  ): MoonwallContext  {
+  public static getContext(config?: MoonwallConfig, force: boolean = false): MoonwallContext {
     if (!MoonwallContext.instance || force) {
       // Retrieves the instance from the global context if it exists.
       // if (global.moonInstance && !force) {

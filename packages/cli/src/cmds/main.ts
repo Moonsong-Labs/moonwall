@@ -279,16 +279,19 @@ const printIntro = async () => {
     version: string;
   }
 
-  let npmVersion = "";
+  interface GithubResponse {
+    tag_name: `${string}@${string}`;
+  }
+
+  let remoteVersion = "";
   try {
-    const resp = await fetch("https://registry.npmjs.org/@moonwall/cli/latest");
-    if (!resp.ok) {
-      throw new Error("Network response was not ok");
-    }
-    const json = (await resp.json()) as NpmResponse;
-    npmVersion = new SemVer(json.version).version;
+    const url = "https://api.github.com/repos/moonsong-labs/moonwall/releases";
+    // const url = "https://registry.npmjs.org/@moonwall/cli/latest"
+    const resp = await fetch(url);
+    const json = (await resp.json()) as GithubResponse[];
+    remoteVersion = json.find((a) => a.tag_name.includes("@moonwall/cli@"))!.tag_name.split("@")[2];
   } catch (error) {
-    npmVersion = "unknown";
+    remoteVersion = "unknown";
     console.error(`Fetch Error: ${error}`);
   }
 
@@ -327,10 +330,10 @@ const printIntro = async () => {
     )
   );
 
-  if (lt(currentVersion, npmVersion)) {
+  if (remoteVersion !== "unknown" && lt(currentVersion, new SemVer(remoteVersion))) {
     process.stdout.write(
       chalk.bgCyan.white(
-        `                 MOONWALL   V${currentVersion.version}   (New version ${npmVersion} available!)             \n`
+        `                 MOONWALL   V${currentVersion.version}   (New version ${remoteVersion} available!)             \n`
       )
     );
   } else {

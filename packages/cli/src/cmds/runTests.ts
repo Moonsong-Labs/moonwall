@@ -37,7 +37,6 @@ export async function executeTests(env: Environment, additionalArgs?: {}) {
 
   if (env.foundation.type === "read_only") {
     try {
-      
       if (!process.env.MOON_TEST_ENV) {
         throw new Error("MOON_TEST_ENV not set");
       }

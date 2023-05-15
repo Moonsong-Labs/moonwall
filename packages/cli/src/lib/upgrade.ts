@@ -82,10 +82,7 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
 
         if (api.query.preimage && preImageExists.isSome && preImageExists.unwrap().isRequested) {
           log(`Preimage ${encodedHash} already exists !\n`);
-        } else if (
-          !api.query.preimage &&
-          democracyPreImageExists
-        ) {
+        } else if (!api.query.preimage && democracyPreImageExists) {
           log(`Preimage ${encodedHash} already exists !\n`);
         } else {
           log(

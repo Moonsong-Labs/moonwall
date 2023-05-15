@@ -33,7 +33,7 @@ export async function downloader(url: string, outputPath: string): Promise<void>
   const response = await fetch(url);
 
   if (!response.body) {
-    throw new Error('No response body');
+    throw new Error("No response body");
   }
 
   const readStream = response.body;
