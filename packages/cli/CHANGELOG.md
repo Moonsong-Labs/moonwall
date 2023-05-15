@@ -1,5 +1,19 @@
 # @moonwall/cli
 
+## 0.5.19
+
+### Patch Changes
+
+- b2eaefd: ## Viem helpers
+
+  - Added viem helpers
+  - Added JSDoc annotations
+  - Added strict types to cli pkg
+  - [#119](https://github.com/Moonsong-Labs/moonwall/issues/119)
+
+- Updated dependencies [b2eaefd]
+  - @moonwall/util@0.5.19
+
 ## 0.5.18
 
 ### Patch Changes
