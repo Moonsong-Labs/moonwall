@@ -92,12 +92,12 @@
     "@polkadot/api": "^10.7.1",
     "@polkadot/api-augment": "^10.7.1",
     "@polkadot/api-derive": "^10.7.1",
-    "@polkadot/keyring": "^12.1.2",
+    "@polkadot/keyring": "^12.2.1",
     "@polkadot/types": "^10.7.1",
     "@polkadot/types-codec": "^10.7.1",
     "@polkadot/util": "^12.1.2",
     "ethers": "^6.3.0",
-    "viem": "^0.3.24",
+    "viem": "^0.3.26",
     "web3": "4.0.1-rc.0",
     "web3-providers-ws": "4.0.1-rc.0"
   },
@@ -107,7 +107,7 @@
     "@polkadot/api": "^10.7.1",
     "@polkadot/api-augment": "^10.7.1",
     "@polkadot/api-derive": "^10.7.1",
-    "@polkadot/keyring": "^12.1.2",
+    "@polkadot/keyring": "^12.2.1",
     "@polkadot/types": "^10.7.1",
     "@polkadot/types-codec": "^10.7.1",
     "@polkadot/util": "^12.1.2",
@@ -116,19 +116,9 @@
     "regenerator-runtime": "^0.13.11",
     "typescript": "^5.0.4",
     "typescript-json-schema": "^0.55.0",
-    "viem": "^0.3.24",
+    "viem": "^0.3.26",
     "web3": "4.0.1-rc.0",
     "web3-providers-ws": "4.0.1-rc.0"
-  },
-  "pnpm": {
-    "overrides": {
-      "@moonwall/util": "workspace:*",
-      "@polkadot/rpc-provider": "$@moonwall/util",
-      "@polkadot/util": "$@moonwall/util",
-      "@polkadot/keyring": "$@moonwall/util",
-      "@polkadot/api": "$@moonwall/util",
-      "@polkadot/types": "$@moonwall/util"
-    }
   },
   "publishConfig": {
     "access": "public"

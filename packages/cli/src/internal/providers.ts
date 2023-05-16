@@ -20,6 +20,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import { moonbeam, moonbaseAlpha, moonriver, Chain } from "viem/chains";
 import { PublicViem, WalletViem } from "../types/runner.js";
 import { getDevChain } from "../lib/viem.js";
+import { ApiOptions } from "@polkadot/api/types/index.js";
 const debug = Debug("global:providers");
 
 export function prepareProviders(providerConfigs: ProviderConfig[]): MoonwallProvider[] {
@@ -68,7 +69,7 @@ export function prepareProviders(providerConfigs: ProviderConfig[]): MoonwallPro
               options["rpc"] = { ...rpc };
             }
 
-            const moonApi = await ApiPromise.create(options);
+            const moonApi = await ApiPromise.create(options as ApiOptions);
             await moonApi.isReady;
             return moonApi;
           },

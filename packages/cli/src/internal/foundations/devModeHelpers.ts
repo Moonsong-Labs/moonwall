@@ -68,8 +68,13 @@ export async function createDevBlock<
       // Ethereum
       results.push({
         type: "eth",
-        hash: ((await customWeb3Request(context.web3(), "eth_sendRawTransaction", [call])) as any)
-          .result,
+        hash: containsViem
+          ? (await context
+              .viemClient("wallet")
+              // @ts-expect-error - Remove when viem type is fixed
+              .request({ method: "eth_sendRawTransaction", params: [call] })).result
+          : ((await customWeb3Request(context.web3(), "eth_sendRawTransaction", [call])) as any)
+              .result,
       });
     } else if (call.isSigned) {
       const tx = api.tx(call);
@@ -147,6 +152,8 @@ export async function createDevBlock<
     await new Promise((resolve, reject) => {
       const pubClient = context.viemClient("public");
 
+
+      // this is too slow, change to a loop
       const unwatch = pubClient.watchBlockNumber({
         onBlockNumber: (blockNum) => {
           if (blockNum > originalBlockNumber) {
