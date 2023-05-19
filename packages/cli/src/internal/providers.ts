@@ -7,6 +7,7 @@ import Debug from "debug";
 import { ProviderConfig, ProviderType } from "../types/config.js";
 import { MoonwallProvider } from "../types/context.js";
 import chalk from "chalk";
+import { Abi } from "abitype";
 import { ALITH_PRIVATE_KEY } from "@moonwall/util";
 import {
   PublicClient,
@@ -152,7 +153,13 @@ export async function populateProviderInterface(
     | Promise<PublicViem>
     | Promise<WalletViem>
     | void
-) {
+): Promise<{
+  name: string;
+  api: any;
+  type: ProviderType;
+  greet: () => void | Promise<void> | { rtVersion: number; rtName: string };
+  disconnect: () => void | Promise<void> | any
+}> {
   switch (type) {
     case "polkadotJs":
       const pjsApi = (await connect()) as ApiPromise;
@@ -205,9 +212,9 @@ export async function populateProviderInterface(
             `👋  Provider ${name} is connected to chain ` +
               (await ethApi.provider!.getNetwork()).chainId
           ),
-        disconnect: async () => {
-          ethApi.provider!.destroy();
-        },
+        disconnect: async () => 
+          ethApi.provider!.destroy()
+        
       };
 
     case "web3":
@@ -253,7 +260,6 @@ export async function populateProviderInterface(
           //TODO: add disconnect
         },
       };
-    //TODO ADD VIEM
 
     default:
       throw new Error("UNKNOWN TYPE");

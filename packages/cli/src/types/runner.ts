@@ -21,6 +21,7 @@ import {
   webSocket,
 } from "viem";
 import { Chain, moonbaseAlpha, moonbeam } from "viem/chains";
+import { CallType } from "../internal/foundations/devModeHelpers.js";
 
 /**
  * @name CustomTest
@@ -261,18 +262,8 @@ export interface ChopsticksContext extends GenericContext {
  * DevModeContext - Interface that extends from GenericContext and includes a method for creating a block.
  */
 export interface DevModeContext extends GenericContext {
-  createBlock<
-    ApiType extends ApiTypes,
-    Call extends
-      | SubmittableExtrinsic<ApiType>
-      | Promise<SubmittableExtrinsic<ApiType>>
-      | string
-      | Promise<string>,
-    Calls extends Call | Call[]
-  >(
+  createBlock<ApiType extends ApiTypes, Calls extends CallType<ApiType> | CallType<ApiType>[]>(
     transactions?: Calls,
     options?: BlockCreation
-  ): Promise<
-    BlockCreationResponse<ApiType, Calls extends Call[] ? Awaited<Call>[] : Awaited<Call>>
-  >;
+  ): Promise<BlockCreationResponse<ApiType, Calls>>;
 }

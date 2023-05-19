@@ -17,7 +17,7 @@ import {
 } from "../types/runner.js";
 import { MoonwallContext, contextCreator } from "./globalContext.js";
 import { BlockCreation, ChopsticksBlockCreation } from "./contextHelpers.js";
-import { createDevBlock, devForkToFinalizedHead } from "../internal/foundations/devModeHelpers.js";
+import { CallType, createDevBlock, devForkToFinalizedHead } from "../internal/foundations/devModeHelpers.js";
 import {
   chopForkToFinalizedHead,
   createChopsticksBlock,
@@ -185,13 +185,8 @@ export function describeSuite({
         context: {
           ...context,
           createBlock: async <
-            ApiType extends ApiTypes,
-            Call extends
-              | SubmittableExtrinsic<ApiType>
-              | Promise<SubmittableExtrinsic<ApiType>>
-              | string
-              | Promise<string>,
-            Calls extends Call | Call[]
+          ApiType extends ApiTypes,
+          Calls extends CallType<ApiType> | CallType<ApiType>[]
           >(
             transactions?: Calls,
             options: BlockCreation = {}

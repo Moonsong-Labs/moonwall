@@ -29,6 +29,7 @@ import {
 import { bytecode, tokenAbi } from "../_test_data/token.js";
 import { privateKeyToAccount } from "viem/accounts";
 import { localhost } from "viem/chains";
+import { stat } from "fs";
 
 describeSuite({
   id: "D01",
@@ -183,7 +184,7 @@ describeSuite({
       test: async function () {
         const { status, contractAddress } = await deployViemContract(context, tokenAbi, bytecode);
         expect(status).to.be.toStrictEqual("success");
-        expect(contractAddress.length).to.be.greaterThan(0);
+        expect(contractAddress!.length).to.be.greaterThan(0);
       },
     });
 
@@ -191,15 +192,10 @@ describeSuite({
       id: "T09",
       title: "It can write-interact with a contract",
       test: async function () {
-        const hash = await context.viemClient("wallet").deployContract({
-          abi: tokenAbi,
-          bytecode,
+        const { contractAddress, status, logs, hash } = await deployViemContract(context, tokenAbi, bytecode, {
+          gas: 10000000n,
         });
-        await context.createBlock();
-
-        const { contractAddress } = await deployViemContract(context, tokenAbi, bytecode);
-        log(`Deployed contract at ${contractAddress}`);
-
+  
         const contractInstance = getContract({
           abi: tokenAbi,
           address: contractAddress!,
@@ -223,6 +219,7 @@ describeSuite({
         expect(balBefore < balanceAfter).to.be.true;
       },
     });
+
     it({
       id: "T10",
       title: "It can sign a message",

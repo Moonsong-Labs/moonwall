@@ -12,19 +12,6 @@ export interface BlockCreation {
   finalize?: boolean;
 }
 
-export interface BlockCreationResponse<
-  ApiType extends ApiTypes,
-  Call extends SubmittableExtrinsic<ApiType> | string | (SubmittableExtrinsic<ApiType> | string)[]
-> {
-  block: {
-    duration: number;
-    hash: string;
-  };
-  result: Call extends (string | SubmittableExtrinsic<ApiType>)[]
-    ? ExtrinsicCreation[]
-    : ExtrinsicCreation;
-}
-
 export interface ExtrinsicCreation {
   extrinsic: GenericExtrinsic<AnyTuple>;
   events: EventRecord[];

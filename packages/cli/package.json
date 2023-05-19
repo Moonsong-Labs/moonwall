@@ -62,9 +62,10 @@
     "@acala-network/chopsticks": "^0.6.4",
     "@types/cli-progress": "^3.11.0",
     "@types/debug": "^4.1.7",
-    "@types/node": "^18.16.3",
+    "@types/node": "^18.16.13",
     "@types/yargs": "^17.0.24",
     "@zombienet/orchestrator": "^0.0.38",
+    "abitype": "^0.8.4",
     "bottleneck": "^2.19.5",
     "chalk": "^5.2.0",
     "clear": "^0.1.0",
@@ -81,7 +82,7 @@
     "superagent": "^8.0.9",
     "ts-node": "^10.9.1",
     "tsup": "^6.7.0",
-    "vitest": "^0.31.0",
+    "vitest": "^0.31.1",
     "ws": "^8.13.0",
     "yaml": "^2.2.2",
     "yargs": "^17.7.2"
@@ -97,7 +98,7 @@
     "@polkadot/types-codec": "^10.7.1",
     "@polkadot/util": "^12.1.2",
     "ethers": "^6.3.0",
-    "viem": "^0.3.26",
+    "viem": "^0.3.31",
     "web3": "4.0.1-rc.0",
     "web3-providers-ws": "4.0.1-rc.0"
   },
@@ -116,7 +117,7 @@
     "regenerator-runtime": "^0.13.11",
     "typescript": "^5.0.4",
     "typescript-json-schema": "^0.55.0",
-    "viem": "^0.3.26",
+    "viem": "^0.3.31",
     "web3": "4.0.1-rc.0",
     "web3-providers-ws": "4.0.1-rc.0"
   },

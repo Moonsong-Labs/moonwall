@@ -1,8 +1,10 @@
-import { createWalletClient, http } from "viem";
+import { Account, DeployContractParameters, createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { Chain, mainnet } from "viem/chains";
 import { DevModeContext } from "../types/runner.js";
 import { ALITH_PRIVATE_KEY } from "@moonwall/util";
+import { Abi } from "abitype";
+import { EthTransactionType } from "../types/config.js";
 
 /**
  * @name getDevChain
@@ -43,6 +45,22 @@ export async function getDevChain(url: string) {
   } as const satisfies Chain;
 }
 
+export type ContractDeploymentOptions = DeepPartial<
+  Omit<DeployContractParameters, "abi" | "bytecode" | "privateKey">
+> & {
+  privateKey?: `0x${string}`;
+  args?: any[];
+  txnType?: EthTransactionType;
+};
+
+export type DeepPartial<T> = {
+  [P in keyof T]?: T[P] extends (infer U)[]
+    ? DeepPartial<U>[]
+    : T[P] extends ReadonlyArray<infer U>
+    ? ReadonlyArray<DeepPartial<U>>
+    : DeepPartial<T[P]>;
+};
+
 /**
  * @name deployViemContract
  * @description This function deploys a contract to the Moonbeam development chain.
@@ -61,13 +79,21 @@ export async function getDevChain(url: string) {
  * @property status - The status of the contract deployment transaction.
  * @property logs - Any logs produced during the contract deployment transaction.
  */
-export async function deployViemContract(
+export async function deployViemContract<TOptions extends ContractDeploymentOptions>( // TODO: Make this generic
   context: DevModeContext,
   abi: any[],
   bytecode: `0x${string}`,
-  privateKey: `0x${string}` = ALITH_PRIVATE_KEY
+  options?: TOptions
 ) {
+  const isLegacy = options?.txnType === "legacy" || options?.txnType === undefined;
+  const isEIP1559 = options?.txnType === "eip1559";
+  const isEIP2930 = options?.txnType === "eip2930";
+
   const url = context.viemClient("public").transport.url;
+
+  const { privateKey = ALITH_PRIVATE_KEY, ...rest } = options || {};
+  const blob = { ...rest, abi, bytecode, account: privateKeyToAccount(privateKey) };
+
   const account = privateKeyToAccount(ALITH_PRIVATE_KEY);
   const client = createWalletClient({
     transport: http(url),
@@ -75,12 +101,28 @@ export async function deployViemContract(
     chain: await getDevChain(url),
   });
 
-  // @ts-expect-error
-  const hash = await client.deployContract({
-    abi,
-    bytecode,
-    account: privateKeyToAccount(privateKey),
-  });
+  // Enable when Viem allows it
+  // switch (true) {
+  //   case isLegacy:
+  //     blob["gasPrice"] = options?.gasPrice || 10_000_000_000n;
+  //     blob["gas"] = options?.gasLimit || 22318;
+  //     break;
+  //   case isEIP1559:
+  //     blob["accessList"] = options?.accessList || [];
+  //     blob["maxFeePerGas"] = options?.maxFeePerGas || 10_000_000_000n;
+  //     blob["maxPriorityFeePerGas"] = options?.maxPriorityFeePerGas || 0n;
+  //     blob["gasLimit"] = options?.gasLimit || 22318;
+  //     break;
+  //   case isEIP2930:
+  //     blob["gasPrice"] = options?.gasPrice || 10_000_000_000n;
+  //     blob["gasLimit"] = options?.gasLimit || 22318n;
+  //     blob["accessList"] = options?.accessList || [];
+  //     break;
+  //   default:
+  //     throw new Error("Invalid transaction type, undpate deployViemContract function");
+  // }
+
+  const hash = await client.deployContract(blob as DeployContractParameters);
 
   await context.createBlock();
 
@@ -88,5 +130,5 @@ export async function deployViemContract(
     .viemClient("public")
     .getTransactionReceipt({ hash });
 
-  return { contractAddress, status, logs };
+  return { contractAddress, status, logs, hash };
 }

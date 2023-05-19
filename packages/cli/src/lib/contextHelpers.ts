@@ -9,116 +9,117 @@ import { Web3 } from "web3";
 import { MoonwallContext } from "./globalContext.js";
 import { assert } from "vitest";
 import Debug, { Debugger } from "debug";
+import { CallType } from "../internal/foundations/devModeHelpers.js";
 const debug = Debug("context");
 
-export async function createBlock<
-  ApiType extends ApiTypes,
-  Call extends
-    | SubmittableExtrinsic<ApiType>
-    | Promise<SubmittableExtrinsic<ApiType>>
-    | string
-    | Promise<string>,
-  Calls extends Call | Call[]
->(
-  w3Api: Web3,
-  pjsApi: ApiPromise,
-  transactions?: Calls,
-  options: BlockCreation = {}
-): Promise<BlockCreationResponse<ApiType, Calls extends Call[] ? Awaited<Call>[] : Awaited<Call>>> {
-  assert(
-    MoonwallContext.getContext().foundation == "dev",
-    "createBlock should only be used on DevMode foundations"
-  );
-  const results: ({ type: "eth"; hash: string } | { type: "sub"; hash: string })[] = [];
-  const txs =
-    transactions == undefined ? [] : Array.isArray(transactions) ? transactions : [transactions];
-  for await (const call of txs) {
-    if (typeof call == "string") {
-      // Ethereum
-      results.push({
-        type: "eth",
-        hash: ((await customWeb3Request(w3Api, "eth_sendRawTransaction", [call])) as any).result,
-      });
-    } else if (call.isSigned) {
-      const tx = pjsApi.tx(call);
-      debug(
-        `- Signed: ${tx.method.section}.${tx.method.method}(${tx.args
-          .map((d) => d.toHuman())
-          .join("; ")}) [ nonce: ${tx.nonce}]`
-      );
-      results.push({
-        type: "sub",
-        hash: (await call.send()).toString(),
-      });
-    } else {
-      const tx = pjsApi.tx(call);
-      debug(
-        `- Unsigned: ${tx.method.section}.${tx.method.method}(${tx.args
-          .map((d) => d.toHuman())
-          .join("; ")}) [ nonce: ${tx.nonce}]`
-      );
-      results.push({
-        type: "sub",
-        hash: (await call.signAndSend(alith)).toString(),
-      });
-    }
-  }
+// export async function createBlock<
+//   ApiType extends ApiTypes,
+//   Call extends
+//     | SubmittableExtrinsic<ApiType>
+//     | Promise<SubmittableExtrinsic<ApiType>>
+//     | string
+//     | Promise<string>,
+//   Calls extends Call | Call[]
+// >(
+//   w3Api: Web3,
+//   pjsApi: ApiPromise,
+//   transactions?: Calls,
+//   options: BlockCreation = {}
+// ): Promise<BlockCreationResponse> {
+//   assert(
+//     MoonwallContext.getContext().foundation == "dev",
+//     "createBlock should only be used on DevMode foundations"
+//   );
+//   const results: ({ type: "eth"; hash: string } | { type: "sub"; hash: string })[] = [];
+//   const txs =
+//     transactions == undefined ? [] : Array.isArray(transactions) ? transactions : [transactions];
+//   for await (const call of txs) {
+//     if (typeof call == "string") {
+//       // Ethereum
+//       results.push({
+//         type: "eth",
+//         hash: ((await customWeb3Request(w3Api, "eth_sendRawTransaction", [call])) as any).result,
+//       });
+//     } else if (call.isSigned) {
+//       const tx = pjsApi.tx(call);
+//       debug(
+//         `- Signed: ${tx.method.section}.${tx.method.method}(${tx.args
+//           .map((d) => d.toHuman())
+//           .join("; ")}) [ nonce: ${tx.nonce}]`
+//       );
+//       results.push({
+//         type: "sub",
+//         hash: (await call.send()).toString(),
+//       });
+//     } else {
+//       const tx = pjsApi.tx(call);
+//       debug(
+//         `- Unsigned: ${tx.method.section}.${tx.method.method}(${tx.args
+//           .map((d) => d.toHuman())
+//           .join("; ")}) [ nonce: ${tx.nonce}]`
+//       );
+//       results.push({
+//         type: "sub",
+//         hash: (await call.signAndSend(alith)).toString(),
+//       });
+//     }
+//   }
 
-  const { parentHash, finalize } = options;
-  const blockResult = await createAndFinalizeBlock(pjsApi, parentHash, finalize);
+//   const { parentHash, finalize } = options;
+//   const blockResult = await createAndFinalizeBlock(pjsApi, parentHash, finalize);
 
-  // No need to extract events if no transactions
-  if (results.length == 0) {
-    return {
-      block: blockResult,
-      result: null,
-    };
-  }
+//   // No need to extract events if no transactions
+//   if (results.length == 0) {
+//     return {
+//       block: blockResult,
+//       result: undefined,
+//     };
+//   }
 
-  // We retrieve the events for that block
-  const allRecords: EventRecord[] = await (await pjsApi.at(blockResult.hash)).query.system.events();
-  // We retrieve the block (including the extrinsics)
-  const blockData = await pjsApi.rpc.chain.getBlock(blockResult.hash);
+//   // We retrieve the events for that block
+//   const allRecords: EventRecord[] = await (await pjsApi.at(blockResult.hash)).query.system.events();
+//   // We retrieve the block (including the extrinsics)
+//   const blockData = await pjsApi.rpc.chain.getBlock(blockResult.hash);
 
-  const result: ExtrinsicCreation[] = results.map((result) => {
-    const extrinsicIndex =
-      result.type == "eth"
-        ? allRecords
-            .find(
-              ({ phase, event: { section, method, data } }) =>
-                phase.isApplyExtrinsic &&
-                section == "ethereum" &&
-                method == "Executed" &&
-                data[2].toString() == result.hash
-            )
-            ?.phase?.asApplyExtrinsic?.toNumber()!
-        : blockData.block.extrinsics.findIndex((ext) => ext.hash.toHex() == result.hash);
-    // We retrieve the events associated with the extrinsic
-    const events = allRecords.filter(
-      ({ phase }) => phase.isApplyExtrinsic && phase.asApplyExtrinsic.toNumber() === extrinsicIndex
-    );
-    const failure = extractError(events);
-    return {
-      extrinsic: extrinsicIndex >= 0 ? blockData.block.extrinsics[extrinsicIndex] : null,
-      events,
-      error:
-        failure &&
-        ((failure.isModule && pjsApi.registry.findMetaError(failure.asModule)) ||
-          ({ name: failure.toString() } as RegistryError)),
-      successful: extrinsicIndex !== undefined && !failure,
-      hash: result.hash,
-    };
-  });
+//   const result: ExtrinsicCreation[] = results.map((result) => {
+//     const extrinsicIndex =
+//       result.type == "eth"
+//         ? allRecords
+//             .find(
+//               ({ phase, event: { section, method, data } }) =>
+//                 phase.isApplyExtrinsic &&
+//                 section == "ethereum" &&
+//                 method == "Executed" &&
+//                 data[2].toString() == result.hash
+//             )
+//             ?.phase?.asApplyExtrinsic?.toNumber()!
+//         : blockData.block.extrinsics.findIndex((ext) => ext.hash.toHex() == result.hash);
+//     // We retrieve the events associated with the extrinsic
+//     const events = allRecords.filter(
+//       ({ phase }) => phase.isApplyExtrinsic && phase.asApplyExtrinsic.toNumber() === extrinsicIndex
+//     );
+//     const failure = extractError(events);
+//     return {
+//       extrinsic: extrinsicIndex >= 0 ? blockData.block.extrinsics[extrinsicIndex] : null,
+//       events,
+//       error:
+//         failure &&
+//         ((failure.isModule && pjsApi.registry.findMetaError(failure.asModule)) ||
+//           ({ name: failure.toString() } as RegistryError)),
+//       successful: extrinsicIndex !== undefined && !failure,
+//       hash: result.hash,
+//     };
+//   });
 
-  // Adds extra time to avoid empty transaction when querying it
-  if (results.find((r) => r.type == "eth")) {
-    await new Promise((resolve) => setTimeout(resolve, 2));
-  }
-  return {
-    block: blockResult,
-    result: Array.isArray(transactions) ? result : (result[0] as any),
-  };
-}
+//   // Adds extra time to avoid empty transaction when querying it
+//   if (results.find((r) => r.type == "eth")) {
+//     await new Promise((resolve) => setTimeout(resolve, 2));
+//   }
+//   return {
+//     block: blockResult,
+//     result: Array.isArray(transactions) ? result : (result[0] as any),
+//   };
+// }
 
 export interface ChopsticksBlockCreation {
   providerName?: string;
@@ -138,17 +139,25 @@ export interface BlockCreation {
 }
 
 export interface BlockCreationResponse<
-  ApiType extends ApiTypes,
-  Call extends SubmittableExtrinsic<ApiType> | string | (SubmittableExtrinsic<ApiType> | string)[]
+ApiType extends ApiTypes,
+Calls extends CallType<ApiType> | CallType<ApiType>[]
 > {
   block: {
     duration: number;
     hash: string;
   };
-  result: Call extends (string | SubmittableExtrinsic<ApiType>)[]
-    ? ExtrinsicCreation[] | null
-    : ExtrinsicCreation | null;
+  result?: Calls extends (string | SubmittableExtrinsic<ApiType>)[]
+    ? (ExtrinsicCreation)[]
+    : ExtrinsicCreation ;
 }
+
+// export interface BlockCreationResponse {
+//   block: {
+//     duration: number;
+//     hash: string;
+//   };
+//   result?: ExtrinsicCreation[]| ExtrinsicCreation;
+// }
 
 export interface ExtrinsicCreation {
   extrinsic: GenericExtrinsic<AnyTuple> | null;

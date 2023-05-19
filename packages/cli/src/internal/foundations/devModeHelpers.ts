@@ -1,6 +1,6 @@
 import "@moonbeam-network/api-augment";
 import "@polkadot/api-augment";
-import { BlockCreation, ExtrinsicCreation, extractError } from "../../lib/contextHelpers.js";
+import { BlockCreation, BlockCreationResponse, ExtrinsicCreation, extractError } from "../../lib/contextHelpers.js";
 import { ApiTypes, AugmentedEvent, SubmittableExtrinsic } from "@polkadot/api/types";
 import { customWeb3Request, alith, createAndFinalizeBlock } from "@moonwall/util";
 import Debug from "debug";
@@ -38,25 +38,43 @@ export async function getDevProviderPath() {
     : `http://127.0.0.1:${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`;
 }
 
+export type CreatedBlockResult = {
+  block: {
+    duration: number;
+    hash: string;
+  };
+  result: ExtrinsicCreation | ExtrinsicCreation[] | null;
+};
+
+export type CallType<TApi extends ApiTypes> = 
+  | SubmittableExtrinsic<TApi>
+  | Promise<SubmittableExtrinsic<TApi>>
+  | `0x${string}`
+  | Promise<string>
+
+
 export async function createDevBlock<
   ApiType extends ApiTypes,
-  Call extends
-    | SubmittableExtrinsic<ApiType>
-    | Promise<SubmittableExtrinsic<ApiType>>
-    | string
-    | Promise<string>,
-  Calls extends Call | Call[]
->(context: GenericContext, transactions?: Calls, options: BlockCreation = { allowFailures: true }) {
-  let containsViem: boolean;
+  Calls extends CallType<ApiType> | CallType<ApiType>[]
+>(
+  context: GenericContext,
+  transactions?: Calls,
+  options: BlockCreation = { allowFailures: true }
+)
+{
   let originalBlockNumber: bigint;
 
-  try {
-    const pubClient = context.viemClient("public");
-    containsViem = true;
-    originalBlockNumber = await pubClient.getBlockNumber();
-  } catch {
-    containsViem = false;
+  const containsViem =
+    MoonwallContext.getContext().providers.find((prov) => prov.type == "viemPublic") &&
+    !!!context.viemClient("public")
+      ? true
+      : false;
+
+  if (containsViem) {
+    originalBlockNumber = await context.viemClient("public").getBlockNumber();
   }
+
+  // const containsViem = context.viemClient("public");
 
   const results: ({ type: "eth"; hash: string } | { type: "sub"; hash: string })[] = [];
 
@@ -69,10 +87,12 @@ export async function createDevBlock<
       results.push({
         type: "eth",
         hash: containsViem
-          ? (await context
-              .viemClient("wallet")
-              // @ts-expect-error - Remove when viem type is fixed
-              .request({ method: "eth_sendRawTransaction", params: [call] })).result
+          ? (
+              (await context.viemClient("public").request({
+                method: "eth_sendRawTransaction",
+                params: [call as `0x${string}`],
+              })) as any
+            ).result
           : ((await customWeb3Request(context.web3(), "eth_sendRawTransaction", [call])) as any)
               .result,
       });
@@ -107,8 +127,7 @@ export async function createDevBlock<
   // No need to extract events if no transactions
   if (results.length == 0) {
     return {
-      block: blockResult,
-      result: null,
+      block: blockResult
     };
   }
 
@@ -148,21 +167,15 @@ export async function createDevBlock<
   });
 
   // Avoiding race condition by ensuring ethereum block is created
-  if (containsViem) {
-    await new Promise((resolve, reject) => {
-      const pubClient = context.viemClient("public");
-
-
-      // this is too slow, change to a loop
-      const unwatch = pubClient.watchBlockNumber({
-        onBlockNumber: (blockNum) => {
-          if (blockNum > originalBlockNumber) {
-            unwatch();
-            resolve("success");
-          }
-        },
-      });
-    });
+  if (containsViem && originalBlockNumber! !== undefined) {
+    const pubClient = context.viemClient("public");
+    while (true) {
+      const blockNum = await pubClient.getBlockNumber();
+      if (blockNum > originalBlockNumber) {
+        break;
+      }
+      await setTimeout(1);
+    }
   } else if (results.find((r) => r.type == "eth")) {
     await setTimeout(10);
   }
@@ -199,6 +212,6 @@ export async function createDevBlock<
 
   return {
     block: blockResult,
-    result: Array.isArray(transactions) ? result : (result[0] as any),
+    result: Array.isArray(transactions) ? result : result[0] as any,
   };
 }

@@ -65,7 +65,10 @@ export type IFoundation =
  * @name EthTransactionType
  * @description The type of Ethereum transaction. Can be "Legacy", "EIP2930", or "EIP1559".
  */
-export type EthTransactionType = "Legacy" | "EIP2930" | "EIP1559";
+export type EthTransactionType = (typeof EthTransactionTypes)[number];
+
+export const EthTransactionTypes = ["eip1559", "eip2930", "legacy"] as const;
+
 
 /**
  * @name FoundationType
