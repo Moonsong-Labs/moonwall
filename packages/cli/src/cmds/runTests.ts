@@ -89,7 +89,7 @@ export async function executeTests(env: Environment, additionalArgs?: {}) {
   }
 
   if (typeof env.multiThreads === "number") {
-    options.minThreads = 1
+    options.minThreads = 1;
     options.maxThreads = Math.floor(env.multiThreads);
   }
 
