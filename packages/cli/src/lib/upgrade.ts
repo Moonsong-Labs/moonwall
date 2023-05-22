@@ -7,7 +7,7 @@ import { blake2AsHex } from "@polkadot/util-crypto";
 import { sha256 } from "ethers";
 import { cancelReferendaWithCouncil, executeProposalWithCouncil } from "./governance.js";
 import { alith } from "@moonwall/util";
-import { ChopsticksContext, UpgradePreferences } from "../types/runner.js";
+import { ChopsticksContext, UpgradePreferences } from "@moonwall/types";
 import { getRuntimeWasm } from "./binaries.js";
 
 export async function upgradeRuntimeChopsticks(context: ChopsticksContext, path: string) {

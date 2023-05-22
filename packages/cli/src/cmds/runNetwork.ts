@@ -3,7 +3,7 @@ import inquirer from "inquirer";
 import { MoonwallContext, runNetworkOnly } from "../lib/globalContext.js";
 import clear from "clear";
 import chalk from "chalk";
-import { Environment } from "../types/config.js";
+import { Environment } from "@moonwall/types";
 import { executeTests } from "./runTests.js";
 import { parse } from "yaml";
 import fs from "fs/promises";

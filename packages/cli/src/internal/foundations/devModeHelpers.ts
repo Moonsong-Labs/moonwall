@@ -1,6 +1,7 @@
 import "@moonbeam-network/api-augment";
 import "@polkadot/api-augment";
-import { BlockCreation, ExtrinsicCreation, extractError } from "../../lib/contextHelpers.js";
+import { extractError } from "../../lib/contextHelpers.js";
+import { BlockCreation, BlockCreationResponse, ExtrinsicCreation } from "@moonwall/types";
 import { ApiTypes, AugmentedEvent, SubmittableExtrinsic } from "@polkadot/api/types";
 import { customWeb3Request, alith, createAndFinalizeBlock } from "@moonwall/util";
 import Debug from "debug";
@@ -12,7 +13,7 @@ import { ApiPromise } from "@polkadot/api";
 import { assert } from "vitest";
 import chalk from "chalk";
 import { importJsonConfig } from "../../lib/configReader.js";
-import { GenericContext } from "../../types/runner.js";
+import { GenericContext } from "@moonwall/types";
 const debug = Debug("DevTest");
 
 export async function devForkToFinalizedHead(context: MoonwallContext) {
@@ -38,25 +39,37 @@ export async function getDevProviderPath() {
     : `http://127.0.0.1:${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`;
 }
 
+export type CreatedBlockResult = {
+  block: {
+    duration: number;
+    hash: string;
+  };
+  result: ExtrinsicCreation | ExtrinsicCreation[] | null;
+};
+
+export type CallType<TApi extends ApiTypes> =
+  | SubmittableExtrinsic<TApi>
+  | Promise<SubmittableExtrinsic<TApi>>
+  | `0x${string}`
+  | Promise<string>;
+
 export async function createDevBlock<
   ApiType extends ApiTypes,
-  Call extends
-    | SubmittableExtrinsic<ApiType>
-    | Promise<SubmittableExtrinsic<ApiType>>
-    | string
-    | Promise<string>,
-  Calls extends Call | Call[]
+  Calls extends CallType<ApiType> | CallType<ApiType>[]
 >(context: GenericContext, transactions?: Calls, options: BlockCreation = { allowFailures: true }) {
-  let containsViem: boolean;
   let originalBlockNumber: bigint;
 
-  try {
-    const pubClient = context.viemClient("public");
-    containsViem = true;
-    originalBlockNumber = await pubClient.getBlockNumber();
-  } catch {
-    containsViem = false;
+  const containsViem =
+    MoonwallContext.getContext().providers.find((prov) => prov.type == "viemPublic") &&
+    !!!context.viemClient("public")
+      ? true
+      : false;
+
+  if (containsViem) {
+    originalBlockNumber = await context.viemClient("public").getBlockNumber();
   }
+
+  // const containsViem = context.viemClient("public");
 
   const results: ({ type: "eth"; hash: string } | { type: "sub"; hash: string })[] = [];
 
@@ -68,8 +81,15 @@ export async function createDevBlock<
       // Ethereum
       results.push({
         type: "eth",
-        hash: ((await customWeb3Request(context.web3(), "eth_sendRawTransaction", [call])) as any)
-          .result,
+        hash: containsViem
+          ? (
+              (await context.viemClient("public").request({
+                method: "eth_sendRawTransaction",
+                params: [call as `0x${string}`],
+              })) as any
+            ).result
+          : ((await customWeb3Request(context.web3(), "eth_sendRawTransaction", [call])) as any)
+              .result,
       });
     } else if (call.isSigned) {
       const tx = api.tx(call);
@@ -103,7 +123,6 @@ export async function createDevBlock<
   if (results.length == 0) {
     return {
       block: blockResult,
-      result: null,
     };
   }
 
@@ -143,19 +162,15 @@ export async function createDevBlock<
   });
 
   // Avoiding race condition by ensuring ethereum block is created
-  if (containsViem) {
-    await new Promise((resolve, reject) => {
-      const pubClient = context.viemClient("public");
-
-      const unwatch = pubClient.watchBlockNumber({
-        onBlockNumber: (blockNum) => {
-          if (blockNum > originalBlockNumber) {
-            unwatch();
-            resolve("success");
-          }
-        },
-      });
-    });
+  if (containsViem && originalBlockNumber! !== undefined) {
+    const pubClient = context.viemClient("public");
+    while (true) {
+      const blockNum = await pubClient.getBlockNumber();
+      if (blockNum > originalBlockNumber) {
+        break;
+      }
+      await setTimeout(1);
+    }
   } else if (results.find((r) => r.type == "eth")) {
     await setTimeout(10);
   }

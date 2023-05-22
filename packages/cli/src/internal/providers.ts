@@ -4,22 +4,19 @@ import { Web3 } from "web3";
 import { WebSocketProvider as Web3ProviderWs } from "web3-providers-ws";
 import { ethers, Signer, Wallet } from "ethers";
 import Debug from "debug";
-import { ProviderConfig, ProviderType } from "../types/config.js";
-import { MoonwallProvider } from "../types/context.js";
+import {
+  ProviderConfig,
+  ProviderType,
+  MoonwallProvider,
+  PublicViem,
+  WalletViem,
+} from "@moonwall/types";
 import chalk from "chalk";
 import { ALITH_PRIVATE_KEY } from "@moonwall/util";
-import {
-  PublicClient,
-  Transport,
-  createPublicClient,
-  createWalletClient,
-  http,
-  webSocket,
-} from "viem";
+import { createPublicClient, createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { moonbeam, moonbaseAlpha, moonriver, Chain } from "viem/chains";
-import { PublicViem, WalletViem } from "../types/runner.js";
-import { getDevChain } from "../lib/viem.js";
+import { getDevChain } from "@moonwall/util";
+import { ApiOptions } from "@polkadot/api/types/index.js";
 const debug = Debug("global:providers");
 
 export function prepareProviders(providerConfigs: ProviderConfig[]): MoonwallProvider[] {
@@ -68,7 +65,7 @@ export function prepareProviders(providerConfigs: ProviderConfig[]): MoonwallPro
               options["rpc"] = { ...rpc };
             }
 
-            const moonApi = await ApiPromise.create(options);
+            const moonApi = await ApiPromise.create(options as ApiOptions);
             await moonApi.isReady;
             return moonApi;
           },
@@ -151,7 +148,13 @@ export async function populateProviderInterface(
     | Promise<PublicViem>
     | Promise<WalletViem>
     | void
-) {
+): Promise<{
+  name: string;
+  api: any;
+  type: ProviderType;
+  greet: () => void | Promise<void> | { rtVersion: number; rtName: string };
+  disconnect: () => void | Promise<void> | any;
+}> {
   switch (type) {
     case "polkadotJs":
       const pjsApi = (await connect()) as ApiPromise;
@@ -204,9 +207,7 @@ export async function populateProviderInterface(
             `👋  Provider ${name} is connected to chain ` +
               (await ethApi.provider!.getNetwork()).chainId
           ),
-        disconnect: async () => {
-          ethApi.provider!.destroy();
-        },
+        disconnect: async () => ethApi.provider!.destroy(),
       };
 
     case "web3":
@@ -252,7 +253,6 @@ export async function populateProviderInterface(
           //TODO: add disconnect
         },
       };
-    //TODO ADD VIEM
 
     default:
       throw new Error("UNKNOWN TYPE");

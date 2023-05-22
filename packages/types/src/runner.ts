@@ -1,26 +1,14 @@
 import { ApiPromise } from "@polkadot/api";
 import { Signer } from "ethers";
 import { Web3 } from "web3";
-import { ApiTypes, AugmentedEvent, SubmittableExtrinsic } from "@polkadot/api/types/index.js";
-import {
-  BlockCreation,
-  BlockCreationResponse,
-  ChopsticksBlockCreation,
-} from "../lib/contextHelpers.js";
+import { ApiTypes } from "@polkadot/api/types/index.js";
 import { ProviderType, ViemClientType, ZombieNodeType } from "./config.js";
 import { Debugger } from "debug";
 import { KeyringPair } from "@polkadot/keyring/types.js";
-import {
-  Account,
-  HttpTransport,
-  PublicClient,
-  Transport,
-  WalletClient,
-  WebSocketTransport,
-  http,
-  webSocket,
-} from "viem";
-import { Chain, moonbaseAlpha, moonbeam } from "viem/chains";
+import { Account, PublicClient, Transport, WalletClient } from "viem";
+import { Chain } from "viem/chains";
+import { BlockCreation, BlockCreationResponse, ChopsticksBlockCreation } from "./context.js";
+import { CallType } from "./foundations.js";
 
 /**
  * @name CustomTest
@@ -261,18 +249,8 @@ export interface ChopsticksContext extends GenericContext {
  * DevModeContext - Interface that extends from GenericContext and includes a method for creating a block.
  */
 export interface DevModeContext extends GenericContext {
-  createBlock<
-    ApiType extends ApiTypes,
-    Call extends
-      | SubmittableExtrinsic<ApiType>
-      | Promise<SubmittableExtrinsic<ApiType>>
-      | string
-      | Promise<string>,
-    Calls extends Call | Call[]
-  >(
+  createBlock<ApiType extends ApiTypes, Calls extends CallType<ApiType> | CallType<ApiType>[]>(
     transactions?: Calls,
     options?: BlockCreation
-  ): Promise<
-    BlockCreationResponse<ApiType, Calls extends Call[] ? Awaited<Call>[] : Awaited<Call>>
-  >;
+  ): Promise<BlockCreationResponse<ApiType, Calls>>;
 }

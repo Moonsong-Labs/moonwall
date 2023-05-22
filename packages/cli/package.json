@@ -9,7 +9,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Moonsong-Labs/moonwall.git",
-    "directory": "packages/moonwall"
+    "directory": "packages/cli"
   },
   "bugs": {
     "url": "https://github.com/Moonsong-Labs/moonwall/issues"
@@ -49,22 +49,23 @@
   ],
   "scripts": {
     "build": "pnpm exec rimraf dist && tsup src --format cjs,esm --config tsup.config.ts && pnpm generate-types",
-    "generate-types": "tsup src --format cjs,esm --dts --config tsup.config.ts && pnpm schema",
+    "generate-types": "tsup src --format cjs,esm --dts --config tsup.config.ts",
     "watch": "tsup src --format cjs,esm --dts --watch",
     "typecheck": "pnpm exec tsc --noEmit",
     "prepublish": "pnpm run build && pnpm run generate-types && pnpm typecheck",
     "prepare": "pnpm build",
-    "schema": "typescript-json-schema ./src/types/config.ts MoonwallConfig > config_schema.json",
     "compile": "pnpm build ",
     "lint": "tsc"
   },
   "dependencies": {
     "@acala-network/chopsticks": "^0.6.4",
+    "@moonwall/types": "workspace:*",
     "@types/cli-progress": "^3.11.0",
     "@types/debug": "^4.1.7",
-    "@types/node": "^18.16.3",
+    "@types/node": "^18.16.13",
     "@types/yargs": "^17.0.24",
     "@zombienet/orchestrator": "^0.0.38",
+    "abitype": "^0.8.4",
     "bottleneck": "^2.19.5",
     "chalk": "^5.2.0",
     "clear": "^0.1.0",
@@ -89,46 +90,36 @@
   "peerDependencies": {
     "@moonbeam-network/api-augment": "^0.2302.0",
     "@moonwall/util": "workspace:*",
-    "@polkadot/api": "^10.7.1",
-    "@polkadot/api-augment": "^10.7.1",
-    "@polkadot/api-derive": "^10.7.1",
-    "@polkadot/keyring": "^12.1.2",
-    "@polkadot/types": "^10.7.1",
-    "@polkadot/types-codec": "^10.7.1",
+    "@polkadot/api": "^10.7.2",
+    "@polkadot/api-augment": "^10.7.2",
+    "@polkadot/api-derive": "^10.7.2",
+    "@polkadot/keyring": "^12.2.1",
+    "@polkadot/types": "^10.7.2",
+    "@polkadot/types-codec": "^10.7.2",
     "@polkadot/util": "^12.1.2",
-    "ethers": "^6.3.0",
-    "viem": "^0.3.24",
+    "ethers": "^6.4.0",
+    "viem": "^0.3.31",
     "web3": "4.0.1-rc.0",
     "web3-providers-ws": "4.0.1-rc.0"
   },
   "devDependencies": {
     "@moonbeam-network/api-augment": "^0.2302.0",
     "@moonwall/util": "workspace:*",
-    "@polkadot/api": "^10.7.1",
-    "@polkadot/api-augment": "^10.7.1",
-    "@polkadot/api-derive": "^10.7.1",
-    "@polkadot/keyring": "^12.1.2",
-    "@polkadot/types": "^10.7.1",
-    "@polkadot/types-codec": "^10.7.1",
+    "@polkadot/api": "^10.7.2",
+    "@polkadot/api-augment": "^10.7.2",
+    "@polkadot/api-derive": "^10.7.2",
+    "@polkadot/keyring": "^12.2.1",
+    "@polkadot/types": "^10.7.2",
+    "@polkadot/types-codec": "^10.7.2",
     "@polkadot/util": "^12.1.2",
     "@vitest/ui": "^0.28.5",
-    "ethers": "^6.3.0",
+    "ethers": "^6.4.0",
     "regenerator-runtime": "^0.13.11",
     "typescript": "^5.0.4",
     "typescript-json-schema": "^0.55.0",
-    "viem": "^0.3.24",
+    "viem": "^0.3.31",
     "web3": "4.0.1-rc.0",
     "web3-providers-ws": "4.0.1-rc.0"
-  },
-  "pnpm": {
-    "overrides": {
-      "@moonwall/util": "workspace:*",
-      "@polkadot/rpc-provider": "$@moonwall/util",
-      "@polkadot/util": "$@moonwall/util",
-      "@polkadot/keyring": "$@moonwall/util",
-      "@polkadot/api": "$@moonwall/util",
-      "@polkadot/types": "$@moonwall/util"
-    }
   },
   "publishConfig": {
     "access": "public"

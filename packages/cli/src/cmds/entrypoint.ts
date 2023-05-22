@@ -2,7 +2,6 @@ import "../internal/logging.js";
 import "@moonbeam-network/api-augment";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
-import { setTimeout } from "timers/promises";
 import { testCmd } from "./runTests.js";
 import { runNetwork } from "./runNetwork.js";
 import { generateConfig } from "../internal/cmdFunctions/initialisation.js";

@@ -1,6 +1,6 @@
 import "@moonbeam-network/api-augment";
 import "@polkadot/api-augment";
-import { describeSuite, expect, beforeAll, getDevChain, deployViemContract } from "@moonwall/cli";
+import { describeSuite, expect, beforeAll } from "@moonwall/cli";
 import {
   CHARLETH_ADDRESS,
   BALTATHAR_ADDRESS,
@@ -10,6 +10,7 @@ import {
   BALTATHAR_PRIVATE_KEY,
   CHARLETH_PRIVATE_KEY,
   ALITH_PRIVATE_KEY,
+  deployViemContract,
 } from "@moonwall/util";
 import { Signer, parseEther } from "ethers";
 import { BN } from "@polkadot/util";
@@ -29,6 +30,7 @@ import {
 import { bytecode, tokenAbi } from "../_test_data/token.js";
 import { privateKeyToAccount } from "viem/accounts";
 import { localhost } from "viem/chains";
+import { stat } from "fs";
 
 describeSuite({
   id: "D01",
@@ -145,7 +147,7 @@ describeSuite({
         );
 
         expect(
-          result.events.find((evt) =>
+          result!.events.find((evt) =>
             context.polkadotJs().events.system.ExtrinsicFailed.is(evt.event)
           ),
           "No Event found in block"
@@ -183,7 +185,7 @@ describeSuite({
       test: async function () {
         const { status, contractAddress } = await deployViemContract(context, tokenAbi, bytecode);
         expect(status).to.be.toStrictEqual("success");
-        expect(contractAddress.length).to.be.greaterThan(0);
+        expect(contractAddress!.length).to.be.greaterThan(0);
       },
     });
 
@@ -191,14 +193,14 @@ describeSuite({
       id: "T09",
       title: "It can write-interact with a contract",
       test: async function () {
-        const hash = await context.viemClient("wallet").deployContract({
-          abi: tokenAbi,
+        const { contractAddress, status, logs, hash } = await deployViemContract(
+          context,
+          tokenAbi,
           bytecode,
-        });
-        await context.createBlock();
-
-        const { contractAddress } = await deployViemContract(context, tokenAbi, bytecode);
-        log(`Deployed contract at ${contractAddress}`);
+          {
+            gas: 10000000n,
+          }
+        );
 
         const contractInstance = getContract({
           abi: tokenAbi,
@@ -223,6 +225,7 @@ describeSuite({
         expect(balBefore < balanceAfter).to.be.true;
       },
     });
+
     it({
       id: "T10",
       title: "It can sign a message",

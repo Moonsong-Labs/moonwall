@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/Moonsong-Labs/moonwall/main/packages/cli/config_schema.json",
+  "$schema": "https://raw.githubusercontent.com/Moonsong-Labs/moonwall/main/packages/types/config_schema.json",
   "label": "Global Test Config 🐯",
   "defaultTestTimeout": 60000,
   "environments": [
@@ -245,7 +245,7 @@
     {
       "name": "dev_multi",
       "testFileDir": ["tests/test_separation"],
-      "multiThreads": true,
+      "multiThreads": 2,
       "foundation": {
         "type": "dev",
         "launchSpec": [

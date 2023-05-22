@@ -23,33 +23,30 @@
     "@mapbox/node-pre-gyp": "^1.0.10",
     "@moonbeam-network/api-augment": "^0.2301.0",
     "@moonwall/cli": "workspace:*",
+    "@moonwall/types": "workspace:*",
     "@moonwall/util": "workspace:*",
-    "@polkadot/api": "^10.7.1",
-    "@polkadot/api-augment": "^10.7.1",
-    "@polkadot/api-derive": "^10.7.1",
-    "@polkadot/keyring": "^12.1.2",
-    "@polkadot/rpc-provider": "^10.7.1",
-    "@polkadot/util-crypto": "^12.1.2",
-    "@types/node": "^18.16.3",
+    "@polkadot/api": "^10.7.2",
+    "@polkadot/api-augment": "^10.7.2",
+    "@polkadot/api-derive": "^10.7.2",
+    "@polkadot/keyring": "^12.2.1",
+    "@polkadot/rpc-provider": "^10.7.2",
+    "@polkadot/util-crypto": "^12.2.1",
+    "@types/node": "^18.16.14",
     "@vitest/utils": "^0.29.8",
     "debug": "^4.3.4",
-    "ethers": "^6.3.0",
+    "ethers": "^6.4.0",
     "pnpm": "7.23.0",
     "prettier": "^2.8.8",
     "rimraf": "^4.4.1",
     "typescript": "^5.0.4",
-    "vitest": "^0.31.0",
-    "viem": "^0.3.24"
+    "viem": "^0.3.31",
+    "vitest": "^0.31.0"
   },
   "pnpm": {
     "overrides": {
       "@moonwall/cli": "workspace:*",
-      "@moonwall/util": "workspace:*",
-      "@polkadot/util-crypto": "$@polkadot/util-crypto",
-      "@polkadot/rpc-provider": "$@polkadot/rpc-provider",
-      "@polkadot/util": "$@polkadot/util-crypto",
-      "@polkadot/api": "$@polkadot/api",
-      "@polkadot/types": "$@polkadot/api"
+      "@moonwall/types": "workspace:*",
+      "@moonwall/util": "workspace:*"
     }
   }
 }

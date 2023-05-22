@@ -9,7 +9,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Moonsong-Labs/moonwall.git",
-    "directory": "packages/moonwall"
+    "directory": "packages/util"
   },
   "bugs": {
     "url": "https://github.com/Moonsong-Labs/moonwall/issues"
@@ -55,8 +55,9 @@
     "lint": "tsc"
   },
   "dependencies": {
+    "@moonwall/types": "workspace:*",
     "@types/debug": "^4.1.7",
-    "@types/node": "^18.16.3",
+    "@types/node": "^18.16.13",
     "@types/yargs": "^17.0.24",
     "bottleneck": "^2.19.5",
     "chalk": "^5.2.0",
@@ -70,9 +71,11 @@
     "moonbeam-types-bundle": "^2.0.10",
     "node-fetch": "^3.3.1",
     "prettier": "^2.8.8",
-    "semver": "^7.5.0",
+    "rlp": "^3.0.0",
+    "semver": "^7.5.1",
     "ts-node": "^10.9.1",
-    "vite": "^4.3.4",
+    "viem": "^0.3.31",
+    "vite": "^4.3.8",
     "vitest": "^0.31.0",
     "ws": "^8.13.0",
     "yaml": "^2.2.2",
@@ -80,40 +83,33 @@
   },
   "peerDependencies": {
     "@moonbeam-network/api-augment": "^0.2302.0",
-    "@polkadot/api": "^10.7.1",
-    "@polkadot/api-augment": "^10.7.1",
-    "@polkadot/api-derive": "^10.7.1",
+    "@polkadot/api": "^10.7.2",
+    "@polkadot/api-augment": "^10.7.2",
+    "@polkadot/api-derive": "^10.7.2",
     "@polkadot/keyring": "^12.1.2",
-    "@polkadot/rpc-provider": "^10.7.1",
-    "@polkadot/types": "^10.7.1",
-    "@polkadot/types-codec": "^10.7.1",
+    "@polkadot/rpc-provider": "^10.7.2",
+    "@polkadot/types": "^10.7.2",
+    "@polkadot/types-codec": "^10.7.2",
     "@polkadot/util": "^12.1.2",
-    "ethers": "^6.3.0",
+    "ethers": "^6.4.0",
     "web3": "4.0.1-rc.0"
   },
   "devDependencies": {
     "@moonbeam-network/api-augment": "^0.2302.0",
-    "@polkadot/api": "^10.7.1",
-    "@polkadot/api-augment": "^10.7.1",
-    "@polkadot/api-derive": "^10.7.1",
-    "@polkadot/keyring": "^12.1.2",
-    "@polkadot/rpc-provider": "^10.7.1",
-    "@polkadot/types": "^10.7.1",
-    "@polkadot/types-codec": "^10.7.1",
-    "@polkadot/util": "^12.1.2",
+    "@polkadot/api": "^10.7.2",
+    "@polkadot/api-augment": "^10.7.2",
+    "@polkadot/api-derive": "^10.7.2",
+    "@polkadot/keyring": "^12.2.1",
+    "@polkadot/rpc-provider": "^10.7.2",
+    "@polkadot/types": "^10.7.2",
+    "@polkadot/types-codec": "^10.7.2",
+    "@polkadot/util": "^12.2.1",
     "@vitest/ui": "^0.30.1",
-    "ethers": "^6.3.0",
+    "ethers": "^6.4.0",
     "regenerator-runtime": "^0.13.11",
     "tsup": "^6.7.0",
     "typescript": "^5.0.4",
     "web3": "4.0.1-rc.0"
-  },
-  "pnpm": {
-    "overrides": {
-      "@polkadot/keyring": "$@polkadot/keyring",
-      "@polkadot/api": "$@polkadot/api",
-      "@polkadot/types": "$@polkadot/api"
-    }
   },
   "publishConfig": {
     "access": "public"

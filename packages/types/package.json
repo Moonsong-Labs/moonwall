@@ -1,0 +1,72 @@
+{
+  "name": "@moonwall/types",
+  "type": "module",
+  "version": "0.5.19",
+  "description": "Testing framework for the Moon family of projects",
+  "author": "timbrinded",
+  "license": "ISC",
+  "homepage": "https://github.com/Moonsong-Labs/moonwall#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Moonsong-Labs/moonwall.git",
+    "directory": "packages/types"
+  },
+  "bugs": {
+    "url": "https://github.com/Moonsong-Labs/moonwall/issues"
+  },
+  "keywords": [
+    "moonwall",
+    "moonbeam",
+    "moondance",
+    "polkadot",
+    "kusama",
+    "substrate"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "engines": {
+    "node": ">=14.16.0",
+    "pnpm": ">=7"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "*.d.ts",
+    "*.d.cts",
+    "*.mjs",
+    "*.cjs"
+  ],
+  "scripts": {
+    "build": "pnpm exec rimraf dist && tsup src --format cjs,esm --config tsup.config.ts && pnpm generate-types",
+    "generate-types": "tsup src --format cjs,esm --dts --config tsup.config.ts && pnpm schema && pnpm typecheck",
+    "watch": "tsup src --format cjs,esm --dts --watch",
+    "typecheck": "pnpm exec tsc --noEmit",
+    "prepublish": "pnpm run build && pnpm run generate-types && pnpm typecheck",
+    "schema": "typescript-json-schema ./src/config.ts MoonwallConfig > config_schema.json",
+    "prepare": "pnpm build",
+    "compile": "pnpm build ",
+    "lint": "tsc"
+  },
+  "dependencies": {
+    "@polkadot/api": "^10.7.2",
+    "debug": "^4.3.4",
+    "ethers": "^6.4.0",
+    "web3": "4.0.1-rc.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "tsup": "^6.7.0",
+    "typescript": "^5.0.4",
+    "typescript-json-schema": "^0.55.0"
+  }
+}

@@ -4,7 +4,10 @@ import {
   FoundationType,
   MoonwallConfig,
   ProviderConfig,
-} from "../types/config";
+  ConnectedProvider,
+  MoonwallEnvironment,
+  MoonwallProvider,
+} from "@moonwall/types";
 import { ChildProcess, exec } from "node:child_process";
 import { populateProviderInterface, prepareProviders } from "../internal/providers.js";
 import { launchNode } from "../internal/localNode.js";
@@ -14,7 +17,6 @@ import { parseChopsticksRunCmd, parseRunCmd, parseZombieCmd } from "../internal/
 import { ApiPromise } from "@polkadot/api";
 import zombie, { Network } from "@zombienet/orchestrator";
 import Debug from "debug";
-import { ConnectedProvider, MoonwallEnvironment, MoonwallProvider } from "../types/context.js";
 import { checkZombieBins, getZombieConfig } from "../internal/foundations/zombieHelpers.js";
 const debugSetup = Debug("global:context");
 
