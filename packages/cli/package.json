@@ -64,7 +64,7 @@
     "@types/debug": "^4.1.7",
     "@types/node": "^18.16.13",
     "@types/yargs": "^17.0.24",
-    "@zombienet/orchestrator": "^0.0.38",
+    "@zombienet/orchestrator": "^0.0.42",
     "abitype": "^0.8.4",
     "bottleneck": "^2.19.5",
     "chalk": "^5.2.0",

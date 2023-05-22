@@ -74,7 +74,7 @@ importers:
         version: 0.3.31(typescript@5.0.4)
       vitest:
         specifier: ^0.31.0
-        version: 0.31.0(@vitest/ui@0.28.5)
+        version: 0.31.0(@vitest/ui@0.30.1)
 
   packages/cli:
     dependencies:
@@ -97,8 +97,8 @@ importers:
         specifier: ^17.0.24
         version: 17.0.24
       '@zombienet/orchestrator':
-        specifier: ^0.0.38
-        version: 0.0.38(@polkadot/util@12.2.1)(@types/node@18.16.14)
+        specifier: ^0.0.42
+        version: 0.0.42(@polkadot/util@12.2.1)(@types/node@18.16.14)
       abitype:
         specifier: ^0.8.4
         version: 0.8.4(typescript@5.0.4)
@@ -2171,13 +2171,13 @@ packages:
     dependencies:
       typescript: 5.0.4
 
-  /@zombienet/orchestrator@0.0.38(@polkadot/util@12.2.1)(@types/node@18.16.14):
-    resolution: {integrity: sha512-+NuIJyMDm329nANXEsMy5lbBOKRU69/mdsQ/DJevzSKX+AfJLcCPDq2ki9x3RVryOS04O34/b5tCRqZoIiPeYA==}
+  /@zombienet/orchestrator@0.0.42(@polkadot/util@12.2.1)(@types/node@18.16.14):
+    resolution: {integrity: sha512-Qfw+TWIiT+isGqt5jSGM7tr8fr0KlPuUDt3PNBRPMsLOIdWSvS5WTXTQFRtFq+jHIIL19QTVcDIfaWrljtejzQ==}
     dependencies:
       '@polkadot/api': 10.7.2
       '@polkadot/keyring': 12.2.1(@polkadot/util-crypto@12.2.1)(@polkadot/util@12.2.1)
       '@polkadot/util-crypto': 12.2.1(@polkadot/util@12.2.1)
-      '@zombienet/utils': 0.0.19(@types/node@18.16.14)(typescript@5.0.4)
+      '@zombienet/utils': 0.0.21(@types/node@18.16.14)(typescript@5.0.4)
       JSONStream: 1.3.5
       chai: 4.3.7
       debug: 4.3.4(supports-color@8.1.1)
@@ -2205,8 +2205,8 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@zombienet/utils@0.0.19(@types/node@18.16.14)(typescript@5.0.4):
-    resolution: {integrity: sha512-dTU1orWPPMyGNi86nLLFEd3cK5n+DNbavAdiOOqu2rhem2m+AuycwYEGXKf+Y4j3Ofau2gnfdUllsfFjRWrj7A==}
+  /@zombienet/utils@0.0.21(@types/node@18.16.14)(typescript@5.0.4):
+    resolution: {integrity: sha512-31fMNlITzmj1gPha2CcihDE6nON94r8ixZTZbWa2g0nacS0nnoTKUNFukw9vg+aGF5QkwSevy+eobOQEb/jhjg==}
     dependencies:
       cli-table3: 0.6.3
       debug: 4.3.4(supports-color@8.1.1)
@@ -6687,6 +6687,7 @@ packages:
       - sugarss
       - supports-color
       - terser
+    dev: false
 
   /vitest@0.31.0(@vitest/ui@0.30.1):
     resolution: {integrity: sha512-JwWJS9p3GU9GxkG7eBSmr4Q4x4bvVBSswaCFf1PBNHiPx00obfhHRJfgHcnI0ffn+NMlIh9QGvG75FlaIBdKGA==}
@@ -6752,7 +6753,6 @@ packages:
       - sugarss
       - supports-color
       - terser
-    dev: false
 
   /w3c-xmlserializer@4.0.0:
     resolution: {integrity: sha512-d+BFHzbiCx6zGfz0HyQ6Rg69w9k19nviJspaj4yNscGjrHu94sVP+aRm75yEbCh+r2/yR+7q6hux9LVtbuTGBw==}

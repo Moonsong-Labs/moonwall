@@ -92,7 +92,7 @@ export async function deployViemContract<TOptions extends ContractDeploymentOpti
 
   const url = context.viemClient("public").transport.url;
 
-  const { privateKey = ALITH_PRIVATE_KEY, ...rest } = options || {};
+  const { privateKey = ALITH_PRIVATE_KEY as `0x${string}`, ...rest } = options || {};
   const blob = { ...rest, abi, bytecode, account: privateKeyToAccount(privateKey) };
 
   const account = privateKeyToAccount(ALITH_PRIVATE_KEY);
@@ -234,7 +234,7 @@ export async function createRawTransaction<TOptions extends DeepPartial<ViemTran
       : {};
 
   if (type !== "legacy" && accessList.length > 0) {
-    // @ts-expect-error
+    // @ts-ignore
     txnBlob["accessList"] = accessList;
   }
 
@@ -295,7 +295,7 @@ export async function deployCreateCompiledContract<TOptions extends ContractDepl
 ) {
   const contractCompiled = getCompiled(contractName);
 
-  const { privateKey = ALITH_PRIVATE_KEY, args = [], ...rest } = options || {};
+  const { privateKey = ALITH_PRIVATE_KEY as `0x${string}`, args = [], ...rest } = options || {};
 
   const blob: ContractDeploymentOptions = {
     ...rest,
