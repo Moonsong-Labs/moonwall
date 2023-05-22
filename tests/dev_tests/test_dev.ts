@@ -1,6 +1,6 @@
 import "@moonbeam-network/api-augment";
 import "@polkadot/api-augment";
-import { describeSuite, expect, beforeAll, getDevChain, deployViemContract } from "@moonwall/cli";
+import { describeSuite, expect, beforeAll } from "@moonwall/cli";
 import {
   CHARLETH_ADDRESS,
   BALTATHAR_ADDRESS,
@@ -10,6 +10,7 @@ import {
   BALTATHAR_PRIVATE_KEY,
   CHARLETH_PRIVATE_KEY,
   ALITH_PRIVATE_KEY,
+  deployViemContract,
 } from "@moonwall/util";
 import { Signer, parseEther } from "ethers";
 import { BN } from "@polkadot/util";
