@@ -34,7 +34,7 @@ export type Environment = {
   foundation: IFoundation;
   include?: string[];
   connections?: ProviderConfig[];
-  multiThreads?: boolean;
+  multiThreads?: boolean | number;
   defaultEthTxnStyle?: EthTransactionType;
 };
 

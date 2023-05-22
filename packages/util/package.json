@@ -107,6 +107,7 @@
     "regenerator-runtime": "^0.13.11",
     "tsup": "^6.7.0",
     "typescript": "^5.0.4",
+    "viem": "^0.3.31",
     "web3": "4.0.1-rc.0"
   },
   "publishConfig": {

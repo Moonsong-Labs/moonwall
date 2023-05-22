@@ -88,6 +88,11 @@ export async function executeTests(env: Environment, additionalArgs?: {}) {
     options.threads = false;
   }
 
+  if (typeof env.multiThreads === "number") {
+    options.minThreads = 1
+    options.maxThreads = Math.floor(env.multiThreads);
+  }
+
   try {
     const folders = env.testFileDir.map((folder) => path.join("/", folder, "/"));
     return await startVitest("test", folders, { ...options, ...additionalArgs });

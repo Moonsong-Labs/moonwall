@@ -15,7 +15,7 @@ import chalk from "chalk";
 import { ALITH_PRIVATE_KEY } from "@moonwall/util";
 import { createPublicClient, createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { getDevChain } from "../lib/viem.js";
+import { getDevChain } from "@moonwall/util";
 import { ApiOptions } from "@polkadot/api/types/index.js";
 const debug = Debug("global:providers");
 
