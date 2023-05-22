@@ -1,5 +1,5 @@
 import "@moonbeam-network/api-augment";
-import { MoonwallConfig } from "../types/config.js";
+import { MoonwallConfig } from "@moonwall/types";
 import fs from "fs/promises";
 import path from "path";
 

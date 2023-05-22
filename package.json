@@ -23,6 +23,7 @@
     "@mapbox/node-pre-gyp": "^1.0.10",
     "@moonbeam-network/api-augment": "^0.2301.0",
     "@moonwall/cli": "workspace:*",
+    "@moonwall/types": "workspace:*",
     "@moonwall/util": "workspace:*",
     "@polkadot/api": "^10.7.1",
     "@polkadot/api-augment": "^10.7.1",
@@ -39,11 +40,12 @@
     "rimraf": "^4.4.1",
     "typescript": "^5.0.4",
     "viem": "^0.3.31",
-    "vitest": "^0.31.1"
+    "vitest": "^0.31.0"
   },
   "pnpm": {
     "overrides": {
       "@moonwall/cli": "workspace:*",
+      "@moonwall/types": "workspace:*",
       "@moonwall/util": "workspace:*"
     }
   }

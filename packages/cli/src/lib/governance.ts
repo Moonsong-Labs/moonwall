@@ -6,8 +6,7 @@ import { KeyringPair } from "@polkadot/keyring/types";
 import { PalletDemocracyReferendumInfo } from "@polkadot/types/lookup";
 import { blake2AsHex } from "@polkadot/util-crypto";
 import { alith, baltathar, charleth, dorothy } from "@moonwall/util";
-import { DevModeContext } from "../types/runner.js";
-import { ExtrinsicCreation } from "./contextHelpers.js";
+import { DevModeContext } from "@moonwall/types";
 
 export const COUNCIL_MEMBERS: KeyringPair[] = [baltathar, charleth, dorothy];
 export const COUNCIL_THRESHOLD = Math.ceil((COUNCIL_MEMBERS.length * 2) / 3);

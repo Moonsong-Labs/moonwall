@@ -69,7 +69,6 @@ export type EthTransactionType = (typeof EthTransactionTypes)[number];
 
 export const EthTransactionTypes = ["eip1559", "eip2930", "legacy"] as const;
 
-
 /**
  * @name FoundationType
  * @description The type of foundation configuration. It can be of several types including "dev", "chopsticks", "zombie", "read_only", or "fork".

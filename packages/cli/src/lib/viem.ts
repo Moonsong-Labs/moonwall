@@ -1,10 +1,8 @@
 import { Account, DeployContractParameters, createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { Chain, mainnet } from "viem/chains";
-import { DevModeContext } from "../types/runner.js";
+import { DevModeContext, EthTransactionType } from "@moonwall/types";
 import { ALITH_PRIVATE_KEY } from "@moonwall/util";
-import { Abi } from "abitype";
-import { EthTransactionType } from "../types/config.js";
 
 /**
  * @name getDevChain

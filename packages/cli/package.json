@@ -9,7 +9,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Moonsong-Labs/moonwall.git",
-    "directory": "packages/moonwall"
+    "directory": "packages/cli"
   },
   "bugs": {
     "url": "https://github.com/Moonsong-Labs/moonwall/issues"
@@ -49,17 +49,17 @@
   ],
   "scripts": {
     "build": "pnpm exec rimraf dist && tsup src --format cjs,esm --config tsup.config.ts && pnpm generate-types",
-    "generate-types": "tsup src --format cjs,esm --dts --config tsup.config.ts && pnpm schema",
+    "generate-types": "tsup src --format cjs,esm --dts --config tsup.config.ts",
     "watch": "tsup src --format cjs,esm --dts --watch",
     "typecheck": "pnpm exec tsc --noEmit",
     "prepublish": "pnpm run build && pnpm run generate-types && pnpm typecheck",
     "prepare": "pnpm build",
-    "schema": "typescript-json-schema ./src/types/config.ts MoonwallConfig > config_schema.json",
     "compile": "pnpm build ",
     "lint": "tsc"
   },
   "dependencies": {
     "@acala-network/chopsticks": "^0.6.4",
+    "@moonwall/types": "workspace:*",
     "@types/cli-progress": "^3.11.0",
     "@types/debug": "^4.1.7",
     "@types/node": "^18.16.13",
@@ -82,7 +82,7 @@
     "superagent": "^8.0.9",
     "ts-node": "^10.9.1",
     "tsup": "^6.7.0",
-    "vitest": "^0.31.1",
+    "vitest": "^0.31.0",
     "ws": "^8.13.0",
     "yaml": "^2.2.2",
     "yargs": "^17.7.2"

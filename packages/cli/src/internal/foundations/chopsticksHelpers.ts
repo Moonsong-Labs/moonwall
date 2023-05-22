@@ -1,10 +1,10 @@
 import { setTimeout } from "timers/promises";
 import { MoonwallContext } from "../../lib/globalContext.js";
-import { GenericContext } from "../../types/runner.js";
+import { GenericContext } from "@moonwall/types";
 import { ApiTypes, AugmentedEvent } from "@polkadot/api/types/index.js";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { FrameSystemEventRecord } from "@polkadot/types/lookup";
-import { ChopsticksBlockCreation } from "../../lib/contextHelpers.js";
+import { ChopsticksBlockCreation } from "@moonwall/types";
 import chalk from "chalk";
 import { assert } from "vitest";
 

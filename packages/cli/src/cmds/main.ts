@@ -2,7 +2,7 @@ import chalk from "chalk";
 import inquirer from "inquirer";
 import PressToContinuePrompt from "inquirer-press-to-continue";
 import { importJsonConfig } from "../lib/configReader.js";
-import { MoonwallConfig } from "../types/config.js";
+import { MoonwallConfig } from "@moonwall/types";
 import { createFolders, generateConfig } from "../internal/cmdFunctions/initialisation.js";
 import colors from "colors";
 import clear from "clear";
@@ -12,7 +12,6 @@ import { fetchArtifact, getVersions } from "../internal/cmdFunctions/fetchArtifa
 import pkg from "../../package.json" assert { type: "json" };
 import { SemVer, gt, lt, lte } from "semver";
 import fetch from "node-fetch";
-import { AnyJson } from "@polkadot/types-codec/types/helpers.js";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 

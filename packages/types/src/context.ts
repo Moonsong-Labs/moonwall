@@ -3,6 +3,13 @@ import { Signer } from "ethers";
 import { Web3 } from "web3";
 import { FoundationType, ProviderType } from "./config.js";
 import { PublicViem, WalletViem } from "./runner.js";
+import { AugmentedEvent } from "@polkadot/api/types/events.js";
+import { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types/index.js";
+import { Debugger } from "debug";
+import { CallType } from "./foundations.js";
+import { GenericExtrinsic } from "@polkadot/types/extrinsic";
+import { AnyTuple, RegistryError } from "@polkadot/types/types";
+import { EventRecord } from "@polkadot/types/interfaces/types.js";
 
 /**
  * @name MoonwallEnvironment
@@ -73,3 +80,41 @@ export type Node = {
   rtUpgradePath?: string;
   launch?: boolean;
 };
+
+export interface ChopsticksBlockCreation {
+  providerName?: string;
+  count?: number;
+  to?: number;
+  expectEvents?: AugmentedEvent<ApiTypes>[];
+  allowFailures?: boolean;
+  logger?: Debugger;
+}
+
+export interface BlockCreation {
+  parentHash?: string;
+  finalize?: boolean;
+  allowFailures?: boolean;
+  expectEvents?: AugmentedEvent<ApiTypes>[];
+  logger?: Debugger;
+}
+
+export interface BlockCreationResponse<
+  ApiType extends ApiTypes,
+  Calls extends CallType<ApiType> | CallType<ApiType>[]
+> {
+  block: {
+    duration: number;
+    hash: string;
+  };
+  result?: Calls extends (string | SubmittableExtrinsic<ApiType>)[]
+    ? ExtrinsicCreation[]
+    : ExtrinsicCreation;
+}
+
+export interface ExtrinsicCreation {
+  extrinsic: GenericExtrinsic<AnyTuple> | null;
+  events: EventRecord[];
+  error: RegistryError | undefined;
+  successful: boolean;
+  hash: string;
+}

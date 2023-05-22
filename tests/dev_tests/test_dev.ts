@@ -192,10 +192,15 @@ describeSuite({
       id: "T09",
       title: "It can write-interact with a contract",
       test: async function () {
-        const { contractAddress, status, logs, hash } = await deployViemContract(context, tokenAbi, bytecode, {
-          gas: 10000000n,
-        });
-  
+        const { contractAddress, status, logs, hash } = await deployViemContract(
+          context,
+          tokenAbi,
+          bytecode,
+          {
+            gas: 10000000n,
+          }
+        );
+
         const contractInstance = getContract({
           abi: tokenAbi,
           address: contractAddress!,

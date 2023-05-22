@@ -2,7 +2,7 @@ import { importJsonConfig, loadEnvVars } from "../lib/configReader.js";
 import { startVitest } from "vitest/node";
 import { UserConfig } from "vitest";
 import { contextCreator } from "../lib/globalContext.js";
-import { Environment } from "../types/config.js";
+import { Environment } from "@moonwall/types";
 import fs from "node:fs";
 import path from "path";
 import chalk from "chalk";
@@ -71,7 +71,8 @@ export async function executeTests(env: Environment, additionalArgs?: {}) {
     useAtomics: true,
     passWithNoTests: false,
     threads: true,
-    include: env.include ? env.include : ["**/{test,spec,test_,test-}*{ts,mts,cts}"],
+
+    include: env.include ? env.include : ["**/*{test,spec,test_,test-}*{ts,mts,cts}"],
     onConsoleLog(log, type) {
       if (type == "stderr" && (log.trim() == "" || log.trim() == "<empty line>")) return false;
 

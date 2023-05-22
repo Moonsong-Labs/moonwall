@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import { ChopsticksLaunchSpec, DevLaunchSpec, ZombieLaunchSpec } from "../types/config.js";
+import { ChopsticksLaunchSpec, DevLaunchSpec, ZombieLaunchSpec } from "@moonwall/types";
 
 export function parseZombieCmd(launchSpec: ZombieLaunchSpec) {
   if (!!launchSpec) {

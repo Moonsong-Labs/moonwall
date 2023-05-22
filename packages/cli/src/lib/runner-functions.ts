@@ -1,35 +1,30 @@
 import "@moonbeam-network/api-augment";
-import { describe, it, beforeAll, afterAll, File, assert } from "vitest";
-import { ApiPromise, WsProvider } from "@polkadot/api";
+import { describe, it, beforeAll, afterAll } from "vitest";
+import { ApiPromise } from "@polkadot/api";
 import { Signer } from "ethers";
 import { Web3 } from "web3";
-import { ApiTypes, AugmentedEvent, SubmittableExtrinsic } from "@polkadot/api/types/index.js";
+import { ApiTypes } from "@polkadot/api/types/index.js";
 import { upgradeRuntime, upgradeRuntimeChopsticks } from "./upgrade.js";
 import {
   ChopsticksContext,
   GenericContext,
   ITestSuiteType,
-  PublicViem,
   UpgradePreferences,
   ViemApiMap,
-  WalletViem,
-  ZombieContext,
-} from "../types/runner.js";
+  ConnectedProvider,
+  ProviderType,
+  ViemClientType,
+} from "@moonwall/types";
 import { MoonwallContext, contextCreator } from "./globalContext.js";
-import { BlockCreation, ChopsticksBlockCreation } from "./contextHelpers.js";
-import { CallType, createDevBlock, devForkToFinalizedHead } from "../internal/foundations/devModeHelpers.js";
+import { BlockCreation, ChopsticksBlockCreation } from "@moonwall/types";
+import { CallType, createDevBlock } from "../internal/foundations/devModeHelpers.js";
 import {
-  chopForkToFinalizedHead,
   createChopsticksBlock,
-  sendNewBlockAndCheck,
-  sendNewBlockRequest,
   sendSetStorageRequest,
 } from "../internal/foundations/chopsticksHelpers.js";
-import { ProviderType, ViemClientType, ZombieNodeType } from "../types/config.js";
 import { importJsonConfig } from "./configReader.js";
 import Debug, { Debugger } from "debug";
 import { error } from "console";
-import { ConnectedProvider } from "../types/context.js";
 
 const RT_VERSION = Number(process.env.MOON_RTVERSION);
 const RT_NAME = process.env.MOON_RTNAME;
@@ -185,8 +180,8 @@ export function describeSuite({
         context: {
           ...context,
           createBlock: async <
-          ApiType extends ApiTypes,
-          Calls extends CallType<ApiType> | CallType<ApiType>[]
+            ApiType extends ApiTypes,
+            Calls extends CallType<ApiType> | CallType<ApiType>[]
           >(
             transactions?: Calls,
             options: BlockCreation = {}

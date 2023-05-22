@@ -1,6 +1,7 @@
 import "@moonbeam-network/api-augment";
 import "@polkadot/api-augment";
-import { BlockCreation, BlockCreationResponse, ExtrinsicCreation, extractError } from "../../lib/contextHelpers.js";
+import { extractError } from "../../lib/contextHelpers.js";
+import { BlockCreation, BlockCreationResponse, ExtrinsicCreation } from "@moonwall/types";
 import { ApiTypes, AugmentedEvent, SubmittableExtrinsic } from "@polkadot/api/types";
 import { customWeb3Request, alith, createAndFinalizeBlock } from "@moonwall/util";
 import Debug from "debug";
@@ -12,7 +13,7 @@ import { ApiPromise } from "@polkadot/api";
 import { assert } from "vitest";
 import chalk from "chalk";
 import { importJsonConfig } from "../../lib/configReader.js";
-import { GenericContext } from "../../types/runner.js";
+import { GenericContext } from "@moonwall/types";
 const debug = Debug("DevTest");
 
 export async function devForkToFinalizedHead(context: MoonwallContext) {
@@ -46,22 +47,16 @@ export type CreatedBlockResult = {
   result: ExtrinsicCreation | ExtrinsicCreation[] | null;
 };
 
-export type CallType<TApi extends ApiTypes> = 
+export type CallType<TApi extends ApiTypes> =
   | SubmittableExtrinsic<TApi>
   | Promise<SubmittableExtrinsic<TApi>>
   | `0x${string}`
-  | Promise<string>
-
+  | Promise<string>;
 
 export async function createDevBlock<
   ApiType extends ApiTypes,
   Calls extends CallType<ApiType> | CallType<ApiType>[]
->(
-  context: GenericContext,
-  transactions?: Calls,
-  options: BlockCreation = { allowFailures: true }
-)
-{
+>(context: GenericContext, transactions?: Calls, options: BlockCreation = { allowFailures: true }) {
   let originalBlockNumber: bigint;
 
   const containsViem =
@@ -127,7 +122,7 @@ export async function createDevBlock<
   // No need to extract events if no transactions
   if (results.length == 0) {
     return {
-      block: blockResult
+      block: blockResult,
     };
   }
 
@@ -212,6 +207,6 @@ export async function createDevBlock<
 
   return {
     block: blockResult,
-    result: Array.isArray(transactions) ? result : result[0] as any,
+    result: Array.isArray(transactions) ? result : (result[0] as any),
   };
 }
