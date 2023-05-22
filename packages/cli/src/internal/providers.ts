@@ -113,7 +113,7 @@ export function prepareProviders(providerConfigs: ProviderConfig[]): MoonwallPro
           connect: async () =>
             createPublicClient({
               transport: http(url.replace("ws", "http")),
-            }),
+            }) as PublicViem,
         };
 
       case "viemWallet":
@@ -125,7 +125,7 @@ export function prepareProviders(providerConfigs: ProviderConfig[]): MoonwallPro
               chain: await getDevChain(url),
               account: privateKeyToAccount(privateKey as `0x${string}`),
               transport: http(url.replace("ws", "http")),
-            }),
+            }) as WalletViem,
         };
 
       default:
