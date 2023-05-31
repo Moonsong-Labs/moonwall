@@ -71,6 +71,7 @@ export const execCouncilProposal = async <
 >(
   context: DevModeContext,
   polkadotCall: Call,
+  index: number = -1,
   voters: KeyringPair[] = COUNCIL_MEMBERS,
   threshold: number = COUNCIL_THRESHOLD
 ) => {
@@ -95,10 +96,13 @@ export const execCouncilProposal = async <
     .event.data[2].toHex() as string;
 
   // Dorothy vote for this proposal and close it
-
+  const proposalIndex = index >= 0 ? index : (await context.polkadotJs().query.councilCollective.proposalCount()).toNumber() - 1;
   await Promise.all(
     voters.map((voter) =>
-      context.polkadotJs().tx.councilCollective.vote(proposalHash, 0, true).signAndSend(voter)
+      context
+        .polkadotJs()
+        .tx.councilCollective.vote(proposalHash, proposalIndex, true)
+        .signAndSend(voter)
     )
   );
   await context.createBlock();
@@ -107,10 +111,10 @@ export const execCouncilProposal = async <
       .polkadotJs()
       .tx.councilCollective.close(
         proposalHash,
-        0,
+        proposalIndex,
         {
-          refTime: 1_000_000_000,
-          proofSize: 0,
+          refTime: 2_000_000_000,
+          proofSize: 100_000,
         },
         lengthBound
       )
@@ -128,7 +132,7 @@ export const proposeReferendaAndDeposit = async <
   decisionDepositer: KeyringPair,
   proposal: string | Call,
   origin
-): Promise<[Number, String]> => {
+): Promise<[number, string]> => {
   // Fetch proposal hash
   const proposalHash =
     typeof proposal == "string" ? proposal : await notePreimage(context, proposal);
@@ -276,8 +280,8 @@ export const execTechnicalCommitteeProposal = async <
         proposalHash,
         Number(proposalCount) - 1,
         {
-          refTime: 1_000_000_000,
-          proofSize: 0,
+          refTime: 2_000_000_000,
+          proofSize: 100_000,
         },
         lengthBound
       )

@@ -29,7 +29,7 @@ import {
 } from "viem";
 import { bytecode, tokenAbi } from "../_test_data/token.js";
 import { privateKeyToAccount } from "viem/accounts";
-import { localhost } from "viem/chains";
+import { localhost, polygon } from "viem/chains";
 import { stat } from "fs";
 
 describeSuite({
@@ -57,6 +57,12 @@ describeSuite({
           await context.polkadotJs().rpc.chain.getBlock()
         ).block.header.number.toNumber();
         log(`Previous block #${block}, new block #${block2}`);
+
+       const lazyTyping: any = BALTATHAR_ADDRESS
+        const balance = (await context.polkadotJs().query.system.account(baltathar.address)).data.free
+        log(balance.toBigInt())
+
+        balance
         expect(block2).to.be.greaterThan(block);
       },
     });

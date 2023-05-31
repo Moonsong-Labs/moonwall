@@ -156,14 +156,14 @@ export type ViemTransactionOptions =
  * @param {`0x${string}`} to - the destination address of the transfer
  * @param {InputAmountFormats} value - the amount to transfer. It accepts different formats including number, bigint, string or hexadecimal strings
  * @param {TOptions} [options] - (optional) additional transaction options
- * @returns {Promise<string>} - the signed raw transaction in hexadecimal string format
+ * @returns {Promise<`0x${string}`>} - the signed raw transaction in hexadecimal string format
  */
 export async function createRawTransfer<TOptions extends TransferOptions>(
   context: DevModeContext,
   to: `0x${string}`,
   value: InputAmountFormats,
   options?: TOptions
-): Promise<string> {
+): Promise<`0x${string}`> {
   const transferAmount = typeof value === "bigint" ? value : BigInt(value);
   return await createRawTransaction(context, { ...options, to, value: transferAmount });
 }
@@ -196,17 +196,16 @@ export async function createRawTransaction<TOptions extends DeepPartial<ViemTran
     .estimateGas({ account: account.address, to, value });
   const accessList = options && options.accessList ? options.accessList : [];
   const data = options && options.data ? options.data : "0x";
-
   const txnBlob: TransactionSerializable =
     type === "eip1559"
       ? {
           to,
           value,
-          maxFeePerGas: options && options.maxFeePerGas ? options.maxFeePerGas : gasPrice,
+          maxFeePerGas: options.maxFeePerGas !== undefined ? options.maxFeePerGas : gasPrice,
           maxPriorityFeePerGas:
-            options && options.maxPriorityFeePerGas ? options.maxPriorityFeePerGas : gasPrice,
-          gas: options && options.gas ? options.gas : estimatedGas,
-          nonce: options && options.nonce ? options.nonce : txnCount,
+            options.maxPriorityFeePerGas !== undefined ? options.maxPriorityFeePerGas : gasPrice,
+          gas: options.gas !== undefined ? options.gas : estimatedGas,
+          nonce: options.nonce !== undefined ? options.nonce : txnCount,
           data,
           chainId,
           type,
@@ -215,18 +214,18 @@ export async function createRawTransaction<TOptions extends DeepPartial<ViemTran
       ? {
           to,
           value,
-          gasPrice: options && options.gasPrice ? options.gasPrice : gasPrice,
-          gas: options && options.gas ? options.gas : estimatedGas,
-          nonce: options && options.nonce ? options.nonce : txnCount,
+          gasPrice: options.gasPrice !== undefined ? options.gasPrice : gasPrice,
+          gas: options.gas !== undefined ? options.gas : estimatedGas,
+          nonce: options.nonce !== undefined ? options.nonce : txnCount,
           data,
         }
       : type === "eip2930"
       ? {
           to,
           value,
-          gasPrice: options && options.gasPrice ? options.gasPrice : gasPrice,
-          gas: options && options.gas ? options.gas : estimatedGas,
-          nonce: options && options.nonce ? options.nonce : txnCount,
+          gasPrice: options.gasPrice !== undefined ? options.gasPrice : gasPrice,
+          gas: options.gas !== undefined ? options.gas : estimatedGas,
+          nonce: options.nonce !== undefined ? options.nonce : txnCount,
           data,
           chainId,
           type,
@@ -237,7 +236,6 @@ export async function createRawTransaction<TOptions extends DeepPartial<ViemTran
     // @ts-ignore
     txnBlob["accessList"] = accessList;
   }
-
   return await account.signTransaction(txnBlob);
 }
 
@@ -328,26 +326,46 @@ export async function deployCreateCompiledContract<TOptions extends ContractDepl
   };
 }
 
+//TODO: Expand this to actually use options correctly
+//TODO: Fix
 export async function prepareToDeployCompiledContract<TOptions extends ContractDeploymentOptions>(
   context: DevModeContext,
   contractName: string,
   options?: TOptions
 ) {
-  const compiled = getCompiled("MultiplyBy7");
+  const compiled = getCompiled(contractName);
   const callData = encodeDeployData({
     abi: compiled.contract.abi,
     bytecode: compiled.byteCode,
     args: [],
   }) as `0x${string}`;
 
-  const nonce = await context.viemClient("public").getTransactionCount({ address: ALITH_ADDRESS });
+  const walletClient =
+    options && options.privateKey
+      ? createWalletClient({
+          transport: http(context.viemClient("public").transport.url),
+          account: privateKeyToAccount(options.privateKey),
+          chain: await getDevChain(context.viemClient("public").transport.url),
+        })
+      : context.viemClient("wallet");
 
-  await context.viemClient("wallet").sendTransaction({ data: callData, nonce });
+  const nonce =
+    options && options.nonce !== undefined
+      ? options.nonce
+      : await context.viemClient("public").getTransactionCount({ address: ALITH_ADDRESS });
+
+  // const hash = await walletClient.sendTransaction({ data: callData, nonce });
+  const rawTx = await createRawTransaction(context, { ...options, data: callData, nonce } as any);
 
   const contractAddress = ("0x" +
     keccak256(RLP.encode([ALITH_ADDRESS, nonce]))
       .slice(12)
       .substring(14)) as `0x${string}`;
 
-  return { contractAddress, callData, abi: compiled.contract.abi, bytecode: compiled.byteCode };
+  return {
+    contractAddress,
+    callData,
+    abi: compiled.contract.abi,
+    bytecode: compiled.byteCode,
+  };
 }

@@ -141,6 +141,7 @@ export function describeSuite({
       const debug = Debug(`test:${process.env.MOON_TEST_ENV}`);
       Debug.enable("test:*");
       Debug.log = console.info.bind(console);
+      // const originalWrite = process.stderr.write.bind(process.stderr);
       return debug;
     };
 
