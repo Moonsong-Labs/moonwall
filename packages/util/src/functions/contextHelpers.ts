@@ -2,10 +2,11 @@ import "@moonbeam-network/api-augment";
 import "@polkadot/api-augment";
 import { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types";
 import { GenericExtrinsic } from "@polkadot/types/extrinsic";
-import { DispatchError, DispatchInfo, EventRecord } from "@polkadot/types/interfaces";
+import { AccountId20, DispatchError, DispatchInfo, EventRecord ,} from "@polkadot/types/interfaces";
 import { AnyTuple, RegistryError } from "@polkadot/types/types";
 import { ALITH_PRIVATE_KEY } from "../constants/accounts.js";
 import { ethers } from "ethers";
+import { u128 } from "@polkadot/types-codec";
 
 export interface BlockCreation {
   parentHash?: string;
@@ -47,6 +48,10 @@ export function extractError(events: EventRecord[] = []): DispatchError | undefi
   return filterAndApply(events, "system", ["ExtrinsicFailed"], getDispatchError)[0];
 }
 
+// export function extractFees(events: EventRecord[] = []): number {
+//   return filterAndApply(events, "balances", ["Transfer"], () => true).length;
+// }
+
 export function isExtrinsicSuccessful(events: EventRecord[] = []): boolean {
   return filterAndApply(events, "system", ["ExtrinsicSuccess"], () => true).length > 0;
 }
@@ -57,6 +62,15 @@ export function extractInfo(events: EventRecord[] = []): DispatchInfo | undefine
     "system",
     ["ExtrinsicFailed", "ExtrinsicSuccess"],
     getDispatchInfo
+  )[0];
+}
+
+export function extractFee(events: EventRecord[]=[]){
+  return  filterAndApply(
+    events,
+    "balances",
+    ["Withdraw"],
+    ({ event }: EventRecord) => event.data as unknown as { who: AccountId20; amount: u128 }
   )[0];
 }
 

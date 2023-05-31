@@ -2,6 +2,7 @@ import "@moonbeam-network/api-augment";
 
 export * from "./functions/block.js";
 export * from "./functions/common.js";
+export * from "./functions/contracts.js";
 export * from "./functions/providers.js";
 export * from "./functions/logging.js";
 export * from "./functions/contextHelpers.js";
@@ -13,3 +14,5 @@ export * from "./classes/eth-tester.js";
 export * from "./constants/accounts.js";
 export * from "./constants/chain.js";
 export * from "./constants/smartContract.js";
+
+export type { KeyringPair } from "@polkadot/keyring/types";
