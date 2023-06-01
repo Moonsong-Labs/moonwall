@@ -19,6 +19,7 @@ jobs:
           node-version: 18.x
           cache: "pnpm"
       - run: pnpm install --frozen-lockfile
+      - run: pnpm run lint && pnpm run build
       - name: Create Release Pull Request
         id: changesets
         uses: changesets/action@v1
