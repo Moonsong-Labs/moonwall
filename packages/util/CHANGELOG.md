@@ -1,5 +1,13 @@
 # @moonwall/util
 
+## 0.5.22
+
+### Patch Changes
+
+- 395f803: Updated Pkgs
+- Updated dependencies [395f803]
+  - @moonwall/types@0.5.22
+
 ## 0.5.21
 
 ### Patch Changes

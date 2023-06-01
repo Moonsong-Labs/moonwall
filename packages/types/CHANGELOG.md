@@ -1,5 +1,11 @@
 # @moonwall/types
 
+## 0.5.22
+
+### Patch Changes
+
+- 395f803: Updated Pkgs
+
 ## 0.5.20
 
 ### Patch Changes
