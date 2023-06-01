@@ -56,7 +56,7 @@
     "lint": "tsc"
   },
   "dependencies": {
-    "@polkadot/api": "^10.7.2",
+    "@polkadot/api": "^10.7.3",
     "debug": "^4.3.4",
     "ethers": "^6.4.0",
     "web3": "4.0.1-rc.1"

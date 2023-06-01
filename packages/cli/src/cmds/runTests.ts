@@ -94,7 +94,7 @@ export async function executeTests(env: Environment, additionalArgs?: {}) {
   }
 
   try {
-    const folders = env.testFileDir.map((folder) => path.join("/", folder, "/"));
+    const folders = env.testFileDir.map((folder) => path.join(".", folder, "/"));
     return await startVitest("test", folders, { ...options, ...additionalArgs });
   } catch (e) {
     console.error(e);
