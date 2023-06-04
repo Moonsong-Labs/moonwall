@@ -18,13 +18,15 @@ jobs:
           cache: "pnpm"
       - run: pnpm install --frozen-lockfile
       - run: pnpm run lint && pnpm run build
-  compile-contracts:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Install Foundry
-        run: |
-          curl -L https://foundry.paradigm.xyz | bash
-          foundryup
+  # compile-contracts:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Install Foundry
+  #       run: |
+  #         curl -L https://foundry.paradigm.xyz | bash
+  #         foundryup
+  #         forge build
+
   test_dev:
     runs-on: ubuntu-latest
     needs: ["build"]
@@ -43,6 +45,10 @@ jobs:
           pnpm run lint && pnpm run build
       - name: Download moonbeam binary
         run: pnpm moonwall download moonbeam latest ./tmp
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+      - name: Compile Contracts
+        run: forge build
       - name: Run standard dev test
         run: pnpm moonwall test dev_test
       #    - name: Run parallel dev test  <--- doesn't work for some reason
