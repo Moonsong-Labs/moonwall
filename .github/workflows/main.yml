@@ -18,14 +18,6 @@ jobs:
           cache: "pnpm"
       - run: pnpm install --frozen-lockfile
       - run: pnpm run lint && pnpm run build
-  # compile-contracts:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Install Foundry
-  #       run: |
-  #         curl -L https://foundry.paradigm.xyz | bash
-  #         foundryup
-  #         forge build
 
   test_dev:
     runs-on: ubuntu-latest

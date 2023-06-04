@@ -58,7 +58,6 @@
     "lint": "tsc"
   },
   "dependencies": {
-    "@acala-network/chopsticks": "^0.6.4",
     "@moonwall/types": "workspace:*",
     "@types/cli-progress": "^3.11.0",
     "@types/debug": "^4.1.8",
@@ -89,6 +88,7 @@
   },
   "peerDependencies": {
     "@moonbeam-network/api-augment": "^0.2302.0",
+    "@acala-network/chopsticks": "^0.6.4",
     "@moonwall/util": "workspace:*",
     "@polkadot/api": "^10.7.3",
     "@polkadot/api-augment": "^10.7.3",
@@ -103,6 +103,7 @@
     "web3-providers-ws": "4.0.1-rc.0"
   },
   "devDependencies": {
+    "@acala-network/chopsticks": "^0.6.4",
     "@moonbeam-network/api-augment": "^0.2302.0",
     "@moonwall/util": "workspace:*",
     "@polkadot/api": "^10.7.3",
