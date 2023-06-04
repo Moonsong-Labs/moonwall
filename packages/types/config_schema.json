@@ -291,6 +291,9 @@
                         },
                         "type": "array"
                     },
+                    "contracts": {
+                        "type": "string"
+                    },
                     "defaultEthTxnStyle": {
                         "$ref": "#/definitions/EthTransactionType"
                     },

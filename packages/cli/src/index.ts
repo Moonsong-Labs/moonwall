@@ -2,6 +2,7 @@ import "@moonbeam-network/api-augment";
 export * from "./lib/runner-functions.js";
 export * from "./lib/configReader.js";
 export * from "./lib/binaries.js";
+export * from "./lib/contracts.js";
 export * from "./lib/contextHelpers.js";
 export * from "./lib/globalContext.js";
 export * from "./lib/governance.js";

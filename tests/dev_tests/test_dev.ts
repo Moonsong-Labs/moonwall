@@ -1,36 +1,29 @@
 import "@moonbeam-network/api-augment";
-import "@polkadot/api-augment";
-import { describeSuite, expect, beforeAll } from "@moonwall/cli";
+import { beforeAll, describeSuite, expect, fetchCompiledContract } from "@moonwall/cli";
 import {
-  CHARLETH_ADDRESS,
+  ALITH_ADDRESS,
   BALTATHAR_ADDRESS,
+  CHARLETH_ADDRESS,
   alith,
   baltathar,
-  ALITH_ADDRESS,
-  BALTATHAR_PRIVATE_KEY,
-  CHARLETH_PRIVATE_KEY,
-  ALITH_PRIVATE_KEY,
   deployViemContract,
 } from "@moonwall/util";
-import { Signer, parseEther } from "ethers";
+import "@polkadot/api-augment";
 import { BN } from "@polkadot/util";
-import Web3 from "web3";
-import { ApiPromise } from "@polkadot/api";
+import { Signer, parseEther } from "ethers";
 import {
-  createWalletClient,
+  Abi,
   decodeErrorResult,
   decodeEventLog,
+  encodeFunctionData,
+  encodeFunctionResult,
   formatEther,
   formatGwei,
-  formatUnits,
   getContract,
-  http,
   verifyMessage,
 } from "viem";
-import { bytecode, tokenAbi } from "../_test_data/token.js";
-import { privateKeyToAccount } from "viem/accounts";
-import { localhost, polygon } from "viem/chains";
-import { stat } from "fs";
+import Web3 from "web3";
+import { bytecode as tokenBytecode, tokenAbi } from "../_test_data/token.js";
 
 describeSuite({
   id: "D01",
@@ -58,11 +51,12 @@ describeSuite({
         ).block.header.number.toNumber();
         log(`Previous block #${block}, new block #${block2}`);
 
-       const lazyTyping: any = BALTATHAR_ADDRESS
-        const balance = (await context.polkadotJs().query.system.account(baltathar.address)).data.free
-        log(balance.toBigInt())
+        const lazyTyping: any = BALTATHAR_ADDRESS;
+        const balance = (await context.polkadotJs().query.system.account(baltathar.address)).data
+          .free;
+        log(balance.toBigInt());
 
-        balance
+        balance;
         expect(block2).to.be.greaterThan(block);
       },
     });
@@ -189,7 +183,11 @@ describeSuite({
       id: "T08",
       title: "It can deploy a contract",
       test: async function () {
-        const { status, contractAddress } = await deployViemContract(context, tokenAbi, bytecode);
+        const { abi, bytecode, methods } = await fetchCompiledContract("MultiplyBy7");
+        log(methods);
+
+        const { status, contractAddress } = await deployViemContract(context, abi, bytecode);
+
         expect(status).to.be.toStrictEqual("success");
         expect(contractAddress!.length).to.be.greaterThan(0);
       },
@@ -197,19 +195,39 @@ describeSuite({
 
     it({
       id: "T09",
-      title: "It can write-interact with a contract",
+      title: "It can call with a contract",
       test: async function () {
+        const { abi, bytecode, methods } = await fetchCompiledContract("MultiplyBy7");
+        const { status, contractAddress } = await deployViemContract(context, abi, bytecode);
+
+        const timbo = await context.viemClient("public").call({
+          account: ALITH_ADDRESS,
+          to: contractAddress!,
+          value: 0n,
+          data: encodeFunctionData({abi, functionName: "multiply", args: [7n]}),
+        });
+
+        expect(BigInt(encodeFunctionResult({abi, functionName: "multiply", result: timbo.data}))).to.be.equal(49n);
+      },
+    });
+
+    it({
+      id: "T10",
+      title: "It can write-interact with a contract",
+      // modifier: "only",
+      test: async function () {
+        // log(methods)
         const { contractAddress, status, logs, hash } = await deployViemContract(
           context,
-          tokenAbi,
-          bytecode,
+          tokenAbi as Abi,
+          tokenBytecode,
           {
             gas: 10000000n,
           }
         );
 
         const contractInstance = getContract({
-          abi: tokenAbi,
+          abi: tokenAbi as Abi,
           address: contractAddress!,
           publicClient: context.viemClient("public"),
         });
@@ -218,8 +236,9 @@ describeSuite({
         const balBefore = (await contractInstance.read.balanceOf([BALTATHAR_ADDRESS])) as bigint;
 
         await context.viemClient("wallet").writeContract({
-          abi: tokenAbi,
+          abi: tokenAbi as Abi,
           address: contractAddress!,
+          value: 0n,
           functionName: "transfer",
           args: [BALTATHAR_ADDRESS, parseEther("2.0")],
         });
@@ -233,7 +252,7 @@ describeSuite({
     });
 
     it({
-      id: "T10",
+      id: "T11",
       title: "It can sign a message",
       test: async function () {
         const string = "Boom Boom Lemon";
@@ -247,10 +266,14 @@ describeSuite({
       },
     });
     it({
-      id: "T11",
+      id: "T12",
       title: "It can calculate the gas cost of a contract interaction",
       test: async function () {
-        const { status, contractAddress } = await deployViemContract(context, tokenAbi, bytecode);
+        const { status, contractAddress } = await deployViemContract(
+          context,
+          tokenAbi as Abi,
+          tokenBytecode
+        );
         log(`Deployed contract at ${contractAddress}`);
 
         const gas = await context.viemClient("public").estimateContractGas({
@@ -266,7 +289,7 @@ describeSuite({
       },
     });
     it({
-      id: "T12",
+      id: "T13",
       title: "It can calculate the gas cost of a simple balance transfer",
       test: async function () {
         const gas = await context
@@ -279,10 +302,14 @@ describeSuite({
     });
 
     it({
-      id: "T13",
+      id: "T14",
       title: "It can simulate a contract interation",
       test: async function () {
-        const { status, contractAddress } = await deployViemContract(context, tokenAbi, bytecode);
+        const { status, contractAddress } = await deployViemContract(
+          context,
+          tokenAbi as Abi,
+          tokenBytecode
+        );
 
         const { result } = await context.viemClient("public").simulateContract({
           account: ALITH_ADDRESS,
@@ -297,7 +324,7 @@ describeSuite({
     });
 
     it({
-      id: "T14",
+      id: "T15",
       title: "It can decode an error result",
       test: async function () {
         const errorData =
@@ -312,10 +339,14 @@ describeSuite({
     });
 
     it({
-      id: "T15",
+      id: "T16",
       title: "It can decode an event log",
       test: async function () {
-        const { status, contractAddress } = await deployViemContract(context, tokenAbi, bytecode);
+        const { status, contractAddress } = await deployViemContract(
+          context,
+          tokenAbi as Abi,
+          tokenBytecode
+        );
         log(`Deployed contract at ${contractAddress}`);
 
         const txHash = await context.viemClient("wallet").writeContract({

@@ -25,6 +25,7 @@ export type MoonwallConfig = {
  * @property connections - An optional array of ProviderConfig objects.
  * @property multiThreads - An optional boolean to indicate if multi-threading is enabled.
  * @property defaultEthTxnStyle - An optional default Ethereum transaction type.
+ * @property contracts - Path to foundry directory containing smart contracts for testing.
  */
 export type Environment = {
   reporters?: string[];
@@ -36,6 +37,7 @@ export type Environment = {
   connections?: ProviderConfig[];
   multiThreads?: boolean | number;
   defaultEthTxnStyle?: EthTransactionType;
+  contracts?: string;
 };
 
 /**
