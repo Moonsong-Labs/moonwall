@@ -246,6 +246,7 @@
       "name": "dev_multi",
       "testFileDir": ["tests/test_separation"],
       "multiThreads": 2,
+      "reporters": ["verbose", "html"],
       "foundation": {
         "type": "dev",
         "launchSpec": [
@@ -368,6 +369,7 @@
       "testFileDir": ["/tests/dev_tests"],
       "envVars": ["DEBUG_COLORS=1", "TIMBO_TEST_ENV='TIMBO timbo timbo'"],
       "reporters": ["verbose"],
+      "contracts": "contracts/",
       "foundation": {
         "type": "dev",
         "launchSpec": [

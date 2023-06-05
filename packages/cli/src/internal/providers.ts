@@ -15,7 +15,7 @@ import chalk from "chalk";
 import { ALITH_PRIVATE_KEY } from "@moonwall/util";
 import { createPublicClient, createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { getDevChain } from "@moonwall/util";
+import { deriveViemChain } from "@moonwall/util";
 import { ApiOptions } from "@polkadot/api/types/index.js";
 const debug = Debug("global:providers");
 
@@ -122,7 +122,7 @@ export function prepareProviders(providerConfigs: ProviderConfig[]): MoonwallPro
           type,
           connect: async () =>
             createWalletClient({
-              chain: await getDevChain(url),
+              chain: await deriveViemChain(url),
               account: privateKeyToAccount(privateKey as `0x${string}`),
               transport: http(url.replace("ws", "http")),
             }) as WalletViem,

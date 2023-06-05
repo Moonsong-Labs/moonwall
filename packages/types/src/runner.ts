@@ -220,7 +220,11 @@ export interface GenericContext {
  * ReadOnlyContext - Interface that extends from GenericContext and includes the method for waiting a certain number of blocks.
  */
 export interface ReadOnlyContext extends GenericContext {
-  waitBlock: (blocksToWaitFor?: number, chain?: string) => Promise<void>;
+  waitBlock: (
+    blocksToWaitFor?: number,
+    chain?: string,
+    mode?: "height" | "quantity"
+  ) => Promise<void>;
 }
 
 /**
@@ -228,7 +232,11 @@ export interface ReadOnlyContext extends GenericContext {
  */
 export interface ZombieContext extends GenericContext {
   upgradeRuntime: (options: UpgradePreferences) => Promise<void>;
-  waitBlock: (blocksToWaitFor?: number, chain?: string) => Promise<void>;
+  waitBlock: (
+    blocksToWaitFor?: number,
+    chain?: string,
+    mode?: "height" | "quantity"
+  ) => Promise<void>;
 }
 
 /**

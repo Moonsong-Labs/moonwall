@@ -1,30 +1,31 @@
 import "@moonbeam-network/api-augment";
-import { describe, it, beforeAll, afterAll } from "vitest";
-import { ApiPromise } from "@polkadot/api";
-import { Signer } from "ethers";
-import { Web3 } from "web3";
-import { ApiTypes } from "@polkadot/api/types/index.js";
-import { upgradeRuntime, upgradeRuntimeChopsticks } from "./upgrade.js";
 import {
+  BlockCreation,
+  ChopsticksBlockCreation,
   ChopsticksContext,
+  ConnectedProvider,
   GenericContext,
   ITestSuiteType,
+  ProviderType,
   UpgradePreferences,
   ViemApiMap,
-  ConnectedProvider,
-  ProviderType,
   ViemClientType,
 } from "@moonwall/types";
-import { MoonwallContext, contextCreator } from "./globalContext.js";
-import { BlockCreation, ChopsticksBlockCreation } from "@moonwall/types";
-import { CallType, createDevBlock } from "../internal/foundations/devModeHelpers.js";
+import { ApiPromise } from "@polkadot/api";
+import { ApiTypes } from "@polkadot/api/types/index.js";
+import { error } from "console";
+import Debug from "debug";
+import { Signer } from "ethers";
+import { afterAll, beforeAll, describe, it } from "vitest";
+import { Web3 } from "web3";
 import {
   createChopsticksBlock,
   sendSetStorageRequest,
 } from "../internal/foundations/chopsticksHelpers.js";
+import { CallType, createDevBlock } from "../internal/foundations/devModeHelpers.js";
 import { importJsonConfig } from "./configReader.js";
-import Debug, { Debugger } from "debug";
-import { error } from "console";
+import { MoonwallContext, contextCreator } from "./globalContext.js";
+import { upgradeRuntime, upgradeRuntimeChopsticks } from "./upgrade.js";
 
 const RT_VERSION = Number(process.env.MOON_RTVERSION);
 const RT_NAME = process.env.MOON_RTNAME;
@@ -138,10 +139,11 @@ export function describeSuite({
 
     const logger = () => {
       process.env.DEBUG_COLORS = "1";
+
       const debug = Debug(`test:${process.env.MOON_TEST_ENV}`);
+      debug.log = console.log.bind(process.stdout);
       Debug.enable("test:*");
-      Debug.log = console.info.bind(console);
-      // const originalWrite = process.stderr.write.bind(process.stderr);
+
       return debug;
     };
 
@@ -214,7 +216,11 @@ export function describeSuite({
       testCases({
         context: {
           ...context,
-          waitBlock: async (blocksToWaitFor: number = 1, chain: string = "parachain") => {
+          waitBlock: async (
+            blocksToWaitFor: number = 1,
+            chain: string = "parachain",
+            mode: "height" | "quantity" = "quantity"
+          ) => {
             const ctx = MoonwallContext.getContext();
             const provider = ctx.providers.find((prov) => prov.name === chain);
 
@@ -232,7 +238,9 @@ export function describeSuite({
               const newBlockNumber = (
                 await api.rpc.chain.getBlock()
               ).block.header.number.toNumber();
-              if (newBlockNumber >= currentBlockNumber + blocksToWaitFor) {
+              if (mode === "quantity" && newBlockNumber >= currentBlockNumber + blocksToWaitFor) {
+                break;
+              } else if (mode === "height" && newBlockNumber >= blocksToWaitFor) {
                 break;
               }
             }
@@ -268,7 +276,11 @@ export function describeSuite({
       testCases({
         context: {
           ...context,
-          waitBlock: async (blocksToWaitFor: number = 1, chainName?: string) => {
+          waitBlock: async (
+            blocksToWaitFor: number = 1,
+            chainName?: string,
+            mode: "height" | "quantity" = "quantity"
+          ) => {
             const ctx = MoonwallContext.getContext();
             const provider = chainName
               ? ctx.providers.find(
@@ -292,7 +304,9 @@ export function describeSuite({
               const newBlockNumber = (
                 await api.rpc.chain.getBlock()
               ).block.header.number.toNumber();
-              if (newBlockNumber >= currentBlockNumber + blocksToWaitFor) {
+              if (mode === "quantity" && newBlockNumber >= currentBlockNumber + blocksToWaitFor) {
+                break;
+              } else if (mode === "height" && newBlockNumber >= blocksToWaitFor) {
                 break;
               }
             }

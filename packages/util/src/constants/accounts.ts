@@ -1,6 +1,5 @@
 import "@moonbeam-network/api-augment";
 import { Keyring } from "@polkadot/api";
-import { KeyringPair } from "@polkadot/keyring/types.js";
 import {
   DEFAULT_GENESIS_BALANCE,
   DEFAULT_GENESIS_MAPPING,

@@ -2,7 +2,7 @@ import "@moonbeam-network/api-augment";
 import "@polkadot/api-augment";
 import { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types";
 import { GenericExtrinsic } from "@polkadot/types/extrinsic";
-import { AccountId20, DispatchError, DispatchInfo, EventRecord ,} from "@polkadot/types/interfaces";
+import { AccountId20, DispatchError, DispatchInfo, EventRecord } from "@polkadot/types/interfaces";
 import { AnyTuple, RegistryError } from "@polkadot/types/types";
 import { ALITH_PRIVATE_KEY } from "../constants/accounts.js";
 import { ethers } from "ethers";
@@ -65,8 +65,8 @@ export function extractInfo(events: EventRecord[] = []): DispatchInfo | undefine
   )[0];
 }
 
-export function extractFee(events: EventRecord[]=[]){
-  return  filterAndApply(
+export function extractFee(events: EventRecord[] = []) {
+  return filterAndApply(
     events,
     "balances",
     ["Withdraw"],

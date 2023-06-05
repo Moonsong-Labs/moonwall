@@ -96,7 +96,10 @@ export const execCouncilProposal = async <
     .event.data[2].toHex() as string;
 
   // Dorothy vote for this proposal and close it
-  const proposalIndex = index >= 0 ? index : (await context.polkadotJs().query.councilCollective.proposalCount()).toNumber() - 1;
+  const proposalIndex =
+    index >= 0
+      ? index
+      : (await context.polkadotJs().query.councilCollective.proposalCount()).toNumber() - 1;
   await Promise.all(
     voters.map((voter) =>
       context

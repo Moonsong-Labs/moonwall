@@ -37,6 +37,10 @@ jobs:
           pnpm run lint && pnpm run build
       - name: Download moonbeam binary
         run: pnpm moonwall download moonbeam latest ./tmp
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+      - name: Compile Contracts
+        run: forge build
       - name: Run standard dev test
         run: pnpm moonwall test dev_test
       #    - name: Run parallel dev test  <--- doesn't work for some reason

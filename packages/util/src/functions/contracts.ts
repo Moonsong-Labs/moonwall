@@ -1,49 +1,44 @@
 import fs from "fs";
 import path from "path";
-import type { Abi } from "abitype";
+import type { Abi } from "viem";
+import { CompiledContract } from "@moonwall/types";
 
-export type CompiledContract<TAbi extends Abi> = {
-  byteCode: `0x${string}`;
-  contract: ContractObject<TAbi>;
-  sourceCode: string;
-};
+export function getAllCompiledContracts(
+  contractsDir: string = "./",
+  recurse: boolean = false
+): string[] {
+  const contractsPath = path.isAbsolute(contractsDir)
+    ? contractsDir
+    : path.join(process.cwd(), contractsDir);
+  let contracts = fs.readdirSync(contractsPath, { withFileTypes: true });
 
-export type ContractObject<TAbi extends Abi> = {
-  abi: TAbi;
-  devdoc: any;
-  evm: any;
-  ewasm: any;
-  metadata: any;
-  storageLayout: any;
-  userdoc: any;
-};
+  let contractNames: string[] = [];
 
-export function getAllContracts(): string[] {
-  const contractsPath = path.join(__dirname, `../contracts/compiled/`);
-  const contracts = fs.readdirSync(contractsPath, { withFileTypes: true });
-  // Register all the contract code
-  return contracts
-    .filter((dirent) => dirent.isFile())
-    .map((contract) => path.basename(contract.name, ".json"));
-}
-type Contracts<T extends Abi> = { [name: string]: CompiledContract<T> };
-const contracts: Contracts<Abi> = {};
+  contracts.forEach((dirent) => {
+    const fullDirentPath = path.join(contractsPath, dirent.name);
 
-export function getCompiled<TAbi extends Abi>(name: string): CompiledContract<TAbi> {
-  const filePath = path.join(process.cwd(), "helpers", "compiled", `${name}.json`);
-  if (!fs.existsSync(filePath)) {
-    throw new Error(`Contract name (${name}) doesn't exist in test suite`);
-  }
-  if (!contracts[name]) {
-    try {
-      const json = fs.readFileSync(filePath, "utf8");
-      contracts[name] = JSON.parse(json);
-    } catch (e) {
-      throw new Error(
-        `Contract name ${name} is not compiled. Please run 'npm run pre-build-contracts`
-      );
+    if (dirent.isDirectory() && recurse) {
+      contractNames = contractNames.concat(getAllCompiledContracts(fullDirentPath, recurse));
+    } else if (dirent.isFile() && path.extname(dirent.name) === ".json") {
+      contractNames.push(path.basename(dirent.name, ".json"));
     }
+  });
+
+  return contractNames;
+}
+
+export function getCompiled<TAbi extends Abi>(contractPath: string): CompiledContract<TAbi> {
+  const filePath = path.join(process.cwd(), `${contractPath}.json`);
+  if (!fs.existsSync(filePath)) {
+    throw new Error(`Contract name (${contractPath}) doesn't exist in test suite`);
   }
-  // @ts-expect-error
-  return contracts[name];
+
+  try {
+    const json = fs.readFileSync(filePath, "utf8");
+    return JSON.parse(json);
+  } catch (e) {
+    throw new Error(
+      `Contract name ${contractPath} is not compiled. Please check compiled json exists`
+    );
+  }
 }

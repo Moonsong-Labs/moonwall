@@ -1,5 +1,6 @@
 import "@moonbeam-network/api-augment";
 import { BN } from "@polkadot/util";
+import fetch from "node-fetch";
 
 // Sort dict by key
 export function sortObjectByKeys(o) {
@@ -96,4 +97,39 @@ export function getObjectMethods(obj) {
     Object.getOwnPropertyNames(currentObj).map((item) => properties.add(item));
   } while ((currentObj = Object.getPrototypeOf(currentObj)));
   return [...properties.keys()].filter((item: any) => typeof obj[item] === "function");
+}
+
+export async function directRpcRequest(
+  endpoint: string,
+  method: string,
+  params: any[] = []
+): Promise<any> {
+  const data = {
+    jsonrpc: "2.0",
+    id: 1,
+    method,
+    params,
+  };
+
+  const response = await fetch(endpoint, {
+    method: "POST",
+    body: JSON.stringify(data),
+    headers: { "Content-Type": "application/json" },
+  });
+
+  const responseData = (await response.json()) as JsonRpcResponse;
+
+  if (responseData.error) {
+    throw new Error(responseData.error.message);
+  }
+
+  return responseData.result;
+}
+
+interface JsonRpcResponse {
+  result?: any;
+  error?: {
+    code: number;
+    message: string;
+  };
 }

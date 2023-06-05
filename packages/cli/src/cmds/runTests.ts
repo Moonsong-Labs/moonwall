@@ -66,7 +66,7 @@ export async function executeTests(env: Environment, additionalArgs?: {}) {
     watch: false,
     globals: true,
     reporters: env.reporters ? env.reporters : ["default"],
-    testTimeout: 10000,
+    testTimeout: globalConfig.defaultTestTimeout,
     hookTimeout: 500000,
     useAtomics: true,
     passWithNoTests: false,
@@ -74,7 +74,7 @@ export async function executeTests(env: Environment, additionalArgs?: {}) {
 
     include: env.include ? env.include : ["**/*{test,spec,test_,test-}*{ts,mts,cts}"],
     onConsoleLog(log, type) {
-      if (type == "stderr" && (log.trim() == "" || log.trim() == "<empty line>")) return false;
+      if (log.trim() == "" || log.trim() == "<empty line>") return false;
 
       if (log.includes("has multiple versions, ensure that there is only one installed.")) {
         return false;
