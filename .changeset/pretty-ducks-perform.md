@@ -1,7 +1,7 @@
 ---
+"@moonwall/cli": minor
 "@moonwall/types": minor
 "@moonwall/util": minor
-"@moonwall/cli": minor
 ---
 
 Added forge support
