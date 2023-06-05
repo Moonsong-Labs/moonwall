@@ -1,4 +1,4 @@
-import { DeepPartial, DevModeContext, EthTransactionType } from "@moonwall/types";
+import { DeepPartial, DevModeContext, EthTransactionType, ContractDeploymentOptions } from "@moonwall/types";
 import type { Abi } from "abitype";
 import * as RLP from "rlp";
 import type {
@@ -13,6 +13,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import { Chain } from "viem/chains";
 import { ALITH_ADDRESS, ALITH_PRIVATE_KEY } from "../constants/accounts.js";
 import { getCompiled } from "./contracts.js";
+import fetch from "node-fetch";
 
 /**
  * @name getDevChain
@@ -52,14 +53,6 @@ export async function getDevChain(url: string) {
     },
   } as const satisfies Chain;
 }
-
-export type ContractDeploymentOptions = DeepPartial<
-  Omit<DeployContractParameters, "abi" | "bytecode" | "privateKey">
-> & {
-  privateKey?: `0x${string}`;
-  args?: any[];
-  txnType?: EthTransactionType;
-};
 
 /**
  * @name deployViemContract
@@ -275,97 +268,4 @@ export async function sendRawTransaction(
   return await context
     .viemClient("public")
     .request({ method: "eth_sendRawTransaction", params: [rawTx] });
-}
-
-// export async function callRawTransaction(
-//   context: DevModeContext,
-//   txnArgs: {}
-// ): Promise<any> {
-//   return await context
-//     .viemClient("public")
-//     .request({ method: "eth_call", params: [txnArgs] });
-// }
-
-export async function deployCreateCompiledContract<TOptions extends ContractDeploymentOptions>(
-  context: DevModeContext,
-  contractName: string,
-  options?: TOptions
-) {
-  const contractCompiled = getCompiled(contractName);
-
-  const { privateKey = ALITH_PRIVATE_KEY as `0x${string}`, args = [], ...rest } = options || {};
-
-  const blob: ContractDeploymentOptions = {
-    ...rest,
-    privateKey,
-    args,
-  };
-
-  const { contractAddress, logs, status, hash } = await deployViemContract(
-    context,
-    contractCompiled.contract.abi as Abi,
-    contractCompiled.byteCode as `0x${string}`,
-    blob
-  );
-
-  const contract = getContract({
-    address: contractAddress!,
-    abi: contractCompiled.contract.abi,
-    publicClient: context.viemClient("public") as PublicClient,
-    walletClient: context.viemClient("wallet") as WalletClient,
-  });
-
-  return {
-    contractAddress: contractAddress as `0x${string}`,
-    contract,
-    logs,
-    hash,
-    status,
-    abi: contractCompiled.contract.abi,
-    bytecode: contractCompiled.byteCode,
-  };
-}
-
-//TODO: Expand this to actually use options correctly
-//TODO: Fix
-export async function prepareToDeployCompiledContract<TOptions extends ContractDeploymentOptions>(
-  context: DevModeContext,
-  contractName: string,
-  options?: TOptions
-) {
-  const compiled = getCompiled(contractName);
-  const callData = encodeDeployData({
-    abi: compiled.contract.abi,
-    bytecode: compiled.byteCode,
-    args: [],
-  }) as `0x${string}`;
-
-  const walletClient =
-    options && options.privateKey
-      ? createWalletClient({
-          transport: http(context.viemClient("public").transport.url),
-          account: privateKeyToAccount(options.privateKey),
-          chain: await getDevChain(context.viemClient("public").transport.url),
-        })
-      : context.viemClient("wallet");
-
-  const nonce =
-    options && options.nonce !== undefined
-      ? options.nonce
-      : await context.viemClient("public").getTransactionCount({ address: ALITH_ADDRESS });
-
-  // const hash = await walletClient.sendTransaction({ data: callData, nonce });
-  const rawTx = await createRawTransaction(context, { ...options, data: callData, nonce } as any);
-
-  const contractAddress = ("0x" +
-    keccak256(RLP.encode([ALITH_ADDRESS, nonce]))
-      .slice(12)
-      .substring(14)) as `0x${string}`;
-
-  return {
-    contractAddress,
-    callData,
-    abi: compiled.contract.abi,
-    bytecode: compiled.byteCode,
-  };
 }

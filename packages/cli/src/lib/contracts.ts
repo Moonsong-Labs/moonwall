@@ -2,19 +2,17 @@ import fs from "fs";
 import path from "path";
 import { importJsonConfig } from "./configReader.js";
 import chalk from "chalk";
-import type { Abi } from "viem";
-import { ForgeContract } from "@moonwall/types";
+import { Abi, PublicClient, WalletClient, getContract } from "viem";
+import { ForgeContract, ContractDeploymentOptions, DevModeContext } from "@moonwall/types";
+import { ALITH_PRIVATE_KEY, deployViemContract } from "@moonwall/util";
 
 export async function fetchCompiledContract<TAbi extends Abi>(
-  contractFile: string,
-  contractName?: string
+  contractName: string
 ): Promise<ForgeContract<TAbi>> {
   const config = await importJsonConfig();
   const contractsDir = config.environments.find(
     (env) => env.name === process.env.MOON_TEST_ENV
   )?.contracts;
-
-  const name = contractName || contractFile;
 
   if (!contractsDir) {
     throw new Error(
@@ -25,30 +23,30 @@ export async function fetchCompiledContract<TAbi extends Abi>(
     );
   }
 
-  const compiledPath = path.join(
-    process.cwd(),
-    contractsDir,
-    "/out",
-    `/${contractFile}.sol`,
-    name + ".json"
-  );
+  const compiledJsonPath = await recursiveSearch(contractsDir, `${contractName}.json`);
+  const solidityFilePath = await recursiveSearch(contractsDir, `${contractName}.sol`);
 
-  if (!fs.existsSync(compiledPath)) {
-    if (!solidityFileExists(path.join(process.cwd(), contractsDir), contractFile)) {
-      throw new Error(`Solidity contract ${contractFile}.sol doesn't exist in ${contractsDir}`);
-    }
-
+  if (!compiledJsonPath && !solidityFilePath) {
     throw new Error(
-      `Compiled contract ${name}.json doesn't exist in ${compiledPath}\n` +
+      `Neither solidity contract ${contractName}.sol nor its compiled json exists in ${contractsDir}`
+    );
+  } else if (!compiledJsonPath) {
+    throw new Error(
+      `Compiled contract ${contractName}.json doesn't exist\n` +
         `Please run ${chalk.bgWhiteBright.blackBright(
           "forge build"
-        )} to compile contract ${contractFile}.sol`
+        )} to compile contract ${contractName}.sol`
     );
   }
 
-  const json = fs.readFileSync(compiledPath, "utf8");
+  const json = fs.readFileSync(compiledJsonPath, "utf8");
   const parsed = JSON.parse(json);
-  return { abi: parsed.abi, bytecode: parsed.bytecode.object, methods: parsed.methodIdentifiers };
+  return {
+    abi: parsed.abi,
+    bytecode: parsed.bytecode.object,
+    methods: parsed.methodIdentifiers,
+    deployedBytecode: parsed.deployedBytecode.object,
+  };
 }
 
 function solidityFileExists(dir: string, contractFile: string): boolean {
@@ -65,3 +63,108 @@ function solidityFileExists(dir: string, contractFile: string): boolean {
 
   return false;
 }
+
+async function recursiveSearch(dir: string, filename: string): Promise<string | null> {
+  const files = await fs.promises.readdir(dir);
+
+  for (const file of files) {
+    const filepath = path.join(dir, file);
+    const stats = await fs.promises.stat(filepath);
+
+    if (stats.isDirectory()) {
+      const searchResult = await recursiveSearch(filepath, filename);
+
+      if (searchResult) {
+        return searchResult;
+      }
+    } else if (stats.isFile() && file === filename) {
+      return filepath;
+    }
+  }
+
+  return null;
+}
+
+export async function deployCreateCompiledContract<TOptions extends ContractDeploymentOptions>(
+  context: DevModeContext,
+  contractName: string,
+  options?: TOptions
+) {
+  const { abi, bytecode, methods } = await fetchCompiledContract(contractName);
+
+  const { privateKey = ALITH_PRIVATE_KEY as `0x${string}`, args = [], ...rest } = options || {};
+
+  const blob: ContractDeploymentOptions = {
+    ...rest,
+    privateKey,
+    args,
+  };
+
+  const { contractAddress, logs, status, hash } = await deployViemContract(
+    context,
+    abi,
+    bytecode,
+    blob
+  );
+
+  const contract = getContract({
+    address: contractAddress!,
+    abi: abi,
+    publicClient: context.viemClient("public") as PublicClient,
+    walletClient: context.viemClient("wallet") as WalletClient,
+  });
+
+  return {
+    contractAddress: contractAddress as `0x${string}`,
+    contract,
+    logs,
+    hash,
+    status,
+    abi,
+    bytecode,
+  };
+}
+
+// //TODO: Expand this to actually use options correctly
+// //TODO: Fix
+// export async function prepareToDeployCompiledContract<TOptions extends ContractDeploymentOptions>(
+//   context: DevModeContext,
+//   contractName: string,
+//   options?: TOptions
+// ) {
+//   const compiled = getCompiled(contractName);
+//   const callData = encodeDeployData({
+//     abi: compiled.contract.abi,
+//     bytecode: compiled.byteCode,
+//     args: [],
+//   }) as `0x${string}`;
+
+//   const walletClient =
+//     options && options.privateKey
+//       ? createWalletClient({
+//           transport: http(context.viemClient("public").transport.url),
+//           account: privateKeyToAccount(options.privateKey),
+//           chain: await getDevChain(context.viemClient("public").transport.url),
+//         })
+//       : context.viemClient("wallet");
+
+//   const nonce =
+//     options && options.nonce !== undefined
+//       ? options.nonce
+//       : await context.viemClient("public").getTransactionCount({ address: ALITH_ADDRESS });
+
+//   // const hash = await walletClient.sendTransaction({ data: callData, nonce });
+//   const rawTx = await createRawTransaction(context, { ...options, data: callData, nonce } as any);
+
+//   const contractAddress = ("0x" +
+//     keccak256(RLP.encode([ALITH_ADDRESS, nonce]))
+//       .slice(12)
+//       .substring(14)) as `0x${string}`;
+
+//   return {
+//     contractAddress,
+//     callData,
+//     abi: compiled.contract.abi,
+//     bytecode: compiled.byteCode,
+//   };
+// }

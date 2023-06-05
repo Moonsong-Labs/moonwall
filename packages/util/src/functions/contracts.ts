@@ -3,13 +3,23 @@ import path from "path";
 import type { Abi } from "viem";
 import { CompiledContract } from "@moonwall/types";
 
-export function getAllContracts(contractsDir: string = "./"): string[] {
-  const contractsPath = path.join(process.cwd(), contractsDir);
-  const contracts = fs.readdirSync(contractsPath, { withFileTypes: true });
-  // Register all the contract code
-  return contracts
-    .filter((dirent) => dirent.isFile())
-    .map((contract) => path.basename(contract.name, ".json"));
+export function getAllCompiledContracts(contractsDir: string = "./", recurse: boolean = false): string[] {
+  const contractsPath = path.isAbsolute(contractsDir) ? contractsDir : path.join(process.cwd(), contractsDir);
+  let contracts = fs.readdirSync(contractsPath, { withFileTypes: true });
+
+  let contractNames: string[] = [];
+
+  contracts.forEach((dirent)=>{
+    const fullDirentPath = path.join(contractsPath, dirent.name);
+
+    if (dirent.isDirectory() && recurse) {
+      contractNames = contractNames.concat(getAllCompiledContracts(fullDirentPath, recurse));
+    } else if (dirent.isFile()&& path.extname(dirent.name) === '.json') {
+      contractNames.push(path.basename(dirent.name, ".json"));
+    }
+  })
+
+  return contractNames;
 }
 
 export function getCompiled<TAbi extends Abi>(contractPath: string): CompiledContract<TAbi> {
