@@ -1,7 +1,8 @@
-import { expect, describeSuite, beforeAll, ApiPromise } from "@moonwall/cli";
+import { expect, describeSuite, beforeAll } from "@moonwall/cli";
 import { ethers } from "ethers";
 import { BALTATHAR_ADDRESS, alith } from "@moonwall/util";
 import "@moonbeam-network/api-augment";
+import { ApiPromise } from "@polkadot/api";
 
 describeSuite({
   id: "Z1",
@@ -42,6 +43,14 @@ describeSuite({
 
     it({
       id: "T03",
+      title: "Check parachain api correctly connected (2)",
+      test: async function () {
+        await context.waitBlock(5, "parachain", "height");
+      },
+    });
+
+    it({
+      id: "T04",
       title: "Can connect to parachain and execute a transaction",
       timeout: 60000,
       test: async function () {
@@ -69,7 +78,7 @@ describeSuite({
     });
 
     it({
-      id: "T04",
+      id: "T05",
       title: "Perform a runtime upgrade",
       timeout: 600000,
       modifier: "skip",

@@ -1,19 +1,11 @@
-import { DeepPartial, DevModeContext, EthTransactionType, ContractDeploymentOptions } from "@moonwall/types";
+import { ContractDeploymentOptions, DeepPartial, DevModeContext } from "@moonwall/types";
 import type { Abi } from "abitype";
-import * as RLP from "rlp";
-import type {
-  BlockTag,
-  DeployContractParameters,
-  PublicClient,
-  TransactionSerializable,
-  WalletClient,
-} from "viem";
-import { createWalletClient, encodeDeployData, getContract, http, keccak256 } from "viem";
+import { BlockTag, DeployContractParameters, TransactionSerializable, hexToNumber } from "viem";
+import { createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { Chain } from "viem/chains";
 import { ALITH_ADDRESS, ALITH_PRIVATE_KEY } from "../constants/accounts.js";
-import { getCompiled } from "./contracts.js";
-import fetch from "node-fetch";
+import { directRpcRequest } from "./common.js";
 
 /**
  * @name getDevChain
@@ -46,6 +38,42 @@ export async function getDevChain(url: string) {
       decimals: 18,
       name: "Glimmer",
       symbol: "GLMR",
+    },
+    rpcUrls: {
+      public: block,
+      default: block,
+    },
+  } as const satisfies Chain;
+}
+
+/**
+ * Derives a Viem chain object from a given HTTP endpoint.
+ *
+ * @export
+ * @param endpoint The endpoint for the JSON RPC requests.
+ * @returns A promise that resolves to an object satisfying the Chain interface, which includes
+ * properties such as the chain id, chain name, network name, native currency information,
+ * and RPC URLs.
+ * @throws Will throw an error if the RPC request fails.
+ * @example
+ * const chain = await deriveViemChain('http://localhost:8545');
+ */
+export async function deriveViemChain(endpoint: string) {
+  const httpEndpoint = endpoint.replace("ws", "http");
+  const block = { http: [httpEndpoint] };
+
+  const id = hexToNumber(await directRpcRequest(httpEndpoint, "eth_chainId"));
+  const name = await directRpcRequest(httpEndpoint, "system_chain");
+  const { tokenSymbol, tokenDecimals } = await directRpcRequest(httpEndpoint, "system_properties");
+
+  return {
+    id,
+    name,
+    network: name,
+    nativeCurrency: {
+      decimals: tokenDecimals,
+      name: tokenSymbol,
+      symbol: tokenSymbol,
     },
     rpcUrls: {
       public: block,
@@ -92,7 +120,7 @@ export async function deployViemContract<TOptions extends ContractDeploymentOpti
   const client = createWalletClient({
     transport: http(url),
     account,
-    chain: await getDevChain(url),
+    chain: await deriveViemChain(url),
   });
 
   // Enable when Viem allows it

@@ -204,10 +204,12 @@ describeSuite({
           account: ALITH_ADDRESS,
           to: contractAddress!,
           value: 0n,
-          data: encodeFunctionData({abi, functionName: "multiply", args: [7n]}),
+          data: encodeFunctionData({ abi, functionName: "multiply", args: [7n] }),
         });
 
-        expect(BigInt(encodeFunctionResult({abi, functionName: "multiply", result: timbo.data}))).to.be.equal(49n);
+        expect(
+          BigInt(encodeFunctionResult({ abi, functionName: "multiply", result: timbo.data }))
+        ).to.be.equal(49n);
       },
     });
 
