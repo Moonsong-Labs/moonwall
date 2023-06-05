@@ -368,7 +368,7 @@
       "testFileDir": ["/tests/dev_tests"],
       "envVars": ["DEBUG_COLORS=1", "TIMBO_TEST_ENV='TIMBO timbo timbo'"],
       "reporters": ["verbose"],
-      "contracts": "/contracts",
+      "contracts": "contracts/",
       "foundation": {
         "type": "dev",
         "launchSpec": [
