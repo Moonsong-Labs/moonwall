@@ -92,7 +92,7 @@
     "@polkadot/types-codec": "^10.7.3",
     "@polkadot/util": "^12.1.2",
     "ethers": "^6.4.0",
-    "web3": "4.0.1-rc.0"
+    "web3": "4.0.1-rc.2"
   },
   "devDependencies": {
     "@moonbeam-network/api-augment": "^0.2302.0",
@@ -109,7 +109,7 @@
     "regenerator-runtime": "^0.13.11",
     "tsup": "^6.7.0",
     "typescript": "^5.0.4",
-    "web3": "4.0.1-rc.0"
+    "web3": "4.0.1-rc.2"
   },
   "publishConfig": {
     "access": "public"
