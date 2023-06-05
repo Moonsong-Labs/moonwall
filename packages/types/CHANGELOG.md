@@ -1,5 +1,15 @@
 # @moonwall/types
 
+## 1.0.0
+
+### Minor Changes
+
+- fa3b546: Added forge support
+  - [#47](https://github.com/Moonsong-Labs/moonwall/issues/47)
+  - [#123](https://github.com/Moonsong-Labs/moonwall/issues/123)
+  - [#132](https://github.com/Moonsong-Labs/moonwall/issues/132)
+  - [#125](https://github.com/Moonsong-Labs/moonwall/issues/125)
+
 ## 0.5.22
 
 ### Patch Changes
