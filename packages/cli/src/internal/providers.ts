@@ -19,6 +19,7 @@ import { deriveViemChain } from "@moonwall/util";
 import { ApiOptions } from "@polkadot/api/types/index.js";
 const debug = Debug("global:providers");
 
+//TODO: Make Generic /w function overloads
 export function prepareProviders(providerConfigs: ProviderConfig[]): MoonwallProvider[] {
   return providerConfigs.map(({ name, endpoints, type, rpc }) => {
     const url = endpoints.includes("ENV_VAR") ? process.env.WSS_URL! : endpoints[0];
@@ -41,7 +42,7 @@ export function prepareProviders(providerConfigs: ProviderConfig[]): MoonwallPro
               options["rpc"] = rpc;
             }
 
-            const api = await ApiPromise.create(options);
+            const api = await ApiPromise.create(options as ApiOptions);
             await api.isReady;
             return api;
           },
@@ -56,6 +57,8 @@ export function prepareProviders(providerConfigs: ProviderConfig[]): MoonwallPro
           connect: async () => {
             const options = {
               provider: new WsProvider(url),
+              initWasm: false,
+              isPedantic: false,
               rpc: rpcDefinitions,
               typesBundle: types,
               noInitWarn: true,
@@ -138,6 +141,7 @@ export function prepareProviders(providerConfigs: ProviderConfig[]): MoonwallPro
   });
 }
 
+//TODO: Make Generic /w function overloads
 export async function populateProviderInterface(
   name: string,
   type: ProviderType,
