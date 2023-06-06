@@ -1,5 +1,15 @@
 # @moonwall/cli
 
+## 1.0.1
+
+### Patch Changes
+
+- 50a9887: Speed optimization
+  - Updated polkadotJs default args for speed
+- Updated dependencies [50a9887]
+  - @moonwall/types@1.0.1
+  - @moonwall/util@1.0.1
+
 ## 1.0.0
 
 ### Minor Changes

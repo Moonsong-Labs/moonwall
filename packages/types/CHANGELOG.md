@@ -1,5 +1,12 @@
 # @moonwall/types
 
+## 1.0.1
+
+### Patch Changes
+
+- 50a9887: Speed optimization
+  - Updated polkadotJs default args for speed
+
 ## 1.0.0
 
 ### Minor Changes
