@@ -92,7 +92,7 @@ export async function deployCreateCompiledContract<TOptions extends ContractDepl
 ) {
   const { abi, bytecode, methods } = await fetchCompiledContract(contractName);
 
-  const { privateKey = ALITH_PRIVATE_KEY as `0x${string}`, args = [], ...rest } = options || {};
+  const { privateKey = ALITH_PRIVATE_KEY, args = [], ...rest } = options || {};
 
   const blob: ContractDeploymentOptions = {
     ...rest,
