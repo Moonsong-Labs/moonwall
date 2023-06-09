@@ -1,5 +1,17 @@
 # @moonwall/cli
 
+## 1.0.4
+
+### Patch Changes
+
+- c7f0b52: Fix GrepTest for Running networks
+  - [#144](https://github.com/Moonsong-Labs/moonwall/issues/144)
+- 7085c51: Tansii Changes
+  - [#145](https://github.com/Moonsong-Labs/moonwall/issues/145)
+- Updated dependencies [7085c51]
+  - @moonwall/types@1.0.4
+  - @moonwall/util@1.0.4
+
 ## 1.0.3
 
 ### Patch Changes
