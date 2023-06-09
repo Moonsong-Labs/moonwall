@@ -1,5 +1,11 @@
 # @moonwall/types
 
+## 1.0.3
+
+### Patch Changes
+
+- 67e0359: Updated Web3
+
 ## 1.0.2
 
 ### Patch Changes
