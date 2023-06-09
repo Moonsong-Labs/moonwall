@@ -1,5 +1,11 @@
 # @moonwall/types
 
+## 1.0.2
+
+### Patch Changes
+
+- 6cd511d: pkg update
+
 ## 1.0.1
 
 ### Patch Changes
