@@ -19,7 +19,7 @@
     "typecheck": "pnpm -r --filter='./packages/**' run typecheck"
   },
   "devDependencies": {
-    "@acala-network/chopsticks": "^0.6.5",
+    "@acala-network/chopsticks": "^0.6.6",
     "@changesets/cli": "^2.26.1",
     "@mapbox/node-pre-gyp": "^1.0.10",
     "@moonbeam-network/api-augment": "^0.2301.0",

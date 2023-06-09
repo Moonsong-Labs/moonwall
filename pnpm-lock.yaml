@@ -10,8 +10,8 @@ importers:
   .:
     devDependencies:
       '@acala-network/chopsticks':
-        specifier: ^0.6.5
-        version: 0.6.5(debug@4.3.4)(ts-node@10.9.1)
+        specifier: ^0.6.6
+        version: 0.6.6(debug@4.3.4)(ts-node@10.9.1)
       '@changesets/cli':
         specifier: ^2.26.1
         version: 2.26.1
@@ -164,8 +164,8 @@ importers:
         version: 17.7.2
     devDependencies:
       '@acala-network/chopsticks':
-        specifier: ^0.6.4
-        version: 0.6.5(debug@4.3.4)(ts-node@10.9.1)
+        specifier: ^0.6.6
+        version: 0.6.6(debug@4.3.4)(ts-node@10.9.1)
       '@moonbeam-network/api-augment':
         specifier: ^0.2302.0
         version: 0.2302.0
@@ -369,15 +369,15 @@ importers:
 
 packages:
 
-  /@acala-network/chopsticks-executor@0.6.5:
-    resolution: {integrity: sha512-6hGkhE8FqryeVKa8LDyjSBIvZyoh856WLDvyfIHBFzYxdo2XHqxjkSG2MgYn/3/K1ucinvXfsHGw6FtjfixsoQ==}
+  /@acala-network/chopsticks-executor@0.6.6:
+    resolution: {integrity: sha512-4darWv6AsuNMCPgGhvHfNYSB0KF5RXPks7rwmGcFIHIUAVp5H7ZegHl5lkDEeXLNSqAbduGE4wY913FHJ0uyog==}
     dev: true
 
-  /@acala-network/chopsticks@0.6.5(debug@4.3.4)(ts-node@10.9.1):
-    resolution: {integrity: sha512-xzfj4viFb0ZJLh8Vm3feaEzjp+V8TYqFNlfnF4Antxmw1rnJCssS8Iz4Huce80y/ZYX+l1WT6mxxSQsN+mB/Rw==}
+  /@acala-network/chopsticks@0.6.6(debug@4.3.4)(ts-node@10.9.1):
+    resolution: {integrity: sha512-PkWg/Y8TqaAkAsa+SFkmFrxnE3LtPdbAK+wvC0oJ6+rJSybEfqbqL9+LDhgvATPJ8q/mh5Mh+ydrR/+bEorrIA==}
     hasBin: true
     dependencies:
-      '@acala-network/chopsticks-executor': 0.6.5
+      '@acala-network/chopsticks-executor': 0.6.6
       '@polkadot/api': 10.8.1
       axios: 1.4.0(debug@4.3.4)
       js-yaml: 4.1.0
@@ -2074,13 +2074,13 @@ packages:
     resolution: {integrity: sha512-bcKpo1oj54hGholplGLpqPHRbIsnbixFtc06nwuNM5/dwSXOq/AAYoIBRsBmnZJSdfeNW5rnff7NTAz3ZCqR9Q==}
     dependencies:
       '@noble/curves': 1.0.0
-      '@noble/hashes': 1.3.0
+      '@noble/hashes': 1.3.1
       '@scure/base': 1.1.1
 
   /@scure/bip39@1.2.0:
     resolution: {integrity: sha512-SX/uKq52cuxm4YFXWFaVByaSHJh2w3BnokVSeUJVCv6K7WulT9u2BuNRBhuFl8vAuYnzx9bEu9WgpcNYTrYieg==}
     dependencies:
-      '@noble/hashes': 1.3.0
+      '@noble/hashes': 1.3.1
       '@scure/base': 1.1.1
 
   /@sqltools/formatter@1.2.5:
