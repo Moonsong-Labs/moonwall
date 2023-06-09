@@ -1,5 +1,14 @@
 # @moonwall/cli
 
+## 1.0.3
+
+### Patch Changes
+
+- 67e0359: Updated Web3
+- Updated dependencies [67e0359]
+  - @moonwall/types@1.0.3
+  - @moonwall/util@1.0.3
+
 ## 1.0.2
 
 ### Patch Changes
