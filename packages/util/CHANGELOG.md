@@ -1,5 +1,13 @@
 # @moonwall/util
 
+## 1.0.2
+
+### Patch Changes
+
+- 6cd511d: pkg update
+- Updated dependencies [6cd511d]
+  - @moonwall/types@1.0.2
+
 ## 1.0.1
 
 ### Patch Changes
