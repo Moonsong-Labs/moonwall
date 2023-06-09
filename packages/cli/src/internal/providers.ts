@@ -17,11 +17,12 @@ import { createPublicClient, createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { deriveViemChain } from "@moonwall/util";
 import { ApiOptions } from "@polkadot/api/types/index.js";
+import { OverrideBundleType } from "@polkadot/types/types/registry";
 const debug = Debug("global:providers");
 
 //TODO: Make Generic /w function overloads
 export function prepareProviders(providerConfigs: ProviderConfig[]): MoonwallProvider[] {
-  return providerConfigs.map(({ name, endpoints, type, rpc }) => {
+  return providerConfigs.map(({ name, endpoints, type, rpc, additionalTypes }) => {
     const url = endpoints.includes("ENV_VAR") ? process.env.WSS_URL! : endpoints[0];
     const privateKey = process.env.MOON_PRIV_KEY || ALITH_PRIVATE_KEY;
 
@@ -32,17 +33,23 @@ export function prepareProviders(providerConfigs: ProviderConfig[]): MoonwallPro
           name,
           type,
           connect: async () => {
-            const options = {
+            const options: ApiOptions = {
               provider: new WsProvider(url),
               initWasm: false,
               noInitWarn: true,
+              rpc: !!rpc ? { ...rpcDefinitions, ...rpc } : rpcDefinitions,
+              typesBundle: !!additionalTypes ? additionalTypes : undefined,
             };
 
             if (!!rpc) {
               options["rpc"] = rpc;
             }
 
-            const api = await ApiPromise.create(options as ApiOptions);
+            if (!!additionalTypes) {
+              options["typesBundle"] = { ...additionalTypes };
+            }
+
+            const api = await ApiPromise.create(options);
             await api.isReady;
             return api;
           },
@@ -55,20 +62,16 @@ export function prepareProviders(providerConfigs: ProviderConfig[]): MoonwallPro
           name,
           type,
           connect: async () => {
-            const options = {
+            const options: ApiOptions = {
               provider: new WsProvider(url),
               initWasm: false,
               isPedantic: false,
-              rpc: rpcDefinitions,
-              typesBundle: types,
+              rpc: !!rpc ? { ...rpcDefinitions, ...rpc } : rpcDefinitions,
+              typesBundle: types as OverrideBundleType,
               noInitWarn: true,
             };
 
-            if (!!rpc) {
-              options["rpc"] = { ...rpc };
-            }
-
-            const moonApi = await ApiPromise.create(options as ApiOptions);
+            const moonApi = await ApiPromise.create(options);
             await moonApi.isReady;
             return moonApi;
           },

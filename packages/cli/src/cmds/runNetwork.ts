@@ -155,7 +155,8 @@ export async function runNetwork(args) {
 
       case 5:
         await resolveGrepChoice(env);
-
+        break;
+        
       case 6:
         const quit = await inquirer.prompt(questions.find(({ name }) => name == "Quit"));
         if (quit.Quit === true) {
@@ -313,6 +314,7 @@ const resolveGrepChoice = async (env: Environment) => {
     message: `What pattern would you like to filter for (ID/Title): `,
     default: "D01T01",
   });
+  process.env.MOON_RECYCLE = "true";
   return await executeTests(env, { testNamePattern: choice.grep });
 };
 

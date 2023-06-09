@@ -155,6 +155,7 @@ export interface ProviderConfig {
   type: ProviderType;
   endpoints: string[];
   rpc?: IRpcBundle;
+  additionalTypes?: TypesBundle;
 }
 
 // TODO: Make Provider Sub-types (for viem and polkadot.js)
@@ -226,3 +227,24 @@ export interface IRpcModule {
 export interface IRpcBundle {
   [moduleName: string]: IRpcModule;
 }
+
+/**
+ * Represents a collection of GenericData.
+ * It's an object where each key is a string and the corresponding value is a GenericData object.
+ *
+ * @example
+ * ```typescript
+ * const example: TypesBundle = {
+ *   ContainerChainGenesisData: {
+ *     id: "Vec<u8>"
+ *   }
+ * };
+ * ```
+ */
+export type TypesBundle = {
+  [key: string]: GenericData;
+};
+
+export type GenericData = {
+  [key: string]: string;
+};
