@@ -99,8 +99,8 @@
     "@polkadot/util": "^12.1.2",
     "ethers": "^6.5.1",
     "viem": "^1.0.2",
-    "web3": "4.0.1-rc.2",
-    "web3-providers-ws": "4.0.1-rc.2"
+    "web3": "4.0.1",
+    "web3-providers-ws": "4.0.1"
   },
   "devDependencies": {
     "@acala-network/chopsticks": "^0.6.6",
@@ -119,8 +119,8 @@
     "typescript": "^5.0.4",
     "typescript-json-schema": "^0.55.0",
     "viem": "^1.0.2",
-    "web3": "4.0.1-rc.2",
-    "web3-providers-ws": "4.0.1-rc.2"
+    "web3": "4.0.1",
+    "web3-providers-ws": "4.0.1"
   },
   "publishConfig": {
     "access": "public"
