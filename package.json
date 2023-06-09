@@ -19,7 +19,7 @@
     "typecheck": "pnpm -r --filter='./packages/**' run typecheck"
   },
   "devDependencies": {
-    "@acala-network/chopsticks": "^0.6.5",
+    "@acala-network/chopsticks": "^0.6.6",
     "@changesets/cli": "^2.26.1",
     "@mapbox/node-pre-gyp": "^1.0.10",
     "@moonbeam-network/api-augment": "^0.2301.0",
@@ -35,12 +35,12 @@
     "@types/node": "^18.16.16",
     "@vitest/utils": "^0.29.8",
     "debug": "^4.3.4",
-    "ethers": "^6.4.2",
+    "ethers": "^6.5.1",
     "pnpm": "7.23.0",
     "prettier": "^2.8.8",
     "rimraf": "^4.4.1",
     "typescript": "^5.1.3",
-    "viem": "^0.3.50",
+    "viem": "^1.0.2",
     "vitest": "^0.31.4"
   },
   "pnpm": {
