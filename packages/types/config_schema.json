@@ -211,6 +211,16 @@
         "ProviderConfig": {
             "description": "The configuration object for a provider.",
             "properties": {
+                "additionalTypes": {
+                    "additionalProperties": {
+                        "additionalProperties": {
+                            "type": "string"
+                        },
+                        "type": "object"
+                    },
+                    "description": "Represents a collection of GenericData.\nIt's an object where each key is a string and the corresponding value is a GenericData object.",
+                    "type": "object"
+                },
                 "endpoints": {
                     "items": {
                         "type": "string"
