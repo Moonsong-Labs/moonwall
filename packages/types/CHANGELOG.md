@@ -1,5 +1,12 @@
 # @moonwall/types
 
+## 1.0.4
+
+### Patch Changes
+
+- 7085c51: Tansii Changes
+  - [#145](https://github.com/Moonsong-Labs/moonwall/issues/145)
+
 ## 1.0.3
 
 ### Patch Changes
