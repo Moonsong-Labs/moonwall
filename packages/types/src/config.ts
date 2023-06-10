@@ -4,12 +4,14 @@
  * @property $schema - The JSON schema for the config.
  * @property label - A label for the config.
  * @property defaultTestTimeout - The default timeout for tests.
+ * @property scriptsDir - Optional path to a directory containing scripts.
  * @property environments - An array of Environment objects for testing.
  */
 export type MoonwallConfig = {
   $schema: string;
   label: string;
   defaultTestTimeout: number;
+  scriptsDir?: string;
   environments: Environment[];
 };
 
@@ -26,6 +28,7 @@ export type MoonwallConfig = {
  * @property multiThreads - An optional boolean to indicate if multi-threading is enabled.
  * @property defaultEthTxnStyle - An optional default Ethereum transaction type.
  * @property contracts - Path to foundry directory containing smart contracts for testing.
+ * @property runScripts - An optional array of scripts to run before testing.
  */
 export type Environment = {
   reporters?: string[];
@@ -38,6 +41,7 @@ export type Environment = {
   multiThreads?: boolean | number;
   defaultEthTxnStyle?: EthTransactionType;
   contracts?: string;
+  runScripts?: string[];
 };
 
 /**
