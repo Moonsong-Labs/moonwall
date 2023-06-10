@@ -42,26 +42,11 @@ export async function fetchCompiledContract<TAbi extends Abi>(
   const json = fs.readFileSync(compiledJsonPath, "utf8");
   const parsed = JSON.parse(json);
   return {
-    abi: parsed.abi,
-    bytecode: parsed.bytecode.object,
-    methods: parsed.methodIdentifiers,
-    deployedBytecode: parsed.deployedBytecode.object,
+    abi: parsed.contract.abi,
+    bytecode: parsed.byteCode,
+    methods: parsed.contract.evm.methodIdentifiers,
+    deployedBytecode: parsed.contract.evm.bytecode,
   };
-}
-
-function solidityFileExists(dir: string, contractFile: string): boolean {
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-
-  for (const entry of entries) {
-    const res = path.resolve(dir, entry.name);
-    if (entry.isDirectory()) {
-      if (solidityFileExists(res, contractFile)) return true;
-    } else if (entry.isFile() && entry.name === contractFile + ".sol") {
-      return true;
-    }
-  }
-
-  return false;
 }
 
 async function recursiveSearch(dir: string, filename: string): Promise<string | null> {
@@ -122,6 +107,7 @@ export async function deployCreateCompiledContract<TOptions extends ContractDepl
     status,
     abi,
     bytecode,
+    methods
   };
 }
 
