@@ -1,5 +1,13 @@
 # @moonwall/types
 
+## 2.0.0
+
+### Minor Changes
+
+- d21fe62: Script support
+  - [#74](https://github.com/Moonsong-Labs/moonwall/issues/74)
+  - Removed foundry support
+
 ## 1.0.4
 
 ### Patch Changes

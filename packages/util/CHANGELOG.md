@@ -1,5 +1,12 @@
 # @moonwall/util
 
+## 2.0.0
+
+### Patch Changes
+
+- Updated dependencies [d21fe62]
+  - @moonwall/types@2.0.0
+
 ## 1.0.4
 
 ### Patch Changes
