@@ -49,7 +49,7 @@ export async function fetchCompiledContract<TAbi extends Abi>(
   };
 }
 
-async function recursiveSearch(dir: string, filename: string): Promise<string | null> {
+export async function recursiveSearch(dir: string, filename: string): Promise<string | null> {
   const files = await fs.promises.readdir(dir);
 
   for (const file of files) {

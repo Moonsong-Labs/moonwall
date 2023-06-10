@@ -6,12 +6,13 @@ import { Environment } from "@moonwall/types";
 import fs from "node:fs";
 import path from "path";
 import chalk from "chalk";
+import { execSync } from "node:child_process";
 
 export async function testCmd(envName: string, additionalArgs?: {}) {
   const globalConfig = await importJsonConfig();
   const env = globalConfig.environments.find(({ name }) => name === envName)!;
   process.env.MOON_TEST_ENV = envName;
-  await loadEnvVars();
+  // process.env.MOON_RUN_SCRIPTS = "true";
   if (!!!env) {
     const envList = globalConfig.environments.map((env) => env.name);
     throw new Error(
@@ -19,6 +20,47 @@ export async function testCmd(envName: string, additionalArgs?: {}) {
         envName
       )}\n Environments defined in config are: ${envList}\n`
     );
+  }
+  await loadEnvVars();
+
+  if (
+    process.env.MOON_RUN_SCRIPTS == "true" &&
+    globalConfig.scriptsDir &&
+    env.runScripts &&
+    env.runScripts.length > 0
+  ) {
+    const scriptsDir = globalConfig.scriptsDir;
+    const files = await fs.promises.readdir(scriptsDir);
+
+    for (const scriptCommand of env.runScripts) {
+      try {
+        const script = scriptCommand.split(" ")[0];
+        const ext = path.extname(script);
+        const scriptPath = path.join(process.cwd(), scriptsDir, scriptCommand);
+
+        if (!files.includes(script)) {
+          throw new Error(`Script ${script} not found in ${scriptsDir}`);
+        }
+
+        console.log(`========== Executing script: ${chalk.bgGrey.greenBright(script)} ==========`);
+
+        switch (ext) {
+          case ".js":
+            execSync("node " + scriptPath, { stdio: "inherit" });
+            break;
+          case ".ts":
+            execSync("ts-node-esm " + scriptPath, { stdio: "inherit" });
+            break;
+          case ".sh":
+            execSync(scriptPath, { stdio: "inherit" });
+            break;
+          default:
+            console.log(`${ext} not supported, skipping ${script}`);
+        }
+      } catch (err) {
+        console.error(`Error executing script: ${chalk.bgGrey.redBright(err)}`);
+      }
+    }
   }
 
   const vitest = await executeTests(env, additionalArgs);

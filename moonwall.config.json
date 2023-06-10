@@ -2,6 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/Moonsong-Labs/moonwall/main/packages/types/config_schema.json",
   "label": "Global Test Config 🐯",
   "defaultTestTimeout": 60000,
+  "scriptsDir": "scripts/",
   "environments": [
     {
       "name": "viem_test",
@@ -90,6 +91,7 @@
       "foundation": {
         "type": "read_only"
       },
+      "runScripts": ["compile-contracts.ts compile -p contracts/precompiles", "greeting.js", "shelley_prose.sh"],
       "connections": []
     },
     {
@@ -370,6 +372,7 @@
       "envVars": ["DEBUG_COLORS=1", "TIMBO_TEST_ENV='TIMBO timbo timbo'"],
       "reporters": ["verbose"],
       "contracts": "contracts/",
+      "runScripts": ["compile-contracts.ts compile -p contracts/precompiles"],
       "foundation": {
         "type": "dev",
         "launchSpec": [
