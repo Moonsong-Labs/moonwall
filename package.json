@@ -49,5 +49,10 @@
       "@moonwall/types": "workspace:*",
       "@moonwall/util": "workspace:*"
     }
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.9.1",
+    "solc": "^0.8.19",
+    "ts-node": "^10.9.1"
   }
 }

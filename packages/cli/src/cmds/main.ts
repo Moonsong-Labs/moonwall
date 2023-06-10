@@ -105,6 +105,7 @@ async function mainMenu(config: MoonwallConfig) {
     case "test":
       const chosenTestEnv = await chooseTestEnv(config);
       if (chosenTestEnv.envName !== "back") {
+        process.env.MOON_RUN_SCRIPTS = "true";
         await testCmd(chosenTestEnv.envName);
         await inquirer.prompt({
           name: "test complete",

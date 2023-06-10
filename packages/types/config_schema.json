@@ -337,6 +337,12 @@
                         },
                         "type": "array"
                     },
+                    "runScripts": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
                     "testFileDir": {
                         "items": {
                             "type": "string"
@@ -349,6 +355,9 @@
             "type": "array"
         },
         "label": {
+            "type": "string"
+        },
+        "scriptsDir": {
             "type": "string"
         }
     },
