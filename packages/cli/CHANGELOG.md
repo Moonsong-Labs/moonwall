@@ -1,5 +1,19 @@
 # @moonwall/cli
 
+## 2.0.0
+
+### Minor Changes
+
+- d21fe62: Script support
+  - [#74](https://github.com/Moonsong-Labs/moonwall/issues/74)
+  - Removed foundry support
+
+### Patch Changes
+
+- Updated dependencies [d21fe62]
+  - @moonwall/types@2.0.0
+  - @moonwall/util@2.0.0
+
 ## 1.0.4
 
 ### Patch Changes
