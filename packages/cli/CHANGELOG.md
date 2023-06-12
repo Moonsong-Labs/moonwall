@@ -1,5 +1,11 @@
 # @moonwall/cli
 
+## 2.0.2
+
+### Patch Changes
+
+- d27c46c: fix again
+
 ## 2.0.1
 
 ### Patch Changes
