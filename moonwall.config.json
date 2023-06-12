@@ -39,6 +39,7 @@
     {
       "name": "zombie_multi_para",
       "testFileDir": ["tests/multizombie"],
+      
       "foundation": {
         "type": "zombie",
         "zombieSpec": {
