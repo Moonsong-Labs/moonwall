@@ -1,5 +1,11 @@
 # @moonwall/cli
 
+## 2.0.1
+
+### Patch Changes
+
+- 2617136: Fix for scripts
+
 ## 2.0.0
 
 ### Minor Changes
