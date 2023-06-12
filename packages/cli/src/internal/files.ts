@@ -3,16 +3,17 @@ import chalk from "chalk";
 import os from "node:os";
 
 export async function checkExists(path: string) {
-  const fsResult = fs.existsSync(path);
+  const binPath = path.split(" ")[0];
+  const fsResult = fs.existsSync(binPath);
   if (!fsResult) {
     throw new Error(
-      `No binary file found at location: ${path} \n Are you sure your ${chalk.bgWhiteBright.blackBright(
+      `No binary file found at location: ${binPath} \n Are you sure your ${chalk.bgWhiteBright.blackBright(
         "moonwall.config.json"
       )} file has the correct "binPath" in launchSpec?`
     );
   }
 
-  const binArch = await getBinaryArchitecture(path);
+  const binArch = await getBinaryArchitecture(binPath);
   const currentArch = os.arch();
   if (binArch !== currentArch && binArch !== "unknown") {
     throw new Error(
@@ -30,15 +31,16 @@ export async function checkExists(path: string) {
 }
 
 export function checkAccess(path: string) {
+  const binPath = path.split(" ")[0];
   try {
-    fs.accessSync(path, fs.constants.X_OK);
+    fs.accessSync(binPath, fs.constants.X_OK);
   } catch (err) {
-    console.error(`The file ${path} is not executable`);
-    throw new Error(`The file at ${path} , lacks execute permissions.`);
+    console.error(`The file ${binPath} is not executable`);
+    throw new Error(`The file at ${binPath} , lacks execute permissions.`);
   }
 }
 
-async function getBinaryArchitecture(filePath) {
+async function getBinaryArchitecture(filePath: string) {
   return new Promise((resolve, reject) => {
     const architectureMap = {
       0x0: "unknown",
