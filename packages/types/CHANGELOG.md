@@ -1,5 +1,11 @@
 # @moonwall/types
 
+## 2.0.3
+
+### Patch Changes
+
+- 116aed0: Updated Pkgs
+
 ## 2.0.0
 
 ### Minor Changes

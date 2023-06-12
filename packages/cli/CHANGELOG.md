@@ -1,5 +1,14 @@
 # @moonwall/cli
 
+## 2.0.3
+
+### Patch Changes
+
+- 116aed0: Updated Pkgs
+- Updated dependencies [116aed0]
+  - @moonwall/types@2.0.3
+  - @moonwall/util@2.0.3
+
 ## 2.0.2
 
 ### Patch Changes
