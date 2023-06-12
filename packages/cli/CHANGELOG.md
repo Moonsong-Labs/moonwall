@@ -1,5 +1,12 @@
 # @moonwall/cli
 
+## 2.0.4
+
+### Patch Changes
+
+- 3b6b2df: Minor tansii fix
+  - [#153](https://github.com/Moonsong-Labs/moonwall/issues/153)
+
 ## 2.0.3
 
 ### Patch Changes
