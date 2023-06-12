@@ -45,7 +45,7 @@ export async function fetchCompiledContract<TAbi extends Abi>(
     abi: parsed.contract.abi,
     bytecode: parsed.byteCode,
     methods: parsed.contract.evm.methodIdentifiers,
-    deployedBytecode: parsed.contract.evm.bytecode,
+    deployedBytecode: ("0x" + parsed.contract.evm.deployedBytecode.object) as `0x${string}`,
   };
 }
 
@@ -107,7 +107,7 @@ export async function deployCreateCompiledContract<TOptions extends ContractDepl
     status,
     abi,
     bytecode,
-    methods
+    methods,
   };
 }
 
