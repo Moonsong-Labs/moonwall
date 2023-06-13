@@ -395,5 +395,13 @@ describeSuite({
         expect(balanceAfter).toBeLessThan(balBefore);
       },
     });
+
+    it({
+      id: "T18",
+      title: "It can use different apis",
+      test: async function () {
+context.api("ethers").getBalance()
+      },
+    });
   },
 });

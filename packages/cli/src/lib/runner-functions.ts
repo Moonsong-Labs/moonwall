@@ -6,10 +6,14 @@ import {
   ConnectedProvider,
   GenericContext,
   ITestSuiteType,
+  ProviderApi,
   ProviderType,
+  PublicViem,
   UpgradePreferences,
   ViemApiMap,
   ViemClientType,
+  WalletViem,
+  ProviderMap,
 } from "@moonwall/types";
 import { ApiPromise } from "@polkadot/api";
 import { ApiTypes } from "@polkadot/api/types/index.js";
@@ -103,10 +107,29 @@ export function describeSuite({
     await MoonwallContext.destroy();
   });
 
+  const tim = getApi("viemPublic");
+  function getApi(type: "polkadotJs", apiName?: string): ApiPromise;
+  function getApi(type: "ethers", apiName?: string): Signer;
+  function getApi(type: "web3", apiName?: string): Web3;
+  function getApi(type: "viemPublic", apiName?: string): PublicViem;
+  function getApi(type: "viemWallet", apiName?: string): WalletViem;
+  function getApi<T extends ProviderType>(type: T, apiName?: string) {
+    if (type == "polkadotJs") {
+      return apiName
+        ? ctx.providers.find(
+            (a) => (a.type == "moon" || a.type == "polkadotJs") && a.name === apiName
+          )!.api
+        : ctx.providers.find((a) => a.type == "moon" || a.type == "polkadotJs")!.api;
+    } else {
+      return apiName
+        ? ctx.providers.find((a) => a.type == type && a.name === apiName)!.api
+        : ctx.providers.find((a) => a.type == type)!.api;
+    }
+  }
+
   describe(`🗃️  #${id} ${title}`, function () {
     const context: GenericContext = {
-      providers: {},
-
+      api: (type: ProviderType, name?: string) => getApi(type, name),
       viemClient: <T extends ViemClientType>(subType: T): ViemApiMap[T] => {
         let provider: ConnectedProvider | undefined;
         if (subType === "public") {
@@ -197,7 +220,7 @@ export function describeSuite({
               signer: env.defaultSigner || { type: "ethereum", privateKey: ALITH_PRIVATE_KEY },
               allowFailures:
                 env.defaultAllowFailures === undefined ? true : env.defaultAllowFailures,
-              finalize: env.defaultFinalization === undefined ? true : env.defaultFinalization
+              finalize: env.defaultFinalization === undefined ? true : env.defaultFinalization,
             };
             return await createDevBlock(context, transactions, { ...defaults, ...options });
           },

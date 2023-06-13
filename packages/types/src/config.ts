@@ -171,16 +171,9 @@ export interface ProviderConfig {
 // TODO: Make Provider Sub-types (for viem and polkadot.js)
 /**
  * @name ProviderType
- * @description The type of provider. Can be "polkadotJs", "ethers", "web3", "moon", "unknown", "viemPublic", or "viemWallet".
+ * @description The type of provider. Can be "polkadotJs", "ethers", "web3", "moon", "viemPublic", or "viemWallet".
  */
-export type ProviderType =
-  | "polkadotJs"
-  | "ethers"
-  | "web3"
-  | "moon"
-  | "unknown"
-  | "viemPublic"
-  | "viemWallet";
+export type ProviderType = "polkadotJs" | "ethers" | "web3" | "moon" | "viemPublic" | "viemWallet";
 
 /**
  * @name ViemClientType

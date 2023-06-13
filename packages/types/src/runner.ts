@@ -7,7 +7,13 @@ import { Debugger } from "debug";
 import { KeyringPair } from "@polkadot/keyring/types.js";
 import { Account, PublicClient, Transport, WalletClient } from "viem";
 import { Chain } from "viem/chains";
-import { BlockCreation, BlockCreationResponse, ChopsticksBlockCreation } from "./context.js";
+import {
+  BlockCreation,
+  BlockCreationResponse,
+  ChopsticksBlockCreation,
+  ProviderApi,
+  ProviderMap,
+} from "./context.js";
 import { CallType } from "./foundations.js";
 
 /**
@@ -209,7 +215,7 @@ export interface ViemApiMap {
  * GenericContext - Interface that encapsulates all the common methods and properties needed for all tests.
  */
 export interface GenericContext {
-  providers: Object;
+  api: (type: ProviderType, name?: string) => ProviderMap[typeof type];
   viemClient: <T extends ViemClientType>(subType: T) => ViemApiMap[T];
   polkadotJs: (options?: { apiName?: string; type?: ProviderType }) => ApiPromise;
   ethersSigner: ([name]?: string) => Signer;
