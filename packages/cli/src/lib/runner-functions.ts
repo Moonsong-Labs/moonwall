@@ -191,13 +191,13 @@ export function describeSuite({
             options: BlockCreation = {}
           ) => {
             const config = await importJsonConfig();
-            const defaultSigner = config.environments.find(
-              (env) => env.name == process.env.MOON_TEST_ENV
-            )?.defaultSigner;
+            const env = config.environments.find((env) => env.name == process.env.MOON_TEST_ENV)!;
 
             const defaults: BlockCreation = {
-              signer: defaultSigner || { type: "ethereum", privateKey: ALITH_PRIVATE_KEY },
-              allowFailures: true,
+              signer: env.defaultSigner || { type: "ethereum", privateKey: ALITH_PRIVATE_KEY },
+              allowFailures:
+                env.defaultAllowFailures === undefined ? true : env.defaultAllowFailures,
+              finalize: env.defaultFinalization === undefined ? true : env.defaultFinalization
             };
             return await createDevBlock(context, transactions, { ...defaults, ...options });
           },

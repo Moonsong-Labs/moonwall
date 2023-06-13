@@ -304,8 +304,14 @@
                     "contracts": {
                         "type": "string"
                     },
+                    "defaultAllowFailures": {
+                        "type": "boolean"
+                    },
                     "defaultEthTxnStyle": {
                         "$ref": "#/definitions/EthTransactionType"
+                    },
+                    "defaultFinalization": {
+                        "type": "boolean"
                     },
                     "defaultSigner": {
                         "properties": {

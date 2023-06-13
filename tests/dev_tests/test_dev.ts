@@ -392,7 +392,7 @@ describeSuite({
           await context.polkadotJs().query.system.account(BALTATHAR_ADDRESS)
         ).data.free.toBigInt();
 
-        expect(balanceAfter).toBeLessThan(balBefore)
+        expect(balanceAfter).toBeLessThan(balBefore);
       },
     });
   },
