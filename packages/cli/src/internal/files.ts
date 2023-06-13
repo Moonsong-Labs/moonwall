@@ -62,15 +62,15 @@ async function getBinaryArchitecture(filePath: string) {
           return;
         }
 
-        if (
-          buffer.readUInt8(0) !== 0x7f ||
-          buffer.readUInt8(1) !== 0x45 ||
-          buffer.readUInt8(2) !== 0x4c ||
-          buffer.readUInt8(3) !== 0x46
-        ) {
-          reject(new Error("Not an ELF file"));
-          return;
-        }
+        // if (
+        //   buffer.readUInt8(0) !== 0x7f ||
+        //   buffer.readUInt8(1) !== 0x45 ||
+        //   buffer.readUInt8(2) !== 0x4c ||
+        //   buffer.readUInt8(3) !== 0x46
+        // ) {
+        //   // reject(new Error("Not an ELF file"));
+        //   return;
+        // }
 
         const e_machine = buffer.readUInt16LE(18);
         const architecture = architectureMap[e_machine] || "unknown";

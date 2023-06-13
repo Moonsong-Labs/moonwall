@@ -96,6 +96,7 @@ export interface BlockCreation {
   allowFailures?: boolean;
   expectEvents?: AugmentedEvent<ApiTypes>[];
   logger?: Debugger;
+  signer?: { type: "ethereum" | "sr25519" | "ed25519"; privateKey: string };
 }
 
 export interface BlockCreationResponse<

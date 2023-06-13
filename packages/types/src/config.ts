@@ -29,6 +29,7 @@ export type MoonwallConfig = {
  * @property defaultEthTxnStyle - An optional default Ethereum transaction type.
  * @property contracts - Path to foundry directory containing smart contracts for testing.
  * @property runScripts - An optional array of scripts to run before testing.
+ * @property defaultSigner - A privateKey string to be the default
  */
 export type Environment = {
   reporters?: string[];
@@ -42,6 +43,7 @@ export type Environment = {
   defaultEthTxnStyle?: EthTransactionType;
   contracts?: string;
   runScripts?: string[];
+  defaultSigner?: { type: "ethereum" | "sr25519" | "ed25519"; privateKey: string };
 };
 
 /**

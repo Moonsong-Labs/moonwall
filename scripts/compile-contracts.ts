@@ -1,4 +1,4 @@
-import { CompiledContract } from "@moonwall/types";
+import { CompiledContract } from "@moonwall/cli";
 import chalk from "chalk";
 import fs from "fs/promises";
 import path from "path";
@@ -19,7 +19,7 @@ yargs(hideBin(process.argv))
       type: "string",
       alias: "p",
       description: "path to directory containing Precompile solidity files",
-      default: "precompiles/",
+      default: "../precompiles/",
     },
     OutputDirectory: {
       type: "string",
@@ -39,28 +39,21 @@ yargs(hideBin(process.argv))
   })
   .parse();
 
-// async (argv) => {
-//   await runNetwork(argv as any);
-//   process.exit(0);
-// }
-
 async function main(args: any) {
-  const precompilesPath = path.join(process.cwd(),args.argv.PreCompilesDirectory)
-  const outputDirectory = path.join(process.cwd(),args.argv.OutputDirectory)
-  const sourceDirectory = path.join(process.cwd(),args.argv.SourceDirectory)
+  const precompilesPath = path.join(process.cwd(), args.argv.PreCompilesDirectory);
+  const outputDirectory = path.join(process.cwd(), args.argv.OutputDirectory);
+  const sourceDirectory = path.join(process.cwd(), args.argv.SourceDirectory);
 
   console.log(`Precompiles path: ${precompilesPath}`);
   console.log(`Output directory: ${outputDirectory}`);
   console.log(`Source directory: ${sourceDirectory}`);
-  // return;
-  // const args = process.argv.slice(2);
-  // const precompilesPath = path.join(__dirname, "../../precompiles");
+
   // Order is important so precompiles are available first
   const contractSourcePaths = [
     ...(await fs.readdir(precompilesPath)).map((filename) => ({
       filepath: path.join(precompilesPath, filename),
       // Solidity import removes the "../../.." when searching for imports
-      importPath: /precompiles.*/.exec(path.join(precompilesPath, filename))[0],
+      importPath: /precompiles.*/.exec(path.join(precompilesPath, filename))![0],
       compile: true,
     })),
     {
@@ -97,7 +90,7 @@ async function main(args: any) {
   // Compile contracts
   for (const ref of Object.keys(sourceToCompile)) {
     try {
-      await compile(ref,outputDirectory);
+      await compile(ref, outputDirectory);
     } catch (e) {
       console.log(`Failed to compile: ${ref}`);
       if (e.errors) {
@@ -206,8 +199,9 @@ async function compile(
         );
       }
       await fs.mkdir(path.dirname(dest), { recursive: true });
-      await fs.writeFile(dest, JSON.stringify(compiledContracts[contractName]), {
+      await fs.writeFile(dest, JSON.stringify(compiledContracts[contractName], null, 2), {
         flag: "w",
+        encoding: "utf-8",
       });
       console.log(`  - ${chalk.green(`${contractName}.json`)} file has been saved!`);
       refByContract[dest] = fileRef;

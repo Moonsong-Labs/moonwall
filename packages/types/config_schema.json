@@ -307,6 +307,22 @@
                     "defaultEthTxnStyle": {
                         "$ref": "#/definitions/EthTransactionType"
                     },
+                    "defaultSigner": {
+                        "properties": {
+                            "privateKey": {
+                                "type": "string"
+                            },
+                            "type": {
+                                "enum": [
+                                    "ed25519",
+                                    "ethereum",
+                                    "sr25519"
+                                ],
+                                "type": "string"
+                            }
+                        },
+                        "type": "object"
+                    },
                     "envVars": {
                         "items": {
                             "type": "string"

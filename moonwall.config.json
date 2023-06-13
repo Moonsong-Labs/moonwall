@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/Moonsong-Labs/moonwall/main/packages/types/config_schema.json",
+  "$schema": "./packages/types/config_schema.json",
   "label": "Global Test Config 🐯",
   "defaultTestTimeout": 60000,
   "scriptsDir": "scripts/",
@@ -39,7 +39,7 @@
     {
       "name": "zombie_multi_para",
       "testFileDir": ["tests/multizombie"],
-      
+
       "foundation": {
         "type": "zombie",
         "zombieSpec": {
@@ -92,7 +92,11 @@
       "foundation": {
         "type": "read_only"
       },
-      "runScripts": ["compile-contracts.ts compile -p contracts/precompiles", "greeting.js", "shelley_prose.sh"],
+      "runScripts": [
+        "compile-contracts.ts compile -p contracts/precompiles",
+        "greeting.js",
+        "shelley_prose.sh"
+      ],
       "connections": []
     },
     {
@@ -374,6 +378,10 @@
       "reporters": ["verbose"],
       "contracts": "contracts/",
       "runScripts": ["compile-contracts.ts compile -p contracts/precompiles"],
+      "defaultSigner": {
+        "type": "ethereum",
+        "privateKey": "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
+      },
       "foundation": {
         "type": "dev",
         "launchSpec": [

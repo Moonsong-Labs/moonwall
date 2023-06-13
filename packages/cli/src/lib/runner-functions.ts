@@ -26,6 +26,7 @@ import { CallType, createDevBlock } from "../internal/foundations/devModeHelpers
 import { importJsonConfig } from "./configReader.js";
 import { MoonwallContext, contextCreator } from "./globalContext.js";
 import { upgradeRuntime, upgradeRuntimeChopsticks } from "./upgrade.js";
+import { ALITH_PRIVATE_KEY } from "@moonwall/util";
 
 const RT_VERSION = Number(process.env.MOON_RTVERSION);
 const RT_NAME = process.env.MOON_RTNAME;
@@ -188,7 +189,18 @@ export function describeSuite({
           >(
             transactions?: Calls,
             options: BlockCreation = {}
-          ) => await createDevBlock(context, transactions, options),
+          ) => {
+            const config = await importJsonConfig();
+            const defaultSigner = config.environments.find(
+              (env) => env.name == process.env.MOON_TEST_ENV
+            )?.defaultSigner;
+
+            const defaults: BlockCreation = {
+              signer: defaultSigner || { type: "ethereum", privateKey: ALITH_PRIVATE_KEY },
+              allowFailures: true,
+            };
+            return await createDevBlock(context, transactions, { ...defaults, ...options });
+          },
         },
         it: testCase,
         log: logger(),

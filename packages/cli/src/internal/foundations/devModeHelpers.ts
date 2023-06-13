@@ -3,7 +3,7 @@ import "@polkadot/api-augment";
 import { extractError } from "../../lib/contextHelpers.js";
 import { BlockCreation, BlockCreationResponse, ExtrinsicCreation } from "@moonwall/types";
 import { ApiTypes, AugmentedEvent, SubmittableExtrinsic } from "@polkadot/api/types";
-import { customWeb3Request, alith, createAndFinalizeBlock } from "@moonwall/util";
+import { customWeb3Request, alith, createAndFinalizeBlock, generateKeyringPair } from "@moonwall/util";
 import Debug from "debug";
 import { setTimeout } from "timers/promises";
 import { EventRecord } from "@polkadot/types/interfaces/types.js";
@@ -14,6 +14,7 @@ import { assert } from "vitest";
 import chalk from "chalk";
 import { importJsonConfig } from "../../lib/configReader.js";
 import { GenericContext } from "@moonwall/types";
+import { option } from "yargs";
 const debug = Debug("DevTest");
 
 export async function devForkToFinalizedHead(context: MoonwallContext) {
@@ -56,7 +57,7 @@ export type CallType<TApi extends ApiTypes> =
 export async function createDevBlock<
   ApiType extends ApiTypes,
   Calls extends CallType<ApiType> | CallType<ApiType>[]
->(context: GenericContext, transactions?: Calls, options: BlockCreation = { allowFailures: true }) {
+>(context: GenericContext, transactions?: Calls, options: BlockCreation ={} ) {
   let originalBlockNumber: bigint;
 
   const containsViem =
@@ -68,8 +69,7 @@ export async function createDevBlock<
   if (containsViem) {
     originalBlockNumber = await context.viemClient("public").getBlockNumber();
   }
-
-  // const containsViem = context.viemClient("public");
+  const signer = generateKeyringPair(options.signer!.type, options.signer!.privateKey )
 
   const results: ({ type: "eth"; hash: string } | { type: "sub"; hash: string })[] = [];
 
@@ -111,7 +111,7 @@ export async function createDevBlock<
       );
       results.push({
         type: "sub",
-        hash: (await call.signAndSend(alith)).toString(),
+        hash: (await call.signAndSend(signer)).toString(),
       });
     }
   }

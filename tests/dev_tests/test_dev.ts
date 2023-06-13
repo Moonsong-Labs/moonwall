@@ -3,7 +3,10 @@ import { beforeAll, describeSuite, expect, fetchCompiledContract } from "@moonwa
 import {
   ALITH_ADDRESS,
   BALTATHAR_ADDRESS,
+  BALTATHAR_PRIVATE_KEY,
   CHARLETH_ADDRESS,
+  DOROTHY_ADDRESS,
+  GLMR,
   alith,
   baltathar,
   deployViemContract,
@@ -370,6 +373,26 @@ describeSuite({
 
         expect(decoded.eventName).to.equal("Transfer");
         expect((decoded.args as any).from).to.equal(ALITH_ADDRESS);
+      },
+    });
+
+    it({
+      id: "T17",
+      title: "It can use different signers when creating a block",
+      test: async function () {
+        const txn = context.polkadotJs().tx.balances.transfer(DOROTHY_ADDRESS, GLMR);
+        const balBefore = (
+          await context.polkadotJs().query.system.account(BALTATHAR_ADDRESS)
+        ).data.free.toBigInt();
+
+        await context.createBlock(txn, {
+          signer: { type: "ethereum", privateKey: BALTATHAR_PRIVATE_KEY },
+        });
+        const balanceAfter = (
+          await context.polkadotJs().query.system.account(BALTATHAR_ADDRESS)
+        ).data.free.toBigInt();
+
+        expect(balanceAfter).toBeLessThan(balBefore)
       },
     });
   },
