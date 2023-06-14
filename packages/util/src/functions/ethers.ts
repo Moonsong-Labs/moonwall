@@ -14,7 +14,7 @@ export async function createEthersTxn<
   const isEIP1559 = params.txnType == "eip1559" || params.type == 2;
   const isEIP2930 = params.txnType == "eip2930";
   // for some reason ethers messes up the nonce
-  const nonce = await context.viemClient("public").getTransactionCount({ address: ALITH_ADDRESS });
+  const nonce = await context.viem("public").getTransactionCount({ address: ALITH_ADDRESS });
   const blob: any = { nonce, ...params };
 
   switch (true) {
@@ -47,8 +47,8 @@ export async function createEthersTxn<
       throw new Error("Unknown transaction type, update createRawEthersTxn fn");
   }
 
-  const txn = await context.ethersSigner().populateTransaction(blob);
-  const raw = await context.ethersSigner().signTransaction(txn);
+  const txn = await context.ethers().populateTransaction(blob);
+  const raw = await context.ethers().signTransaction(txn);
   return { rawSigned: raw as `0x${string}`, request: txn };
 }
 

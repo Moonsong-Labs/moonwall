@@ -126,7 +126,7 @@ export function describeSuite({
 
     const context: GenericContext = {
       api: <T extends ProviderType>(type: T, name?: string) => getApi(type, name),
-      viemClient: <T extends ViemClientType>(clientType?: T, name?: string): ViemApiMap[T] => {
+      viem: <T extends ViemClientType>(clientType?: T, name?: string): ViemApiMap[T] => {
         return (
           clientType == "public"
             ? getApi("viemPublic", name)
@@ -141,7 +141,7 @@ export function describeSuite({
             ? getApi(options.type, options.apiName)
             : getApi("polkadotJs", options.apiName)
           : getApi("polkadotJs"),
-      ethersSigner: (apiName?: string): Signer => getApi("ethers", apiName),
+      ethers: (apiName?: string): Signer => getApi("ethers", apiName),
       web3: (apiName?: string): Web3 => getApi("web3", apiName),
     };
 

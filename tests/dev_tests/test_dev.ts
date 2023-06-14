@@ -37,7 +37,7 @@ describeSuite({
     let w3: Web3;
 
     beforeAll(async () => {
-      signer = context.ethersSigner();
+      signer = context.ethers();
       w3 = context.web3();
     });
 
@@ -163,10 +163,10 @@ describeSuite({
       title: "Can send viem txns",
       test: async function () {
         const balanceBefore = await context
-          .viemClient("public")
+          .viem("public")
           .getBalance({ address: BALTATHAR_ADDRESS });
 
-        await context.viemClient("wallet").sendTransaction({
+        await context.viem("wallet").sendTransaction({
           to: BALTATHAR_ADDRESS,
           value: parseEther("1.0"),
         });
@@ -174,7 +174,7 @@ describeSuite({
         await context.createBlock();
 
         const balanceAfter = await context
-          .viemClient("public")
+          .viem("public")
           .getBalance({ address: BALTATHAR_ADDRESS });
         log(`Baltahaar balance before: ${formatEther(balanceBefore)}`);
         log(`Baltahaar balance after: ${formatEther(balanceAfter)}`);
@@ -203,7 +203,7 @@ describeSuite({
         const { abi, bytecode, methods } = await fetchCompiledContract("MultiplyBy7");
         const { status, contractAddress } = await deployViemContract(context, abi, bytecode);
 
-        const timbo = await context.viemClient("public").call({
+        const timbo = await context.viem("public").call({
           account: ALITH_ADDRESS,
           to: contractAddress!,
           value: 0n,
@@ -234,13 +234,13 @@ describeSuite({
         const contractInstance = getContract({
           abi: tokenAbi as Abi,
           address: contractAddress!,
-          publicClient: context.viemClient("public"),
+          publicClient: context.viem("public"),
         });
 
         const symbol = await contractInstance.read.symbol();
         const balBefore = (await contractInstance.read.balanceOf([BALTATHAR_ADDRESS])) as bigint;
 
-        await context.viemClient("wallet").writeContract({
+        await context.viem("wallet").writeContract({
           abi: tokenAbi as Abi,
           address: contractAddress!,
           value: 0n,
@@ -261,11 +261,11 @@ describeSuite({
       title: "It can sign a message",
       test: async function () {
         const string = "Boom Boom Lemon";
-        const signature = await context.viemClient("wallet").signMessage({ message: string });
+        const signature = await context.viem("wallet").signMessage({ message: string });
         const valid = await verifyMessage({ address: ALITH_ADDRESS, message: string, signature });
         log(`Signature: ${signature}`);
 
-        context.ethersSigner();
+        context.ethers();
         expect(signature.length).to.be.greaterThan(0);
         expect(valid).to.be.true;
       },
@@ -281,7 +281,7 @@ describeSuite({
         );
         log(`Deployed contract at ${contractAddress}`);
 
-        const gas = await context.viemClient("public").estimateContractGas({
+        const gas = await context.viem("public").estimateContractGas({
           abi: tokenAbi,
           address: contractAddress!,
           functionName: "transfer",
@@ -298,7 +298,7 @@ describeSuite({
       title: "It can calculate the gas cost of a simple balance transfer",
       test: async function () {
         const gas = await context
-          .viemClient("public")
+          .viem("public")
           .estimateGas({ account: ALITH_ADDRESS, to: BALTATHAR_ADDRESS, value: parseEther("1.0") });
 
         log(`Gas cost to transfer system balance is ${formatGwei(gas)} gwei`);
@@ -316,7 +316,7 @@ describeSuite({
           tokenBytecode
         );
 
-        const { result } = await context.viemClient("public").simulateContract({
+        const { result } = await context.viem("public").simulateContract({
           account: ALITH_ADDRESS,
           abi: tokenAbi,
           address: contractAddress!,
@@ -354,7 +354,7 @@ describeSuite({
         );
         log(`Deployed contract at ${contractAddress}`);
 
-        const txHash = await context.viemClient("wallet").writeContract({
+        const txHash = await context.viem("wallet").writeContract({
           abi: tokenAbi,
           address: contractAddress!,
           functionName: "transfer",
@@ -363,7 +363,7 @@ describeSuite({
 
         await context.createBlock();
 
-        const { logs } = await context.viemClient("public").getTransactionReceipt({ hash: txHash });
+        const { logs } = await context.viem("public").getTransactionReceipt({ hash: txHash });
 
         const decoded = decodeEventLog({
           abi: tokenAbi,
@@ -400,7 +400,7 @@ describeSuite({
       id: "T18",
       title: "It can use different apis",
       test: async function () {
-        log(await context.ethersSigner().provider?.getBalance(BALTATHAR_ADDRESS));
+        log(await context.ethers().provider?.getBalance(BALTATHAR_ADDRESS));
         expect(await context.api("ethers").provider?.getBalance(BALTATHAR_ADDRESS)).toBeGreaterThan(0n)
       },
     });

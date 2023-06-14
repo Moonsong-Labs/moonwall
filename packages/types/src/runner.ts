@@ -220,10 +220,10 @@ export interface GenericContext {
   api(type: "web3", name?: string): Web3;
   api(type: "viemPublic", name?: string): PublicViem;
   api(type: "viemWallet", name?: string): WalletViem;
-  viemClient(clientType?: "public", name?: string): PublicViem;
-  viemClient(clientType: "wallet", name?: string): WalletViem; 
+  viem(clientType?: "public", name?: string): PublicViem;
+  viem(clientType: "wallet", name?: string): WalletViem; 
   polkadotJs(options?: { apiName?: string; type?: PolkadotProviders }): ApiPromise;
-  ethersSigner(name?: string): Signer;
+  ethers(name?: string): Signer;
   web3(name?: string): Web3;
 }
 

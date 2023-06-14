@@ -62,12 +62,12 @@ export async function createDevBlock<
 
   const containsViem =
     MoonwallContext.getContext().providers.find((prov) => prov.type == "viemPublic") &&
-    !!!context.viemClient("public")
+    !!!context.viem("public")
       ? true
       : false;
 
   if (containsViem) {
-    originalBlockNumber = await context.viemClient("public").getBlockNumber();
+    originalBlockNumber = await context.viem("public").getBlockNumber();
   }
   const signer = generateKeyringPair(options.signer!.type, options.signer!.privateKey )
 
@@ -83,7 +83,7 @@ export async function createDevBlock<
         type: "eth",
         hash: containsViem
           ? (
-              (await context.viemClient("public").request({
+              (await context.viem("public").request({
                 method: "eth_sendRawTransaction",
                 params: [call as `0x${string}`],
               })) as any
@@ -163,7 +163,7 @@ export async function createDevBlock<
 
   // Avoiding race condition by ensuring ethereum block is created
   if (containsViem && originalBlockNumber! !== undefined) {
-    const pubClient = context.viemClient("public");
+    const pubClient = context.viem("public");
     while (true) {
       const blockNum = await pubClient.getBlockNumber();
       if (blockNum > originalBlockNumber) {

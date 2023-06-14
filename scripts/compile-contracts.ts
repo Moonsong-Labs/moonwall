@@ -4,6 +4,7 @@ import fs from "fs/promises";
 import path from "path";
 import solc from "solc";
 import { Abi } from "viem";
+import {} from "@polkadot/util-crypto"
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 
@@ -32,6 +33,12 @@ yargs(hideBin(process.argv))
       alias: "i",
       description: "Source directory for solidity contracts to compile",
       default: "contracts/src",
+    },
+    TempFile: {
+        type: "string",
+        alias: "t",
+        description: "Path to temp file for working out if contracts need to be recompiled",
+        default: "contracts/.compile.tmp",
     },
   })
   .command("compile", "Compile contracts", async (argv) => {
