@@ -2,7 +2,7 @@ import { ApiPromise } from "@polkadot/api";
 import { Signer } from "ethers";
 import { Web3 } from "web3";
 import { ApiTypes } from "@polkadot/api/types/index.js";
-import { ProviderType, ViemClientType, ZombieNodeType } from "./config.js";
+import { PolkadotProviders, ProviderType, ViemClientType, ZombieNodeType } from "./config.js";
 import { Debugger } from "debug";
 import { KeyringPair } from "@polkadot/keyring/types.js";
 import { Account, PublicClient, Transport, WalletClient } from "viem";
@@ -215,11 +215,16 @@ export interface ViemApiMap {
  * GenericContext - Interface that encapsulates all the common methods and properties needed for all tests.
  */
 export interface GenericContext {
-  api: (type: ProviderType, name?: string) => ProviderMap[typeof type];
-  viemClient: <T extends ViemClientType>(subType: T) => ViemApiMap[T];
-  polkadotJs: (options?: { apiName?: string; type?: ProviderType }) => ApiPromise;
-  ethersSigner: ([name]?: string) => Signer;
-  web3: ([name]?: string) => Web3;
+  api(type: "polkadotJs" | "moon", name?: string): ApiPromise;
+  api(type: "ethers", name?: string): Signer;
+  api(type: "web3", name?: string): Web3;
+  api(type: "viemPublic", name?: string): PublicViem;
+  api(type: "viemWallet", name?: string): WalletViem;
+  viemClient(clientType?: "public", name?: string): PublicViem;
+  viemClient(clientType: "wallet", name?: string): WalletViem; 
+  polkadotJs(options?: { apiName?: string; type?: PolkadotProviders }): ApiPromise;
+  ethersSigner(name?: string): Signer;
+  web3(name?: string): Web3;
 }
 
 /**

@@ -400,7 +400,8 @@ describeSuite({
       id: "T18",
       title: "It can use different apis",
       test: async function () {
-context.api("ethers").getBalance()
+        log(await context.ethersSigner().provider?.getBalance(BALTATHAR_ADDRESS));
+        expect(await context.api("ethers").provider?.getBalance(BALTATHAR_ADDRESS)).toBeGreaterThan(0n)
       },
     });
   },

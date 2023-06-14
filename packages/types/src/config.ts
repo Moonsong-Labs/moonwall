@@ -175,6 +175,8 @@ export interface ProviderConfig {
  */
 export type ProviderType = "polkadotJs" | "ethers" | "web3" | "moon" | "viemPublic" | "viemWallet";
 
+export type PolkadotProviders = Extract<ProviderType, "moon" | "polkadotJs">
+
 /**
  * @name ViemClientType
  * @description The type of Viem client. Can be "public" or "wallet".

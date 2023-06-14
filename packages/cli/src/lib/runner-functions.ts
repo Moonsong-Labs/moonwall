@@ -1,20 +1,21 @@
 import "@moonbeam-network/api-augment";
-import {
+import type {
   BlockCreation,
   ChopsticksBlockCreation,
   ChopsticksContext,
   ConnectedProvider,
   GenericContext,
   ITestSuiteType,
-  ProviderApi,
+  ProviderMap,
   ProviderType,
-  PublicViem,
   UpgradePreferences,
   ViemApiMap,
   ViemClientType,
+  PolkadotProviders,
+  PublicViem,
   WalletViem,
-  ProviderMap,
 } from "@moonwall/types";
+import { ALITH_PRIVATE_KEY } from "@moonwall/util";
 import { ApiPromise } from "@polkadot/api";
 import { ApiTypes } from "@polkadot/api/types/index.js";
 import { error } from "console";
@@ -30,7 +31,6 @@ import { CallType, createDevBlock } from "../internal/foundations/devModeHelpers
 import { importJsonConfig } from "./configReader.js";
 import { MoonwallContext, contextCreator } from "./globalContext.js";
 import { upgradeRuntime, upgradeRuntimeChopsticks } from "./upgrade.js";
-import { ALITH_PRIVATE_KEY } from "@moonwall/util";
 
 const RT_VERSION = Number(process.env.MOON_RTVERSION);
 const RT_NAME = process.env.MOON_RTNAME;
@@ -97,7 +97,7 @@ export function describeSuite({
     ctx = await contextCreator(globalConfig, process.env.MOON_TEST_ENV);
 
     if (ctx.environment.foundationType === "dev") {
-      //   // await devForkToFinalizedHead(ctx); // TODO: Implement way of cleanly forking to fresh state
+      // await devForkToFinalizedHead(ctx); // TODO: Implement way of cleanly forking to fresh state
     } else if (ctx.environment.foundationType === "chopsticks") {
       // await chopForkToFinalizedHead(ctx); // TODO: Implement way of cleanly forking to fresh state
     }
@@ -107,58 +107,42 @@ export function describeSuite({
     await MoonwallContext.destroy();
   });
 
-  const tim = getApi("viemPublic");
-  function getApi(type: "polkadotJs", apiName?: string): ApiPromise;
-  function getApi(type: "ethers", apiName?: string): Signer;
-  function getApi(type: "web3", apiName?: string): Web3;
-  function getApi(type: "viemPublic", apiName?: string): PublicViem;
-  function getApi(type: "viemWallet", apiName?: string): WalletViem;
-  function getApi<T extends ProviderType>(type: T, apiName?: string) {
-    if (type == "polkadotJs") {
-      return apiName
-        ? ctx.providers.find(
-            (a) => (a.type == "moon" || a.type == "polkadotJs") && a.name === apiName
-          )!.api
-        : ctx.providers.find((a) => a.type == "moon" || a.type == "polkadotJs")!.api;
-    } else {
-      return apiName
-        ? ctx.providers.find((a) => a.type == type && a.name === apiName)!.api
-        : ctx.providers.find((a) => a.type == type)!.api;
-    }
-  }
-
   describe(`🗃️  #${id} ${title}`, function () {
+    const getApi = <T extends ProviderType>(apiType: T, apiName?: string) => {
+      const provider = ctx.providers.find(
+        (prov) =>
+          prov.type == apiType ||
+          (apiType == "polkadotJs" && prov.type == "moon" && (!apiName || prov.name === apiName))
+      );
+
+      if (!provider) {
+        throw new Error(
+          `API of type ${apiType} ${apiName ? "and name " + apiName : ""} could not be found`
+        );
+      }
+
+      return provider.api as ProviderMap[T];
+    };
+
     const context: GenericContext = {
-      api: (type: ProviderType, name?: string) => getApi(type, name),
-      viemClient: <T extends ViemClientType>(subType: T): ViemApiMap[T] => {
-        let provider: ConnectedProvider | undefined;
-        if (subType === "public") {
-          provider = ctx.providers.find((prov) => prov.type == "viemPublic");
-        } else {
-          provider = ctx.providers.find((prov) => prov.type == "viemWallet");
-        }
-
-        if (!provider) {
-          throw new Error(`Provider of type '${subType}' not found`);
-        }
-
-        return provider.api as ViemApiMap[T];
+      api: <T extends ProviderType>(type: T, name?: string) => getApi(type, name),
+      viemClient: <T extends ViemClientType>(clientType?: T, name?: string): ViemApiMap[T] => {
+        return (
+          clientType == "public"
+            ? getApi("viemPublic", name)
+            : clientType == "wallet"
+            ? getApi("viemWallet", name)
+            : getApi("viemPublic")
+        ) as ViemApiMap[T];
       },
-      polkadotJs: (options?: { apiName?: string; type?: ProviderType }): ApiPromise =>
-        options && options.apiName
-          ? (ctx.providers.find((a) => a.name == options.apiName)!.api as ApiPromise)
-          : options && options.type
-          ? (ctx.providers.find((a) => a.type == options.type)!.api as ApiPromise)
-          : (ctx.providers.find((a) => a.type == "moon" || a.type == "polkadotJs")!
-              .api as ApiPromise),
-      ethersSigner: (apiName?: string): Signer =>
-        apiName
-          ? (ctx.providers.find((a) => a.name == apiName)!.api as Signer)
-          : (ctx.providers.find((a) => a.type == "ethers")!.api as Signer),
-      web3: (apiName?: string): Web3 =>
-        apiName
-          ? (ctx.providers.find((a) => a.name == apiName)!.api as Web3)
-          : (ctx.providers.find((a) => a.type == "web3")!.api as Web3),
+      polkadotJs: (options?: { apiName?: string; type?: PolkadotProviders }): ApiPromise =>
+        options
+          ? options.type
+            ? getApi(options.type, options.apiName)
+            : getApi("polkadotJs", options.apiName)
+          : getApi("polkadotJs"),
+      ethersSigner: (apiName?: string): Signer => getApi("ethers", apiName),
+      web3: (apiName?: string): Web3 => getApi("web3", apiName),
     };
 
     const logger = () => {
@@ -355,8 +339,6 @@ export function describeSuite({
     }
   });
 }
-
-// export { GenericContext };
 
 // TODO: Extend to include skipIf() and runIf()
 export type TestCaseModifier = "only" | "skip";
