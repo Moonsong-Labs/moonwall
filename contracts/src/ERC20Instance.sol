@@ -37,7 +37,7 @@ contract ERC20Instance is IERC20 {
             abi.encodeWithSignature("totalSupply()")
         );
         require(result == true);
-        return uint256(bytes32(data));
+        return abi.decode(data, (uint256));
     }
 
     function balanceOf(address who) external view override returns (uint256) {
