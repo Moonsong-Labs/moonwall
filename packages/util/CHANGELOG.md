@@ -1,5 +1,36 @@
 # @moonwall/util
 
+## 3.0.0
+
+### Minor Changes
+
+- 409e085: Big Refactor
+  - Many methods changed names
+  - Interfaces and types moved around
+  - Should be even more typesafe allround and easier to maintain
+
+### Patch Changes
+
+- 2730f58: Added default options to createBlock
+  - [#62](https://github.com/Moonsong-Labs/moonwall/issues/62)
+  - Moonwall config now has options for the createBlock() function on `dev` foundations
+- 4072cb0: Updated Compile Script
+  - Updated the solidity compiler script to take into account incremental builds
+  - [#157](https://github.com/Moonsong-Labs/moonwall/issues/157)
+- d29f57e: Big Refactor
+  - big types refactor
+  - [#60](https://github.com/Moonsong-Labs/moonwall/issues/60)
+- 4ae3228: Added default signer
+  - [#63](https://github.com/Moonsong-Labs/moonwall/issues/63)
+  - Signer option added to both when creating new blocks `context.createBlock(TXN, {signer: {type:<type>, privateKey: <key>}})
+  - Default Signer config option available in moonwall.config for environments
+- Updated dependencies [2730f58]
+- Updated dependencies [4072cb0]
+- Updated dependencies [409e085]
+- Updated dependencies [d29f57e]
+- Updated dependencies [4ae3228]
+  - @moonwall/types@3.0.0
+
 ## 2.0.3
 
 ### Patch Changes
