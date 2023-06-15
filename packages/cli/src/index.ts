@@ -9,4 +9,4 @@ export * from "./lib/contracts.js";
 export * from "./lib/globalContext.js";
 export * from "./lib/governance.js";
 export * from "./lib/rpc.js";
-export * from "./lib/runner-functions.js";
+export * from "./lib/runnerContext.js";
