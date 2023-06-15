@@ -1,36 +1,18 @@
 import "@moonbeam-network/api-augment";
+import { BlockCreation, ExtrinsicCreation, GenericContext } from "@moonwall/types";
+import { createAndFinalizeBlock, customWeb3Request, generateKeyringPair } from "@moonwall/util";
 import "@polkadot/api-augment";
-import { extractError } from "../../lib/contextHelpers.js";
-import { BlockCreation, BlockCreationResponse, ExtrinsicCreation } from "@moonwall/types";
-import { ApiTypes, AugmentedEvent, SubmittableExtrinsic } from "@polkadot/api/types";
-import { customWeb3Request, alith, createAndFinalizeBlock, generateKeyringPair } from "@moonwall/util";
+import { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types";
+import { RegistryError } from "@polkadot/types-codec/types/registry";
+import { EventRecord } from "@polkadot/types/interfaces/types.js";
+import chalk from "chalk";
 import Debug from "debug";
 import { setTimeout } from "timers/promises";
-import { EventRecord } from "@polkadot/types/interfaces/types.js";
-import { RegistryError } from "@polkadot/types-codec/types/registry";
-import { MoonwallContext } from "../../lib/globalContext.js";
-import { ApiPromise } from "@polkadot/api";
 import { assert } from "vitest";
-import chalk from "chalk";
 import { importJsonConfig } from "../../lib/configReader.js";
-import { GenericContext } from "@moonwall/types";
-import { option } from "yargs";
+import { extractError } from "../../lib/contextHelpers.js";
+import { MoonwallContext } from "../../lib/globalContext.js";
 const debug = Debug("DevTest");
-
-export async function devForkToFinalizedHead(context: MoonwallContext) {
-  const api = context.providers.find(({ type }) => type == "moon")!.api as ApiPromise;
-  const finalizedHead = context.genesis;
-  await api.rpc.engine.createBlock(true, true, finalizedHead);
-  while (true) {
-    const newHead = (await api.rpc.chain.getFinalizedHead()).toString();
-    if (newHead == finalizedHead) {
-      await setTimeout(100);
-    } else {
-      context.genesis = newHead;
-      break;
-    }
-  }
-}
 
 export async function getDevProviderPath() {
   const globalConfig = await importJsonConfig();

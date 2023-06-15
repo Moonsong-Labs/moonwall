@@ -54,7 +54,6 @@ describeSuite({
         ).block.header.number.toNumber();
         log(`Previous block #${block}, new block #${block2}`);
 
-        const lazyTyping: any = BALTATHAR_ADDRESS;
         const balance = (await context.polkadotJs().query.system.account(baltathar.address)).data
           .free;
         log(balance.toBigInt());

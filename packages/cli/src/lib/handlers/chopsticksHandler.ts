@@ -3,7 +3,7 @@ import {
   createChopsticksBlock,
   sendSetStorageRequest,
 } from "../../internal/foundations/chopsticksHelpers.js";
-import { upgradeRuntimeChopsticks } from "../upgrade.js";
+import { upgradeRuntimeChopsticks } from "../upgradeProcedures.js";
 
 export const chopsticksHandler: FoundationHandler<"chopsticks"> = ({
   testCases,

@@ -5,10 +5,10 @@ import type { WeightV2 } from "@polkadot/types/interfaces";
 import { ApiPromise } from "@polkadot/api";
 import { blake2AsHex } from "@polkadot/util-crypto";
 import { sha256 } from "ethers";
-import { cancelReferendaWithCouncil, executeProposalWithCouncil } from "./governance.js";
+import { cancelReferendaWithCouncil, executeProposalWithCouncil } from "./governanceProcedures.js";
 import { alith } from "@moonwall/util";
 import { ChopsticksContext, UpgradePreferences } from "@moonwall/types";
-import { getRuntimeWasm } from "./binaries.js";
+import { getRuntimeWasm } from "./binariesHelpers.js";
 
 export async function upgradeRuntimeChopsticks(context: ChopsticksContext, path: string) {
   if (!!!existsSync(path)) {

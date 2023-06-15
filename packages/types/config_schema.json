@@ -81,15 +81,6 @@
             },
             "type": "object"
         },
-        "EthTransactionType": {
-            "description": "The type of Ethereum transaction. Can be \"Legacy\", \"EIP2930\", or \"EIP1559\".",
-            "enum": [
-                "eip1559",
-                "eip2930",
-                "legacy"
-            ],
-            "type": "string"
-        },
         "IFoundation": {
             "anyOf": [
                 {
@@ -305,9 +296,6 @@
                     },
                     "defaultAllowFailures": {
                         "type": "boolean"
-                    },
-                    "defaultEthTxnStyle": {
-                        "$ref": "#/definitions/EthTransactionType"
                     },
                     "defaultFinalization": {
                         "type": "boolean"

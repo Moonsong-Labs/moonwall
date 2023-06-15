@@ -174,6 +174,63 @@ export class ProviderFactory {
   public static prepare(providerConfigs: ProviderConfig[]): MoonwallProvider[] {
     return providerConfigs.map((providerConfig) => new ProviderFactory(providerConfig).create());
   }
+
+  public static prepareDefaultDev(): MoonwallProvider[] {
+    return this.prepare([
+      {
+        name: "w3",
+        type: "web3",
+        endpoints: [vitestAutoUrl],
+      },
+      {
+        name: "eth",
+        type: "ethers",
+        endpoints: [vitestAutoUrl],
+      },
+      {
+        name: "public",
+        type: "viemPublic",
+        endpoints: [vitestAutoUrl],
+      },
+      {
+        name: "wallet",
+        type: "viemWallet",
+        endpoints: [vitestAutoUrl],
+      },
+      {
+        name: "mb",
+        type: "moon",
+        endpoints: [vitestAutoUrl],
+      },
+    ]);
+  }
+
+  public static prepareDefaultZombie(): MoonwallProvider[] {
+    const MOON_PARA_WSS = process.env.MOON_PARA_WSS || "error";
+    const MOON_RELAY_WSS = process.env.MOON_RELAY_WSS || "error";
+    return this.prepare([
+      {
+        name: "w3",
+        type: "web3",
+        endpoints: [MOON_PARA_WSS],
+      },
+      {
+        name: "eth",
+        type: "ethers",
+        endpoints: [MOON_PARA_WSS],
+      },
+      {
+        name: "parachain",
+        type: "moon",
+        endpoints: [MOON_PARA_WSS],
+      },
+      {
+        name: "relaychain",
+        type: "polkadotJs",
+        endpoints: [MOON_RELAY_WSS],
+      },
+    ]);
+  }
 }
 
 export interface ProviderInterface {
@@ -321,3 +378,7 @@ export class ProviderInterfaceFactory {
     return await new ProviderInterfaceFactory(name, type, connect).create();
   }
 }
+
+export const vitestAutoUrl = `ws://127.0.0.1:${
+  10000 + Number(process.env.VITEST_POOL_ID || 1) * 100
+}`;

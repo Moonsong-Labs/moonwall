@@ -1,6 +1,6 @@
 import { FoundationHandler, UpgradePreferences } from "@moonwall/types";
 import { ApiPromise } from "@polkadot/api";
-import { upgradeRuntime } from "../upgrade.js";
+import { upgradeRuntime } from "../upgradeProcedures.js";
 import { MoonwallContext } from "../globalContext.js";
 
 export const zombieHandler: FoundationHandler<"zombie"> = ({ testCases, context, testCase, logger }) => {
