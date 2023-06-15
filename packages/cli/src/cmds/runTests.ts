@@ -116,11 +116,12 @@ export async function executeTests(env: Environment, additionalArgs?: {}) {
 
     include: env.include ? env.include : ["**/*{test,spec,test_,test-}*{ts,mts,cts}"],
     onConsoleLog(log, type) {
-      if (log.trim() == "" || log.trim() == "<empty line>") return false;
-
+      if (filterList.includes(log.trim())) return false;
+      // if (log.trim() == "stdout | unknown test" || log.trim() == "<empty line>") return false;
       if (log.includes("has multiple versions, ensure that there is only one installed.")) {
         return false;
       }
+      
     },
   };
 
@@ -143,3 +144,5 @@ export async function executeTests(env: Environment, additionalArgs?: {}) {
     process.exit(1);
   }
 }
+
+const filterList = ["<empty line>", "", "stdout | unknown test"]

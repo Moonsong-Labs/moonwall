@@ -2,16 +2,18 @@ import { ApiPromise } from "@polkadot/api";
 import { Signer } from "ethers";
 import { Web3 } from "web3";
 import { ApiTypes } from "@polkadot/api/types/index.js";
-import { PolkadotProviders, ProviderType, ViemClientType, ZombieNodeType } from "./config.js";
+import {
+  FoundationType,
+  PolkadotProviders,
+  ProviderType,
+  ViemClientType,
+  ZombieNodeType,
+} from "./config.js";
 import { Debugger } from "debug";
 import { KeyringPair } from "@polkadot/keyring/types.js";
 import { Account, PublicClient, Transport, WalletClient } from "viem";
 import { Chain } from "viem/chains";
-import {
-  BlockCreation,
-  BlockCreationResponse,
-  ChopsticksBlockCreation,
-} from "./context.js";
+import { BlockCreation, BlockCreationResponse, ChopsticksBlockCreation } from "./context.js";
 import { CallType } from "./foundations.js";
 
 /**
@@ -40,14 +42,53 @@ export interface CustomTest {
 }
 
 export type FoundationMethod = "dev" | "chopsticks" | "zombie" | "read_only" | "fork";
+
 export type ChainType = "moonbeam" | "moonriver" | "moonbase";
-export type TestContextMap = {
-  dev: DevTestContext;
-  chopsticks: ChopsticksTestContext;
-  zombie: ZombieTestContext;
-  read_only: ReadOnlyTestContext;
-  fork: GenericTestContext;
+
+export type FoundationContextMap = {
+  [K in FoundationMethod]: K extends "dev"
+    ? DevModeContext
+    : K extends "chopsticks"
+    ? ChopsticksContext
+    : K extends "zombie"
+    ? ZombieContext
+    : K extends "read_only"
+    ? ReadOnlyContext
+    : /* default: */ GenericContext;
 };
+
+export type TestContextMap = {
+  [K in FoundationMethod]: ITestContext<FoundationContextMap[K]>;
+};
+
+export type TestCasesFn<T extends FoundationType> = (params: {
+  context: GenericContext & FoundationContextMap[T];
+  it: (params: ITestCase) => void;
+  log: Debugger;
+}) => void;
+
+// TODO: Extend to include skipIf() and runIf()
+export type TestCaseModifier = "only" | "skip";
+
+export interface ITestCase {
+  id: string;
+  title: string;
+  test: () => void;
+  modifier?: TestCaseModifier;
+  minRtVersion?: number;
+  chainType?: "moonbeam" | "moonriver" | "moonbase";
+  notChainType?: "moonbeam" | "moonriver" | "moonbase";
+  // networkName?: string; TODO: Implement this
+  timeout?: number;
+}
+
+export type FoundationHandler<T extends FoundationType> = (params: {
+  testCases: TestCasesFn<T>;
+  context: GenericContext;
+  testCase: (params: ITestCase) => void;
+  logger: () => Debugger;
+  ctx?: any;
+}) => void;
 
 export type ITestSuiteType<T extends FoundationMethod> = {
   id: string;
@@ -66,7 +107,6 @@ interface ITestContext<T extends GenericContext> {
   log: Debugger;
 }
 
-
 /**
  * @name DevTestContext
  * @description The context for tests running in development mode.
@@ -75,7 +115,6 @@ interface ITestContext<T extends GenericContext> {
  * @property log - The Debugger instance for logging.
  */
 export type DevTestContext = ITestContext<DevModeContext>;
-
 
 /**
  * @name ReadOnlyTestContext
