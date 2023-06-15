@@ -6,6 +6,7 @@ import {
   MoonwallConfig,
   MoonwallEnvironment,
   MoonwallProvider,
+  Node,
 } from "@moonwall/types";
 import { ApiPromise } from "@polkadot/api";
 import zombie, { Network } from "@zombienet/orchestrator";
@@ -136,6 +137,49 @@ export class MoonwallContext {
     };
   }
 
+  private async startZombieNetwork(nodes: Node[]) {
+    console.log("🧟 Spawning zombie nodes ...");
+    const config = await importJsonConfig();
+    const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
+    const zombieConfig = getZombieConfig(nodes[0].cmd);
+
+    await checkZombieBins(zombieConfig);
+
+    const network = await zombie.start("", zombieConfig, { silent: true });
+
+    process.env.MOON_RELAY_WSS = network.relay[0].wsUri;
+    process.env.MOON_PARA_WSS = Object.values(network.paras)[0].nodes[0].wsUri;
+
+    if (
+      env.foundation.type == "zombie" &&
+      env.foundation.zombieSpec.monitoredNode &&
+      env.foundation.zombieSpec.monitoredNode in network.nodesByName
+    ) {
+      process.env.MOON_MONITORED_NODE = `${network.tmpDir}/${env.foundation.zombieSpec.monitoredNode}.log`;
+    }
+
+    const processIds = Object.values((network.client as any).processMap)
+      .filter((item) => item!["pid"])
+      .map((process) => process!["pid"]);
+
+    const onProcessExit = () => {
+      exec(`kill -9 ${processIds.join(" ")}`, (error) => {
+        if (error) {
+          console.error(`Error killing process: ${error.message}`);
+        }
+      });
+    };
+
+    process.once("exit", onProcessExit);
+    process.once("SIGINT", onProcessExit);
+
+    process.env.MOON_MONITORED_NODE = zombieConfig.parachains[0].collator
+      ? `${network.tmpDir}/${zombieConfig.parachains[0].collator.name}.log`
+      : `${network.tmpDir}/${zombieConfig.parachains[0].collators![0].name}.log`;
+    this.zombieNetwork = network;
+    return;
+  }
+
   public async startNetwork() {
     if (process.env.MOON_RECYCLE == "true") {
       debugSetup("Network has already been started, skipping command");
@@ -150,52 +194,14 @@ export class MoonwallContext {
     const nodes = MoonwallContext.getContext().environment.nodes;
 
     if (this.environment.foundationType === "zombie") {
-      console.log("🧟 Spawning zombie nodes ...");
-      const config = await importJsonConfig();
-      const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
-      const zombieConfig = getZombieConfig(nodes[0].cmd);
-
-      await checkZombieBins(zombieConfig);
-
-      const network = await zombie.start("", zombieConfig, { silent: true });
-
-      process.env.MOON_RELAY_WSS = network.relay[0].wsUri;
-      process.env.MOON_PARA_WSS = Object.values(network.paras)[0].nodes[0].wsUri;
-
-      if (
-        env.foundation.type == "zombie" &&
-        env.foundation.zombieSpec.monitoredNode &&
-        env.foundation.zombieSpec.monitoredNode in network.nodesByName
-      ) {
-        process.env.MOON_MONITORED_NODE = `${network.tmpDir}/${env.foundation.zombieSpec.monitoredNode}.log`;
-      }
-
-      const processIds = Object.values((network.client as any).processMap)
-        .filter((item) => item!["pid"])
-        .map((process) => process!["pid"]);
-
-      const onProcessExit = () => {
-        exec(`kill -9 ${processIds.join(" ")}`, (error) => {
-          if (error) {
-            console.error(`Error killing process: ${error.message}`);
-          }
-        });
-      };
-
-      process.once("exit", onProcessExit);
-      process.once("SIGINT", onProcessExit);
-
-      process.env.MOON_MONITORED_NODE = zombieConfig.parachains[0].collator
-        ? `${network.tmpDir}/${zombieConfig.parachains[0].collator.name}.log`
-        : `${network.tmpDir}/${zombieConfig.parachains[0].collators![0].name}.log`;
-      this.zombieNetwork = network;
-      return;
+      return await this.startZombieNetwork(nodes);
     }
 
     const promises = nodes.map(async ({ cmd, args, name, launch }) => {
       return launch && this.nodes.push(await launchNode(cmd, args, name!));
     });
     await Promise.all(promises);
+    return MoonwallContext.getContext();
   }
 
   public async connectEnvironment(): Promise<MoonwallContext> {
