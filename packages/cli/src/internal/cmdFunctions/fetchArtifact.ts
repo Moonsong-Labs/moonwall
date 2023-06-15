@@ -3,7 +3,7 @@ import path from "path";
 import fetch from "node-fetch";
 import semver from "semver";
 import chalk from "chalk";
-import { runTask } from "../runner.js";
+import { runTask } from "../processHelpers.js";
 import { downloader } from "./downloader.js";
 
 const supportedBinaries = [

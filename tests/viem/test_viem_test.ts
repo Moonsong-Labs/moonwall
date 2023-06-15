@@ -9,7 +9,7 @@ describeSuite({
   testCases: ({ context, log, it }) => {
     let api: PublicViem;
     beforeAll(() => {
-      api = context.viemClient("public");
+      api = context.viem("public");
     });
 
     it({

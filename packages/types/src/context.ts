@@ -59,10 +59,21 @@ export interface MoonwallProvider {
 export interface ConnectedProvider {
   name: string;
   type: ProviderType;
-  api: ApiPromise | Signer | Web3 | PublicViem | WalletViem;
+  api: ProviderApi;
   disconnect: () => Promise<void>;
   greet: () => Promise<void> | void | { rtName: string; rtVersion: number };
 }
+
+export type ProviderApi = { [P in keyof ProviderMap]: ProviderMap[P] }[keyof ProviderMap];
+
+export type ProviderMap = {
+  polkadotJs: ApiPromise;
+  ethers: Signer;
+  web3: Web3;
+  moon: ApiPromise;
+  viemPublic: PublicViem;
+  viemWallet: WalletViem;
+};
 
 /**
  * @name Node
@@ -96,6 +107,7 @@ export interface BlockCreation {
   allowFailures?: boolean;
   expectEvents?: AugmentedEvent<ApiTypes>[];
   logger?: Debugger;
+  signer?: { type: "ethereum" | "sr25519" | "ed25519"; privateKey: string };
 }
 
 export interface BlockCreationResponse<

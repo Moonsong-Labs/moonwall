@@ -112,23 +112,6 @@ export async function createChopsticksBlock(
   return { result };
 }
 
-export async function chopForkToFinalizedHead(context: MoonwallContext) {
-  const api = context.providers.find(({ type }) => type == "moon" || type == "polkadotJs")!
-    .api as ApiPromise;
-
-  const finalizedHead = context.genesis;
-  await sendSetHeadRequest(finalizedHead);
-  await sendNewBlockRequest();
-  while (true) {
-    const newHead = (await api.rpc.chain.getFinalizedHead()).toString();
-    await setTimeout(50);
-    if (newHead !== finalizedHead) {
-      context.genesis = newHead;
-      break;
-    }
-  }
-}
-
 export async function sendSetHeadRequest(newHead: string, providerName?: string) {
   const ws = providerName ? await getWsFromConfig(providerName) : await getWsFromConfig();
 

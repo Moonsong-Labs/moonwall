@@ -111,7 +111,7 @@ export async function deployViemContract<TOptions extends ContractDeploymentOpti
   // const isEIP1559 = options?.txnType === "eip1559";
   // const isEIP2930 = options?.txnType === "eip2930";
 
-  const url = context.viemClient("public").transport.url;
+  const url = context.viem("public").transport.url;
 
   const { privateKey = ALITH_PRIVATE_KEY, ...rest } = options || {};
   const blob = { ...rest, abi, bytecode, account: privateKeyToAccount(privateKey) };
@@ -149,7 +149,7 @@ export async function deployViemContract<TOptions extends ContractDeploymentOpti
   await context.createBlock();
 
   const { contractAddress, status, logs } = await context
-    .viemClient("public")
+    .viem("public")
     .getTransactionReceipt({ hash });
 
   return { contractAddress, status, logs, hash };
@@ -207,13 +207,13 @@ export async function createRawTransaction<TOptions extends DeepPartial<ViemTran
   const account = privateKeyToAccount(privateKey);
   const value = options && options.value ? options.value : 0n;
   const to = options && options.to ? options.to : "0x0000000000000000000000000000000000000000";
-  const chainId = await context.viemClient("public").getChainId();
+  const chainId = await context.viem("public").getChainId();
   const txnCount = await context
-    .viemClient("public")
+    .viem("public")
     .getTransactionCount({ address: account.address });
-  const gasPrice = await context.viemClient("public").getGasPrice();
+  const gasPrice = await context.viem("public").getGasPrice();
   const estimatedGas = await context
-    .viemClient("public")
+    .viem("public")
     .estimateGas({ account: account.address, to, value });
   const accessList = options && options.accessList ? options.accessList : [];
   const data = options && options.data ? options.data : "0x";
@@ -274,10 +274,10 @@ export async function checkBalance(
   block: BlockTag | bigint = "latest"
 ): Promise<bigint> {
   return typeof block == "string"
-    ? await context.viemClient("public").getBalance({ address: account, blockTag: block })
+    ? await context.viem("public").getBalance({ address: account, blockTag: block })
     : typeof block == "bigint"
-    ? await context.viemClient("public").getBalance({ address: account, blockNumber: block })
-    : await context.viemClient("public").getBalance({ address: account });
+    ? await context.viem("public").getBalance({ address: account, blockNumber: block })
+    : await context.viem("public").getBalance({ address: account });
 }
 
 /**
@@ -294,6 +294,6 @@ export async function sendRawTransaction(
   rawTx: `0x${string}`
 ): Promise<any> {
   return await context
-    .viemClient("public")
+    .viem("public")
     .request({ method: "eth_sendRawTransaction", params: [rawTx] });
 }

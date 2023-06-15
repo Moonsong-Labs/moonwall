@@ -1,35 +1,18 @@
 import "@moonbeam-network/api-augment";
+import { BlockCreation, ExtrinsicCreation, GenericContext } from "@moonwall/types";
+import { createAndFinalizeBlock, customWeb3Request, generateKeyringPair } from "@moonwall/util";
 import "@polkadot/api-augment";
-import { extractError } from "../../lib/contextHelpers.js";
-import { BlockCreation, BlockCreationResponse, ExtrinsicCreation } from "@moonwall/types";
-import { ApiTypes, AugmentedEvent, SubmittableExtrinsic } from "@polkadot/api/types";
-import { customWeb3Request, alith, createAndFinalizeBlock } from "@moonwall/util";
+import { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types";
+import { RegistryError } from "@polkadot/types-codec/types/registry";
+import { EventRecord } from "@polkadot/types/interfaces/types.js";
+import chalk from "chalk";
 import Debug from "debug";
 import { setTimeout } from "timers/promises";
-import { EventRecord } from "@polkadot/types/interfaces/types.js";
-import { RegistryError } from "@polkadot/types-codec/types/registry";
-import { MoonwallContext } from "../../lib/globalContext.js";
-import { ApiPromise } from "@polkadot/api";
 import { assert } from "vitest";
-import chalk from "chalk";
 import { importJsonConfig } from "../../lib/configReader.js";
-import { GenericContext } from "@moonwall/types";
+import { extractError } from "../../lib/contextHelpers.js";
+import { MoonwallContext } from "../../lib/globalContext.js";
 const debug = Debug("DevTest");
-
-export async function devForkToFinalizedHead(context: MoonwallContext) {
-  const api = context.providers.find(({ type }) => type == "moon")!.api as ApiPromise;
-  const finalizedHead = context.genesis;
-  await api.rpc.engine.createBlock(true, true, finalizedHead);
-  while (true) {
-    const newHead = (await api.rpc.chain.getFinalizedHead()).toString();
-    if (newHead == finalizedHead) {
-      await setTimeout(100);
-    } else {
-      context.genesis = newHead;
-      break;
-    }
-  }
-}
 
 export async function getDevProviderPath() {
   const globalConfig = await importJsonConfig();
@@ -56,20 +39,19 @@ export type CallType<TApi extends ApiTypes> =
 export async function createDevBlock<
   ApiType extends ApiTypes,
   Calls extends CallType<ApiType> | CallType<ApiType>[]
->(context: GenericContext, transactions?: Calls, options: BlockCreation = { allowFailures: true }) {
+>(context: GenericContext, transactions?: Calls, options: BlockCreation ={} ) {
   let originalBlockNumber: bigint;
 
   const containsViem =
     MoonwallContext.getContext().providers.find((prov) => prov.type == "viemPublic") &&
-    !!!context.viemClient("public")
+    !!!context.viem("public")
       ? true
       : false;
 
   if (containsViem) {
-    originalBlockNumber = await context.viemClient("public").getBlockNumber();
+    originalBlockNumber = await context.viem("public").getBlockNumber();
   }
-
-  // const containsViem = context.viemClient("public");
+  const signer = generateKeyringPair(options.signer!.type, options.signer!.privateKey )
 
   const results: ({ type: "eth"; hash: string } | { type: "sub"; hash: string })[] = [];
 
@@ -83,7 +65,7 @@ export async function createDevBlock<
         type: "eth",
         hash: containsViem
           ? (
-              (await context.viemClient("public").request({
+              (await context.viem("public").request({
                 method: "eth_sendRawTransaction",
                 params: [call as `0x${string}`],
               })) as any
@@ -111,7 +93,7 @@ export async function createDevBlock<
       );
       results.push({
         type: "sub",
-        hash: (await call.signAndSend(alith)).toString(),
+        hash: (await call.signAndSend(signer)).toString(),
       });
     }
   }
@@ -163,7 +145,7 @@ export async function createDevBlock<
 
   // Avoiding race condition by ensuring ethereum block is created
   if (containsViem && originalBlockNumber! !== undefined) {
-    const pubClient = context.viemClient("public");
+    const pubClient = context.viem("public");
     while (true) {
       const blockNum = await pubClient.getBlockNumber();
       if (blockNum > originalBlockNumber) {

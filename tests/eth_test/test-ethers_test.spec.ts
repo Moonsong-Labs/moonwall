@@ -11,7 +11,7 @@ describeSuite({
 
     beforeAll(() => {
       log("Should be before each tc");
-      api = context.ethersSigner();
+      api = context.ethers();
     });
 
     it({

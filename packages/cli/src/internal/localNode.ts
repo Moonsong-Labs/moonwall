@@ -1,7 +1,7 @@
 import { ChildProcess, spawn } from "child_process";
 import chalk from "chalk";
 import Debug from "debug";
-import { checkAccess, checkExists } from "./files.js";
+import { checkAccess, checkExists } from "./fileCheckers.js";
 const debugNode = Debug("global:node");
 
 export async function launchNode(cmd: string, args: string[], name: string): Promise<ChildProcess> {

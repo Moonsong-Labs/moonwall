@@ -81,15 +81,6 @@
             },
             "type": "object"
         },
-        "EthTransactionType": {
-            "description": "The type of Ethereum transaction. Can be \"Legacy\", \"EIP2930\", or \"EIP1559\".",
-            "enum": [
-                "eip1559",
-                "eip2930",
-                "legacy"
-            ],
-            "type": "string"
-        },
         "IFoundation": {
             "anyOf": [
                 {
@@ -240,12 +231,11 @@
             "type": "object"
         },
         "ProviderType": {
-            "description": "The type of provider. Can be \"polkadotJs\", \"ethers\", \"web3\", \"moon\", \"unknown\", \"viemPublic\", or \"viemWallet\".",
+            "description": "The type of provider. Can be \"polkadotJs\", \"ethers\", \"web3\", \"moon\", \"viemPublic\", or \"viemWallet\".",
             "enum": [
                 "ethers",
                 "moon",
                 "polkadotJs",
-                "unknown",
                 "viemPublic",
                 "viemWallet",
                 "web3"
@@ -304,8 +294,27 @@
                     "contracts": {
                         "type": "string"
                     },
-                    "defaultEthTxnStyle": {
-                        "$ref": "#/definitions/EthTransactionType"
+                    "defaultAllowFailures": {
+                        "type": "boolean"
+                    },
+                    "defaultFinalization": {
+                        "type": "boolean"
+                    },
+                    "defaultSigner": {
+                        "properties": {
+                            "privateKey": {
+                                "type": "string"
+                            },
+                            "type": {
+                                "enum": [
+                                    "ed25519",
+                                    "ethereum",
+                                    "sr25519"
+                                ],
+                                "type": "string"
+                            }
+                        },
+                        "type": "object"
                     },
                     "envVars": {
                         "items": {

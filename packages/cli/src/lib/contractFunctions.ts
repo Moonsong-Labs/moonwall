@@ -95,8 +95,8 @@ export async function deployCreateCompiledContract<TOptions extends ContractDepl
   const contract = getContract({
     address: contractAddress!,
     abi: abi,
-    publicClient: context.viemClient("public") as PublicClient,
-    walletClient: context.viemClient("wallet") as WalletClient,
+    publicClient: context.viem("public") as PublicClient,
+    walletClient: context.viem("wallet") as WalletClient,
   });
 
   return {
@@ -128,16 +128,16 @@ export async function deployCreateCompiledContract<TOptions extends ContractDepl
 //   const walletClient =
 //     options && options.privateKey
 //       ? createWalletClient({
-//           transport: http(context.viemClient("public").transport.url),
+//           transport: http(context.viem("public").transport.url),
 //           account: privateKeyToAccount(options.privateKey),
-//           chain: await getDevChain(context.viemClient("public").transport.url),
+//           chain: await getDevChain(context.viem("public").transport.url),
 //         })
-//       : context.viemClient("wallet");
+//       : context.viem("wallet");
 
 //   const nonce =
 //     options && options.nonce !== undefined
 //       ? options.nonce
-//       : await context.viemClient("public").getTransactionCount({ address: ALITH_ADDRESS });
+//       : await context.viem("public").getTransactionCount({ address: ALITH_ADDRESS });
 
 //   // const hash = await walletClient.sendTransaction({ data: callData, nonce });
 //   const rawTx = await createRawTransaction(context, { ...options, data: callData, nonce } as any);

@@ -2,7 +2,13 @@ import { ApiPromise } from "@polkadot/api";
 import { Signer } from "ethers";
 import { Web3 } from "web3";
 import { ApiTypes } from "@polkadot/api/types/index.js";
-import { ProviderType, ViemClientType, ZombieNodeType } from "./config.js";
+import {
+  FoundationType,
+  PolkadotProviders,
+  ProviderType,
+  ViemClientType,
+  ZombieNodeType,
+} from "./config.js";
 import { Debugger } from "debug";
 import { KeyringPair } from "@polkadot/keyring/types.js";
 import { Account, PublicClient, Transport, WalletClient } from "viem";
@@ -35,71 +41,71 @@ export interface CustomTest {
   }): void;
 }
 
-// TODO: make chaintype/rt filters dependent on foundation type and a type itself
+export type FoundationMethod = "dev" | "chopsticks" | "zombie" | "read_only" | "fork";
 
-/**
- * @name ITestSuiteType
- * @description The test suite type.
- * @property foundationMethods - The foundation methods required for the test suite.
- * @property id - A unique identifier for the test suite.
- * @property title - The title of the test suite.
- * @property testCases - A function that receives a TestContext and defines the test cases.
- * @property options - Additional options for the test suite.
- * @property minRtVersion - The minimum runtime version required for the test suite.
- * @property chainType - The chain type required for the test suite.
- * @property notChainType - The chain type excluded from the test suite.
- */
-export type ITestSuiteType =
-  | {
-      foundationMethods: "dev";
-      id: string;
-      title: string;
-      testCases: (TestContext: DevTestContext) => void;
-      options?: Object;
-      minRtVersion?: number;
-      chainType?: "moonbeam" | "moonriver" | "moonbase";
-      notChainType?: "moonbeam" | "moonriver" | "moonbase";
-    }
-  | {
-      foundationMethods: "chopsticks";
-      id: string;
-      title: string;
-      testCases: (TestContext: ChopsticksTestContext) => void;
-      options?: Object;
-      minRtVersion?: number;
-      chainType?: "moonbeam" | "moonriver" | "moonbase";
-      notChainType?: "moonbeam" | "moonriver" | "moonbase";
-    }
-  | {
-      foundationMethods: "zombie";
-      id: string;
-      title: string;
-      testCases: (TestContext: ZombieTestContext) => void;
-      options?: Object;
-      minRtVersion?: number;
-      chainType?: "moonbeam" | "moonriver" | "moonbase";
-      notChainType?: "moonbeam" | "moonriver" | "moonbase";
-    }
-  | {
-      foundationMethods: "read_only";
-      id: string;
-      title: string;
-      testCases: (TestContext: ReadOnlyTestContext) => void;
-      minRtVersion?: number;
-      chainType?: "moonbeam" | "moonriver" | "moonbase";
-      notChainType?: "moonbeam" | "moonriver" | "moonbase";
-      options?: Object;
-    }
-  | {
-      foundationMethods: "fork";
-      id: string;
-      title: string;
-      testCases: (TestContext: GenericTestContext) => void;
-      minRtVersion?: number;
-      chainType?: "moonbeam" | "moonriver" | "moonbase";
-      notChainType?: "moonbeam" | "moonriver" | "moonbase";
-      options?: Object;
-    };
+export type ChainType = "moonbeam" | "moonriver" | "moonbase";
+
+export type FoundationContextMap = {
+  [K in FoundationMethod]: K extends "dev"
+    ? DevModeContext
+    : K extends "chopsticks"
+    ? ChopsticksContext
+    : K extends "zombie"
+    ? ZombieContext
+    : K extends "read_only"
+    ? ReadOnlyContext
+    : /* default: */ GenericContext;
+};
+
+export type TestContextMap = {
+  [K in FoundationMethod]: ITestContext<FoundationContextMap[K]>;
+};
+
+export type TestCasesFn<T extends FoundationType> = (params: {
+  context: GenericContext & FoundationContextMap[T];
+  it: (params: ITestCase) => void;
+  log: Debugger;
+}) => void;
+
+// TODO: Extend to include skipIf() and runIf()
+export type TestCaseModifier = "only" | "skip";
+
+export interface ITestCase {
+  id: string;
+  title: string;
+  test: () => void;
+  modifier?: TestCaseModifier;
+  minRtVersion?: number;
+  chainType?: "moonbeam" | "moonriver" | "moonbase";
+  notChainType?: "moonbeam" | "moonriver" | "moonbase";
+  // networkName?: string; TODO: Implement this
+  timeout?: number;
+}
+
+export type FoundationHandler<T extends FoundationType> = (params: {
+  testCases: TestCasesFn<T>;
+  context: GenericContext;
+  testCase: (params: ITestCase) => void;
+  logger: () => Debugger;
+  ctx?: any;
+}) => void;
+
+export type ITestSuiteType<T extends FoundationMethod> = {
+  id: string;
+  title: string;
+  testCases: (TestContext: TestContextMap[T]) => void;
+  foundationMethods: T;
+  options?: Object;
+  minRtVersion?: number;
+  chainType?: ChainType;
+  notChainType?: ChainType;
+};
+
+interface ITestContext<T extends GenericContext> {
+  context: T;
+  it: CustomTest;
+  log: Debugger;
+}
 
 /**
  * @name DevTestContext
@@ -108,11 +114,7 @@ export type ITestSuiteType =
  * @property it - The CustomTest function for the test.
  * @property log - The Debugger instance for logging.
  */
-export interface DevTestContext {
-  context: DevModeContext;
-  it: CustomTest;
-  log: Debugger;
-}
+export type DevTestContext = ITestContext<DevModeContext>;
 
 /**
  * @name ReadOnlyTestContext
@@ -121,11 +123,7 @@ export interface DevTestContext {
  * @property it - The CustomTest function for the test.
  * @property log - The Debugger instance for logging.
  */
-export interface ReadOnlyTestContext {
-  context: ReadOnlyContext;
-  it: CustomTest;
-  log: Debugger;
-}
+export type ReadOnlyTestContext = ITestContext<ReadOnlyContext>;
 
 /**
  * @name ChopsticksTestContext
@@ -134,24 +132,16 @@ export interface ReadOnlyTestContext {
  * @property it - The CustomTest function for the test.
  * @property log - The Debugger instance for logging.
  */
-export interface ChopsticksTestContext {
-  context: ChopsticksContext;
-  it: CustomTest;
-  log: Debugger;
-}
+export type ChopsticksTestContext = ITestContext<ChopsticksContext>;
 
-/**
- * @name ZombieTestContext
- * @description The context for tests running with zombie.
- * @property context - The context for the zombie mode.
- * @property it - The CustomTest function for the test.
- * @property log - The Debugger instance for logging.
- */
-export interface ZombieTestContext {
-  context: ZombieContext;
-  it: CustomTest;
-  log: Debugger;
-}
+// /**
+//  * @name ZombieTestContext
+//  * @description The context for tests running with zombie.
+//  * @property context - The context for the zombie mode.
+//  * @property it - The CustomTest function for the test.
+//  * @property log - The Debugger instance for logging.
+//  */
+export type ZombieTestContext = ITestContext<ZombieContext>;
 
 /**
  * @name GenericTestContext
@@ -160,11 +150,7 @@ export interface ZombieTestContext {
  * @property it - The CustomTest function for the test.
  * @property log - The Debugger instance for logging.
  */
-export interface GenericTestContext {
-  context: GenericContext;
-  it: CustomTest;
-  log: Debugger;
-}
+export type GenericTestContext = ITestContext<GenericContext>;
 
 /**
  * @name UpgradePreferences
@@ -209,11 +195,16 @@ export interface ViemApiMap {
  * GenericContext - Interface that encapsulates all the common methods and properties needed for all tests.
  */
 export interface GenericContext {
-  providers: Object;
-  viemClient: <T extends ViemClientType>(subType: T) => ViemApiMap[T];
-  polkadotJs: (options?: { apiName?: string; type?: ProviderType }) => ApiPromise;
-  ethersSigner: ([name]?: string) => Signer;
-  web3: ([name]?: string) => Web3;
+  api(type: "polkadotJs" | "moon", name?: string): ApiPromise;
+  api(type: "ethers", name?: string): Signer;
+  api(type: "web3", name?: string): Web3;
+  api(type: "viemPublic", name?: string): PublicViem;
+  api(type: "viemWallet", name?: string): WalletViem;
+  viem(clientType?: "public", name?: string): PublicViem;
+  viem(clientType: "wallet", name?: string): WalletViem;
+  polkadotJs(options?: { apiName?: string; type?: PolkadotProviders }): ApiPromise;
+  ethers(name?: string): Signer;
+  web3(name?: string): Web3;
 }
 
 /**

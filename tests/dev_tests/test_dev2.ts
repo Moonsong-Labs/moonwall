@@ -13,7 +13,7 @@ describeSuite({
     let polkadotJs: ApiPromise;
 
     beforeAll(() => {
-      signer = context.ethersSigner();
+      signer = context.ethers();
       w3 = context.web3();
       polkadotJs = context.polkadotJs();
     });

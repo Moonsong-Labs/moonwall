@@ -1,15 +1,18 @@
-import { CompiledContract } from "@moonwall/types";
+import { CompiledContract } from "@moonwall/cli";
 import chalk from "chalk";
 import fs from "fs/promises";
 import path from "path";
 import solc from "solc";
 import { Abi } from "viem";
+import crypto from "crypto";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 
 let sourceByReference = {} as { [ref: string]: string };
 let countByReference = {} as { [ref: string]: number };
 let refByContract = {} as { [contract: string]: string };
+let contractMd5 = {} as { [contract: string]: string };
+const solcVersion = solc.version();
 
 yargs(hideBin(process.argv))
   .usage("Usage: $0")
@@ -19,7 +22,7 @@ yargs(hideBin(process.argv))
       type: "string",
       alias: "p",
       description: "path to directory containing Precompile solidity files",
-      default: "precompiles/",
+      default: "../precompiles/",
     },
     OutputDirectory: {
       type: "string",
@@ -39,28 +42,23 @@ yargs(hideBin(process.argv))
   })
   .parse();
 
-// async (argv) => {
-//   await runNetwork(argv as any);
-//   process.exit(0);
-// }
-
 async function main(args: any) {
-  const precompilesPath = path.join(process.cwd(),args.argv.PreCompilesDirectory)
-  const outputDirectory = path.join(process.cwd(),args.argv.OutputDirectory)
-  const sourceDirectory = path.join(process.cwd(),args.argv.SourceDirectory)
+  const precompilesPath = path.join(process.cwd(), args.argv.PreCompilesDirectory);
+  const outputDirectory = path.join(process.cwd(), args.argv.OutputDirectory);
+  const sourceDirectory = path.join(process.cwd(), args.argv.SourceDirectory);
+  const tempFile = path.join(process.cwd(), args.argv.OutputDirectory, ".compile.tmp");
 
-  console.log(`Precompiles path: ${precompilesPath}`);
-  console.log(`Output directory: ${outputDirectory}`);
-  console.log(`Source directory: ${sourceDirectory}`);
-  // return;
-  // const args = process.argv.slice(2);
-  // const precompilesPath = path.join(__dirname, "../../precompiles");
+  console.log(`🧪  Solc version: ${solcVersion}`);
+  console.log(`🗃️  Precompiles path: ${precompilesPath}`);
+  console.log(`🗃️  Output directory: ${outputDirectory}`);
+  console.log(`🗃️  Source directory: ${sourceDirectory}`);
+
   // Order is important so precompiles are available first
   const contractSourcePaths = [
     ...(await fs.readdir(precompilesPath)).map((filename) => ({
       filepath: path.join(precompilesPath, filename),
       // Solidity import removes the "../../.." when searching for imports
-      importPath: /precompiles.*/.exec(path.join(precompilesPath, filename))[0],
+      importPath: /precompiles.*/.exec(path.join(precompilesPath, filename))![0],
       compile: true,
     })),
     {
@@ -76,6 +74,7 @@ async function main(args: any) {
   ];
 
   const sourceToCompile = {};
+  const filePaths: string[] = [];
   for (const contractPath of contractSourcePaths) {
     const contracts = (await getFiles(contractPath.filepath)).filter((filename) =>
       filename.endsWith(".sol")
@@ -84,6 +83,7 @@ async function main(args: any) {
       const ref = filepath
         .replace(contractPath.filepath, contractPath.importPath)
         .replace(/^\//, "");
+      filePaths.push(filepath);
       sourceByReference[ref] = (await fs.readFile(filepath)).toString();
       if (contractPath.compile) {
         countByReference[ref] = 0;
@@ -94,10 +94,36 @@ async function main(args: any) {
     }
   }
 
+  console.log(`📁 Found ${Object.keys(sourceToCompile).length} contracts to compile`);
+  const contractsToCompile = [];
+  const tempFileExists = await fs
+    .access(tempFile)
+    .then(() => true)
+    .catch(() => false);
+
+  if (tempFileExists) {
+    contractMd5 = JSON.parse((await fs.readFile(tempFile)).toString());
+    for (const contract of Object.keys(sourceToCompile)) {
+      const path = filePaths.find((path) => path.includes(contract));
+      const contractHash = computeHash((await fs.readFile(path)).toString());
+      if (contractHash != contractMd5[contract]) {
+        console.log(`  - Change in ${chalk.yellow(contract)}, compiling ⚙️`);
+        contractsToCompile.push(contract);
+      } else {
+        console.log(`  - No change to ${chalk.green(contract)}, skipping ✅`);
+      }
+    }
+  } else {
+    console.log(`  - ${chalk.yellow("No temp file found, compiling all contracts ⚙️")}`);
+    contractsToCompile.push(...Object.keys(sourceToCompile));
+  }
+
   // Compile contracts
-  for (const ref of Object.keys(sourceToCompile)) {
+  for (const ref of contractsToCompile) {
     try {
-      await compile(ref,outputDirectory);
+      await compile(ref, outputDirectory);
+
+      await fs.writeFile(tempFile, JSON.stringify(contractMd5, null, 2));
     } catch (e) {
       console.log(`Failed to compile: ${ref}`);
       if (e.errors) {
@@ -110,11 +136,11 @@ async function main(args: any) {
       process.exit(1);
     }
   }
-  for (const ref of Object.keys(countByReference)) {
-    if (!countByReference[ref]) {
-      console.log(`${chalk.red("Warning")}: ${ref} never used: ${countByReference[ref]}`);
-    }
-  }
+  // for (const ref of Object.keys(countByReference)) {
+  //   if (!countByReference[ref]) {
+  //     console.log(`${chalk.red("Warning")}: ${ref} never used: ${countByReference[ref]}`);
+  //   }
+  // }
 }
 
 // For some reasons, solc doesn't provide the relative path to imports :(
@@ -206,11 +232,13 @@ async function compile(
         );
       }
       await fs.mkdir(path.dirname(dest), { recursive: true });
-      await fs.writeFile(dest, JSON.stringify(compiledContracts[contractName]), {
+      await fs.writeFile(dest, JSON.stringify(compiledContracts[contractName], null, 2), {
         flag: "w",
+        encoding: "utf-8",
       });
-      console.log(`  - ${chalk.green(`${contractName}.json`)} file has been saved!`);
+      console.log(`  - ${chalk.green(`${contractName}.json`)} file has been saved 💾`);
       refByContract[dest] = fileRef;
+      contractMd5[fileRef] = computeHash(soliditySource);
     })
   );
   return compiledContracts;
@@ -225,4 +253,10 @@ async function getFiles(dir) {
     })
   );
   return files.reduce((a, f) => a.concat(f), []);
+}
+
+function computeHash(input: string): string {
+  const hash = crypto.createHash("md5");
+  hash.update(input + solcVersion);
+  return hash.digest("hex");
 }

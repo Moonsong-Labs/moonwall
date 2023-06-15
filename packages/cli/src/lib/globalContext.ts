@@ -1,68 +1,28 @@
 import "@moonbeam-network/api-augment";
 import {
-  EthTransactionType,
+  ConnectedProvider,
+  Environment,
   FoundationType,
   MoonwallConfig,
-  ProviderConfig,
-  ConnectedProvider,
   MoonwallEnvironment,
   MoonwallProvider,
+  Node,
 } from "@moonwall/types";
-import { ChildProcess, exec } from "node:child_process";
-import { populateProviderInterface, prepareProviders } from "../internal/providers.js";
-import { launchNode } from "../internal/localNode.js";
-import { setTimeout } from "node:timers/promises";
-import { importJsonConfig } from "./configReader.js";
-import { parseChopsticksRunCmd, parseRunCmd, parseZombieCmd } from "../internal/foundations.js";
 import { ApiPromise } from "@polkadot/api";
 import zombie, { Network } from "@zombienet/orchestrator";
 import Debug from "debug";
+import { ChildProcess, exec } from "node:child_process";
+import { setTimeout } from "node:timers/promises";
+import { parseChopsticksRunCmd, parseRunCmd, parseZombieCmd } from "../internal/commandParsers.js";
 import { checkZombieBins, getZombieConfig } from "../internal/foundations/zombieHelpers.js";
+import { launchNode } from "../internal/localNode.js";
+import {
+  ProviderFactory,
+  ProviderInterfaceFactory,
+  vitestAutoUrl,
+} from "../internal/providerFactories.js";
+import { importJsonConfig } from "./configReader.js";
 const debugSetup = Debug("global:context");
-
-export const contextCreator = async (config: MoonwallConfig, env: string) => {
-  const ctx = MoonwallContext.getContext(config);
-  await runNetworkOnly(config);
-  await ctx.connectEnvironment();
-  return ctx;
-};
-
-export const runNetworkOnly = async (config: MoonwallConfig) => {
-  const ctx = MoonwallContext.getContext(config);
-  await ctx.startNetwork();
-};
-
-export const vitestAutoUrl = `ws://127.0.0.1:${
-  10000 + Number(process.env.VITEST_POOL_ID || 1) * 100
-}`;
-
-const defaultConnections: ProviderConfig[] = [
-  {
-    name: "w3",
-    type: "web3",
-    endpoints: [vitestAutoUrl],
-  },
-  {
-    name: "eth",
-    type: "ethers",
-    endpoints: [vitestAutoUrl],
-  },
-  {
-    name: "public",
-    type: "viemPublic",
-    endpoints: [vitestAutoUrl],
-  },
-  {
-    name: "wallet",
-    type: "viemWallet",
-    endpoints: [vitestAutoUrl],
-  },
-  {
-    name: "mb",
-    type: "moon",
-    endpoints: [vitestAutoUrl],
-  },
-];
 
 export class MoonwallContext {
   private static instance: MoonwallContext | undefined;
@@ -71,112 +31,153 @@ export class MoonwallContext {
   nodes: ChildProcess[];
   foundation: FoundationType;
   zombieNetwork?: Network;
-  private _finalizedHead?: string;
   rtUpgradePath?: string;
-  defaultEthTxnStyle?: EthTransactionType;
 
   constructor(config: MoonwallConfig) {
-    // this.environment;
+    const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
     this.providers = [];
     this.nodes = [];
-
-    const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
-    const blob = {
-      name: env.name,
-      context: {},
-      providers: [] as MoonwallProvider[],
-      nodes: [] as {
-        name?: string;
-        cmd: string;
-        args: string[];
-        launch: boolean;
-      }[],
-      foundationType: env.foundation.type,
-    };
     this.foundation = env.foundation.type;
 
-    switch (env.foundation.type) {
-      case "read_only":
-        if (!env.connections) {
-          throw new Error(
-            `${env.name} env config is missing connections specification, required by foundation READ_ONLY`
-          );
-        } else {
-          blob.providers = prepareProviders(env.connections);
-        }
+    const foundationHandlers: Record<
+      FoundationType,
+      (env: Environment) => IGlobalContextFoundation
+    > = {
+      read_only: this.handleReadOnly,
+      chopsticks: this.handleChopsticks,
+      dev: this.handleDev,
+      zombie: this.handleZombie,
+      fork: this.handleReadOnly, // TODO: Implement fork
+    };
 
-        debugSetup(`🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`);
-        break;
+    const foundationHandler = foundationHandlers[env.foundation.type];
+    this.environment = { providers: [], nodes: [], ...foundationHandler.call(this, env) };
+  }
 
-      case "chopsticks":
-        blob.nodes.push(parseChopsticksRunCmd(env.foundation.launchSpec));
-        blob.providers.push(...prepareProviders(env.connections!));
-        this.rtUpgradePath = env.foundation.rtUpgradePath;
-        debugSetup(`🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`);
-        break;
+  private handleZombie(env: Environment): IGlobalContextFoundation {
+    if (env.foundation.type !== "zombie") {
+      throw new Error(`Foundation type must be 'zombie'`);
+    }
 
-      case "dev":
-        if (env.defaultEthTxnStyle) {
-          this.defaultEthTxnStyle = env.defaultEthTxnStyle;
-        }
-
-        const { cmd, args, launch } = parseRunCmd(env.foundation.launchSpec[0]);
-        blob.nodes.push({
-          name: env.foundation.launchSpec[0].name,
-          cmd,
-          args,
-          launch,
-        });
-
-        blob.providers = env.connections
-          ? prepareProviders(env.connections)
-          : !!!env.foundation.launchSpec[0].disableDefaultEthProviders
-          ? prepareProviders(defaultConnections)
-          : prepareProviders([
-              {
-                name: "node",
-                type: "polkadotJs",
-                endpoints: [vitestAutoUrl],
-              },
-            ]);
-
-        debugSetup(`🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`);
-        break;
-
-      case "zombie":
-        const { cmd: zombieConfig } = parseZombieCmd(env.foundation.zombieSpec);
-        blob.nodes.push({
+    const { cmd: zombieConfig } = parseZombieCmd(env.foundation.zombieSpec);
+    this.rtUpgradePath = env.foundation.rtUpgradePath;
+    return {
+      name: env.name,
+      foundationType: "zombie",
+      nodes: [
+        {
           name: env.foundation.zombieSpec.name,
           cmd: zombieConfig,
           args: [],
           launch: true,
-        });
-        this.rtUpgradePath = env.foundation.rtUpgradePath;
-
-        debugSetup(`🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`);
-        break;
-
-      default:
-        debugSetup(`🚧  Foundation "${env.foundation.type}" unsupported, skipping`);
-        return;
-    }
-
-    this.environment = blob;
+        },
+      ],
+    };
   }
 
-  public get genesis() {
-    if (this._finalizedHead) {
-      return this._finalizedHead;
-    } else {
-      return "";
+  private handleDev(env: Environment): IGlobalContextFoundation {
+    if (env.foundation.type !== "dev") {
+      throw new Error(`Foundation type must be 'dev'`);
     }
+
+    const { cmd, args, launch } = parseRunCmd(env.foundation.launchSpec![0]);
+    return {
+      name: env.name,
+      foundationType: "dev",
+      nodes: [
+        {
+          name: env.foundation.launchSpec![0].name,
+          cmd,
+          args,
+          launch,
+        },
+      ],
+      providers: env.connections
+        ? ProviderFactory.prepare(env.connections)
+        : !!!env.foundation.launchSpec![0].disableDefaultEthProviders
+        ? ProviderFactory.prepareDefaultDev()
+        : ProviderFactory.prepare([
+            {
+              name: "node",
+              type: "polkadotJs",
+              endpoints: [vitestAutoUrl],
+            },
+          ]),
+    };
   }
 
-  public set genesis(hash: string) {
-    if (hash.length !== 66) {
-      throw new Error("Cannot set genesis to invalid hash");
+  private handleReadOnly(env: Environment): IGlobalContextFoundation {
+    if (env.foundation.type !== "read_only") {
+      throw new Error(`Foundation type must be 'dev'`);
     }
-    this._finalizedHead = hash;
+
+    if (!env.connections) {
+      throw new Error(
+        `${env.name} env config is missing connections specification, required by foundation READ_ONLY`
+      );
+    }
+    return {
+      name: env.name,
+      foundationType: "read_only",
+      providers: ProviderFactory.prepare(env.connections),
+    };
+  }
+
+  private handleChopsticks(env: Environment): IGlobalContextFoundation {
+    if (env.foundation.type !== "chopsticks") {
+      throw new Error(`Foundation type must be 'dev'`);
+    }
+
+    this.rtUpgradePath = env.foundation.rtUpgradePath;
+    return {
+      name: env.name,
+      foundationType: "chopsticks",
+      nodes: [parseChopsticksRunCmd(env.foundation.launchSpec!)],
+      providers: [...ProviderFactory.prepare(env.connections!)],
+    };
+  }
+
+  private async startZombieNetwork(nodes: Node[]) {
+    console.log("🧟 Spawning zombie nodes ...");
+    const config = await importJsonConfig();
+    const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
+    const zombieConfig = getZombieConfig(nodes[0].cmd);
+
+    await checkZombieBins(zombieConfig);
+
+    const network = await zombie.start("", zombieConfig, { silent: true });
+
+    process.env.MOON_RELAY_WSS = network.relay[0].wsUri;
+    process.env.MOON_PARA_WSS = Object.values(network.paras)[0].nodes[0].wsUri;
+
+    if (
+      env.foundation.type == "zombie" &&
+      env.foundation.zombieSpec.monitoredNode &&
+      env.foundation.zombieSpec.monitoredNode in network.nodesByName
+    ) {
+      process.env.MOON_MONITORED_NODE = `${network.tmpDir}/${env.foundation.zombieSpec.monitoredNode}.log`;
+    }
+
+    const processIds = Object.values((network.client as any).processMap)
+      .filter((item) => item!["pid"])
+      .map((process) => process!["pid"]);
+
+    const onProcessExit = () => {
+      exec(`kill -9 ${processIds.join(" ")}`, (error) => {
+        if (error) {
+          console.error(`Error killing process: ${error.message}`);
+        }
+      });
+    };
+
+    process.once("exit", onProcessExit);
+    process.once("SIGINT", onProcessExit);
+
+    process.env.MOON_MONITORED_NODE = zombieConfig.parachains[0].collator
+      ? `${network.tmpDir}/${zombieConfig.parachains[0].collator.name}.log`
+      : `${network.tmpDir}/${zombieConfig.parachains[0].collators![0].name}.log`;
+    this.zombieNetwork = network;
+    return;
   }
 
   public async startNetwork() {
@@ -193,85 +194,24 @@ export class MoonwallContext {
     const nodes = MoonwallContext.getContext().environment.nodes;
 
     if (this.environment.foundationType === "zombie") {
-      console.log("🧟 Spawning zombie nodes ...");
-      const config = await importJsonConfig();
-      const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
-      const zombieConfig = getZombieConfig(nodes[0].cmd);
-
-      await checkZombieBins(zombieConfig);
-
-      const network = await zombie.start("", zombieConfig, { silent: true });
-
-      process.env.MOON_RELAY_WSS = network.relay[0].wsUri;
-      process.env.MOON_PARA_WSS = Object.values(network.paras)[0].nodes[0].wsUri;
-
-      if (
-        env.foundation.type == "zombie" &&
-        env.foundation.zombieSpec.monitoredNode &&
-        env.foundation.zombieSpec.monitoredNode in network.nodesByName
-      ) {
-        process.env.MOON_MONITORED_NODE = `${network.tmpDir}/${env.foundation.zombieSpec.monitoredNode}.log`;
-      }
-
-      const processIds = Object.values((network.client as any).processMap)
-        .filter((item) => item!["pid"])
-        .map((process) => process!["pid"]);
-
-      const onProcessExit = () => {
-        exec(`kill -9 ${processIds.join(" ")}`, (error) => {
-          if (error) {
-            console.error(`Error killing process: ${error.message}`);
-          }
-        });
-      };
-
-      process.once("exit", onProcessExit);
-      process.once("SIGINT", onProcessExit);
-
-      process.env.MOON_MONITORED_NODE = zombieConfig.parachains[0].collator
-        ? `${network.tmpDir}/${zombieConfig.parachains[0].collator.name}.log`
-        : `${network.tmpDir}/${zombieConfig.parachains[0].collators![0].name}.log`;
-      this.zombieNetwork = network;
-      return;
+      return await this.startZombieNetwork(nodes);
     }
 
     const promises = nodes.map(async ({ cmd, args, name, launch }) => {
       return launch && this.nodes.push(await launchNode(cmd, args, name!));
     });
     await Promise.all(promises);
+    return MoonwallContext.getContext();
   }
 
   public async connectEnvironment(): Promise<MoonwallContext> {
     const config = await importJsonConfig();
     const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
-    const MOON_PARA_WSS = process.env.MOON_PARA_WSS || "error";
-    const MOON_RELAY_WSS = process.env.MOON_RELAY_WSS || "error";
-    // TODO: Explicitly communicate (DOCs and console) this is done automatically
+
     if (this.environment.foundationType == "zombie") {
       this.environment.providers = env.connections
-        ? prepareProviders(env.connections)
-        : prepareProviders([
-            {
-              name: "w3",
-              type: "web3",
-              endpoints: [MOON_PARA_WSS],
-            },
-            {
-              name: "eth",
-              type: "ethers",
-              endpoints: [MOON_PARA_WSS],
-            },
-            {
-              name: "parachain",
-              type: "moon",
-              endpoints: [MOON_PARA_WSS],
-            },
-            {
-              name: "relaychain",
-              type: "polkadotJs",
-              endpoints: [MOON_RELAY_WSS],
-            },
-          ]);
+        ? ProviderFactory.prepare(env.connections)
+        : ProviderFactory.prepareDefaultZombie();
     }
 
     if (this.providers.length > 0) {
@@ -281,30 +221,11 @@ export class MoonwallContext {
     const promises = this.environment.providers.map(
       async ({ name, type, connect }) =>
         new Promise(async (resolve) => {
-          this.providers.push(await populateProviderInterface(name, type, connect));
+          this.providers.push(await ProviderInterfaceFactory.populate(name, type, connect));
           resolve("");
         })
     );
     await Promise.all(promises);
-
-    // TODO: Do we actually need this?
-    if (this.foundation == "dev") {
-      this.genesis = (
-        await (
-          this.providers.find(({ type }) => type == "polkadotJs" || type == "moon")!
-            .api as ApiPromise
-        ).rpc.chain.getBlockHash(0)
-      ).toString();
-    }
-
-    if (this.foundation == "chopsticks") {
-      this.genesis = (
-        await (
-          this.providers.find(({ type }) => type == "polkadotJs" || type == "moon")!
-            .api as ApiPromise
-        ).rpc.chain.getFinalizedHead()
-      ).toString();
-    }
 
     if (this.foundation == "zombie") {
       const promises = this.providers
@@ -356,15 +277,9 @@ export class MoonwallContext {
 
   public static getContext(config?: MoonwallConfig, force: boolean = false): MoonwallContext {
     if (!MoonwallContext.instance || force) {
-      // Retrieves the instance from the global context if it exists.
-      // if (global.moonInstance && !force) {
-      //   MoonwallContext.instance = global.moonInstance;
-      //   return MoonwallContext.instance;
-      // }
       if (!config) {
         console.error("❌ Config must be provided on Global Context instantiation");
         process.exit(2);
-        // return undefined;
       }
       MoonwallContext.instance = new MoonwallContext(config);
 
@@ -396,4 +311,29 @@ export class MoonwallContext {
       await ctx.zombieNetwork.stop();
     }
   }
+}
+
+export const contextCreator = async (config: MoonwallConfig, env: string) => {
+  const ctx = MoonwallContext.getContext(config);
+  await runNetworkOnly(config);
+  await ctx.connectEnvironment();
+  return ctx;
+};
+
+export const runNetworkOnly = async (config: MoonwallConfig) => {
+  const ctx = MoonwallContext.getContext(config);
+  await ctx.startNetwork();
+};
+
+export interface IGlobalContextFoundation {
+  name: string;
+  context?: {};
+  providers?: MoonwallProvider[];
+  nodes?: {
+    name?: string;
+    cmd: string;
+    args: string[];
+    launch: boolean;
+  }[];
+  foundationType: FoundationType;
 }

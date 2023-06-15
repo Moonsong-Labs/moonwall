@@ -26,9 +26,11 @@ export type MoonwallConfig = {
  * @property include - An optional array of included files or directories.
  * @property connections - An optional array of ProviderConfig objects.
  * @property multiThreads - An optional boolean to indicate if multi-threading is enabled.
- * @property defaultEthTxnStyle - An optional default Ethereum transaction type.
  * @property contracts - Path to foundry directory containing smart contracts for testing.
  * @property runScripts - An optional array of scripts to run before testing.
+ * @property defaultSigner - The privateKey with which to sign and send transactions in createBlock() function.
+ * @property defaultAllowFailures - Toggle whether createBlock() will throw when extrinsic errors inside.
+ * @property defaultFinalization - Toggle whether createBlock() will finalize blocks by default or not.
  */
 export type Environment = {
   reporters?: string[];
@@ -39,9 +41,11 @@ export type Environment = {
   include?: string[];
   connections?: ProviderConfig[];
   multiThreads?: boolean | number;
-  defaultEthTxnStyle?: EthTransactionType;
   contracts?: string;
   runScripts?: string[];
+  defaultSigner?: { type: "ethereum" | "sr25519" | "ed25519"; privateKey: string };
+  defaultAllowFailures?: boolean;
+  defaultFinalization?: boolean;
 };
 
 /**
@@ -165,16 +169,11 @@ export interface ProviderConfig {
 // TODO: Make Provider Sub-types (for viem and polkadot.js)
 /**
  * @name ProviderType
- * @description The type of provider. Can be "polkadotJs", "ethers", "web3", "moon", "unknown", "viemPublic", or "viemWallet".
+ * @description The type of provider. Can be "polkadotJs", "ethers", "web3", "moon", "viemPublic", or "viemWallet".
  */
-export type ProviderType =
-  | "polkadotJs"
-  | "ethers"
-  | "web3"
-  | "moon"
-  | "unknown"
-  | "viemPublic"
-  | "viemWallet";
+export type ProviderType = "polkadotJs" | "ethers" | "web3" | "moon" | "viemPublic" | "viemWallet";
+
+export type PolkadotProviders = Extract<ProviderType, "moon" | "polkadotJs">;
 
 /**
  * @name ViemClientType
