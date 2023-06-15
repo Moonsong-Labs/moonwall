@@ -9,7 +9,7 @@ import {
   MoonwallProvider,
 } from "@moonwall/types";
 import { ChildProcess, exec } from "node:child_process";
-import { populateProviderInterface, prepareProviders } from "../internal/providers.js";
+import { ProviderInterfaceFactory, ProviderFactory } from "../internal/providers.js";
 import { launchNode } from "../internal/localNode.js";
 import { setTimeout } from "node:timers/promises";
 import { importJsonConfig } from "./configReader.js";
@@ -102,7 +102,7 @@ export class MoonwallContext {
             `${env.name} env config is missing connections specification, required by foundation READ_ONLY`
           );
         } else {
-          blob.providers = prepareProviders(env.connections);
+          blob.providers = ProviderFactory.prepare(env.connections);
         }
 
         debugSetup(`🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`);
@@ -110,7 +110,7 @@ export class MoonwallContext {
 
       case "chopsticks":
         blob.nodes.push(parseChopsticksRunCmd(env.foundation.launchSpec));
-        blob.providers.push(...prepareProviders(env.connections!));
+        blob.providers.push(...ProviderFactory.prepare(env.connections!));
         this.rtUpgradePath = env.foundation.rtUpgradePath;
         debugSetup(`🟢  Foundation "${env.foundation.type}" parsed for environment: ${env.name}`);
         break;
@@ -129,10 +129,10 @@ export class MoonwallContext {
         });
 
         blob.providers = env.connections
-          ? prepareProviders(env.connections)
+          ? ProviderFactory.prepare(env.connections)
           : !!!env.foundation.launchSpec[0].disableDefaultEthProviders
-          ? prepareProviders(defaultConnections)
-          : prepareProviders([
+          ? ProviderFactory.prepare(defaultConnections)
+          : ProviderFactory.prepare([
               {
                 name: "node",
                 type: "polkadotJs",
@@ -249,8 +249,8 @@ export class MoonwallContext {
     // TODO: Explicitly communicate (DOCs and console) this is done automatically
     if (this.environment.foundationType == "zombie") {
       this.environment.providers = env.connections
-        ? prepareProviders(env.connections)
-        : prepareProviders([
+        ? ProviderFactory.prepare(env.connections)
+        : ProviderFactory.prepare([
             {
               name: "w3",
               type: "web3",
@@ -281,7 +281,7 @@ export class MoonwallContext {
     const promises = this.environment.providers.map(
       async ({ name, type, connect }) =>
         new Promise(async (resolve) => {
-          this.providers.push(await populateProviderInterface(name, type, connect));
+          this.providers.push(await ProviderInterfaceFactory.populate(name, type, connect));
           resolve("");
         })
     );

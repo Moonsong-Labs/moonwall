@@ -20,7 +20,7 @@ import { ApiOptions } from "@polkadot/api/types/index.js";
 import { OverrideBundleType } from "@polkadot/types/types/registry";
 const debug = Debug("global:providers");
 
-class ProviderFactory {
+export class ProviderFactory {
   private url: string;
   private privateKey: string;
 
@@ -170,13 +170,13 @@ class ProviderFactory {
       connect: () => console.log(`🚧  provider ${this.providerConfig.name} not yet implemented`),
     };
   }
+
+  public static prepare(providerConfigs: ProviderConfig[]): MoonwallProvider[] {
+    return providerConfigs.map((providerConfig) => new ProviderFactory(providerConfig).create());
+  }
 }
 
-export function prepareProviders(providerConfigs: ProviderConfig[]): MoonwallProvider[] {
-  return providerConfigs.map((providerConfig) => new ProviderFactory(providerConfig).create());
-}
-
-interface ProviderInterface {
+export interface ProviderInterface {
   name: string;
   api: any;
   type: ProviderType;
@@ -184,7 +184,7 @@ interface ProviderInterface {
   disconnect: () => void | Promise<void> | any;
 }
 
-class ProviderInterfaceFactory {
+export class ProviderInterfaceFactory {
   constructor(private name: string, private type: ProviderType, private connect: () => any) {}
 
   public async create(): Promise<ProviderInterface> {
@@ -306,18 +306,18 @@ class ProviderInterfaceFactory {
       },
     };
   }
-}
 
-export async function populateProviderInterface(
-  name: string,
-  type: ProviderType,
-  connect: () =>
-    | Promise<ApiPromise>
-    | Signer
-    | Web3
-    | Promise<PublicViem>
-    | Promise<WalletViem>
-    | void
-): Promise<ProviderInterface> {
-  return await new ProviderInterfaceFactory(name, type, connect).create();
+  public static async populate(
+    name: string,
+    type: ProviderType,
+    connect: () =>
+      | Promise<ApiPromise>
+      | Signer
+      | Web3
+      | Promise<PublicViem>
+      | Promise<WalletViem>
+      | void
+  ): Promise<ProviderInterface> {
+    return await new ProviderInterfaceFactory(name, type, connect).create();
+  }
 }
