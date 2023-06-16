@@ -166,16 +166,18 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
 
       log(`Waiting to apply new runtime (${chalk.red(`~4min`)})...`);
       let isInitialVersion = true;
-      const unsub = await api.rpc.state.subscribeRuntimeVersion(async (version) => {
+
+      const unsub = await api.rpc.state.subscribeStorage([":code"], async (newCode: any) => {
         if (!isInitialVersion) {
           const blockNumber = (await api.rpc.chain.getHeader()).number.toNumber();
           log(
-            `Complete ✅ [${version.implName}-${version.specVersion} ${existingCode!
+            `Complete ✅ [New Code: ${newCode.toString().slice(0, 5)}...${newCode
               .toString()
-              .slice(0, 6)}...] [#${blockNumber}]`
+              .slice(-4)} , Old Code:${existingCode!.toString().slice(0, 5)}...${existingCode!
+              .toString()
+              .slice(-4)}] [#${blockNumber}]`
           );
           unsub();
-          const newCode = await api.rpc.state.getStorage(":code");
           if (newCode!.toString() != code) {
             reject(
               `Unexpected new code: ${newCode!.toString().slice(0, 20)} vs ${code
