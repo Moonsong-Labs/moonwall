@@ -1,5 +1,12 @@
 # @moonwall/util
 
+## 3.0.4
+
+### Patch Changes
+
+- Updated dependencies [54f03f9]
+  - @moonwall/types@3.0.4
+
 ## 3.0.0
 
 ### Minor Changes
