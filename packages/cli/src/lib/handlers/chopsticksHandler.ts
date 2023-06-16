@@ -4,13 +4,13 @@ import {
   sendSetStorageRequest,
 } from "../../internal/foundations/chopsticksHelpers.js";
 import { upgradeRuntimeChopsticks } from "../upgradeProcedures.js";
+import { MoonwallContext } from "../globalContext.js";
 
 export const chopsticksHandler: FoundationHandler<"chopsticks"> = ({
   testCases,
   context,
   testCase,
   logger,
-  ctx
 }) => {
   testCases({
     context: {
@@ -24,7 +24,10 @@ export const chopsticksHandler: FoundationHandler<"chopsticks"> = ({
         methodParams: any[];
       }) => await sendSetStorageRequest(params),
       upgradeRuntime: async (chCtx: ChopsticksContext) => {
-        await upgradeRuntimeChopsticks(chCtx, ctx.rtUpgradePath!);
+        await upgradeRuntimeChopsticks(
+          chCtx,
+          (() => MoonwallContext.getContext().rtUpgradePath!)()
+        );
       },
     },
     it: testCase,

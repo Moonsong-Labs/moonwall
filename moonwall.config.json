@@ -29,7 +29,7 @@
       "testFileDir": ["tests/zombie"],
       "foundation": {
         "type": "zombie",
-        "rtUpgradePath": "./tmp/moonbase-runtime-2301.wasm",
+        "rtUpgradePath": "./tmp/moonbase-runtime-2400.wasm",
         "zombieSpec": {
           "name": "zombienet",
           "configPath": "./configs/zombieOverride.json"
@@ -67,7 +67,7 @@
       "testFileDir": ["tests/zombie"],
       "foundation": {
         "type": "zombie",
-        "rtUpgradePath": "./tmp/moonbase-runtime-2201.wasm",
+        "rtUpgradePath": "./tmp/moonbase-runtime-2400.wasm",
         "zombieSpec": {
           "name": "zombienet",
           "configPath": "./configs/zombie.json"
@@ -105,7 +105,7 @@
       "include": ["**/*basic*"],
       "foundation": {
         "type": "chopsticks",
-        "rtUpgradePath": "./tmp/moonriver_runtime.compact.compressed.wasm",
+        "rtUpgradePath": "./tmp/moonriver-runtime-2400.wasm",
         "launchSpec": [
           {
             "name": "mb",

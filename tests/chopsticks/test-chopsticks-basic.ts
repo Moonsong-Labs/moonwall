@@ -1,4 +1,4 @@
-import { describeSuite, expect, beforeAll } from "@moonwall/cli";
+import { describeSuite, expect, beforeAll, MoonwallContext } from "@moonwall/cli";
 import { BALTATHAR_ADDRESS, CHARLETH_ADDRESS, ETHAN_ADDRESS, alith } from "@moonwall/util";
 import { parseEther, formatEther } from "ethers";
 import { ApiPromise } from "@polkadot/api";
@@ -97,6 +97,8 @@ describeSuite({
       modifier: "skip",
       test: async function () {
         const rtBefore = api.consts.system.version.specVersion.toNumber();
+        const ctx = MoonwallContext.getContext()
+        log(ctx.rtUpgradePath)
         await context.upgradeRuntime(context);
         const rtafter = api.consts.system.version.specVersion.toNumber();
         expect(rtBefore).toBeLessThan(rtafter);
