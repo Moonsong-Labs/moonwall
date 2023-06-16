@@ -1,5 +1,11 @@
 # @moonwall/cli
 
+## 3.0.5
+
+### Patch Changes
+
+- 22c7b57: fix upgrade fn
+
 ## 3.0.4
 
 ### Patch Changes
