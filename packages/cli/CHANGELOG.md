@@ -1,5 +1,11 @@
 # @moonwall/cli
 
+## 3.0.3
+
+### Patch Changes
+
+- 66a727e: Handler fix
+
 ## 3.0.2
 
 ### Patch Changes
