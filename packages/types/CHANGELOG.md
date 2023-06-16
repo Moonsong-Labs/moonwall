@@ -1,5 +1,11 @@
 # @moonwall/types
 
+## 3.0.4
+
+### Patch Changes
+
+- 54f03f9: fix for chain upgrading rt2400+
+
 ## 3.0.0
 
 ### Minor Changes

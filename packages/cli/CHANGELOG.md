@@ -1,5 +1,14 @@
 # @moonwall/cli
 
+## 3.0.4
+
+### Patch Changes
+
+- 54f03f9: fix for chain upgrading rt2400+
+- Updated dependencies [54f03f9]
+  - @moonwall/types@3.0.4
+  - @moonwall/util@3.0.4
+
 ## 3.0.3
 
 ### Patch Changes
