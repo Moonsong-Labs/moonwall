@@ -1,5 +1,11 @@
 # @moonwall/cli
 
+## 3.0.1
+
+### Patch Changes
+
+- a9c0f9a: minorest fix
+
 ## 3.0.0
 
 ### Minor Changes
