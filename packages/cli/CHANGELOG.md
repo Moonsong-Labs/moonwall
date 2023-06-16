@@ -1,5 +1,11 @@
 # @moonwall/cli
 
+## 3.0.2
+
+### Patch Changes
+
+- 6efab3f: Testcase number fix
+
 ## 3.0.1
 
 ### Patch Changes
