@@ -105,7 +105,7 @@ export const checkBlockFinalized = async (api: ApiPromise, number: number) => {
   return {
     number,
     finalized: (
-      await (api as any).rpc.moon.isBlockFinalized(await api.rpc.chain.getBlockHash(number))
+      await api.rpc.moon.isBlockFinalized(await api.rpc.chain.getBlockHash(number))
     ).isTrue,
   };
 };

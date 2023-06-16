@@ -168,11 +168,11 @@ const testCase = (params: ITestCase) => {
     (params.chainType && params.chainType !== RT_NAME) ||
     (params.notChainType && params.notChainType === RT_NAME)
   ) {
-    it.skip(`📁  #${params.id.concat(params.id)} ${params.title}`, params.test, params.timeout);
+    it.skip(`📁  #${params.id.concat(params.title)}`, params.test, params.timeout);
     return;
   }
 
-  it(`📁  #${params.id.concat(params.id)} ${params.title}`, params.test, params.timeout);
+  it(`📁  #${params.id.concat(params.title)}`, params.test, params.timeout);
 };
 
 const logger = () => {
