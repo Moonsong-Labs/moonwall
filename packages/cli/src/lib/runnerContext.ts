@@ -10,7 +10,7 @@ import type {
   ProviderType,
   TestCasesFn,
   ViemApiMap,
-  ViemClientType
+  ViemClientType,
 } from "@moonwall/types";
 import { ApiPromise } from "@polkadot/api";
 import Debug from "debug";
@@ -23,7 +23,6 @@ import { readOnlyHandler } from "./handlers/readOnlyHandler.js";
 import { devHandler } from "./handlers/devHandler.js";
 import { chopsticksHandler } from "./handlers/chopsticksHandler.js";
 import { zombieHandler } from "./handlers/zombieHandler.js";
-
 
 const RT_VERSION = Number(process.env.MOON_RTVERSION);
 const RT_NAME = process.env.MOON_RTNAME;
@@ -93,6 +92,27 @@ export function describeSuite<T extends FoundationType>({
     await MoonwallContext.destroy();
   });
 
+  const testCase = (params: ITestCase) => {
+    if (params.modifier) {
+      it[params.modifier](
+        `📁  #${params.id.concat(id)} ${params.title}`,
+        params.test,
+        params.timeout
+      );
+      return;
+    }
+    if (
+      (params.minRtVersion && params.minRtVersion > RT_VERSION) ||
+      (params.chainType && params.chainType !== RT_NAME) ||
+      (params.notChainType && params.notChainType === RT_NAME)
+    ) {
+      it.skip(`📁  #${params.id.concat(id)} ${params.title}`, params.test, params.timeout);
+      return;
+    }
+
+    it(`📁  #${params.id.concat(id)} ${params.title}`, params.test, params.timeout);
+  };
+
   describe(`🗃️  #${id} ${title}`, function () {
     const getApi = <T extends ProviderType>(apiType: T, apiName?: string) => {
       const provider = ctx.providers.find(
@@ -149,31 +169,10 @@ export function describeSuite<T extends FoundationType>({
       context,
       testCase,
       logger,
-      ctx
+      ctx,
     });
   });
 }
-
-const testCase = (params: ITestCase) => {
-  if (params.modifier) {
-    it[params.modifier](
-      `📁  #${params.id.concat(params.id)} ${params.title}`,
-      params.test,
-      params.timeout
-    );
-    return;
-  }
-  if (
-    (params.minRtVersion && params.minRtVersion > RT_VERSION) ||
-    (params.chainType && params.chainType !== RT_NAME) ||
-    (params.notChainType && params.notChainType === RT_NAME)
-  ) {
-    it.skip(`📁  #${params.id.concat(params.title)}`, params.test, params.timeout);
-    return;
-  }
-
-  it(`📁  #${params.id.concat(params.title)}`, params.test, params.timeout);
-};
 
 const logger = () => {
   process.env.DEBUG_COLORS = "1";
