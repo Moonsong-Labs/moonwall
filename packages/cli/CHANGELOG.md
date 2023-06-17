@@ -1,5 +1,14 @@
 # @moonwall/cli
 
+## 3.0.6
+
+### Patch Changes
+
+- fc81d29: Pkg update
+- Updated dependencies [fc81d29]
+  - @moonwall/util@3.0.6
+  - @moonwall/types@3.0.6
+
 ## 3.0.5
 
 ### Patch Changes
