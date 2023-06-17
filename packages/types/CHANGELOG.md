@@ -1,5 +1,11 @@
 # @moonwall/types
 
+## 3.0.6
+
+### Patch Changes
+
+- fc81d29: Pkg update
+
 ## 3.0.4
 
 ### Patch Changes
