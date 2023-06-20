@@ -12,6 +12,7 @@ import { importJsonConfig, loadEnvVars } from "../lib/configReader.js";
 import { watch } from "fs";
 import { ApiPromise } from "@polkadot/api";
 import WebSocket from "ws";
+import { test } from "node:test";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
@@ -156,7 +157,7 @@ export async function runNetwork(args) {
       case 5:
         await resolveGrepChoice(env);
         break;
-        
+
       case 6:
         const quit = await inquirer.prompt(questions.find(({ name }) => name == "Quit"));
         if (quit.Quit === true) {
@@ -315,7 +316,9 @@ const resolveGrepChoice = async (env: Environment) => {
     default: "D01T01",
   });
   process.env.MOON_RECYCLE = "true";
-  return await executeTests(env, { testNamePattern: choice.grep });
+
+  console.log(`Running tests with grep pattern: ${await choice.grep}`);
+  return await executeTests(env, { testNamePattern: await choice.grep });
 };
 
 const resolveTestChoice = async (env: Environment) => {
