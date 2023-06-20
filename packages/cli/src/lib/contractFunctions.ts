@@ -1,10 +1,11 @@
+import { ContractDeploymentOptions, DevModeContext, ForgeContract } from "@moonwall/types";
+import { ALITH_PRIVATE_KEY, deployViemContract } from "@moonwall/util";
+import chalk from "chalk";
 import fs from "fs";
 import path from "path";
+import type { Abi } from "viem";
+import { Log, PublicClient, WalletClient, getContract } from "viem";
 import { importJsonConfig } from "./configReader.js";
-import chalk from "chalk";
-import { Abi, PublicClient, WalletClient, getContract } from "viem";
-import { ForgeContract, ContractDeploymentOptions, DevModeContext } from "@moonwall/types";
-import { ALITH_PRIVATE_KEY, deployViemContract } from "@moonwall/util";
 
 export async function fetchCompiledContract<TAbi extends Abi>(
   contractName: string
@@ -74,10 +75,19 @@ export async function deployCreateCompiledContract<TOptions extends ContractDepl
   context: DevModeContext,
   contractName: string,
   options?: TOptions
-) {
+): Promise<{
+  contractAddress: `0x${string}`;
+  contract: any;
+  logs: Log<bigint, number>[];
+  hash: `0x${string}`;
+  status: "success" | "reverted";
+  abi: Abi;
+  bytecode: `0x${string}`;
+  methods: any;
+}> {
   const { abi, bytecode, methods } = await fetchCompiledContract(contractName);
 
-  const { privateKey = ALITH_PRIVATE_KEY, args = [], ...rest } = options || {};
+  const { privateKey = ALITH_PRIVATE_KEY, args = [], ...rest } = options || ({} as any);
 
   const blob: ContractDeploymentOptions = {
     ...rest,

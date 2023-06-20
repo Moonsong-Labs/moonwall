@@ -1,17 +1,17 @@
-import PressToContinuePrompt from "inquirer-press-to-continue";
-import inquirer from "inquirer";
-import { MoonwallContext, runNetworkOnly } from "../lib/globalContext.js";
-import clear from "clear";
-import chalk from "chalk";
 import { Environment } from "@moonwall/types";
-import { executeTests } from "./runTests.js";
-import { parse } from "yaml";
-import fs from "fs/promises";
-import { createReadStream, stat } from "node:fs";
-import { importJsonConfig, loadEnvVars } from "../lib/configReader.js";
-import { watch } from "fs";
 import { ApiPromise } from "@polkadot/api";
+import chalk from "chalk";
+import clear from "clear";
+import { watch } from "fs";
+import fs from "fs/promises";
+import inquirer from "inquirer";
+import PressToContinuePrompt from "inquirer-press-to-continue";
+import { createReadStream, stat } from "node:fs";
 import WebSocket from "ws";
+import { parse } from "yaml";
+import { importJsonConfig, loadEnvVars } from "../lib/configReader.js";
+import { MoonwallContext, runNetworkOnly } from "../lib/globalContext.js";
+import { executeTests } from "./runTests.js";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
@@ -19,7 +19,7 @@ export async function runNetwork(args) {
   process.env.MOON_TEST_ENV = args.envName;
   const globalConfig = await importJsonConfig();
   const env = globalConfig.environments.find(({ name }) => name === args.envName)!;
-  await loadEnvVars();
+
   if (!!!env) {
     const envList = globalConfig.environments.map((env) => env.name);
     throw new Error(
@@ -28,7 +28,8 @@ export async function runNetwork(args) {
       )}\n Environments defined in config are: ${envList}\n`
     );
   }
-
+  await loadEnvVars();
+  
   const testFileDirs = globalConfig.environments.find(
     ({ name }) => name == args.envName
   )!.testFileDir;
@@ -156,7 +157,7 @@ export async function runNetwork(args) {
       case 5:
         await resolveGrepChoice(env);
         break;
-        
+
       case 6:
         const quit = await inquirer.prompt(questions.find(({ name }) => name == "Quit"));
         if (quit.Quit === true) {
@@ -315,7 +316,9 @@ const resolveGrepChoice = async (env: Environment) => {
     default: "D01T01",
   });
   process.env.MOON_RECYCLE = "true";
-  return await executeTests(env, { testNamePattern: choice.grep });
+
+  console.log(`Running tests with grep pattern: ${await choice.grep}`);
+  return await executeTests(env, { testNamePattern: await choice.grep });
 };
 
 const resolveTestChoice = async (env: Environment) => {
