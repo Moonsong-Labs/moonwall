@@ -1,7 +1,7 @@
+import { CompiledContract } from "@moonwall/types";
 import fs from "fs";
 import path from "path";
 import type { Abi } from "viem";
-import { CompiledContract } from "@moonwall/types";
 
 export function getAllCompiledContracts(
   contractsDir: string = "./",

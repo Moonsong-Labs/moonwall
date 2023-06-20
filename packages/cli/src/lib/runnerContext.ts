@@ -19,9 +19,9 @@ import { afterAll, beforeAll, describe, it } from "vitest";
 import { Web3 } from "web3";
 import { importJsonConfig } from "./configReader.js";
 import { MoonwallContext, contextCreator } from "./globalContext.js";
-import { readOnlyHandler } from "./handlers/readOnlyHandler.js";
-import { devHandler } from "./handlers/devHandler.js";
 import { chopsticksHandler } from "./handlers/chopsticksHandler.js";
+import { devHandler } from "./handlers/devHandler.js";
+import { readOnlyHandler } from "./handlers/readOnlyHandler.js";
 import { zombieHandler } from "./handlers/zombieHandler.js";
 
 const RT_VERSION = Number(process.env.MOON_RTVERSION);

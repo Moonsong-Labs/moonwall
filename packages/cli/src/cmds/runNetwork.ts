@@ -1,18 +1,17 @@
-import PressToContinuePrompt from "inquirer-press-to-continue";
-import inquirer from "inquirer";
-import { MoonwallContext, runNetworkOnly } from "../lib/globalContext.js";
-import clear from "clear";
-import chalk from "chalk";
 import { Environment } from "@moonwall/types";
-import { executeTests } from "./runTests.js";
-import { parse } from "yaml";
-import fs from "fs/promises";
-import { createReadStream, stat } from "node:fs";
-import { importJsonConfig, loadEnvVars } from "../lib/configReader.js";
-import { watch } from "fs";
 import { ApiPromise } from "@polkadot/api";
+import chalk from "chalk";
+import clear from "clear";
+import { watch } from "fs";
+import fs from "fs/promises";
+import inquirer from "inquirer";
+import PressToContinuePrompt from "inquirer-press-to-continue";
+import { createReadStream, stat } from "node:fs";
 import WebSocket from "ws";
-import { test } from "node:test";
+import { parse } from "yaml";
+import { importJsonConfig, loadEnvVars } from "../lib/configReader.js";
+import { MoonwallContext, runNetworkOnly } from "../lib/globalContext.js";
+import { executeTests } from "./runTests.js";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
