@@ -83,8 +83,8 @@ importers:
         specifier: ^5.1.3
         version: 5.1.3
       viem:
-        specifier: ^1.0.5
-        version: 1.0.5(typescript@5.1.3)
+        specifier: ^1.0.7
+        version: 1.0.7(typescript@5.1.3)
       vitest:
         specifier: ^0.31.4
         version: 0.31.4(@vitest/ui@0.30.1)
@@ -110,8 +110,8 @@ importers:
         specifier: ^17.0.24
         version: 17.0.24
       '@zombienet/orchestrator':
-        specifier: ^0.0.42
-        version: 0.0.42(@polkadot/util@12.3.2)(@swc/core@1.3.62)(@types/node@18.16.18)
+        specifier: ^0.0.47
+        version: 0.0.47(@polkadot/util@12.3.2)(@swc/core@1.3.62)(@types/node@18.16.18)
       bottleneck:
         specifier: ^2.19.5
         version: 2.19.5
@@ -219,8 +219,8 @@ importers:
         specifier: ^0.55.0
         version: 0.55.0(@swc/core@1.3.62)
       viem:
-        specifier: ^1.0.5
-        version: 1.0.5(typescript@5.1.3)
+        specifier: ^1.0.7
+        version: 1.0.7(typescript@5.1.3)
       web3:
         specifier: 4.0.1
         version: 4.0.1
@@ -313,8 +313,8 @@ importers:
         specifier: ^10.9.1
         version: 10.9.1(@swc/core@1.3.62)(@types/node@18.16.18)(typescript@5.1.3)
       viem:
-        specifier: ^1.0.5
-        version: 1.0.5(typescript@5.1.3)
+        specifier: ^1.0.7
+        version: 1.0.7(typescript@5.1.3)
       vite:
         specifier: ^4.3.9
         version: 4.3.9(@types/node@18.16.18)
@@ -1938,13 +1938,13 @@ packages:
     resolution: {integrity: sha512-bcKpo1oj54hGholplGLpqPHRbIsnbixFtc06nwuNM5/dwSXOq/AAYoIBRsBmnZJSdfeNW5rnff7NTAz3ZCqR9Q==}
     dependencies:
       '@noble/curves': 1.0.0
-      '@noble/hashes': 1.3.0
+      '@noble/hashes': 1.3.1
       '@scure/base': 1.1.1
 
   /@scure/bip39@1.2.0:
     resolution: {integrity: sha512-SX/uKq52cuxm4YFXWFaVByaSHJh2w3BnokVSeUJVCv6K7WulT9u2BuNRBhuFl8vAuYnzx9bEu9WgpcNYTrYieg==}
     dependencies:
-      '@noble/hashes': 1.3.0
+      '@noble/hashes': 1.3.1
       '@scure/base': 1.1.1
 
   /@sqltools/formatter@1.2.5:
@@ -2290,8 +2290,9 @@ packages:
     dependencies:
       typescript: 5.1.3
 
-  /@zombienet/orchestrator@0.0.42(@polkadot/util@12.3.2)(@swc/core@1.3.62)(@types/node@18.16.18):
-    resolution: {integrity: sha512-Qfw+TWIiT+isGqt5jSGM7tr8fr0KlPuUDt3PNBRPMsLOIdWSvS5WTXTQFRtFq+jHIIL19QTVcDIfaWrljtejzQ==}
+  /@zombienet/orchestrator@0.0.47(@polkadot/util@12.3.2)(@swc/core@1.3.62)(@types/node@18.16.18):
+    resolution: {integrity: sha512-MSva5ghrULYNh9vBnkwibS+naoDu9Iz+FaZF9MmyqKp/nApg/nKZIvDKV36ufG4u0ZOgAgYD14w9MufbQWz2Cw==}
+    engines: {node: '>=18'}
     dependencies:
       '@polkadot/api': 10.9.1
       '@polkadot/keyring': 12.3.2(@polkadot/util-crypto@12.3.2)(@polkadot/util@12.3.2)
@@ -4466,6 +4467,7 @@ packages:
       chalk: 2.4.2
       diff-match-patch: 1.0.5
     dev: true
+    bundledDependencies: []
 
   /jsonfile@4.0.0:
     resolution: {integrity: sha512-m6F1R3z8jjlf2imQHS2Qez5sjKWQzbuuhuJ/FKYFRZvPE3PuHcSMVZzfsLhGVOkfd20obL5SWEBew5ShlquNxg==}
@@ -6716,8 +6718,10 @@ packages:
       spdx-expression-parse: 3.0.1
     dev: true
 
-  /viem@1.0.5(typescript@5.1.3):
-    resolution: {integrity: sha512-PvCPjvgk/H0S9bEA2tBoeNoTBHuJ7Ocs++BIcl8AO5djxlkjdbkPq73d/PJ8KnU7+o3PeX+tLmozxS/upiNUnQ==}
+  /viem@1.0.7(typescript@5.1.3):
+    resolution: {integrity: sha512-P/T2Zn8+V74kxO2e2NdhNR/MBtldovssigvc36+7g3DgTeETKnSS1fMQdBl0jE+Atlal+M6cuJ2HcFY7U45o0Q==}
+    peerDependencies:
+      typescript: '>=5.0.4'
     dependencies:
       '@adraffy/ens-normalize': 1.9.0
       '@noble/curves': 1.0.0
@@ -6727,10 +6731,10 @@ packages:
       '@wagmi/chains': 1.1.0(typescript@5.1.3)
       abitype: 0.8.7(typescript@5.1.3)
       isomorphic-ws: 5.0.0(ws@8.12.0)
+      typescript: 5.1.3
       ws: 8.12.0
     transitivePeerDependencies:
       - bufferutil
-      - typescript
       - utf-8-validate
       - zod
 

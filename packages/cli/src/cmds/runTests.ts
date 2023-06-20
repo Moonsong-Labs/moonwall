@@ -121,13 +121,14 @@ export async function executeTests(env: Environment, additionalArgs?: {}) {
       if (log.includes("has multiple versions, ensure that there is only one installed.")) {
         return false;
       }
-      
     },
   };
 
-  if (!env.multiThreads || process.env.MOON_SINGLE_THREAD === "true") {
-    // process.env.MOON_RECYCLE = "true";
-    options.useAtomics = false;
+  if (
+    !env.multiThreads ||
+    process.env.MOON_SINGLE_THREAD === "true" ||
+    process.env.MOON_RECYCLE === "true"
+  ) {
     options.threads = false;
   }
 
@@ -145,4 +146,4 @@ export async function executeTests(env: Environment, additionalArgs?: {}) {
   }
 }
 
-const filterList = ["<empty line>", "", "stdout | unknown test"]
+const filterList = ["<empty line>", "", "stdout | unknown test"];

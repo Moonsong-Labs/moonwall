@@ -19,7 +19,7 @@ export async function runNetwork(args) {
   process.env.MOON_TEST_ENV = args.envName;
   const globalConfig = await importJsonConfig();
   const env = globalConfig.environments.find(({ name }) => name === args.envName)!;
-  await loadEnvVars();
+
   if (!!!env) {
     const envList = globalConfig.environments.map((env) => env.name);
     throw new Error(
@@ -28,7 +28,8 @@ export async function runNetwork(args) {
       )}\n Environments defined in config are: ${envList}\n`
     );
   }
-
+  await loadEnvVars();
+  
   const testFileDirs = globalConfig.environments.find(
     ({ name }) => name == args.envName
   )!.testFileDir;
