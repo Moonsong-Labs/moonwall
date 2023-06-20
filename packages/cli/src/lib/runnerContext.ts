@@ -61,7 +61,7 @@ let ctx: MoonwallContext;
  *      });
  */
 export function describeSuite<T extends FoundationType>({
-  id,
+  id: suiteId,
   title,
   testCases,
   foundationMethods,
@@ -74,7 +74,7 @@ export function describeSuite<T extends FoundationType>({
     (chainType && chainType !== RT_NAME) ||
     (notChainType && notChainType === RT_NAME)
   ) {
-    describe.skip(`🗃️  #${id} ${title}`);
+    describe.skip(`🗃️  #${suiteId} ${title}`);
     return;
   }
 
@@ -95,7 +95,7 @@ export function describeSuite<T extends FoundationType>({
   const testCase = (params: ITestCase) => {
     if (params.modifier) {
       it[params.modifier](
-        `📁  #${params.id.concat(id)} ${params.title}`,
+        `📁  #${suiteId.concat(params.id)} ${params.title}`,
         params.test,
         params.timeout
       );
@@ -106,14 +106,14 @@ export function describeSuite<T extends FoundationType>({
       (params.chainType && params.chainType !== RT_NAME) ||
       (params.notChainType && params.notChainType === RT_NAME)
     ) {
-      it.skip(`📁  #${params.id.concat(id)} ${params.title}`, params.test, params.timeout);
+      it.skip(`📁  #${suiteId.concat(params.id)} ${params.title}`, params.test, params.timeout);
       return;
     }
 
-    it(`📁  #${params.id.concat(id)} ${params.title}`, params.test, params.timeout);
+    it(`📁  #${suiteId.concat(params.id)} ${params.title}`, params.test, params.timeout);
   };
 
-  describe(`🗃️  #${id} ${title}`, function () {
+  describe(`🗃️  #${suiteId} ${title}`, function () {
     const getApi = <T extends ProviderType>(apiType: T, apiName?: string) => {
       //todo fix this to prioritise apiName properly
       const provider = ctx.providers.find(
@@ -166,7 +166,7 @@ export function describeSuite<T extends FoundationType>({
     }
 
     handler({
-      testCases: testCases as TestCasesFn<any>, // Typescript will prevent us from directly passing `testCases`, so we need to cast it to the correct type.
+      testCases: testCases as TestCasesFn<any>,
       context,
       testCase,
       logger,
