@@ -1,5 +1,16 @@
 # @moonwall/cli
 
+## 3.0.7
+
+### Patch Changes
+
+- f121ac7: pushing all pkgs
+- 1f0f77c: Fixed greptest
+  - [#165](https://github.com/Moonsong-Labs/moonwall/issues/165)
+- Updated dependencies [f121ac7]
+  - @moonwall/types@3.0.7
+  - @moonwall/util@3.0.7
+
 ## 3.0.6
 
 ### Patch Changes
