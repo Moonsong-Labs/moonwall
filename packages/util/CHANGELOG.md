@@ -1,5 +1,13 @@
 # @moonwall/util
 
+## 3.0.7
+
+### Patch Changes
+
+- f121ac7: pushing all pkgs
+- Updated dependencies [f121ac7]
+  - @moonwall/types@3.0.7
+
 ## 3.0.6
 
 ### Patch Changes
