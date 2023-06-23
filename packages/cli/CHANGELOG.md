@@ -1,5 +1,14 @@
 # @moonwall/cli
 
+## 3.0.8
+
+### Patch Changes
+
+- f983dc9: GetApi fix
+- Updated dependencies [f983dc9]
+  - @moonwall/types@3.0.8
+  - @moonwall/util@3.0.8
+
 ## 3.0.7
 
 ### Patch Changes

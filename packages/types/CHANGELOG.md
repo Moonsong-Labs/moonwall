@@ -1,5 +1,11 @@
 # @moonwall/types
 
+## 3.0.8
+
+### Patch Changes
+
+- f983dc9: GetApi fix
+
 ## 3.0.7
 
 ### Patch Changes
