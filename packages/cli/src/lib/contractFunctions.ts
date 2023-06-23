@@ -34,9 +34,7 @@ export async function fetchCompiledContract<TAbi extends Abi>(
   } else if (!compiledJsonPath) {
     throw new Error(
       `Compiled contract ${contractName}.json doesn't exist\n` +
-        `Please run ${chalk.bgWhiteBright.blackBright(
-          "forge build"
-        )} to compile contract ${contractName}.sol`
+        `Please ${chalk.bgWhiteBright.blackBright("recompile contract")} ${contractName}.sol`
     );
   }
 

@@ -114,13 +114,20 @@ export function describeSuite<T extends FoundationType>({
   };
 
   describe(`🗃️  #${suiteId} ${title}`, function () {
-    const getApi = <T extends ProviderType>(apiType: T, apiName?: string) => {
-      //todo fix this to prioritise apiName properly
-      const provider = ctx.providers.find(
-        (prov) =>
-          prov.type == apiType ||
-          (apiType == "polkadotJs" && prov.type == "moon" && (!apiName || prov.name === apiName))
-      );
+    const getApi = <T extends ProviderType>(apiType?: T, apiName?: string) => {
+      const provider = ctx.providers.find((prov) => {
+        if (apiType == "polkadotJs" && apiName == "anyPolkadot") {
+          return prov.type == "moon" || prov.type == "polkadotJs";
+        } else if (apiType && apiName) {
+          return prov.type == apiType && prov.name === apiName;
+        } else if (apiType && !apiName) {
+          return prov.type == apiType;
+        } else if (!apiType && apiName) {
+          return prov.name === apiName;
+        } else {
+          return false;
+        }
+      });
 
       if (!provider) {
         throw new Error(
@@ -147,7 +154,7 @@ export function describeSuite<T extends FoundationType>({
           ? options.type
             ? getApi(options.type, options.apiName)
             : getApi("polkadotJs", options.apiName)
-          : getApi("polkadotJs"),
+          : getApi("polkadotJs", "anyPolkadot"),
       ethers: (apiName?: string): Signer => getApi("ethers", apiName),
       web3: (apiName?: string): Web3 => getApi("web3", apiName),
     };
