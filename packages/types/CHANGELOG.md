@@ -1,5 +1,11 @@
 # @moonwall/types
 
+## 3.0.10
+
+### Patch Changes
+
+- f914550: Fix download
+
 ## 3.0.9
 
 ### Patch Changes
