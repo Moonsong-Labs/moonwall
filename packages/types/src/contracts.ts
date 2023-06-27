@@ -2,7 +2,7 @@ import { Abi, DeployContractParameters } from "viem";
 import { DeepPartial } from "./helpers.js";
 import { EthTransactionType } from "./config.js";
 
-export type ForgeContract<TAbi extends Abi> = {
+export type MoonwallContract<TAbi extends Abi> = {
   abi: TAbi;
   bytecode: `0x${string}`;
   methods: Record<string, string>[];

@@ -1,4 +1,4 @@
-import { ContractDeploymentOptions, DevModeContext, ForgeContract } from "@moonwall/types";
+import { ContractDeploymentOptions, DevModeContext, MoonwallContract } from "@moonwall/types";
 import { ALITH_PRIVATE_KEY, deployViemContract } from "@moonwall/util";
 import chalk from "chalk";
 import fs from "fs";
@@ -9,7 +9,7 @@ import { importJsonConfig } from "./configReader.js";
 
 export async function fetchCompiledContract<TAbi extends Abi>(
   contractName: string
-): Promise<ForgeContract<TAbi>> {
+): Promise<MoonwallContract<TAbi>> {
   const config = await importJsonConfig();
   const contractsDir = config.environments.find(
     (env) => env.name === process.env.MOON_TEST_ENV

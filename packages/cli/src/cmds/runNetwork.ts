@@ -29,7 +29,7 @@ export async function runNetwork(args) {
     );
   }
   await loadEnvVars();
-  
+
   const testFileDirs = globalConfig.environments.find(
     ({ name }) => name == args.envName
   )!.testFileDir;
@@ -129,7 +129,12 @@ export async function runNetwork(args) {
     console.log(`  🖥️   https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0.0.1%3A${port}`)
   );
 
-  await inquirer.prompt(questions.find(({ name }) => name == "NetworkStarted"));
+  if (!args.GrepTest) {
+    await inquirer.prompt(questions.find(({ name }) => name == "NetworkStarted"));
+  } else {
+    process.env.MOON_RECYCLE = "true";
+    await executeTests(env, { testNamePattern: await args.GrepTest });
+  }
 
   mainloop: while (true) {
     const choice = await inquirer.prompt(questions.find(({ name }) => name == "MenuChoice"));

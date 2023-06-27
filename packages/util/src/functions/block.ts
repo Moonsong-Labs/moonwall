@@ -1,20 +1,20 @@
 import "@moonbeam-network/api-augment/moonbase";
-import "@polkadot/api-augment";
 import { ApiPromise } from "@polkadot/api";
+import "@polkadot/api-augment";
+import type { TxWithEvent } from "@polkadot/api-derive/types";
+import { Option, u32, u64 } from "@polkadot/types";
+import type { ITuple } from "@polkadot/types-codec/types";
 import {
   BlockHash,
-  RuntimeDispatchInfo,
-  Event,
-  Extrinsic,
-  RuntimeDispatchInfoV1,
   DispatchError,
   DispatchInfo,
+  Event,
+  Extrinsic,
+  RuntimeDispatchInfo,
+  RuntimeDispatchInfoV1,
 } from "@polkadot/types/interfaces";
+import type { Block, SignedBlock } from "@polkadot/types/interfaces/runtime/types";
 import { FrameSystemEventRecord, SpWeightsWeightV2Weight } from "@polkadot/types/lookup";
-import { u32, u64, u128, Option, GenericExtrinsic } from "@polkadot/types";
-import type { Block, AccountId20, SignedBlock } from "@polkadot/types/interfaces/runtime/types";
-import type { TxWithEvent } from "@polkadot/api-derive/types";
-import type { ITuple } from "@polkadot/types-codec/types";
 import Bottleneck from "bottleneck";
 import Debug from "debug";
 const debug = Debug("test:blocks");
@@ -26,15 +26,18 @@ export async function createAndFinalizeBlock(
 ): Promise<{
   duration: number;
   hash: string;
+  proofSize?: number;
 }> {
   const startTime: number = Date.now();
-  const block = parentHash
-    ? await api.rpc.engine.createBlock(true, finalize, parentHash)
-    : await api.rpc.engine.createBlock(true, finalize);
+  // TODO: any/raw rpc request can be removed once api-augment is updated
+  const block: any = parentHash
+    ? await api.rpc("engine_createBlock", true, finalize, parentHash)
+    : await api.rpc("engine_createBlock", true, finalize);
 
   return {
     duration: Date.now() - startTime,
-    hash: block.toJSON().hash as string, // toString doesn't work for block hashes
+    hash: block.hash as string, // toString doesn't work for block hashes
+    proofSize: block.proof_size as number, // TODO: casting can be removed once api-augment is updated
   };
 }
 
@@ -104,9 +107,8 @@ export const getBlockTime = (signedBlock: any) =>
 export const checkBlockFinalized = async (api: ApiPromise, number: number) => {
   return {
     number,
-    finalized: (
-      await api.rpc.moon.isBlockFinalized(await api.rpc.chain.getBlockHash(number))
-    ).isTrue,
+    finalized: (await api.rpc.moon.isBlockFinalized(await api.rpc.chain.getBlockHash(number)))
+      .isTrue,
   };
 };
 
