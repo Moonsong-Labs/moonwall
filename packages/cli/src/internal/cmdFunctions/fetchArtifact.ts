@@ -20,8 +20,8 @@ const repos = {
 };
 
 export async function fetchArtifact(args) {
-  if (!supportedBinaries.includes(args.artifact)) {
-    throw new Error(`Downloading ${args.artifact} unsupported`);
+  if (!supportedBinaries.includes(args.bin)) {
+    throw new Error(`Downloading ${args.bin} unsupported`);
   }
 
   if (await fs.access(args.path).catch(() => true)) {
@@ -29,31 +29,31 @@ export async function fetchArtifact(args) {
     fs.mkdir(args.path);
   }
 
-  const binary = args.artifact;
-  const repoName = args.artifact.includes("-runtime") ? "moonbeam" : args.artifact;
+  const binary = args.bin;
+  const repoName = args.bin.includes("-runtime") ? "moonbeam" : args.bin;
   const enteredPath = args.path ? args.path : "tmp/";
   const binaryPath = path.join("./", enteredPath, binary);
 
   const releases = (await (await fetch(repos[repoName])).json()) as any[];
-  const release = args.artifact.includes("-runtime")
+  const release = args.bin.includes("-runtime")
     ? releases.find((release) => {
-        if (args.binVersion === "latest") {
+        if (args.ver === "latest") {
           return release.assets.find((asset) => asset.name.includes(binary));
         } else {
-          return release.assets.find((asset) => asset.name === `${binary}-${args.binVersion}.wasm`);
+          return release.assets.find((asset) => asset.name === `${binary}-${args.ver}.wasm`);
         }
       })
-    : args.binVersion === "latest"
+    : args.ver === "latest"
     ? releases.find((release) => release.assets.find((asset) => asset.name === binary))
     : releases
-        .filter((release) => release.tag_name.includes("v" + args.binVersion))
+        .filter((release) => release.tag_name.includes("v" + args.ver))
         .find((release) => release.assets.find((asset) => asset.name === binary));
 
   if (release == null) {
-    throw new Error(`Release not found for ${args.binVersion}`);
+    throw new Error(`Release not found for ${args.ver}`);
   }
 
-  const asset = args.artifact.includes("-runtime")
+  const asset = args.bin.includes("-runtime")
     ? release.assets.find((asset) => asset.name.includes(binary) && asset.name.includes("wasm"))
     : release.assets.find((asset) => asset.name === binary);
 
@@ -65,7 +65,7 @@ export async function fetchArtifact(args) {
   }
 
   if (binary.includes("-runtime")) {
-    const binaryPath = path.join("./", args.path, `${args.artifact}-${args.binVersion}.wasm`);
+    const binaryPath = path.join("./", args.path, `${args.bin}-${args.ver}.wasm`);
     await downloader(asset.browser_download_url, binaryPath);
     await fs.chmod(binaryPath, "755");
     process.stdout.write(` ${chalk.green("done")} ✓\n`);

@@ -19,10 +19,10 @@ yargs(hideBin(process.argv))
     "Download x86 artifact from GitHub",
     (yargs) => {
       return yargs
-        .positional("artifact", {
+        .positional("bin", {
           describe: "Name of artifact to download\n[ moonbeam | polkadot | *-runtime ]",
         })
-        .positional("bin-version", {
+        .positional("ver", {
           describe: "Artifact version to download",
           default: "latest",
         })

@@ -186,8 +186,8 @@ async function resolveDownloadChoice() {
     }
 
     await fetchArtifact({
-      artifact: firstChoice.artifact,
-      binVersion: chooseversion.binVersion,
+      bin: firstChoice.artifact,
+      ver: chooseversion.binVersion,
       path: chooseLocation.path,
     });
     await inquirer.prompt({
