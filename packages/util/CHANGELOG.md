@@ -1,5 +1,14 @@
 # @moonwall/util
 
+## 3.0.9
+
+### Patch Changes
+
+- f9f30de: Extended run cmd
+  - [#174](https://github.com/Moonsong-Labs/moonwall/issues/174)
+- Updated dependencies [f9f30de]
+  - @moonwall/types@3.0.9
+
 ## 3.0.8
 
 ### Patch Changes
