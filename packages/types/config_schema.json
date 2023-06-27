@@ -55,6 +55,9 @@
                 "name": {
                     "type": "string"
                 },
+                "newRpcBehaviour": {
+                    "type": "boolean"
+                },
                 "options": {
                     "items": {
                         "type": "string"

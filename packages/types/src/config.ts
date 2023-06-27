@@ -143,10 +143,11 @@ export interface ChopsticksLaunchSpec extends GenericLaunchSpec {
 export interface DevLaunchSpec extends GenericLaunchSpec {
   binPath: string;
   disableDefaultEthProviders?: boolean;
+  newRpcBehaviour?: boolean;
   ports?: {
     p2pPort: number;
-    wsPort: number;
     rpcPort: number;
+    wsPort: number;
   };
 }
 

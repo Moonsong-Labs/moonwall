@@ -44,12 +44,16 @@ export function parseRunCmd(launchSpec: DevLaunchSpec) {
     if (ports.wsPort) {
       args.push(`--ws-port=${ports.wsPort}`);
     }
-    // if (ports.rpcPort) {
-    //   args.push(`--rpc-port=${ports.rpcPort}`);
-    // }
+    if (ports.rpcPort) {
+      args.push(`--rpc-port=${ports.rpcPort}`);
+    }
   } else {
+    if (launchSpec.newRpcBehaviour) {
+      args.push(`--rpc-port=${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`);
+    } else {
+      args.push(`--ws-port=${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`);
+    }
     args.push(`--port=${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100 + 2}`);
-    args.push(`--ws-port=${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`);
     // args.push(`--rpc-port=${10000 + (Number(process.env.VITEST_POOL_ID || 1) * 100 + 1)}`);
   }
   return { cmd, args, launch };

@@ -117,6 +117,7 @@ export interface BlockCreationResponse<
   block: {
     duration: number;
     hash: string;
+    proofSize?: number;
   };
   result?: Calls extends (string | SubmittableExtrinsic<ApiType>)[]
     ? ExtrinsicCreation[]

@@ -75,12 +75,17 @@ yargs(hideBin(process.argv))
     }
   )
   .command(
-    `run <envName>`,
+    `run <envName> [GrepTest]`,
     "Start new network found in global config",
     (yargs) => {
-      return yargs.positional("envName", {
-        describe: "Network environment to start",
-      });
+      return yargs
+        .positional("envName", {
+          describe: "Network environment to start",
+        })
+        .positional("GrepTest", {
+          type: "string",
+          description: "Pattern to grep test ID/Description to run",
+        });
     },
     async (argv) => {
       await runNetwork(argv as any);

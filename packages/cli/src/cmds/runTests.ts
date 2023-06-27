@@ -7,6 +7,7 @@ import fs from "node:fs";
 import path from "path";
 import chalk from "chalk";
 import { execSync } from "node:child_process";
+import { filterCallsSome } from "@polkadot/types/metadata/decorate/index.js";
 
 export async function testCmd(envName: string, additionalArgs?: {}) {
   const globalConfig = await importJsonConfig();
@@ -112,6 +113,12 @@ export async function executeTests(env: Environment, additionalArgs?: {}) {
     hookTimeout: 500000,
     useAtomics: true,
     passWithNoTests: false,
+    isolate: false,
+    deps: {
+      experimentalOptimizer: {
+        enabled: true,
+      },
+    },
     threads: true,
 
     include: env.include ? env.include : ["**/*{test,spec,test_,test-}*{ts,mts,cts}"],

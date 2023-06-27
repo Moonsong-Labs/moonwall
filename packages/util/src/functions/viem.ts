@@ -1,6 +1,13 @@
 import { ContractDeploymentOptions, DeepPartial, DevModeContext } from "@moonwall/types";
 import type { Abi } from "viem";
-import { BlockTag, DeployContractParameters, TransactionSerializable, createWalletClient, hexToNumber, http } from "viem";
+import {
+  BlockTag,
+  DeployContractParameters,
+  TransactionSerializable,
+  createWalletClient,
+  hexToNumber,
+  http,
+} from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { Chain } from "viem/chains";
 import { ALITH_ADDRESS, ALITH_PRIVATE_KEY } from "../constants/accounts.js";
@@ -209,11 +216,13 @@ export async function createRawTransaction<TOptions extends DeepPartial<ViemTran
   const chainId = await context.viem("public").getChainId();
   const txnCount = await context.viem("public").getTransactionCount({ address: account.address });
   const gasPrice = await context.viem("public").getGasPrice();
+  const data = options && options.data ? options.data : "0x";
+
   const estimatedGas = await context
     .viem("public")
-    .estimateGas({ account: account.address, to, value });
+    .estimateGas({ account: account.address, to, value, data });
   const accessList = options && options.accessList ? options.accessList : [];
-  const data = options && options.data ? options.data : "0x";
+
   const txnBlob: TransactionSerializable =
     type === "eip1559"
       ? {
