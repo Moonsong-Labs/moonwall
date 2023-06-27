@@ -1,5 +1,14 @@
 # @moonwall/cli
 
+## 3.0.10
+
+### Patch Changes
+
+- f914550: Fix download
+- Updated dependencies [f914550]
+  - @moonwall/types@3.0.10
+  - @moonwall/util@3.0.10
+
 ## 3.0.9
 
 ### Patch Changes
