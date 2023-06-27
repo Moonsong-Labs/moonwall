@@ -15,8 +15,8 @@ yargs(hideBin(process.argv))
     await generateConfig();
   })
   .command(
-    `download <artifact> [bin-version] [path]`,
-    "Download a published x86 artifact from GitHub",
+    `download <bin> [ver] [path]`,
+    "Download x86 artifact from GitHub",
     (yargs) => {
       return yargs
         .positional("artifact", {
@@ -92,7 +92,8 @@ yargs(hideBin(process.argv))
       process.exit(0);
     }
   )
-  .command("*", "Run the guided walkthrough", async () => {
+  .demandCommand(1)
+  .fail(async (msg, err, yargs) => {
     await main();
   })
   .options({
@@ -102,11 +103,7 @@ yargs(hideBin(process.argv))
       description: "path to MoonwallConfig file",
       default: "./moonwall.config.json",
     },
-    // environment: {
-    //   type: "string",
-    //   alias: "t",
-    //   description: "name of environment tests to run",
-    //   demandOption: false,
-    // },
   })
+  .help("h")
+  .alias("h", "help")
   .parse();
