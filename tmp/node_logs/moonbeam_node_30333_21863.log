@@ -1,0 +1,41 @@
+2023-06-29 19:31:50 Moonbeam Parachain Collator    
+2023-06-29 19:31:50 ✌️  version 0.31.0-a3721deb89e    
+2023-06-29 19:31:50 ❤️  by PureStake, 2019-2023    
+2023-06-29 19:31:50 📋 Chain specification: Moonbase Development Testnet    
+2023-06-29 19:31:50 🏷  Node name: tangible-circle-6197    
+2023-06-29 19:31:50 👤 Role: AUTHORITY    
+2023-06-29 19:31:50 💾 Database: RocksDb at /var/folders/1j/v_lqv7cd4hb_bktvqptwhx9m0000gn/T/substratexKaRJ4/chains/moonbase_dev/db/full    
+2023-06-29 19:31:50 ⛓  Native runtime: moonbase-2300 (moonbase-0.tx2.au4)    
+2023-06-29 19:31:51 🔨 Initializing Genesis block/state (state: 0x26e7…4d94, header-hash: 0xcda0…e76b)    
+2023-06-29 19:31:51 Using default protocol ID "sup" because none is configured in the chain specs    
+2023-06-29 19:31:51 🏷  Local node identity is: 12D3KooWRuxoHxiY4SjBiZWp6MYrRW3vfGBzccKrbwZacB5fEwnp    
+2023-06-29 19:31:52 💻 Operating system: macos    
+2023-06-29 19:31:52 💻 CPU architecture: aarch64    
+2023-06-29 19:31:52 📦 Highest known block at #0    
+2023-06-29 19:31:52 Running JSON-RPC HTTP server: addr=127.0.0.1:9933, allowed origins=["*"]    
+2023-06-29 19:31:52 Running JSON-RPC WS server: addr=127.0.0.1:9944, allowed origins=["*"]    
+2023-06-29 19:31:52 Development Service Ready    
+2023-06-29 19:31:52 Accepting new connection 1/100
+2023-06-29 19:31:52 Accepting new connection 2/100
+2023-06-29 19:31:52 Accepting new connection 3/100
+2023-06-29 19:31:52 Accepting new connection 4/100
+2023-06-29 19:31:52 Accepting new connection 4/100
+2023-06-29 19:31:52 Accepting new connection 4/100
+2023-06-29 19:31:52 🙌 Starting consensus session on top of parent 0xcda06b0a02d041d5b8bff38aab518b807e071d936a3e90a7b81f1682f3fce76b    
+2023-06-29 19:31:52 🎁 Prepared block for proposing at 1 (0 ms) [hash: 0x484b3307da26485c285a2ad64de8f142fa52dbb64b5336c5ce31d7013b5fc52a; parent_hash: 0xcda0…e76b; extrinsics (4): [0x5bac…aaa5, 0x88e4…4616, 0xef12…0427, 0x3a5c…6b7f]]    
+2023-06-29 19:31:52 ✨ Imported #1 (0x6b5a…c9a0)    
+2023-06-29 19:31:52 🙌 Starting consensus session on top of parent 0x6b5ad9696d116ca2b0f0b3cab74a5f1eafcaee2f14dbaef97e10693d4511c9a0    
+2023-06-29 19:31:52 🎁 Prepared block for proposing at 2 (0 ms) [hash: 0xa9db0adaf8dca11df72ea020d94fc740e0ae99e1f87911854c34d81a576c14ce; parent_hash: 0x6b5a…c9a0; extrinsics (5): [0x2830…70cf, 0x16e4…6cc0, 0xef12…0427, 0x3a5c…6b7f, 0xf823…d472]]    
+2023-06-29 19:31:52 ✨ Imported #2 (0x4bd9…2c89)    
+2023-06-29 19:31:52 🙌 Starting consensus session on top of parent 0x4bd994723e741a2e71670a65b88b1104929621b5710620404858a1fd26b92c89    
+2023-06-29 19:31:52 🎁 Prepared block for proposing at 3 (0 ms) [hash: 0x507d0d1ab709b7d6b4210434212687aa5ff198cb767eb52e193ac67316415a2d; parent_hash: 0x4bd9…2c89; extrinsics (4): [0xe899…2285, 0x56b2…e1c9, 0xef12…0427, 0x3a5c…6b7f]]    
+2023-06-29 19:31:52 ✨ Imported #3 (0x7242…a409)    
+2023-06-29 19:31:52 🙌 Starting consensus session on top of parent 0x7242e28daec304c6169da67e72a3ce0c56a2c217a8ba236bf6cb2cbaeea5a409    
+2023-06-29 19:31:52 🎁 Prepared block for proposing at 4 (0 ms) [hash: 0xe5405f9ba158afad0cfa02ae726fa103f5b93c0e314b966f078972bb425e090d; parent_hash: 0x7242…a409; extrinsics (5): [0xaa03…8cfd, 0x9497…c071, 0xef12…0427, 0x3a5c…6b7f, 0xa88f…567b]]    
+2023-06-29 19:31:52 ✨ Imported #4 (0xb47f…9ef6)    
+2023-06-29 19:31:52 🙌 Starting consensus session on top of parent 0xb47f5ba58b2aeea09fbfb6356d8c12af891ddf3cb2752f6167fb37eca05b9ef6    
+2023-06-29 19:31:52 🎁 Prepared block for proposing at 5 (0 ms) [hash: 0x520f62f603dbaa6f4aa0aaa142f8ed09b2814f178fad5452a704b237ddf4e76f; parent_hash: 0xb47f…9ef6; extrinsics (5): [0xcc31…1983, 0x2654…50cf, 0xef12…0427, 0x3a5c…6b7f, 0x3690…cea6]]    
+2023-06-29 19:31:52 ✨ Imported #5 (0xa459…ec7b)    
+2023-06-29 19:31:52 🙌 Starting consensus session on top of parent 0xa459c254efa16c6ba6ef58289a7410d4c0137fe642d6e9a4279cbfbf90eeec7b    
+2023-06-29 19:31:52 🎁 Prepared block for proposing at 6 (0 ms) [hash: 0x3430ad9ae220ac2b3ccdfeaa79e3997f3755cfaaf0c45b621e776bec1d853ae9; parent_hash: 0xa459…ec7b; extrinsics (5): [0x265e…e3bf, 0x2931…98f1, 0xef12…0427, 0x3a5c…6b7f, 0x5ec1…32d9]]    
+2023-06-29 19:31:52 ✨ Imported #6 (0xb527…9ae4)    

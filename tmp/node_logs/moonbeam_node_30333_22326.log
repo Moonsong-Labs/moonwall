@@ -1,0 +1,120 @@
+2023-06-29 19:36:37 Moonbeam Parachain Collator    
+2023-06-29 19:36:37 ✌️  version 0.31.0-a3721deb89e    
+2023-06-29 19:36:37 ❤️  by PureStake, 2019-2023    
+2023-06-29 19:36:37 📋 Chain specification: Moonbase Development Testnet    
+2023-06-29 19:36:37 🏷  Node name: adjoining-holiday-0925    
+2023-06-29 19:36:37 👤 Role: AUTHORITY    
+2023-06-29 19:36:37 💾 Database: RocksDb at /var/folders/1j/v_lqv7cd4hb_bktvqptwhx9m0000gn/T/substrateNcITeN/chains/moonbase_dev/db/full    
+2023-06-29 19:36:37 ⛓  Native runtime: moonbase-2300 (moonbase-0.tx2.au4)    
+2023-06-29 19:36:38 🔨 Initializing Genesis block/state (state: 0x26e7…4d94, header-hash: 0xcda0…e76b)    
+2023-06-29 19:36:38 Using default protocol ID "sup" because none is configured in the chain specs    
+2023-06-29 19:36:38 🏷  Local node identity is: 12D3KooWBZH7gERasU8y6g825YvF6kyAmKpMfPQpV287RLBjSA5F    
+2023-06-29 19:36:39 💻 Operating system: macos    
+2023-06-29 19:36:39 💻 CPU architecture: aarch64    
+2023-06-29 19:36:39 📦 Highest known block at #0    
+2023-06-29 19:36:39 Running JSON-RPC HTTP server: addr=127.0.0.1:9933, allowed origins=["*"]    
+2023-06-29 19:36:39 Running JSON-RPC WS server: addr=127.0.0.1:9944, allowed origins=["*"]    
+2023-06-29 19:36:39 Development Service Ready    
+2023-06-29 19:36:44 💤 Idle (0 peers), best: #0 (0xcda0…e76b), finalized #0 (0xcda0…e76b), ⬇ 0 ⬆ 0    
+2023-06-29 19:36:46 Accepting new connection 1/100
+2023-06-29 19:36:46 Accepting new connection 2/100
+2023-06-29 19:36:46 Accepting new connection 3/100
+2023-06-29 19:36:46 Accepting new connection 4/100
+2023-06-29 19:36:46 Accepting new connection 4/100
+2023-06-29 19:36:46 Accepting new connection 4/100
+2023-06-29 19:36:46 🙌 Starting consensus session on top of parent 0xcda06b0a02d041d5b8bff38aab518b807e071d936a3e90a7b81f1682f3fce76b    
+2023-06-29 19:36:46 🎁 Prepared block for proposing at 1 (0 ms) [hash: 0xdf7139965222e258be7878f29e23a5382a5d189492938b6f55ff10b58cdb5473; parent_hash: 0xcda0…e76b; extrinsics (4): [0x599d…512e, 0x88e4…4616, 0xef12…0427, 0x3a5c…6b7f]]    
+2023-06-29 19:36:46 ✨ Imported #1 (0x0076…8f48)    
+2023-06-29 19:36:46 🙌 Starting consensus session on top of parent 0x00766c2599477685baa18cf5250f7b43264a3dd0578751f54826b6cf99808f48    
+2023-06-29 19:36:46 🎁 Prepared block for proposing at 2 (0 ms) [hash: 0x636f9dfc4c46d59c99561b817b267c530aa086098021aa546405d887b682d033; parent_hash: 0x0076…8f48; extrinsics (5): [0xc617…daae, 0x16e4…6cc0, 0xef12…0427, 0x3a5c…6b7f, 0x1481…6ab1]]    
+2023-06-29 19:36:46 ✨ Imported #2 (0x9174…8251)    
+2023-06-29 19:36:46 🙌 Starting consensus session on top of parent 0x917445d6c2aab52cf7dca406abedd40c75f43e458b736de22d7b151b19de8251    
+2023-06-29 19:36:46 🎁 Prepared block for proposing at 3 (0 ms) [hash: 0x41ce37152fcefe6d1a36de679810c5c7346c9604d47902ca99bb65aeaf19aba7; parent_hash: 0x9174…8251; extrinsics (4): [0xe114…e311, 0x56b2…e1c9, 0xef12…0427, 0x3a5c…6b7f]]    
+2023-06-29 19:36:46 ✨ Imported #3 (0xd659…f4fe)    
+2023-06-29 19:36:46 🙌 Starting consensus session on top of parent 0xd659f9b2e245127c29db7bf658895ce2911beb6e1c2bdef7c54a9e4ed0fff4fe    
+2023-06-29 19:36:46 🎁 Prepared block for proposing at 4 (0 ms) [hash: 0x08ea8e96a2f71e58ab509cc3017bb972566961c39aaee7cfa23f57e716f8a3af; parent_hash: 0xd659…f4fe; extrinsics (5): [0x618b…4f72, 0x9497…c071, 0xef12…0427, 0x3a5c…6b7f, 0x050e…7f85]]    
+2023-06-29 19:36:46 ✨ Imported #4 (0x0a19…0dd3)    
+2023-06-29 19:36:46 🙌 Starting consensus session on top of parent 0x0a190dc3144522d649bc0beb820684dcd8aacddc6a8ce88eb907f1c064ba0dd3    
+2023-06-29 19:36:46 🎁 Prepared block for proposing at 5 (0 ms) [hash: 0xb0325b1ac8aa5bf2f0bd57eb849ea92e495b3fb4429ebce9668b3a1b2cc4eb79; parent_hash: 0x0a19…0dd3; extrinsics (5): [0x5e27…dc0b, 0x2654…50cf, 0xef12…0427, 0x3a5c…6b7f, 0x3690…cea6]]    
+2023-06-29 19:36:46 ✨ Imported #5 (0xb1fa…0368)    
+2023-06-29 19:36:46 🙌 Starting consensus session on top of parent 0xb1fa198b28e1c05e6cdb2bba57daac7a8c020cc99749dff5b85fcc1be6c20368    
+2023-06-29 19:36:46 🎁 Prepared block for proposing at 6 (0 ms) [hash: 0xa64e5419a9ee8dfddc57c95b1837d699021c02ac3150ea59e480175c0566374d; parent_hash: 0xb1fa…0368; extrinsics (5): [0xbd08…0907, 0x2931…98f1, 0xef12…0427, 0x3a5c…6b7f, 0xc592…fe5c]]    
+2023-06-29 19:36:46 ✨ Imported #6 (0x1d57…b71f)    
+2023-06-29 19:36:46 🙌 Starting consensus session on top of parent 0x1d57b51dd4bc66de7b5607d8970e8358dd6387f32ac10d5f0e4a71874b6db71f    
+2023-06-29 19:36:46 🎁 Prepared block for proposing at 7 (0 ms) [hash: 0xe3111bc0f560fc443f11ca9157a7b69e6bd4501101efb53fd207ac94857a22d9; parent_hash: 0x1d57…b71f; extrinsics (5): [0x0c7e…17b0, 0x2c23…6083, 0xef12…0427, 0x3a5c…6b7f, 0xac50…1898]]    
+2023-06-29 19:36:46 ✨ Imported #7 (0x6840…4f4e)    
+2023-06-29 19:36:46 Accepting new connection 4/100
+2023-06-29 19:36:46 Accepting new connection 5/100
+2023-06-29 19:36:46 🙌 Starting consensus session on top of parent 0x684094a33e2eb95ffe46d450072b2f7b276f80ec750e48ccd9842c663a074f4e    
+2023-06-29 19:36:46 🎁 Prepared block for proposing at 8 (0 ms) [hash: 0x537719900c1be792b9d8bc00d439ec3a524ba9f2b0282ee9e7384e1e04e82fc9; parent_hash: 0x6840…4f4e; extrinsics (5): [0xbd31…2b49, 0xaf27…3a05, 0xef12…0427, 0x3a5c…6b7f, 0x8c2f…9e1f]]    
+2023-06-29 19:36:46 ✨ Imported #8 (0xa067…7aa7)    
+2023-06-29 19:36:46 Accepting new connection 6/100
+2023-06-29 19:36:46 Accepting new connection 6/100
+2023-06-29 19:36:46 Accepting new connection 6/100
+2023-06-29 19:36:46 🙌 Starting consensus session on top of parent 0xa067462ec12ab41264893e5bf5145dbcfae7bd6c8043199e3aa3ebc3fbcb7aa7    
+2023-06-29 19:36:46 🎁 Prepared block for proposing at 9 (0 ms) [hash: 0x01c3538a12049d2b24f839aa3d3536cd17aa11316adfc3f5ce3e752dbbcd99ff; parent_hash: 0xa067…7aa7; extrinsics (5): [0xa9a2…6a92, 0x1713…84ba, 0xef12…0427, 0x3a5c…6b7f, 0x14d5…9976]]    
+2023-06-29 19:36:46 ✨ Imported #9 (0x5f4f…1b61)    
+2023-06-29 19:36:46 Accepting new connection 6/100
+2023-06-29 19:36:46 Accepting new connection 6/100
+2023-06-29 19:36:46 Accepting new connection 6/100
+2023-06-29 19:36:46 🙌 Starting consensus session on top of parent 0x5f4f6fc484d8e160734155521164d6fe6a6ffd357fb882e463133ccc74291b61    
+2023-06-29 19:36:46 🎁 Prepared block for proposing at 10 (1 ms) [hash: 0xd16ceda8895a2ad44d6870703aeb7924a9948aedd5e4c3617fc20eee5cfe8b12; parent_hash: 0x5f4f…1b61; extrinsics (5): [0xc00e…1efa, 0xb8ae…aa46, 0xef12…0427, 0x3a5c…6b7f, 0x9a6c…3de6]]    
+2023-06-29 19:36:46 ✨ Imported #10 (0xd8a1…9925)    
+2023-06-29 19:36:46 Accepting new connection 6/100
+2023-06-29 19:36:46 Accepting new connection 6/100
+2023-06-29 19:36:46 Accepting new connection 6/100
+2023-06-29 19:36:46 🙌 Starting consensus session on top of parent 0xd8a1886a02a1c3bd5de0b558a3cb4b541c4b5ca88d80f050b4eeb18161589925    
+2023-06-29 19:36:46 🎁 Prepared block for proposing at 11 (1 ms) [hash: 0xb18ae3e25690d5e4752d68f8cd8e2684d602a8037e1d5bb56d446a3c22eaa323; parent_hash: 0xd8a1…9925; extrinsics (5): [0xd462…bffb, 0xeafc…d86e, 0xef12…0427, 0x3a5c…6b7f, 0x7c4c…d442]]    
+2023-06-29 19:36:46 ✨ Imported #11 (0x6661…fd51)    
+2023-06-29 19:36:46 🙌 Starting consensus session on top of parent 0x6661d96f27621d5e298851c52cd0e1d582b5f960db4956564361ee473a82fd51    
+2023-06-29 19:36:46 🎁 Prepared block for proposing at 12 (0 ms) [hash: 0x937a718d8861e80cf3405708b27623496e5acca1bb8577bb804dd7566320588d; parent_hash: 0x6661…fd51; extrinsics (5): [0xa11f…4cc9, 0xb19f…c9fd, 0xef12…0427, 0x3a5c…6b7f, 0x8f90…3b9a]]    
+2023-06-29 19:36:46 ✨ Imported #12 (0xd39d…f963)    
+2023-06-29 19:36:46 Accepting new connection 6/100
+2023-06-29 19:36:46 Accepting new connection 6/100
+2023-06-29 19:36:46 Accepting new connection 6/100
+2023-06-29 19:36:46 🙌 Starting consensus session on top of parent 0xd39dd625681e72db78de3b806d97fcba9951c795f1e8aae16f87e57a7432f963    
+2023-06-29 19:36:46 🎁 Prepared block for proposing at 13 (1 ms) [hash: 0xf813d66ab92016eb9110fdeda116c61b51de153ed241bc9e0926813a3db98d4d; parent_hash: 0xd39d…f963; extrinsics (5): [0xc3fc…3204, 0x9963…1a90, 0xef12…0427, 0x3a5c…6b7f, 0x8008…4d14]]    
+2023-06-29 19:36:46 ✨ Imported #13 (0xfa12…3310)    
+2023-06-29 19:36:46 Accepting new connection 6/100
+2023-06-29 19:36:46 Accepting new connection 6/100
+2023-06-29 19:36:46 Accepting new connection 6/100
+2023-06-29 19:36:46 🙌 Starting consensus session on top of parent 0xfa12d7acc4d92b5345d714b439de7ff50f9ec58476853ad6ef4cb36aaac93310    
+2023-06-29 19:36:46 🎁 Prepared block for proposing at 14 (1 ms) [hash: 0x385a1b11b2d9940cb28750c94cc0c8ee85a7212aa5a1f67919757855479f496b; parent_hash: 0xfa12…3310; extrinsics (5): [0xa7d4…38b6, 0xc601…e153, 0xef12…0427, 0x3a5c…6b7f, 0xbcaa…bed9]]    
+2023-06-29 19:36:46 ✨ Imported #14 (0x2199…33c3)    
+2023-06-29 19:36:46 Accepting new connection 6/100
+2023-06-29 19:36:46 Accepting new connection 6/100
+2023-06-29 19:36:46 Accepting new connection 6/100
+2023-06-29 19:36:46 🙌 Starting consensus session on top of parent 0x21992ac5c05a1873d543de83c73c6d7e3ee5cf11f81e6f2bad02d87b4f7633c3    
+2023-06-29 19:36:46 🎁 Prepared block for proposing at 15 (1 ms) [hash: 0x1dd3c40b3da8b05963fdd3287a9c5d3050fde30a3d7b9bd01f558698cc20c3c8; parent_hash: 0x2199…33c3; extrinsics (5): [0xcade…6fc5, 0x36f3…8337, 0xef12…0427, 0x3a5c…6b7f, 0x7b2d…7b53]]    
+2023-06-29 19:36:46 ✨ Imported #15 (0x99f4…9c24)    
+2023-06-29 19:36:46 🙌 Starting consensus session on top of parent 0x99f4ab62c13ea5e8420c73cc2fecb819aa57047e611bf9371ac1db8422029c24    
+2023-06-29 19:36:46 🎁 Prepared block for proposing at 16 (1 ms) [hash: 0xde873324a9a7527c4c18d4de56b60c08b3597cd71f1e9819093f1be6e1440659; parent_hash: 0x99f4…9c24; extrinsics (5): [0x0196…9353, 0x00bb…938e, 0xef12…0427, 0x3a5c…6b7f, 0xf02a…17d7]]    
+2023-06-29 19:36:46 ✨ Imported #16 (0xaddc…bdcf)    
+2023-06-29 19:36:46 🙌 Starting consensus session on top of parent 0xaddc466f81f7f7de3d71a06965b3105e7c0afc0c1a6937c7dd7006f0df83bdcf    
+2023-06-29 19:36:46 🎁 Prepared block for proposing at 17 (0 ms) [hash: 0xabad47212dc5e524184107e5087490e9e94ff2a657d899ff5653147bb77ccef3; parent_hash: 0xaddc…bdcf; extrinsics (5): [0x4441…d389, 0xf8ce…180f, 0xef12…0427, 0x3a5c…6b7f, 0x2203…eb02]]    
+2023-06-29 19:36:46 ✨ Imported #17 (0x5659…7cb3)    
+2023-06-29 19:36:46 Accepting new connection 3/100
+2023-06-29 19:36:46 Accepting new connection 4/100
+2023-06-29 19:36:46 Accepting new connection 5/100
+2023-06-29 19:36:46 Accepting new connection 6/100
+2023-06-29 19:36:46 Accepting new connection 6/100
+2023-06-29 19:36:46 Accepting new connection 6/100
+2023-06-29 19:36:46 🙌 Starting consensus session on top of parent 0x5659275bd8eb1f0a61ad946a3ad05ada85f34f6670ad353a425ca8bbe5ca7cb3    
+2023-06-29 19:36:46 🎁 Prepared block for proposing at 18 (0 ms) [hash: 0x35d2b95fc42b478b49579620a7dade5d7064077c6ac985e6471c961efac5b41c; parent_hash: 0x5659…7cb3; extrinsics (4): [0xf2be…69f2, 0xd586…7c6c, 0xef12…0427, 0x3a5c…6b7f]]    
+2023-06-29 19:36:46 ✨ Imported #18 (0x5f71…5314)    
+2023-06-29 19:36:46 🙌 Starting consensus session on top of parent 0x5f71e440dc2f17ebd8e8cb954775ed4a3c7f6082997c51a04960247af2e25314    
+2023-06-29 19:36:46 🎁 Prepared block for proposing at 19 (0 ms) [hash: 0x93ecf9ab9dcf9aa0bc2678c085a8a4ae6db6c466b0c48804440300d5723dbe7e; parent_hash: 0x5f71…5314; extrinsics (5): [0xf9da…7469, 0xb0fa…aae3, 0xef12…0427, 0x3a5c…6b7f, 0x6fd3…2948]]    
+2023-06-29 19:36:46 ✨ Imported #19 (0x03bc…fd86)    
+2023-06-29 19:36:46 🙌 Starting consensus session on top of parent 0x03bc75f4984a0adef1953057c87d15f538abb38563de784e1f5c98e22979fd86    
+2023-06-29 19:36:46 🎁 Prepared block for proposing at 20 (0 ms) [hash: 0xc03367801def1609500e482dfc2620a1fac256732a4e9b64b68f266b75e4cb69; parent_hash: 0x03bc…fd86; extrinsics (4): [0x49ff…eba7, 0x426b…72af, 0xef12…0427, 0x3a5c…6b7f]]    
+2023-06-29 19:36:46 ✨ Imported #20 (0xc562…2332)    
+2023-06-29 19:36:46 🙌 Starting consensus session on top of parent 0xc562fa3e5cb35803da2575ec2d6a6ae2051341657b01cf6a300eb033348f2332    
+2023-06-29 19:36:46 🎁 Prepared block for proposing at 21 (0 ms) [hash: 0x24ccf318bda01b409849f7aaf056783766273334ba7ec5898c5df4e1a743e0f7; parent_hash: 0xc562…2332; extrinsics (5): [0xbc02…8148, 0xb932…43ba, 0xef12…0427, 0x3a5c…6b7f, 0xafae…e7a9]]    
+2023-06-29 19:36:46 ✨ Imported #21 (0x4acf…9258)    
+2023-06-29 19:36:46 🙌 Starting consensus session on top of parent 0x4acf49f4a3534be76239167f92f5129422a8475247ac8a0a122344b7bfe39258    
+2023-06-29 19:36:46 🎁 Prepared block for proposing at 22 (0 ms) [hash: 0x9d2f7cedec3469f26ec77b069d8265fb6e1660e953bf29664348ec108369212b; parent_hash: 0x4acf…9258; extrinsics (5): [0x1965…94f4, 0x59a3…500d, 0xef12…0427, 0x3a5c…6b7f, 0x6097…1e59]]    
+2023-06-29 19:36:46 ✨ Imported #22 (0xd029…8a9c)    
+2023-06-29 19:36:46 🙌 Starting consensus session on top of parent 0xd0298584862386d50c042e3b50c8e999b62cc01b00676c94356797a5bc0c8a9c    
+2023-06-29 19:36:46 🎁 Prepared block for proposing at 23 (0 ms) [hash: 0x3dae3c8ab8836561ea57b7f164d1ca7a58c1dd3b50b807add43e84912854e2ff; parent_hash: 0xd029…8a9c; extrinsics (5): [0x71b6…d2c2, 0x58b0…f319, 0xef12…0427, 0x3a5c…6b7f, 0x10d2…8692]]    
+2023-06-29 19:36:46 ✨ Imported #23 (0x5d3a…493c)    
+2023-06-29 19:36:49 💤 Idle (0 peers), best: #23 (0x5d3a…493c), finalized #23 (0x5d3a…493c), ⬇ 0 ⬆ 0    

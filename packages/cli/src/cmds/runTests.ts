@@ -7,7 +7,7 @@ import fs from "node:fs";
 import path from "path";
 import chalk from "chalk";
 import { execSync } from "node:child_process";
-import { filterCallsSome } from "@polkadot/types/metadata/decorate/index.js";
+import { clearNodeLogs } from "src/internal/cmdFunctions/tempLogs.js";
 
 export async function testCmd(envName: string, additionalArgs?: {}) {
   const globalConfig = await importJsonConfig();
@@ -63,7 +63,9 @@ export async function testCmd(envName: string, additionalArgs?: {}) {
       }
     }
   }
-
+  if (env.foundation.type == "dev" && !env.foundation.launchSpec[0].retainAllLogs) {
+    clearNodeLogs();
+  }
   const vitest = await executeTests(env, additionalArgs);
   const failed = vitest!.state.getFiles().filter((file) => file.result!.state === "fail");
 

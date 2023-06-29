@@ -25,6 +25,8 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
     )
   );
 
+  const dirPath = path.join(process.cwd(), "tmp", "node_logs");
+  
   const onProcessExit = () => {
     runningNode && runningNode.kill();
   };
@@ -34,7 +36,17 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
 
   process.once("exit", onProcessExit);
   process.once("SIGINT", onProcessInterrupt);
+
   runningNode = spawn(cmd, args);
+
+  const fsStream = fs.createWriteStream(
+    path.join(
+      dirPath,
+      `${path.basename(cmd)}_node_${args.find((a) => a.includes("port"))?.split("=")[1]}_${
+        runningNode.pid
+      }.log`
+    )
+  );
 
   runningNode.once("exit", () => {
     process.removeListener("exit", onProcessExit);
