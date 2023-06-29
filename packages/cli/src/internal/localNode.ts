@@ -14,19 +14,8 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
 
   let runningNode: ChildProcess;
 
-  const dirPath = path.join(process.cwd(), "tmp");
-  if (!fs.existsSync(dirPath)) {
-    fs.mkdirSync(dirPath);
-  }
-  const fsStream = fs.createWriteStream(
-    path.join(
-      dirPath,
-      `${path.basename(cmd)}_node_${args.find((a) => a.includes("port"))?.split("=")[1]}.log`
-    )
-  );
-
   const dirPath = path.join(process.cwd(), "tmp", "node_logs");
-  
+
   const onProcessExit = () => {
     runningNode && runningNode.kill();
   };
