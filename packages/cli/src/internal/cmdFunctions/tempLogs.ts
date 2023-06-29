@@ -2,7 +2,6 @@ import path from "path";
 import fs from "fs";
 
 export function clearNodeLogs() {
-  // TODO: check if logs exist already and purge unless command set in config
   const dirPath = path.join(process.cwd(), "tmp", "node_logs");
   if (!fs.existsSync(dirPath)) {
     fs.mkdirSync(dirPath, { recursive: true });

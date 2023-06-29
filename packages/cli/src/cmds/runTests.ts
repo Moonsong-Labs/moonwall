@@ -13,7 +13,7 @@ export async function testCmd(envName: string, additionalArgs?: {}) {
   const globalConfig = await importJsonConfig();
   const env = globalConfig.environments.find(({ name }) => name === envName)!;
   process.env.MOON_TEST_ENV = envName;
-  // process.env.MOON_RUN_SCRIPTS = "true";
+
   if (!!!env) {
     const envList = globalConfig.environments.map((env) => env.name);
     throw new Error(
