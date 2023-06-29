@@ -1,5 +1,15 @@
 # @moonwall/cli
 
+## 3.0.11
+
+### Patch Changes
+
+- 63aab7e: Added log saving
+  - [#175](https://github.com/Moonsong-Labs/moonwall/issues/175)
+- Updated dependencies [63aab7e]
+  - @moonwall/types@3.0.11
+  - @moonwall/util@3.0.11
+
 ## 3.0.10
 
 ### Patch Changes
