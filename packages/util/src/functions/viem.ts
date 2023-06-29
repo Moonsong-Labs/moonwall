@@ -172,6 +172,7 @@ export type TransferOptions =
 export type ViemTransactionOptions =
   | TransactionSerializable & {
       privateKey?: `0x${string}`;
+      skipEstimation?: boolean;
     };
 
 /**
@@ -218,9 +219,9 @@ export async function createRawTransaction<TOptions extends DeepPartial<ViemTran
   const gasPrice = await context.viem("public").getGasPrice();
   const data = options && options.data ? options.data : "0x";
 
-  const estimatedGas = await context
-    .viem("public")
-    .estimateGas({ account: account.address, to, value, data });
+  const estimatedGas = options.skipEstimation
+    ? 1_500_000n
+    : await context.viem("public").estimateGas({ account: account.address, to, value, data });
   const accessList = options && options.accessList ? options.accessList : [];
 
   const txnBlob: TransactionSerializable =

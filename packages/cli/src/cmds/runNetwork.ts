@@ -12,6 +12,7 @@ import { parse } from "yaml";
 import { importJsonConfig, loadEnvVars } from "../lib/configReader.js";
 import { MoonwallContext, runNetworkOnly } from "../lib/globalContext.js";
 import { executeTests } from "./runTests.js";
+import { clearNodeLogs, reportLogLocation } from "src/internal/cmdFunctions/tempLogs.js";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
@@ -30,11 +31,8 @@ export async function runNetwork(args) {
   }
   await loadEnvVars();
 
-  const testFileDirs = globalConfig.environments.find(
-    ({ name }) => name == args.envName
-  )!.testFileDir;
-  const foundation = globalConfig.environments.find(({ name }) => name == args.envName)!.foundation
-    .type;
+  const testFileDirs = env.testFileDir;
+  const foundation = env.foundation.type;
 
   const questions = [
     {
@@ -121,10 +119,14 @@ export async function runNetwork(args) {
     },
   ];
 
+  if (env.foundation.type == "dev" && !env.foundation.launchSpec[0].retainAllLogs) {
+    clearNodeLogs();
+  }
+
   await runNetworkOnly(globalConfig);
   clear();
   const portsList = await reportServicePorts();
-
+  reportLogLocation();
   portsList.forEach(({ port }) =>
     console.log(`  🖥️   https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0.0.1%3A${port}`)
   );
@@ -308,6 +310,7 @@ const resolveInfoChoice = async (env: Environment) => {
   console.log(chalk.bgWhite.blackBright("Launch Spec in Config File:"));
   console.dir(env, { depth: null });
   const portsList = await reportServicePorts();
+  reportLogLocation();
   portsList.forEach(({ port }) =>
     console.log(`  🖥️   https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0.0.1%3A${port}`)
   );

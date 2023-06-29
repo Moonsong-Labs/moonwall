@@ -2,6 +2,8 @@ import { ChildProcess, spawn } from "child_process";
 import chalk from "chalk";
 import Debug from "debug";
 import { checkAccess, checkExists } from "./fileCheckers.js";
+import fs from "fs";
+import path from "path";
 const debugNode = Debug("global:node");
 
 export async function launchNode(cmd: string, args: string[], name: string): Promise<ChildProcess> {
@@ -12,6 +14,8 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
 
   let runningNode: ChildProcess;
 
+  const dirPath = path.join(process.cwd(), "tmp", "node_logs");
+
   const onProcessExit = () => {
     runningNode && runningNode.kill();
   };
@@ -21,11 +25,22 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
 
   process.once("exit", onProcessExit);
   process.once("SIGINT", onProcessInterrupt);
+
   runningNode = spawn(cmd, args);
+
+  const fsStream = fs.createWriteStream(
+    path.join(
+      dirPath,
+      `${path.basename(cmd)}_node_${args.find((a) => a.includes("port"))?.split("=")[1]}_${
+        runningNode.pid
+      }.log`
+    )
+  );
 
   runningNode.once("exit", () => {
     process.removeListener("exit", onProcessExit);
     process.removeListener("SIGINT", onProcessInterrupt);
+    fsStream.end(); // This line ensures that the writable stream is properly closed
     debugNode(`Exiting dev node: ${name}`);
   });
 
@@ -39,6 +54,15 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
     }
     process.exit(1);
   });
+
+  const writeLogToFile = (chunk: any) => {
+    fsStream.write(chunk, (err) => {
+      if (err) console.error(err);
+      else fsStream.emit("drain");
+    });
+  };
+  runningNode.stderr?.on("data", writeLogToFile);
+  runningNode.stdout?.on("data", writeLogToFile);
 
   const binaryLogs: any[] = [];
   await new Promise<void>((resolve, reject) => {

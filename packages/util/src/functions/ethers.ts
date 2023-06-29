@@ -1,5 +1,5 @@
 import { DevModeContext } from "@moonwall/types";
-import { TransactionRequest } from "ethers";
+import { TransactionRequest, Wallet } from "ethers";
 import { TransactionType } from "@moonwall/types";
 import { ALITH_ADDRESS } from "../constants/accounts.js";
 
@@ -27,7 +27,7 @@ const transactionHandlers: Record<TransactionType, TransactionHandler> = {
 };
 
 export async function createEthersTxn<
-  TOptions extends TransactionRequest & { txnType?: TransactionType }
+  TOptions extends TransactionRequest & { txnType?: TransactionType; privateKey?: `0x${string}` }
 >(context: DevModeContext, params: TOptions) {
   const nonce = await context.viem("public").getTransactionCount({ address: ALITH_ADDRESS });
   const blob: {} = { nonce, ...params };
@@ -38,7 +38,11 @@ export async function createEthersTxn<
   }
   handler(blob, params);
 
-  const txn = await context.ethers().populateTransaction(blob);
-  const raw = await context.ethers().signTransaction(txn);
+  const signer = params.privateKey
+    ? new Wallet(params.privateKey, context.ethers().provider)
+    : context.ethers();
+
+  const txn = await signer.populateTransaction(blob);
+  const raw = await signer.signTransaction(txn);
   return { rawSigned: raw as `0x${string}`, request: txn };
 }

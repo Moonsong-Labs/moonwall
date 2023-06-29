@@ -1,50 +1,108 @@
 /**
- * @name MoonwallConfig
- * @description The main configuration object for Moonwall.
- * @property $schema - The JSON schema for the config.
- * @property label - A label for the config.
- * @property defaultTestTimeout - The default timeout for tests.
- * @property scriptsDir - Optional path to a directory containing scripts.
- * @property environments - An array of Environment objects for testing.
+ * The main configuration object for Moonwall.
  */
 export type MoonwallConfig = {
+  /**
+   * The JSON schema for the config.
+   */
   $schema: string;
+
+  /**
+   * A label for the config.
+   */
   label: string;
+
+  /**
+   * The default timeout for tests.
+   */
   defaultTestTimeout: number;
+
+  /**
+   * Optional path to a directory containing scripts.
+   */
   scriptsDir?: string;
+
+  /**
+   * An array of Environment objects for testing.
+   */
   environments: Environment[];
 };
 
 /**
- * @name Environment
- * @description The environment configuration for testing.
- * @property reporters - An optional array of reporter names.
- * @property name - The name of the environment.
- * @property testFileDir - An array of directories with test files.
- * @property envVars - An optional array of environment variable names.
- * @property foundation - The foundation configuration for the environment.
- * @property include - An optional array of included files or directories.
- * @property connections - An optional array of ProviderConfig objects.
- * @property multiThreads - An optional boolean to indicate if multi-threading is enabled.
- * @property contracts - Path to foundry directory containing smart contracts for testing.
- * @property runScripts - An optional array of scripts to run before testing.
- * @property defaultSigner - The privateKey with which to sign and send transactions in createBlock() function.
- * @property defaultAllowFailures - Toggle whether createBlock() will throw when extrinsic errors inside.
- * @property defaultFinalization - Toggle whether createBlock() will finalize blocks by default or not.
+ * The environment configuration for testing.
  */
 export type Environment = {
+  /**
+   * An optional array of reporter names.
+   */
   reporters?: string[];
+
+  /**
+   * The name of the environment.
+   */
   name: string;
+
+  /**
+   * An array of directories with test files.
+   */
   testFileDir: string[];
+
+  /**
+   * An optional array of environment variable names.
+   */
   envVars?: string[];
+
+  /**
+   * The foundation configuration for the environment.
+   */
   foundation: IFoundation;
+
+  /**
+   * An optional array of included files or directories.
+   */
   include?: string[];
+
+  /**
+   * An optional array of ProviderConfig objects.
+   */
   connections?: ProviderConfig[];
+
+  /**
+   * An optional boolean to indicate if multi-threading is enabled.
+   */
   multiThreads?: boolean | number;
+
+  /**
+   * Path to directory containing smart contracts for testing against.
+   */
   contracts?: string;
+
+  /**
+   * An optional array of scripts to run before testing.
+   */
   runScripts?: string[];
-  defaultSigner?: { type: "ethereum" | "sr25519" | "ed25519"; privateKey: string };
+
+  /**
+   * The privateKey with which to sign and send transactions in createBlock() function.
+   */
+  defaultSigner?: { 
+    /**
+     *  Substrate Keyring type
+     */
+    type: "ethereum" | "sr25519" | "ed25519"; 
+    /**
+     * Hex encoded private key to generate KeyringPair ("0x..") 
+     */
+    privateKey: string };
+
+  /**
+   * Toggle whether createBlock() will throw when extrinsic errors inside.
+   */
   defaultAllowFailures?: boolean;
+
+  /**
+   * Toggle whether createBlock() will finalize blocks by default or not.
+   */
   defaultFinalization?: boolean;
 };
 
@@ -86,84 +144,153 @@ export const EthTransactionTypes = ["eip1559", "eip2930", "legacy"] as const;
 export type FoundationType = IFoundation["type"];
 
 /**
- * @name GenericLaunchSpec
- * @description A generic launch specification object.
- * @property name - The name of the launch spec.
- * @property running - An optional flag indicating if the spec is currently running.
- * @property options - An optional array of options for the launch spec.
+ * A generic launch specification object.
  */
 export interface GenericLaunchSpec {
+  /**
+   * The name of the launch spec.
+   */
   name: string;
+
+  /**
+   * UNUSED
+   */
   running?: boolean;
+
+  /**
+   * An optional array of options for the launch spec.
+   */
   options?: string[];
 }
 
 /**
- * @name ZombieLaunchSpec
- * @description A launch specification object for the "zombie" foundation type.
+ * A launch specification object for the "zombie" foundation type.
  * @extends GenericLaunchSpec
- * @property configPath - The path to the config file.
- * @property monitoredNode - An optional monitored node.
- * @property skipBlockCheck - An optional array of blocks to skip checking.
  */
 export interface ZombieLaunchSpec extends GenericLaunchSpec {
+  /**
+   * The path to the config file.
+   */
   configPath: string;
+
+  /**
+   * An optional monitored node.
+   */
   monitoredNode?: string;
+
+  /**
+   * An optional array of blocks to skip checking.
+   */
   skipBlockCheck?: string[];
 }
 
 // TODO: Separate single chopsticks network and multi chopsticks into separate interfaces
 /**
- * @name ChopsticksLaunchSpec
- * @description A launch specification object for the "chopsticks" foundation type.
+ * A launch specification object for the "chopsticks" foundation type.
  * @extends GenericLaunchSpec
- * @property configPath - The path to the config file.
- * @property wsPort - An optional WebSocket port.
- * @property type - An optional type of either "relaychain" or "parachain".
- * @property wasmOverride - An optional WebAssembly override.
- * @property buildBlockMode - An optional block building mode, can be "batch", "manual" or "instant".
  */
 export interface ChopsticksLaunchSpec extends GenericLaunchSpec {
+  /**
+   * The path to the config file.
+   */
   configPath: string;
-  wsPort?: number; // Quirk of Chopsticks is that port option  only for single mode not xcm
+
+  /**
+   * An optional WebSocket port.
+   * Quirk of Chopsticks is that port option is only for single mode not xcm.
+   */
+  wsPort?: number;
+
+  /**
+   * An optional type of either "relaychain" or "parachain".
+   */
   type?: "relaychain" | "parachain";
+
+  /**
+   * An optional WebAssembly override.
+   */
   wasmOverride?: string;
-  // buildBlockMode only supported for single mode chopsticks
+
+  /**
+   * An optional block building mode, can be "batch", "manual" or "instant".
+   * This is only supported for single mode chopsticks.
+   */
   buildBlockMode?: "batch" | "manual" | "instant";
 }
 
 /**
- * @name DevLaunchSpec
- * @description A launch specification object for the "dev" foundation type.
+ * A launch specification object for the "dev" foundation type.
  * @extends GenericLaunchSpec
- * @property binPath - The path to the binary file.
- * @property disableDefaultEthProviders - An optional flag to disable default Ethereum providers.
- * @property ports - An optional object with p2pPort, wsPort, and rpcPort.
  */
 export interface DevLaunchSpec extends GenericLaunchSpec {
+  /**
+   * The path to the binary file.
+   */
   binPath: string;
+
+  /**
+   * Switch to not connect to Ethereum providers by default.
+   */
   disableDefaultEthProviders?: boolean;
+
+  /**
+   * Launch node using rpc-port parameter instead of ws-port.
+   */
   newRpcBehaviour?: boolean;
+
+  /**
+   * An optional flag to retain node logs from previous runs.
+   */
+  retainAllLogs?: boolean;
+
+  /**
+   * An optional object with p2pPort, wsPort, and rpcPort.
+   */
   ports?: {
+    /**
+     * The port for peer-to-peer (P2P) communication.
+     */
     p2pPort: number;
+
+    /**
+     * The port for remote procedure call (RPC).
+     */
     rpcPort: number;
+
+    /**
+     * The port for WebSocket communication (soon deprecated)
+     */
     wsPort: number;
   };
 }
 
 /**
- * @name ProviderConfig
- * @description The configuration object for a provider.
- * @property name - The name of the provider.
- * @property type - The type of the provider.
- * @property endpoints - An array of endpoint URLs.
- * @property rpc - An optional RPC bundle.
+ * The configuration object for a provider.
  */
 export interface ProviderConfig {
+  /**
+   * The name of the provider.
+   */
   name: string;
+
+  /**
+   * The type of the provider.
+   */
   type: ProviderType;
+
+  /**
+   * An array of endpoint URLs.
+   */
   endpoints: string[];
+
+  /**
+   * An optional RPC bundle.
+   */
   rpc?: IRpcBundle;
+
+  /**
+   * An optional collection of additional types.
+   */
   additionalTypes?: TypesBundle;
 }
 
