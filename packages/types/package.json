@@ -45,6 +45,7 @@
     "*.cjs"
   ],
   "scripts": {
+    "clean":"pnpm rimraf dist && pnpm rimraf node_modules",
     "build": "pnpm exec rimraf dist && tsup src --format cjs,esm --config tsup.config.ts && pnpm generate-types",
     "generate-types": "tsup src --format cjs,esm --dts --config tsup.config.ts && pnpm schema && pnpm typecheck",
     "watch": "tsup src --format cjs,esm --dts --watch",

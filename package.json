@@ -13,6 +13,7 @@
     "changeset": "changeset",
     "changeset:release": "changeset publish",
     "changeset:version": "changeset version",
+    "clean-all":"rimraf node_modules && pnpm -r --filter='./packages/**' run clean",
     "start": "pnpm exec moonwall",
     "display-reports": "pnpm exec vite preview --base __vitest__ --outDir html",
     "test": "pnpm exec moonwall test 'basic chopsticks dev_seq chop_state_test'",
