@@ -1,6 +1,5 @@
 import "@moonbeam-network/api-augment";
 import { beforeAll, describeSuite, expect, fetchCompiledContract } from "@moonwall/cli";
-import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import {
   ALITH_ADDRESS,
   BALTATHAR_ADDRESS,
@@ -10,8 +9,7 @@ import {
   GLMR,
   alith,
   baltathar,
-  deployViemContract,
-  sendRawTransaction,
+  deployViemContract
 } from "@moonwall/util";
 import "@polkadot/api-augment";
 import { BN } from "@polkadot/util";
@@ -27,8 +25,9 @@ import {
   getContract,
   verifyMessage,
 } from "viem";
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import Web3 from "web3";
-import { bytecode as tokenBytecode, tokenAbi } from "../_test_data/token.js";
+import { tokenAbi, bytecode as tokenBytecode } from "../_test_data/token.js";
 
 describeSuite({
   id: "D01",

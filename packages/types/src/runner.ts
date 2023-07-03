@@ -172,12 +172,12 @@ export interface UpgradePreferences {
 /**
  * PublicViem - A PublicClient type from the 'viem' module.
  */
-export type PublicViem = PublicClient<Transport, Chain, true>;
+export type PublicViem = PublicClient<Transport, Chain>;
 
 /**
  * WalletViem - A WalletClient type from the 'viem' module.
  */
-export type WalletViem = WalletClient<Transport, Chain, Account, true>;
+export type WalletViem = WalletClient<Transport, Chain, Account>;
 
 /**
  * ViemApiMap - An interface to map 'public' and 'wallet' to their respective types.
