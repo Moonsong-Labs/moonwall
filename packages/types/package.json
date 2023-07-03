@@ -59,7 +59,7 @@
   "dependencies": {
     "@polkadot/api": "^10.9.1",
     "debug": "^4.3.4",
-    "ethers": "^6.5.1",
+    "ethers": "^6.6.2",
     "web3": "4.0.1"
   },
   "publishConfig": {

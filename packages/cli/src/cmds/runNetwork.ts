@@ -232,7 +232,7 @@ const resolveCommandChoice = async () => {
   });
 
   const ctx = await MoonwallContext.getContext().connectEnvironment();
-  const api = ctx.providers.find((a) => a.type == "moon" || a.type == "polkadotJs")!
+  const api = ctx.providers.find((a) => a.type == "polkadotJs")!
     .api as ApiPromise;
   const globalConfig = importJsonConfig();
   const config = globalConfig.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;

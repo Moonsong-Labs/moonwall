@@ -17,8 +17,6 @@ import { BN } from "@polkadot/util";
 import { Signer, parseEther } from "ethers";
 import {
   Abi,
-  PublicActions,
-  PublicClient,
   createWalletClient,
   decodeErrorResult,
   decodeEventLog,
@@ -29,7 +27,7 @@ import {
   getContract,
   http,
   publicActions,
-  verifyMessage,
+  verifyMessage
 } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import Web3 from "web3";

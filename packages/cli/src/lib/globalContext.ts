@@ -229,7 +229,7 @@ export class MoonwallContext {
 
     if (this.foundation == "zombie") {
       const promises = this.providers
-        .filter(({ type }) => type == "polkadotJs" || type == "moon")
+        .filter(({ type }) => type == "polkadotJs")
         .filter(
           ({ name }) =>
             env.foundation.type == "zombie" &&

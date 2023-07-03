@@ -13,7 +13,7 @@ describeSuite({
     let relayApi: ApiPromise;
 
     beforeAll(() => {
-      paraApi = context.polkadotJs({ type: "moon" });
+      paraApi = context.polkadotJs();
       relayApi = context.polkadotJs({ type: "polkadotJs" });
     });
 

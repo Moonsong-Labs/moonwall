@@ -28,8 +28,6 @@ export class ProviderFactory {
     switch (this.providerConfig.type) {
       case "polkadotJs":
         return this.createPolkadotJs();
-      case "moon":
-        return this.createMoon();
       case "web3":
         return this.createWeb3();
       case "ethers":
@@ -51,6 +49,7 @@ export class ProviderFactory {
           provider: new WsProvider(this.url),
           initWasm: false,
           noInitWarn: true,
+          isPedantic: false,
           rpc: !!this.providerConfig.rpc ? this.providerConfig.rpc : undefined,
           typesBundle: !!this.providerConfig.additionalTypes
             ? this.providerConfig.additionalTypes
@@ -60,33 +59,6 @@ export class ProviderFactory {
         const api = await ApiPromise.create(options);
         await api.isReady;
         return api;
-      },
-      ws: () => new WsProvider(this.url),
-    };
-  }
-
-  private createMoon(): MoonwallProvider {
-    debug(`🟢  Moonbeam provider ${this.providerConfig.name} details prepared`);
-    return {
-      name: this.providerConfig.name,
-      type: this.providerConfig.type,
-      connect: async () => {
-        const options: ApiOptions = {
-          provider: new WsProvider(this.url),
-          initWasm: false,
-          isPedantic: false,
-          rpc: !!this.providerConfig.rpc
-            ? { ...rpcDefinitions, ...this.providerConfig.rpc }
-            : rpcDefinitions,
-          typesBundle: !!this.providerConfig.additionalTypes
-            ? { ...(types as OverrideBundleType), ...this.providerConfig.additionalTypes }
-            : (types as OverrideBundleType),
-          noInitWarn: true,
-        };
-
-        const moonApi = await ApiPromise.create(options);
-        await moonApi.isReady;
-        return moonApi;
       },
       ws: () => new WsProvider(this.url),
     };
@@ -171,11 +143,6 @@ export class ProviderFactory {
         type: "viem",
         endpoints: [vitestAutoUrl],
       },
-      {
-        name: "mb",
-        type: "moon",
-        endpoints: [vitestAutoUrl],
-      },
     ]);
   }
 
@@ -195,7 +162,7 @@ export class ProviderFactory {
       },
       {
         name: "parachain",
-        type: "moon",
+        type: "polkadotJs",
         endpoints: [MOON_PARA_WSS],
       },
       {
@@ -222,8 +189,6 @@ export class ProviderInterfaceFactory {
     switch (this.type) {
       case "polkadotJs":
         return this.createPolkadotJs();
-      case "moon":
-        return this.createMoon();
       case "web3":
         return this.createWeb3();
       case "ethers":
@@ -236,27 +201,6 @@ export class ProviderInterfaceFactory {
   }
 
   private async createPolkadotJs(): Promise<ProviderInterface> {
-    const api = (await this.connect()) as ApiPromise;
-    return {
-      name: this.name,
-      api,
-      type: this.type,
-      greet: () => {
-        debug(
-          `👋  Provider ${this.name} is connected to chain` +
-            ` ${api.consts.system.version.specName.toString()} ` +
-            `RT${api.consts.system.version.specVersion.toNumber()}`
-        );
-        return {
-          rtVersion: api.consts.system.version.specVersion.toNumber(),
-          rtName: api.consts.system.version.specName.toString(),
-        };
-      },
-      disconnect: async () => api.disconnect(),
-    };
-  }
-
-  private async createMoon(): Promise<ProviderInterface> {
     const api = (await this.connect()) as ApiPromise;
     return {
       name: this.name,

@@ -5,7 +5,6 @@ import type {
   GenericContext,
   ITestCase,
   ITestSuiteType,
-  PolkadotProviders,
   ProviderMap,
   ProviderType,
   TestCasesFn,
@@ -115,9 +114,7 @@ export function describeSuite<T extends FoundationType>({
   describe(`🗃️  #${suiteId} ${title}`, function () {
     const getApi = <T extends ProviderType>(apiType?: T, apiName?: string) => {
       const provider = ctx.providers.find((prov) => {
-        if (apiType == "polkadotJs" && apiName == "anyPolkadot") {
-          return prov.type == "moon" || prov.type == "polkadotJs";
-        } else if (apiType && apiName) {
+        if (apiType && apiName) {
           return prov.type == apiType && prov.name === apiName;
         } else if (apiType && !apiName) {
           return prov.type == apiType;
@@ -140,12 +137,7 @@ export function describeSuite<T extends FoundationType>({
     const context: GenericContext = {
       api: <T extends ProviderType>(type: T, name?: string) => getApi(type, name),
       viem: (apiName?: string): ViemClient => getApi("viem", apiName),
-      polkadotJs: (options?: { apiName?: string; type?: PolkadotProviders }): ApiPromise =>
-        options
-          ? options.type
-            ? getApi(options.type, options.apiName)
-            : getApi("polkadotJs", options.apiName)
-          : getApi("polkadotJs", "anyPolkadot"),
+      polkadotJs: (apiName?: string): ApiPromise => getApi("polkadotJs", apiName),
       ethers: (apiName?: string): Signer => getApi("ethers", apiName),
       web3: (apiName?: string): Web3 => getApi("web3", apiName),
     };

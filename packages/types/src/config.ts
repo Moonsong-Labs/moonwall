@@ -296,11 +296,9 @@ export interface ProviderConfig {
 
 /**
  * @name ProviderType
- * @description The type of provider. Can be "polkadotJs", "ethers", "web3", "moon", "viem"
+ * @description The type of provider. Can be "polkadotJs", "ethers", "web3", "viem"
  */
-export type ProviderType = "polkadotJs" | "ethers" | "web3" | "moon" | "viem"
-
-export type PolkadotProviders = Extract<ProviderType, "moon" | "polkadotJs">;
+export type ProviderType = "polkadotJs" | "ethers" | "web3"  | "viem"
 
 /**
  * @name ZombieNodeType

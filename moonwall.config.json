@@ -114,7 +114,7 @@
       "connections": [
         {
           "name": "MB",
-          "type": "moon",
+          "type": "polkadotJs",
           "endpoints": ["ws://127.0.0.1:10000"]
         }
       ]
@@ -137,7 +137,7 @@
       "connections": [
         {
           "name": "MB",
-          "type": "moon",
+          "type": "polkadotJs",
           "endpoints": ["ws://127.0.0.1:10000"]
         }
       ]
@@ -152,7 +152,7 @@
       "connections": [
         {
           "name": "MB",
-          "type": "moon",
+          "type": "polkadotJs",
           "endpoints": ["wss://moonbeam.api.onfinality.io/public-ws"]
         }
       ]
@@ -167,7 +167,7 @@
       "connections": [
         {
           "name": "MB",
-          "type": "moon",
+          "type": "polkadotJs",
           "endpoints": ["wss://wss.api.moonriver.moonbeam.network"]
         }
       ]
@@ -191,7 +191,7 @@
       "connections": [
         {
           "name": "MB",
-          "type": "moon",
+          "type": "polkadotJs",
           "endpoints": ["ws://127.0.0.1:12000"]
         }
       ]
@@ -235,12 +235,12 @@
       "connections": [
         {
           "name": "MB",
-          "type": "moon",
+          "type": "polkadotJs",
           "endpoints": ["ws://127.0.0.1:10000"]
         },
         {
           "name": "MR",
-          "type": "moon",
+          "type": "polkadotJs",
           "endpoints": ["ws://127.0.0.1:12000"]
         }
       ]
@@ -290,7 +290,7 @@
         },
         {
           "name": "mb",
-          "type": "moon",
+          "type": "polkadotJs",
           "endpoints": ["wss://moonbeam.api.onfinality.io/public-ws"]
         }
       ]
@@ -347,7 +347,7 @@
         },
         {
           "name": "MB",
-          "type": "moon",
+          "type": "polkadotJs",
           "endpoints": ["wss://wss.api.moonbeam.network"]
         }
       ]
@@ -420,10 +420,10 @@
         },
         {
           "name": "pjs",
-          "type": "moon",
+          "type": "polkadotJs",
           "endpoints": ["ws://127.0.0.1:9944"],
           "rpc": {
-            "moon": {
+            "polkadotJs": {
               "isTxFinalized": {
                 "description": "Just a test method",
                 "params": [

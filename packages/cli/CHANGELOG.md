@@ -307,7 +307,7 @@
   "connections": [
           {
             "name": "para",
-            "type": "moon",
+            "type": "polkadotJs",
             "endpoints": ["ws://127.0.0.1:9944"],
             "rpc": {
               "moon": {
