@@ -386,7 +386,7 @@
             "name": "moonbeam",
             "running": false,
             "binPath": "tmp/moonbeam",
-            "retainAllLogs": true,
+            "retainAllLogs": false,
             "ports": { "p2pPort": 30333, "wsPort": 9944, "rpcPort": 9933 },
             "options": [
               "--dev",

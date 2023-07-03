@@ -177,24 +177,9 @@ export interface UpgradePreferences {
 }
 
 /**
- * PublicViem - A PublicClient type from the 'viem' module.
+ * ViemClient - Combined type that contains both Wallet and Public viem client actions
  */
-export type PublicViem = PublicClient<Transport, Chain>;
-
-/**
- * WalletViem - A WalletClient type from the 'viem' module.
- */
-export type WalletViem = WalletClient<Transport, Chain, Account>;
-
 export type ViemClient = WalletClient<Transport, Chain, Account> & PublicActions;
-
-/**
- * ViemApiMap - An interface to map 'public' and 'wallet' to their respective types.
- */
-export interface ViemApiMap {
-  public: PublicViem;
-  wallet: WalletViem;
-}
 
 /**
  * GenericContext - Interface that encapsulates all the common methods and properties needed for all tests.
@@ -266,6 +251,15 @@ export interface DevModeContext extends GenericContext {
   >(
     options: TOptions
   ): Promise<`0x${string}`>;
+
+//   //TODO: e.g
+//   callPrecom (from call Precompiled)
+// execContract (from execute Contract)
+// runPrecom (from run Precompiled)
+// invokeCont (from invoke Contract)
+// actPrecom (from act on Precompiled)
+// procContract (from process Contract)
+
 }
 
 export type ViemTransactionOptions =
