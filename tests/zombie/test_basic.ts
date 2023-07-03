@@ -13,8 +13,8 @@ describeSuite({
     let relayApi: ApiPromise;
 
     beforeAll(() => {
-      paraApi = context.polkadotJs();
-      relayApi = context.polkadotJs({ type: "polkadotJs" });
+      paraApi = context.polkadotJs("parachain");
+      relayApi = context.polkadotJs("relaychain");
     });
 
     it({
@@ -44,7 +44,7 @@ describeSuite({
     it({
       id: "T03",
       title: "Check parachain api correctly connected (2)",
-      timeout:120000,
+      timeout: 120000,
       test: async function () {
         await context.waitBlock(5, "parachain", "height");
       },

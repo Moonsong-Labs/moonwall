@@ -13,7 +13,7 @@
     "changeset": "changeset",
     "changeset:release": "changeset publish",
     "changeset:version": "changeset version",
-    "clean-all":"rimraf node_modules && pnpm -r --filter='./packages/**' run clean",
+    "clean-all":"rimraf node_modules && pnpm rimraf pnpm-lock.yaml && pnpm -r --filter='./packages/**' run clean",
     "pristine-build": "pnpm clean-all && pnpm i && pnpm build && pnpm generate-types",
     "start": "pnpm exec moonwall",
     "display-reports": "pnpm exec vite preview --base __vitest__ --outDir html",

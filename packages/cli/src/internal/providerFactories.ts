@@ -2,11 +2,9 @@ import { MoonwallProvider, ProviderConfig, ProviderType, ViemClient } from "@moo
 import { ALITH_PRIVATE_KEY, deriveViemChain } from "@moonwall/util";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { ApiOptions } from "@polkadot/api/types/index.js";
-import { OverrideBundleType } from "@polkadot/types/types/registry";
 import chalk from "chalk";
 import Debug from "debug";
 import { Signer, Wallet, ethers } from "ethers";
-import { rpcDefinitions, types } from "moonbeam-types-bundle";
 import { createWalletClient, http, publicActions } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { Web3 } from "web3";
