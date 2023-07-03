@@ -9,8 +9,7 @@ import type {
   ProviderMap,
   ProviderType,
   TestCasesFn,
-  ViemApiMap,
-  ViemClientType,
+  ViemClient,
 } from "@moonwall/types";
 import { ApiPromise } from "@polkadot/api";
 import Debug from "debug";
@@ -140,15 +139,7 @@ export function describeSuite<T extends FoundationType>({
 
     const context: GenericContext = {
       api: <T extends ProviderType>(type: T, name?: string) => getApi(type, name),
-      viem: <T extends ViemClientType>(clientType?: T, name?: string): ViemApiMap[T] => {
-        return (
-          clientType == "public"
-            ? getApi("viemPublic", name)
-            : clientType == "wallet"
-            ? getApi("viemWallet", name)
-            : getApi("viemPublic")
-        ) as ViemApiMap[T];
-      },
+      viem: (apiName?: string): ViemClient => getApi("viem", apiName),
       polkadotJs: (options?: { apiName?: string; type?: PolkadotProviders }): ApiPromise =>
         options
           ? options.type

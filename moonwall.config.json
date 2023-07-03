@@ -13,15 +13,11 @@
       },
       "connections": [
         {
-          "name": "public",
-          "type": "viemPublic",
-          "endpoints": ["wss://wss.api.moonbeam.network"]
-        },
-        {
-          "name": "wallet",
-          "type": "viemWallet",
+          "name": "viem",
+          "type": "viem",
           "endpoints": ["wss://wss.api.moonbeam.network"]
         }
+        
       ]
     },
     {
@@ -418,13 +414,8 @@
           "endpoints": ["ws://127.0.0.1:9944"]
         },
         {
-          "name": "wallet",
-          "type": "viemWallet",
-          "endpoints": ["ws://127.0.0.1:9944"]
-        },
-        {
-          "name": "public",
-          "type": "viemPublic",
+          "name": "viem",
+          "type": "viem",
           "endpoints": ["ws://127.0.0.1:9944"]
         },
         {

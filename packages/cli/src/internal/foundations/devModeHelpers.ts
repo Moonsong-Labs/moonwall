@@ -1,7 +1,6 @@
 import "@moonbeam-network/api-augment";
 import { BlockCreation, ExtrinsicCreation, GenericContext } from "@moonwall/types";
 import { createAndFinalizeBlock, customWeb3Request, generateKeyringPair } from "@moonwall/util";
-import "@polkadot/api-augment";
 import { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types";
 import { RegistryError } from "@polkadot/types-codec/types/registry";
 import { EventRecord } from "@polkadot/types/interfaces/types.js";
@@ -39,19 +38,18 @@ export type CallType<TApi extends ApiTypes> =
 export async function createDevBlock<
   ApiType extends ApiTypes,
   Calls extends CallType<ApiType> | CallType<ApiType>[]
->(context: GenericContext, transactions?: Calls, options: BlockCreation ={} ) {
+>(context: GenericContext, transactions?: Calls, options: BlockCreation = {}) {
   let originalBlockNumber: bigint;
 
   const containsViem =
-    MoonwallContext.getContext().providers.find((prov) => prov.type == "viemPublic") &&
-    !!!context.viem("public")
+    MoonwallContext.getContext().providers.find((prov) => prov.type == "viem") && !!!context.viem()
       ? true
       : false;
 
   if (containsViem) {
-    originalBlockNumber = await context.viem("public").getBlockNumber();
+    originalBlockNumber = await context.viem().getBlockNumber();
   }
-  const signer = generateKeyringPair(options.signer!.type, options.signer!.privateKey )
+  const signer = generateKeyringPair(options.signer!.type, options.signer!.privateKey);
 
   const results: ({ type: "eth"; hash: string } | { type: "sub"; hash: string })[] = [];
 
@@ -65,7 +63,7 @@ export async function createDevBlock<
         type: "eth",
         hash: containsViem
           ? (
-              (await context.viem("public").request({
+              (await context.viem().request({
                 method: "eth_sendRawTransaction",
                 params: [call as `0x${string}`],
               })) as any
@@ -145,7 +143,7 @@ export async function createDevBlock<
 
   // Avoiding race condition by ensuring ethereum block is created
   if (containsViem && originalBlockNumber! !== undefined) {
-    const pubClient = context.viem("public");
+    const pubClient = context.viem();
     while (true) {
       const blockNum = await pubClient.getBlockNumber();
       if (blockNum > originalBlockNumber) {

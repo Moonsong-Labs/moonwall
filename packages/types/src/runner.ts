@@ -3,7 +3,7 @@ import { ApiTypes } from "@polkadot/api/types/index.js";
 import { KeyringPair } from "@polkadot/keyring/types.js";
 import { Debugger } from "debug";
 import { AccessListish, Signer, TransactionRequest } from "ethers";
-import { Account, PublicClient, TransactionSerializable, Transport, WalletClient } from "viem";
+import { Account, PublicClient, TransactionSerializable, Transport, WalletClient, PublicActions, WalletActions } from "viem";
 import { Chain } from "viem/chains";
 import { Web3 } from "web3";
 import { FoundationType, PolkadotProviders } from "./config.js";
@@ -179,6 +179,8 @@ export type PublicViem = PublicClient<Transport, Chain>;
  */
 export type WalletViem = WalletClient<Transport, Chain, Account>;
 
+export type ViemClient = WalletClient<Transport, Chain, Account> & PublicActions
+
 /**
  * ViemApiMap - An interface to map 'public' and 'wallet' to their respective types.
  */
@@ -194,10 +196,12 @@ export interface GenericContext {
   api(type: "polkadotJs" | "moon", name?: string): ApiPromise;
   api(type: "ethers", name?: string): Signer;
   api(type: "web3", name?: string): Web3;
-  api(type: "viemPublic", name?: string): PublicViem;
-  api(type: "viemWallet", name?: string): WalletViem;
-  viem(clientType?: "public", name?: string): PublicViem;
-  viem(clientType: "wallet", name?: string): WalletViem;
+  api(type: "viem", name?: string): ViemClient;
+  // api(type: "viemPublic", name?: string): PublicViem;
+  // api(type: "viemWallet", name?: string): WalletViem;
+  // viem(clientType?: "public", name?: string): PublicViem;
+  // viem(clientType: "wallet", name?: string): WalletViem;
+  viem(name?: string): ViemClient;
   polkadotJs(options?: { apiName?: string; type?: PolkadotProviders }): ApiPromise;
   ethers(name?: string): Signer;
   web3(name?: string): Web3;

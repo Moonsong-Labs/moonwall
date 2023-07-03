@@ -2,6 +2,7 @@ import "@moonbeam-network/api-augment";
 import { beforeAll, describeSuite, expect, fetchCompiledContract } from "@moonwall/cli";
 import {
   ALITH_ADDRESS,
+  ALITH_PRIVATE_KEY,
   BALTATHAR_ADDRESS,
   BALTATHAR_PRIVATE_KEY,
   CHARLETH_ADDRESS,
@@ -9,13 +10,16 @@ import {
   GLMR,
   alith,
   baltathar,
-  deployViemContract
+  deployViemContract,
 } from "@moonwall/util";
 import "@polkadot/api-augment";
 import { BN } from "@polkadot/util";
 import { Signer, parseEther } from "ethers";
 import {
   Abi,
+  PublicActions,
+  PublicClient,
+  createWalletClient,
   decodeErrorResult,
   decodeEventLog,
   encodeFunctionData,
@@ -23,6 +27,8 @@ import {
   formatEther,
   formatGwei,
   getContract,
+  http,
+  publicActions,
   verifyMessage,
 } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
@@ -163,10 +169,10 @@ describeSuite({
       title: "Can send viem txns",
       test: async function () {
         const balanceBefore = await context
-          .viem("public")
+          .viem()
           .getBalance({ address: BALTATHAR_ADDRESS });
 
-        await context.viem("wallet").sendTransaction({
+        await context.viem().sendTransaction({
           to: BALTATHAR_ADDRESS,
           value: parseEther("1.0"),
         });
@@ -174,7 +180,7 @@ describeSuite({
         await context.createBlock();
 
         const balanceAfter = await context
-          .viem("public")
+          .viem()
           .getBalance({ address: BALTATHAR_ADDRESS });
         log(`Baltahaar balance before: ${formatEther(balanceBefore)}`);
         log(`Baltahaar balance after: ${formatEther(balanceAfter)}`);
@@ -203,7 +209,7 @@ describeSuite({
         const { abi, bytecode, methods } = await fetchCompiledContract("MultiplyBy7");
         const { status, contractAddress } = await deployViemContract(context, abi, bytecode);
 
-        const timbo = await context.viem("public").call({
+        const timbo = await context.viem().call({
           account: ALITH_ADDRESS,
           to: contractAddress!,
           value: 0n,
@@ -234,13 +240,14 @@ describeSuite({
         const contractInstance = getContract({
           abi: tokenAbi as Abi,
           address: contractAddress!,
-          publicClient: context.viem("public"),
+          publicClient: context.viem() as any,
         });
+
 
         const symbol = await contractInstance.read.symbol();
         const balBefore = (await contractInstance.read.balanceOf([BALTATHAR_ADDRESS])) as bigint;
 
-        await context.viem("wallet").writeContract({
+        await context.viem().writeContract({
           abi: tokenAbi as Abi,
           address: contractAddress!,
           value: 0n,
@@ -261,9 +268,14 @@ describeSuite({
       title: "It can sign a message",
       test: async function () {
         const string = "Boom Boom Lemon";
-        const signature = await context.viem("wallet").signMessage({ message: string });
+        const signature = await context.viem().signMessage({ message: string });
         const valid = await verifyMessage({ address: ALITH_ADDRESS, message: string, signature });
         log(`Signature: ${signature}`);
+
+        const tim = createWalletClient({
+          account: privateKeyToAccount(ALITH_PRIVATE_KEY),
+          transport: http("211312awd"),
+        }).extend(publicActions)
 
         context.ethers();
         expect(signature.length).to.be.greaterThan(0);
@@ -281,7 +293,7 @@ describeSuite({
         );
         log(`Deployed contract at ${contractAddress}`);
 
-        const gas = await context.viem("public").estimateContractGas({
+        const gas = await context.viem().estimateContractGas({
           abi: tokenAbi,
           address: contractAddress!,
           functionName: "transfer",
@@ -298,7 +310,7 @@ describeSuite({
       title: "It can calculate the gas cost of a simple balance transfer",
       test: async function () {
         const gas = await context
-          .viem("public")
+          .viem()
           .estimateGas({ account: ALITH_ADDRESS, to: BALTATHAR_ADDRESS, value: parseEther("1.0") });
 
         log(`Gas cost to transfer system balance is ${formatGwei(gas)} gwei`);
@@ -316,7 +328,7 @@ describeSuite({
           tokenBytecode
         );
 
-        const { result } = await context.viem("public").simulateContract({
+        const { result } = await context.viem().simulateContract({
           account: ALITH_ADDRESS,
           abi: tokenAbi,
           address: contractAddress!,
@@ -354,7 +366,7 @@ describeSuite({
         );
         log(`Deployed contract at ${contractAddress}`);
 
-        const txHash = await context.viem("wallet").writeContract({
+        const txHash = await context.viem().writeContract({
           abi: tokenAbi,
           address: contractAddress!,
           functionName: "transfer",
@@ -363,7 +375,7 @@ describeSuite({
 
         await context.createBlock();
 
-        const { logs } = await context.viem("public").getTransactionReceipt({ hash: txHash });
+        const { logs } = await context.viem().getTransactionReceipt({ hash: txHash });
 
         const decoded = decodeEventLog({
           abi: tokenAbi,
@@ -424,7 +436,7 @@ describeSuite({
         log(`Raw generated txn1 is ${rawTxn1}`);
         expect(rawTxn1.length).toBeGreaterThan(2);
 
-        const balance1 = await context.viem("public").getBalance({ address: address1 });
+        const balance1 = await context.viem().getBalance({ address: address1 });
         expect(balance1).toBe(GLMR);
         const rawTxn2 = await context.createTxn!({
           to: address2,
@@ -435,7 +447,7 @@ describeSuite({
         log(`Raw generated txn2 is ${rawTxn2}`);
         expect(rawTxn2.length).toBeGreaterThan(2);
 
-        const balance2 = await context.viem("public").getBalance({ address: address2 });
+        const balance2 = await context.viem().getBalance({ address: address2 });
         expect(balance2).toBe(GLMR);
       },
     });

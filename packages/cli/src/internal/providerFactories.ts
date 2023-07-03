@@ -1,23 +1,16 @@
-import { rpcDefinitions, types } from "moonbeam-types-bundle";
+import { MoonwallProvider, ProviderConfig, ProviderType, ViemClient } from "@moonwall/types";
+import { ALITH_PRIVATE_KEY, deriveViemChain } from "@moonwall/util";
 import { ApiPromise, WsProvider } from "@polkadot/api";
-import { Web3 } from "web3";
-import { WebSocketProvider as Web3ProviderWs } from "web3-providers-ws";
-import { ethers, Signer, Wallet } from "ethers";
-import Debug from "debug";
-import {
-  ProviderConfig,
-  ProviderType,
-  MoonwallProvider,
-  PublicViem,
-  WalletViem,
-} from "@moonwall/types";
-import chalk from "chalk";
-import { ALITH_PRIVATE_KEY } from "@moonwall/util";
-import { createPublicClient, createWalletClient, http } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
-import { deriveViemChain } from "@moonwall/util";
 import { ApiOptions } from "@polkadot/api/types/index.js";
 import { OverrideBundleType } from "@polkadot/types/types/registry";
+import chalk from "chalk";
+import Debug from "debug";
+import { Signer, Wallet, ethers } from "ethers";
+import { rpcDefinitions, types } from "moonbeam-types-bundle";
+import { createWalletClient, http, publicActions } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+import { Web3 } from "web3";
+import { WebSocketProvider as Web3ProviderWs } from "web3-providers-ws";
 const debug = Debug("global:providers");
 
 export class ProviderFactory {
@@ -41,10 +34,8 @@ export class ProviderFactory {
         return this.createWeb3();
       case "ethers":
         return this.createEthers();
-      case "viemPublic":
-        return this.createViemPublic();
-      case "viemWallet":
-        return this.createViemWallet();
+      case "viem":
+        return this.createViem();
       default:
         return this.createDefault();
     }
@@ -136,20 +127,8 @@ export class ProviderFactory {
     };
   }
 
-  private createViemPublic(): MoonwallProvider {
-    debug(`🟢  Viem Public provider ${this.providerConfig.name} details prepared`);
-    return {
-      name: this.providerConfig.name,
-      type: this.providerConfig.type,
-      connect: async () =>
-        createPublicClient({
-          transport: http(this.url.replace("ws", "http")),
-        }) as PublicViem,
-    };
-  }
-
-  private createViemWallet(): MoonwallProvider {
-    debug(`🟢  Viem Wallet provider ${this.providerConfig.name} details prepared`);
+  private createViem(): MoonwallProvider {
+    debug(`🟢  Viem omni provider ${this.providerConfig.name} details prepared`);
     return {
       name: this.providerConfig.name,
       type: this.providerConfig.type,
@@ -158,7 +137,7 @@ export class ProviderFactory {
           chain: await deriveViemChain(this.url),
           account: privateKeyToAccount(this.privateKey as `0x${string}`),
           transport: http(this.url.replace("ws", "http")),
-        }) as WalletViem,
+        }).extend(publicActions) as ViemClient,
     };
   }
 
@@ -189,12 +168,7 @@ export class ProviderFactory {
       },
       {
         name: "public",
-        type: "viemPublic",
-        endpoints: [vitestAutoUrl],
-      },
-      {
-        name: "wallet",
-        type: "viemWallet",
+        type: "viem",
         endpoints: [vitestAutoUrl],
       },
       {
@@ -254,10 +228,8 @@ export class ProviderInterfaceFactory {
         return this.createWeb3();
       case "ethers":
         return this.createEthers();
-      case "viemPublic":
-        return this.createViemPublic();
-      case "viemWallet":
-        return this.createViemWallet();
+      case "viem":
+        return this.createViem();
       default:
         throw new Error("UNKNOWN TYPE");
     }
@@ -336,22 +308,8 @@ export class ProviderInterfaceFactory {
     };
   }
 
-  private async createViemPublic(): Promise<ProviderInterface> {
-    const api = (await this.connect()) as PublicViem;
-    return {
-      name: this.name,
-      api,
-      type: this.type,
-      greet: async () =>
-        console.log(`👋 Provider ${this.name} is connected to chain ` + (await api.getChainId())),
-      disconnect: async () => {
-        // Not needed until we switch to websockets
-      },
-    };
-  }
-
-  private async createViemWallet(): Promise<ProviderInterface> {
-    const api = (await this.connect()) as WalletViem;
+  private async createViem(): Promise<ProviderInterface> {
+    const api = (await this.connect()) as ViemClient;
     return {
       name: this.name,
       api,
@@ -371,8 +329,7 @@ export class ProviderInterfaceFactory {
       | Promise<ApiPromise>
       | Signer
       | Web3
-      | Promise<PublicViem>
-      | Promise<WalletViem>
+      | Promise<ViemClient>
       | void
   ): Promise<ProviderInterface> {
     return await new ProviderInterfaceFactory(name, type, connect).create();

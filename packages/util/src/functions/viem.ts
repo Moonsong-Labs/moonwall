@@ -117,7 +117,8 @@ export async function deployViemContract<TOptions extends ContractDeploymentOpti
   // const isEIP1559 = options?.txnType === "eip1559";
   // const isEIP2930 = options?.txnType === "eip2930";
 
-  const url = context.viem("public").transport.url;
+  // const url = context.viem().transport.url;
+  const url = context.viem().transport.url;
 
   const { privateKey = ALITH_PRIVATE_KEY, ...rest } = options || {};
   const blob = { ...rest, abi, bytecode, account: privateKeyToAccount(privateKey) };
@@ -155,7 +156,7 @@ export async function deployViemContract<TOptions extends ContractDeploymentOpti
   await context.createBlock();
 
   const { contractAddress, status, logs } = await context
-    .viem("public")
+    .viem()
     .getTransactionReceipt({ hash });
 
   return { contractAddress, status, logs, hash };
@@ -209,14 +210,14 @@ export async function createViemTransaction<TOptions extends DeepPartial<ViemTra
   const account = privateKeyToAccount(privateKey);
   const value = options && options.value ? options.value : 0n;
   const to = options && options.to ? options.to : "0x0000000000000000000000000000000000000000";
-  const chainId = await context.viem("public").getChainId();
-  const txnCount = await context.viem("public").getTransactionCount({ address: account.address });
-  const gasPrice = await context.viem("public").getGasPrice();
+  const chainId = await context.viem().getChainId();
+  const txnCount = await context.viem().getTransactionCount({ address: account.address });
+  const gasPrice = await context.viem().getGasPrice();
   const data = options && options.data ? options.data : "0x";
 
   const estimatedGas = options.skipEstimation
     ? 1_500_000n
-    : await context.viem("public").estimateGas({ account: account.address, to, value, data });
+    : await context.viem().estimateGas({ account: account.address, to, value, data });
   const accessList = options && options.accessList ? options.accessList : [];
 
   const txnBlob: TransactionSerializable =
@@ -276,10 +277,10 @@ export async function checkBalance(
   block: BlockTag | bigint = "latest"
 ): Promise<bigint> {
   return typeof block == "string"
-    ? await context.viem("public").getBalance({ address: account, blockTag: block })
+    ? await context.viem().getBalance({ address: account, blockTag: block })
     : typeof block == "bigint"
-    ? await context.viem("public").getBalance({ address: account, blockNumber: block })
-    : await context.viem("public").getBalance({ address: account });
+    ? await context.viem().getBalance({ address: account, blockNumber: block })
+    : await context.viem().getBalance({ address: account });
 }
 
 /**
@@ -296,6 +297,6 @@ export async function sendRawTransaction(
   rawTx: `0x${string}`
 ): Promise<any> {
   return await context
-    .viem("public")
+    .viem()
     .request({ method: "eth_sendRawTransaction", params: [rawTx] });
 }

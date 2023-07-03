@@ -4,7 +4,7 @@ import chalk from "chalk";
 import fs from "fs";
 import path from "path";
 import type { Abi } from "viem";
-import { Log, PublicClient, WalletClient, getContract } from "viem";
+import { Log } from "viem";
 import { importJsonConfig } from "./configReader.js";
 
 export async function fetchCompiledContract<TAbi extends Abi>(
@@ -75,7 +75,6 @@ export async function deployCreateCompiledContract<TOptions extends ContractDepl
   options?: TOptions
 ): Promise<{
   contractAddress: `0x${string}`;
-  contract: any;
   logs: Log<bigint, number>[];
   hash: `0x${string}`;
   status: "success" | "reverted";
@@ -100,16 +99,8 @@ export async function deployCreateCompiledContract<TOptions extends ContractDepl
     blob
   );
 
-  const contract = getContract({
-    address: contractAddress!,
-    abi: abi,
-    publicClient: context.viem("public") as PublicClient,
-    walletClient: context.viem("wallet") as WalletClient,
-  });
-
   return {
     contractAddress: contractAddress as `0x${string}`,
-    contract,
     logs,
     hash,
     status,
@@ -118,47 +109,3 @@ export async function deployCreateCompiledContract<TOptions extends ContractDepl
     methods,
   };
 }
-
-// //TODO: Expand this to actually use options correctly
-// //TODO: Fix
-// export async function prepareToDeployCompiledContract<TOptions extends ContractDeploymentOptions>(
-//   context: DevModeContext,
-//   contractName: string,
-//   options?: TOptions
-// ) {
-//   const compiled = getCompiled(contractName);
-//   const callData = encodeDeployData({
-//     abi: compiled.contract.abi,
-//     bytecode: compiled.byteCode,
-//     args: [],
-//   }) as `0x${string}`;
-
-//   const walletClient =
-//     options && options.privateKey
-//       ? createWalletClient({
-//           transport: http(context.viem("public").transport.url),
-//           account: privateKeyToAccount(options.privateKey),
-//           chain: await getDevChain(context.viem("public").transport.url),
-//         })
-//       : context.viem("wallet");
-
-//   const nonce =
-//     options && options.nonce !== undefined
-//       ? options.nonce
-//       : await context.viem("public").getTransactionCount({ address: ALITH_ADDRESS });
-
-//   // const hash = await walletClient.sendTransaction({ data: callData, nonce });
-//   const rawTx = await createRawTransaction(context, { ...options, data: callData, nonce } as any);
-
-//   const contractAddress = ("0x" +
-//     keccak256(RLP.encode([ALITH_ADDRESS, nonce]))
-//       .slice(12)
-//       .substring(14)) as `0x${string}`;
-
-//   return {
-//     contractAddress,
-//     callData,
-//     abi: compiled.contract.abi,
-//     bytecode: compiled.byteCode,
-//   };
-// }

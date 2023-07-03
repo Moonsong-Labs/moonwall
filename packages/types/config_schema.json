@@ -260,13 +260,12 @@
             "type": "object"
         },
         "ProviderType": {
-            "description": "The type of provider. Can be \"polkadotJs\", \"ethers\", \"web3\", \"moon\", \"viemPublic\", or \"viemWallet\".",
+            "description": "The type of provider. Can be \"polkadotJs\", \"ethers\", \"web3\", \"moon\", \"viem\"",
             "enum": [
                 "ethers",
                 "moon",
                 "polkadotJs",
-                "viemPublic",
-                "viemWallet",
+                "viem",
                 "web3"
             ],
             "type": "string"

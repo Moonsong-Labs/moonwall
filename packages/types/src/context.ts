@@ -2,7 +2,7 @@ import { ApiPromise, WsProvider } from "@polkadot/api";
 import { Signer } from "ethers";
 import { Web3 } from "web3";
 import { FoundationType, ProviderType } from "./config.js";
-import { PublicViem, WalletViem } from "./runner.js";
+import { ViemClient } from "./runner.js";
 import { AugmentedEvent } from "@polkadot/api/types/events.js";
 import { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types/index.js";
 import { Debugger } from "debug";
@@ -41,8 +41,7 @@ export interface MoonwallProvider {
     | Promise<ApiPromise>
     | Signer
     | Web3
-    | Promise<PublicViem>
-    | Promise<WalletViem>
+    | Promise<ViemClient>
     | void;
   ws?: () => WsProvider;
 }
@@ -71,8 +70,7 @@ export type ProviderMap = {
   ethers: Signer;
   web3: Web3;
   moon: ApiPromise;
-  viemPublic: PublicViem;
-  viemWallet: WalletViem;
+  viem: ViemClient;
 };
 
 /**
