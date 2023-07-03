@@ -168,9 +168,7 @@ describeSuite({
       id: "T07",
       title: "Can send viem txns",
       test: async function () {
-        const balanceBefore = await context
-          .viem()
-          .getBalance({ address: BALTATHAR_ADDRESS });
+        const balanceBefore = await context.viem().getBalance({ address: BALTATHAR_ADDRESS });
 
         await context.viem().sendTransaction({
           to: BALTATHAR_ADDRESS,
@@ -179,9 +177,7 @@ describeSuite({
 
         await context.createBlock();
 
-        const balanceAfter = await context
-          .viem()
-          .getBalance({ address: BALTATHAR_ADDRESS });
+        const balanceAfter = await context.viem().getBalance({ address: BALTATHAR_ADDRESS });
         log(`Baltahaar balance before: ${formatEther(balanceBefore)}`);
         log(`Baltahaar balance after: ${formatEther(balanceAfter)}`);
         expect(balanceBefore < balanceAfter).to.be.true;
@@ -192,7 +188,7 @@ describeSuite({
       id: "T08",
       title: "It can deploy a contract",
       test: async function () {
-        const { abi, bytecode, methods } = await fetchCompiledContract("MultiplyBy7");
+        const { abi, bytecode, methods } = fetchCompiledContract("MultiplyBy7");
         log(methods);
 
         const { status, contractAddress } = await deployViemContract(context, abi, bytecode);
@@ -206,7 +202,7 @@ describeSuite({
       id: "T09",
       title: "It can call with a contract",
       test: async function () {
-        const { abi, bytecode, methods } = await fetchCompiledContract("MultiplyBy7");
+        const { abi, bytecode, methods } = fetchCompiledContract("MultiplyBy7");
         const { status, contractAddress } = await deployViemContract(context, abi, bytecode);
 
         const timbo = await context.viem().call({
@@ -243,7 +239,6 @@ describeSuite({
           publicClient: context.viem() as any,
         });
 
-
         const symbol = await contractInstance.read.symbol();
         const balBefore = (await contractInstance.read.balanceOf([BALTATHAR_ADDRESS])) as bigint;
 
@@ -275,7 +270,7 @@ describeSuite({
         const tim = createWalletClient({
           account: privateKeyToAccount(ALITH_PRIVATE_KEY),
           transport: http("211312awd"),
-        }).extend(publicActions)
+        }).extend(publicActions);
 
         context.ethers();
         expect(signature.length).to.be.greaterThan(0);

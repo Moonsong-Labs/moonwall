@@ -2,14 +2,15 @@ import { ContractDeploymentOptions, DevModeContext, MoonwallContract } from "@mo
 import { ALITH_PRIVATE_KEY, deployViemContract } from "@moonwall/util";
 import chalk from "chalk";
 import fs from "fs";
+import { readFileSync } from "fs";
 import path from "path";
 import type { Abi } from "viem";
 import { Log } from "viem";
 import { importJsonConfig } from "./configReader.js";
 
-export async function fetchCompiledContract<TAbi extends Abi>(
+export function fetchCompiledContract<TAbi extends Abi>(
   contractName: string
-): Promise<MoonwallContract<TAbi>> {
+): MoonwallContract<TAbi> {
   const config = importJsonConfig();
   const contractsDir = config.environments.find(
     (env) => env.name === process.env.MOON_TEST_ENV
@@ -24,8 +25,8 @@ export async function fetchCompiledContract<TAbi extends Abi>(
     );
   }
 
-  const compiledJsonPath = await recursiveSearch(contractsDir, `${contractName}.json`);
-  const solidityFilePath = await recursiveSearch(contractsDir, `${contractName}.sol`);
+  const compiledJsonPath =  recursiveSearch(contractsDir, `${contractName}.json`);
+  const solidityFilePath =  recursiveSearch(contractsDir, `${contractName}.sol`);
 
   if (!compiledJsonPath && !solidityFilePath) {
     throw new Error(
@@ -38,7 +39,7 @@ export async function fetchCompiledContract<TAbi extends Abi>(
     );
   }
 
-  const json = fs.readFileSync(compiledJsonPath, "utf8");
+  const json = readFileSync(compiledJsonPath, "utf8");
   const parsed = JSON.parse(json);
   return {
     abi: parsed.contract.abi,
@@ -48,15 +49,15 @@ export async function fetchCompiledContract<TAbi extends Abi>(
   };
 }
 
-export async function recursiveSearch(dir: string, filename: string): Promise<string | null> {
-  const files = await fs.promises.readdir(dir);
+export function recursiveSearch(dir: string, filename: string): string | null {
+  const files = fs.readdirSync(dir);
 
   for (const file of files) {
     const filepath = path.join(dir, file);
-    const stats = await fs.promises.stat(filepath);
+    const stats =  fs.statSync(filepath);
 
     if (stats.isDirectory()) {
-      const searchResult = await recursiveSearch(filepath, filename);
+      const searchResult =  recursiveSearch(filepath, filename);
 
       if (searchResult) {
         return searchResult;
@@ -82,7 +83,7 @@ export async function deployCreateCompiledContract<TOptions extends ContractDepl
   bytecode: `0x${string}`;
   methods: any;
 }> {
-  const { abi, bytecode, methods } = await fetchCompiledContract(contractName);
+  const { abi, bytecode, methods } = fetchCompiledContract(contractName);
 
   const { privateKey = ALITH_PRIVATE_KEY, args = [], ...rest } = options || ({} as any);
 
