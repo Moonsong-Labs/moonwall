@@ -127,6 +127,11 @@ export class ProviderFactory {
   public static prepareDefaultDev(): MoonwallProvider[] {
     return this.prepare([
       {
+        name: "dev",
+        type: "polkadotJs",
+        endpoints: [vitestAutoUrl],
+      },
+      {
         name: "w3",
         type: "web3",
         endpoints: [vitestAutoUrl],

@@ -1,7 +1,7 @@
+import "@moonbeam-network/api-augment";
 import { expect, describeSuite, beforeAll } from "@moonwall/cli";
 import { ethers } from "ethers";
 import { BALTATHAR_ADDRESS, alith } from "@moonwall/util";
-import "@moonbeam-network/api-augment";
 import { ApiPromise } from "@polkadot/api";
 
 describeSuite({
