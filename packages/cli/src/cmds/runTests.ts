@@ -10,7 +10,7 @@ import { execSync } from "node:child_process";
 import { clearNodeLogs } from "src/internal/cmdFunctions/tempLogs.js";
 
 export async function testCmd(envName: string, additionalArgs?: {}) {
-  const globalConfig = await importJsonConfig();
+  const globalConfig = importJsonConfig();
   const env = globalConfig.environments.find(({ name }) => name === envName)!;
   process.env.MOON_TEST_ENV = envName;
 
@@ -78,7 +78,7 @@ export async function testCmd(envName: string, additionalArgs?: {}) {
 }
 
 export async function executeTests(env: Environment, additionalArgs?: {}) {
-  const globalConfig = await importJsonConfig();
+  const globalConfig = importJsonConfig();
 
   if (env.foundation.type === "read_only") {
     try {

@@ -2,16 +2,15 @@ import { ApiPromise } from "@polkadot/api";
 import { ApiTypes } from "@polkadot/api/types/index.js";
 import { KeyringPair } from "@polkadot/keyring/types.js";
 import { Debugger } from "debug";
-import { Signer } from "ethers";
-import { Account, PublicClient, Transport, WalletClient } from "viem";
+import { AccessListish, Signer, TransactionRequest } from "ethers";
+import { Account, PublicClient, TransactionSerializable, Transport, WalletClient } from "viem";
 import { Chain } from "viem/chains";
 import { Web3 } from "web3";
-import {
-  FoundationType,
-  PolkadotProviders
-} from "./config.js";
+import { FoundationType, PolkadotProviders } from "./config.js";
 import { BlockCreation, BlockCreationResponse, ChopsticksBlockCreation } from "./context.js";
 import { CallType } from "./foundations.js";
+import { DeepPartial } from "./helpers.js";
+import { TransactionType } from "./eth.js";
 
 /**
  * @name CustomTest
@@ -249,4 +248,26 @@ export interface DevModeContext extends GenericContext {
     transactions?: Calls,
     options?: BlockCreation
   ): Promise<BlockCreationResponse<ApiType, Calls>>;
+  createTxn?<
+    TOptions extends
+      | (DeepPartial<ViemTransactionOptions> & {
+          libraryType?: "viem";
+        })
+      | (EthersTransactionOptions & {
+          libraryType: "ethers";
+        })
+  >(
+    options: TOptions
+  ): Promise<`0x${string}`>;
 }
+
+export type ViemTransactionOptions =
+  | TransactionSerializable & {
+      privateKey?: `0x${string}`;
+      skipEstimation?: boolean;
+    };
+
+export type EthersTransactionOptions = TransactionRequest & {
+  txnType?: TransactionType;
+  privateKey?: `0x${string}`;
+};

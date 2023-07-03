@@ -1,6 +1,7 @@
 import "@moonbeam-network/api-augment";
 import { MoonwallConfig } from "@moonwall/types";
 import fs from "fs/promises";
+import { readFileSync } from "fs";
 import path from "path";
 
 export async function loadConfig(path: string): Promise<MoonwallConfig> {
@@ -22,10 +23,10 @@ export async function importConfig(configPath: string): Promise<MoonwallConfig> 
   return await import(configPath);
 }
 
-export async function importJsonConfig(): Promise<MoonwallConfig> {
+export function importJsonConfig(): MoonwallConfig {
   const filePath = path.join(process.cwd(), "moonwall.config.json");
   try {
-    const file = await fs.readFile(filePath, "utf8");
+    const file = readFileSync(filePath, "utf8");
     const json = JSON.parse(file);
     return json as MoonwallConfig;
   } catch (e) {
@@ -34,8 +35,8 @@ export async function importJsonConfig(): Promise<MoonwallConfig> {
   }
 }
 
-export async function loadEnvVars(): Promise<void> {
-  const globalConfig = await importJsonConfig();
+export function loadEnvVars(): void {
+  const globalConfig = importJsonConfig();
   const env = globalConfig.environments.find(({ name }) => name === process.env.MOON_TEST_ENV)!;
   env.envVars &&
     env.envVars.forEach((envVar) => {

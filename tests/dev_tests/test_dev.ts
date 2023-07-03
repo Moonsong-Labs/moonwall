@@ -1,5 +1,6 @@
 import "@moonbeam-network/api-augment";
 import { beforeAll, describeSuite, expect, fetchCompiledContract } from "@moonwall/cli";
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import {
   ALITH_ADDRESS,
   BALTATHAR_ADDRESS,
@@ -10,6 +11,7 @@ import {
   alith,
   baltathar,
   deployViemContract,
+  sendRawTransaction,
 } from "@moonwall/util";
 import "@polkadot/api-augment";
 import { BN } from "@polkadot/util";
@@ -400,7 +402,42 @@ describeSuite({
       title: "It can use different apis",
       test: async function () {
         log(await context.ethers().provider?.getBalance(BALTATHAR_ADDRESS));
-        expect(await context.api("ethers").provider?.getBalance(BALTATHAR_ADDRESS)).toBeGreaterThan(0n)
+        expect(await context.api("ethers").provider?.getBalance(BALTATHAR_ADDRESS)).toBeGreaterThan(
+          0n
+        );
+      },
+    });
+
+    it({
+      id: "T19",
+      title: "It has working runner functions added to context",
+      test: async function () {
+        const address1 = privateKeyToAccount(generatePrivateKey()).address;
+        const address2 = privateKeyToAccount(generatePrivateKey()).address;
+
+        const rawTxn1 = await context.createTxn!({
+          to: address1,
+          value: parseEther("1.0"),
+          libraryType: "ethers",
+        });
+
+        await context.createBlock(rawTxn1);
+        log(`Raw generated txn1 is ${rawTxn1}`);
+        expect(rawTxn1.length).toBeGreaterThan(2);
+
+        const balance1 = await context.viem("public").getBalance({ address: address1 });
+        expect(balance1).toBe(GLMR);
+        const rawTxn2 = await context.createTxn!({
+          to: address2,
+          value: parseEther("1.0"),
+          libraryType: "viem",
+        });
+        await context.createBlock(rawTxn2);
+        log(`Raw generated txn2 is ${rawTxn2}`);
+        expect(rawTxn2.length).toBeGreaterThan(2);
+
+        const balance2 = await context.viem("public").getBalance({ address: address2 });
+        expect(balance2).toBe(GLMR);
       },
     });
   },

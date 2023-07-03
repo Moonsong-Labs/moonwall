@@ -79,7 +79,7 @@ export function describeSuite<T extends FoundationType>({
   }
 
   beforeAll(async function () {
-    const globalConfig = await importJsonConfig();
+    const globalConfig = importJsonConfig();
 
     if (!process.env.MOON_TEST_ENV) {
       throw new Error("MOON_TEST_ENV not set");

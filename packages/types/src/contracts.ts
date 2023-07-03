@@ -1,6 +1,7 @@
 import { Abi, DeployContractParameters } from "viem";
 import { DeepPartial } from "./helpers.js";
 import { EthTransactionType } from "./config.js";
+import { TransactionType } from "./eth.js";
 
 export type MoonwallContract<TAbi extends Abi> = {
   abi: TAbi;
@@ -30,5 +31,5 @@ export type ContractDeploymentOptions = DeepPartial<
 > & {
   privateKey?: `0x${string}`;
   args?: any[];
-  txnType?: EthTransactionType;
+  txnType?: TransactionType;
 };

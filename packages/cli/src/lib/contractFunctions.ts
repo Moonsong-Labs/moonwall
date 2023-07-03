@@ -10,7 +10,7 @@ import { importJsonConfig } from "./configReader.js";
 export async function fetchCompiledContract<TAbi extends Abi>(
   contractName: string
 ): Promise<MoonwallContract<TAbi>> {
-  const config = await importJsonConfig();
+  const config = importJsonConfig();
   const contractsDir = config.environments.find(
     (env) => env.name === process.env.MOON_TEST_ENV
   )?.contracts;

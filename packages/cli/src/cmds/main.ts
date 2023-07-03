@@ -19,7 +19,7 @@ export async function main() {
   while (true) {
     let globalConfig;
     try {
-      globalConfig = await importJsonConfig();
+      globalConfig = importJsonConfig();
     } catch (e) {
       console.log(e);
     }

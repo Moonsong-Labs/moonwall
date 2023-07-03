@@ -1,4 +1,4 @@
-import { ContractDeploymentOptions, DeepPartial, DevModeContext } from "@moonwall/types";
+import { ContractDeploymentOptions, DeepPartial, DevModeContext, GenericContext, ViemTransactionOptions } from "@moonwall/types";
 import type { Abi } from "viem";
 import {
   BlockTag,
@@ -169,11 +169,6 @@ export type TransferOptions =
     })
   | undefined;
 
-export type ViemTransactionOptions =
-  | TransactionSerializable & {
-      privateKey?: `0x${string}`;
-      skipEstimation?: boolean;
-    };
 
 /**
  * createRawTransfer function creates and signs a transfer, as a hex string, that can be submitted to the network via public client."
@@ -193,20 +188,20 @@ export async function createRawTransfer<TOptions extends TransferOptions>(
   options?: TOptions
 ): Promise<`0x${string}`> {
   const transferAmount = typeof value === "bigint" ? value : BigInt(value);
-  return await createRawTransaction(context, { ...options, to, value: transferAmount });
+  return await createViemTransaction(context, { ...options, to, value: transferAmount });
 }
 
 /**
- * createRawTransaction function creates and signs a raw transaction, as a hex string, that can be submitted to the network via public client."
+ * createViemTransaction function creates and signs a raw transaction, as a hex string, that can be submitted to the network via public client."
  *
  * @export
  * @template TOptions - Optional parameters of Viem's TransactionOptions
- * @param {DevModeContext} context - the DevModeContext instance
+ * @param {GenericContext} context - the GenericContext instance
  * @param {TOptions} options - transaction options including type, privateKey, value, to, chainId, gasPrice, estimatedGas, accessList, data
  * @returns {Promise<string>} - the signed raw transaction in hexadecimal string format
  */
-export async function createRawTransaction<TOptions extends DeepPartial<ViemTransactionOptions>>(
-  context: DevModeContext,
+export async function createViemTransaction<TOptions extends DeepPartial<ViemTransactionOptions>>(
+  context: GenericContext,
   options: TOptions
 ): Promise<`0x${string}`> {
   const type = !!options && !!options.type ? options.type : "eip1559";

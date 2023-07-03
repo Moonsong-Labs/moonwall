@@ -15,7 +15,7 @@ import { MoonwallContext } from "../../lib/globalContext.js";
 const debug = Debug("DevTest");
 
 export async function getDevProviderPath() {
-  const globalConfig = await importJsonConfig();
+  const globalConfig = importJsonConfig();
   const env = globalConfig.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
   return env.connections
     ? env.connections[0].endpoints[0].replace("ws://", "http://")

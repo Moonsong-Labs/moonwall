@@ -18,7 +18,7 @@ inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
 export async function runNetwork(args) {
   process.env.MOON_TEST_ENV = args.envName;
-  const globalConfig = await importJsonConfig();
+  const globalConfig = importJsonConfig();
   const env = globalConfig.environments.find(({ name }) => name === args.envName)!;
 
   if (!!!env) {
@@ -183,7 +183,7 @@ export async function runNetwork(args) {
 const reportServicePorts = async () => {
   const ctx = MoonwallContext.getContext();
   const portsList: { port: string; name: string }[] = [];
-  const globalConfig = await importJsonConfig();
+  const globalConfig = importJsonConfig();
   const config = globalConfig.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
   if (config.foundation.type == "dev") {
     const port =
@@ -234,7 +234,7 @@ const resolveCommandChoice = async () => {
   const ctx = await MoonwallContext.getContext().connectEnvironment();
   const api = ctx.providers.find((a) => a.type == "moon" || a.type == "polkadotJs")!
     .api as ApiPromise;
-  const globalConfig = await importJsonConfig();
+  const globalConfig = importJsonConfig();
   const config = globalConfig.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
 
   // TODO: Support multiple chains on chopsticks
@@ -424,7 +424,7 @@ const resolveTailChoice = async () => {
 
     //         case "T":
     //           new Promise(async (resolve)=>{
-    //             const globalConfig = await importJsonConfig();
+    //             const globalConfig = importJsonConfig();
     //             const env = globalConfig.environments.find(
     //               ({ name }) => name === process.env.MOON_TEST_ENV
     //             )!;
