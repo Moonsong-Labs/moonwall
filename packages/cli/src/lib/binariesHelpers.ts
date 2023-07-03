@@ -40,6 +40,14 @@ export async function getPolkadotReleaseBinary(binaryTag: string): Promise<strin
   );
 }
 
+export async function getTanssiReleaseBinary(binaryTag: string): Promise<string> {
+  const binaryPath = path.join(BINARY_DIRECTORY, `polkadot-${binaryTag}`);
+  return getGithubReleaseBinary(
+    `https://github.com/moondance-labs/tanssi/releases/download/${binaryTag}/polkadot`,
+    binaryPath
+  );
+}
+
 export async function getTagSha8(binaryTag: string): Promise<string> {
   const sha = child_process.execSync(`git rev-list -1 ${binaryTag}`).toString();
   if (!sha) {
