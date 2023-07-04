@@ -288,14 +288,14 @@ export async function checkBalance(
  *
  * @async
  * @function
- * @param {DevModeContext} context - The DevModeContext for the Ethereum client interaction.
+ * @param {GenericContext} context - The DevModeContext for the Ethereum client interaction.
  * @param {`0x${string}`} rawTx - The signed and serialized hexadecimal transaction string.
  * @returns {Promise<any>} A Promise resolving when the transaction is sent or rejecting with an error.
  */
 export async function sendRawTransaction(
-  context: DevModeContext,
+  context: GenericContext ,
   rawTx: `0x${string}`
-): Promise<any> {
+): Promise<`0x${string}`>{
   return await context
     .viem()
     .request({ method: "eth_sendRawTransaction", params: [rawTx] });

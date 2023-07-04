@@ -371,7 +371,7 @@
       "name": "dev_test",
       "testFileDir": ["/tests/dev_tests"],
       "envVars": ["DEBUG_COLORS=1", "TIMBO_TEST_ENV='TIMBO timbo timbo'"],
-      "reporters": ["verbose"],
+      "reporters": ["default"],
       "contracts": "contracts/",
       "runScripts": ["compile-contracts.ts compile -p contracts/precompiles"],
       "defaultSigner": {

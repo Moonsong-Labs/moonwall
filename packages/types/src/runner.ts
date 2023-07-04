@@ -236,10 +236,28 @@ export interface ChopsticksContext extends GenericContext {
  * DevModeContext - Interface that extends from GenericContext and includes a method for creating a block.
  */
 export interface DevModeContext extends GenericContext {
+  /**
+   * Creates a block with given transactions and options.
+   *
+   * @template ApiType Type of API to be used.
+   * @template Calls Type of calls to be made, could be a single CallType or an array of CallType.
+   * @param {Calls} transactions An optional array of transactions.
+   * @param {BlockCreation} options Optional parameters for block creation.
+   * @returns {Promise<BlockCreationResponse<ApiType, Calls>>} A Promise that resolves to a BlockCreationResponse.
+   */
   createBlock<ApiType extends ApiTypes, Calls extends CallType<ApiType> | CallType<ApiType>[]>(
     transactions?: Calls,
     options?: BlockCreation
   ): Promise<BlockCreationResponse<ApiType, Calls>>;
+
+  /**
+   * Creates a raw Ethereum transaction based on the given options.
+   *
+   * @template TOptions Type of option parameters to be used. Use libraryType to specify which web3 library to use
+   * (viem or ethers), otherwise will default to viem.
+   * @param {TOptions} options Options for creating a transaction.
+   * @returns {Promise<`0x${string}`>} A Promise that resolves to a raw transaction string prefixed with '0x'.
+   */
   createTxn?<
     TOptions extends
       | (DeepPartial<ViemTransactionOptions> & {
@@ -252,14 +270,24 @@ export interface DevModeContext extends GenericContext {
     options: TOptions
   ): Promise<`0x${string}`>;
 
-//   //TODO: e.g
-//   callPrecom (from call Precompiled)
-// execContract (from execute Contract)
-// runPrecom (from run Precompiled)
-// invokeCont (from invoke Contract)
-// actPrecom (from act on Precompiled)
-// procContract (from process Contract)
+  /**
+   * Method to execute a non-state changing transaction to a precompiled contract address (i.e. read).
+   *
+   * @param {ContractCallOptions} callOptions The options for the contract call.
+   * @returns {Promise<unknown>} A Promise that resolves to the return data from the contract call.
+   */
+  readPrecompile?(callOptions: ContractCallOptions): Promise<unknown>;
 
+  /**
+   * Method to submit a state-changing transaction to a precompiled contract address.
+   *
+   * @param {ContractCallOptions} callOptions The options for the contract call.
+   * @returns {Promise<`0x${string}`>} The transaction hash that resolves after the write operation has been completed.
+   */
+  writePrecompile?(callOptions: ContractCallOptions): Promise<`0x${string}`>;
+
+  readContract?(callOptions: ContractCallOptions): Promise<`0x${string}`>;
+  writeContract?(callOptions: ContractCallOptions): Promise<`0x${string}`>;
 }
 
 export type ViemTransactionOptions =
@@ -272,3 +300,57 @@ export type EthersTransactionOptions = TransactionRequest & {
   txnType?: TransactionType;
   privateKey?: `0x${string}`;
 };
+
+export interface ContractCallOptions {
+  /**
+   * The name of the pre-compiled contract you want to interact with.
+   * Precompiled contracts are a set of contract-like code that is
+   * embedded into the Moonbeam runtime.
+   */
+  precompileName: string;
+
+  /**
+   * The name of the function in the contract that you want to call.
+   */
+  functionName: string;
+
+  /**
+   * If set to true, only the raw transaction data will be returned,
+   * and the transaction will not be sent. This can be useful if you
+   * want to sign the transaction yourself or send it at a later time.
+   */
+  rawTxOnly?: boolean;
+
+  /**
+   * If set to true, the function call will be executed as a "call" and
+   * will not create a transaction on the blockchain. This is useful
+   * for view functions that don't modify the blockchain's state.
+   */
+  call?: boolean;
+
+  /**
+   * The private key used for signing the transaction. It should be a
+   * hexadecimal string with a "0x" prefix. If not provided, the
+   * transaciton will default to ALITH
+   */
+  privateKey?: `0x${string}`;
+
+  /**
+   * The amount of gas to use for the transaction. This can either be a
+   * specific number (as a bigint) or the string "estimate", in which
+   * case the library will automatically estimate the gas needed.
+   */
+  gas?: bigint | "estimate";
+
+  /**
+   * The JavaScript library to use for interacting with the Ethereum network.
+   * "viem" or "ethers" are the currently supported options.
+   */
+  web3Library?: "viem" | "ethers";
+
+  /**
+   * An array of arguments to pass to the function call. The types of these
+   * arguments depend on the function you're calling.
+   */
+  args?: any[];
+}

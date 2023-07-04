@@ -6,11 +6,13 @@ import {
   EthersTransactionOptions,
   FoundationHandler,
   ViemTransactionOptions,
+  ContractCallOptions,
 } from "@moonwall/types";
 import { ALITH_PRIVATE_KEY, createEthersTransaction, createViemTransaction } from "@moonwall/util";
 import { ApiTypes } from "@polkadot/api/types/index.js";
 import { createDevBlock } from "../../internal/foundations/devModeHelpers.js";
 import { importJsonConfig } from "../configReader.js";
+import { interactWithPrecompileContract } from "../contractFunctions.js";
 
 export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testCase, logger }) => {
   const config = importJsonConfig();
@@ -56,6 +58,21 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
             return libraryType === "viem"
               ? createViemTransaction(ctx, txnOptions as DeepPartial<ViemTransactionOptions>)
               : createEthersTransaction(ctx, txnOptions as EthersTransactionOptions);
+          },
+      readPrecompile: ethCompatible
+        ? undefined
+        : async (options: ContractCallOptions) => {
+            const response = await interactWithPrecompileContract(ctx, {
+              call: true,
+              ...options,
+            });
+            return response;
+          },
+      writePrecompile: ethCompatible
+        ? undefined
+        : async (options: ContractCallOptions) => {
+            const response = await interactWithPrecompileContract(ctx, { call: false, ...options });
+            return response as `0x${string}`
           },
     },
 

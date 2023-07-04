@@ -27,7 +27,7 @@ import {
   getContract,
   http,
   publicActions,
-  verifyMessage
+  verifyMessage,
 } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import Web3 from "web3";
@@ -236,8 +236,9 @@ describeSuite({
           address: contractAddress!,
           publicClient: context.viem() as any,
         });
-
+        // @ts-ignore
         const symbol = await contractInstance.read.symbol();
+        //@ts-ignore
         const balBefore = (await contractInstance.read.balanceOf([BALTATHAR_ADDRESS])) as bigint;
 
         await context.viem().writeContract({
@@ -249,6 +250,7 @@ describeSuite({
         });
         await context.createBlock();
 
+        //@ts-ignore
         const balanceAfter = (await contractInstance.read.balanceOf([BALTATHAR_ADDRESS])) as bigint;
         log(`Baltahaar balance before: ${formatEther(balBefore)} ${symbol}`);
         log(`Baltahaar balance after: ${formatEther(balanceAfter)} ${symbol}`);
@@ -442,6 +444,68 @@ describeSuite({
 
         const balance2 = await context.viem().getBalance({ address: address2 });
         expect(balance2).toBe(GLMR);
+      },
+    });
+
+    it({
+      id: "T20",
+      title: "It can read a precompiled contracts",
+      test: async function () {
+        const round = await context.readPrecompile!({
+          precompileName: "ParachainStaking",
+          functionName: "round",
+        });
+
+        log(`Parachain staking Round is ${round}`);
+        expect(round).toBe(1n);
+      },
+    });
+
+    it({
+      id: "T21",
+      title: "It can write to a precompiled contract",
+      test: async function () {
+        const allowanceBefore = (await context.readPrecompile!({
+          precompileName: "IERC20",
+          functionName: "allowance",
+          args: [ALITH_ADDRESS, BALTATHAR_ADDRESS],
+        })) as bigint;
+
+        log(`Allowance of baltathar is:  ${allowanceBefore}`);
+
+        const tx = await context.writePrecompile!({
+          precompileName: "IERC20",
+          functionName: "approve",
+          args: [BALTATHAR_ADDRESS, GLMR],
+        });
+        log(`Txn hash is ${tx}`);
+
+        await context.createBlock();
+
+        const allowanceAfter = (await context.readPrecompile!({
+          precompileName: "IERC20",
+          functionName: "allowance",
+          args: [ALITH_ADDRESS, BALTATHAR_ADDRESS],
+        })) as bigint;
+        log(`Allowance of baltathar is:  ${allowanceAfter}`);
+        expect(allowanceAfter - allowanceBefore).toBe(GLMR);
+
+        const rawTx = await context.writePrecompile!({
+          precompileName: "IERC20",
+          functionName: "approve",
+          rawTxOnly: true,
+          args: [BALTATHAR_ADDRESS, 2n * GLMR],
+        });
+
+        await context.createBlock(rawTx);
+
+        const allowanceFinal = (await context.readPrecompile!({
+          precompileName: "IERC20",
+          functionName: "allowance",
+          args: [ALITH_ADDRESS, BALTATHAR_ADDRESS],
+        })) as bigint;
+        log(`Allowance of baltathar is:  ${allowanceFinal}`);
+        expect(allowanceFinal - allowanceAfter).toBe(GLMR);
       },
     });
   },

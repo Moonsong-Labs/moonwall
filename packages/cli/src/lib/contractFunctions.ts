@@ -1,16 +1,28 @@
-import { ContractDeploymentOptions, DevModeContext, MoonwallContract } from "@moonwall/types";
-import { ALITH_PRIVATE_KEY, deployViemContract } from "@moonwall/util";
+import {
+  ContractDeploymentOptions,
+  DevModeContext,
+  MoonwallContract,
+  ContractCallOptions,
+} from "@moonwall/types";
+import {
+  ALITH_PRIVATE_KEY,
+  createEthersTransaction,
+  deployViemContract,
+  sendRawTransaction,
+} from "@moonwall/util";
+import { PRECOMPILES } from "@moonwall/util";
 import chalk from "chalk";
 import fs from "fs";
 import { readFileSync } from "fs";
 import path from "path";
 import type { Abi } from "viem";
-import { Log } from "viem";
+import { Log, decodeFunctionResult, encodeFunctionData } from "viem";
 import { importJsonConfig } from "./configReader.js";
+import { createViemTransaction } from "@moonwall/util";
+import { privateKeyToAccount } from "viem/accounts";
+import { GenericContext } from "@moonwall/types";
 
-export function fetchCompiledContract<TAbi extends Abi>(
-  contractName: string
-): MoonwallContract<TAbi> {
+function getCompiledPath(contractName: string) {
   const config = importJsonConfig();
   const contractsDir = config.environments.find(
     (env) => env.name === process.env.MOON_TEST_ENV
@@ -25,8 +37,8 @@ export function fetchCompiledContract<TAbi extends Abi>(
     );
   }
 
-  const compiledJsonPath =  recursiveSearch(contractsDir, `${contractName}.json`);
-  const solidityFilePath =  recursiveSearch(contractsDir, `${contractName}.sol`);
+  const compiledJsonPath = recursiveSearch(contractsDir, `${contractName}.json`);
+  const solidityFilePath = recursiveSearch(contractsDir, `${contractName}.sol`);
 
   if (!compiledJsonPath && !solidityFilePath) {
     throw new Error(
@@ -38,8 +50,14 @@ export function fetchCompiledContract<TAbi extends Abi>(
         `Please ${chalk.bgWhiteBright.blackBright("recompile contract")} ${contractName}.sol`
     );
   }
+  return compiledJsonPath;
+}
 
-  const json = readFileSync(compiledJsonPath, "utf8");
+export function fetchCompiledContract<TAbi extends Abi>(
+  contractName: string
+): MoonwallContract<TAbi> {
+  const compiledPath = getCompiledPath(contractName);
+  const json = readFileSync(compiledPath, "utf8");
   const parsed = JSON.parse(json);
   return {
     abi: parsed.contract.abi,
@@ -54,10 +72,10 @@ export function recursiveSearch(dir: string, filename: string): string | null {
 
   for (const file of files) {
     const filepath = path.join(dir, file);
-    const stats =  fs.statSync(filepath);
+    const stats = fs.statSync(filepath);
 
     if (stats.isDirectory()) {
-      const searchResult =  recursiveSearch(filepath, filename);
+      const searchResult = recursiveSearch(filepath, filename);
 
       if (searchResult) {
         return searchResult;
@@ -68,6 +86,64 @@ export function recursiveSearch(dir: string, filename: string): string | null {
   }
 
   return null;
+}
+
+export async function interactWithPrecompileContract<T extends boolean>(
+  context: GenericContext,
+  callOptions: ContractCallOptions
+) {
+  const {
+    precompileName,
+    functionName,
+    args = [],
+    web3Library = "viem",
+    gas = "estimate",
+    privateKey = ALITH_PRIVATE_KEY,
+    rawTxOnly = false,
+    call = false,
+  } = callOptions;
+  const { abi } = fetchCompiledContract(precompileName);
+  const data = encodeFunctionData({
+    abi,
+    functionName,
+    args,
+  });
+  const precompileAddress = PRECOMPILES[precompileName];
+  const account = privateKeyToAccount(privateKey);
+  const gasParam =
+    gas === "estimate"
+      ? await context
+          .viem()
+          .estimateGas({ account: account.address, to: precompileAddress, value: 0n, data })
+      : gas > 0n
+      ? gas
+      : 200_000n;
+
+  if (!call && rawTxOnly) {
+    return web3Library === "viem"
+      ? createViemTransaction(context, { to: precompileAddress, data, gas: gasParam, privateKey })
+      : createEthersTransaction(context, {
+          to: precompileAddress,
+          data,
+          gas: gasParam,
+          privateKey,
+        });
+  }
+
+  // TODO: add switch for equivalent ethers function
+  if (call) {
+    const result = await context
+      .viem()
+      .call({ account, to: precompileAddress, value: 0n, data, gas: gasParam });
+    return decodeFunctionResult({ abi, functionName, data: result.data! });
+  } else if (!rawTxOnly) {
+    const hash = await context
+      .viem()
+      .sendTransaction({ account, to: precompileAddress, value: 0n, data, gas: gasParam });
+    return hash;
+  } else {
+    throw new Error("This should never happen, if it does there's a logic error in the code");
+  }
 }
 
 export async function deployCreateCompiledContract<TOptions extends ContractDeploymentOptions>(
