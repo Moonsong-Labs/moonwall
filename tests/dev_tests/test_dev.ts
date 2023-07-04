@@ -454,6 +454,7 @@ describeSuite({
         const round = await context.readPrecompile!({
           precompileName: "ParachainStaking",
           functionName: "round",
+        
         });
 
         log(`Parachain staking Round is ${round}`);
@@ -496,6 +497,7 @@ describeSuite({
           rawTxOnly: true,
           args: [BALTATHAR_ADDRESS, 2n * GLMR],
         });
+        log(rawTx)
 
         await context.createBlock(rawTx);
 

@@ -16,11 +16,13 @@ import fs from "fs";
 import { readFileSync } from "fs";
 import path from "path";
 import type { Abi } from "viem";
-import { Log, decodeFunctionResult, encodeFunctionData } from "viem";
+import { Log, decodeFunctionResult, encodeFunctionData, toHex } from "viem";
 import { importJsonConfig } from "./configReader.js";
 import { createViemTransaction } from "@moonwall/util";
 import { privateKeyToAccount } from "viem/accounts";
 import { GenericContext } from "@moonwall/types";
+import { Interface, InterfaceAbi, Wallet } from "ethers";
+import { sign } from "crypto";
 
 function getCompiledPath(contractName: string) {
   const config = importJsonConfig();
@@ -88,7 +90,8 @@ export function recursiveSearch(dir: string, filename: string): string | null {
   return null;
 }
 
-export async function interactWithPrecompileContract<T extends boolean>(
+// TODO: split out into a separate base function that works for non-precompile contracts
+export async function interactWithPrecompileContract(
   context: GenericContext,
   callOptions: ContractCallOptions
 ) {
@@ -130,17 +133,39 @@ export async function interactWithPrecompileContract<T extends boolean>(
         });
   }
 
-  // TODO: add switch for equivalent ethers function
   if (call) {
-    const result = await context
-      .viem()
-      .call({ account, to: precompileAddress, value: 0n, data, gas: gasParam });
-    return decodeFunctionResult({ abi, functionName, data: result.data! });
+    if (web3Library === "viem") {
+      const result = await context
+        .viem()
+        .call({ account, to: precompileAddress, value: 0n, data, gas: gasParam });
+      return decodeFunctionResult({ abi, functionName, data: result.data! });
+    } else {
+      const result = await context.ethers().call({
+        from: account.address,
+        to: precompileAddress,
+        value: 0n,
+        data,
+        gasLimit: toHex(gasParam),
+      });
+      return new Interface(abi as InterfaceAbi).decodeFunctionResult(functionName, result);
+    }
   } else if (!rawTxOnly) {
-    const hash = await context
-      .viem()
-      .sendTransaction({ account, to: precompileAddress, value: 0n, data, gas: gasParam });
-    return hash;
+    if (web3Library === "viem") {
+      const hash = await context
+        .viem()
+        .sendTransaction({ account, to: precompileAddress, value: 0n, data, gas: gasParam });
+      return hash;
+    } else {
+      const signer = new Wallet(privateKey, context.ethers().provider);
+      const { hash } = await signer.sendTransaction({
+        from: account.address,
+        to: precompileAddress,
+        value: 0n,
+        data,
+        gasLimit: toHex(gasParam),
+      });
+      return hash;
+    }
   } else {
     throw new Error("This should never happen, if it does there's a logic error in the code");
   }
