@@ -273,18 +273,18 @@ export interface DevModeContext extends GenericContext {
   /**
    * Method to execute a non-state changing transaction to a precompiled contract address (i.e. read).
    *
-   * @param {ContractCallOptions} callOptions The options for the contract call.
+   * @param {PrecompileCallOptions} callOptions The options for the contract call.
    * @returns {Promise<unknown>} A Promise that resolves to the return data from the contract call.
    */
-  readPrecompile?(callOptions: ContractCallOptions): Promise<unknown>;
+  readPrecompile?(callOptions: PrecompileCallOptions): Promise<unknown>;
 
   /**
    * Method to submit a state-changing transaction to a precompiled contract address.
    *
-   * @param {ContractCallOptions} callOptions The options for the contract call.
+   * @param {PrecompileCallOptions} callOptions The options for the contract call.
    * @returns {Promise<`0x${string}`>} The transaction hash that resolves after the write operation has been completed.
    */
-  writePrecompile?(callOptions: ContractCallOptions): Promise<`0x${string}`>;
+  writePrecompile?(callOptions: PrecompileCallOptions): Promise<`0x${string}`>;
 
   readContract?(callOptions: ContractCallOptions): Promise<`0x${string}`>;
   writeContract?(callOptions: ContractCallOptions): Promise<`0x${string}`>;
@@ -301,13 +301,31 @@ export type EthersTransactionOptions = TransactionRequest & {
   privateKey?: `0x${string}`;
 };
 
-export interface ContractCallOptions {
-  /**
-   * The name of the pre-compiled contract you want to interact with.
-   * Precompiled contracts are a set of contract-like code that is
+export type PrecompileCallOptions = Omit<
+  ContractCallOptions,
+  "contractName" | "contractAddress"
+> & {
+  /**  The name of the Pre-compiled contract you want to interact with.
+   * Compiled contracts are a set of contract-like code that is
    * embedded into the Moonbeam runtime.
    */
   precompileName: string;
+};
+
+
+export interface ContractCallOptions {
+  /**
+   * The name of the compiled contract you want to interact with.
+   * Compiled contracts are solidity contracts already compiled by solc
+   * into JSON files accessible to this project. Refer to Moonwall help
+   * docs for more info.
+   */
+  contractName: string;
+
+  /**
+   * The address of the deployed contract you want to interact with.
+   */
+  contractAddress: `0xs${string}`
 
   /**
    * The name of the function in the contract that you want to call.

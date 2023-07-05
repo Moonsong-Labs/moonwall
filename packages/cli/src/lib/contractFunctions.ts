@@ -23,6 +23,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import { GenericContext } from "@moonwall/types";
 import { Interface, InterfaceAbi, Wallet } from "ethers";
 import { sign } from "crypto";
+import { PrecompileCallOptions } from "@moonwall/types";
 
 function getCompiledPath(contractName: string) {
   const config = importJsonConfig();
@@ -90,13 +91,30 @@ export function recursiveSearch(dir: string, filename: string): string | null {
   return null;
 }
 
-// TODO: split out into a separate base function that works for non-precompile contracts
 export async function interactWithPrecompileContract(
+  context: GenericContext,
+  callOptions: PrecompileCallOptions
+) {
+  const { precompileName, ...rest } = callOptions;
+  const precompileAddress = PRECOMPILES[precompileName] as `0xs${string}` | undefined;
+
+  if (!precompileAddress) {
+    throw new Error(`No precompile found with the name: ${precompileName}`);
+  }
+  return await interactWithContract(context, {
+    ...rest,
+    contractName: precompileName,
+    contractAddress: precompileAddress,
+  });
+}
+
+export async function interactWithContract(
   context: GenericContext,
   callOptions: ContractCallOptions
 ) {
   const {
-    precompileName,
+    contractName,
+    contractAddress,
     functionName,
     args = [],
     web3Library = "viem",
@@ -105,28 +123,28 @@ export async function interactWithPrecompileContract(
     rawTxOnly = false,
     call = false,
   } = callOptions;
-  const { abi } = fetchCompiledContract(precompileName);
+  const { abi } = fetchCompiledContract(contractName);
   const data = encodeFunctionData({
     abi,
     functionName,
     args,
   });
-  const precompileAddress = PRECOMPILES[precompileName];
+
   const account = privateKeyToAccount(privateKey);
   const gasParam =
     gas === "estimate"
       ? await context
           .viem()
-          .estimateGas({ account: account.address, to: precompileAddress, value: 0n, data })
+          .estimateGas({ account: account.address, to: contractAddress, value: 0n, data })
       : gas > 0n
       ? gas
       : 200_000n;
 
   if (!call && rawTxOnly) {
     return web3Library === "viem"
-      ? createViemTransaction(context, { to: precompileAddress, data, gas: gasParam, privateKey })
+      ? createViemTransaction(context, { to: contractAddress, data, gas: gasParam, privateKey })
       : createEthersTransaction(context, {
-          to: precompileAddress,
+          to: contractAddress,
           data,
           gas: gasParam,
           privateKey,
@@ -137,12 +155,12 @@ export async function interactWithPrecompileContract(
     if (web3Library === "viem") {
       const result = await context
         .viem()
-        .call({ account, to: precompileAddress, value: 0n, data, gas: gasParam });
+        .call({ account, to: contractAddress, value: 0n, data, gas: gasParam });
       return decodeFunctionResult({ abi, functionName, data: result.data! });
     } else {
       const result = await context.ethers().call({
         from: account.address,
-        to: precompileAddress,
+        to: contractAddress,
         value: 0n,
         data,
         gasLimit: toHex(gasParam),
@@ -153,13 +171,13 @@ export async function interactWithPrecompileContract(
     if (web3Library === "viem") {
       const hash = await context
         .viem()
-        .sendTransaction({ account, to: precompileAddress, value: 0n, data, gas: gasParam });
+        .sendTransaction({ account, to: contractAddress, value: 0n, data, gas: gasParam });
       return hash;
     } else {
       const signer = new Wallet(privateKey, context.ethers().provider);
       const { hash } = await signer.sendTransaction({
         from: account.address,
-        to: precompileAddress,
+        to: contractAddress,
         value: 0n,
         data,
         gasLimit: toHex(gasParam),

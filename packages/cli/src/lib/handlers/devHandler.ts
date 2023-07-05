@@ -13,6 +13,7 @@ import { ApiTypes } from "@polkadot/api/types/index.js";
 import { createDevBlock } from "../../internal/foundations/devModeHelpers.js";
 import { importJsonConfig } from "../configReader.js";
 import { interactWithPrecompileContract } from "../contractFunctions.js";
+import { PrecompileCallOptions } from "@moonwall/types";
 
 export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testCase, logger }) => {
   const config = importJsonConfig();
@@ -61,7 +62,7 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
           },
       readPrecompile: ethCompatible
         ? undefined
-        : async (options: ContractCallOptions) => {
+        : async (options: PrecompileCallOptions) => {
             const response = await interactWithPrecompileContract(ctx, {
               call: true,
               ...options,
@@ -70,7 +71,7 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
           },
       writePrecompile: ethCompatible
         ? undefined
-        : async (options: ContractCallOptions) => {
+        : async (options: PrecompileCallOptions) => {
             const response = await interactWithPrecompileContract(ctx, { call: false, ...options });
             return response as `0x${string}`
           },
