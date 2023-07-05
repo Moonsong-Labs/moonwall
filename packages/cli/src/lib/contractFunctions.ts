@@ -4,14 +4,14 @@ import {
   DevModeContext,
   GenericContext,
   MoonwallContract,
-  PrecompileCallOptions
+  PrecompileCallOptions,
 } from "@moonwall/types";
 import {
   ALITH_PRIVATE_KEY,
   PRECOMPILES,
   createEthersTransaction,
   createViemTransaction,
-  deployViemContract
+  deployViemContract,
 } from "@moonwall/util";
 import chalk from "chalk";
 import { Interface, InterfaceAbi, Wallet } from "ethers";
@@ -93,15 +93,20 @@ export async function interactWithPrecompileContract(
   callOptions: PrecompileCallOptions
 ) {
   const { precompileName, ...rest } = callOptions;
-  const precompileAddress = PRECOMPILES[precompileName] as `0x${string}` | undefined;
 
-  if (!precompileAddress) {
+  const precompileInfo = PRECOMPILES[precompileName];
+  if (!precompileInfo) {
     throw new Error(`No precompile found with the name: ${precompileName}`);
   }
+
+  const [contractAddress, contractName] = Array.isArray(precompileInfo)
+    ? precompileInfo
+    : [precompileInfo, precompileName];
+
   return await interactWithContract(context, {
     ...rest,
-    contractName: precompileName,
-    contractAddress: precompileAddress,
+    contractName,
+    contractAddress: contractAddress as `0x${string}`,
   });
 }
 
