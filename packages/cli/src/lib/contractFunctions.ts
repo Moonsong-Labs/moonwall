@@ -1,29 +1,26 @@
 import {
+  ContractCallOptions,
   ContractDeploymentOptions,
   DevModeContext,
+  GenericContext,
   MoonwallContract,
-  ContractCallOptions,
+  PrecompileCallOptions
 } from "@moonwall/types";
 import {
   ALITH_PRIVATE_KEY,
+  PRECOMPILES,
   createEthersTransaction,
-  deployViemContract,
-  sendRawTransaction,
+  createViemTransaction,
+  deployViemContract
 } from "@moonwall/util";
-import { PRECOMPILES } from "@moonwall/util";
 import chalk from "chalk";
-import fs from "fs";
-import { readFileSync } from "fs";
+import { Interface, InterfaceAbi, Wallet } from "ethers";
+import fs, { readFileSync } from "fs";
 import path from "path";
 import type { Abi } from "viem";
 import { Log, decodeFunctionResult, encodeFunctionData, toHex } from "viem";
-import { importJsonConfig } from "./configReader.js";
-import { createViemTransaction } from "@moonwall/util";
 import { privateKeyToAccount } from "viem/accounts";
-import { GenericContext } from "@moonwall/types";
-import { Interface, InterfaceAbi, Wallet } from "ethers";
-import { sign } from "crypto";
-import { PrecompileCallOptions } from "@moonwall/types";
+import { importJsonConfig } from "./configReader.js";
 
 function getCompiledPath(contractName: string) {
   const config = importJsonConfig();
@@ -96,7 +93,7 @@ export async function interactWithPrecompileContract(
   callOptions: PrecompileCallOptions
 ) {
   const { precompileName, ...rest } = callOptions;
-  const precompileAddress = PRECOMPILES[precompileName] as `0xs${string}` | undefined;
+  const precompileAddress = PRECOMPILES[precompileName] as `0x${string}` | undefined;
 
   if (!precompileAddress) {
     throw new Error(`No precompile found with the name: ${precompileName}`);

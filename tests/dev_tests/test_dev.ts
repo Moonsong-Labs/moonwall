@@ -1,5 +1,11 @@
 import "@moonbeam-network/api-augment";
-import { beforeAll, describeSuite, expect, fetchCompiledContract } from "@moonwall/cli";
+import {
+  beforeAll,
+  deployCreateCompiledContract,
+  describeSuite,
+  expect,
+  fetchCompiledContract,
+} from "@moonwall/cli";
 import {
   ALITH_ADDRESS,
   ALITH_PRIVATE_KEY,
@@ -454,7 +460,6 @@ describeSuite({
         const round = await context.readPrecompile!({
           precompileName: "ParachainStaking",
           functionName: "round",
-        
         });
 
         log(`Parachain staking Round is ${round}`);
@@ -497,7 +502,7 @@ describeSuite({
           rawTxOnly: true,
           args: [BALTATHAR_ADDRESS, 2n * GLMR],
         });
-        log(rawTx)
+        log(rawTx);
 
         await context.createBlock(rawTx);
 
@@ -508,6 +513,38 @@ describeSuite({
         })) as bigint;
         log(`Allowance of baltathar is:  ${allowanceFinal}`);
         expect(allowanceFinal - allowanceAfter).toBe(GLMR);
+      },
+    });
+
+    it({
+      id: "T22",
+      title: "it can read a newly deployed contract",
+      test: async function () {
+        const { contractAddress } = await context.deployContract!("ToyContract");
+        log(`Deployed contract at ${contractAddress}`);
+
+        const value = await context.readContract!({
+          contractName: "ToyContract",
+          contractAddress,
+          functionName: "value",
+        });
+        log(`Value is ${value}`);
+        expect(value).toBe(5n);
+        await context.writeContract!({
+          contractName: "ToyContract",
+          contractAddress,
+          functionName: "setter",
+          args: [20],
+        });
+        await context.createBlock();
+
+        const value2 = await context.readContract!({
+          contractName: "ToyContract",
+          contractAddress,
+          functionName: "value",
+        });
+        log(`Value is ${value2}`);
+        expect(value2).toBe(20n);
       },
     });
   },

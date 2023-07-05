@@ -1,4 +1,10 @@
-import { ContractDeploymentOptions, DeepPartial, DevModeContext, GenericContext, ViemTransactionOptions } from "@moonwall/types";
+import {
+  ContractDeploymentOptions,
+  DeepPartial,
+  DevModeContext,
+  GenericContext,
+  ViemTransactionOptions,
+} from "@moonwall/types";
 import type { Abi } from "viem";
 import {
   BlockTag,
@@ -155,9 +161,7 @@ export async function deployViemContract<TOptions extends ContractDeploymentOpti
 
   await context.createBlock();
 
-  const { contractAddress, status, logs } = await context
-    .viem()
-    .getTransactionReceipt({ hash });
+  const { contractAddress, status, logs } = await context.viem().getTransactionReceipt({ hash });
 
   return { contractAddress, status, logs, hash };
 }
@@ -169,7 +173,6 @@ export type TransferOptions =
       privateKey?: `0x${string}`;
     })
   | undefined;
-
 
 /**
  * createRawTransfer function creates and signs a transfer, as a hex string, that can be submitted to the network via public client."
@@ -293,10 +296,8 @@ export async function checkBalance(
  * @returns {Promise<any>} A Promise resolving when the transaction is sent or rejecting with an error.
  */
 export async function sendRawTransaction(
-  context: GenericContext ,
+  context: GenericContext,
   rawTx: `0x${string}`
-): Promise<`0x${string}`>{
-  return await context
-    .viem()
-    .request({ method: "eth_sendRawTransaction", params: [rawTx] });
+): Promise<`0x${string}`> {
+  return await context.viem().request({ method: "eth_sendRawTransaction", params: [rawTx] });
 }

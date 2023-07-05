@@ -8,12 +8,22 @@ import {
   ViemTransactionOptions,
   ContractCallOptions,
 } from "@moonwall/types";
-import { ALITH_PRIVATE_KEY, createEthersTransaction, createViemTransaction } from "@moonwall/util";
+import {
+  ALITH_PRIVATE_KEY,
+  createEthersTransaction,
+  createViemTransaction,
+  deployViemContract,
+} from "@moonwall/util";
 import { ApiTypes } from "@polkadot/api/types/index.js";
 import { createDevBlock } from "../../internal/foundations/devModeHelpers.js";
 import { importJsonConfig } from "../configReader.js";
-import { interactWithPrecompileContract } from "../contractFunctions.js";
+import {
+  deployCreateCompiledContract,
+  interactWithContract,
+  interactWithPrecompileContract,
+} from "../contractFunctions.js";
 import { PrecompileCallOptions } from "@moonwall/types";
+import { ContractDeploymentOptions } from "@moonwall/types";
 
 export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testCase, logger }) => {
   const config = importJsonConfig();
@@ -60,6 +70,7 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
               ? createViemTransaction(ctx, txnOptions as DeepPartial<ViemTransactionOptions>)
               : createEthersTransaction(ctx, txnOptions as EthersTransactionOptions);
           },
+
       readPrecompile: ethCompatible
         ? undefined
         : async (options: PrecompileCallOptions) => {
@@ -73,7 +84,30 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
         ? undefined
         : async (options: PrecompileCallOptions) => {
             const response = await interactWithPrecompileContract(ctx, { call: false, ...options });
-            return response as `0x${string}`
+            return response as `0x${string}`;
+          },
+
+      readContract: ethCompatible
+        ? undefined
+        : async (options: ContractCallOptions) => {
+            const response = await interactWithContract(ctx, {
+              call: true,
+              ...options,
+            });
+            return response;
+          },
+
+      writeContract: ethCompatible
+        ? undefined
+        : async (options: ContractCallOptions) => {
+            const response = await interactWithContract(ctx, { call: false, ...options });
+            return response as `0x${string}`;
+          },
+
+      deployContract: ethCompatible
+        ? undefined
+        : async (contractName: string, options?: ContractDeploymentOptions) => {
+            return await deployCreateCompiledContract(ctx, contractName, options);
           },
     },
 
@@ -81,3 +115,10 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
     log: logger(),
   });
 };
+
+// deployContract?(options: ContractDeploymentOptions): Promise<{
+//   contractAddress: `0x${string}` | null;
+//   status: "success" | "reverted";
+//   logs: Log<bigint, number>[];
+//   hash: `0x${string}`;
+// }>;

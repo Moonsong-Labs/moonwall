@@ -4,20 +4,22 @@ import { KeyringPair } from "@polkadot/keyring/types.js";
 import { Debugger } from "debug";
 import { Signer, TransactionRequest } from "ethers";
 import {
+  Abi,
   Account,
-  PublicClient,
+  Log,
+  PublicActions,
   TransactionSerializable,
   Transport,
-  WalletClient,
-  PublicActions,
+  WalletClient
 } from "viem";
 import { Chain } from "viem/chains";
 import { Web3 } from "web3";
 import { FoundationType } from "./config.js";
 import { BlockCreation, BlockCreationResponse, ChopsticksBlockCreation } from "./context.js";
+import { ContractDeploymentOptions } from "./contracts.js";
+import { TransactionType } from "./eth.js";
 import { CallType } from "./foundations.js";
 import { DeepPartial } from "./helpers.js";
-import { TransactionType } from "./eth.js";
 
 /**
  * @name CustomTest
@@ -271,7 +273,7 @@ export interface DevModeContext extends GenericContext {
   ): Promise<`0x${string}`>;
 
   /**
-   * Method to execute a non-state changing transaction to a precompiled contract address (i.e. read).
+   * Execute a non-state changing transaction to a precompiled contract address (i.e. read).
    *
    * @param {PrecompileCallOptions} callOptions The options for the contract call.
    * @returns {Promise<unknown>} A Promise that resolves to the return data from the contract call.
@@ -279,15 +281,47 @@ export interface DevModeContext extends GenericContext {
   readPrecompile?(callOptions: PrecompileCallOptions): Promise<unknown>;
 
   /**
-   * Method to submit a state-changing transaction to a precompiled contract address.
+   * Submit a state-changing transaction to a precompiled contract address.
    *
    * @param {PrecompileCallOptions} callOptions The options for the contract call.
    * @returns {Promise<`0x${string}`>} The transaction hash that resolves after the write operation has been completed.
    */
   writePrecompile?(callOptions: PrecompileCallOptions): Promise<`0x${string}`>;
 
-  readContract?(callOptions: ContractCallOptions): Promise<`0x${string}`>;
+  /**
+   * Execute a non-state changing transaction to a deployed contract address (i.e. read).
+   *
+   * @param {ContractCallOptions} callOptions The options for the contract call.
+   * @returns {Promise<unknown>} A Promise that resolves to the return data from the contract call.
+   */
+  readContract?(callOptions: ContractCallOptions): Promise<unknown>;
+
+  /**
+   * Submit a state-changing transaction to a deployed contract address.
+   *
+   * @param {ContractCallOptions} callOptions The options for the contract call.
+   * @returns {Promise<`0x${string}`>} The transaction hash that resolves after the write operation has been completed.
+   */
   writeContract?(callOptions: ContractCallOptions): Promise<`0x${string}`>;
+
+  /**
+   * Deploy a contract to the local dev network.
+   *
+   * @param {ContractDeploymentOptions} options The options necessary for the contract deployment.
+   * @returns {Promise<{contractAddress: `0x${string}` | null, status: "success" | "reverted", logs: Log<bigint, number>[], hash: `0x${string}`}>} A Promise that resolves to an object containing the contract address, the status of the deployment, logs, and the transaction hash of the deployment.
+   */
+  deployContract?(
+    contractName: string,
+    options?: ContractDeploymentOptions
+  ): Promise<{
+    contractAddress: `0x${string}`;
+    logs: Log<bigint, number>[];
+    hash: `0x${string}`;
+    status: "success" | "reverted";
+    abi: Abi;
+    bytecode: `0x${string}`;
+    methods: any;
+  }>;
 }
 
 export type ViemTransactionOptions =
@@ -312,7 +346,6 @@ export type PrecompileCallOptions = Omit<
   precompileName: string;
 };
 
-
 export interface ContractCallOptions {
   /**
    * The name of the compiled contract you want to interact with.
@@ -325,7 +358,7 @@ export interface ContractCallOptions {
   /**
    * The address of the deployed contract you want to interact with.
    */
-  contractAddress: `0xs${string}`
+  contractAddress: `0x${string}`;
 
   /**
    * The name of the function in the contract that you want to call.
