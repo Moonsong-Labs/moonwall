@@ -14,6 +14,7 @@ import {
   CHARLETH_ADDRESS,
   DOROTHY_ADDRESS,
   GLMR,
+  PRECOMPILES,
   alith,
   baltathar,
   deployViemContract,
@@ -472,7 +473,7 @@ describeSuite({
       title: "It can write to a precompiled contract",
       test: async function () {
         const allowanceBefore = (await context.readPrecompile!({
-          precompileName: "IERC20",
+          precompileName: "NativeErc20",
           functionName: "allowance",
           args: [ALITH_ADDRESS, BALTATHAR_ADDRESS],
         })) as bigint;
@@ -480,7 +481,7 @@ describeSuite({
         log(`Allowance of baltathar is:  ${allowanceBefore}`);
 
         const tx = await context.writePrecompile!({
-          precompileName: "IERC20",
+          precompileName: "NativeErc20",
           functionName: "approve",
           args: [BALTATHAR_ADDRESS, GLMR],
         });
@@ -489,7 +490,7 @@ describeSuite({
         await context.createBlock();
 
         const allowanceAfter = (await context.readPrecompile!({
-          precompileName: "IERC20",
+          precompileName: "NativeErc20",
           functionName: "allowance",
           args: [ALITH_ADDRESS, BALTATHAR_ADDRESS],
         })) as bigint;
@@ -497,7 +498,7 @@ describeSuite({
         expect(allowanceAfter - allowanceBefore).toBe(GLMR);
 
         const rawTx = await context.writePrecompile!({
-          precompileName: "IERC20",
+          precompileName: "NativeErc20",
           functionName: "approve",
           rawTxOnly: true,
           args: [BALTATHAR_ADDRESS, 2n * GLMR],
@@ -507,7 +508,7 @@ describeSuite({
         await context.createBlock(rawTx);
 
         const allowanceFinal = (await context.readPrecompile!({
-          precompileName: "IERC20",
+          precompileName: "NativeErc20",
           functionName: "allowance",
           args: [ALITH_ADDRESS, BALTATHAR_ADDRESS],
         })) as bigint;
