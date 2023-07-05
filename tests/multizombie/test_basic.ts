@@ -1,6 +1,6 @@
-import { expect, describeSuite, beforeAll, ApiPromise } from "@moonwall/cli";
 import "@moonbeam-network/api-augment";
-import "@polkadot/api-augment";
+import { expect, describeSuite, beforeAll } from "@moonwall/cli";
+import { ApiPromise } from "@polkadot/api";
 
 describeSuite({
   id: "Z1",
@@ -11,8 +11,8 @@ describeSuite({
     let para2Api: ApiPromise;
 
     beforeAll(() => {
-      para1Api = context.polkadotJs({ apiName: "para1" });
-      para2Api = context.polkadotJs({ apiName: "para2" });
+      para1Api = context.polkadotJs("para1");
+      para2Api = context.polkadotJs("para2");
     });
 
     it({
@@ -25,7 +25,6 @@ describeSuite({
 
         const network = para1Api.consts.system.version.specName.toString();
         log(network);
-        // expect(network).to.contain("rococo");
         console.log((await para2Api.rpc.chain.getBlock()).block.header.number.toNumber());
         await context.waitBlock(2, "para1");
         console.log((await para2Api.rpc.chain.getBlock()).block.header.number.toNumber());

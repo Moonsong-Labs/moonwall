@@ -1,16 +1,29 @@
-import { ContractDeploymentOptions, DevModeContext, MoonwallContract } from "@moonwall/types";
-import { ALITH_PRIVATE_KEY, deployViemContract } from "@moonwall/util";
+import {
+  ContractCallOptions,
+  ContractDeploymentOptions,
+  DevModeContext,
+  GenericContext,
+  MoonwallContract,
+  PrecompileCallOptions
+} from "@moonwall/types";
+import {
+  ALITH_PRIVATE_KEY,
+  PRECOMPILES,
+  createEthersTransaction,
+  createViemTransaction,
+  deployViemContract
+} from "@moonwall/util";
 import chalk from "chalk";
-import fs from "fs";
+import { Interface, InterfaceAbi, Wallet } from "ethers";
+import fs, { readFileSync } from "fs";
 import path from "path";
 import type { Abi } from "viem";
-import { Log, PublicClient, WalletClient, getContract } from "viem";
+import { Log, decodeFunctionResult, encodeFunctionData, toHex } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
 import { importJsonConfig } from "./configReader.js";
 
-export async function fetchCompiledContract<TAbi extends Abi>(
-  contractName: string
-): Promise<MoonwallContract<TAbi>> {
-  const config = await importJsonConfig();
+function getCompiledPath(contractName: string) {
+  const config = importJsonConfig();
   const contractsDir = config.environments.find(
     (env) => env.name === process.env.MOON_TEST_ENV
   )?.contracts;
@@ -24,8 +37,8 @@ export async function fetchCompiledContract<TAbi extends Abi>(
     );
   }
 
-  const compiledJsonPath = await recursiveSearch(contractsDir, `${contractName}.json`);
-  const solidityFilePath = await recursiveSearch(contractsDir, `${contractName}.sol`);
+  const compiledJsonPath = recursiveSearch(contractsDir, `${contractName}.json`);
+  const solidityFilePath = recursiveSearch(contractsDir, `${contractName}.sol`);
 
   if (!compiledJsonPath && !solidityFilePath) {
     throw new Error(
@@ -37,8 +50,14 @@ export async function fetchCompiledContract<TAbi extends Abi>(
         `Please ${chalk.bgWhiteBright.blackBright("recompile contract")} ${contractName}.sol`
     );
   }
+  return compiledJsonPath;
+}
 
-  const json = fs.readFileSync(compiledJsonPath, "utf8");
+export function fetchCompiledContract<TAbi extends Abi>(
+  contractName: string
+): MoonwallContract<TAbi> {
+  const compiledPath = getCompiledPath(contractName);
+  const json = readFileSync(compiledPath, "utf8");
   const parsed = JSON.parse(json);
   return {
     abi: parsed.contract.abi,
@@ -48,15 +67,15 @@ export async function fetchCompiledContract<TAbi extends Abi>(
   };
 }
 
-export async function recursiveSearch(dir: string, filename: string): Promise<string | null> {
-  const files = await fs.promises.readdir(dir);
+export function recursiveSearch(dir: string, filename: string): string | null {
+  const files = fs.readdirSync(dir);
 
   for (const file of files) {
     const filepath = path.join(dir, file);
-    const stats = await fs.promises.stat(filepath);
+    const stats = fs.statSync(filepath);
 
     if (stats.isDirectory()) {
-      const searchResult = await recursiveSearch(filepath, filename);
+      const searchResult = recursiveSearch(filepath, filename);
 
       if (searchResult) {
         return searchResult;
@@ -69,13 +88,110 @@ export async function recursiveSearch(dir: string, filename: string): Promise<st
   return null;
 }
 
+export async function interactWithPrecompileContract(
+  context: GenericContext,
+  callOptions: PrecompileCallOptions
+) {
+  const { precompileName, ...rest } = callOptions;
+  const precompileAddress = PRECOMPILES[precompileName] as `0x${string}` | undefined;
+
+  if (!precompileAddress) {
+    throw new Error(`No precompile found with the name: ${precompileName}`);
+  }
+  return await interactWithContract(context, {
+    ...rest,
+    contractName: precompileName,
+    contractAddress: precompileAddress,
+  });
+}
+
+export async function interactWithContract(
+  context: GenericContext,
+  callOptions: ContractCallOptions
+) {
+  const {
+    contractName,
+    contractAddress,
+    functionName,
+    args = [],
+    web3Library = "viem",
+    gas = "estimate",
+    privateKey = ALITH_PRIVATE_KEY,
+    rawTxOnly = false,
+    call = false,
+  } = callOptions;
+  const { abi } = fetchCompiledContract(contractName);
+  const data = encodeFunctionData({
+    abi,
+    functionName,
+    args,
+  });
+
+  const account = privateKeyToAccount(privateKey);
+  const gasParam =
+    gas === "estimate"
+      ? await context
+          .viem()
+          .estimateGas({ account: account.address, to: contractAddress, value: 0n, data })
+      : gas > 0n
+      ? gas
+      : 200_000n;
+
+  if (!call && rawTxOnly) {
+    return web3Library === "viem"
+      ? createViemTransaction(context, { to: contractAddress, data, gas: gasParam, privateKey })
+      : createEthersTransaction(context, {
+          to: contractAddress,
+          data,
+          gas: gasParam,
+          privateKey,
+        });
+  }
+
+  if (call) {
+    if (web3Library === "viem") {
+      const result = await context
+        .viem()
+        .call({ account, to: contractAddress, value: 0n, data, gas: gasParam });
+      return decodeFunctionResult({ abi, functionName, data: result.data! });
+    } else {
+      const result = await context.ethers().call({
+        from: account.address,
+        to: contractAddress,
+        value: 0n,
+        data,
+        gasLimit: toHex(gasParam),
+      });
+      return new Interface(abi as InterfaceAbi).decodeFunctionResult(functionName, result);
+    }
+  } else if (!rawTxOnly) {
+    if (web3Library === "viem") {
+      const hash = await context
+        .viem()
+        .sendTransaction({ account, to: contractAddress, value: 0n, data, gas: gasParam });
+      return hash;
+    } else {
+      const signer = new Wallet(privateKey, context.ethers().provider);
+      const { hash } = await signer.sendTransaction({
+        from: account.address,
+        to: contractAddress,
+        value: 0n,
+        data,
+        gasLimit: toHex(gasParam),
+      });
+      return hash;
+    }
+  } else {
+    throw new Error("This should never happen, if it does there's a logic error in the code");
+  }
+}
+
 export async function deployCreateCompiledContract<TOptions extends ContractDeploymentOptions>(
   context: DevModeContext,
   contractName: string,
   options?: TOptions
 ): Promise<{
   contractAddress: `0x${string}`;
-  contract: any;
   logs: Log<bigint, number>[];
   hash: `0x${string}`;
   status: "success" | "reverted";
@@ -83,7 +199,7 @@ export async function deployCreateCompiledContract<TOptions extends ContractDepl
   bytecode: `0x${string}`;
   methods: any;
 }> {
-  const { abi, bytecode, methods } = await fetchCompiledContract(contractName);
+  const { abi, bytecode, methods } = fetchCompiledContract(contractName);
 
   const { privateKey = ALITH_PRIVATE_KEY, args = [], ...rest } = options || ({} as any);
 
@@ -100,16 +216,8 @@ export async function deployCreateCompiledContract<TOptions extends ContractDepl
     blob
   );
 
-  const contract = getContract({
-    address: contractAddress!,
-    abi: abi,
-    publicClient: context.viem("public") as PublicClient,
-    walletClient: context.viem("wallet") as WalletClient,
-  });
-
   return {
     contractAddress: contractAddress as `0x${string}`,
-    contract,
     logs,
     hash,
     status,
@@ -118,47 +226,3 @@ export async function deployCreateCompiledContract<TOptions extends ContractDepl
     methods,
   };
 }
-
-// //TODO: Expand this to actually use options correctly
-// //TODO: Fix
-// export async function prepareToDeployCompiledContract<TOptions extends ContractDeploymentOptions>(
-//   context: DevModeContext,
-//   contractName: string,
-//   options?: TOptions
-// ) {
-//   const compiled = getCompiled(contractName);
-//   const callData = encodeDeployData({
-//     abi: compiled.contract.abi,
-//     bytecode: compiled.byteCode,
-//     args: [],
-//   }) as `0x${string}`;
-
-//   const walletClient =
-//     options && options.privateKey
-//       ? createWalletClient({
-//           transport: http(context.viem("public").transport.url),
-//           account: privateKeyToAccount(options.privateKey),
-//           chain: await getDevChain(context.viem("public").transport.url),
-//         })
-//       : context.viem("wallet");
-
-//   const nonce =
-//     options && options.nonce !== undefined
-//       ? options.nonce
-//       : await context.viem("public").getTransactionCount({ address: ALITH_ADDRESS });
-
-//   // const hash = await walletClient.sendTransaction({ data: callData, nonce });
-//   const rawTx = await createRawTransaction(context, { ...options, data: callData, nonce } as any);
-
-//   const contractAddress = ("0x" +
-//     keccak256(RLP.encode([ALITH_ADDRESS, nonce]))
-//       .slice(12)
-//       .substring(14)) as `0x${string}`;
-
-//   return {
-//     contractAddress,
-//     callData,
-//     abi: compiled.contract.abi,
-//     bytecode: compiled.byteCode,
-//   };
-// }

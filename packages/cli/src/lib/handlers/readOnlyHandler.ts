@@ -6,7 +6,7 @@ export const readOnlyHandler: FoundationHandler<"read_only"> = ({
   testCases,
   context,
   testCase,
-  logger
+  logger,
 }) => {
   testCases({
     context: {
@@ -18,11 +18,8 @@ export const readOnlyHandler: FoundationHandler<"read_only"> = ({
       ) => {
         const ctx = MoonwallContext.getContext();
         const provider = chainName
-          ? ctx.providers.find(
-              (prov) =>
-                prov.name === chainName && (prov.type === "moon" || prov.type === "polkadotJs")
-            )
-          : ctx.providers.find((prov) => prov.type === "moon" || prov.type === "polkadotJs");
+          ? ctx.providers.find((prov) => prov.name === chainName && prov.type === "polkadotJs")
+          : ctx.providers.find((prov) => prov.type === "polkadotJs");
 
         if (!!!provider) {
           throw new Error("No PolkadotJs api found in provider config");

@@ -13,15 +13,11 @@
       },
       "connections": [
         {
-          "name": "public",
-          "type": "viemPublic",
-          "endpoints": ["wss://wss.api.moonbeam.network"]
-        },
-        {
-          "name": "wallet",
-          "type": "viemWallet",
+          "name": "viem",
+          "type": "viem",
           "endpoints": ["wss://wss.api.moonbeam.network"]
         }
+        
       ]
     },
     {
@@ -118,7 +114,7 @@
       "connections": [
         {
           "name": "MB",
-          "type": "moon",
+          "type": "polkadotJs",
           "endpoints": ["ws://127.0.0.1:10000"]
         }
       ]
@@ -141,7 +137,7 @@
       "connections": [
         {
           "name": "MB",
-          "type": "moon",
+          "type": "polkadotJs",
           "endpoints": ["ws://127.0.0.1:10000"]
         }
       ]
@@ -156,7 +152,7 @@
       "connections": [
         {
           "name": "MB",
-          "type": "moon",
+          "type": "polkadotJs",
           "endpoints": ["wss://moonbeam.api.onfinality.io/public-ws"]
         }
       ]
@@ -171,7 +167,7 @@
       "connections": [
         {
           "name": "MB",
-          "type": "moon",
+          "type": "polkadotJs",
           "endpoints": ["wss://wss.api.moonriver.moonbeam.network"]
         }
       ]
@@ -195,7 +191,7 @@
       "connections": [
         {
           "name": "MB",
-          "type": "moon",
+          "type": "polkadotJs",
           "endpoints": ["ws://127.0.0.1:12000"]
         }
       ]
@@ -239,12 +235,12 @@
       "connections": [
         {
           "name": "MB",
-          "type": "moon",
+          "type": "polkadotJs",
           "endpoints": ["ws://127.0.0.1:10000"]
         },
         {
           "name": "MR",
-          "type": "moon",
+          "type": "polkadotJs",
           "endpoints": ["ws://127.0.0.1:12000"]
         }
       ]
@@ -294,7 +290,7 @@
         },
         {
           "name": "mb",
-          "type": "moon",
+          "type": "polkadotJs",
           "endpoints": ["wss://moonbeam.api.onfinality.io/public-ws"]
         }
       ]
@@ -351,7 +347,7 @@
         },
         {
           "name": "MB",
-          "type": "moon",
+          "type": "polkadotJs",
           "endpoints": ["wss://wss.api.moonbeam.network"]
         }
       ]
@@ -375,7 +371,7 @@
       "name": "dev_test",
       "testFileDir": ["/tests/dev_tests"],
       "envVars": ["DEBUG_COLORS=1", "TIMBO_TEST_ENV='TIMBO timbo timbo'"],
-      "reporters": ["verbose"],
+      "reporters": ["default"],
       "contracts": "contracts/",
       "runScripts": ["compile-contracts.ts compile -p contracts/precompiles"],
       "defaultSigner": {
@@ -390,7 +386,7 @@
             "name": "moonbeam",
             "running": false,
             "binPath": "tmp/moonbeam",
-            "retainAllLogs": true,
+            "retainAllLogs": false,
             "ports": { "p2pPort": 30333, "wsPort": 9944, "rpcPort": 9933 },
             "options": [
               "--dev",
@@ -418,21 +414,16 @@
           "endpoints": ["ws://127.0.0.1:9944"]
         },
         {
-          "name": "wallet",
-          "type": "viemWallet",
-          "endpoints": ["ws://127.0.0.1:9944"]
-        },
-        {
-          "name": "public",
-          "type": "viemPublic",
+          "name": "viem",
+          "type": "viem",
           "endpoints": ["ws://127.0.0.1:9944"]
         },
         {
           "name": "pjs",
-          "type": "moon",
+          "type": "polkadotJs",
           "endpoints": ["ws://127.0.0.1:9944"],
           "rpc": {
-            "moon": {
+            "polkadotJs": {
               "isTxFinalized": {
                 "description": "Just a test method",
                 "params": [

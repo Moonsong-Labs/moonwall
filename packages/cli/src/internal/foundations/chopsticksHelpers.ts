@@ -25,14 +25,12 @@ export async function getWsFromConfig(providerName?: string): Promise<WsProvider
     return provider.ws();
   } else {
     const provider = MoonwallContext.getContext().environment.providers.find(
-      ({ type }) => type == "moon" || type == "polkadotJs"
+      ({ type }) => type == "polkadotJs"
     );
 
     if (typeof provider == "undefined") {
       throw new Error(
-        `Cannot find providers of type ${chalk.bgWhiteBright.blackBright(
-          "moon"
-        )} or ${chalk.bgWhiteBright.blackBright("polkadotJs")}`
+        `Cannot find providers of type ${chalk.bgWhiteBright.blackBright("polkadotJs")}`
       );
     }
 

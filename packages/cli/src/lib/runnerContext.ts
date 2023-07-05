@@ -5,12 +5,10 @@ import type {
   GenericContext,
   ITestCase,
   ITestSuiteType,
-  PolkadotProviders,
   ProviderMap,
   ProviderType,
   TestCasesFn,
-  ViemApiMap,
-  ViemClientType,
+  ViemClient,
 } from "@moonwall/types";
 import { ApiPromise } from "@polkadot/api";
 import Debug from "debug";
@@ -79,7 +77,7 @@ export function describeSuite<T extends FoundationType>({
   }
 
   beforeAll(async function () {
-    const globalConfig = await importJsonConfig();
+    const globalConfig = importJsonConfig();
 
     if (!process.env.MOON_TEST_ENV) {
       throw new Error("MOON_TEST_ENV not set");
@@ -116,9 +114,7 @@ export function describeSuite<T extends FoundationType>({
   describe(`🗃️  #${suiteId} ${title}`, function () {
     const getApi = <T extends ProviderType>(apiType?: T, apiName?: string) => {
       const provider = ctx.providers.find((prov) => {
-        if (apiType == "polkadotJs" && apiName == "anyPolkadot") {
-          return prov.type == "moon" || prov.type == "polkadotJs";
-        } else if (apiType && apiName) {
+        if (apiType && apiName) {
           return prov.type == apiType && prov.name === apiName;
         } else if (apiType && !apiName) {
           return prov.type == apiType;
@@ -140,21 +136,8 @@ export function describeSuite<T extends FoundationType>({
 
     const context: GenericContext = {
       api: <T extends ProviderType>(type: T, name?: string) => getApi(type, name),
-      viem: <T extends ViemClientType>(clientType?: T, name?: string): ViemApiMap[T] => {
-        return (
-          clientType == "public"
-            ? getApi("viemPublic", name)
-            : clientType == "wallet"
-            ? getApi("viemWallet", name)
-            : getApi("viemPublic")
-        ) as ViemApiMap[T];
-      },
-      polkadotJs: (options?: { apiName?: string; type?: PolkadotProviders }): ApiPromise =>
-        options
-          ? options.type
-            ? getApi(options.type, options.apiName)
-            : getApi("polkadotJs", options.apiName)
-          : getApi("polkadotJs", "anyPolkadot"),
+      viem: (apiName?: string): ViemClient => getApi("viem", apiName),
+      polkadotJs: (apiName?: string): ApiPromise => getApi("polkadotJs", apiName),
       ethers: (apiName?: string): Signer => getApi("ethers", apiName),
       web3: (apiName?: string): Web3 => getApi("web3", apiName),
     };

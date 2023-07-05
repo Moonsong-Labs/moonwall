@@ -1,4 +1,4 @@
-import { DevModeContext } from "@moonwall/types";
+import { GenericContext, EthersTransactionOptions } from "@moonwall/types";
 import { TransactionRequest, Wallet } from "ethers";
 import { TransactionType } from "@moonwall/types";
 import { ALITH_ADDRESS } from "../constants/accounts.js";
@@ -26,16 +26,19 @@ const transactionHandlers: Record<TransactionType, TransactionHandler> = {
   },
 };
 
-export async function createEthersTxn<
-  TOptions extends TransactionRequest & { txnType?: TransactionType; privateKey?: `0x${string}` }
->(context: DevModeContext, params: TOptions) {
-  const nonce = await context.viem("public").getTransactionCount({ address: ALITH_ADDRESS });
+export async function createEthersTransaction<TOptions extends EthersTransactionOptions>(
+  context: GenericContext,
+  params: TOptions
+) {
+  // const nonce = await context.viem().getTransactionCount({ address: ALITH_ADDRESS });
+  const nonce = await context.viem().getTransactionCount({ address: ALITH_ADDRESS });
   const blob: {} = { nonce, ...params };
 
   const handler = transactionHandlers[params.txnType || "legacy"];
   if (!handler) {
     throw new Error("Unknown transaction type, update createRawEthersTxn fn");
   }
+
   handler(blob, params);
 
   const signer = params.privateKey
@@ -43,6 +46,5 @@ export async function createEthersTxn<
     : context.ethers();
 
   const txn = await signer.populateTransaction(blob);
-  const raw = await signer.signTransaction(txn);
-  return { rawSigned: raw as `0x${string}`, request: txn };
+  return (await signer.signTransaction(txn)) as `0x${string}`;
 }

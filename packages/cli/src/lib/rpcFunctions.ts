@@ -2,7 +2,7 @@ import { importJsonConfig } from "./configReader.js";
 import fetch from "node-fetch";
 
 export async function customDevRpcRequest(method: string, params: any[] = []): Promise<any> {
-  const globalConfig = await importJsonConfig();
+  const globalConfig = importJsonConfig();
   const env = globalConfig.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
   const endpoint = env.connections
     ? env.connections[0].endpoints[0].replace("ws://", "http://")

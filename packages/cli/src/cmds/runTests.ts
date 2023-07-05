@@ -10,7 +10,7 @@ import { execSync } from "node:child_process";
 import { clearNodeLogs } from "src/internal/cmdFunctions/tempLogs.js";
 
 export async function testCmd(envName: string, additionalArgs?: {}) {
-  const globalConfig = await importJsonConfig();
+  const globalConfig = importJsonConfig();
   const env = globalConfig.environments.find(({ name }) => name === envName)!;
   process.env.MOON_TEST_ENV = envName;
 
@@ -78,7 +78,7 @@ export async function testCmd(envName: string, additionalArgs?: {}) {
 }
 
 export async function executeTests(env: Environment, additionalArgs?: {}) {
-  const globalConfig = await importJsonConfig();
+  const globalConfig = importJsonConfig();
 
   if (env.foundation.type === "read_only") {
     try {
@@ -88,7 +88,7 @@ export async function executeTests(env: Environment, additionalArgs?: {}) {
 
       const ctx = await contextCreator(globalConfig, process.env.MOON_TEST_ENV);
       const chainData = ctx.providers
-        .filter((provider) => provider.type == "moon" || provider.type == "polkadotJs")
+        .filter((provider) => provider.type == "polkadotJs")
         .map((provider) => {
           return {
             [provider.name]: {
@@ -116,11 +116,6 @@ export async function executeTests(env: Environment, additionalArgs?: {}) {
     useAtomics: true,
     passWithNoTests: false,
     isolate: false,
-    deps: {
-      experimentalOptimizer: {
-        enabled: true,
-      },
-    },
     threads: true,
 
     include: env.include ? env.include : ["**/*{test,spec,test_,test-}*{ts,mts,cts}"],

@@ -1,7 +1,14 @@
 import "@moonbeam-network/api-augment";
-import { beforeAll, describeSuite, expect, fetchCompiledContract } from "@moonwall/cli";
+import {
+  beforeAll,
+  deployCreateCompiledContract,
+  describeSuite,
+  expect,
+  fetchCompiledContract,
+} from "@moonwall/cli";
 import {
   ALITH_ADDRESS,
+  ALITH_PRIVATE_KEY,
   BALTATHAR_ADDRESS,
   BALTATHAR_PRIVATE_KEY,
   CHARLETH_ADDRESS,
@@ -16,6 +23,7 @@ import { BN } from "@polkadot/util";
 import { Signer, parseEther } from "ethers";
 import {
   Abi,
+  createWalletClient,
   decodeErrorResult,
   decodeEventLog,
   encodeFunctionData,
@@ -23,10 +31,13 @@ import {
   formatEther,
   formatGwei,
   getContract,
+  http,
+  publicActions,
   verifyMessage,
 } from "viem";
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import Web3 from "web3";
-import { bytecode as tokenBytecode, tokenAbi } from "../_test_data/token.js";
+import { tokenAbi, bytecode as tokenBytecode } from "../_test_data/token.js";
 
 describeSuite({
   id: "D01",
@@ -161,20 +172,16 @@ describeSuite({
       id: "T07",
       title: "Can send viem txns",
       test: async function () {
-        const balanceBefore = await context
-          .viem("public")
-          .getBalance({ address: BALTATHAR_ADDRESS });
+        const balanceBefore = await context.viem().getBalance({ address: BALTATHAR_ADDRESS });
 
-        await context.viem("wallet").sendTransaction({
+        await context.viem().sendTransaction({
           to: BALTATHAR_ADDRESS,
           value: parseEther("1.0"),
         });
 
         await context.createBlock();
 
-        const balanceAfter = await context
-          .viem("public")
-          .getBalance({ address: BALTATHAR_ADDRESS });
+        const balanceAfter = await context.viem().getBalance({ address: BALTATHAR_ADDRESS });
         log(`Baltahaar balance before: ${formatEther(balanceBefore)}`);
         log(`Baltahaar balance after: ${formatEther(balanceAfter)}`);
         expect(balanceBefore < balanceAfter).to.be.true;
@@ -185,7 +192,7 @@ describeSuite({
       id: "T08",
       title: "It can deploy a contract",
       test: async function () {
-        const { abi, bytecode, methods } = await fetchCompiledContract("MultiplyBy7");
+        const { abi, bytecode, methods } = fetchCompiledContract("MultiplyBy7");
         log(methods);
 
         const { status, contractAddress } = await deployViemContract(context, abi, bytecode);
@@ -199,10 +206,10 @@ describeSuite({
       id: "T09",
       title: "It can call with a contract",
       test: async function () {
-        const { abi, bytecode, methods } = await fetchCompiledContract("MultiplyBy7");
+        const { abi, bytecode, methods } = fetchCompiledContract("MultiplyBy7");
         const { status, contractAddress } = await deployViemContract(context, abi, bytecode);
 
-        const timbo = await context.viem("public").call({
+        const timbo = await context.viem().call({
           account: ALITH_ADDRESS,
           to: contractAddress!,
           value: 0n,
@@ -233,13 +240,14 @@ describeSuite({
         const contractInstance = getContract({
           abi: tokenAbi as Abi,
           address: contractAddress!,
-          publicClient: context.viem("public"),
+          publicClient: context.viem() as any,
         });
-
+        // @ts-ignore
         const symbol = await contractInstance.read.symbol();
+        //@ts-ignore
         const balBefore = (await contractInstance.read.balanceOf([BALTATHAR_ADDRESS])) as bigint;
 
-        await context.viem("wallet").writeContract({
+        await context.viem().writeContract({
           abi: tokenAbi as Abi,
           address: contractAddress!,
           value: 0n,
@@ -248,6 +256,7 @@ describeSuite({
         });
         await context.createBlock();
 
+        //@ts-ignore
         const balanceAfter = (await contractInstance.read.balanceOf([BALTATHAR_ADDRESS])) as bigint;
         log(`Baltahaar balance before: ${formatEther(balBefore)} ${symbol}`);
         log(`Baltahaar balance after: ${formatEther(balanceAfter)} ${symbol}`);
@@ -260,9 +269,14 @@ describeSuite({
       title: "It can sign a message",
       test: async function () {
         const string = "Boom Boom Lemon";
-        const signature = await context.viem("wallet").signMessage({ message: string });
+        const signature = await context.viem().signMessage({ message: string });
         const valid = await verifyMessage({ address: ALITH_ADDRESS, message: string, signature });
         log(`Signature: ${signature}`);
+
+        const tim = createWalletClient({
+          account: privateKeyToAccount(ALITH_PRIVATE_KEY),
+          transport: http("211312awd"),
+        }).extend(publicActions);
 
         context.ethers();
         expect(signature.length).to.be.greaterThan(0);
@@ -280,7 +294,7 @@ describeSuite({
         );
         log(`Deployed contract at ${contractAddress}`);
 
-        const gas = await context.viem("public").estimateContractGas({
+        const gas = await context.viem().estimateContractGas({
           abi: tokenAbi,
           address: contractAddress!,
           functionName: "transfer",
@@ -297,7 +311,7 @@ describeSuite({
       title: "It can calculate the gas cost of a simple balance transfer",
       test: async function () {
         const gas = await context
-          .viem("public")
+          .viem()
           .estimateGas({ account: ALITH_ADDRESS, to: BALTATHAR_ADDRESS, value: parseEther("1.0") });
 
         log(`Gas cost to transfer system balance is ${formatGwei(gas)} gwei`);
@@ -315,7 +329,7 @@ describeSuite({
           tokenBytecode
         );
 
-        const { result } = await context.viem("public").simulateContract({
+        const { result } = await context.viem().simulateContract({
           account: ALITH_ADDRESS,
           abi: tokenAbi,
           address: contractAddress!,
@@ -353,7 +367,7 @@ describeSuite({
         );
         log(`Deployed contract at ${contractAddress}`);
 
-        const txHash = await context.viem("wallet").writeContract({
+        const txHash = await context.viem().writeContract({
           abi: tokenAbi,
           address: contractAddress!,
           functionName: "transfer",
@@ -362,7 +376,7 @@ describeSuite({
 
         await context.createBlock();
 
-        const { logs } = await context.viem("public").getTransactionReceipt({ hash: txHash });
+        const { logs } = await context.viem().getTransactionReceipt({ hash: txHash });
 
         const decoded = decodeEventLog({
           abi: tokenAbi,
@@ -400,7 +414,137 @@ describeSuite({
       title: "It can use different apis",
       test: async function () {
         log(await context.ethers().provider?.getBalance(BALTATHAR_ADDRESS));
-        expect(await context.api("ethers").provider?.getBalance(BALTATHAR_ADDRESS)).toBeGreaterThan(0n)
+        expect(await context.api("ethers").provider?.getBalance(BALTATHAR_ADDRESS)).toBeGreaterThan(
+          0n
+        );
+      },
+    });
+
+    it({
+      id: "T19",
+      title: "It has working runner functions added to context",
+      test: async function () {
+        const address1 = privateKeyToAccount(generatePrivateKey()).address;
+        const address2 = privateKeyToAccount(generatePrivateKey()).address;
+
+        const rawTxn1 = await context.createTxn!({
+          to: address1,
+          value: parseEther("1.0"),
+          libraryType: "ethers",
+        });
+
+        await context.createBlock(rawTxn1);
+        log(`Raw generated txn1 is ${rawTxn1}`);
+        expect(rawTxn1.length).toBeGreaterThan(2);
+
+        const balance1 = await context.viem().getBalance({ address: address1 });
+        expect(balance1).toBe(GLMR);
+        const rawTxn2 = await context.createTxn!({
+          to: address2,
+          value: parseEther("1.0"),
+          libraryType: "viem",
+        });
+        await context.createBlock(rawTxn2);
+        log(`Raw generated txn2 is ${rawTxn2}`);
+        expect(rawTxn2.length).toBeGreaterThan(2);
+
+        const balance2 = await context.viem().getBalance({ address: address2 });
+        expect(balance2).toBe(GLMR);
+      },
+    });
+
+    it({
+      id: "T20",
+      title: "It can read a precompiled contracts",
+      test: async function () {
+        const round = await context.readPrecompile!({
+          precompileName: "ParachainStaking",
+          functionName: "round",
+        });
+
+        log(`Parachain staking Round is ${round}`);
+        expect(round).toBe(1n);
+      },
+    });
+
+    it({
+      id: "T21",
+      title: "It can write to a precompiled contract",
+      test: async function () {
+        const allowanceBefore = (await context.readPrecompile!({
+          precompileName: "IERC20",
+          functionName: "allowance",
+          args: [ALITH_ADDRESS, BALTATHAR_ADDRESS],
+        })) as bigint;
+
+        log(`Allowance of baltathar is:  ${allowanceBefore}`);
+
+        const tx = await context.writePrecompile!({
+          precompileName: "IERC20",
+          functionName: "approve",
+          args: [BALTATHAR_ADDRESS, GLMR],
+        });
+        log(`Txn hash is ${tx}`);
+
+        await context.createBlock();
+
+        const allowanceAfter = (await context.readPrecompile!({
+          precompileName: "IERC20",
+          functionName: "allowance",
+          args: [ALITH_ADDRESS, BALTATHAR_ADDRESS],
+        })) as bigint;
+        log(`Allowance of baltathar is:  ${allowanceAfter}`);
+        expect(allowanceAfter - allowanceBefore).toBe(GLMR);
+
+        const rawTx = await context.writePrecompile!({
+          precompileName: "IERC20",
+          functionName: "approve",
+          rawTxOnly: true,
+          args: [BALTATHAR_ADDRESS, 2n * GLMR],
+        });
+        log(rawTx);
+
+        await context.createBlock(rawTx);
+
+        const allowanceFinal = (await context.readPrecompile!({
+          precompileName: "IERC20",
+          functionName: "allowance",
+          args: [ALITH_ADDRESS, BALTATHAR_ADDRESS],
+        })) as bigint;
+        log(`Allowance of baltathar is:  ${allowanceFinal}`);
+        expect(allowanceFinal - allowanceAfter).toBe(GLMR);
+      },
+    });
+
+    it({
+      id: "T22",
+      title: "it can read a newly deployed contract",
+      test: async function () {
+        const { contractAddress } = await context.deployContract!("ToyContract");
+        log(`Deployed contract at ${contractAddress}`);
+
+        const value = await context.readContract!({
+          contractName: "ToyContract",
+          contractAddress,
+          functionName: "value",
+        });
+        log(`Value is ${value}`);
+        expect(value).toBe(5n);
+        await context.writeContract!({
+          contractName: "ToyContract",
+          contractAddress,
+          functionName: "setter",
+          args: [20],
+        });
+        await context.createBlock();
+
+        const value2 = await context.readContract!({
+          contractName: "ToyContract",
+          contractAddress,
+          functionName: "value",
+        });
+        log(`Value is ${value2}`);
+        expect(value2).toBe(20n);
       },
     });
   },

@@ -139,7 +139,7 @@ export class MoonwallContext {
 
   private async startZombieNetwork(nodes: Node[]) {
     console.log("🧟 Spawning zombie nodes ...");
-    const config = await importJsonConfig();
+    const config = importJsonConfig();
     const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
     const zombieConfig = getZombieConfig(nodes[0].cmd);
 
@@ -205,7 +205,7 @@ export class MoonwallContext {
   }
 
   public async connectEnvironment(): Promise<MoonwallContext> {
-    const config = await importJsonConfig();
+    const config = importJsonConfig();
     const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
 
     if (this.environment.foundationType == "zombie") {
@@ -229,7 +229,7 @@ export class MoonwallContext {
 
     if (this.foundation == "zombie") {
       const promises = this.providers
-        .filter(({ type }) => type == "polkadotJs" || type == "moon")
+        .filter(({ type }) => type == "polkadotJs")
         .filter(
           ({ name }) =>
             env.foundation.type == "zombie" &&

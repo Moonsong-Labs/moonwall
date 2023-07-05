@@ -19,7 +19,7 @@ export async function main() {
   while (true) {
     let globalConfig;
     try {
-      globalConfig = await importJsonConfig();
+      globalConfig = importJsonConfig();
     } catch (e) {
       console.log(e);
     }
@@ -138,6 +138,10 @@ async function resolveDownloadChoice() {
         "moonbase-runtime",
         "moonriver-runtime",
         "moonbeam-runtime",
+        new inquirer.Separator(),
+        "tanssi-node",
+        "container-chain-template-frontier-node",
+        "container-chain-template-simple-node",
         new inquirer.Separator(),
         "Back",
         new inquirer.Separator(),

@@ -2,16 +2,24 @@ import { ApiPromise } from "@polkadot/api";
 import { ApiTypes } from "@polkadot/api/types/index.js";
 import { KeyringPair } from "@polkadot/keyring/types.js";
 import { Debugger } from "debug";
-import { Signer } from "ethers";
-import { Account, PublicClient, Transport, WalletClient } from "viem";
+import { Signer, TransactionRequest } from "ethers";
+import {
+  Abi,
+  Account,
+  Log,
+  PublicActions,
+  TransactionSerializable,
+  Transport,
+  WalletClient
+} from "viem";
 import { Chain } from "viem/chains";
 import { Web3 } from "web3";
-import {
-  FoundationType,
-  PolkadotProviders
-} from "./config.js";
+import { FoundationType } from "./config.js";
 import { BlockCreation, BlockCreationResponse, ChopsticksBlockCreation } from "./context.js";
+import { ContractDeploymentOptions } from "./contracts.js";
+import { TransactionType } from "./eth.js";
 import { CallType } from "./foundations.js";
+import { DeepPartial } from "./helpers.js";
 
 /**
  * @name CustomTest
@@ -171,35 +179,20 @@ export interface UpgradePreferences {
 }
 
 /**
- * PublicViem - A PublicClient type from the 'viem' module.
+ * ViemClient - Combined type that contains both Wallet and Public viem client actions
  */
-export type PublicViem = PublicClient<Transport, Chain, true>;
-
-/**
- * WalletViem - A WalletClient type from the 'viem' module.
- */
-export type WalletViem = WalletClient<Transport, Chain, Account, true>;
-
-/**
- * ViemApiMap - An interface to map 'public' and 'wallet' to their respective types.
- */
-export interface ViemApiMap {
-  public: PublicViem;
-  wallet: WalletViem;
-}
+export type ViemClient = WalletClient<Transport, Chain, Account> & PublicActions;
 
 /**
  * GenericContext - Interface that encapsulates all the common methods and properties needed for all tests.
  */
 export interface GenericContext {
-  api(type: "polkadotJs" | "moon", name?: string): ApiPromise;
+  api(type: "polkadotJs", name?: string): ApiPromise;
   api(type: "ethers", name?: string): Signer;
   api(type: "web3", name?: string): Web3;
-  api(type: "viemPublic", name?: string): PublicViem;
-  api(type: "viemWallet", name?: string): WalletViem;
-  viem(clientType?: "public", name?: string): PublicViem;
-  viem(clientType: "wallet", name?: string): WalletViem;
-  polkadotJs(options?: { apiName?: string; type?: PolkadotProviders }): ApiPromise;
+  api(type: "viem", name?: string): ViemClient;
+  viem(name?: string): ViemClient;
+  polkadotJs(apiName?: string): ApiPromise;
   ethers(name?: string): Signer;
   web3(name?: string): Web3;
 }
@@ -245,8 +238,170 @@ export interface ChopsticksContext extends GenericContext {
  * DevModeContext - Interface that extends from GenericContext and includes a method for creating a block.
  */
 export interface DevModeContext extends GenericContext {
+  /**
+   * Creates a block with given transactions and options.
+   *
+   * @template ApiType Type of API to be used.
+   * @template Calls Type of calls to be made, could be a single CallType or an array of CallType.
+   * @param {Calls} transactions An optional array of transactions.
+   * @param {BlockCreation} options Optional parameters for block creation.
+   * @returns {Promise<BlockCreationResponse<ApiType, Calls>>} A Promise that resolves to a BlockCreationResponse.
+   */
   createBlock<ApiType extends ApiTypes, Calls extends CallType<ApiType> | CallType<ApiType>[]>(
     transactions?: Calls,
     options?: BlockCreation
   ): Promise<BlockCreationResponse<ApiType, Calls>>;
+
+  /**
+   * Creates a raw Ethereum transaction based on the given options.
+   *
+   * @template TOptions Type of option parameters to be used. Use libraryType to specify which web3 library to use
+   * (viem or ethers), otherwise will default to viem.
+   * @param {TOptions} options Options for creating a transaction.
+   * @returns {Promise<`0x${string}`>} A Promise that resolves to a raw transaction string prefixed with '0x'.
+   */
+  createTxn?<
+    TOptions extends
+      | (DeepPartial<ViemTransactionOptions> & {
+          libraryType?: "viem";
+        })
+      | (EthersTransactionOptions & {
+          libraryType: "ethers";
+        })
+  >(
+    options: TOptions
+  ): Promise<`0x${string}`>;
+
+  /**
+   * Execute a non-state changing transaction to a precompiled contract address (i.e. read).
+   *
+   * @param {PrecompileCallOptions} callOptions The options for the contract call.
+   * @returns {Promise<unknown>} A Promise that resolves to the return data from the contract call.
+   */
+  readPrecompile?(callOptions: PrecompileCallOptions): Promise<unknown>;
+
+  /**
+   * Submit a state-changing transaction to a precompiled contract address.
+   *
+   * @param {PrecompileCallOptions} callOptions The options for the contract call.
+   * @returns {Promise<`0x${string}`>} The transaction hash that resolves after the write operation has been completed.
+   */
+  writePrecompile?(callOptions: PrecompileCallOptions): Promise<`0x${string}`>;
+
+  /**
+   * Execute a non-state changing transaction to a deployed contract address (i.e. read).
+   *
+   * @param {ContractCallOptions} callOptions The options for the contract call.
+   * @returns {Promise<unknown>} A Promise that resolves to the return data from the contract call.
+   */
+  readContract?(callOptions: ContractCallOptions): Promise<unknown>;
+
+  /**
+   * Submit a state-changing transaction to a deployed contract address.
+   *
+   * @param {ContractCallOptions} callOptions The options for the contract call.
+   * @returns {Promise<`0x${string}`>} The transaction hash that resolves after the write operation has been completed.
+   */
+  writeContract?(callOptions: ContractCallOptions): Promise<`0x${string}`>;
+
+  /**
+   * Deploy a contract to the local dev network.
+   *
+   * @param {ContractDeploymentOptions} options The options necessary for the contract deployment.
+   * @returns {Promise<{contractAddress: `0x${string}` | null, status: "success" | "reverted", logs: Log<bigint, number>[], hash: `0x${string}`}>} A Promise that resolves to an object containing the contract address, the status of the deployment, logs, and the transaction hash of the deployment.
+   */
+  deployContract?(
+    contractName: string,
+    options?: ContractDeploymentOptions
+  ): Promise<{
+    contractAddress: `0x${string}`;
+    logs: Log<bigint, number>[];
+    hash: `0x${string}`;
+    status: "success" | "reverted";
+    abi: Abi;
+    bytecode: `0x${string}`;
+    methods: any;
+  }>;
+}
+
+export type ViemTransactionOptions =
+  | TransactionSerializable & {
+      privateKey?: `0x${string}`;
+      skipEstimation?: boolean;
+    };
+
+export type EthersTransactionOptions = TransactionRequest & {
+  txnType?: TransactionType;
+  privateKey?: `0x${string}`;
+};
+
+export type PrecompileCallOptions = Omit<
+  ContractCallOptions,
+  "contractName" | "contractAddress"
+> & {
+  /**  The name of the Pre-compiled contract you want to interact with.
+   * Compiled contracts are a set of contract-like code that is
+   * embedded into the Moonbeam runtime.
+   */
+  precompileName: string;
+};
+
+export interface ContractCallOptions {
+  /**
+   * The name of the compiled contract you want to interact with.
+   * Compiled contracts are solidity contracts already compiled by solc
+   * into JSON files accessible to this project. Refer to Moonwall help
+   * docs for more info.
+   */
+  contractName: string;
+
+  /**
+   * The address of the deployed contract you want to interact with.
+   */
+  contractAddress: `0x${string}`;
+
+  /**
+   * The name of the function in the contract that you want to call.
+   */
+  functionName: string;
+
+  /**
+   * If set to true, only the raw transaction data will be returned,
+   * and the transaction will not be sent. This can be useful if you
+   * want to sign the transaction yourself or send it at a later time.
+   */
+  rawTxOnly?: boolean;
+
+  /**
+   * If set to true, the function call will be executed as a "call" and
+   * will not create a transaction on the blockchain. This is useful
+   * for view functions that don't modify the blockchain's state.
+   */
+  call?: boolean;
+
+  /**
+   * The private key used for signing the transaction. It should be a
+   * hexadecimal string with a "0x" prefix. If not provided, the
+   * transaciton will default to ALITH
+   */
+  privateKey?: `0x${string}`;
+
+  /**
+   * The amount of gas to use for the transaction. This can either be a
+   * specific number (as a bigint) or the string "estimate", in which
+   * case the library will automatically estimate the gas needed.
+   */
+  gas?: bigint | "estimate";
+
+  /**
+   * The JavaScript library to use for interacting with the Ethereum network.
+   * "viem" or "ethers" are the currently supported options.
+   */
+  web3Library?: "viem" | "ethers";
+
+  /**
+   * An array of arguments to pass to the function call. The types of these
+   * arguments depend on the function you're calling.
+   */
+  args?: any[];
 }
