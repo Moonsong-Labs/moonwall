@@ -5,6 +5,7 @@ import {
   DEFAULT_GENESIS_MAPPING,
   DEFAULT_GENESIS_STAKING,
 } from "./chain.js";
+import { KeyringPair } from "@polkadot/keyring/types";
 
 const keyringEth = new Keyring({ type: "ethereum" });
 const keyringEd25519 = new Keyring({ type: "ed25519" });
@@ -73,13 +74,13 @@ export const ALITH_GENESIS_RESERVE_BALANCE = DEFAULT_GENESIS_MAPPING;
 export const ALITH_GENESIS_TRANSFERABLE_BALANCE =
   ALITH_GENESIS_FREE_BALANCE - ALITH_GENESIS_LOCK_BALANCE;
 
-export const alith = keyringEth.addFromUri(ALITH_PRIVATE_KEY);
-export const baltathar = keyringEth.addFromUri(BALTATHAR_PRIVATE_KEY);
-export const charleth = keyringEth.addFromUri(CHARLETH_PRIVATE_KEY);
-export const dorothy = keyringEth.addFromUri(DOROTHY_PRIVATE_KEY);
-export const ethan = keyringEth.addFromUri(ETHAN_PRIVATE_KEY);
-export const faith = keyringEth.addFromUri(FAITH_PRIVATE_KEY);
-export const goliath = keyringEth.addFromUri(GOLIATH_PRIVATE_KEY);
+export const alith: KeyringPair = keyringEth.addFromUri(ALITH_PRIVATE_KEY);
+export const baltathar: KeyringPair = keyringEth.addFromUri(BALTATHAR_PRIVATE_KEY);
+export const charleth: KeyringPair = keyringEth.addFromUri(CHARLETH_PRIVATE_KEY);
+export const dorothy: KeyringPair = keyringEth.addFromUri(DOROTHY_PRIVATE_KEY);
+export const ethan: KeyringPair = keyringEth.addFromUri(ETHAN_PRIVATE_KEY);
+export const faith: KeyringPair = keyringEth.addFromUri(FAITH_PRIVATE_KEY);
+export const goliath: KeyringPair = keyringEth.addFromUri(GOLIATH_PRIVATE_KEY);
 
 // deprecated
 export const gerald = keyringEth.addFromUri(GERALD_PRIVATE_KEY);

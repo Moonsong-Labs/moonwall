@@ -10,6 +10,7 @@ import {
 } from "@moonwall/types";
 import {
   ALITH_PRIVATE_KEY,
+  alith,
   createEthersTransaction,
   createViemTransaction,
   deployViemContract,
@@ -38,14 +39,14 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
       Calls extends CallType<ApiType> | CallType<ApiType>[]
     >(
       transactions?: Calls,
-      options: BlockCreation = {}
+      options?: BlockCreation
     ) => {
       const defaults: BlockCreation = {
-        signer: env.defaultSigner || { type: "ethereum", privateKey: ALITH_PRIVATE_KEY },
+        signer: env.defaultSigner || alith,
         allowFailures: env.defaultAllowFailures === undefined ? true : env.defaultAllowFailures,
         finalize: env.defaultFinalization === undefined ? true : env.defaultFinalization,
       };
-      return await createDevBlock(context, transactions, { ...defaults, ...options });
+      return await createDevBlock(context, { ...defaults, ...options }, transactions);
     },
   };
 

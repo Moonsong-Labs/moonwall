@@ -37,8 +37,8 @@ export type CallType<TApi extends ApiTypes> =
 
 export async function createDevBlock<
   ApiType extends ApiTypes,
-  Calls extends CallType<ApiType> | CallType<ApiType>[]
->(context: GenericContext, transactions?: Calls, options: BlockCreation = {}) {
+  Calls extends CallType<ApiType> | Array<CallType<ApiType>> 
+>(context: GenericContext,  options: BlockCreation, transactions?: Calls) {
   let originalBlockNumber: bigint;
 
   const containsViem =
@@ -49,13 +49,17 @@ export async function createDevBlock<
   if (containsViem) {
     originalBlockNumber = await context.viem().getBlockNumber();
   }
-  const signer = generateKeyringPair(options.signer!.type, options.signer!.privateKey);
+  const signer =
+    "privateKey" in options.signer && "type" in options.signer
+      ? generateKeyringPair(options.signer!.type, options.signer!.privateKey)
+      : options.signer;
 
   const results: ({ type: "eth"; hash: string } | { type: "sub"; hash: string })[] = [];
 
   const api = context.polkadotJs();
   const txs =
     transactions == undefined ? [] : Array.isArray(transactions) ? transactions : [transactions];
+    
   for await (const call of txs) {
     if (typeof call == "string") {
       // Ethereum
