@@ -1,25 +1,15 @@
 import "@moonbeam-network/api-augment";
 import "@polkadot/api-augment";
-import { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types";
-import { GenericExtrinsic } from "@polkadot/types/extrinsic";
-import { AccountId20, DispatchError, DispatchInfo, EventRecord } from "@polkadot/types/interfaces";
-import { AnyTuple, RegistryError } from "@polkadot/types/types";
-import { ALITH_PRIVATE_KEY } from "../constants/accounts.js";
-import { ethers } from "ethers";
 import { u128 } from "@polkadot/types-codec";
+import { AccountId20, DispatchError, DispatchInfo, EventRecord } from "@polkadot/types/interfaces";
 
-export interface BlockCreation {
-  parentHash?: string;
-  finalize?: boolean;
-}
-
-export interface ExtrinsicCreation {
-  extrinsic: GenericExtrinsic<AnyTuple>;
-  events: EventRecord[];
-  error: RegistryError;
-  successful: boolean;
-  hash: string;
-}
+// export interface ExtrinsicCreation {
+//   extrinsic: GenericExtrinsic<AnyTuple>;
+//   events: EventRecord[];
+//   error: RegistryError;
+//   successful: boolean;
+//   hash: string;
+// }
 
 export function filterAndApply<T>(
   events: EventRecord[],
@@ -73,10 +63,3 @@ export function extractFee(events: EventRecord[] = []) {
     ({ event }: EventRecord) => event.data as unknown as { who: AccountId20; amount: u128 }
   )[0];
 }
-
-// Ethers
-export const alithSigner = (context: ethers.Provider) => {
-  const signer = new ethers.Wallet(ALITH_PRIVATE_KEY, context);
-  signer.connect(context);
-  return signer;
-};

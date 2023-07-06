@@ -1,15 +1,16 @@
 import { ApiPromise, WsProvider } from "@polkadot/api";
+import { AugmentedEvent } from "@polkadot/api/types/events.js";
+import { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types/index.js";
+import { KeyringPair } from "@polkadot/keyring/types";
+import { GenericExtrinsic } from "@polkadot/types/extrinsic";
+import { EventRecord } from "@polkadot/types/interfaces/types.js";
+import { AnyTuple, RegistryError } from "@polkadot/types/types";
+import { Debugger } from "debug";
 import { Signer } from "ethers";
 import { Web3 } from "web3";
 import { FoundationType, ProviderType } from "./config.js";
-import { ViemClient } from "./runner.js";
-import { AugmentedEvent } from "@polkadot/api/types/events.js";
-import { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types/index.js";
-import { Debugger } from "debug";
 import { CallType } from "./foundations.js";
-import { GenericExtrinsic } from "@polkadot/types/extrinsic";
-import { AnyTuple, RegistryError } from "@polkadot/types/types";
-import { EventRecord } from "@polkadot/types/interfaces/types.js";
+import { ViemClient } from "./runner.js";
 
 /**
  * @name MoonwallEnvironment
@@ -37,12 +38,7 @@ export type MoonwallEnvironment = {
 export interface MoonwallProvider {
   name: string;
   type: ProviderType;
-  connect: () =>
-    | Promise<ApiPromise>
-    | Signer
-    | Web3
-    | Promise<ViemClient>
-    | void;
+  connect: () => Promise<ApiPromise> | Signer | Web3 | Promise<ViemClient> | void;
   ws?: () => WsProvider;
 }
 
@@ -105,7 +101,7 @@ export interface BlockCreation {
   allowFailures?: boolean;
   expectEvents?: AugmentedEvent<ApiTypes>[];
   logger?: Debugger;
-  signer?: { type: "ethereum" | "sr25519" | "ed25519"; privateKey: string };
+  signer: { type: "ethereum" | "sr25519" | "ed25519"; privateKey: string } | KeyringPair;
 }
 
 export interface BlockCreationResponse<

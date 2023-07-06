@@ -187,7 +187,7 @@ const reportServicePorts = async () => {
   const config = globalConfig.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
   if (config.foundation.type == "dev") {
     const port =
-      ctx.environment.nodes[0].args.find((a) => a.includes("ws-port"))!.split("=")[1] || "9944";
+      ctx.environment.nodes[0].args.find((a) => a.includes("ws-port") || a.includes("rpc-port"))!.split("=")[1] || "9944";
     portsList.push({ port, name: "dev" });
   } else if (config.foundation.type == "chopsticks") {
     portsList.push(
