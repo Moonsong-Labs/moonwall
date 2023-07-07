@@ -8,9 +8,33 @@ import { generateConfig } from "../internal/cmdFunctions/initialisation.js";
 import { main } from "./main.js";
 import { fetchArtifact } from "../internal/cmdFunctions/fetchArtifact.js";
 
+// Hack to expose config-path to all commands and fallback
+const parsed = yargs(hideBin(process.argv))
+  .options({
+    configFile: {
+      type: "string",
+      alias: "c",
+      description: "path to MoonwallConfig file",
+      default: "./moonwall.config.json",
+    },
+  })
+  .parseSync();
+process.env.MOON_CONFIG_PATH = parsed.configFile;
+
 yargs(hideBin(process.argv))
   .usage("Usage: $0")
   .version("2.0.0")
+  .options({
+    configFile: {
+      type: "string",
+      alias: "c",
+      description: "path to MoonwallConfig file",
+      default: "./moonwall.config.json",
+    },
+  })
+  .middleware((argv) => {
+    process.env.MOON_CONFIG_PATH = argv.configFile;
+  })
   .command(`init`, "Run tests for a given Environment", async () => {
     await generateConfig();
   })
@@ -93,17 +117,9 @@ yargs(hideBin(process.argv))
     }
   )
   .demandCommand(1)
-  .fail(async (msg, err, yargs) => {
+  .fail(async (msg, err, instance) => {
     await main();
-  })
-  .options({
-    configFile: {
-      type: "string",
-      alias: "c",
-      description: "path to MoonwallConfig file",
-      default: "./moonwall.config.json",
-    },
   })
   .help("h")
   .alias("h", "help")
-  .parse();
+  .parseSync();
