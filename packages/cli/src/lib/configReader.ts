@@ -24,7 +24,7 @@ export async function importConfig(configPath: string): Promise<MoonwallConfig> 
 }
 
 export function importJsonConfig(): MoonwallConfig {
-  const filePath = path.join(process.cwd(), "moonwall.config.json");
+  const filePath = path.join(process.cwd(), process.env.MOON_CONFIG_PATH!);
   try {
     const file = readFileSync(filePath, "utf8");
     const json = JSON.parse(file);
