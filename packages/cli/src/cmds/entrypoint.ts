@@ -122,4 +122,4 @@ yargs(hideBin(process.argv))
   })
   .help("h")
   .alias("h", "help")
-  .parseSync();
+  .parse();
