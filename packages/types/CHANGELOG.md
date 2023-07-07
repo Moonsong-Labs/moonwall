@@ -1,5 +1,11 @@
 # @moonwall/types
 
+## 4.0.1
+
+### Patch Changes
+
+- 6015a4d: SMall fix
+
 ## 4.0.0
 
 ### Minor Changes
