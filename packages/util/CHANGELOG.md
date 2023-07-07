@@ -1,5 +1,13 @@
 # @moonwall/util
 
+## 4.0.1
+
+### Patch Changes
+
+- 6015a4d: SMall fix
+- Updated dependencies [6015a4d]
+  - @moonwall/types@4.0.1
+
 ## 4.0.0
 
 ### Minor Changes
