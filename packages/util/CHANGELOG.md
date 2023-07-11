@@ -1,5 +1,11 @@
 # @moonwall/util
 
+## 4.0.2
+
+### Patch Changes
+
+- 5bbd542: replace ts-node with tsx
+
 ## 4.0.1
 
 ### Patch Changes
