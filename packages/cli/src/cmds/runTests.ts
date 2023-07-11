@@ -50,7 +50,7 @@ export async function testCmd(envName: string, additionalArgs?: {}) {
             execSync("node " + scriptPath, { stdio: "inherit" });
             break;
           case ".ts":
-            execSync("pnpm ts-node-esm --swc " + scriptPath, { stdio: "inherit" });
+            execSync("pnpm tsx " + scriptPath, { stdio: "inherit" });
             break;
           case ".sh":
             execSync(scriptPath, { stdio: "inherit" });
