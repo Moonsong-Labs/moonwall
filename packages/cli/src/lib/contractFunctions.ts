@@ -121,6 +121,7 @@ export async function interactWithContract(
     args = [],
     web3Library = "viem",
     gas = "estimate",
+    value = 0n,
     privateKey = ALITH_PRIVATE_KEY,
     rawTxOnly = false,
     call = false,
@@ -144,11 +145,12 @@ export async function interactWithContract(
 
   if (!call && rawTxOnly) {
     return web3Library === "viem"
-      ? createViemTransaction(context, { to: contractAddress, data, gas: gasParam, privateKey })
+      ? createViemTransaction(context, { to: contractAddress, data, gas: gasParam, privateKey, value })
       : createEthersTransaction(context, {
           to: contractAddress,
           data,
           gas: gasParam,
+          value: toHex(value),
           privateKey,
         });
   }
@@ -163,7 +165,7 @@ export async function interactWithContract(
       const result = await context.ethers().call({
         from: account.address,
         to: contractAddress,
-        value: 0n,
+        value: toHex(value),
         data,
         gasLimit: toHex(gasParam),
       });
@@ -173,14 +175,14 @@ export async function interactWithContract(
     if (web3Library === "viem") {
       const hash = await context
         .viem()
-        .sendTransaction({ account, to: contractAddress, value: 0n, data, gas: gasParam });
+        .sendTransaction({ account, to: contractAddress, value, data, gas: gasParam });
       return hash;
     } else {
       const signer = new Wallet(privateKey, context.ethers().provider);
       const { hash } = await signer.sendTransaction({
         from: account.address,
         to: contractAddress,
-        value: 0n,
+        value: toHex(value),
         data,
         gasLimit: toHex(gasParam),
       });
