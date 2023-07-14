@@ -15,28 +15,26 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18.x
+          cache: "pnpm"
       - run: pnpm install --frozen-lockfile
       - run: pnpm run lint && pnpm run build
-      - name: Archive production artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: workspace
-          path: .
       
   test_basic:
     runs-on: ubuntu-latest
     needs: ["build"]
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v2
-        with:
-          name: workspace
       - uses: pnpm/action-setup@v2
         with:
           version: 8
       - uses: actions/setup-node@v3
         with:
           node-version: 18.x
+          cache: "pnpm"
+      - name: Build like before
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm run lint && pnpm run build
       - name: Run standard dev test
         run: pnpm moonwall test basic
 
