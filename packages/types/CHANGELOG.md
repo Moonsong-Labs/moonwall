@@ -1,5 +1,11 @@
 # @moonwall/types
 
+## 4.0.3
+
+### Patch Changes
+
+- 0c70af6: Better CI
+
 ## 4.0.1
 
 ### Patch Changes
