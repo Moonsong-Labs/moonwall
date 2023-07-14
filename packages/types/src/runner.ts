@@ -10,7 +10,7 @@ import {
   PublicActions,
   TransactionSerializable,
   Transport,
-  WalletClient
+  WalletClient,
 } from "viem";
 import { Chain } from "viem/chains";
 import { Web3 } from "web3";
@@ -392,6 +392,11 @@ export interface ContractCallOptions {
    * case the library will automatically estimate the gas needed.
    */
   gas?: bigint | "estimate";
+
+  /**
+   * The native balance to send along with the transaction.
+   */
+  value?: bigint;
 
   /**
    * The JavaScript library to use for interacting with the Ethereum network.

@@ -122,7 +122,6 @@ export async function deployViemContract<TOptions extends ContractDeploymentOpti
   // const isLegacy = options?.txnType === "legacy" || options?.txnType === undefined;
   // const isEIP1559 = options?.txnType === "eip1559";
   // const isEIP2930 = options?.txnType === "eip2930";
-
   // const url = context.viem().transport.url;
   const url = context.viem().transport.url;
 
