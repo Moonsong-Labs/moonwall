@@ -548,5 +548,28 @@ describeSuite({
         expect(value2).toBe(20n);
       },
     });
+
+    it({
+      id: "T23",
+      title: "it can interact with a contract with balance",
+      test: async function () {
+        const { contractAddress } = await context.deployContract!("ToyContract");
+        const balBefore = await context.viem().getBalance({ address: contractAddress });
+
+        await context.writeContract!({
+          contractName: "ToyContract",
+          contractAddress,
+          functionName: "acceptBalance",
+          value: parseEther("1.0"),
+        });
+        await context.createBlock();
+
+        const balAfter = await context.viem().getBalance({ address: contractAddress });
+        log(`Balance before: ${formatEther(balBefore)}`);
+        log(`Balance after: ${formatEther(balAfter)}`);
+
+        expect(balAfter - balBefore).toBe(parseEther("1.0"));
+      },
+    });
   },
 });

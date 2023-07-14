@@ -19,4 +19,9 @@ contract ToyContract {
       return false;
     }
   }
+
+  function acceptBalance() external payable returns(bool){
+    // React to receiving ether
+    return true;
+  }
 }
