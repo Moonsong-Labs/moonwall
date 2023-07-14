@@ -1,5 +1,14 @@
 # @moonwall/cli
 
+## 4.0.3
+
+### Patch Changes
+
+- 0c70af6: Better CI
+- Updated dependencies [0c70af6]
+  - @moonwall/types@4.0.3
+  - @moonwall/util@4.0.3
+
 ## 4.0.2
 
 ### Patch Changes
