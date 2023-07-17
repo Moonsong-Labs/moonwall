@@ -1,5 +1,11 @@
 # @moonwall/cli
 
+## 4.0.4
+
+### Patch Changes
+
+- 84f5f3b: Fix zombie RT fn to accept custom signers
+
 ## 4.0.3
 
 ### Patch Changes
