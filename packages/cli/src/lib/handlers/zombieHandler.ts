@@ -2,6 +2,7 @@ import { FoundationHandler, UpgradePreferences } from "@moonwall/types";
 import { ApiPromise } from "@polkadot/api";
 import { upgradeRuntime } from "../upgradeProcedures.js";
 import { MoonwallContext } from "../globalContext.js";
+import { alith } from "@moonwall/util";
 
 export const zombieHandler: FoundationHandler<"zombie"> = ({ testCases, context, testCase, logger }) => {
     testCases({
@@ -47,6 +48,7 @@ export const zombieHandler: FoundationHandler<"zombie"> = ({ testCases, context,
             localPath: options.localPath || ctx.rtUpgradePath!,
             useGovernance: options.useGovernance || false,
             waitMigration: options.waitMigration || true,
+            from: options.from || alith,
           };
   
           if (options.logger) {

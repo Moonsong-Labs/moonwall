@@ -33,7 +33,6 @@ export async function upgradeRuntimeChopsticks(context: ChopsticksContext, path:
 
 export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePreferences) {
   const options = {
-    from: alith,
     waitMigration: true,
     useGovernance: false,
     ...preferences,
@@ -64,7 +63,7 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
         );
       }
 
-      let nonce = (await api.rpc.system.accountNextIndex(options.from.address)).toNumber();
+      let nonce = (await api.rpc.system.accountNextIndex(options.from!.address)).toNumber();
 
       if (options.useGovernance) {
         log("Using governance...");
@@ -96,12 +95,12 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
           if (api.query.preimage) {
             await api.tx.preimage
               .notePreimage(encodedProposal)
-              .signAndSend(options.from, { nonce: nonce++ });
+              .signAndSend(options.from!, { nonce: nonce++ });
           } else {
             // TODO: remove support for democracy after 2000
             await api.tx.democracy
               .notePreimage(encodedProposal)
-              .signAndSend(options.from, { nonce: nonce++ });
+              .signAndSend(options.from!, { nonce: nonce++ });
           }
           log(`Complete ✅`);
         }
@@ -137,11 +136,11 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
         await executeProposalWithCouncil(api, encodedHash);
 
         // Needs to retrieve nonce after those governance calls
-        nonce = (await api.rpc.system.accountNextIndex(options.from.address)).toNumber();
+        nonce = (await api.rpc.system.accountNextIndex(options.from!.address)).toNumber();
         log(`Enacting authorized upgrade...`);
         await api.tx.parachainSystem
           .enactAuthorizedUpgrade(code)
-          .signAndSend(options.from, { nonce: nonce++ });
+          .signAndSend(options.from!, { nonce: nonce++ });
         log(`Complete ✅`);
       } else {
         log(
@@ -160,7 +159,7 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
                   refTime: 1,
                 }
           )
-          .signAndSend(options.from, { nonce: nonce++ });
+          .signAndSend(options.from!, { nonce: nonce++ });
         log(`✅`);
       }
 
