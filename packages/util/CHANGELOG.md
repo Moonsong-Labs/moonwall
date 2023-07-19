@@ -1,5 +1,13 @@
 # @moonwall/util
 
+## 4.0.5
+
+### Patch Changes
+
+- 86703ac: Updated pkgs
+- Updated dependencies [86703ac]
+  - @moonwall/types@4.0.5
+
 ## 4.0.3
 
 ### Patch Changes
