@@ -21,7 +21,7 @@ import {
   ProviderInterfaceFactory,
   vitestAutoUrl,
 } from "../internal/providerFactories.js";
-import { importJsonConfig } from "./configReader.js";
+import { importJsonConfig, isEthereumDevConfig } from "./configReader.js";
 const debugSetup = Debug("global:context");
 
 export class MoonwallContext {
@@ -94,7 +94,7 @@ export class MoonwallContext {
       ],
       providers: env.connections
         ? ProviderFactory.prepare(env.connections)
-        : !!!env.foundation.launchSpec![0].disableDefaultEthProviders
+        : isEthereumDevConfig()
         ? ProviderFactory.prepareDefaultDev()
         : ProviderFactory.prepare([
             {

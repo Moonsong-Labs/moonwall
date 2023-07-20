@@ -1,6 +1,12 @@
 import "@moonbeam-network/api-augment";
 import { BlockCreation, ExtrinsicCreation, GenericContext } from "@moonwall/types";
-import { createAndFinalizeBlock, customWeb3Request, generateKeyringPair } from "@moonwall/util";
+import {
+  alith,
+  createAndFinalizeBlock,
+  customWeb3Request,
+  generateKeyringPair
+} from "@moonwall/util";
+import { Keyring } from "@polkadot/api";
 import { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types";
 import { RegistryError } from "@polkadot/types-codec/types/registry";
 import { EventRecord } from "@polkadot/types/interfaces/types.js";
@@ -8,7 +14,7 @@ import chalk from "chalk";
 import Debug from "debug";
 import { setTimeout } from "timers/promises";
 import { assert } from "vitest";
-import { importJsonConfig } from "../../lib/configReader.js";
+import { importJsonConfig, isEthereumDevConfig } from "../../lib/configReader.js";
 import { extractError } from "../../lib/contextHelpers.js";
 import { MoonwallContext } from "../../lib/globalContext.js";
 const debug = Debug("DevTest");
@@ -35,10 +41,22 @@ export type CallType<TApi extends ApiTypes> =
   | `0x${string}`
   | Promise<string>;
 
+function returnSigner(options: BlockCreation) {
+  return "privateKey" in options.signer! && "type" in options.signer
+    ? generateKeyringPair(options.signer!.type, options.signer!.privateKey)
+    : options.signer;
+}
+
+function returnDefaultSigner() {
+  return isEthereumDevConfig()
+    ? alith
+    : new Keyring({ type: "sr25519" }).addFromUri("//Alice", { name: "Alice default" });
+}
+
 export async function createDevBlock<
   ApiType extends ApiTypes,
-  Calls extends CallType<ApiType> | Array<CallType<ApiType>> 
->(context: GenericContext,  options: BlockCreation, transactions?: Calls) {
+  Calls extends CallType<ApiType> | Array<CallType<ApiType>>
+>(context: GenericContext, options: BlockCreation, transactions?: Calls) {
   let originalBlockNumber: bigint;
 
   const containsViem =
@@ -49,17 +67,15 @@ export async function createDevBlock<
   if (containsViem) {
     originalBlockNumber = await context.viem().getBlockNumber();
   }
-  const signer =
-    "privateKey" in options.signer && "type" in options.signer
-      ? generateKeyringPair(options.signer!.type, options.signer!.privateKey)
-      : options.signer;
+
+  const signer = options.signer !== undefined ? returnSigner(options) : returnDefaultSigner();
 
   const results: ({ type: "eth"; hash: string } | { type: "sub"; hash: string })[] = [];
 
   const api = context.polkadotJs();
   const txs =
     transactions == undefined ? [] : Array.isArray(transactions) ? transactions : [transactions];
-    
+
   for await (const call of txs) {
     if (typeof call == "string") {
       // Ethereum

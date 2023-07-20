@@ -23,6 +23,12 @@ export async function importConfig(configPath: string): Promise<MoonwallConfig> 
   return await import(configPath);
 }
 
+export function isEthereumDevConfig(): boolean {
+  const config = importJsonConfig();
+  const env = config.environments.find((env) => env.name == process.env.MOON_TEST_ENV)!;
+  return env.foundation.type == "dev" && !!!env.foundation.launchSpec[0].disableDefaultEthProviders;
+}
+
 export function importJsonConfig(): MoonwallConfig {
   const configPath = process.env.MOON_CONFIG_PATH!;
   const filePath = path.isAbsolute(configPath) ? configPath : path.join(process.cwd(), configPath);

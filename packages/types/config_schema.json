@@ -59,7 +59,7 @@
                     "type": "string"
                 },
                 "disableDefaultEthProviders": {
-                    "description": "Switch to not connect to Ethereum providers by default.",
+                    "description": "Switch to not connect to Ethereum providers by default.\nNote: This also acts as a feature gate for context methods like createTxn and readPrecompile.",
                     "type": "boolean"
                 },
                 "name": {

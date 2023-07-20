@@ -230,6 +230,7 @@ export interface DevLaunchSpec extends GenericLaunchSpec {
 
   /**
    * Switch to not connect to Ethereum providers by default.
+   * Note: This also acts as a feature gate for context methods like createTxn and readPrecompile.
    */
   disableDefaultEthProviders?: boolean;
 

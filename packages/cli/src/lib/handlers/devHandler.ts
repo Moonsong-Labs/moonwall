@@ -1,36 +1,33 @@
 import {
   BlockCreation,
   CallType,
+  ContractCallOptions,
+  ContractDeploymentOptions,
   DeepPartial,
   DevModeContext,
   EthersTransactionOptions,
   FoundationHandler,
+  PrecompileCallOptions,
   ViemTransactionOptions,
-  ContractCallOptions,
 } from "@moonwall/types";
 import {
-  ALITH_PRIVATE_KEY,
   alith,
   createEthersTransaction,
-  createViemTransaction,
-  deployViemContract,
+  createViemTransaction
 } from "@moonwall/util";
 import { ApiTypes } from "@polkadot/api/types/index.js";
 import { createDevBlock } from "../../internal/foundations/devModeHelpers.js";
-import { importJsonConfig } from "../configReader.js";
+import { importJsonConfig, isEthereumDevConfig } from "../configReader.js";
 import {
   deployCreateCompiledContract,
   interactWithContract,
   interactWithPrecompileContract,
 } from "../contractFunctions.js";
-import { PrecompileCallOptions } from "@moonwall/types";
-import { ContractDeploymentOptions } from "@moonwall/types";
 
 export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testCase, logger }) => {
   const config = importJsonConfig();
   const env = config.environments.find((env) => env.name == process.env.MOON_TEST_ENV)!;
-  const ethCompatible =
-    env.foundation.type == "dev" && env.foundation.launchSpec[0].disableDefaultEthProviders;
+  const ethCompatible = isEthereumDevConfig();
 
   const ctx: DevModeContext = {
     ...context,

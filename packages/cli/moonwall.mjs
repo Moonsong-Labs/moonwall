@@ -1,3 +1,3 @@
-#!/usr/bin/env -S node --no-warnings --experimental-modules --experimental-specifier-resolution=node  --experimental-wasm-modules --experimental-json-modules 
+#!/usr/bin/env -S node --no-warnings --no-experimental-fetch
 
 import './dist/cmds/entrypoint.js'
