@@ -13,8 +13,11 @@ import { importJsonConfig, loadEnvVars } from "../lib/configReader.js";
 import { MoonwallContext, runNetworkOnly } from "../lib/globalContext.js";
 import { executeTests } from "./runTests.js";
 import { clearNodeLogs, reportLogLocation } from "src/internal/cmdFunctions/tempLogs.js";
+import { compactStripLength } from "@polkadot/util";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
+
+let lastSelected = 0;
 
 export async function runNetwork(args) {
   process.env.MOON_TEST_ENV = args.envName;
@@ -33,7 +36,6 @@ export async function runNetwork(args) {
 
   const testFileDirs = env.testFileDir;
   const foundation = env.foundation.type;
-
   const questions = [
     {
       type: "confirm",
@@ -52,7 +54,7 @@ export async function runNetwork(args) {
       type: "list",
       message:
         `Environment : ${chalk.bgGray.cyanBright(args.envName)}\n` + "Please select a choice: ",
-      default: 0,
+      default: () => lastSelected,
       pageSize: 10,
       choices: [
         {
@@ -135,6 +137,7 @@ export async function runNetwork(args) {
     await inquirer.prompt(questions.find(({ name }) => name == "NetworkStarted"));
   } else {
     process.env.MOON_RECYCLE = "true";
+    process.env.MOON_GREP = await args.GrepTest;
     await executeTests(env, { testNamePattern: await args.GrepTest });
   }
 
@@ -146,23 +149,28 @@ export async function runNetwork(args) {
       case 1:
         clear();
         await resolveTailChoice();
+        lastSelected = 0;
         clear();
         break;
 
       case 2:
         await resolveInfoChoice(env);
+        lastSelected = 1;
         break;
 
       case 3:
         await resolveCommandChoice();
+        lastSelected = 2;
         break;
 
       case 4:
         await resolveTestChoice(env);
+        lastSelected = 3;
         break;
 
       case 5:
         await resolveGrepChoice(env);
+        lastSelected = 4;
         break;
 
       case 6:
@@ -187,7 +195,9 @@ const reportServicePorts = async () => {
   const config = globalConfig.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
   if (config.foundation.type == "dev") {
     const port =
-      ctx.environment.nodes[0].args.find((a) => a.includes("ws-port") || a.includes("rpc-port"))!.split("=")[1] || "9944";
+      ctx.environment.nodes[0].args
+        .find((a) => a.includes("ws-port") || a.includes("rpc-port"))!
+        .split("=")[1] || "9944";
     portsList.push({ port, name: "dev" });
   } else if (config.foundation.type == "chopsticks") {
     portsList.push(
@@ -232,8 +242,7 @@ const resolveCommandChoice = async () => {
   });
 
   const ctx = await MoonwallContext.getContext().connectEnvironment();
-  const api = ctx.providers.find((a) => a.type == "polkadotJs")!
-    .api as ApiPromise;
+  const api = ctx.providers.find((a) => a.type == "polkadotJs")!.api as ApiPromise;
   const globalConfig = importJsonConfig();
   const config = globalConfig.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
 
@@ -321,11 +330,12 @@ const resolveGrepChoice = async (env: Environment) => {
     name: "grep",
     type: "input",
     message: `What pattern would you like to filter for (ID/Title): `,
-    default: "D01T01",
+    default: process.env.MOON_GREP || "D01T01",
   });
   process.env.MOON_RECYCLE = "true";
 
   console.log(`Running tests with grep pattern: ${await choice.grep}`);
+  process.env.MOON_GREP = await choice.grep;
   return await executeTests(env, { testNamePattern: await choice.grep });
 };
 
