@@ -3,6 +3,7 @@ import { MoonwallConfig } from "@moonwall/types";
 import fs from "fs/promises";
 import { readFileSync } from "fs";
 import path from "path";
+import chalk from "chalk";
 
 export async function loadConfig(path: string): Promise<MoonwallConfig> {
   if (
@@ -36,7 +37,9 @@ export function importJsonConfig(): MoonwallConfig {
   try {
     const file = readFileSync(filePath, "utf8");
     const json = JSON.parse(file);
-    return json as MoonwallConfig;
+    const replacedJson = replaceEnvVars(json);
+
+    return replacedJson as MoonwallConfig;
   } catch (e) {
     console.error(e);
     throw new Error(`Error import config at ${filePath}`);
@@ -51,4 +54,30 @@ export function loadEnvVars(): void {
       const [key, value] = envVar.split("=");
       process.env[key] = value;
     });
+}
+
+function replaceEnvVars(value: any): any {
+  if (typeof value === "string") {
+    return value.replace(/\$\{([^}]+)\}/g, (match, group) => {
+      const envVarValue = process.env[group];
+      // Disabled until we only process Environment Config associated with the current Environment
+      
+      // if (envVarValue === undefined) {
+      //   throw new Error(
+      //     `❌ Moonwall config Environment Variable ${chalk.bgWhiteBright.redBright(
+      //       group
+      //     )} does not exist\n Please add ${chalk.bgWhiteBright.redBright(
+      //       group
+      //     )} to your .env file or change your config file.`
+      //   );
+      // }
+      return envVarValue || match;
+    });
+  } else if (Array.isArray(value)) {
+    return value.map(replaceEnvVars);
+  } else if (typeof value === "object" && value !== null) {
+    return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, replaceEnvVars(v)]));
+  } else {
+    return value;
+  }
 }

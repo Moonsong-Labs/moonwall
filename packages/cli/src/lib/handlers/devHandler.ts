@@ -50,7 +50,7 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
   testCases({
     context: {
       ...ctx,
-      createTxn: ethCompatible
+      createTxn: !ethCompatible
         ? undefined
         : <
             TOptions extends
@@ -69,7 +69,7 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
               : createEthersTransaction(ctx, txnOptions as EthersTransactionOptions);
           },
 
-      readPrecompile: ethCompatible
+      readPrecompile: !ethCompatible
         ? undefined
         : async (options: PrecompileCallOptions) => {
             const response = await interactWithPrecompileContract(ctx, {
@@ -78,14 +78,14 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
             });
             return response;
           },
-      writePrecompile: ethCompatible
+      writePrecompile: !ethCompatible
         ? undefined
         : async (options: PrecompileCallOptions) => {
             const response = await interactWithPrecompileContract(ctx, { call: false, ...options });
             return response as `0x${string}`;
           },
 
-      readContract: ethCompatible
+      readContract: !ethCompatible
         ? undefined
         : async (options: ContractCallOptions) => {
             const response = await interactWithContract(ctx, {
@@ -95,14 +95,14 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
             return response;
           },
 
-      writeContract: ethCompatible
+      writeContract: !ethCompatible
         ? undefined
         : async (options: ContractCallOptions) => {
             const response = await interactWithContract(ctx, { call: false, ...options });
             return response as `0x${string}`;
           },
 
-      deployContract: ethCompatible
+      deployContract: !ethCompatible
         ? undefined
         : async (contractName: string, options?: ContractDeploymentOptions) => {
             return await deployCreateCompiledContract(ctx, contractName, options);

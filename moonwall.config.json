@@ -387,6 +387,9 @@
             "running": false,
             "binPath": "tmp/moonbeam",
             "retainAllLogs": false,
+            "ports": {
+              "wsPort": 9955
+            },
             "options": [
               "--dev",
               "--no-hardware-benchmarks",
@@ -405,22 +408,22 @@
         {
           "name": "eth",
           "type": "ethers",
-          "endpoints": ["ws://127.0.0.1:9944"]
+          "endpoints": ["${WSS_URL}"]
         },
         {
           "name": "w3",
           "type": "web3",
-          "endpoints": ["ws://127.0.0.1:9944"]
+          "endpoints": ["${WSS_URL}"]
         },
         {
           "name": "viem",
           "type": "viem",
-          "endpoints": ["ws://127.0.0.1:9944"]
+          "endpoints": ["${WSS_URL}"]
         },
         {
           "name": "pjs",
           "type": "polkadotJs",
-          "endpoints": ["ws://127.0.0.1:9944"],
+          "endpoints": ["${WSS_URL}"],
           "rpc": {
             "polkadotJs": {
               "isTxFinalized": {
