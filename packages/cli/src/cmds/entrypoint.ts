@@ -7,6 +7,8 @@ import { runNetwork } from "./runNetwork.js";
 import { generateConfig } from "../internal/cmdFunctions/initialisation.js";
 import { main } from "./main.js";
 import { fetchArtifact } from "../internal/cmdFunctions/fetchArtifact.js";
+import dotenv from "dotenv";
+dotenv.config();
 
 // Hack to expose config-path to all commands and fallback
 const parsed = yargs(hideBin(process.argv))
