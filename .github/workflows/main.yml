@@ -4,7 +4,7 @@ on:
     branches:
       - "**"
 env:
-  WSS_URL: ws://localhost:9955      
+  WSS_URL: ws://127.0.0.1:9955      
 
 jobs:
   build:
