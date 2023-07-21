@@ -1,5 +1,13 @@
 # @moonwall/cli
 
+## 4.0.6
+
+### Patch Changes
+
+- 786d3ab: ENv Var support
+  - [#202](https://github.com/Moonsong-Labs/moonwall/issues/202)
+  - [#206](https://github.com/Moonsong-Labs/moonwall/issues/206)
+
 ## 4.0.5
 
 ### Patch Changes
