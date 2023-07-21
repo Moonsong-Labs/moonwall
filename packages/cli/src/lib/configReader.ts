@@ -60,16 +60,18 @@ function replaceEnvVars(value: any): any {
   if (typeof value === "string") {
     return value.replace(/\$\{([^}]+)\}/g, (match, group) => {
       const envVarValue = process.env[group];
-      if (envVarValue === undefined) {
-        throw new Error(
-          `❌ Moonwall config Environment Variable ${chalk.bgWhiteBright.redBright(
-            group
-          )} does not exist\n Please add ${chalk.bgWhiteBright.redBright(
-            group
-          )} to your .env file or change your config file.`
-        );
-      }
-      return envVarValue;
+      // Disabled until we only process Environment Config associated with the current Environment
+      
+      // if (envVarValue === undefined) {
+      //   throw new Error(
+      //     `❌ Moonwall config Environment Variable ${chalk.bgWhiteBright.redBright(
+      //       group
+      //     )} does not exist\n Please add ${chalk.bgWhiteBright.redBright(
+      //       group
+      //     )} to your .env file or change your config file.`
+      //   );
+      // }
+      return envVarValue || match;
     });
   } else if (Array.isArray(value)) {
     return value.map(replaceEnvVars);
