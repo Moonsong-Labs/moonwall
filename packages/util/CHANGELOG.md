@@ -1,5 +1,13 @@
 # @moonwall/util
 
+## 4.0.7
+
+### Patch Changes
+
+- 7bf49d8: Small Fixes
+- Updated dependencies [7bf49d8]
+  - @moonwall/types@4.0.7
+
 ## 4.0.5
 
 ### Patch Changes
