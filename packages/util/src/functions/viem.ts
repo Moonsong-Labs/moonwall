@@ -207,7 +207,7 @@ export async function createViemTransaction<TOptions extends DeepPartial<ViemTra
   context: GenericContext,
   options: TOptions
 ): Promise<`0x${string}`> {
-  const type = !!options && !!options.type ? options.type : "eip1559";
+  const type = !!options && !!options.txnType ? options.txnType : "eip1559";
   const privateKey = !!options && !!options.privateKey ? options.privateKey : ALITH_PRIVATE_KEY;
   const account = privateKeyToAccount(privateKey);
   const value = options && options.value ? options.value : 0n;

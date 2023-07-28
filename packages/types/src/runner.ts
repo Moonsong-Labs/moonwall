@@ -328,6 +328,7 @@ export type ViemTransactionOptions =
   | TransactionSerializable & {
       privateKey?: `0x${string}`;
       skipEstimation?: boolean;
+      txnType?: TransactionType;
     };
 
 export type EthersTransactionOptions = TransactionRequest & {
