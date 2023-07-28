@@ -1,5 +1,11 @@
 # @moonwall/types
 
+## 4.0.7
+
+### Patch Changes
+
+- 7bf49d8: Small Fixes
+
 ## 4.0.5
 
 ### Patch Changes
