@@ -149,8 +149,6 @@ export async function executeTests(env: Environment, additionalArgs?: {}) {
     options.experimentalVmWorkerMemoryLimit = 0.75;
   }
 
-  console.log(options);
-
   try {
     const folders = env.testFileDir.map((folder) => path.join(".", folder, "/"));
     return await startVitest("test", folders, { ...options, ...additionalArgs });
