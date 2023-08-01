@@ -145,7 +145,13 @@ export async function interactWithContract(
 
   if (!call && rawTxOnly) {
     return web3Library === "viem"
-      ? createViemTransaction(context, { to: contractAddress, data, gas: gasParam, privateKey, value })
+      ? createViemTransaction(context, {
+          to: contractAddress,
+          data,
+          gas: gasParam,
+          privateKey,
+          value,
+        })
       : createEthersTransaction(context, {
           to: contractAddress,
           data,

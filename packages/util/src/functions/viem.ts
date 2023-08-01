@@ -217,9 +217,10 @@ export async function createViemTransaction<TOptions extends DeepPartial<ViemTra
   const gasPrice = await context.viem().getGasPrice();
   const data = options && options.data ? options.data : "0x";
 
-  const estimatedGas = options.skipEstimation || options.gas !== undefined
-    ? 1_500_000n
-    : await context.viem().estimateGas({ account: account.address, to, value, data });
+  const estimatedGas =
+    options.skipEstimation || options.gas !== undefined
+      ? 1_500_000n
+      : await context.viem().estimateGas({ account: account.address, to, value, data });
   const accessList = options && options.accessList ? options.accessList : [];
 
   const txnBlob: TransactionSerializable =

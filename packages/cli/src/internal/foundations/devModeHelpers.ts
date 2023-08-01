@@ -4,7 +4,7 @@ import {
   alith,
   createAndFinalizeBlock,
   customWeb3Request,
-  generateKeyringPair
+  generateKeyringPair,
 } from "@moonwall/util";
 import { Keyring } from "@polkadot/api";
 import { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types";

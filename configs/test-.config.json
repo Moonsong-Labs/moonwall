@@ -4,7 +4,6 @@
   "defaultTestTimeout": 60000,
   "scriptsDir": "scripts/",
   "environments": [
-   
     {
       "name": "dev_test",
       "testFileDir": ["/tests/dev_tests"],
