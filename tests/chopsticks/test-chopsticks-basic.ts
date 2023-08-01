@@ -97,8 +97,8 @@ describeSuite({
       modifier: "skip",
       test: async function () {
         const rtBefore = api.consts.system.version.specVersion.toNumber();
-        const ctx = MoonwallContext.getContext()
-        log(ctx.rtUpgradePath)
+        const ctx = MoonwallContext.getContext();
+        log(ctx.rtUpgradePath);
         await context.upgradeRuntime(context);
         const rtafter = api.consts.system.version.specVersion.toNumber();
         expect(rtBefore).toBeLessThan(rtafter);

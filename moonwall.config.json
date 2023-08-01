@@ -17,7 +17,6 @@
           "type": "viem",
           "endpoints": ["wss://wss.api.moonbeam.network"]
         }
-        
       ]
     },
     {
@@ -248,8 +247,8 @@
     {
       "name": "dev_multi",
       "testFileDir": ["tests/test_separation"],
-      "multiThreads": 2,
-      "reporters": ["verbose", "html"],
+      "multiThreads": "turbo",
+      "reporters": ["basic", "html"],
       "foundation": {
         "type": "dev",
         "launchSpec": [

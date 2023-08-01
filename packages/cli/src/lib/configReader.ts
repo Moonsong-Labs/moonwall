@@ -61,7 +61,7 @@ function replaceEnvVars(value: any): any {
     return value.replace(/\$\{([^}]+)\}/g, (match, group) => {
       const envVarValue = process.env[group];
       // Disabled until we only process Environment Config associated with the current Environment
-      
+
       // if (envVarValue === undefined) {
       //   throw new Error(
       //     `❌ Moonwall config Environment Variable ${chalk.bgWhiteBright.redBright(

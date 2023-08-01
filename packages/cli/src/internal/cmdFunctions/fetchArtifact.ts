@@ -38,7 +38,6 @@ const Artifacts: NetworkArtifacts[] = [
 ];
 
 export async function fetchArtifact(args) {
-
   if (await fs.access(args.path).catch(() => true)) {
     console.log("Folder not exists, creating");
     fs.mkdir(args.path);

@@ -139,7 +139,17 @@ export async function executeTests(env: Environment, additionalArgs?: {}) {
   if (typeof env.multiThreads === "number") {
     options.minThreads = 1;
     options.maxThreads = Math.floor(env.multiThreads);
+  } else if (
+    env.multiThreads === "turbo" &&
+    process.env.MOON_SINGLE_THREAD !== "true" &&
+    process.env.MOON_RECYCLE !== "true"
+  ) {
+    delete options.threads;
+    options.experimentalVmThreads = true;
+    options.experimentalVmWorkerMemoryLimit = 0.75;
   }
+
+  console.log(options);
 
   try {
     const folders = env.testFileDir.map((folder) => path.join(".", folder, "/"));

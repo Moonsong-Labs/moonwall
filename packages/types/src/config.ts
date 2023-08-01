@@ -69,8 +69,9 @@ export type Environment = {
 
   /**
    * An optional boolean to indicate if multi-threading is enabled.
+   * Turbo is an experimental feature which may cause memory leaks 😰
    */
-  multiThreads?: boolean | number;
+  multiThreads?: boolean | number | "turbo";
 
   /**
    * Path to directory containing smart contracts for testing against.
@@ -85,15 +86,16 @@ export type Environment = {
   /**
    * The privateKey with which to sign and send transactions in createBlock() function.
    */
-  defaultSigner?: { 
+  defaultSigner?: {
     /**
      *  Substrate Keyring type
      */
-    type: "ethereum" | "sr25519" | "ed25519"; 
+    type: "ethereum" | "sr25519" | "ed25519";
     /**
-     * Hex encoded private key to generate KeyringPair ("0x..") 
+     * Hex encoded private key to generate KeyringPair ("0x..")
      */
-    privateKey: string };
+    privateKey: string;
+  };
 
   /**
    * Toggle whether createBlock() will throw when extrinsic errors inside.
@@ -299,7 +301,7 @@ export interface ProviderConfig {
  * @name ProviderType
  * @description The type of provider. Can be "polkadotJs", "ethers", "web3", "viem"
  */
-export type ProviderType = "polkadotJs" | "ethers" | "web3"  | "viem"
+export type ProviderType = "polkadotJs" | "ethers" | "web3" | "viem";
 
 /**
  * @name ZombieNodeType

@@ -272,12 +272,7 @@ export class ProviderInterfaceFactory {
   public static async populate(
     name: string,
     type: ProviderType,
-    connect: () =>
-      | Promise<ApiPromise>
-      | Signer
-      | Web3
-      | Promise<ViemClient>
-      | void
+    connect: () => Promise<ApiPromise> | Signer | Web3 | Promise<ViemClient> | void
   ): Promise<ProviderInterface> {
     return await new ProviderInterfaceFactory(name, type, connect).create();
   }
