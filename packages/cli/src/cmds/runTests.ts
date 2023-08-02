@@ -5,6 +5,7 @@ import { contextCreator } from "../lib/globalContext.js";
 import { Environment } from "@moonwall/types";
 import fs from "node:fs";
 import path from "path";
+import os from "node:os";
 import chalk from "chalk";
 import { execSync } from "node:child_process";
 import { clearNodeLogs } from "src/internal/cmdFunctions/tempLogs.js";
@@ -117,6 +118,8 @@ export async function executeTests(env: Environment, additionalArgs?: {}) {
     passWithNoTests: false,
     isolate: false,
     threads: true,
+    minThreads: 1,
+    maxThreads: calculateCores(),
 
     include: env.include ? env.include : ["**/*{test,spec,test_,test-}*{ts,mts,cts}"],
     onConsoleLog(log, type) {
@@ -160,3 +163,8 @@ export async function executeTests(env: Environment, additionalArgs?: {}) {
 }
 
 const filterList = ["<empty line>", "", "stdout | unknown test"];
+
+const calculateCores = () => {
+  const cores = os.cpus().length;
+  return Math.max(Math.floor(cores * 0.5), 1);
+};
