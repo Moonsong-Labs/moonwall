@@ -1,5 +1,11 @@
 # @moonwall/types
 
+## 4.0.8
+
+### Patch Changes
+
+- ef3641a: Deps Upgrade
+
 ## 4.0.7
 
 ### Patch Changes

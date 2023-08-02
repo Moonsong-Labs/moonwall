@@ -1,5 +1,14 @@
 # @moonwall/cli
 
+## 4.0.8
+
+### Patch Changes
+
+- ef3641a: Deps Upgrade
+- Updated dependencies [ef3641a]
+  - @moonwall/types@4.0.8
+  - @moonwall/util@4.0.8
+
 ## 4.0.7
 
 ### Patch Changes
