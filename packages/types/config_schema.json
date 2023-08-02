@@ -1,406 +1,430 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "definitions": {
-    "ChopsticksLaunchSpec": {
-      "description": "A launch specification object for the \"chopsticks\" foundation type.",
-      "properties": {
-        "buildBlockMode": {
-          "description": "An optional block building mode, can be \"batch\", \"manual\" or \"instant\".\nThis is only supported for single mode chopsticks.",
-          "enum": ["batch", "instant", "manual"],
-          "type": "string"
-        },
-        "configPath": {
-          "description": "The path to the config file.",
-          "type": "string"
-        },
-        "name": {
-          "description": "The name of the launch spec.",
-          "type": "string"
-        },
-        "options": {
-          "description": "An optional array of options for the launch spec.",
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
-        "running": {
-          "description": "UNUSED",
-          "type": "boolean"
-        },
-        "type": {
-          "description": "An optional type of either \"relaychain\" or \"parachain\".",
-          "enum": ["parachain", "relaychain"],
-          "type": "string"
-        },
-        "wasmOverride": {
-          "description": "An optional WebAssembly override.",
-          "type": "string"
-        },
-        "wsPort": {
-          "description": "An optional WebSocket port.\nQuirk of Chopsticks is that port option is only for single mode not xcm.",
-          "type": "number"
-        }
-      },
-      "type": "object"
-    },
-    "DevLaunchSpec": {
-      "description": "A launch specification object for the \"dev\" foundation type.",
-      "properties": {
-        "binPath": {
-          "description": "The path to the binary file.",
-          "type": "string"
-        },
-        "disableDefaultEthProviders": {
-          "description": "Switch to not connect to Ethereum providers by default.\nNote: This also acts as a feature gate for context methods like createTxn and readPrecompile.",
-          "type": "boolean"
-        },
-        "name": {
-          "description": "The name of the launch spec.",
-          "type": "string"
-        },
-        "newRpcBehaviour": {
-          "description": "Launch node using rpc-port parameter instead of ws-port.",
-          "type": "boolean"
-        },
-        "options": {
-          "description": "An optional array of options for the launch spec.",
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
-        "ports": {
-          "description": "An optional object with p2pPort, wsPort, and rpcPort.",
-          "properties": {
-            "p2pPort": {
-              "description": "The port for peer-to-peer (P2P) communication.",
-              "type": "number"
-            },
-            "rpcPort": {
-              "description": "The port for remote procedure call (RPC).",
-              "type": "number"
-            },
-            "wsPort": {
-              "description": "The port for WebSocket communication (soon deprecated)",
-              "type": "number"
-            }
-          },
-          "type": "object"
-        },
-        "retainAllLogs": {
-          "description": "An optional flag to retain node logs from previous runs.",
-          "type": "boolean"
-        },
-        "running": {
-          "description": "UNUSED",
-          "type": "boolean"
-        }
-      },
-      "type": "object"
-    },
-    "IFoundation": {
-      "anyOf": [
-        {
-          "properties": {
-            "launchSpec": {
-              "items": {
-                "$ref": "#/definitions/DevLaunchSpec"
-              },
-              "type": "array"
-            },
-            "type": {
-              "const": "dev",
-              "type": "string"
-            }
-          },
-          "type": "object"
-        },
-        {
-          "properties": {
-            "launchSpec": {
-              "items": {
-                "$ref": "#/definitions/ChopsticksLaunchSpec"
-              },
-              "type": "array"
-            },
-            "rtUpgradePath": {
-              "type": "string"
-            },
-            "type": {
-              "const": "chopsticks",
-              "type": "string"
-            }
-          },
-          "type": "object"
-        },
-        {
-          "properties": {
-            "rtUpgradePath": {
-              "type": "string"
-            },
-            "type": {
-              "const": "zombie",
-              "type": "string"
-            },
-            "zombieSpec": {
-              "$ref": "#/definitions/ZombieLaunchSpec"
-            }
-          },
-          "type": "object"
-        },
-        {
-          "properties": {
-            "type": {
-              "enum": ["fork", "read_only"],
-              "type": "string"
-            }
-          },
-          "type": "object"
-        }
-      ],
-      "description": "The foundation configuration for the environment. It can be of several types including \"dev\", \"chopsticks\", \"zombie\", \"read_only\", or \"fork\"."
-    },
-    "IRpcBundle": {
-      "additionalProperties": {
-        "$ref": "#/definitions/IRpcModule"
-      },
-      "description": "Interface for defining RPC bundles.\nIt is a dictionary where each key is a module name and the value is an IRpcModule.",
-      "type": "object"
-    },
-    "IRpcMethod": {
-      "description": "Interface for defining RPC methods.",
-      "properties": {
-        "description": {
-          "type": "string"
-        },
-        "params": {
-          "items": {
-            "$ref": "#/definitions/IRpcParam"
-          },
-          "type": "array"
-        },
-        "type": {
-          "type": "string"
-        }
-      },
-      "type": "object"
-    },
-    "IRpcModule": {
-      "additionalProperties": {
-        "$ref": "#/definitions/IRpcMethod"
-      },
-      "description": "Interface for defining RPC modules.\nIt is a dictionary where each key is a method name and the value is an IRpcMethod.",
-      "type": "object"
-    },
-    "IRpcParam": {
-      "description": "Interface for defining RPC parameters.",
-      "properties": {
-        "isOptional": {
-          "type": "boolean"
-        },
-        "name": {
-          "type": "string"
-        },
-        "type": {
-          "type": "string"
-        }
-      },
-      "type": "object"
-    },
-    "ProviderConfig": {
-      "description": "The configuration object for a provider.",
-      "properties": {
-        "additionalTypes": {
-          "additionalProperties": {
-            "additionalProperties": {
-              "type": "string"
-            },
-            "type": "object"
-          },
-          "description": "An optional collection of additional types.",
-          "type": "object"
-        },
-        "endpoints": {
-          "description": "An array of endpoint URLs.",
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
-        "name": {
-          "description": "The name of the provider.",
-          "type": "string"
-        },
-        "rpc": {
-          "$ref": "#/definitions/IRpcBundle",
-          "description": "An optional RPC bundle."
-        },
-        "type": {
-          "$ref": "#/definitions/ProviderType",
-          "description": "The type of the provider."
-        }
-      },
-      "type": "object"
-    },
-    "ProviderType": {
-      "description": "The type of provider. Can be \"polkadotJs\", \"ethers\", \"web3\", \"viem\"",
-      "enum": ["ethers", "polkadotJs", "viem", "web3"],
-      "type": "string"
-    },
-    "ZombieLaunchSpec": {
-      "description": "A launch specification object for the \"zombie\" foundation type.",
-      "properties": {
-        "configPath": {
-          "description": "The path to the config file.",
-          "type": "string"
-        },
-        "monitoredNode": {
-          "description": "An optional monitored node.",
-          "type": "string"
-        },
-        "name": {
-          "description": "The name of the launch spec.",
-          "type": "string"
-        },
-        "options": {
-          "description": "An optional array of options for the launch spec.",
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
-        "running": {
-          "description": "UNUSED",
-          "type": "boolean"
-        },
-        "skipBlockCheck": {
-          "description": "An optional array of blocks to skip checking.",
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        }
-      },
-      "type": "object"
-    }
-  },
-  "description": "The main configuration object for Moonwall.",
-  "properties": {
-    "$schema": {
-      "description": "The JSON schema for the config.",
-      "type": "string"
-    },
-    "defaultTestTimeout": {
-      "description": "The default timeout for tests.",
-      "type": "number"
-    },
-    "environments": {
-      "description": "An array of Environment objects for testing.",
-      "items": {
-        "description": "The environment configuration for testing.",
-        "properties": {
-          "connections": {
-            "description": "An optional array of ProviderConfig objects.",
-            "items": {
-              "$ref": "#/definitions/ProviderConfig"
-            },
-            "type": "array"
-          },
-          "contracts": {
-            "description": "Path to directory containing smart contracts for testing against.",
-            "type": "string"
-          },
-          "defaultAllowFailures": {
-            "description": "Toggle whether createBlock() will throw when extrinsic errors inside.",
-            "type": "boolean"
-          },
-          "defaultFinalization": {
-            "description": "Toggle whether createBlock() will finalize blocks by default or not.",
-            "type": "boolean"
-          },
-          "defaultSigner": {
-            "description": "The privateKey with which to sign and send transactions in createBlock() function.",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "ChopsticksLaunchSpec": {
+            "description": "A launch specification object for the \"chopsticks\" foundation type.",
             "properties": {
-              "privateKey": {
-                "description": "Hex encoded private key to generate KeyringPair (\"0x..\")",
-                "type": "string"
-              },
-              "type": {
-                "description": "Substrate Keyring type",
-                "enum": ["ed25519", "ethereum", "sr25519"],
-                "type": "string"
-              }
+                "buildBlockMode": {
+                    "description": "An optional block building mode, can be \"batch\", \"manual\" or \"instant\".\nThis is only supported for single mode chopsticks.",
+                    "enum": [
+                        "batch",
+                        "instant",
+                        "manual"
+                    ],
+                    "type": "string"
+                },
+                "configPath": {
+                    "description": "The path to the config file.",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "The name of the launch spec.",
+                    "type": "string"
+                },
+                "options": {
+                    "description": "An optional array of options for the launch spec.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "running": {
+                    "description": "UNUSED",
+                    "type": "boolean"
+                },
+                "type": {
+                    "description": "An optional type of either \"relaychain\" or \"parachain\".",
+                    "enum": [
+                        "parachain",
+                        "relaychain"
+                    ],
+                    "type": "string"
+                },
+                "wasmOverride": {
+                    "description": "An optional WebAssembly override.",
+                    "type": "string"
+                },
+                "wsPort": {
+                    "description": "An optional WebSocket port.\nQuirk of Chopsticks is that port option is only for single mode not xcm.",
+                    "type": "number"
+                }
             },
             "type": "object"
-          },
-          "envVars": {
-            "description": "An optional array of environment variable names.",
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "foundation": {
-            "$ref": "#/definitions/IFoundation",
-            "description": "The foundation configuration for the environment."
-          },
-          "include": {
-            "description": "An optional array of included files or directories.",
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "multiThreads": {
-            "anyOf": [
-              {
-                "enum": [false, true, "turbo"]
-              },
-              {
-                "type": "number"
-              }
-            ],
-            "description": "An optional boolean to indicate if multi-threading is enabled.\nTurbo is an experimental feature which may cause memory leaks 😰"
-          },
-          "name": {
-            "description": "The name of the environment.",
-            "type": "string"
-          },
-          "reporters": {
-            "description": "An optional array of reporter names.",
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "runScripts": {
-            "description": "An optional array of scripts to run before testing.",
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "testFileDir": {
-            "description": "An array of directories with test files.",
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          }
         },
-        "type": "object"
-      },
-      "type": "array"
+        "DevLaunchSpec": {
+            "description": "A launch specification object for the \"dev\" foundation type.",
+            "properties": {
+                "binPath": {
+                    "description": "The path to the binary file.",
+                    "type": "string"
+                },
+                "disableDefaultEthProviders": {
+                    "description": "Switch to not connect to Ethereum providers by default.\nNote: This also acts as a feature gate for context methods like createTxn and readPrecompile.",
+                    "type": "boolean"
+                },
+                "name": {
+                    "description": "The name of the launch spec.",
+                    "type": "string"
+                },
+                "newRpcBehaviour": {
+                    "description": "Launch node using rpc-port parameter instead of ws-port.",
+                    "type": "boolean"
+                },
+                "options": {
+                    "description": "An optional array of options for the launch spec.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "ports": {
+                    "description": "An optional object with p2pPort, wsPort, and rpcPort.",
+                    "properties": {
+                        "p2pPort": {
+                            "description": "The port for peer-to-peer (P2P) communication.",
+                            "type": "number"
+                        },
+                        "rpcPort": {
+                            "description": "The port for remote procedure call (RPC).",
+                            "type": "number"
+                        },
+                        "wsPort": {
+                            "description": "The port for WebSocket communication (soon deprecated)",
+                            "type": "number"
+                        }
+                    },
+                    "type": "object"
+                },
+                "retainAllLogs": {
+                    "description": "An optional flag to retain node logs from previous runs.",
+                    "type": "boolean"
+                },
+                "running": {
+                    "description": "UNUSED",
+                    "type": "boolean"
+                }
+            },
+            "type": "object"
+        },
+        "IFoundation": {
+            "anyOf": [
+                {
+                    "properties": {
+                        "launchSpec": {
+                            "items": {
+                                "$ref": "#/definitions/DevLaunchSpec"
+                            },
+                            "type": "array"
+                        },
+                        "type": {
+                            "const": "dev",
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                {
+                    "properties": {
+                        "launchSpec": {
+                            "items": {
+                                "$ref": "#/definitions/ChopsticksLaunchSpec"
+                            },
+                            "type": "array"
+                        },
+                        "rtUpgradePath": {
+                            "type": "string"
+                        },
+                        "type": {
+                            "const": "chopsticks",
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                {
+                    "properties": {
+                        "rtUpgradePath": {
+                            "type": "string"
+                        },
+                        "type": {
+                            "const": "zombie",
+                            "type": "string"
+                        },
+                        "zombieSpec": {
+                            "$ref": "#/definitions/ZombieLaunchSpec"
+                        }
+                    },
+                    "type": "object"
+                },
+                {
+                    "properties": {
+                        "type": {
+                            "enum": [
+                                "fork",
+                                "read_only"
+                            ],
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                }
+            ],
+            "description": "The foundation configuration for the environment. It can be of several types including \"dev\", \"chopsticks\", \"zombie\", \"read_only\", or \"fork\"."
+        },
+        "IRpcBundle": {
+            "additionalProperties": {
+                "$ref": "#/definitions/IRpcModule"
+            },
+            "description": "Interface for defining RPC bundles.\nIt is a dictionary where each key is a module name and the value is an IRpcModule.",
+            "type": "object"
+        },
+        "IRpcMethod": {
+            "description": "Interface for defining RPC methods.",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "params": {
+                    "items": {
+                        "$ref": "#/definitions/IRpcParam"
+                    },
+                    "type": "array"
+                },
+                "type": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "IRpcModule": {
+            "additionalProperties": {
+                "$ref": "#/definitions/IRpcMethod"
+            },
+            "description": "Interface for defining RPC modules.\nIt is a dictionary where each key is a method name and the value is an IRpcMethod.",
+            "type": "object"
+        },
+        "IRpcParam": {
+            "description": "Interface for defining RPC parameters.",
+            "properties": {
+                "isOptional": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "ProviderConfig": {
+            "description": "The configuration object for a provider.",
+            "properties": {
+                "additionalTypes": {
+                    "additionalProperties": {
+                        "additionalProperties": {
+                            "type": "string"
+                        },
+                        "type": "object"
+                    },
+                    "description": "An optional collection of additional types.",
+                    "type": "object"
+                },
+                "endpoints": {
+                    "description": "An array of endpoint URLs.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "name": {
+                    "description": "The name of the provider.",
+                    "type": "string"
+                },
+                "rpc": {
+                    "$ref": "#/definitions/IRpcBundle",
+                    "description": "An optional RPC bundle."
+                },
+                "type": {
+                    "$ref": "#/definitions/ProviderType",
+                    "description": "The type of the provider."
+                }
+            },
+            "type": "object"
+        },
+        "ProviderType": {
+            "description": "The type of provider. Can be \"polkadotJs\", \"ethers\", \"web3\", \"viem\"",
+            "enum": [
+                "ethers",
+                "polkadotJs",
+                "viem",
+                "web3"
+            ],
+            "type": "string"
+        },
+        "ZombieLaunchSpec": {
+            "description": "A launch specification object for the \"zombie\" foundation type.",
+            "properties": {
+                "configPath": {
+                    "description": "The path to the config file.",
+                    "type": "string"
+                },
+                "monitoredNode": {
+                    "description": "An optional monitored node.",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "The name of the launch spec.",
+                    "type": "string"
+                },
+                "options": {
+                    "description": "An optional array of options for the launch spec.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "running": {
+                    "description": "UNUSED",
+                    "type": "boolean"
+                },
+                "skipBlockCheck": {
+                    "description": "An optional array of blocks to skip checking.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                }
+            },
+            "type": "object"
+        }
     },
-    "label": {
-      "description": "A label for the config.",
-      "type": "string"
+    "description": "The main configuration object for Moonwall.",
+    "properties": {
+        "$schema": {
+            "description": "The JSON schema for the config.",
+            "type": "string"
+        },
+        "defaultTestTimeout": {
+            "description": "The default timeout for tests.",
+            "type": "number"
+        },
+        "environments": {
+            "description": "An array of Environment objects for testing.",
+            "items": {
+                "description": "The environment configuration for testing.",
+                "properties": {
+                    "connections": {
+                        "description": "An optional array of ProviderConfig objects.",
+                        "items": {
+                            "$ref": "#/definitions/ProviderConfig"
+                        },
+                        "type": "array"
+                    },
+                    "contracts": {
+                        "description": "Path to directory containing smart contracts for testing against.",
+                        "type": "string"
+                    },
+                    "defaultAllowFailures": {
+                        "description": "Toggle whether createBlock() will throw when extrinsic errors inside.",
+                        "type": "boolean"
+                    },
+                    "defaultFinalization": {
+                        "description": "Toggle whether createBlock() will finalize blocks by default or not.",
+                        "type": "boolean"
+                    },
+                    "defaultSigner": {
+                        "description": "The privateKey with which to sign and send transactions in createBlock() function.",
+                        "properties": {
+                            "privateKey": {
+                                "description": "Hex encoded private key to generate KeyringPair (\"0x..\")",
+                                "type": "string"
+                            },
+                            "type": {
+                                "description": "Substrate Keyring type",
+                                "enum": [
+                                    "ed25519",
+                                    "ethereum",
+                                    "sr25519"
+                                ],
+                                "type": "string"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "envVars": {
+                        "description": "An optional array of environment variable names.",
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "foundation": {
+                        "$ref": "#/definitions/IFoundation",
+                        "description": "The foundation configuration for the environment."
+                    },
+                    "include": {
+                        "description": "An optional array of included files or directories.",
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "multiThreads": {
+                        "anyOf": [
+                            {
+                                "enum": [
+                                    false,
+                                    true,
+                                    "turbo"
+                                ]
+                            },
+                            {
+                                "type": "number"
+                            }
+                        ],
+                        "description": "An optional boolean to indicate if multi-threading is enabled.\nTurbo is an experimental feature which may cause memory leaks 😰"
+                    },
+                    "name": {
+                        "description": "The name of the environment.",
+                        "type": "string"
+                    },
+                    "reporters": {
+                        "description": "An optional array of reporter names.",
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "runScripts": {
+                        "description": "An optional array of scripts to run before testing.",
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "testFileDir": {
+                        "description": "An array of directories with test files.",
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    }
+                },
+                "type": "object"
+            },
+            "type": "array"
+        },
+        "label": {
+            "description": "A label for the config.",
+            "type": "string"
+        },
+        "scriptsDir": {
+            "description": "Optional path to a directory containing scripts.",
+            "type": "string"
+        }
     },
-    "scriptsDir": {
-      "description": "Optional path to a directory containing scripts.",
-      "type": "string"
-    }
-  },
-  "type": "object"
+    "type": "object"
 }
+

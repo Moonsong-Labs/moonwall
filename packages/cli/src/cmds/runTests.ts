@@ -145,6 +145,7 @@ export async function executeTests(env: Environment, additionalArgs?: {}) {
     process.env.MOON_RECYCLE !== "true"
   ) {
     delete options.threads;
+    delete options.isolate;
     options.experimentalVmThreads = true;
     options.experimentalVmWorkerMemoryLimit = 0.75;
   }
