@@ -1,5 +1,11 @@
 # @moonwall/cli
 
+## 4.0.9
+
+### Patch Changes
+
+- c627328: multi core
+
 ## 4.0.8
 
 ### Patch Changes
