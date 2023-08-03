@@ -25,12 +25,10 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "require": "./dist/index.cjs",
       "import": "./dist/index.js"
     }
   },
   "module": "./dist/index.js",
-  "main": "./dist/index.cjs",
   "types": "./dist/index.d.ts",
   "bin": {
     "moonwall": "./moonwall.mjs"
@@ -49,14 +47,10 @@
   ],
   "scripts": {
     "clean": "pnpm rimraf dist && pnpm rimraf node_modules",
-    "build": "pnpm exec rimraf dist && tsup src --format cjs,esm --config tsup.config.ts && pnpm generate-types",
-    "generate-types": "tsup src --format cjs,esm --dts --config tsup.config.ts",
-    "watch": "tsup src --format cjs,esm --dts --watch",
-    "typecheck": "pnpm exec tsc --noEmit",
+    "build": "tsup src --format esm --config tsup.config.ts",
+    "generate-types": "tsup src --format esm --dts",
     "prepublish": "pnpm run build && pnpm run generate-types && pnpm typecheck",
-    "prepare": "pnpm build",
-    "compile": "pnpm build ",
-    "lint": "tsc"
+    "typecheck": "pnpm exec tsc --noEmit"
   },
   "dependencies": {
     "@moonwall/types": "workspace:*",

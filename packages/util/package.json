@@ -25,11 +25,9 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "require": "./dist/index.cjs",
       "import": "./dist/index.js"
     }
   },
-  "main": "dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "engines": {
@@ -46,13 +44,10 @@
   ],
   "scripts": {
     "clean": "pnpm rimraf dist && pnpm rimraf node_modules",
-    "build": "pnpm exec rimraf dist && tsup src --format cjs,esm --config tsup.config.ts && pnpm generate-types",
-    "generate-types": "tsup src --format cjs,esm --dts --config tsup.config.ts",
-    "watch": "tsup src --format cjs,esm --dts --watch",
+    "build": "pnpm tsup src --format esm --config tsup.config.ts",
+    "generate-types": "tsup src --format esm --dts --config tsup.config.ts",
     "typecheck": "pnpm exec tsc --noEmit",
     "prepublish": "pnpm run build && pnpm run generate-types && pnpm typecheck",
-    "prepare": "pnpm build",
-    "compile": "pnpm build ",
     "lint": "tsc"
   },
   "dependencies": {

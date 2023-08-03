@@ -25,11 +25,9 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "require": "./dist/index.cjs",
       "import": "./dist/index.js"
     }
   },
-  "main": "dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "engines": {
@@ -46,15 +44,10 @@
   ],
   "scripts": {
     "clean": "pnpm rimraf dist && pnpm rimraf node_modules",
-    "build": "pnpm exec rimraf dist && tsup src --format cjs,esm --config tsup.config.ts && pnpm generate-types",
-    "generate-types": "tsup src --format cjs,esm --dts --config tsup.config.ts && pnpm schema && pnpm typecheck",
-    "watch": "tsup src --format cjs,esm --dts --watch",
-    "typecheck": "pnpm exec tsc --noEmit",
-    "prepublish": "pnpm run build && pnpm run generate-types && pnpm typecheck",
+    "build": " tsup src --format esm",
+    "generate-types": "tsup src --format esm --dts && pnpm schema && pnpm typecheck",
     "schema": "typescript-json-schema --tsNodeRegister --esModuleInterop -o config_schema.json ./src/config.ts MoonwallConfig",
-    "prepare": "pnpm build",
-    "compile": "pnpm build ",
-    "lint": "tsc"
+    "typecheck": "pnpm exec tsc --noEmit"
   },
   "dependencies": {
     "@polkadot/api": "^10.9.1",
