@@ -51,22 +51,19 @@
     "watch": "tsup src --format cjs,esm --dts --watch",
     "typecheck": "pnpm exec tsc --noEmit",
     "prepublish": "pnpm run build && pnpm run generate-types && pnpm typecheck",
-    "schema": "typescript-json-schema --tsNodeRegister --esModuleInterop -o config_schema.json ./src/config.ts MoonwallConfig",
-    "prepare": "pnpm build",
-    "compile": "pnpm build ",
-    "lint": "tsc"
+    "schema": "typescript-json-schema --tsNodeRegister --esModuleInterop -o config_schema.json ./src/config.ts MoonwallConfig"
   },
   "dependencies": {
     "@polkadot/api": "^10.9.1",
     "debug": "^4.3.4",
-    "ethers": "^6.6.7",
+    "ethers": "^6.7.0",
     "web3": "4.0.3"
   },
   "publishConfig": {
     "access": "public"
   },
   "devDependencies": {
-    "tsup": "^7.1.0",
+    "tsup": "^7.2.0",
     "typescript": "^5.1.6",
     "typescript-json-schema": "^0.59.0"
   }
