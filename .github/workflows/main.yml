@@ -132,6 +132,9 @@ jobs:
         with:
           node-version: 20.x
           cache: "pnpm"
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
       - name: Build like before
         run: |
           pnpm install --frozen-lockfile
@@ -140,9 +143,6 @@ jobs:
         run: |
           bun moonwall download moonbeam latest ./tmp
           bun moonwall download polkadot latest ./tmp
-      - uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: latest
       - name: Run standard zombie test
         run: bun moonwall test zombie_test
 
