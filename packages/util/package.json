@@ -99,7 +99,7 @@
     "@polkadot/rpc-provider": "^10.9.1",
     "@polkadot/types": "^10.9.1",
     "@polkadot/types-codec": "^10.9.1",
-    "@polkadot/util": "^12.3.1",
+    "@polkadot/util": "^12.3.2",
     "@vitest/ui": "^0.30.1",
     "ethers": "^6.7.0",
     "tsup": "^7.2.0",

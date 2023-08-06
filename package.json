@@ -53,5 +53,8 @@
       "@moonwall/util": "workspace:*",
       "solc": "^0.8.19"
     }
+  },
+  "dependencies": {
+    "@polkadot/util": "^12.3.2"
   }
 }

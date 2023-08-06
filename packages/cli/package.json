@@ -104,7 +104,7 @@
     "@polkadot/api": "^10.9.1",
     "@polkadot/api-augment": "^10.9.1",
     "@polkadot/api-derive": "^10.9.1",
-    "@polkadot/keyring": "^12.3.1",
+    "@polkadot/keyring": "^12.3.2",
     "@polkadot/types": "^10.9.1",
     "@polkadot/types-codec": "^10.9.1",
     "@polkadot/util": "^12.3.2",
