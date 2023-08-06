@@ -62,7 +62,6 @@
     "@polkadot/util-crypto": "^12.3.2",
     "debug": "^4.3.4",
     "ethers": "^6.7.0",
-    "rimraf": "^5.0.1",
     "viem": "^1.5.3",
     "web3": "4.0.3"
   },
@@ -70,6 +69,7 @@
     "access": "public"
   },
   "devDependencies": {
+    "rimraf": "^5.0.1",
     "tsup": "^7.2.0",
     "typescript": "^5.1.6",
     "typescript-json-schema": "^0.59.0"
