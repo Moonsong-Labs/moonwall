@@ -125,7 +125,7 @@ export async function deployViemContract<TOptions extends ContractDeploymentOpti
   // const url = context.viem().transport.url;
   const url = context.viem().transport.url;
 
-  const { privateKey = ALITH_PRIVATE_KEY, ...rest } = options || {};
+  const { privateKey = ALITH_PRIVATE_KEY, ...rest } = options || ({} as any);
   const blob = { ...rest, abi, bytecode, account: privateKeyToAccount(privateKey) };
 
   const account = privateKeyToAccount(ALITH_PRIVATE_KEY);

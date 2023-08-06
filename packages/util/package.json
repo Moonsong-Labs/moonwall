@@ -54,6 +54,7 @@
   },
   "dependencies": {
     "@moonwall/types": "workspace:*",
+    "@polkadot/util-crypto": "^12.3.2",
     "@types/debug": "^4.1.8",
     "@types/node": "^20.4.8",
     "@types/yargs": "^17.0.24",

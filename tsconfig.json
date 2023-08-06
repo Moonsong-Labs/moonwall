@@ -18,5 +18,5 @@
     "noUncheckedIndexedAccess": true,
     "strict": false //renable this oneday
   },
-  "exclude": ["./tests/**", "**/dist/**", "./packages/*/*.d.ts", "./packages/*/*.d.cts"]
+  "exclude": ["test/**", "**/dist/**", "./packages/*/*.d.ts", "./packages/*/*.d.cts"]
 }

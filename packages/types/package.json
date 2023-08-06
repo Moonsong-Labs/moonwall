@@ -56,9 +56,13 @@
   "dependencies": {
     "@polkadot/api": "^10.9.1",
     "@polkadot/api-base": "^10.9.1",
+    "@polkadot/keyring": "^12.3.2",
     "@polkadot/types": "^10.9.1",
+    "@polkadot/util": "^12.3.2",
+    "@polkadot/util-crypto": "^12.3.2",
     "debug": "^4.3.4",
     "ethers": "^6.7.0",
+    "viem": "^1.5.3",
     "web3": "4.0.3"
   },
   "publishConfig": {

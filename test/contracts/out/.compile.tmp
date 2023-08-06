@@ -1,0 +1,11 @@
+{
+  "precompiles/assets/ERC20.sol": "4450f4f7fd52bd50cbbc372ac8a32820",
+  "precompiles/assets/LocalAsset.sol": "8f2957faa53bab0c2983c2363ee78e3d",
+  "precompiles/assets/Permit.sol": "869df239276c3fd1e7e1775456d3c000",
+  "precompiles/assets/Roles.sol": "f007174456c4435a8d65517d12be2bc5",
+  "ERC20Instance.sol": "ae2b2724c327e292a84f70f11b40f503",
+  "ERC20WithInitialSupply.sol": "0119aada99b17c04ab9d26524fa27663",
+  "MultiplyBy7.sol": "904663d4210d08e9086ea3948f47b7c9",
+  "precompiles/parachain-staking/StakingInterface.sol": "4f9af699d56d725a8d94f70ab78a555d",
+  "ToyContract.sol": "2641292de729f754dbf0e0c4711fbb0f"
+}

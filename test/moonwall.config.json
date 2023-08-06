@@ -1,12 +1,12 @@
 {
-  "$schema": "./packages/types/config_schema.json",
+  "$schema": "../packages/types/config_schema.json",
   "label": "Global Test Config 🐯",
   "defaultTestTimeout": 60000,
   "scriptsDir": "scripts/",
   "environments": [
     {
       "name": "viem_test",
-      "testFileDir": ["tests/viem"],
+      "testFileDir": ["suites/viem"],
       "envVars": [""],
       "foundation": {
         "type": "read_only"
@@ -21,7 +21,7 @@
     },
     {
       "name": "zombie_wasm",
-      "testFileDir": ["tests/zombie"],
+      "testFileDir": ["suites/zombie"],
       "foundation": {
         "type": "zombie",
         "rtUpgradePath": "./tmp/moonbase-runtime-2400.wasm",
@@ -33,7 +33,7 @@
     },
     {
       "name": "zombie_multi_para",
-      "testFileDir": ["tests/multizombie"],
+      "testFileDir": ["suites/multizombie"],
 
       "foundation": {
         "type": "zombie",
@@ -59,7 +59,7 @@
     },
     {
       "name": "zombie_test",
-      "testFileDir": ["tests/zombie"],
+      "testFileDir": ["suites/zombie"],
       "foundation": {
         "type": "zombie",
         "rtUpgradePath": "./tmp/moonbase-runtime-2401.wasm",
@@ -71,7 +71,7 @@
     },
     {
       "name": "para_test",
-      "testFileDir": ["tests/zombie"],
+      "testFileDir": ["suites/zombie"],
       "multiThreads": false,
       "foundation": {
         "type": "zombie",
@@ -83,7 +83,7 @@
     },
     {
       "name": "basic",
-      "testFileDir": ["tests/basic/"],
+      "testFileDir": ["suites/basic/"],
       "foundation": {
         "type": "read_only"
       },
@@ -96,7 +96,7 @@
     },
     {
       "name": "chopsticks",
-      "testFileDir": ["tests/chopsticks/"],
+      "testFileDir": ["suites/chopsticks/"],
       "include": ["**/*basic*"],
       "foundation": {
         "type": "chopsticks",
@@ -120,7 +120,7 @@
     },
     {
       "name": "chopsticks_state",
-      "testFileDir": ["tests/chopsticks/"],
+      "testFileDir": ["suites/chopsticks/"],
       "include": ["**/*state*"],
       "foundation": {
         "type": "chopsticks",
@@ -143,7 +143,7 @@
     },
     {
       "name": "moonbeam_smoke",
-      "testFileDir": ["tests/dummy-smoke/"],
+      "testFileDir": ["suites/dummy-smoke/"],
       "include": ["**/*conditional*"],
       "foundation": {
         "type": "read_only"
@@ -158,7 +158,7 @@
     },
     {
       "name": "moonriver_smoke",
-      "testFileDir": ["tests/dummy-smoke/"],
+      "testFileDir": ["suites/dummy-smoke/"],
       "include": ["**/*conditional*"],
       "foundation": {
         "type": "read_only"
@@ -173,7 +173,7 @@
     },
     {
       "name": "chop_state_test",
-      "testFileDir": ["tests/chopsticks/"],
+      "testFileDir": ["suites/chopsticks/"],
       "include": ["**/*state*"],
       "foundation": {
         "type": "chopsticks",
@@ -246,7 +246,7 @@
     },
     {
       "name": "dev_multi",
-      "testFileDir": ["tests/test_separation"],
+      "testFileDir": ["suites/test_separation"],
       "multiThreads": true,
       "reporters": ["basic", "html"],
       "foundation": {
@@ -255,6 +255,7 @@
           {
             "name": "moonbeam",
             "running": true,
+            "newRpcBehaviour": false,
             "binPath": "./tmp/moonbeam"
           }
         ]
@@ -262,7 +263,7 @@
     },
     {
       "name": "dev_turbo",
-      "testFileDir": ["tests/test_separation"],
+      "testFileDir": ["suites/test_separation"],
       "multiThreads": "turbo",
       "reporters": ["basic", "html"],
       "foundation": {
@@ -271,6 +272,7 @@
           {
             "name": "moonbeam",
             "running": true,
+            "newRpcBehaviour": false,
             "binPath": "./tmp/moonbeam"
           }
         ]
@@ -278,7 +280,7 @@
     },
     {
       "name": "dev_seq",
-      "testFileDir": ["tests/test_separation"],
+      "testFileDir": ["suites/test_separation"],
       "multiThreads": false,
       "foundation": {
         "type": "dev",
@@ -286,6 +288,7 @@
           {
             "name": "moonbeam",
             "running": true,
+            "newRpcBehaviour": false,
             "binPath": "./tmp/moonbeam"
           }
         ]
@@ -293,7 +296,7 @@
     },
     {
       "name": "wrongFoundation",
-      "testFileDir": ["tests/run_error/"],
+      "testFileDir": ["suites/run_error/"],
       "foundation": {
         "type": "read_only"
       },
@@ -312,7 +315,7 @@
     },
     {
       "name": "pass",
-      "testFileDir": ["tests/run_error/"],
+      "testFileDir": ["suites/run_error/"],
       "foundation": {
         "type": "dev",
         "launchSpec": [
@@ -350,7 +353,7 @@
     },
     {
       "name": "web3_test",
-      "testFileDir": ["tests/web3_test/"],
+      "testFileDir": ["suites/web3_test/"],
       "foundation": {
         "type": "read_only"
       },
@@ -369,7 +372,7 @@
     },
     {
       "name": "eth_test",
-      "testFileDir": ["tests/eth_test/"],
+      "testFileDir": ["suites/eth_test/"],
       "include": ["**/{test,spec,test_,test-}*{ts,mts,cts}"],
       "foundation": {
         "type": "read_only"
@@ -384,7 +387,7 @@
     },
     {
       "name": "dev_test",
-      "testFileDir": ["/tests/dev_tests"],
+      "testFileDir": ["suites/dev_tests"],
       "envVars": ["DEBUG_COLORS=1", "TIMBO_TEST_ENV='TIMBO timbo timbo'"],
       "reporters": ["default"],
       "contracts": "contracts/",
