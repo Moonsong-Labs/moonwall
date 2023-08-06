@@ -247,6 +247,22 @@
     {
       "name": "dev_multi",
       "testFileDir": ["tests/test_separation"],
+      "multiThreads": true,
+      "reporters": ["basic", "html"],
+      "foundation": {
+        "type": "dev",
+        "launchSpec": [
+          {
+            "name": "moonbeam",
+            "running": true,
+            "binPath": "./tmp/moonbeam"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dev_turbo",
+      "testFileDir": ["tests/test_separation"],
       "multiThreads": "turbo",
       "reporters": ["basic", "html"],
       "foundation": {

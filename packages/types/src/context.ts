@@ -1,8 +1,8 @@
+import "@polkadot/api-base/types/events";
 import { ApiPromise, WsProvider } from "@polkadot/api";
-import { AugmentedEvent } from "@polkadot/api/types/events.js";
-import { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types/index.js";
+import type { ApiTypes, AugmentedEvent, SubmittableExtrinsic } from "@polkadot/api-base/types";
 import { KeyringPair } from "@polkadot/keyring/types";
-import { GenericExtrinsic } from "@polkadot/types/extrinsic";
+import { GenericExtrinsic } from "@polkadot/types";
 import { EventRecord } from "@polkadot/types/interfaces/types.js";
 import { AnyTuple, RegistryError } from "@polkadot/types/types";
 import { Debugger } from "debug";

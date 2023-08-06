@@ -60,7 +60,7 @@ jobs:
           pnpm install --frozen-lockfile
           pnpm run lint && pnpm run build
       - name: Download moonbeam binary
-        run: pnpm moonwall download moonbeam latest ./tmp
+        run: bun moonwall download moonbeam latest ./tmp
       - uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest

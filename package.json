@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "@acala-network/chopsticks": "^0.7.3",
-    "@changesets/cli": "^2.26.1",
+    "@changesets/cli": "^2.26.2",
     "@moonbeam-network/api-augment": "^0.2400.0",
     "@moonwall/cli": "workspace:*",
     "@moonwall/types": "workspace:*",
@@ -34,7 +34,7 @@
     "@polkadot/keyring": "^12.3.2",
     "@polkadot/rpc-provider": "^10.9.1",
     "@polkadot/util-crypto": "^12.3.2",
-    "@types/node": "^20.4.6",
+    "@types/node": "^20.4.8",
     "@vitest/utils": "^0.29.8",
     "debug": "^4.3.4",
     "ethers": "^6.7.0",
