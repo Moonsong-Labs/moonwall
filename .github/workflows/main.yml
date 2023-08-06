@@ -38,7 +38,7 @@ jobs:
           bun-version: latest
       - name: Build like before
         run: |
-          pnpm install  --no-frozen-lockfile
+          pnpm install 
           pnpm run lint && pnpm run build
       - name: Run standard dev test
         run: bun moonwall test basic
@@ -48,6 +48,9 @@ jobs:
     needs: ["build"]
     steps:
       - uses: actions/checkout@v3
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
       - uses: pnpm/action-setup@v2
         with:
           version: "latest"
@@ -57,7 +60,7 @@ jobs:
           cache: "pnpm"
       - name: Build like before
         run: |
-          pnpm install --no-frozen-lockfile
+          pnpm install
           pnpm run lint && pnpm run build
       - name: Download moonbeam binary
         run: bun moonwall download moonbeam latest ./tmp
@@ -85,7 +88,7 @@ jobs:
           cache: "pnpm"
       - name: Build like before
         run: |
-          pnpm install  --no-frozen-lockfile
+          pnpm install 
           pnpm run lint && pnpm run build
       - uses: oven-sh/setup-bun@v1
         with:
@@ -107,7 +110,7 @@ jobs:
           cache: "pnpm"
       - name: Build like before
         run: |
-          pnpm install  --no-frozen-lockfile
+          pnpm install 
           pnpm run lint && pnpm run build
       - uses: oven-sh/setup-bun@v1
         with:
@@ -137,7 +140,7 @@ jobs:
           bun-version: latest
       - name: Build like before
         run: |
-          pnpm install  --no-frozen-lockfile
+          pnpm install 
           pnpm run lint && pnpm run build
       - name: Download binaries
         run: |
@@ -163,7 +166,7 @@ jobs:
           bun-version: latest
       - name: Build like before
         run: |
-          pnpm install  --no-frozen-lockfile
+          pnpm install 
           pnpm run lint && pnpm run build
       - name: Download binaries
         run: |
