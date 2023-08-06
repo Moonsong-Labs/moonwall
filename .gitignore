@@ -1,6 +1,6 @@
 node_modules/
 dist/
-html/*
+test/html/*
 *.sqlite
 **/*.log
 downloads/*
@@ -18,4 +18,5 @@ typechain-types
 # Hardhat files
 cache
 artifacts
-contracts/out
+test/tmp
+test/contracts/out
