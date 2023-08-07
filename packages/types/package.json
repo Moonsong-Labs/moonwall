@@ -50,7 +50,7 @@
     "generate-types": "tsup src --format cjs,esm --dts --config tsup.config.ts && pnpm schema && pnpm typecheck",
     "watch": "tsup src --format cjs,esm --dts --watch",
     "typecheck": "pnpm exec tsc --noEmit",
-    "prepublish": "pnpm run build && pnpm run generate-types && pnpm typecheck",
+    "prepublish": "pnpm run build && pnpm run generate-types",
     "schema": "typescript-json-schema --tsNodeRegister --esModuleInterop -o config_schema.json ./src/config.ts MoonwallConfig"
   },
   "dependencies": {

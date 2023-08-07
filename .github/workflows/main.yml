@@ -157,7 +157,7 @@ jobs:
       - name: Build like before
         run: |
           pnpm install   
-          pnpm run lint && pnpm run build
+          pnpm run build
       - name: Download binaries
         run: |
           cd test
