@@ -12,7 +12,7 @@
   },
   "devDependencies": {
     "@acala-network/chopsticks": "^0.7.3",
-    "@changesets/cli": "^2.26.2",
+
     "@moonbeam-network/api-augment": "^0.2400.0",
     "@moonwall/cli": "workspace:*",
     "@moonwall/types": "workspace:*",
