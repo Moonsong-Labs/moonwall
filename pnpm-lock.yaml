@@ -247,6 +247,9 @@ importers:
       vitest:
         specifier: ^0.34.1
         version: 0.34.1(@vitest/ui@0.34.1)
+      web3:
+        specifier: 4.0.3
+        version: 4.0.3
       ws:
         specifier: ^8.13.0
         version: 8.13.0
@@ -296,9 +299,6 @@ importers:
       typescript:
         specifier: ^5.1.6
         version: 5.1.6
-      web3:
-        specifier: 4.0.3
-        version: 4.0.3
 
   test:
     devDependencies:
