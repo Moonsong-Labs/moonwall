@@ -45,8 +45,8 @@
     "*.cjs"
   ],
   "scripts": {
-    "clean": "pnpm rimraf dist && pnpm rimraf node_modules",
-    "build": "pnpm exec rimraf dist && tsup src --format cjs,esm --config tsup.config.ts && pnpm generate-types",
+    "clean": "rm -rf dist && rm -rf node_modules",
+    "build": "pnpm exec rm -rf dist && tsup src --format cjs,esm --config tsup.config.ts && pnpm generate-types",
     "generate-types": "tsup src --format cjs,esm --dts --config tsup.config.ts && pnpm schema && pnpm typecheck",
     "watch": "tsup src --format cjs,esm --dts --watch",
     "typecheck": "pnpm exec tsc --noEmit",
@@ -69,7 +69,6 @@
     "access": "public"
   },
   "devDependencies": {
-    "rimraf": "^5.0.1",
     "tsup": "^7.2.0",
     "typescript": "^5.1.6",
     "typescript-json-schema": "^0.59.0"

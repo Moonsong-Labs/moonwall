@@ -165,7 +165,7 @@ export async function interactWithContract(
     if (web3Library === "viem") {
       const result = await context
         .viem()
-        .call({ account, to: contractAddress, value: 0n, data, gas: gasParam });
+        .call({ account: account.address, to: contractAddress, value: 0n, data, gas: gasParam });
       return decodeFunctionResult({ abi, functionName, data: result.data! });
     } else {
       const result = await context.ethers().call({
@@ -181,7 +181,13 @@ export async function interactWithContract(
     if (web3Library === "viem") {
       const hash = await context
         .viem()
-        .sendTransaction({ account, to: contractAddress, value, data, gas: gasParam });
+        .sendTransaction({
+          account: account as any,
+          to: contractAddress,
+          value,
+          data,
+          gas: gasParam,
+        });
       return hash;
     } else {
       const signer = new Wallet(privateKey, context.ethers().provider);

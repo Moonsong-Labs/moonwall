@@ -26,7 +26,8 @@
     ".": {
       "types": "./dist/index.d.ts",
       "require": "./dist/index.cjs",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "bun": "./src/cmds/entrypoint.ts"
     }
   },
   "module": "./dist/index.js",
@@ -48,8 +49,8 @@
     "*.cjs"
   ],
   "scripts": {
-    "clean": "pnpm rimraf dist && pnpm rimraf node_modules",
-    "build": "pnpm exec rimraf dist && tsup src --format cjs,esm --config tsup.config.ts && pnpm generate-types",
+    "clean": "rm -rf dist && rm -rf node_modules",
+    "build": "pnpm exec rm -rf dist && tsup src --format cjs,esm --config tsup.config.ts && pnpm generate-types",
     "generate-types": "tsup src --format cjs,esm --dts --config tsup.config.ts",
     "watch": "tsup src --format cjs,esm --dts --watch",
     "typecheck": "pnpm exec tsc --noEmit",
@@ -112,7 +113,6 @@
     "@polkadot/util": "^12.3.2",
     "@vitest/ui": "^0.34.1",
     "ethers": "^6.7.0",
-    "rimraf": "^5.0.1",
     "typescript": "^5.1.6",
     "viem": "^1.5.3",
     "web3": "4.0.3",
