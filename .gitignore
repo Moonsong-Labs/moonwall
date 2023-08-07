@@ -1,5 +1,5 @@
-node_modules/
-dist/
+**/node_modules/
+**/dist/
 test/html/*
 *.sqlite
 **/*.log
@@ -9,14 +9,12 @@ moonbeam
 polkadot
 geth
 node_modules
-.env
 coverage
 coverage.json
 typechain
 typechain-types
 
-# Hardhat files
 cache
 artifacts
-test/tmp
-test/contracts/out
+**/tmp/*
+**/contracts/out/*

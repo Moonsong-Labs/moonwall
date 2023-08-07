@@ -40,13 +40,5 @@
     "vitest": "^0.34.1",
     "web3": "4.0.3",
     "yargs": "^17.7.2"
-  },
-  "pnpm": {
-    "overrides": {
-      "@moonwall/cli": "workspace:*",
-      "@moonwall/types": "workspace:*",
-      "@moonwall/util": "workspace:*",
-      "solc": "^0.8.19"
-    }
   }
 }
