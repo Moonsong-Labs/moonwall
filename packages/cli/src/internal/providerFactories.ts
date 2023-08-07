@@ -107,7 +107,7 @@ export class ProviderFactory {
           chain: await deriveViemChain(this.url),
           account: privateKeyToAccount(this.privateKey as `0x${string}`),
           transport: http(this.url.replace("ws", "http")),
-        }).extend(publicActions) as ViemClient,
+        }).extend(publicActions) as any,
     };
   }
 
