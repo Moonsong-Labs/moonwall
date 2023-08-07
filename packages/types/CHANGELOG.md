@@ -1,5 +1,12 @@
 # @moonwall/types
 
+## 4.0.10
+
+### Patch Changes
+
+- 4445814: Pkg updates
+- dd80fec: Pkg Updates
+
 ## 4.0.8
 
 ### Patch Changes
