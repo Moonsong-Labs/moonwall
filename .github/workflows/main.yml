@@ -68,8 +68,9 @@ jobs:
         with:
           bun-version: latest
       - name: Download moonbeam binary
-        run: bun moonwall download moonbeam latest ./tmp
-
+        run: |
+          cd test
+          bun moonwall download moonbeam latest ./tmp
       - name: Run standard dev test
         run: |
           cd test
@@ -163,7 +164,9 @@ jobs:
           bun moonwall download moonbeam latest ./tmp
           bun moonwall download polkadot latest ./tmp
       - name: Run standard zombie test
-        run: bun moonwall test zombie_test
+        run: |
+          cd test
+          bun moonwall test zombie_test
 
   test_multi_zombie:
     runs-on: ubuntu-latest
@@ -190,4 +193,6 @@ jobs:
           bun moonwall download moonbeam latest ./tmp
           bun moonwall download polkadot latest ./tmp
       - name: Run multi zombie test
-        run: bun moonwall test zombie_multi_para
+        run: |
+          cd test
+          bun moonwall test zombie_multi_para
