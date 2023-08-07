@@ -1,5 +1,16 @@
 # @moonwall/cli
 
+## 4.0.10
+
+### Patch Changes
+
+- 4445814: Pkg updates
+- dd80fec: Pkg Updates
+- Updated dependencies [4445814]
+- Updated dependencies [dd80fec]
+  - @moonwall/types@4.0.10
+  - @moonwall/util@4.0.10
+
 ## 4.0.9
 
 ### Patch Changes
