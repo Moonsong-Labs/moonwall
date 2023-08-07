@@ -40,6 +40,10 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
   runningNode.once("exit", () => {
     process.removeListener("exit", onProcessExit);
     process.removeListener("SIGINT", onProcessInterrupt);
+
+    runningNode.stderr?.off("data", writeLogToFile);
+    runningNode.stdout?.off("data", writeLogToFile);
+
     fsStream.end(); // This line ensures that the writable stream is properly closed
     debugNode(`Exiting dev node: ${name}`);
   });
@@ -56,10 +60,12 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
   });
 
   const writeLogToFile = (chunk: any) => {
-    fsStream.write(chunk, (err) => {
-      if (err) console.error(err);
-      else fsStream.emit("drain");
-    });
+    if (fsStream.writable) {
+      fsStream.write(chunk, (err) => {
+        if (err) console.error(err);
+        else fsStream.emit("drain");
+      });
+    }
   };
   runningNode.stderr?.on("data", writeLogToFile);
   runningNode.stdout?.on("data", writeLogToFile);

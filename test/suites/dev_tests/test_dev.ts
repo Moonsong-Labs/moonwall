@@ -1,11 +1,5 @@
 import "@moonbeam-network/api-augment";
-import {
-  beforeAll,
-  deployCreateCompiledContract,
-  describeSuite,
-  expect,
-  fetchCompiledContract,
-} from "@moonwall/cli";
+import { beforeAll, describeSuite, expect, fetchCompiledContract } from "@moonwall/cli";
 import {
   ALITH_ADDRESS,
   ALITH_PRIVATE_KEY,
@@ -14,7 +8,6 @@ import {
   CHARLETH_ADDRESS,
   DOROTHY_ADDRESS,
   GLMR,
-  PRECOMPILES,
   alith,
   baltathar,
   deployViemContract,
@@ -38,7 +31,7 @@ import {
 } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import Web3 from "web3";
-import { tokenAbi, bytecode as tokenBytecode } from "../_test_data/token.js";
+import { tokenAbi, bytecode as tokenBytecode } from "../../_test_data/token.js";
 
 describeSuite({
   id: "D01",
