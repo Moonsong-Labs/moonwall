@@ -74,6 +74,7 @@
     "viem": "^1.5.3",
     "vite": "^4.4.8",
     "vitest": "^0.34.1",
+    "web3": "4.0.3",
     "ws": "^8.13.0",
     "yaml": "^2.3.1",
     "yargs": "^17.7.2"
@@ -88,8 +89,7 @@
     "@polkadot/types": "^10.9.1",
     "@polkadot/types-codec": "^10.9.1",
     "@polkadot/util": "^12.3.2",
-    "ethers": "^6.6.7",
-    "web3": "4.0.3"
+    "ethers": "^6.6.7"
   },
   "devDependencies": {
     "@moonbeam-network/api-augment": "^0.2400.0",
@@ -104,8 +104,7 @@
     "@vitest/ui": "^0.34.1",
     "ethers": "^6.7.0",
     "tsup": "^7.2.0",
-    "typescript": "^5.1.6",
-    "web3": "4.0.3"
+    "typescript": "^5.1.6"
   },
   "publishConfig": {
     "access": "public"
