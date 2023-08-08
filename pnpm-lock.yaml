@@ -35,9 +35,6 @@ importers:
       '@zombienet/orchestrator':
         specifier: ^0.0.50
         version: 0.0.50(@polkadot/util@12.3.2)(@types/node@20.4.8)
-      bottleneck:
-        specifier: ^2.19.5
-        version: 2.19.5
       chalk:
         specifier: ^5.3.0
         version: 5.3.0
