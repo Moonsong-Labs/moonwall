@@ -1,5 +1,11 @@
 # @moonwall/cli
 
+## 4.0.13
+
+### Patch Changes
+
+- 42635fa: fix
+
 ## 4.0.12
 
 ### Patch Changes
