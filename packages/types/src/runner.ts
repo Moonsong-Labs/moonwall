@@ -37,7 +37,7 @@ export interface CustomTest {
   (params: {
     id: string;
     title: string;
-    test: () => void;
+    test: (vitestContext: any) => void;
     modifier?: "only" | "skip";
     minRtVersion?: number;
     chainType?: "moonriver" | "moonbeam" | "moonbase";
@@ -78,7 +78,7 @@ export type TestCaseModifier = "only" | "skip";
 export interface ITestCase {
   id: string;
   title: string;
-  test: () => void;
+  test: (vitestContext: any) => void;
   modifier?: TestCaseModifier;
   minRtVersion?: number;
   chainType?: "moonbeam" | "moonriver" | "moonbase";

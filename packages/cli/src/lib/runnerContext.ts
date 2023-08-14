@@ -5,12 +5,15 @@ import type {
   GenericContext,
   ITestCase,
   ITestSuiteType,
+  ProviderApi,
   ProviderMap,
   ProviderType,
+  ReadOnlyLaunchSpec,
   TestCasesFn,
   ViemClient,
 } from "@moonwall/types";
 import { ApiPromise } from "@polkadot/api";
+import Bottleneck from "bottleneck";
 import Debug from "debug";
 import { Signer } from "ethers";
 import { afterAll, beforeAll, describe, it } from "vitest";
@@ -24,7 +27,8 @@ import { zombieHandler } from "./handlers/zombieHandler.js";
 
 const RT_VERSION = Number(process.env.MOON_RTVERSION);
 const RT_NAME = process.env.MOON_RTNAME;
-let ctx: MoonwallContext;
+let ctx: MoonwallContext | undefined = undefined;
+let limiter: Bottleneck | undefined = undefined;
 
 // About: This has been designed in the handler pattern so that eventually we can integrate it to vitest
 // https://vitest.dev/advanced/runner.html
@@ -84,6 +88,12 @@ export function describeSuite<T extends FoundationType>({
     }
 
     ctx = await contextCreator(globalConfig, process.env.MOON_TEST_ENV);
+    const env = globalConfig.environments.find(({ name }) => name === process.env.MOON_TEST_ENV)!;
+
+    if (env.foundation.type === "read_only") {
+      const settings = loadParams(env.foundation.launchSpec);
+      limiter = new Bottleneck(settings);
+    }
   });
 
   afterAll(async function () {
@@ -113,7 +123,7 @@ export function describeSuite<T extends FoundationType>({
 
   describe(`🗃️  #${suiteId} ${title}`, function () {
     const getApi = <T extends ProviderType>(apiType?: T, apiName?: string) => {
-      const provider = ctx.providers.find((prov) => {
+      const provider = ctx!.providers.find((prov) => {
         if (apiType && apiName) {
           return prov.type == apiType && prov.name === apiName;
         } else if (apiType && !apiName) {
@@ -131,7 +141,9 @@ export function describeSuite<T extends FoundationType>({
         );
       }
 
-      return provider.api as ProviderMap[T];
+      return !!!limiter
+        ? (provider.api as ProviderMap[T])
+        : scheduleWithBottleneck(provider.api as ProviderMap[T]);
     };
 
     const context: GenericContext = {
@@ -172,4 +184,34 @@ const logger = () => {
   Debug.enable("test:*");
 
   return debug;
+};
+
+const loadParams = (config?: ReadOnlyLaunchSpec) => {
+  const defaultParams = { maxConcurrent: 5, minTime: 100 };
+
+  if (!config || config.rateLimiter === undefined || config.rateLimiter === true) {
+    return defaultParams;
+  }
+
+  if (config.rateLimiter === false) {
+    return {};
+  }
+
+  if (typeof config.rateLimiter === "object") {
+    return config.rateLimiter;
+  }
+};
+
+const scheduleWithBottleneck = <T extends ProviderApi>(api: T): T => {
+  return new Proxy(api, {
+    get(target, propKey, receiver) {
+      const origMethod = target[propKey];
+      if (typeof origMethod === "function") {
+        return (...args: any[]) => {
+          return limiter!.schedule(() => origMethod.apply(target, args));
+        };
+      }
+      return origMethod;
+    },
+  });
 };

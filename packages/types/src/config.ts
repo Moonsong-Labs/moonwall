@@ -1,3 +1,5 @@
+import Bottleneck from "bottleneck"
+
 /**
  * The main configuration object for Moonwall.
  */
@@ -128,7 +130,12 @@ export type IFoundation =
       zombieSpec: ZombieLaunchSpec;
     }
   | {
-      type: "read_only" | "fork";
+      type: "read_only";
+      launchSpec: ReadOnlyLaunchSpec;
+    }
+  | {
+      type: "fork";
+      // launchSpec: ForkLaunchSpec;
     };
 
 /**
@@ -163,6 +170,25 @@ export interface GenericLaunchSpec {
    * An optional array of options for the launch spec.
    */
   options?: string[];
+}
+
+/**
+ * A launch specification object for the "read_only" foundation type.
+ * @extends GenericLaunchSpec
+ */
+export interface ReadOnlyLaunchSpec extends GenericLaunchSpec {
+  /**
+   * Rate limiter options, on by default. 
+   * Can be set to false to disable.
+   */
+  rateLimiter?: boolean | Bottleneck.ConstructorOptions;
+}
+
+/**
+ * A launch specification object for the "fork" foundation type.
+ * @extends GenericLaunchSpec
+ */
+export interface ForkLaunchSpec extends GenericLaunchSpec {
 }
 
 /**
