@@ -206,7 +206,7 @@ const scheduleWithBottleneck = <T extends ProviderApi>(api: T): T => {
   return new Proxy(api, {
     get(target, propKey, receiver) {
       const origMethod = target[propKey];
-      if (typeof origMethod === "function" && propKey !== "rpc") {
+      if (typeof origMethod === "function" && propKey !== "rpc" && propKey !== "tx") {
         return (...args: any[]) => {
           return limiter!.schedule(() => origMethod.apply(target, args));
         };
