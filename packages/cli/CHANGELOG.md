@@ -1,5 +1,15 @@
 # @moonwall/cli
 
+## 4.0.11
+
+### Patch Changes
+
+- 96a442b: Rate Limiter
+  - [#222](https://github.com/Moonsong-Labs/moonwall/issues/222)
+- Updated dependencies [96a442b]
+  - @moonwall/types@4.0.11
+  - @moonwall/util@4.0.11
+
 ## 4.0.10
 
 ### Patch Changes
