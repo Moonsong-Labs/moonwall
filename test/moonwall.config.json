@@ -393,6 +393,33 @@
       ]
     },
     {
+      "name": "readonly",
+      "testFileDir": ["suites/read_only/"],
+      "include": ["**/{test,spec,test_,test-}*{ts,mts,cts}"],
+      "multiThreads": false,
+      "foundation": {
+        "type": "read_only",
+        "launchSpec": {
+          "rateLimiter": {
+            "maxConcurrent": 5,
+            "minTime": 10000
+          }
+        }
+      },
+      "connections": [
+        {
+          "name": "eth",
+          "type": "ethers",
+          "endpoints": ["wss://wss.api.moonbeam.network"]
+        },
+        {
+          "name": "para",
+          "type": "polkadotJs",
+          "endpoints": ["wss://wss.api.moonbeam.network"]
+        }
+      ]
+    },
+    {
       "name": "dev_test",
       "testFileDir": ["suites/dev_tests"],
       "envVars": ["DEBUG_COLORS=1", "TIMBO_TEST_ENV='TIMBO timbo timbo'"],
