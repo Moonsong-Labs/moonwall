@@ -35,6 +35,9 @@ importers:
       '@zombienet/orchestrator':
         specifier: ^0.0.50
         version: 0.0.50(@polkadot/util@12.3.2)(@types/node@20.4.8)
+      bottleneck:
+        specifier: ^2.19.5
+        version: 2.19.5
       chalk:
         specifier: ^5.3.0
         version: 5.3.0
@@ -169,6 +172,9 @@ importers:
         specifier: 4.0.3
         version: 4.0.3
     devDependencies:
+      bottleneck:
+        specifier: ^2.19.5
+        version: 2.19.5
       tsup:
         specifier: ^7.2.0
         version: 7.2.0(typescript@5.1.6)
@@ -2323,7 +2329,6 @@ packages:
 
   /bottleneck@2.19.5:
     resolution: {integrity: sha512-VHiNCbI1lKdl44tGrhNfU3lup0Tj/ZBMJB5/2ZbNXRCPuRCO7ed2mgcK4r17y+KB2EfuYuRaVlwNbAeaWGSpbw==}
-    dev: false
 
   /brace-expansion@1.1.11:
     resolution: {integrity: sha512-iCuPHDFgrHX7H2vEI/5xpz07zSHB00TpugqhmYtVmMO6518mCuRMoOYFldEBl0g187ufozdaHgWKcYFb61qGiA==}

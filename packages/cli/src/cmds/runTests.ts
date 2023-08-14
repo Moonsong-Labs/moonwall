@@ -1,14 +1,14 @@
-import { importJsonConfig, loadEnvVars } from "../lib/configReader.js";
-import { startVitest } from "vitest/node";
-import { UserConfig } from "vitest";
-import { contextCreator } from "../lib/globalContext.js";
 import { Environment } from "@moonwall/types";
-import fs from "node:fs";
-import path from "path";
-import os from "node:os";
 import chalk from "chalk";
 import { execSync } from "node:child_process";
+import fs from "node:fs";
+import os from "node:os";
+import path from "path";
 import { clearNodeLogs } from "src/internal/cmdFunctions/tempLogs.js";
+import { UserConfig } from "vitest";
+import { startVitest } from "vitest/node";
+import { importJsonConfig, loadEnvVars } from "../lib/configReader.js";
+import { contextCreator } from "../lib/globalContext.js";
 
 export async function testCmd(envName: string, additionalArgs?: {}) {
   const globalConfig = importJsonConfig();
@@ -89,7 +89,7 @@ export async function executeTests(env: Environment, additionalArgs?: {}) {
 
       const ctx = await contextCreator(globalConfig, process.env.MOON_TEST_ENV);
       const chainData = ctx.providers
-        .filter((provider) => provider.type == "polkadotJs")
+        .filter((provider) => provider.type == "polkadotJs" && provider.name.includes("para"))
         .map((provider) => {
           return {
             [provider.name]: {

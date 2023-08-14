@@ -374,8 +374,15 @@
       "name": "eth_test",
       "testFileDir": ["suites/eth_test/"],
       "include": ["**/{test,spec,test_,test-}*{ts,mts,cts}"],
+      "multiThreads": false,
       "foundation": {
-        "type": "read_only"
+        "type": "read_only",
+        "launchSpec": {
+          "rateLimiter": {
+            "maxConcurrent": 5,
+            "minTime": 10000
+          }
+        }
       },
       "connections": [
         {
