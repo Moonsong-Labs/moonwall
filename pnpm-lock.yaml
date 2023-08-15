@@ -72,15 +72,6 @@ importers:
       '@polkadot/api':
         specifier: ^10.9.1
         version: 10.9.1
-      '@polkadot/keyring':
-        specifier: ^12.3.2
-        version: 12.3.2(@polkadot/util-crypto@12.3.2)(@polkadot/util@12.3.2)
-      '@polkadot/types':
-        specifier: ^10.9.1
-        version: 10.9.1
-      '@polkadot/util-crypto':
-        specifier: ^12.3.2
-        version: 12.3.2(@polkadot/util@12.3.2)
       '@types/cli-progress':
         specifier: ^3.11.0
         version: 3.11.0
