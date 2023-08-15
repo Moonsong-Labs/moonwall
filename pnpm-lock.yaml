@@ -17,6 +17,9 @@ importers:
       '@moonwall/types':
         specifier: workspace:*
         version: link:../types
+      '@polkadot/util-crypto':
+        specifier: ^12.3.2
+        version: 12.3.2(@polkadot/util@12.3.2)
       bottleneck:
         specifier: ^2.19.5
         version: 2.19.5
@@ -4125,6 +4128,7 @@ packages:
       chalk: 2.4.2
       diff-match-patch: 1.0.5
     dev: true
+    bundledDependencies: []
 
   /jsonfile@4.0.0:
     resolution: {integrity: sha512-m6F1R3z8jjlf2imQHS2Qez5sjKWQzbuuhuJ/FKYFRZvPE3PuHcSMVZzfsLhGVOkfd20obL5SWEBew5ShlquNxg==}
