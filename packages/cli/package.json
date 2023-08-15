@@ -50,16 +50,16 @@
   ],
   "scripts": {
     "clean": "rm -rf dist && rm -rf node_modules",
-    "build": "pnpm exec rm -rf dist && tsup src --format cjs,esm --config tsup.config.ts && pnpm generate-types",
-    "generate-types": "tsup src --format cjs,esm --dts --config tsup.config.ts",
+    "build": "pnpm exec rm -rf dist && tsup src --format cjs,esm --tsconfig tsconfig.json && pnpm generate-types",
+    "generate-types": "tsup src --format cjs,esm --dts --tsconfig tsconfig.json",
     "watch": "tsup src --format cjs,esm --dts --watch",
     "typecheck": "pnpm exec tsc --noEmit",
     "prepublish": "pnpm run build && pnpm run generate-types"
   },
   "dependencies": {
     "@moonwall/types": "workspace:*",
-    "@polkadot/keyring": "^12.3.2",
     "@polkadot/util-crypto": "^12.3.2",
+    "@polkadot/keyring": "^12.3.2",
     "@polkadot/util": "^12.3.2",
     "bottleneck": "^2.19.5",
     "chalk": "^5.3.0",

@@ -46,8 +46,8 @@
   ],
   "scripts": {
     "clean": "rm -rf dist && rm -rf node_modules",
-    "build": "pnpm exec rm -rf dist && tsup src --format cjs,esm --config tsup.config.ts && pnpm generate-types",
-    "generate-types": "tsup src --format cjs,esm --dts --config tsup.config.ts && pnpm schema && pnpm typecheck",
+    "build": "pnpm exec rm -rf dist && tsup src --format cjs,esm --tsconfig tsconfig.json && pnpm generate-types",
+    "generate-types": "tsup src --format cjs,esm --dts --tsconfig tsconfig.json && pnpm schema && pnpm typecheck",
     "watch": "tsup src --format cjs,esm --dts --watch",
     "typecheck": "pnpm exec tsc --noEmit",
     "prepublish": "pnpm run build && pnpm run generate-types",
