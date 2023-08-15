@@ -59,6 +59,7 @@
   "dependencies": {
     "@moonwall/types": "workspace:*",
     "@polkadot/util-crypto": "^12.3.2",
+    "@polkadot/util": "^12.3.2",
     "bottleneck": "^2.19.5",
     "chalk": "^5.3.0",
     "clear": "^0.1.0",
