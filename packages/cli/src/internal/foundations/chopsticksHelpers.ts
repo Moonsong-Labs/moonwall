@@ -1,7 +1,7 @@
 import { setTimeout } from "timers/promises";
 import { MoonwallContext } from "../../lib/globalContext.js";
 import { GenericContext } from "@moonwall/types";
-import { ApiTypes, AugmentedEvent } from "@polkadot/api/types/index.js";
+import { ApiTypes, AugmentedEvent } from "@polkadot/api/types";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { FrameSystemEventRecord } from "@polkadot/types/lookup";
 import { ChopsticksBlockCreation } from "@moonwall/types";

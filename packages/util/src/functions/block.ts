@@ -1,6 +1,4 @@
-import "@moonbeam-network/api-augment/moonbase";
 import { ApiPromise } from "@polkadot/api";
-import "@polkadot/api-augment";
 import type { TxWithEvent } from "@polkadot/api-derive/types";
 import { Option, u32, u64 } from "@polkadot/types";
 import type { ITuple } from "@polkadot/types-codec/types";
@@ -107,8 +105,10 @@ export const getBlockTime = (signedBlock: any) =>
 export const checkBlockFinalized = async (api: ApiPromise, number: number) => {
   return {
     number,
-    finalized: (await api.rpc.moon.isBlockFinalized(await api.rpc.chain.getBlockHash(number)))
-      .isTrue,
+    //@ts-expect-error - remove once pJs exposes this
+    finalized: await api._rpcCore.provider.send("moon_isBlockFinalized", [
+      await api.rpc.chain.getBlockHash(number),
+    ]),
   };
 };
 
@@ -197,11 +197,13 @@ export function extractPreimageDeposit(
       }
 ) {
   const deposit = "deposit" in request ? request.deposit : request;
-  if ("isSome" in deposit) {
+  if ("isSome" in deposit && deposit.isSome) {
     return {
       accountId: deposit.unwrap()[0].toHex(),
       amount: deposit.unwrap()[1],
     };
+  } else if ("isNone" in deposit && deposit.isNone) {
+    return undefined;
   }
   return {
     accountId: deposit[0].toHex(),
