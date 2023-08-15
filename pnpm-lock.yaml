@@ -320,6 +320,9 @@ importers:
       '@polkadot/api-augment':
         specifier: ^10.9.1
         version: 10.9.1
+      '@polkadot/util':
+        specifier: ^12.3.2
+        version: 12.3.2
       '@vitest/ui':
         specifier: ^0.34.1
         version: 0.34.1(vitest@0.34.1)
