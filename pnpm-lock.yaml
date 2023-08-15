@@ -78,6 +78,9 @@ importers:
       '@polkadot/api':
         specifier: ^10.9.1
         version: 10.9.1
+      '@polkadot/types':
+        specifier: ^10.9.1
+        version: 10.9.1
       '@types/cli-progress':
         specifier: ^3.11.0
         version: 3.11.0
