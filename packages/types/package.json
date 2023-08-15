@@ -62,8 +62,8 @@
     "@polkadot/util-crypto": "^12.3.2",
     "bottleneck": "^2.19.5",
     "debug": "^4.3.4",
-    "ethers": "^6.7.0",
-    "viem": "^1.5.3",
+    "ethers": "^6.7.1",
+    "viem": "^1.6.0",
     "web3": "4.0.3"
   },
   "publishConfig": {
