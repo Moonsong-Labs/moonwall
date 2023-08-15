@@ -4,7 +4,6 @@
     "module": "esnext",
     "baseUrl": "./",
     "lib": ["ESNext"],
-    "types": ["node"],
     "declaration": true,
     "outDir": "./dist",
     "moduleResolution": "NodeNext",
