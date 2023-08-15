@@ -17,6 +17,9 @@ importers:
       '@moonwall/types':
         specifier: workspace:*
         version: link:../types
+      '@polkadot/util':
+        specifier: ^12.3.2
+        version: 12.3.2
       '@polkadot/util-crypto':
         specifier: ^12.3.2
         version: 12.3.2(@polkadot/util@12.3.2)
@@ -2050,6 +2053,7 @@ packages:
 
   /abbrev@1.1.1:
     resolution: {integrity: sha512-nne9/IiQ/hzIhY6pdDnbBtz7DjPTKrY00P/zvPSm5pOFkl6xuGrGnXn/VtTNNfNtAfZ9/1RtehkszU9qcTii0Q==}
+    requiresBuild: true
     dev: true
 
   /abitype@0.9.3(typescript@5.1.6):
