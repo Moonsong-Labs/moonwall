@@ -1,11 +1,12 @@
-import { expect } from "vitest";
+import "@moonbeam-network/api-augment";
+import { DevModeContext } from "@moonwall/types";
+import { alith, baltathar, charleth, dorothy } from "@moonwall/util";
 import { ApiPromise } from "@polkadot/api";
 import { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types";
 import { KeyringPair } from "@polkadot/keyring/types";
 import { PalletDemocracyReferendumInfo } from "@polkadot/types/lookup";
 import { blake2AsHex } from "@polkadot/util-crypto";
-import { alith, baltathar, charleth, dorothy } from "@moonwall/util";
-import { DevModeContext } from "@moonwall/types";
+import { expect } from "vitest";
 
 export const COUNCIL_MEMBERS: KeyringPair[] = [baltathar, charleth, dorothy];
 export const COUNCIL_THRESHOLD = Math.ceil((COUNCIL_MEMBERS.length * 2) / 3);

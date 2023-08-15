@@ -20,7 +20,7 @@
     "test": "pnpm exec moonwall test 'basic chopsticks dev_seq chop_state_test'",
     "typecheck": "pnpm -r --filter='./packages/**' run typecheck"
   },
-  "devDependencies": {
+  "dependencies": {
     "@changesets/cli": "^2.26.2"
   }
 }

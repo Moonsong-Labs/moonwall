@@ -1,7 +1,7 @@
 import { ApiPromise } from "@polkadot/api";
-import { mapExtrinsics } from "./block.js";
+import { Extrinsic } from "@polkadot/types/interfaces";
 import Debug from "debug";
-import { Extrinsic } from "@polkadot/types/interfaces/types.js";
+import { mapExtrinsics } from "./block.js";
 
 export function setupLogger(name: string) {
   const debug = Debug(`test:${name}`);

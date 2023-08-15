@@ -8,7 +8,7 @@ import {
 import { Keyring } from "@polkadot/api";
 import { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types";
 import { RegistryError } from "@polkadot/types-codec/types/registry";
-import { EventRecord } from "@polkadot/types/interfaces/types.js";
+import { EventRecord } from "@polkadot/types/interfaces";
 import chalk from "chalk";
 import Debug from "debug";
 import { setTimeout } from "timers/promises";

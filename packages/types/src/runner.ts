@@ -1,6 +1,5 @@
 import { ApiPromise } from "@polkadot/api";
-import { ApiTypes } from "@polkadot/api/types/index.js";
-import { KeyringPair } from "@polkadot/keyring/types.js";
+import { ApiTypes } from "@polkadot/api/types";
 import { Debugger } from "debug";
 import { Signer, TransactionRequest } from "ethers";
 import {
@@ -20,6 +19,7 @@ import { ContractDeploymentOptions } from "./contracts.js";
 import { TransactionType } from "./eth.js";
 import { CallType } from "./foundations.js";
 import { DeepPartial } from "./helpers.js";
+import { KeyringPair } from "@polkadot/keyring/types";
 
 /**
  * @name CustomTest

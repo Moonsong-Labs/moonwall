@@ -3,7 +3,6 @@ import PressToContinuePrompt from "inquirer-press-to-continue";
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 import fs from "fs/promises";
 import { FoundationType, MoonwallConfig } from "@moonwall/types";
-import { option } from "yargs";
 
 export async function createFolders() {
   await fs.mkdir("scripts").catch(() => "scripts folder already exists, skipping");
@@ -34,7 +33,6 @@ export async function generateConfig() {
       );
 
       await fs.writeFile("moonwall.config.json", JSONBlob, "utf-8");
-      // await fs.writeFile("moonwall.config.ts", getBody(answers), "utf-8");
       break;
     } else {
       console.log("ℹ️  Config file already exists at this location. Quitting.");

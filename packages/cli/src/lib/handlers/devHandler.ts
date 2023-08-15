@@ -11,7 +11,7 @@ import {
   ViemTransactionOptions,
 } from "@moonwall/types";
 import { alith, createEthersTransaction, createViemTransaction } from "@moonwall/util";
-import { ApiTypes } from "@polkadot/api/types/index.js";
+import { ApiTypes } from "@polkadot/api/types";
 import { createDevBlock } from "../../internal/foundations/devModeHelpers.js";
 import { importJsonConfig, isEthereumDevConfig } from "../configReader.js";
 import {
