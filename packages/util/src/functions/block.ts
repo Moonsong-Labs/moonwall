@@ -1,5 +1,4 @@
 import { ApiPromise } from "@polkadot/api";
-import "@polkadot/api-augment";
 import type { TxWithEvent } from "@polkadot/api-derive/types";
 import { Option, u32, u64 } from "@polkadot/types";
 import type { ITuple } from "@polkadot/types-codec/types";

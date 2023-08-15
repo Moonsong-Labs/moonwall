@@ -2062,7 +2062,6 @@ packages:
 
   /abbrev@1.1.1:
     resolution: {integrity: sha512-nne9/IiQ/hzIhY6pdDnbBtz7DjPTKrY00P/zvPSm5pOFkl6xuGrGnXn/VtTNNfNtAfZ9/1RtehkszU9qcTii0Q==}
-    requiresBuild: true
     dev: true
 
   /abitype@0.9.3(typescript@5.1.6):
@@ -4154,7 +4153,6 @@ packages:
       chalk: 2.4.2
       diff-match-patch: 1.0.5
     dev: true
-    bundledDependencies: []
 
   /jsonfile@4.0.0:
     resolution: {integrity: sha512-m6F1R3z8jjlf2imQHS2Qez5sjKWQzbuuhuJ/FKYFRZvPE3PuHcSMVZzfsLhGVOkfd20obL5SWEBew5ShlquNxg==}
