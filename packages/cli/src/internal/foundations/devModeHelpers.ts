@@ -1,4 +1,3 @@
-import "@moonbeam-network/api-augment";
 import { BlockCreation, ExtrinsicCreation, GenericContext } from "@moonwall/types";
 import {
   alith,

@@ -1,4 +1,3 @@
-import "@moonbeam-network/api-augment";
 import { DispatchError, DispatchInfo, EventRecord } from "@polkadot/types/interfaces";
 
 export function filterAndApply<T>(

@@ -263,9 +263,6 @@ importers:
         specifier: ^17.7.2
         version: 17.7.2
     devDependencies:
-      '@moonbeam-network/api-augment':
-        specifier: ^0.2400.0
-        version: 0.2400.0
       '@polkadot/api':
         specifier: ^10.9.1
         version: 10.9.1

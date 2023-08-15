@@ -1,4 +1,3 @@
-import "@moonbeam-network/api-augment";
 import {
   ConnectedProvider,
   Environment,

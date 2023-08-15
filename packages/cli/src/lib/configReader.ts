@@ -1,9 +1,7 @@
-import "@moonbeam-network/api-augment";
 import { MoonwallConfig } from "@moonwall/types";
 import fs from "fs/promises";
 import { readFileSync } from "fs";
 import path from "path";
-import chalk from "chalk";
 
 export async function loadConfig(path: string): Promise<MoonwallConfig> {
   if (

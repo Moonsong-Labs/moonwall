@@ -80,7 +80,6 @@
     "yargs": "^17.7.2"
   },
   "peerDependencies": {
-    "@moonbeam-network/api-augment": "^0.2400.0",
     "@polkadot/api": "^10.9.1",
     "@polkadot/api-augment": "^10.9.1",
     "@polkadot/api-derive": "^10.9.1",
@@ -92,7 +91,6 @@
     "ethers": "^6.6.7"
   },
   "devDependencies": {
-    "@moonbeam-network/api-augment": "^0.2400.0",
     "@polkadot/api": "^10.9.1",
     "@polkadot/api-augment": "^10.9.1",
     "@polkadot/api-derive": "^10.9.1",

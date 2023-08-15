@@ -1,4 +1,3 @@
-import "@moonbeam-network/api-augment";
 import { Keyring } from "@polkadot/api";
 import {
   DEFAULT_GENESIS_BALANCE,

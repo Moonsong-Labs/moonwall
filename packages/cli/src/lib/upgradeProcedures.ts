@@ -1,4 +1,3 @@
-import "@moonbeam-network/api-augment";
 import fs, { readFileSync, existsSync } from "fs";
 import chalk from "chalk";
 import type { WeightV2 } from "@polkadot/types/interfaces";

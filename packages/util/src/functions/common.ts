@@ -1,4 +1,3 @@
-import "@moonbeam-network/api-augment";
 import { BN } from "@polkadot/util";
 import fetch from "node-fetch";
 
