@@ -181,6 +181,9 @@ importers:
       '@moonwall/types':
         specifier: workspace:*
         version: link:../types
+      '@polkadot/api-derive':
+        specifier: ^10.9.1
+        version: 10.9.1
       '@polkadot/types-codec':
         specifier: ^10.9.1
         version: 10.9.1
@@ -4153,6 +4156,7 @@ packages:
       chalk: 2.4.2
       diff-match-patch: 1.0.5
     dev: true
+    bundledDependencies: []
 
   /jsonfile@4.0.0:
     resolution: {integrity: sha512-m6F1R3z8jjlf2imQHS2Qez5sjKWQzbuuhuJ/FKYFRZvPE3PuHcSMVZzfsLhGVOkfd20obL5SWEBew5ShlquNxg==}
