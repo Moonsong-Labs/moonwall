@@ -20,6 +20,9 @@ importers:
       '@polkadot/keyring':
         specifier: ^12.3.2
         version: 12.3.2(@polkadot/util-crypto@12.3.2)(@polkadot/util@12.3.2)
+      '@polkadot/types-codec':
+        specifier: ^10.9.1
+        version: 10.9.1
       '@polkadot/util':
         specifier: ^12.3.2
         version: 12.3.2
