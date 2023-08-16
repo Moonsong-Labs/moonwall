@@ -68,7 +68,7 @@
                     "type": "string"
                 },
                 "disableDefaultEthProviders": {
-                    "description": "Switch to not connect to Ethereum providers by default.\nNote: This also acts as a feature gate for context methods like createTxn and readPrecompile.",
+                    "description": "Determines if the default Ethereum provider connections should be disabled.\nWhen set to true, the framework will not automatically connect the Ethereum providers.\nDefault behavior (when unset or set to false) is to connect with Ethers, Viem & Web3 frameworks.\n\nNote: This also acts as a feature gate for context methods like createTxn and readPrecompile.",
                     "type": "boolean"
                 },
                 "name": {
@@ -398,7 +398,7 @@
                             "type": "boolean"
                         }
                     ],
-                    "description": "Rate limiter options, on by default. \nCan be set to false to disable."
+                    "description": "Rate limiter options, on by default.\nCan be set to false to disable."
                 },
                 "running": {
                     "description": "UNUSED",
@@ -413,6 +413,10 @@
                 "configPath": {
                     "description": "The path to the config file.",
                     "type": "string"
+                },
+                "disableDefaultEthProviders": {
+                    "description": "Determines if the default Ethereum provider connections should be disabled.\nWhen set to true, the framework will not automatically connect the Ethereum providers.\nDefault behavior (when unset or set to false) is to connect with Ethers, Viem & Web3 frameworks.",
+                    "type": "boolean"
                 },
                 "monitoredNode": {
                     "description": "An optional monitored node.",

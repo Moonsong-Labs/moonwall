@@ -3,7 +3,6 @@ import { MoonwallConfig } from "@moonwall/types";
 import fs from "fs/promises";
 import { readFileSync } from "fs";
 import path from "path";
-import chalk from "chalk";
 
 export async function loadConfig(path: string): Promise<MoonwallConfig> {
   if (
@@ -22,6 +21,12 @@ export async function loadConfig(path: string): Promise<MoonwallConfig> {
 
 export async function importConfig(configPath: string): Promise<MoonwallConfig> {
   return await import(configPath);
+}
+
+export function isEthereumZombieConfig(): boolean {
+  const config = importJsonConfig();
+  const env = config.environments.find((env) => env.name == process.env.MOON_TEST_ENV)!;
+  return env.foundation.type ==  "zombie" && !!!env.foundation.zombieSpec.disableDefaultEthProviders;
 }
 
 export function isEthereumDevConfig(): boolean {

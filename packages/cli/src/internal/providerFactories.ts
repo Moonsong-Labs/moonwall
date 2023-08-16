@@ -164,6 +164,28 @@ export class ProviderFactory {
         endpoints: [MOON_PARA_WSS],
       },
       {
+        name: "viem",
+        type: "viem",
+        endpoints: [MOON_PARA_WSS],
+      },
+      {
+        name: "parachain",
+        type: "polkadotJs",
+        endpoints: [MOON_PARA_WSS],
+      },
+      {
+        name: "relaychain",
+        type: "polkadotJs",
+        endpoints: [MOON_RELAY_WSS],
+      },
+    ]);
+  }
+
+  public static prepareNoEthDefaultZombie(): MoonwallProvider[] {
+    const MOON_PARA_WSS = process.env.MOON_PARA_WSS || "error";
+    const MOON_RELAY_WSS = process.env.MOON_RELAY_WSS || "error";
+    return this.prepare([
+      {
         name: "parachain",
         type: "polkadotJs",
         endpoints: [MOON_PARA_WSS],

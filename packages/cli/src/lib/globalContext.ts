@@ -21,7 +21,7 @@ import {
   ProviderInterfaceFactory,
   vitestAutoUrl,
 } from "../internal/providerFactories.js";
-import { importJsonConfig, isEthereumDevConfig } from "./configReader.js";
+import { importJsonConfig, isEthereumDevConfig, isEthereumZombieConfig } from "./configReader.js";
 const debugSetup = Debug("global:context");
 
 export class MoonwallContext {
@@ -211,7 +211,9 @@ export class MoonwallContext {
     if (this.environment.foundationType == "zombie") {
       this.environment.providers = env.connections
         ? ProviderFactory.prepare(env.connections)
-        : ProviderFactory.prepareDefaultZombie();
+        : isEthereumZombieConfig()
+        ? ProviderFactory.prepareDefaultZombie()
+        : ProviderFactory.prepareNoEthDefaultZombie();
     }
 
     if (this.providers.length > 0) {

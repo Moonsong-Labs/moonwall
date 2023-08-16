@@ -1,4 +1,4 @@
-import Bottleneck from "bottleneck"
+import Bottleneck from "bottleneck";
 
 /**
  * The main configuration object for Moonwall.
@@ -178,7 +178,7 @@ export interface GenericLaunchSpec {
  */
 export interface ReadOnlyLaunchSpec extends GenericLaunchSpec {
   /**
-   * Rate limiter options, on by default. 
+   * Rate limiter options, on by default.
    * Can be set to false to disable.
    */
   rateLimiter?: boolean | Bottleneck.ConstructorOptions;
@@ -188,14 +188,20 @@ export interface ReadOnlyLaunchSpec extends GenericLaunchSpec {
  * A launch specification object for the "fork" foundation type.
  * @extends GenericLaunchSpec
  */
-export interface ForkLaunchSpec extends GenericLaunchSpec {
-}
+export interface ForkLaunchSpec extends GenericLaunchSpec {}
 
 /**
  * A launch specification object for the "zombie" foundation type.
  * @extends GenericLaunchSpec
  */
 export interface ZombieLaunchSpec extends GenericLaunchSpec {
+  /**
+   * Determines if the default Ethereum provider connections should be disabled.
+   * When set to true, the framework will not automatically connect the Ethereum providers.
+   * Default behavior (when unset or set to false) is to connect with Ethers, Viem & Web3 frameworks.
+   */
+  disableDefaultEthProviders?: boolean;
+
   /**
    * The path to the config file.
    */
@@ -257,7 +263,10 @@ export interface DevLaunchSpec extends GenericLaunchSpec {
   binPath: string;
 
   /**
-   * Switch to not connect to Ethereum providers by default.
+   * Determines if the default Ethereum provider connections should be disabled.
+   * When set to true, the framework will not automatically connect the Ethereum providers.
+   * Default behavior (when unset or set to false) is to connect with Ethers, Viem & Web3 frameworks.
+   *
    * Note: This also acts as a feature gate for context methods like createTxn and readPrecompile.
    */
   disableDefaultEthProviders?: boolean;
