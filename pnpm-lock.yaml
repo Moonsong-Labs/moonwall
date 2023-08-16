@@ -51,8 +51,8 @@ importers:
         specifier: ^12.3.2
         version: 12.3.2(@polkadot/util@12.3.2)
       '@zombienet/orchestrator':
-        specifier: ^0.0.52
-        version: 0.0.52(@polkadot/util@12.3.2)(@types/node@20.5.0)
+        specifier: ^0.0.50
+        version: 0.0.50(@polkadot/util@12.3.2)(@types/node@20.5.0)
       bottleneck:
         specifier: ^2.19.5
         version: 2.19.5
@@ -1988,8 +1988,8 @@ packages:
     dependencies:
       typescript: 5.1.6
 
-  /@zombienet/orchestrator@0.0.52(@polkadot/util@12.3.2)(@types/node@20.5.0):
-    resolution: {integrity: sha512-69+MWhYtIqYFn3QF4dkUqB9pdlXb8tXpn5d8lDFNLyq12EClBGnDv2NmQVyWr9zgXSyTpvKmb/sAbRhxKjVdow==}
+  /@zombienet/orchestrator@0.0.50(@polkadot/util@12.3.2)(@types/node@20.5.0):
+    resolution: {integrity: sha512-phpyoUmC2Kv+IJ8naqvaJ/CIT0DT+WNpACa22LTdx4ZukJWXbVfTkWm1imejApUyk7NmLK92OlwCdUOGdyOATg==}
     engines: {node: '>=18'}
     dependencies:
       '@polkadot/api': 10.9.1
