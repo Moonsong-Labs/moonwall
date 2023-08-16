@@ -298,7 +298,7 @@ importers:
     devDependencies:
       '@acala-network/chopsticks':
         specifier: ^0.7.3
-        version: 0.7.3
+        version: 0.7.3(debug@4.3.4)
       '@moonbeam-network/api-augment':
         specifier: ^0.2400.0
         version: 0.2400.0
@@ -356,13 +356,16 @@ importers:
       web3:
         specifier: 4.0.3
         version: 4.0.3
+      yargs:
+        specifier: ^17.7.2
+        version: 17.7.2
 
 packages:
 
   /@acala-network/chopsticks-executor@0.7.3:
     resolution: {integrity: sha512-sPAQst4/i8S5i3aGPz7YXgRHfoR71HxOdk30PXnuExkUpOKQH1BYD0wuQkoVstonTeBwis3BSW5CL9Xz/4ksjQ==}
 
-  /@acala-network/chopsticks@0.7.3:
+  /@acala-network/chopsticks@0.7.3(debug@4.3.4):
     resolution: {integrity: sha512-RYGFI1UQgNwc+rUwjoZEucLYesiG62IJXT9ABfs/KKEkvMx6JiJWwO37tObdGkUm4S8zezdRumEnOPOl+B65FQ==}
     hasBin: true
     dependencies:
@@ -405,52 +408,6 @@ packages:
       - ts-node
       - typeorm-aurora-data-api-driver
       - utf-8-validate
-    dev: true
-
-  /@acala-network/chopsticks@0.7.3(debug@4.3.4):
-    resolution: {integrity: sha512-RYGFI1UQgNwc+rUwjoZEucLYesiG62IJXT9ABfs/KKEkvMx6JiJWwO37tObdGkUm4S8zezdRumEnOPOl+B65FQ==}
-    hasBin: true
-    dependencies:
-      '@acala-network/chopsticks-executor': 0.7.3
-      '@pnpm/npm-conf': 2.2.2
-      '@polkadot/api': 10.9.1
-      axios: 1.4.0(debug@4.3.4)
-      global-agent: 3.0.0
-      js-yaml: 4.1.0
-      jsondiffpatch: 0.4.1
-      lodash: 4.17.21
-      pino: 8.15.0
-      pino-pretty: 10.2.0
-      reflect-metadata: 0.1.13
-      sqlite3: 5.1.6
-      typeorm: 0.3.17(sqlite3@5.1.6)
-      ws: 8.13.0
-      yargs: 17.7.2
-      zod: 3.21.4
-    transitivePeerDependencies:
-      - '@google-cloud/spanner'
-      - '@sap/hana-client'
-      - better-sqlite3
-      - bluebird
-      - bufferutil
-      - debug
-      - encoding
-      - hdb-pool
-      - ioredis
-      - mongodb
-      - mssql
-      - mysql2
-      - oracledb
-      - pg
-      - pg-native
-      - pg-query-stream
-      - redis
-      - sql.js
-      - supports-color
-      - ts-node
-      - typeorm-aurora-data-api-driver
-      - utf-8-validate
-    dev: false
 
   /@adraffy/ens-normalize@1.9.0:
     resolution: {integrity: sha512-iowxq3U30sghZotgl4s/oJRci6WPBfNO5YYgk2cIOMCHr3LeGPcsZjCEr+33Q4N+oV3OABDAtA+pyvWjbvBifQ==}
@@ -7010,10 +6967,6 @@ packages:
   /yocto-queue@1.0.0:
     resolution: {integrity: sha512-9bnSc/HEW2uRy67wc+T8UwauLuPJVn28jb+GtJY16iiKWyvmYJRXVT4UamsAEGQfPohgr2q4Tq0sQbQlxTfi1g==}
     engines: {node: '>=12.20'}
-
-  /zod@3.21.4:
-    resolution: {integrity: sha512-m46AKbrzKVzOzs/DZgVnG5H55N1sv1M8qZU3A8RIKbs3mrACDNeIOeilDymVb2HdmP8uwshOCF4uJ8uM9rCqJw==}
-    dev: false
 
   /zod@3.22.0:
     resolution: {integrity: sha512-y5KZY/ssf5n7hCGDGGtcJO/EBJEm5Pa+QQvFBeyMOtnFYOSflalxIFFvdaYevPhePcmcKC4aTbFkCcXN7D0O8Q==}
