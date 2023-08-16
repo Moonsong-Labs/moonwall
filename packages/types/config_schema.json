@@ -418,6 +418,9 @@
                     "description": "Determines if the default Ethereum provider connections should be disabled.\nWhen set to true, the framework will not automatically connect the Ethereum providers.\nDefault behavior (when unset or set to false) is to connect with Ethers, Viem & Web3 frameworks.",
                     "type": "boolean"
                 },
+                "disableLogEavesdropping": {
+                    "type": "boolean"
+                },
                 "monitoredNode": {
                     "description": "An optional monitored node.",
                     "type": "string"

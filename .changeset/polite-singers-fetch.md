@@ -7,3 +7,4 @@
 
 August Update
 - [#231](https://github.com/Moonsong-Labs/moonwall/issues/231)
+- [#92](https://github.com/Moonsong-Labs/moonwall/issues/92)

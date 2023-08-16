@@ -23,10 +23,18 @@ export async function importConfig(configPath: string): Promise<MoonwallConfig> 
   return await import(configPath);
 }
 
+export function isOptionSet(option: string): boolean {
+  const config = importJsonConfig();
+  const env = config.environments.find((env) => env.name == process.env.MOON_TEST_ENV)!;
+  const optionValue = traverseConfig(env, option);
+
+  return optionValue !== undefined;
+}
+
 export function isEthereumZombieConfig(): boolean {
   const config = importJsonConfig();
   const env = config.environments.find((env) => env.name == process.env.MOON_TEST_ENV)!;
-  return env.foundation.type ==  "zombie" && !!!env.foundation.zombieSpec.disableDefaultEthProviders;
+  return env.foundation.type == "zombie" && !!!env.foundation.zombieSpec.disableDefaultEthProviders;
 }
 
 export function isEthereumDevConfig(): boolean {
@@ -85,4 +93,21 @@ function replaceEnvVars(value: any): any {
   } else {
     return value;
   }
+}
+
+function traverseConfig(configObj: any, option: string): any {
+  if (typeof configObj !== "object" || configObj === null) return undefined;
+
+  if (configObj.hasOwnProperty(option)) {
+    return configObj[option];
+  }
+
+  for (let key in configObj) {
+    let result = traverseConfig(configObj[key], option);
+    if (result !== undefined) {
+      return result;
+    }
+  }
+
+  return undefined;
 }
