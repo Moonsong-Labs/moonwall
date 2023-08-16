@@ -111,3 +111,22 @@ function traverseConfig(configObj: any, option: string): any {
 
   return undefined;
 }
+
+export function parseZombieConfigForBins(zombieConfigPath: string) {
+  const config = JSON.parse(readFileSync(zombieConfigPath, "utf8"));
+  const commands: string[] = [];
+
+  if (config.relaychain && config.relaychain.default_command) {
+    commands.push(path.basename(config.relaychain.default_command));
+  }
+
+  if (config.parachains) {
+    for (const parachain of config.parachains) {
+      if (parachain.collator && parachain.collator.command) {
+        commands.push(path.basename(parachain.collator.command));
+      }
+    }
+  }
+
+  return [...new Set(commands)].sort();
+}

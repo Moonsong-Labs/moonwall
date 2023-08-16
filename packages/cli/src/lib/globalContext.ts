@@ -173,7 +173,7 @@ export class MoonwallContext {
       .map((process) => process!["pid"]);
 
     const onProcessExit = () => {
-      exec(`kill -9 ${processIds.join(" ")}`, (error) => {
+      exec(`kill ${processIds.join(" ")}`, (error) => {
         if (error) {
           console.error(`Error killing process: ${error.message}`);
         }
@@ -207,9 +207,10 @@ export class MoonwallContext {
       return await this.startZombieNetwork(nodes);
     }
 
-    const promises = nodes.map(async ({ cmd, args, name, launch }) => {
-      return launch && this.nodes.push(await launchNode(cmd, args, name!));
-    });
+    const promises = nodes.map(
+      async ({ cmd, args, name, launch }) =>
+        launch && this.nodes.push(await launchNode(cmd, args, name!))
+    );
     await Promise.all(promises);
     return MoonwallContext.getContext();
   }

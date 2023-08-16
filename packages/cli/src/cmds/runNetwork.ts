@@ -7,13 +7,14 @@ import fs from "fs/promises";
 import inquirer from "inquirer";
 import PressToContinuePrompt from "inquirer-press-to-continue";
 import { createReadStream, stat } from "node:fs";
+import path from "path";
+import { clearNodeLogs, reportLogLocation } from "src/internal/cmdFunctions/tempLogs.js";
 import WebSocket from "ws";
 import { parse } from "yaml";
-import { importJsonConfig, loadEnvVars } from "../lib/configReader.js";
+import { checkAlreadyRunning, promptAlreadyRunning } from "../internal/fileCheckers.js";
+import { importJsonConfig, loadEnvVars, parseZombieConfigForBins } from "../lib/configReader.js";
 import { MoonwallContext, runNetworkOnly } from "../lib/globalContext.js";
 import { executeTests } from "./runTests.js";
-import { clearNodeLogs, reportLogLocation } from "src/internal/cmdFunctions/tempLogs.js";
-import { compactStripLength } from "@polkadot/util";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
@@ -32,7 +33,19 @@ export async function runNetwork(args) {
       )}\n Environments defined in config are: ${envList}\n`
     );
   }
-  await loadEnvVars();
+  loadEnvVars();
+
+  if (env.foundation.type == "dev") {
+    const binName = path.basename(env.foundation.launchSpec[0].binPath);
+    const pids = checkAlreadyRunning(binName);
+    pids.length == 0 || (await promptAlreadyRunning(pids));
+  }
+
+  if (env.foundation.type == "zombie") {
+    const bins = parseZombieConfigForBins(env.foundation.zombieSpec.configPath);
+    const pids = bins.flatMap((bin) => checkAlreadyRunning(bin));
+    pids.length == 0 || (await promptAlreadyRunning(pids));
+  }
 
   const testFileDirs = env.testFileDir;
   const foundation = env.foundation.type;

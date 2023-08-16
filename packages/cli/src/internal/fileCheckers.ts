@@ -1,6 +1,8 @@
 import fs from "node:fs";
+import { execFileSync, execSync } from "child_process";
 import chalk from "chalk";
 import os from "node:os";
+import inquirer from "inquirer";
 
 export async function checkExists(path: string) {
   const binPath = path.split(" ")[0];
@@ -28,6 +30,80 @@ export async function checkExists(path: string) {
   }
 
   return true;
+}
+
+export function checkListeningPorts(processId: number) {
+
+  try {
+    const stdOut = execSync(`lsof -p  ${processId} | grep LISTEN`, { encoding: "utf-8" });
+
+    const binName = stdOut.split("\n")[0].split(" ")[0];
+    const ports = stdOut
+      .split("\n")
+      .filter(Boolean)
+      .map((line) => {
+        const port = line.split(":")[1];
+        return port.split(" ")[0];
+      });
+    const filtered = new Set(ports);
+    return ({binName,processId ,ports: [...filtered].sort()})
+  }catch(e){
+    console.log(e)
+
+    const binName = execSync(`ps -p ${processId} -o comm=`).toString().trim()
+    console.log(`Process ${processId} is running which for binary ${binName}, however it is unresponsive.`)
+    console.log("Running Moonwall with this in the background may cause unexpected behaviour. Please manually kill the process and try running Moonwall again.")
+    console.log(`N.B. You can kill it with: sudo kill -9 ${processId}`)
+
+    process.exit(1)
+  }
+  
+}
+
+export function checkAlreadyRunning(binaryName: string): number[] {
+  try {
+    const stdOut = execFileSync("pgrep", [binaryName], { encoding: "utf-8" });
+    const pIdStrings = stdOut.split("\n").filter(Boolean);
+    return pIdStrings.map((pId) => parseInt(pId, 10));
+  } catch (error: any) {
+    if (error.status === 1) {
+      return [];
+    }
+    throw error;
+  }
+}
+
+export async function promptAlreadyRunning(pids: number[]) {
+  const choice = await inquirer.prompt({
+    name: "AlreadyRunning",
+    type: "list",
+    message: `The following processes are already running: \n${pids
+      .map((pid) => {
+        const {binName, ports} = checkListeningPorts(pid);
+        return `${binName} - pid: ${pid}, listenPorts: [${ports.join(", ")}]`;
+      })
+      .join("\n")}`,
+    default: 1,
+    choices: [
+      { name: "🪓  Kill processes and continue", value: "kill" },
+      { name: "➡️   Continue (and let processes live)", value: "continue" },
+      { name: "🛑  Abort (and let processes live)", value: "abort" },
+    ],
+  });
+
+  switch (choice.AlreadyRunning) {
+    case "kill":
+      pids.forEach((pid) => {
+        execSync(`kill ${pid}`);
+      });
+      break;
+
+    case "continue":
+      break;
+
+    case "abort":
+      process.exit(130);
+  }
 }
 
 export function checkAccess(path: string) {

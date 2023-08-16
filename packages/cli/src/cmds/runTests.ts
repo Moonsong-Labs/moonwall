@@ -7,7 +7,8 @@ import path from "path";
 import { clearNodeLogs } from "src/internal/cmdFunctions/tempLogs.js";
 import { UserConfig } from "vitest";
 import { startVitest } from "vitest/node";
-import { importJsonConfig, loadEnvVars } from "../lib/configReader.js";
+import { checkAlreadyRunning, promptAlreadyRunning } from "../internal/fileCheckers.js";
+import { importJsonConfig, loadEnvVars, parseZombieConfigForBins } from "../lib/configReader.js";
 import { contextCreator } from "../lib/globalContext.js";
 
 export async function testCmd(envName: string, additionalArgs?: {}) {
@@ -23,7 +24,19 @@ export async function testCmd(envName: string, additionalArgs?: {}) {
       )}\n Environments defined in config are: ${envList}\n`
     );
   }
-  await loadEnvVars();
+  loadEnvVars();
+
+  if (env.foundation.type == "dev") {
+    const binName = path.basename(env.foundation.launchSpec[0].binPath);
+    const pids = checkAlreadyRunning(binName);
+    pids.length == 0 || (await promptAlreadyRunning(pids));
+  }
+
+  if (env.foundation.type == "zombie") {
+    const bins = parseZombieConfigForBins(env.foundation.zombieSpec.configPath);
+    const pids = bins.flatMap((bin) => checkAlreadyRunning(bin));
+    pids.length == 0 || (await promptAlreadyRunning(pids));
+  }
 
   if (
     process.env.MOON_RUN_SCRIPTS == "true" &&
