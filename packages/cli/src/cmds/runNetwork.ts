@@ -11,7 +11,7 @@ import path from "path";
 import { clearNodeLogs, reportLogLocation } from "src/internal/cmdFunctions/tempLogs.js";
 import WebSocket from "ws";
 import { parse } from "yaml";
-import { checkAlreadyRunning, promptAlreadyRunning } from "../internal/fileCheckers.js";
+import { checkAlreadyRunning, downloadBinsIfMissing, promptAlreadyRunning } from "../internal/fileCheckers.js";
 import { importJsonConfig, loadEnvVars, parseZombieConfigForBins } from "../lib/configReader.js";
 import { MoonwallContext, runNetworkOnly } from "../lib/globalContext.js";
 import { executeTests } from "./runTests.js";
@@ -39,6 +39,7 @@ export async function runNetwork(args) {
     const binName = path.basename(env.foundation.launchSpec[0].binPath);
     const pids = checkAlreadyRunning(binName);
     pids.length == 0 || (await promptAlreadyRunning(pids));
+    await downloadBinsIfMissing(env.foundation.launchSpec[0].binPath)
   }
 
   if (env.foundation.type == "zombie") {

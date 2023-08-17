@@ -3,6 +3,7 @@ import { execFileSync, execSync } from "child_process";
 import chalk from "chalk";
 import os from "node:os";
 import inquirer from "inquirer";
+import path from "node:path";
 
 export async function checkExists(path: string) {
   const binPath = path.split(" ")[0];
@@ -32,8 +33,50 @@ export async function checkExists(path: string) {
   return true;
 }
 
-export function checkListeningPorts(processId: number) {
+export async function downloadBinsIfMissing(binPath: string) {
+  const binName = path.basename(binPath);
+  const binDir = path.dirname(binPath);
+  const binPathExists = fs.existsSync(binPath);
+  if (!binPathExists && process.arch === "x64") {
+    const choices = await inquirer.prompt({
+      name: "download",
+      type: "list",
+      message: `The binary ${chalk.bgBlack.greenBright(
+        binName
+      )} is missing from ${chalk.bgBlack.greenBright(
+        path.join(process.cwd(), binDir)
+      )}.\nWould you like to download it now?`,
+      default: 0,
+      choices: [
+        { name: `Yes, download ${binName}`, value: true },
+        { name: "No, quit program", value: false },
+      ],
+    });
 
+    if (!choices.download) {
+      process.exit(0);
+    } else {
+      execSync(`mkdir -p ${binDir}`);
+      execSync(`pnpm moonwall download ${binName} latest ${binDir}`, {
+        stdio: "inherit",
+      });
+    }
+  } else if (!binPathExists) {
+    console.log(
+      `The binary: ${chalk.bgBlack.greenBright(
+        binName
+      )} is missing from: ${chalk.bgBlack.greenBright(path.join(process.cwd(), binDir))}`
+    );
+    console.log(
+      `Given you are running ${chalk.bgBlack.yellowBright(
+        process.arch
+      )} architecture, you will need to build it manually from source 🛠️`
+    );
+    process.exit(130);
+  }
+}
+
+export function checkListeningPorts(processId: number) {
   try {
     const stdOut = execSync(`lsof -p  ${processId} | grep LISTEN`, { encoding: "utf-8" });
 
@@ -46,18 +89,21 @@ export function checkListeningPorts(processId: number) {
         return port.split(" ")[0];
       });
     const filtered = new Set(ports);
-    return ({binName,processId ,ports: [...filtered].sort()})
-  }catch(e){
-    console.log(e)
+    return { binName, processId, ports: [...filtered].sort() };
+  } catch (e) {
+    console.log(e);
 
-    const binName = execSync(`ps -p ${processId} -o comm=`).toString().trim()
-    console.log(`Process ${processId} is running which for binary ${binName}, however it is unresponsive.`)
-    console.log("Running Moonwall with this in the background may cause unexpected behaviour. Please manually kill the process and try running Moonwall again.")
-    console.log(`N.B. You can kill it with: sudo kill -9 ${processId}`)
+    const binName = execSync(`ps -p ${processId} -o comm=`).toString().trim();
+    console.log(
+      `Process ${processId} is running which for binary ${binName}, however it is unresponsive.`
+    );
+    console.log(
+      "Running Moonwall with this in the background may cause unexpected behaviour. Please manually kill the process and try running Moonwall again."
+    );
+    console.log(`N.B. You can kill it with: sudo kill -9 ${processId}`);
 
-    process.exit(1)
+    process.exit(1);
   }
-  
 }
 
 export function checkAlreadyRunning(binaryName: string): number[] {
@@ -79,7 +125,7 @@ export async function promptAlreadyRunning(pids: number[]) {
     type: "list",
     message: `The following processes are already running: \n${pids
       .map((pid) => {
-        const {binName, ports} = checkListeningPorts(pid);
+        const { binName, ports } = checkListeningPorts(pid);
         return `${binName} - pid: ${pid}, listenPorts: [${ports.join(", ")}]`;
       })
       .join("\n")}`,
