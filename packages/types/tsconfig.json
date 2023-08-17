@@ -6,7 +6,7 @@
     "lib": ["ESNext"],
     "declaration": true,
     "outDir": "./dist",
-    "moduleResolution": "node",
+    "moduleResolution": "Bundler",
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
     "preserveSymlinks": true,

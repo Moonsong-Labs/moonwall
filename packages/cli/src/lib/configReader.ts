@@ -3,7 +3,6 @@ import { MoonwallConfig } from "@moonwall/types";
 import fs from "fs/promises";
 import { readFileSync } from "fs";
 import path from "path";
-import chalk from "chalk";
 
 export async function loadConfig(path: string): Promise<MoonwallConfig> {
   if (
@@ -22,6 +21,20 @@ export async function loadConfig(path: string): Promise<MoonwallConfig> {
 
 export async function importConfig(configPath: string): Promise<MoonwallConfig> {
   return await import(configPath);
+}
+
+export function isOptionSet(option: string): boolean {
+  const config = importJsonConfig();
+  const env = config.environments.find((env) => env.name == process.env.MOON_TEST_ENV)!;
+  const optionValue = traverseConfig(env, option);
+
+  return optionValue !== undefined;
+}
+
+export function isEthereumZombieConfig(): boolean {
+  const config = importJsonConfig();
+  const env = config.environments.find((env) => env.name == process.env.MOON_TEST_ENV)!;
+  return env.foundation.type == "zombie" && !!!env.foundation.zombieSpec.disableDefaultEthProviders;
 }
 
 export function isEthereumDevConfig(): boolean {
@@ -80,4 +93,40 @@ function replaceEnvVars(value: any): any {
   } else {
     return value;
   }
+}
+
+function traverseConfig(configObj: any, option: string): any {
+  if (typeof configObj !== "object" || configObj === null) return undefined;
+
+  if (configObj.hasOwnProperty(option)) {
+    return configObj[option];
+  }
+
+  for (let key in configObj) {
+    let result = traverseConfig(configObj[key], option);
+    if (result !== undefined) {
+      return result;
+    }
+  }
+
+  return undefined;
+}
+
+export function parseZombieConfigForBins(zombieConfigPath: string) {
+  const config = JSON.parse(readFileSync(zombieConfigPath, "utf8"));
+  const commands: string[] = [];
+
+  if (config.relaychain && config.relaychain.default_command) {
+    commands.push(path.basename(config.relaychain.default_command));
+  }
+
+  if (config.parachains) {
+    for (const parachain of config.parachains) {
+      if (parachain.collator && parachain.collator.command) {
+        commands.push(path.basename(parachain.collator.command));
+      }
+    }
+  }
+
+  return [...new Set(commands)].sort();
 }

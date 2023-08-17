@@ -95,7 +95,7 @@ yargs(hideBin(process.argv))
         process.exit(0);
       } else {
         console.log("❌ No environment specified");
-        console.log(`👉 Run 'pnpm moonwall test --help' for more information`);
+        console.log(`👉 Run 'pnpm moonwall --help' for more information`);
         process.exit(1);
       }
     }

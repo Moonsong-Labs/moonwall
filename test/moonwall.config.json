@@ -40,6 +40,7 @@
         "zombieSpec": {
           "name": "zombienet",
           "configPath": "./configs/zombieMulti.json",
+          "disableLogEavesdropping": true,
           "monitoredNode": "alice",
           "skipBlockCheck": ["para2"]
         }

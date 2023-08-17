@@ -3,7 +3,7 @@ import { ApiPromise, WsProvider } from "@polkadot/api";
 import type { ApiTypes, AugmentedEvent, SubmittableExtrinsic } from "@polkadot/api-base/types";
 import { KeyringPair } from "@polkadot/keyring/types";
 import { GenericExtrinsic } from "@polkadot/types";
-import { EventRecord } from "@polkadot/types/interfaces/types.js";
+import { EventRecord } from "@polkadot/types/interfaces";
 import { AnyTuple, RegistryError } from "@polkadot/types/types";
 import { Debugger } from "debug";
 import { Signer } from "ethers";

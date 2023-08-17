@@ -2,7 +2,7 @@ import "@moonbeam-network/api-augment";
 import { ApiPromise } from "@polkadot/api";
 import { mapExtrinsics } from "./block.js";
 import Debug from "debug";
-import { Extrinsic } from "@polkadot/types/interfaces/types.js";
+import { Extrinsic } from "@polkadot/types/interfaces";
 
 export function setupLogger(name: string) {
   const debug = Debug(`test:${name}`);

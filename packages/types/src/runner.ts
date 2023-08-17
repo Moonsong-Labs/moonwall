@@ -1,6 +1,6 @@
 import { ApiPromise } from "@polkadot/api";
-import { ApiTypes } from "@polkadot/api/types/index.js";
-import { KeyringPair } from "@polkadot/keyring/types.js";
+import { ApiTypes } from "@polkadot/api/types";
+import { KeyringPair } from "@polkadot/keyring/types";
 import { Debugger } from "debug";
 import { Signer, TransactionRequest } from "ethers";
 import {

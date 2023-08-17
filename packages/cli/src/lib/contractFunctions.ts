@@ -179,15 +179,13 @@ export async function interactWithContract(
     }
   } else if (!rawTxOnly) {
     if (web3Library === "viem") {
-      const hash = await context
-        .viem()
-        .sendTransaction({
-          account: account as any,
-          to: contractAddress,
-          value,
-          data,
-          gas: gasParam,
-        });
+      const hash = await context.viem().sendTransaction({
+        account: account as any,
+        to: contractAddress,
+        value,
+        data,
+        gas: gasParam,
+      });
       return hash;
     } else {
       const signer = new Wallet(privateKey, context.ethers().provider);

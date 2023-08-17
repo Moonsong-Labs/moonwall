@@ -1,7 +1,7 @@
 import { MoonwallProvider, ProviderConfig, ProviderType, ViemClient } from "@moonwall/types";
 import { ALITH_PRIVATE_KEY, deriveViemChain } from "@moonwall/util";
 import { ApiPromise, WsProvider } from "@polkadot/api";
-import { ApiOptions } from "@polkadot/api/types/index.js";
+import { ApiOptions } from "@polkadot/api/types";
 import chalk from "chalk";
 import Debug from "debug";
 import { Signer, Wallet, ethers } from "ethers";
@@ -163,6 +163,28 @@ export class ProviderFactory {
         type: "ethers",
         endpoints: [MOON_PARA_WSS],
       },
+      {
+        name: "viem",
+        type: "viem",
+        endpoints: [MOON_PARA_WSS],
+      },
+      {
+        name: "parachain",
+        type: "polkadotJs",
+        endpoints: [MOON_PARA_WSS],
+      },
+      {
+        name: "relaychain",
+        type: "polkadotJs",
+        endpoints: [MOON_RELAY_WSS],
+      },
+    ]);
+  }
+
+  public static prepareNoEthDefaultZombie(): MoonwallProvider[] {
+    const MOON_PARA_WSS = process.env.MOON_PARA_WSS || "error";
+    const MOON_RELAY_WSS = process.env.MOON_RELAY_WSS || "error";
+    return this.prepare([
       {
         name: "parachain",
         type: "polkadotJs",

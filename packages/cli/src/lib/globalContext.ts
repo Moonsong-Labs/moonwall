@@ -21,7 +21,14 @@ import {
   ProviderInterfaceFactory,
   vitestAutoUrl,
 } from "../internal/providerFactories.js";
-import { importJsonConfig, isEthereumDevConfig } from "./configReader.js";
+import fs from "fs";
+import readline from "readline";
+import {
+  importJsonConfig,
+  isEthereumDevConfig,
+  isEthereumZombieConfig,
+  isOptionSet,
+} from "./configReader.js";
 const debugSetup = Debug("global:context");
 
 export class MoonwallContext {
@@ -149,6 +156,7 @@ export class MoonwallContext {
 
     process.env.MOON_RELAY_WSS = network.relay[0].wsUri;
     process.env.MOON_PARA_WSS = Object.values(network.paras)[0].nodes[0].wsUri;
+    process.env.MOON_ZOMBIE_PATH = network.client.tmpDir;
 
     if (
       env.foundation.type == "zombie" &&
@@ -157,13 +165,15 @@ export class MoonwallContext {
     ) {
       process.env.MOON_MONITORED_NODE = `${network.tmpDir}/${env.foundation.zombieSpec.monitoredNode}.log`;
     }
+    const nodeNames = Object.keys(network.nodesByName);
+    process.env.MOON_ZOMBIE_NODES = nodeNames.join("|");
 
     const processIds = Object.values((network.client as any).processMap)
       .filter((item) => item!["pid"])
       .map((process) => process!["pid"]);
 
     const onProcessExit = () => {
-      exec(`kill -9 ${processIds.join(" ")}`, (error) => {
+      exec(`kill ${processIds.join(" ")}`, (error) => {
         if (error) {
           console.error(`Error killing process: ${error.message}`);
         }
@@ -197,9 +207,10 @@ export class MoonwallContext {
       return await this.startZombieNetwork(nodes);
     }
 
-    const promises = nodes.map(async ({ cmd, args, name, launch }) => {
-      return launch && this.nodes.push(await launchNode(cmd, args, name!));
-    });
+    const promises = nodes.map(
+      async ({ cmd, args, name, launch }) =>
+        launch && this.nodes.push(await launchNode(cmd, args, name!))
+    );
     await Promise.all(promises);
     return MoonwallContext.getContext();
   }
@@ -211,7 +222,9 @@ export class MoonwallContext {
     if (this.environment.foundationType == "zombie") {
       this.environment.providers = env.connections
         ? ProviderFactory.prepare(env.connections)
-        : ProviderFactory.prepareDefaultZombie();
+        : isEthereumZombieConfig()
+        ? ProviderFactory.prepareDefaultZombie()
+        : ProviderFactory.prepareNoEthDefaultZombie();
     }
 
     if (this.providers.length > 0) {
@@ -228,6 +241,28 @@ export class MoonwallContext {
     await Promise.all(promises);
 
     if (this.foundation == "zombie") {
+      let readStreams: any[];
+      if (!isOptionSet("disableLogEavesdropping")) {
+        console.log(`🦻 Eavesdropping on node logs at ${process.env.MOON_ZOMBIE_PATH}`);
+        const zombieNodeLogs = process.env
+          .MOON_ZOMBIE_NODES!.split("|")
+          .map((nodeName) => `${process.env.MOON_ZOMBIE_PATH}/${nodeName}.log`);
+
+        readStreams = zombieNodeLogs.map((logPath) => {
+          const readStream = fs.createReadStream(logPath, { encoding: "utf8" });
+          const lineReader = readline.createInterface({
+            input: readStream,
+          });
+
+          lineReader.on("line", (line) => {
+            if (line.includes("WARN") || line.includes("ERROR")) {
+              console.log(line);
+            }
+          });
+          return readStream;
+        });
+      }
+
       const promises = this.providers
         .filter(({ type }) => type == "polkadotJs")
         .filter(
@@ -252,6 +287,10 @@ export class MoonwallContext {
         });
 
       await Promise.all(promises);
+
+      if (!isOptionSet("disableLogEavesdropping")) {
+        readStreams!.forEach((readStream) => readStream.close());
+      }
     }
 
     return MoonwallContext.getContext();

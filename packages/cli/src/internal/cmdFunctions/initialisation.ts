@@ -3,7 +3,6 @@ import PressToContinuePrompt from "inquirer-press-to-continue";
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 import fs from "fs/promises";
 import { FoundationType, MoonwallConfig } from "@moonwall/types";
-import { option } from "yargs";
 
 export async function createFolders() {
   await fs.mkdir("scripts").catch(() => "scripts folder already exists, skipping");
