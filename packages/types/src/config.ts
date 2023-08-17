@@ -203,10 +203,10 @@ export interface ZombieLaunchSpec extends GenericLaunchSpec {
   disableDefaultEthProviders?: boolean;
 
   /**
- * Specifies whether the framework should eavesdrop and log WARN, ERROR from the node logs.
- * If set to true, the eavesdropping on node logs is disabled. 
- * Default behavior (when unset or set to false) is to listen to the logs.
- */
+   * Specifies whether the framework should eavesdrop and log WARN, ERROR from the node logs.
+   * If set to true, the eavesdropping on node logs is disabled.
+   * Default behavior (when unset or set to false) is to listen to the logs.
+   */
   disableLogEavesdropping?: boolean;
 
   /**

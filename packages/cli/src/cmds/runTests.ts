@@ -7,7 +7,11 @@ import path from "path";
 import { clearNodeLogs } from "src/internal/cmdFunctions/tempLogs.js";
 import { UserConfig } from "vitest";
 import { startVitest } from "vitest/node";
-import { checkAlreadyRunning, downloadBinsIfMissing, promptAlreadyRunning } from "../internal/fileCheckers.js";
+import {
+  checkAlreadyRunning,
+  downloadBinsIfMissing,
+  promptAlreadyRunning,
+} from "../internal/fileCheckers.js";
 import { importJsonConfig, loadEnvVars, parseZombieConfigForBins } from "../lib/configReader.js";
 import { contextCreator } from "../lib/globalContext.js";
 
@@ -30,7 +34,7 @@ export async function testCmd(envName: string, additionalArgs?: {}) {
     const binName = path.basename(env.foundation.launchSpec[0].binPath);
     const pids = checkAlreadyRunning(binName);
     pids.length == 0 || (await promptAlreadyRunning(pids));
-    await downloadBinsIfMissing(env.foundation.launchSpec[0].binPath)
+    await downloadBinsIfMissing(env.foundation.launchSpec[0].binPath);
   }
 
   if (env.foundation.type == "zombie") {
