@@ -1,5 +1,11 @@
 # @moonwall/cli
 
+## 4.0.16
+
+### Patch Changes
+
+- 14dcee3: Minor fix
+
 ## 4.0.15
 
 ### Patch Changes
