@@ -5,6 +5,22 @@
   "scriptsDir": "scripts/",
   "environments": [
     {
+      "name": "dev_tanssi",
+      "testFileDir": ["suites/tanssi"],
+      "foundation": {
+        "type": "dev",
+        "launchSpec": [
+          {
+            "binPath": "./tmp/tanssi-node",
+            "disableDefaultEthProviders": true,
+            "options": ["--dev", "--sealing=manual", "--no-hardware-benchmarks", "--no-telemetry"],
+            "newRpcBehaviour": true
+
+          }
+        ]
+      }
+    },
+    {
       "name": "viem_test",
       "testFileDir": ["suites/viem"],
       "envVars": [""],
