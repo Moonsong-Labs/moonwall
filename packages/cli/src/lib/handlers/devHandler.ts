@@ -10,7 +10,15 @@ import {
   PrecompileCallOptions,
   ViemTransactionOptions,
 } from "@moonwall/types";
-import { alith, createEthersTransaction, createViemTransaction } from "@moonwall/util";
+import {
+  ALITH_PRIVATE_KEY,
+  BALTATHAR_PRIVATE_KEY,
+  CHARLETH_PRIVATE_KEY,
+  DOROTHY_PRIVATE_KEY,
+  alith,
+  createEthersTransaction,
+  createViemTransaction,
+} from "@moonwall/util";
 import { ApiTypes } from "@polkadot/api/types";
 import { createDevBlock } from "../../internal/foundations/devModeHelpers.js";
 import { importJsonConfig, isEthereumDevConfig } from "../configReader.js";
@@ -39,14 +47,17 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
   };
 
   const newKeyring = () => {
+    const isEth = accountTypeLookup() == "AccountId20";
     const keyring = new Keyring({
-      type: accountTypeLookup() == "AccountId20" ? "ethereum" : "sr25519",
+      type: isEth ? "ethereum" : "sr25519",
     });
     return {
-      alice: keyring.addFromUri("//Alice", { name: "Alice default" }),
-      bob: keyring.addFromUri("//Bob", { name: "Bob default" }),
-      charlie: keyring.addFromUri("//Charlie", { name: "Charlie default" }),
-      dave: keyring.addFromUri("//Dave", { name: "Dave default" }),
+      alice: keyring.addFromUri(isEth ? ALITH_PRIVATE_KEY : "//Alice", { name: "Alice default" }),
+      bob: keyring.addFromUri(isEth ? BALTATHAR_PRIVATE_KEY : "//Bob", { name: "Bob default" }),
+      charlie: keyring.addFromUri(isEth ? CHARLETH_PRIVATE_KEY : "//Charlie", {
+        name: "Charlie default",
+      }),
+      dave: keyring.addFromUri(isEth ? DOROTHY_PRIVATE_KEY : "//Dave", { name: "Dave default" }),
     };
   };
 
