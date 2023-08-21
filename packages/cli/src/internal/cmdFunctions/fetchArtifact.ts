@@ -5,6 +5,7 @@ import semver from "semver";
 import chalk from "chalk";
 import { runTask } from "../processHelpers.js";
 import { downloader } from "./downloader.js";
+import { release } from "node:os";
 
 type NetworkArtifacts = {
   network: string;
@@ -95,14 +96,26 @@ export async function getVersions(name: string, runtime: boolean = false) {
   const url = result.repo;
   const releases = (await (await fetch(url)).json()) as Release[];
   const versions = releases
-    .map((release) => release.tag_name.replace("v", "").split("-rc")[0])
+    .map((release) => {
+      let tag = release.tag_name;
+      if (release.tag_name.includes("v")) {
+        tag = tag.split("v")[1];
+      }
+      if (tag.includes("-rc")) {
+        tag = tag.split("-rc")[0];
+      }
+      return tag;
+    })
     .filter(
       (version) =>
         (runtime && version.includes("runtime")) || (!runtime && !version.includes("runtime"))
     )
     .map((version) => version.replace("runtime-", ""));
+
   const set = new Set(versions);
-  return runtime ? [...set] : [...set].sort((a, b) => semver.rcompare(a, b));
+  return runtime
+    ? [...set]
+    : [...set].sort((a, b) => (semver.valid(a) && semver.valid(b) ? semver.rcompare(a, b) : a));
 }
 
 export interface Release {

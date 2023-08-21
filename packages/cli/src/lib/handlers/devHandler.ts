@@ -19,14 +19,53 @@ import {
   interactWithContract,
   interactWithPrecompileContract,
 } from "../contractFunctions.js";
+import { Keyring } from "@polkadot/api";
 
 export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testCase, logger }) => {
   const config = importJsonConfig();
   const env = config.environments.find((env) => env.name == process.env.MOON_TEST_ENV)!;
   const ethCompatible = isEthereumDevConfig();
 
-  const ctx: DevModeContext = {
+  const accountTypeLookup = () => {
+    const metadata = ctx.polkadotJs().runtimeMetadata.asLatest;
+    const systemPalletIndex = metadata.pallets.findIndex(
+      (pallet) => pallet.name.toString() === "System"
+    );
+    const systemAccountStorageType = metadata.pallets[systemPalletIndex].storage
+      .unwrap()
+      .items.find((storage) => storage.name.toString() === "Account")!.type;
+
+    return metadata.lookup.getTypeDef(systemAccountStorageType.asMap.key).type;
+  };
+
+  const newKeyring = () => {
+    const keyring = new Keyring({
+      type: accountTypeLookup() == "AccountId20" ? "ethereum" : "sr25519",
+    });
+    return {
+      alice: keyring.addFromUri("//Alice", { name: "Alice default" }),
+      bob: keyring.addFromUri("//Bob", { name: "Bob default" }),
+      charlie: keyring.addFromUri("//Charlie", { name: "Charlie default" }),
+      dave: keyring.addFromUri("//Dave", { name: "Dave default" }),
+    };
+  };
+
+  const ctx = {
     ...context,
+    get isEthereumChain() {
+      return accountTypeLookup() === "AccountId20";
+    },
+    get isSubstrateChain() {
+      return accountTypeLookup() === "AccountId32";
+    },
+    get pjsApi() {
+      return context.polkadotJs();
+    },
+
+    get keyring() {
+      return newKeyring();
+    },
+
     createBlock: async <
       ApiType extends ApiTypes,
       Calls extends CallType<ApiType> | CallType<ApiType>[]
@@ -41,78 +80,69 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
       };
       return await createDevBlock(context, { ...defaults, ...options }, transactions);
     },
-  };
+
+    createTxn: !ethCompatible
+      ? undefined
+      : <
+          TOptions extends
+            | (DeepPartial<ViemTransactionOptions> & {
+                libraryType?: "viem";
+              })
+            | (EthersTransactionOptions & {
+                libraryType: "ethers";
+              })
+        >(
+          options: TOptions
+        ) => {
+          const { libraryType = "viem", ...txnOptions } = options;
+          return libraryType === "viem"
+            ? createViemTransaction(ctx, txnOptions as DeepPartial<ViemTransactionOptions>)
+            : createEthersTransaction(ctx, txnOptions as EthersTransactionOptions);
+        },
+
+    readPrecompile: !ethCompatible
+      ? undefined
+      : async (options: PrecompileCallOptions) => {
+          const response = await interactWithPrecompileContract(ctx, {
+            call: true,
+            ...options,
+          });
+          return response;
+        },
+    writePrecompile: !ethCompatible
+      ? undefined
+      : async (options: PrecompileCallOptions) => {
+          const response = await interactWithPrecompileContract(ctx, { call: false, ...options });
+          return response as `0x${string}`;
+        },
+
+    readContract: !ethCompatible
+      ? undefined
+      : async (options: ContractCallOptions) => {
+          const response = await interactWithContract(ctx, {
+            call: true,
+            ...options,
+          });
+          return response;
+        },
+
+    writeContract: !ethCompatible
+      ? undefined
+      : async (options: ContractCallOptions) => {
+          const response = await interactWithContract(ctx, { call: false, ...options });
+          return response as `0x${string}`;
+        },
+
+    deployContract: !ethCompatible
+      ? undefined
+      : async (contractName: string, options?: ContractDeploymentOptions) => {
+          return await deployCreateCompiledContract(ctx, contractName, options);
+        },
+  } satisfies DevModeContext;
 
   testCases({
-    context: {
-      ...ctx,
-      createTxn: !ethCompatible
-        ? undefined
-        : <
-            TOptions extends
-              | (DeepPartial<ViemTransactionOptions> & {
-                  libraryType?: "viem";
-                })
-              | (EthersTransactionOptions & {
-                  libraryType: "ethers";
-                })
-          >(
-            options: TOptions
-          ) => {
-            const { libraryType = "viem", ...txnOptions } = options;
-            return libraryType === "viem"
-              ? createViemTransaction(ctx, txnOptions as DeepPartial<ViemTransactionOptions>)
-              : createEthersTransaction(ctx, txnOptions as EthersTransactionOptions);
-          },
-
-      readPrecompile: !ethCompatible
-        ? undefined
-        : async (options: PrecompileCallOptions) => {
-            const response = await interactWithPrecompileContract(ctx, {
-              call: true,
-              ...options,
-            });
-            return response;
-          },
-      writePrecompile: !ethCompatible
-        ? undefined
-        : async (options: PrecompileCallOptions) => {
-            const response = await interactWithPrecompileContract(ctx, { call: false, ...options });
-            return response as `0x${string}`;
-          },
-
-      readContract: !ethCompatible
-        ? undefined
-        : async (options: ContractCallOptions) => {
-            const response = await interactWithContract(ctx, {
-              call: true,
-              ...options,
-            });
-            return response;
-          },
-
-      writeContract: !ethCompatible
-        ? undefined
-        : async (options: ContractCallOptions) => {
-            const response = await interactWithContract(ctx, { call: false, ...options });
-            return response as `0x${string}`;
-          },
-
-      deployContract: !ethCompatible
-        ? undefined
-        : async (contractName: string, options?: ContractDeploymentOptions) => {
-            return await deployCreateCompiledContract(ctx, contractName, options);
-          },
-    },
-
+    context: ctx,
     it: testCase,
     log: logger(),
   });
 };
-
-// deployContract?(options: ContractDeploymentOptions): Promise<{
-//   contractAddress: `0x${string}` | null;
-//   status: "success" | "reverted";
-//   logs: Log<bigint, number>[];
-//   hash: `0x${string}`;
-// }>;

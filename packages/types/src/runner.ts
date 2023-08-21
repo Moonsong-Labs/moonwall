@@ -1,4 +1,4 @@
-import { ApiPromise } from "@polkadot/api";
+import { ApiPromise, Keyring } from "@polkadot/api";
 import { ApiTypes } from "@polkadot/api/types";
 import { KeyringPair } from "@polkadot/keyring/types";
 import { Debugger } from "debug";
@@ -238,6 +238,25 @@ export interface ChopsticksContext extends GenericContext {
  * DevModeContext - Interface that extends from GenericContext and includes a method for creating a block.
  */
 export interface DevModeContext extends GenericContext {
+  /**
+   * Default getter for a connected PolkadotJs ApiPromise instance
+   */
+  pjsApi: ApiPromise;
+
+  /**
+   * Getter that returns true if System.Account is AccountId20 (Ethereum Account length is 20 bytes).
+   */
+  isEthereumChain: boolean;
+
+    /**
+   * Getter that returns an object with the default accounts already generated.
+   */
+  keyring: { alice: KeyringPair; bob: KeyringPair; charlie: KeyringPair; dave: KeyringPair };
+
+  /**
+   * Property that returns true if System.Account is AccountId32 (Substrate Account length is 32 bytes).
+   */
+  isSubstrateChain: boolean;
   /**
    * Creates a block with given transactions and options.
    *

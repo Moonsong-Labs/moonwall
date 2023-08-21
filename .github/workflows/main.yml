@@ -44,6 +44,36 @@ jobs:
         run: |
           cd test
           bun moonwall test basic
+  test_tanssi:
+    runs-on: ubuntu-latest
+    needs: ["build"]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - uses: pnpm/action-setup@v2
+        with:
+          version: "latest"
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+          cache: "pnpm"
+      - name: Build like before
+        run: |
+          pnpm install  
+          pnpm run lint && pnpm run build
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - name: Download tanssi binary
+        run: |
+          cd test
+          bun moonwall download tanssi-node latest ./tmp
+      - name: Run standard dev test
+        run: |
+          cd test
+          bun moonwall test dev_tanssi
 
   test_dev:
     runs-on: ubuntu-latest
