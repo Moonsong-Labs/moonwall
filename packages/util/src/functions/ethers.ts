@@ -3,7 +3,7 @@ import { TransactionRequest, Wallet } from "ethers";
 import { TransactionType } from "@moonwall/types";
 import { ALITH_ADDRESS } from "../constants/accounts";
 
-type TransactionHandler = (blob: {}, params: TransactionRequest) => void;
+type TransactionHandler = (blob: object, params: TransactionRequest) => void;
 
 const transactionHandlers: Record<TransactionType, TransactionHandler> = {
   legacy: (blob, params) => {
@@ -32,7 +32,7 @@ export async function createEthersTransaction<TOptions extends EthersTransaction
 ) {
   // const nonce = await context.viem().getTransactionCount({ address: ALITH_ADDRESS });
   const nonce = await context.viem().getTransactionCount({ address: ALITH_ADDRESS });
-  const blob: {} = { nonce, ...params };
+  const blob: object = { nonce, ...params };
 
   const handler = transactionHandlers[params.txnType || "legacy"];
   if (!handler) {

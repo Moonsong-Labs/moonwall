@@ -47,7 +47,7 @@ class Perthing {
   }
 
   divCeil(a: any, num: BN) {
-    var dm = a.divmod(num);
+    const dm = a.divmod(num);
 
     // Fast case - exact division
     if (dm.mod.isZero()) return dm.div;
@@ -57,16 +57,16 @@ class Perthing {
   }
 
   divNearest(a: any, num: BN) {
-    var dm = a.divmod(num);
+    const dm = a.divmod(num);
 
     // Fast case - exact division
     if (dm.mod.isZero()) return dm.div;
 
-    var mod = dm.div.negative !== 0 ? dm.mod.isub(num) : dm.mod;
+    const mod = dm.div.negative !== 0 ? dm.mod.isub(num) : dm.mod;
 
-    var half = num.ushrn(1);
-    var r2 = num.andln(1);
-    var cmp = mod.cmp(half);
+    const half = num.ushrn(1);
+    const r2 = num.andln(1);
+    const cmp = mod.cmp(half);
 
     // Round down
     if (cmp <= 0 || (r2 === new BN(1) && cmp === 0)) return dm.div;
@@ -91,7 +91,7 @@ export class Percent extends Perthing {
 }
 
 export function getObjectMethods(obj) {
-  let properties = new Set();
+  const properties = new Set();
   let currentObj = obj;
   do {
     Object.getOwnPropertyNames(currentObj).map((item) => properties.add(item));

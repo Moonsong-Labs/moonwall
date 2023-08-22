@@ -96,12 +96,13 @@ async function mainMenu(config: MoonwallConfig) {
       await generateConfig();
       await createFolders();
       return false;
-    case "run":
-     { const chosenRunEnv = await chooseRunEnv(config);
+    case "run": {
+      const chosenRunEnv = await chooseRunEnv(config);
       if (chosenRunEnv.envName !== "back") {
         await runNetwork(chosenRunEnv);
       }
-      return false;}
+      return false;
+    }
     case "test": {
       const chosenTestEnv = await chooseTestEnv(config);
       if (chosenTestEnv.envName !== "back") {

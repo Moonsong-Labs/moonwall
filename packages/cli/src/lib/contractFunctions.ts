@@ -179,7 +179,6 @@ export async function interactWithContract(
     }
   } else if (!rawTxOnly) {
     if (web3Library === "viem") {
-      
       const hash = await (context.viem() as any).sendTransaction({
         account: account,
         to: contractAddress,

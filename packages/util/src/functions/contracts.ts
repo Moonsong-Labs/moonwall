@@ -10,7 +10,7 @@ export function getAllCompiledContracts(
   const contractsPath = path.isAbsolute(contractsDir)
     ? contractsDir
     : path.join(process.cwd(), contractsDir);
-  let contracts = fs.readdirSync(contractsPath, { withFileTypes: true });
+  const contracts = fs.readdirSync(contractsPath, { withFileTypes: true });
 
   let contractNames: string[] = [];
 

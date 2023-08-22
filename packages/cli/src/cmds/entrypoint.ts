@@ -120,7 +120,7 @@ yargs(hideBin(process.argv))
   )
   .demandCommand(1)
   .fail(async (msg) => {
-    console.log(msg)
+    console.log(msg);
     await main();
   })
   .help("h")

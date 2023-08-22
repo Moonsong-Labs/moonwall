@@ -223,7 +223,7 @@ export async function createViemTransaction<TOptions extends DeepPartial<ViemTra
       : await context.viem().estimateGas({ account: account.address, to, value, data });
   const accessList = options && options.accessList ? options.accessList : [];
 
-  const txnBlob: TransactionSerializable | {} =
+  const txnBlob: TransactionSerializable | object =
     type === "eip1559"
       ? {
           to,
@@ -260,7 +260,6 @@ export async function createViemTransaction<TOptions extends DeepPartial<ViemTra
       : {};
 
   if (type !== "legacy" && accessList.length > 0) {
-    // @ts-ignore
     txnBlob["accessList"] = accessList;
   }
   return await account.signTransaction(txnBlob);
