@@ -1,6 +1,5 @@
 import { Abi, DeployContractParameters } from "viem";
 import { DeepPartial } from "./helpers";
-import { EthTransactionType } from "./config";
 import { TransactionType } from "./eth";
 
 /**

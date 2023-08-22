@@ -17,7 +17,7 @@ import chalk from "chalk";
 import { Interface, InterfaceAbi, Wallet } from "ethers";
 import fs, { readFileSync } from "fs";
 import path from "path";
-import type { Abi, Account } from "viem";
+import type { Abi } from "viem";
 import { Log, decodeFunctionResult, encodeFunctionData, toHex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { importJsonConfig } from "./configReader";

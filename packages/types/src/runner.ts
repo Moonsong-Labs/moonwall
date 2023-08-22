@@ -1,4 +1,4 @@
-import { ApiPromise, Keyring } from "@polkadot/api";
+import { ApiPromise } from "@polkadot/api";
 import { ApiTypes } from "@polkadot/api/types";
 import { KeyringPair } from "@polkadot/keyring/types";
 import { Debugger } from "debug";
@@ -100,7 +100,7 @@ export type ITestSuiteType<T extends FoundationMethod> = {
   title: string;
   testCases: (TestContext: TestContextMap[T]) => void;
   foundationMethods: T;
-  options?: Object;
+  options?: object;
   minRtVersion?: number;
   chainType?: ChainType;
   notChainType?: ChainType;
@@ -248,7 +248,7 @@ export interface DevModeContext extends GenericContext {
    */
   isEthereumChain: boolean;
 
-    /**
+  /**
    * Getter that returns an object with the default accounts already generated.
    */
   keyring: { alice: KeyringPair; bob: KeyringPair; charlie: KeyringPair; dave: KeyringPair };
