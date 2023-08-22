@@ -17,10 +17,10 @@ import chalk from "chalk";
 import { Interface, InterfaceAbi, Wallet } from "ethers";
 import fs, { readFileSync } from "fs";
 import path from "path";
-import type { Abi } from "viem";
+import type { Abi, Account } from "viem";
 import { Log, decodeFunctionResult, encodeFunctionData, toHex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { importJsonConfig } from "./configReader.js";
+import { importJsonConfig } from "./configReader";
 
 function getCompiledPath(contractName: string) {
   const config = importJsonConfig();
@@ -179,6 +179,7 @@ export async function interactWithContract(
     }
   } else if (!rawTxOnly) {
     if (web3Library === "viem") {
+      // @ts-ignore viem being weird
       const hash = await context.viem().sendTransaction({
         account: account as any,
         to: contractAddress,

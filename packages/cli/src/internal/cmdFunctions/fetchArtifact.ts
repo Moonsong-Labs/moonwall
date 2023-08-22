@@ -3,8 +3,8 @@ import path from "path";
 import fetch from "node-fetch";
 import semver from "semver";
 import chalk from "chalk";
-import { runTask } from "../processHelpers.js";
-import { downloader } from "./downloader.js";
+import { runTask } from "../processHelpers";
+import { downloader } from "./downloader";
 import { release } from "node:os";
 
 type NetworkArtifacts = {

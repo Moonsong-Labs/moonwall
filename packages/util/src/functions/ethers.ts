@@ -1,7 +1,7 @@
 import { GenericContext, EthersTransactionOptions } from "@moonwall/types";
 import { TransactionRequest, Wallet } from "ethers";
 import { TransactionType } from "@moonwall/types";
-import { ALITH_ADDRESS } from "../constants/accounts.js";
+import { ALITH_ADDRESS } from "../constants/accounts";
 
 type TransactionHandler = (blob: {}, params: TransactionRequest) => void;
 

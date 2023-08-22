@@ -1,6 +1,6 @@
 import "@moonbeam-network/api-augment";
 import { ApiPromise } from "@polkadot/api";
-import { mapExtrinsics } from "./block.js";
+import { mapExtrinsics } from "./block";
 import Debug from "debug";
 import { Extrinsic } from "@polkadot/types/interfaces";
 

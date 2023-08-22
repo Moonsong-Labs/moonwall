@@ -1,6 +1,6 @@
 import { ApiPromise } from "@polkadot/api";
 import { FoundationHandler } from "@moonwall/types";
-import { MoonwallContext } from "../globalContext.js";
+import { MoonwallContext } from "../globalContext";
 
 export const readOnlyHandler: FoundationHandler<"read_only"> = ({
   testCases,

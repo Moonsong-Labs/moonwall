@@ -14,9 +14,9 @@ import chalk from "chalk";
 import Debug from "debug";
 import { setTimeout } from "timers/promises";
 import { assert } from "vitest";
-import { importJsonConfig, isEthereumDevConfig } from "../../lib/configReader.js";
-import { extractError } from "../../lib/contextHelpers.js";
-import { MoonwallContext } from "../../lib/globalContext.js";
+import { importJsonConfig, isEthereumDevConfig } from "../../lib/configReader";
+import { extractError } from "../../lib/contextHelpers";
+import { MoonwallContext } from "../../lib/globalContext";
 const debug = Debug("DevTest");
 
 export async function getDevProviderPath() {

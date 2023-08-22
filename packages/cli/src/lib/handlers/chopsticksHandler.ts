@@ -2,9 +2,9 @@ import { ChopsticksBlockCreation, ChopsticksContext, FoundationHandler } from "@
 import {
   createChopsticksBlock,
   sendSetStorageRequest,
-} from "../../internal/foundations/chopsticksHelpers.js";
-import { upgradeRuntimeChopsticks } from "../upgradeProcedures.js";
-import { MoonwallContext } from "../globalContext.js";
+} from "../../internal/foundations/chopsticksHelpers";
+import { upgradeRuntimeChopsticks } from "../upgradeProcedures";
+import { MoonwallContext } from "../globalContext";
 
 export const chopsticksHandler: FoundationHandler<"chopsticks"> = ({
   testCases,

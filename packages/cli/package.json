@@ -51,7 +51,7 @@
   "scripts": {
     "clean": "rm -rf dist && rm -rf node_modules",
     "build": "pnpm exec rm -rf dist && tsup src --format cjs,esm  && pnpm generate-types",
-    "lint": "pnpm prettier --write --ignore-path ../../.prettierignore '**/*.(yml|js|ts|json)'",
+    "format": "pnpm prettier --write --ignore-path ../../.prettierignore '**/*.(yml|js|ts|json)'",
     "generate-types": "tsup src --format cjs,esm --dts ",
     "watch": "tsup src --format cjs,esm --dts --watch",
     "typecheck": "pnpm exec tsc --noEmit",
@@ -83,7 +83,7 @@
     "inquirer-press-to-continue": "^1.2.0",
     "node-fetch": "^3.3.2",
     "semver": "^7.5.4",
-    "viem": "^1.6.4",
+    "viem": "^1.6.7",
     "vitest": "^0.34.2",
     "web3": "4.0.3",
     "web3-providers-ws": "4.0.3",

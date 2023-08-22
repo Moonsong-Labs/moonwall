@@ -4,16 +4,16 @@ import { execSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "path";
-import { clearNodeLogs } from "src/internal/cmdFunctions/tempLogs.js";
+import { clearNodeLogs } from "../internal/cmdFunctions/tempLogs";
 import { UserConfig } from "vitest";
 import { startVitest } from "vitest/node";
 import {
   checkAlreadyRunning,
   downloadBinsIfMissing,
   promptAlreadyRunning,
-} from "../internal/fileCheckers.js";
-import { importJsonConfig, loadEnvVars, parseZombieConfigForBins } from "../lib/configReader.js";
-import { contextCreator } from "../lib/globalContext.js";
+} from "../internal/fileCheckers";
+import { importJsonConfig, loadEnvVars, parseZombieConfigForBins } from "../lib/configReader";
+import { contextCreator } from "../lib/globalContext";
 
 export async function testCmd(envName: string, additionalArgs?: {}) {
   const globalConfig = importJsonConfig();

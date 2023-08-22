@@ -31,7 +31,7 @@ import {
 } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import Web3 from "web3";
-import { tokenAbi, bytecode as tokenBytecode } from "../../_test_data/token.js";
+import { tokenAbi, bytecode as tokenBytecode } from "../../_test_data/token";
 
 describeSuite({
   id: "D01",

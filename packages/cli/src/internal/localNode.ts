@@ -1,7 +1,7 @@
 import { ChildProcess, spawn } from "child_process";
 import chalk from "chalk";
 import Debug from "debug";
-import { checkAccess, checkExists } from "./fileCheckers.js";
+import { checkAccess, checkExists } from "./fileCheckers";
 import fs from "fs";
 import path from "path";
 const debugNode = Debug("global:node");

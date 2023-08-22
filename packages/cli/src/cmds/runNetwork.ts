@@ -8,17 +8,17 @@ import inquirer from "inquirer";
 import PressToContinuePrompt from "inquirer-press-to-continue";
 import { createReadStream, stat } from "node:fs";
 import path from "path";
-import { clearNodeLogs, reportLogLocation } from "src/internal/cmdFunctions/tempLogs.js";
+import { clearNodeLogs, reportLogLocation } from "../internal/cmdFunctions/tempLogs";
 import WebSocket from "ws";
 import { parse } from "yaml";
 import {
   checkAlreadyRunning,
   downloadBinsIfMissing,
   promptAlreadyRunning,
-} from "../internal/fileCheckers.js";
-import { importJsonConfig, loadEnvVars, parseZombieConfigForBins } from "../lib/configReader.js";
-import { MoonwallContext, runNetworkOnly } from "../lib/globalContext.js";
-import { executeTests } from "./runTests.js";
+} from "../internal/fileCheckers";
+import { importJsonConfig, loadEnvVars, parseZombieConfigForBins } from "../lib/configReader";
+import { MoonwallContext, runNetworkOnly } from "../lib/globalContext";
+import { executeTests } from "./runTests";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 

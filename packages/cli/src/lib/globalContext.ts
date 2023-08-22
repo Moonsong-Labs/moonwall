@@ -13,14 +13,14 @@ import zombie, { Network } from "@zombienet/orchestrator";
 import Debug from "debug";
 import { ChildProcess, exec } from "node:child_process";
 import { setTimeout } from "node:timers/promises";
-import { parseChopsticksRunCmd, parseRunCmd, parseZombieCmd } from "../internal/commandParsers.js";
-import { checkZombieBins, getZombieConfig } from "../internal/foundations/zombieHelpers.js";
-import { launchNode } from "../internal/localNode.js";
+import { parseChopsticksRunCmd, parseRunCmd, parseZombieCmd } from "../internal/commandParsers";
+import { checkZombieBins, getZombieConfig } from "../internal/foundations/zombieHelpers";
+import { launchNode } from "../internal/localNode";
 import {
   ProviderFactory,
   ProviderInterfaceFactory,
   vitestAutoUrl,
-} from "../internal/providerFactories.js";
+} from "../internal/providerFactories";
 import fs from "fs";
 import readline from "readline";
 import {
@@ -28,7 +28,7 @@ import {
   isEthereumDevConfig,
   isEthereumZombieConfig,
   isOptionSet,
-} from "./configReader.js";
+} from "./configReader";
 const debugSetup = Debug("global:context");
 
 export class MoonwallContext {

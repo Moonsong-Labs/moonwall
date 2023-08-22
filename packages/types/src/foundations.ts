@@ -1,5 +1,5 @@
 import { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types";
-import { ExtrinsicCreation } from "./context.js";
+import { ExtrinsicCreation } from "./context";
 
 export type CreatedBlockResult = {
   block: {

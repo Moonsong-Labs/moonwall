@@ -4,7 +4,7 @@ import {
   DEFAULT_GENESIS_BALANCE,
   DEFAULT_GENESIS_MAPPING,
   DEFAULT_GENESIS_STAKING,
-} from "./chain.js";
+} from "./chain";
 import { KeyringPair } from "@polkadot/keyring/types";
 
 const keyringEth = new Keyring({ type: "ethereum" });

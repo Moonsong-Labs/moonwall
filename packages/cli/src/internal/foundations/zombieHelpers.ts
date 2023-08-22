@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import { LaunchConfig } from "@zombienet/orchestrator";
-import { checkAccess, checkExists } from "../fileCheckers.js";
+import { checkAccess, checkExists } from "../fileCheckers";
 import chalk from "chalk";
 
 export async function checkZombieBins(config: LaunchConfig) {

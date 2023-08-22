@@ -1,5 +1,5 @@
 import { setTimeout } from "timers/promises";
-import { MoonwallContext } from "../../lib/globalContext.js";
+import { MoonwallContext } from "../../lib/globalContext";
 import { GenericContext } from "@moonwall/types";
 import { ApiTypes, AugmentedEvent } from "@polkadot/api/types";
 import { ApiPromise, WsProvider } from "@polkadot/api";

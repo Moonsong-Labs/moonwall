@@ -48,7 +48,7 @@
     "clean": "rm -rf dist && rm -rf node_modules",
     "build": "pnpm exec rm -rf dist && tsup src --format cjs,esm  && pnpm generate-types",
     "generate-types": "tsup src --format cjs,esm --dts ",
-    "lint": "pnpm prettier --write --ignore-path ../../.prettierignore '**/*.(yml|js|ts|json)'",
+    "format": "pnpm prettier --write --ignore-path ../../.prettierignore '**/*.(yml|js|ts|json)'",
     "watch": "tsup src --format cjs,esm --dts --watch",
     "typecheck": "pnpm exec tsc --noEmit",
     "prepublish": "pnpm run build && pnpm run generate-types"

@@ -14,12 +14,12 @@ import {
 } from "viem";
 import { Chain } from "viem/chains";
 import { Web3 } from "web3";
-import { FoundationType } from "./config.js";
-import { BlockCreation, BlockCreationResponse, ChopsticksBlockCreation } from "./context.js";
-import { ContractDeploymentOptions } from "./contracts.js";
-import { TransactionType } from "./eth.js";
-import { CallType } from "./foundations.js";
-import { DeepPartial } from "./helpers.js";
+import { FoundationType } from "./config";
+import { BlockCreation, BlockCreationResponse, ChopsticksBlockCreation } from "./context";
+import { ContractDeploymentOptions } from "./contracts";
+import { TransactionType } from "./eth";
+import { CallType } from "./foundations";
+import { DeepPartial } from "./helpers";
 
 /**
  * @name CustomTest

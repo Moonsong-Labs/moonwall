@@ -9,7 +9,7 @@
     "build": "pnpm -r --filter='./packages/**' run build",
     "generate-types": "pnpm -r --filter='./packages/**' run generate-types",
     "prettier": "pnpm exec prettier --write --ignore-path .gitignore '**/*.(yml|js|ts|json)'",
-    "lint": "pnpm -r --filter='./packages/**' run lint",
+    "format": "pnpm -r --filter='./packages/**' run lint",
     "changeset": "changeset",
     "changeset:release": "changeset publish",
     "changeset:version": "changeset version",
