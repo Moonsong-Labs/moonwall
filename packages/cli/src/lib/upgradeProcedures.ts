@@ -11,7 +11,7 @@ import { ChopsticksContext, UpgradePreferences } from "@moonwall/types";
 import { getRuntimeWasm } from "./binariesHelpers";
 
 export async function upgradeRuntimeChopsticks(context: ChopsticksContext, path: string) {
-  if (!!!existsSync(path)) {
+  if (!existsSync(path)) {
     throw new Error("Runtime wasm not found at path: " + path);
   }
   const rtWasm = readFileSync(path);
@@ -68,12 +68,12 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
       if (options.useGovernance) {
         log("Using governance...");
         // TODO: remove support for old style after all chains upgraded to 2400+
-        let proposal =
+        const proposal =
           api.consts.system.version.specVersion.toNumber() >= 2400
             ? (api.tx.parachainSystem as any).authorizeUpgrade(blake2AsHex(code), false)
             : (api.tx.parachainSystem as any).authorizeUpgrade(blake2AsHex(code));
-        let encodedProposal = proposal.method.toHex();
-        let encodedHash = blake2AsHex(encodedProposal);
+        const encodedProposal = proposal.method.toHex();
+        const encodedHash = blake2AsHex(encodedProposal);
 
         log("Checking if preimage already exists...");
         // Check if already in governance

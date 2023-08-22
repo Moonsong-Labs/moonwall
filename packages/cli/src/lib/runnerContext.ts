@@ -87,7 +87,7 @@ export function describeSuite<T extends FoundationType>({
       throw new Error("MOON_TEST_ENV not set");
     }
 
-    ctx = await contextCreator(globalConfig, process.env.MOON_TEST_ENV);
+    ctx = await contextCreator(globalConfig);
     const env = globalConfig.environments.find(({ name }) => name === process.env.MOON_TEST_ENV)!;
 
     if (env.foundation.type === "read_only") {
@@ -141,7 +141,7 @@ export function describeSuite<T extends FoundationType>({
         );
       }
 
-      return !!!limiter
+      return !limiter
         ? (provider.api as ProviderMap[T])
         : scheduleWithBottleneck(provider.api as ProviderMap[T]);
     };
@@ -205,7 +205,7 @@ const loadParams = (config?: ReadOnlyLaunchSpec) => {
 
 const scheduleWithBottleneck = <T extends ProviderApi>(api: T): T => {
   return new Proxy(api, {
-    get(target, propKey, receiver) {
+    get(target, propKey) {
       const origMethod = target[propKey];
       if (typeof origMethod === "function" && propKey !== "rpc" && propKey !== "tx") {
         return (...args: any[]) => {

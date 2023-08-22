@@ -9,10 +9,10 @@ import {
   Node,
 } from "@moonwall/types";
 import { ApiPromise } from "@polkadot/api";
+import { setTimeout } from "timers/promises";
 import zombie, { Network } from "@zombienet/orchestrator";
 import Debug from "debug";
 import { ChildProcess, exec } from "node:child_process";
-import { setTimeout } from "node:timers/promises";
 import { parseChopsticksRunCmd, parseRunCmd, parseZombieCmd } from "../internal/commandParsers";
 import { checkZombieBins, getZombieConfig } from "../internal/foundations/zombieHelpers";
 import { launchNode } from "../internal/localNode";
@@ -345,14 +345,14 @@ export class MoonwallContext {
 
     await Promise.all(promises);
 
-    if (!!ctx.zombieNetwork) {
+    if (ctx.zombieNetwork) {
       console.log("🪓  Killing zombie nodes");
       await ctx.zombieNetwork.stop();
     }
   }
 }
 
-export const contextCreator = async (config: MoonwallConfig, env: string) => {
+export const contextCreator = async (config: MoonwallConfig) => {
   const ctx = MoonwallContext.getContext(config);
   await runNetworkOnly(config);
   await ctx.connectEnvironment();
@@ -366,7 +366,7 @@ export const runNetworkOnly = async (config: MoonwallConfig) => {
 
 export interface IGlobalContextFoundation {
   name: string;
-  context?: {};
+  context?: object;
   providers?: MoonwallProvider[];
   nodes?: {
     name?: string;

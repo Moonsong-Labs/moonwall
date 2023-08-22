@@ -1,12 +1,11 @@
-import { setTimeout } from "timers/promises";
-import { MoonwallContext } from "../../lib/globalContext";
-import { GenericContext } from "@moonwall/types";
+import { ChopsticksBlockCreation, GenericContext } from "@moonwall/types";
+import { WsProvider } from "@polkadot/api";
 import { ApiTypes, AugmentedEvent } from "@polkadot/api/types";
-import { ApiPromise, WsProvider } from "@polkadot/api";
 import { FrameSystemEventRecord } from "@polkadot/types/lookup";
-import { ChopsticksBlockCreation } from "@moonwall/types";
 import chalk from "chalk";
+import { setTimeout } from "timers/promises";
 import { assert } from "vitest";
+import { MoonwallContext } from "../../lib/globalContext";
 
 export async function getWsFromConfig(providerName?: string): Promise<WsProvider> {
   if (providerName) {
@@ -18,7 +17,7 @@ export async function getWsFromConfig(providerName?: string): Promise<WsProvider
       throw new Error(`Cannot find provider ${chalk.bgWhiteBright.blackBright(providerName)}`);
     }
 
-    if (!!!provider.ws) {
+    if (!provider.ws) {
       throw new Error("Provider does not have an attached ws() property ");
     }
 
@@ -34,7 +33,7 @@ export async function getWsFromConfig(providerName?: string): Promise<WsProvider
       );
     }
 
-    if (!!!provider.ws) {
+    if (!provider.ws) {
       throw new Error("Provider does not have an attached ws() property ");
     }
 

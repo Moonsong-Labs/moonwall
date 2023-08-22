@@ -179,9 +179,9 @@ export async function interactWithContract(
     }
   } else if (!rawTxOnly) {
     if (web3Library === "viem") {
-      // @ts-ignore viem being weird
-      const hash = await context.viem().sendTransaction({
-        account: account as any,
+      
+      const hash = await (context.viem() as any).sendTransaction({
+        account: account,
         to: contractAddress,
         value,
         data,

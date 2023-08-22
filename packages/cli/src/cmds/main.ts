@@ -10,13 +10,13 @@ import { runNetwork } from "./runNetwork";
 import { testCmd } from "./runTests";
 import { fetchArtifact, getVersions } from "../internal/cmdFunctions/fetchArtifact";
 import pkg from "../../package.json" assert { type: "json" };
-import { SemVer, gt, lt, lte } from "semver";
+import { SemVer, lt } from "semver";
 import fetch from "node-fetch";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
 export async function main() {
-  while (true) {
+  for (;;) {
     let globalConfig;
     try {
       globalConfig = importJsonConfig();
@@ -97,12 +97,12 @@ async function mainMenu(config: MoonwallConfig) {
       await createFolders();
       return false;
     case "run":
-      const chosenRunEnv = await chooseRunEnv(config);
+     { const chosenRunEnv = await chooseRunEnv(config);
       if (chosenRunEnv.envName !== "back") {
         await runNetwork(chosenRunEnv);
       }
-      return false;
-    case "test":
+      return false;}
+    case "test": {
       const chosenTestEnv = await chooseTestEnv(config);
       if (chosenTestEnv.envName !== "back") {
         process.env.MOON_RUN_SCRIPTS = "true";
@@ -117,6 +117,7 @@ async function mainMenu(config: MoonwallConfig) {
         });
       }
       return false;
+    }
     case "download":
       await resolveDownloadChoice();
 
@@ -127,7 +128,7 @@ async function mainMenu(config: MoonwallConfig) {
 }
 
 async function resolveDownloadChoice() {
-  while (true) {
+  for (;;) {
     const firstChoice = await inquirer.prompt({
       name: "artifact",
       type: "list",
@@ -279,10 +280,6 @@ const resolveQuitChoice = async () => {
 const printIntro = async () => {
   const currentVersion = new SemVer(pkg.version);
 
-  interface NpmResponse {
-    version: string;
-  }
-
   interface GithubResponse {
     tag_name: `${string}@${string}`;
   }
@@ -290,7 +287,6 @@ const printIntro = async () => {
   let remoteVersion = "";
   try {
     const url = "https://api.github.com/repos/moonsong-labs/moonwall/releases";
-    // const url = "https://registry.npmjs.org/@moonwall/cli/latest"
     const resp = await fetch(url);
     const json = (await resp.json()) as GithubResponse[];
     remoteVersion = json.find((a) => a.tag_name.includes("@moonwall/cli@"))!.tag_name.split("@")[2];

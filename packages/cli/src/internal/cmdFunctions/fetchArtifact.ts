@@ -5,7 +5,6 @@ import semver from "semver";
 import chalk from "chalk";
 import { runTask } from "../processHelpers";
 import { downloader } from "./downloader";
-import { release } from "node:os";
 
 type NetworkArtifacts = {
   network: string;

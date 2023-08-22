@@ -51,6 +51,8 @@
   "scripts": {
     "clean": "rm -rf dist && rm -rf node_modules",
     "build": "pnpm exec rm -rf dist && tsup src --format cjs,esm  && pnpm generate-types",
+    "lint": "eslint ./src/**/*.ts",
+    "lint:fix": "eslint './src/**/*.ts' --fix",
     "format": "pnpm prettier --write --ignore-path ../../.prettierignore '**/*.(yml|js|ts|json)'",
     "generate-types": "tsup src --format cjs,esm --dts ",
     "watch": "tsup src --format cjs,esm --dts --watch",

@@ -76,7 +76,7 @@ export const execCouncilProposal = async <
   threshold: number = COUNCIL_THRESHOLD
 ) => {
   // Charleth submit the proposal to the council (and therefore implicitly votes for)
-  let lengthBound = polkadotCall.method.encodedLength;
+  const lengthBound = polkadotCall.method.encodedLength;
   const { result: proposalResult } = await context.createBlock(
     context
       .polkadotJs()
@@ -249,7 +249,7 @@ export const execTechnicalCommitteeProposal = async <
   // Tech committee members
 
   // Alith submit the proposal to the council (and therefore implicitly votes for)
-  let lengthBound = polkadotCall.encodedLength;
+  const lengthBound = polkadotCall.encodedLength;
   const { result: proposalResult } = await context.createBlock(
     context.polkadotJs().tx.techCommitteeCollective.propose(threshold, polkadotCall, lengthBound)
   );
@@ -295,7 +295,7 @@ export const execTechnicalCommitteeProposal = async <
 
 export const executeProposalWithCouncil = async (api: ApiPromise, encodedHash: string) => {
   let nonce = (await api.rpc.system.accountNextIndex(alith.address)).toNumber();
-  let referendumNextIndex = (await api.query.democracy.referendumCount()).toNumber();
+  const referendumNextIndex = (await api.query.democracy.referendumCount()).toNumber();
 
   // process.stdout.write(
   //   `Sending council motion (${encodedHash} ` +
@@ -306,8 +306,8 @@ export const executeProposalWithCouncil = async (api: ApiPromise, encodedHash: s
       ? { Legacy: encodedHash }
       : encodedHash;
 
-  let external = api.tx.democracy.externalProposeMajority(callData);
-  let fastTrack = api.tx.democracy.fastTrack(encodedHash, 1, 0);
+  const external = api.tx.democracy.externalProposeMajority(callData);
+  const fastTrack = api.tx.democracy.fastTrack(encodedHash, 1, 0);
   const voteAmount = 1n * 10n ** BigInt(api.registry.chainDecimals[0]);
 
   process.stdout.write(`Sending motion + fast-track + vote for ${encodedHash}...`);

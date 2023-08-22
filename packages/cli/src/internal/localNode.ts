@@ -12,8 +12,6 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
     checkAccess(cmd);
   }
 
-  let runningNode: ChildProcess;
-
   const dirPath = path.join(process.cwd(), "tmp", "node_logs");
 
   const onProcessExit = () => {
@@ -26,7 +24,7 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
   process.once("exit", onProcessExit);
   process.once("SIGINT", onProcessInterrupt);
 
-  runningNode = spawn(cmd, args);
+  const runningNode = spawn(cmd, args);
 
   const fsStream = fs.createWriteStream(
     path.join(

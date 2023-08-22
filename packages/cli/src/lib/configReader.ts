@@ -34,13 +34,13 @@ export function isOptionSet(option: string): boolean {
 export function isEthereumZombieConfig(): boolean {
   const config = importJsonConfig();
   const env = config.environments.find((env) => env.name == process.env.MOON_TEST_ENV)!;
-  return env.foundation.type == "zombie" && !!!env.foundation.zombieSpec.disableDefaultEthProviders;
+  return env.foundation.type == "zombie" && !env.foundation.zombieSpec.disableDefaultEthProviders;
 }
 
 export function isEthereumDevConfig(): boolean {
   const config = importJsonConfig();
   const env = config.environments.find((env) => env.name == process.env.MOON_TEST_ENV)!;
-  return env.foundation.type == "dev" && !!!env.foundation.launchSpec[0].disableDefaultEthProviders;
+  return env.foundation.type == "dev" && !env.foundation.launchSpec[0].disableDefaultEthProviders;
 }
 
 export function importJsonConfig(): MoonwallConfig {
@@ -98,12 +98,12 @@ function replaceEnvVars(value: any): any {
 function traverseConfig(configObj: any, option: string): any {
   if (typeof configObj !== "object" || configObj === null) return undefined;
 
-  if (configObj.hasOwnProperty(option)) {
+  if (configObj.prototype.hasOwnProperty.call(option)) {
     return configObj[option];
   }
 
-  for (let key in configObj) {
-    let result = traverseConfig(configObj[key], option);
+  for (const key in configObj) {
+    const result = traverseConfig(configObj[key], option);
     if (result !== undefined) {
       return result;
     }
