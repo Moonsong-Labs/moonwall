@@ -1,10 +1,17 @@
 import { ChopsticksBlockCreation, ChopsticksContext, FoundationHandler } from "@moonwall/types";
 import {
+  ALITH_PRIVATE_KEY,
+  BALTATHAR_PRIVATE_KEY,
+  CHARLETH_PRIVATE_KEY,
+  DOROTHY_PRIVATE_KEY,
+} from "@moonwall/util";
+import { Keyring } from "@polkadot/api";
+import {
   createChopsticksBlock,
   sendSetStorageRequest,
 } from "../../internal/foundations/chopsticksHelpers";
-import { upgradeRuntimeChopsticks } from "../upgradeProcedures";
 import { MoonwallContext } from "../globalContext";
+import { upgradeRuntimeChopsticks } from "../upgradeProcedures";
 
 export const chopsticksHandler: FoundationHandler<"chopsticks"> = ({
   testCases,
