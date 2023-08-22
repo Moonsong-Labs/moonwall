@@ -35,6 +35,20 @@ jobs:
       - run: pnpm install
       - run: pnpm run lint
 
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+          cache: "pnpm"
+      - run: pnpm install
+      - run: pnpm run format
+
   test_basic:
     runs-on: ubuntu-latest
     needs: ["build"]
