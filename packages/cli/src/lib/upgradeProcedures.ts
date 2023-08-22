@@ -6,7 +6,6 @@ import { ApiPromise } from "@polkadot/api";
 import { blake2AsHex } from "@polkadot/util-crypto";
 import { sha256 } from "ethers";
 import { cancelReferendaWithCouncil, executeProposalWithCouncil } from "./governanceProcedures.js";
-import { alith } from "@moonwall/util";
 import { ChopsticksContext, UpgradePreferences } from "@moonwall/types";
 import { getRuntimeWasm } from "./binariesHelpers.js";
 
@@ -25,8 +24,9 @@ export async function upgradeRuntimeChopsticks(context: ChopsticksContext, path:
   await context.createBlock();
 
   const api = context.polkadotJs();
+  const signer = context.keyring.alice;
 
-  await api.tx.parachainSystem.enactAuthorizedUpgrade(rtHex).signAndSend(alith);
+  await api.tx.parachainSystem.enactAuthorizedUpgrade(rtHex).signAndSend(signer);
 
   await context.createBlock({ count: 3 });
 }

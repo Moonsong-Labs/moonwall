@@ -19,13 +19,16 @@ describeSuite({
       id: "T1",
       title: "Query the chain",
       timeout: 60000,
+      // modifier:"only",
       test: async function () {
         const chainName = api.consts.system.version.specName.toString();
         const currentBlockHeight = (await api.rpc.chain.getHeader()).number.toNumber();
         log(`You are now connected to ${chainName} at height #${currentBlockHeight}`);
         expect(currentBlockHeight).toBeGreaterThan(0);
-        expect(chainName).toBe("moonriver");
+        expect(["dancebox", "moonriver"].includes(chainName)).toBe(true);
         log(JSON.stringify(await api.rpc.state.getStorage(":code")).slice(0, 20));
+        log(`This chain is an Ethereum chain: ${context.isEthereumChain}`);
+        log(`Alith Address is: ${context.keyring.alice.address}`);
       },
     });
 
@@ -99,7 +102,7 @@ describeSuite({
         const rtBefore = api.consts.system.version.specVersion.toNumber();
         const ctx = MoonwallContext.getContext();
         log(ctx.rtUpgradePath);
-        await context.upgradeRuntime(context);
+        await context.upgradeRuntime();
         const rtafter = api.consts.system.version.specVersion.toNumber();
         expect(rtBefore).toBeLessThan(rtafter);
       },

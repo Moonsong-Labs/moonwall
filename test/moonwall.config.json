@@ -112,12 +112,37 @@
       "connections": []
     },
     {
+      "name": "tanssi_chopsticks",
+      "testFileDir": ["suites/chopsticks/"],
+      "include": ["**/*basic*"],
+      "foundation": {
+        "type": "chopsticks",
+        "rtUpgradePath": "./tmp/dancebox_runtime.compact.compressed.wasm",
+        "launchSpec": [
+          {
+            "name": "tanssi",
+            "type": "parachain",
+
+            "buildBlockMode": "manual",
+            "configPath": "./configs/dancebox.yml"
+          }
+        ]
+      },
+      "connections": [
+        {
+          "name": "MB",
+          "type": "polkadotJs",
+          "endpoints": ["ws://127.0.0.1:8000"]
+        }
+      ]
+    },
+    {
       "name": "chopsticks",
       "testFileDir": ["suites/chopsticks/"],
       "include": ["**/*basic*"],
       "foundation": {
         "type": "chopsticks",
-        "rtUpgradePath": "./tmp/moonriver-runtime-2400.wasm",
+        "rtUpgradePath": "./tmp/moonriver_runtime.compact.compressed.wasm",
         "launchSpec": [
           {
             "name": "mb",
