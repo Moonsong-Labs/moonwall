@@ -1,5 +1,12 @@
 # @moonwall/util
 
+## 4.0.17
+
+### Patch Changes
+
+- Updated dependencies [2474534]
+  - @moonwall/types@4.0.17
+
 ## 4.0.15
 
 ### Patch Changes
