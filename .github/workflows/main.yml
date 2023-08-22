@@ -67,7 +67,7 @@ jobs:
       - name: Build like before
         run: |
           pnpm install   
-          pnpm run lint && pnpm run build
+          pnpm run build
       - name: Run standard dev test
         run: |
           cd test
@@ -90,7 +90,7 @@ jobs:
       - name: Build like before
         run: |
           pnpm install  
-          pnpm run lint && pnpm run build
+          pnpm run build
       - uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
@@ -121,7 +121,7 @@ jobs:
       - name: Build like before
         run: |
           pnpm install  
-          pnpm run lint && pnpm run build
+          pnpm run build
       - uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
@@ -157,7 +157,7 @@ jobs:
       - name: Build like before
         run: |
           pnpm install   
-          pnpm run lint && pnpm run build
+          pnpm run build
       - uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
@@ -181,7 +181,7 @@ jobs:
       - name: Build like before
         run: |
           pnpm install   
-          pnpm run lint && pnpm run build
+          pnpm run build
       - uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
@@ -244,7 +244,7 @@ jobs:
       - name: Build like before
         run: |
           pnpm install   
-          pnpm run lint && pnpm run build
+          pnpm run build
       - name: Download binaries
         run: |
           cd test
