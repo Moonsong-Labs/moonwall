@@ -52,7 +52,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint ./src/**/*.ts",
     "lint:fix": "eslint './src/**/*.ts' --fix",
-    "format": "prettier --write --ignore-path ../../.prettierignore '**/*.(yml|js|ts|json)'",
+    "fmt": "pnpm prettier --write --ignore-path ../../.prettierignore '**/*.(yml|js|ts|json)'",
+    "fmt:fix": "pnpm prettier --write --ignore-path ../../.prettierignore '**/*.(yml|js|ts|json)'",
     "prepublish": "pnpm run build && pnpm run generate-types",
     "schema": "typescript-json-schema --tsNodeRegister --esModuleInterop -o config_schema.json ./src/config.ts MoonwallConfig"
   },

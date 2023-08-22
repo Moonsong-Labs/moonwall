@@ -47,7 +47,7 @@ jobs:
           node-version: 20.x
           cache: "pnpm"
       - run: pnpm install
-      - run: pnpm run format
+      - run: pnpm run fmt
 
   test_basic:
     runs-on: ubuntu-latest

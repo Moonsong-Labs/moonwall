@@ -98,7 +98,7 @@ function replaceEnvVars(value: any): any {
 function traverseConfig(configObj: any, option: string): any {
   if (typeof configObj !== "object" || configObj === null) return undefined;
 
-  if (configObj.prototype.hasOwnProperty.call(option)) {
+  if (Object.prototype.hasOwnProperty.call(configObj, option)) {
     return configObj[option];
   }
 
