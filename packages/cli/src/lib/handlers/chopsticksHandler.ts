@@ -1,7 +1,7 @@
 import { ChopsticksBlockCreation, ChopsticksContext, FoundationHandler } from "@moonwall/types";
 import {
   createChopsticksBlock,
-  sendSetStorageRequest
+  sendSetStorageRequest,
 } from "../../internal/foundations/chopsticksHelpers";
 import { upgradeRuntimeChopsticks } from "../upgradeProcedures";
 import { MoonwallContext } from "../globalContext";

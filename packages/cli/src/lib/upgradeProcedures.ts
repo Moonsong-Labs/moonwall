@@ -1,14 +1,13 @@
 import "@moonbeam-network/api-augment";
-import fs, { readFileSync, existsSync } from "fs";
-import chalk from "chalk";
-import type { WeightV2 } from "@polkadot/types/interfaces";
-import { ApiPromise } from "@polkadot/api";
-import { blake2AsHex } from "@polkadot/util-crypto";
-import { sha256 } from "ethers";
-import { cancelReferendaWithCouncil, executeProposalWithCouncil } from "./governanceProcedures";
-import { alith } from "@moonwall/util";
 import { ChopsticksContext, UpgradePreferences } from "@moonwall/types";
+import { ApiPromise } from "@polkadot/api";
+import type { WeightV2 } from "@polkadot/types/interfaces";
+import { blake2AsHex } from "@polkadot/util-crypto";
+import chalk from "chalk";
+import { sha256 } from "ethers";
+import fs, { existsSync, readFileSync } from "fs";
 import { getRuntimeWasm } from "./binariesHelpers";
+import { cancelReferendaWithCouncil, executeProposalWithCouncil } from "./governanceProcedures";
 
 export async function upgradeRuntimeChopsticks(context: ChopsticksContext, path: string) {
   if (!existsSync(path)) {
