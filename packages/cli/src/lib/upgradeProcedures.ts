@@ -25,8 +25,9 @@ export async function upgradeRuntimeChopsticks(context: ChopsticksContext, path:
   await context.createBlock();
 
   const api = context.polkadotJs();
+  const signer = context.keyring.alice;
 
-  await api.tx.parachainSystem.enactAuthorizedUpgrade(rtHex).signAndSend(alith);
+  await api.tx.parachainSystem.enactAuthorizedUpgrade(rtHex).signAndSend(signer);
 
   await context.createBlock({ count: 3 });
 }

@@ -1,5 +1,14 @@
 # @moonwall/cli
 
+## 4.0.17
+
+### Patch Changes
+
+- 2474534: RT upgrade for non-eth chains
+- Updated dependencies [2474534]
+  - @moonwall/types@4.0.17
+  - @moonwall/util@4.0.17
+
 ## 4.0.16
 
 ### Patch Changes

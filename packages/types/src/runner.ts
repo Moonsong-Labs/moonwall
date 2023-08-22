@@ -224,14 +224,57 @@ export interface ZombieContext extends GenericContext {
  * ChopsticksContext - Interface that extends from GenericContext and includes methods for creating a block, setting storage, and upgrading runtime.
  */
 export interface ChopsticksContext extends GenericContext {
+  /**
+   * Creates a block based on the given options.
+   *
+   * @param {ChopsticksBlockCreation} [options] Optional parameters for block creation.
+   * @returns {Promise<{ result: string }>} A Promise that resolves to an object containing the result string.
+   */
   createBlock: (options?: ChopsticksBlockCreation) => Promise<{ result: string }>;
+
+  /**
+   * Sets the storage based on the provided parameters.
+   *
+   * @param {Object} params The parameters required for setting storage.
+   * @param {string} [params.providerName] Optional name of the provider.
+   * @param {string} params.module The name of the module.
+   * @param {string} params.method The method to be called.
+   * @param {any} params.methodParams The parameters required for the method.
+   * @returns {Promise<void>} A Promise that resolves once the storage has been set.
+   */
   setStorage: (params: {
     providerName?: string;
     module: string;
     method: string;
     methodParams: any;
   }) => Promise<void>;
-  upgradeRuntime: (context: ChopsticksContext) => Promise<void>;
+
+  /**
+   * Upgrades the runtime.
+   *
+   * @returns {Promise<void>} A Promise that resolves once the runtime has been upgraded.
+   */
+  upgradeRuntime: () => Promise<void>;
+
+  /**
+   * Getter that returns true if System.Account is AccountId20 (Ethereum Account length is 20 bytes).
+   */
+  isEthereumChain: boolean;
+
+  /**
+   * Getter that returns an object with the default accounts already generated.
+   */
+  keyring: { alice: KeyringPair; bob: KeyringPair; charlie: KeyringPair; dave: KeyringPair };
+
+  /**
+   * Property that returns true if System.Account is AccountId32 (Substrate Account length is 32 bytes).
+   */
+  isSubstrateChain: boolean;
+
+  /**
+   * Default getter for a connected PolkadotJs ApiPromise instance
+   */
+  pjsApi: ApiPromise;
 }
 
 /**
