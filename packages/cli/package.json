@@ -53,7 +53,7 @@
     "build": "pnpm exec rm -rf dist && tsup src --format cjs,esm  && pnpm generate-types",
     "lint": "eslint ./src/**/*.ts",
     "lint:fix": "eslint './src/**/*.ts' --fix",
-    "fmt": "pnpm prettier --write --ignore-path ../../.prettierignore '**/*.(yml|js|ts|json)'",
+    "fmt": "pnpm prettier --check --ignore-path ../../.prettierignore '**/*.(yml|js|ts|json)'",
     "fmt:fix": "pnpm prettier --write --ignore-path ../../.prettierignore '**/*.(yml|js|ts|json)'",
     "generate-types": "tsup src --format cjs,esm --dts ",
     "watch": "tsup src --format cjs,esm --dts --watch",
