@@ -6,7 +6,7 @@ import { MoonwallConfig } from "@moonwall/types";
 import { createFolders, generateConfig } from "../internal/cmdFunctions/initialisation";
 import colors from "colors";
 import clear from "clear";
-import { runNetwork } from "./runNetwork";
+import { runNetworkCmd } from "./runNetwork";
 import { testCmd } from "./runTests";
 import { fetchArtifact, getVersions } from "../internal/cmdFunctions/fetchArtifact";
 import pkg from "../../package.json" assert { type: "json" };
@@ -99,7 +99,7 @@ async function mainMenu(config: MoonwallConfig) {
     case "run": {
       const chosenRunEnv = await chooseRunEnv(config);
       if (chosenRunEnv.envName !== "back") {
-        await runNetwork(chosenRunEnv);
+        await runNetworkCmd(chosenRunEnv);
       }
       return false;
     }

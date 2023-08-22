@@ -105,7 +105,7 @@ export async function executeTests(env: Environment, additionalArgs?: object) {
         throw new Error("MOON_TEST_ENV not set");
       }
 
-      const ctx = await contextCreator(globalConfig);
+      const ctx = await contextCreator();
       const chainData = ctx.providers
         .filter((provider) => provider.type == "polkadotJs" && provider.name.includes("para"))
         .map((provider) => {

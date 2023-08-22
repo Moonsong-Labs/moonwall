@@ -24,7 +24,7 @@ inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
 let lastSelected = 0;
 
-export async function runNetwork(args) {
+export async function runNetworkCmd(args) {
   process.env.MOON_TEST_ENV = args.envName;
   const globalConfig = importJsonConfig();
   const env = globalConfig.environments.find(({ name }) => name === args.envName)!;
@@ -37,6 +37,7 @@ export async function runNetwork(args) {
       )}\n Environments defined in config are: ${envList}\n`
     );
   }
+  
   loadEnvVars();
 
   if (env.foundation.type == "dev") {
@@ -143,7 +144,7 @@ export async function runNetwork(args) {
     clearNodeLogs();
   }
 
-  await runNetworkOnly(globalConfig);
+  await runNetworkOnly();
   clear();
   const portsList = await reportServicePorts();
   reportLogLocation();

@@ -87,7 +87,7 @@ export function describeSuite<T extends FoundationType>({
       throw new Error("MOON_TEST_ENV not set");
     }
 
-    ctx = await contextCreator(globalConfig);
+    ctx = await contextCreator();
     const env = globalConfig.environments.find(({ name }) => name === process.env.MOON_TEST_ENV)!;
 
     if (env.foundation.type === "read_only") {

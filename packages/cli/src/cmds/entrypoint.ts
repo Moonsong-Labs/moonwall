@@ -3,7 +3,7 @@ import "@moonbeam-network/api-augment";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import { testCmd } from "./runTests";
-import { runNetwork } from "./runNetwork";
+import { runNetworkCmd } from "./runNetwork";
 import { generateConfig } from "../internal/cmdFunctions/initialisation";
 import { main } from "./main";
 import { fetchArtifact } from "../internal/cmdFunctions/fetchArtifact";
@@ -114,7 +114,7 @@ yargs(hideBin(process.argv))
         });
     },
     async (argv) => {
-      await runNetwork(argv as any);
+      await runNetworkCmd(argv as any);
       process.exit(0);
     }
   )

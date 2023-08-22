@@ -153,7 +153,6 @@ export class MoonwallContext {
     await checkZombieBins(zombieConfig);
 
     const network = await zombie.start("", zombieConfig, { silent: true });
-
     process.env.MOON_RELAY_WSS = network.relay[0].wsUri;
     process.env.MOON_PARA_WSS = Object.values(network.paras)[0].nodes[0].wsUri;
     process.env.MOON_ZOMBIE_PATH = network.client.tmpDir;
@@ -352,14 +351,16 @@ export class MoonwallContext {
   }
 }
 
-export const contextCreator = async (config: MoonwallConfig) => {
+export const contextCreator = async () => {
+  const config = importJsonConfig();
   const ctx = MoonwallContext.getContext(config);
-  await runNetworkOnly(config);
+  await runNetworkOnly();
   await ctx.connectEnvironment();
   return ctx;
 };
 
-export const runNetworkOnly = async (config: MoonwallConfig) => {
+export const runNetworkOnly = async () => {
+  const config = importJsonConfig();
   const ctx = MoonwallContext.getContext(config);
   await ctx.startNetwork();
 };
