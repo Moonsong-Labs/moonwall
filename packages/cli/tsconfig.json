@@ -1,25 +1,8 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "target": "esnext",
-    "module": "esnext",
-    "baseUrl": "./",
-    "lib": ["ESNext"],
-    "declaration": true,
-    "outDir": "./dist",
-    "moduleResolution": "Bundler",
-    "allowSyntheticDefaultImports": true,
-    "importHelpers": false,
-    "skipLibCheck": true,
-    "skipDefaultLibCheck": true,
-    "removeComments": false,
-    "preserveConstEnums": true,
-    "sourceMap": false,
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "noEmit": true,
-    "strict": true,
-    // TODO: Remove the following to eliminate tech-debt
-    "noImplicitAny": false
+    // ensure that nobody can accidentally use this config for a build
+    "noEmit": true
   },
   "include": ["./src/**/*.ts"],
   "exclude": ["./tests/**", "**/dist/**", "./packages/*/*.d.ts", "./packages/*/*.d.cts"]

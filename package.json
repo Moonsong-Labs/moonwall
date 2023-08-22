@@ -21,6 +21,8 @@
     "typecheck": "pnpm -r --filter='./packages/**' run typecheck"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.26.2"
+    "@changesets/cli": "^2.26.2",
+    "@pnpm/eslint-config": "^1.0.1",
+    "tslint": "^6.1.3"
   }
 }
