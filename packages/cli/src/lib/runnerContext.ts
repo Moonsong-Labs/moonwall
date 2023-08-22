@@ -146,7 +146,6 @@ export function describeSuite<T extends FoundationType>({
         : scheduleWithBottleneck(provider.api as ProviderMap[T]);
     };
 
- 
     const context: GenericContext = {
       api: <T extends ProviderType>(type: T, name?: string) => getApi(type, name),
       viem: (apiName?: string): ViemClient => getApi("viem", apiName),
