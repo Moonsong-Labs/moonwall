@@ -46,7 +46,7 @@ export const chopsticksHandler: FoundationHandler<"chopsticks"> = ({
     };
   };
 
-  let ctx = {
+  const ctx = {
     ...context,
     get isEthereumChain() {
       return accountTypeLookup() === "AccountId20";
