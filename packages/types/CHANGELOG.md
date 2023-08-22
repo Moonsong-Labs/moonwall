@@ -1,5 +1,11 @@
 # @moonwall/types
 
+## 4.0.17
+
+### Patch Changes
+
+- 2474534: RT upgrade for non-eth chains
+
 ## 4.0.15
 
 ### Patch Changes
