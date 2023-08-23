@@ -1,3 +1,3 @@
-#!/usr/bin/env -S node --no-warnings --no-experimental-fetch
+#!/usr/bin/env -S node --no-warnings
 
 import './dist/cmds/entrypoint.js'

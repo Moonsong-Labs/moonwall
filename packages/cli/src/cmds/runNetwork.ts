@@ -37,7 +37,7 @@ export async function runNetworkCmd(args) {
       )}\n Environments defined in config are: ${envList}\n`
     );
   }
-  
+
   loadEnvVars();
 
   if (env.foundation.type == "dev") {

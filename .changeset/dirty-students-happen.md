@@ -7,3 +7,4 @@
 
 eslint
 - [#239](https://github.com/Moonsong-Labs/moonwall/issues/239)
+- [#238](https://github.com/Moonsong-Labs/moonwall/issues/238)

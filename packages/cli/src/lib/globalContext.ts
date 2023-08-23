@@ -6,13 +6,14 @@ import {
   MoonwallConfig,
   MoonwallEnvironment,
   MoonwallProvider,
-  Node,
 } from "@moonwall/types";
 import { ApiPromise } from "@polkadot/api";
-import { setTimeout } from "timers/promises";
 import zombie, { Network } from "@zombienet/orchestrator";
 import Debug from "debug";
+import fs from "fs";
 import { ChildProcess, exec } from "node:child_process";
+import readline from "readline";
+import { setTimeout } from "timers/promises";
 import { parseChopsticksRunCmd, parseRunCmd, parseZombieCmd } from "../internal/commandParsers";
 import { checkZombieBins, getZombieConfig } from "../internal/foundations/zombieHelpers";
 import { launchNode } from "../internal/localNode";
@@ -21,8 +22,6 @@ import {
   ProviderInterfaceFactory,
   vitestAutoUrl,
 } from "../internal/providerFactories";
-import fs from "fs";
-import readline from "readline";
 import {
   importJsonConfig,
   isEthereumDevConfig,
@@ -144,10 +143,17 @@ export class MoonwallContext {
     };
   }
 
-  private async startZombieNetwork(nodes: Node[]) {
-    console.log("🧟 Spawning zombie nodes ...");
+  private async startZombieNetwork() {
     const config = importJsonConfig();
     const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
+
+    if (env.foundation.type !== "zombie") {
+      throw new Error(`Foundation type must be 'zombie', something has gone very wrong.`);
+    }
+
+    console.log("🧟 Spawning zombie nodes ...");
+    const nodes = this.environment.nodes;
+
     const zombieConfig = getZombieConfig(nodes[0].cmd);
 
     await checkZombieBins(zombieConfig);
@@ -203,7 +209,7 @@ export class MoonwallContext {
     const nodes = MoonwallContext.getContext().environment.nodes;
 
     if (this.environment.foundationType === "zombie") {
-      return await this.startZombieNetwork(nodes);
+      return await this.startZombieNetwork();
     }
 
     const promises = nodes.map(

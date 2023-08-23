@@ -73,7 +73,7 @@
     "@polkadot/types-codec": "^10.9.1",
     "@polkadot/util": "^12.4.1",
     "@polkadot/util-crypto": "^12.4.1",
-    "@zombienet/orchestrator": "^0.0.52",
+    "@zombienet/orchestrator": "^0.0.50",
     "bottleneck": "^2.19.5",
     "chalk": "^5.3.0",
     "clear": "^0.1.0",

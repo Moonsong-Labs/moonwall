@@ -78,8 +78,8 @@ importers:
         specifier: ^12.4.1
         version: 12.4.1(@polkadot/util@12.4.1)
       '@zombienet/orchestrator':
-        specifier: ^0.0.52
-        version: 0.0.52(@polkadot/util@12.4.1)(@types/node@20.5.3)
+        specifier: ^0.0.50
+        version: 0.0.50(@polkadot/util@12.4.1)(@types/node@20.5.3)
       bottleneck:
         specifier: ^2.19.5
         version: 2.19.5
@@ -2415,8 +2415,8 @@ packages:
     dependencies:
       typescript: 5.1.6
 
-  /@zombienet/orchestrator@0.0.52(@polkadot/util@12.4.1)(@types/node@20.5.3):
-    resolution: {integrity: sha512-69+MWhYtIqYFn3QF4dkUqB9pdlXb8tXpn5d8lDFNLyq12EClBGnDv2NmQVyWr9zgXSyTpvKmb/sAbRhxKjVdow==}
+  /@zombienet/orchestrator@0.0.50(@polkadot/util@12.4.1)(@types/node@20.5.3):
+    resolution: {integrity: sha512-phpyoUmC2Kv+IJ8naqvaJ/CIT0DT+WNpACa22LTdx4ZukJWXbVfTkWm1imejApUyk7NmLK92OlwCdUOGdyOATg==}
     engines: {node: '>=18'}
     dependencies:
       '@polkadot/api': 10.9.1
@@ -7500,6 +7500,7 @@ packages:
   /web3-errors@1.1.1:
     resolution: {integrity: sha512-9IEhcympCJEK3Nmkz2oE/daKnOh+3CxHceuVWWRkHWKUfuIiJQgXAv9wRkPGk63JJTP/R9jtGmP+IbkScKoTBA==}
     engines: {node: '>=14', npm: '>=6.12.0'}
+    requiresBuild: true
     dependencies:
       web3-types: 1.1.1
     optional: true
@@ -7671,6 +7672,7 @@ packages:
   /web3-types@1.1.1:
     resolution: {integrity: sha512-bXmIPJi/NPed43JBcya71gT+euZSMvfQx6NYv8G97PSNxR1HWwANYBKbamTZvzBbq10QCwQLh0hZw3tyOXuPFA==}
     engines: {node: '>=14', npm: '>=6.12.0'}
+    requiresBuild: true
     optional: true
 
   /web3-utils@4.0.3:
@@ -7685,6 +7687,7 @@ packages:
   /web3-utils@4.0.5:
     resolution: {integrity: sha512-43xIM7rr3htYNzliVQLpWLQmEf4XX8IXgjvqLcEuC/xje14O5UQM4kamRCtz8v3JZN3X6QTfsV6Zgby67mVmCg==}
     engines: {node: '>=14', npm: '>=6.12.0'}
+    requiresBuild: true
     dependencies:
       ethereum-cryptography: 2.1.2
       web3-errors: 1.1.1
@@ -7705,6 +7708,7 @@ packages:
   /web3-validator@2.0.1:
     resolution: {integrity: sha512-RIdZCNhceBEOQpmzcEk6K3qqLHRfDIMkg2PJe7yllpuEc0fa0cmUZgGUl1FEnioc5Rx9GBEE8eTllaneIAiiQQ==}
     engines: {node: '>=14', npm: '>=6.12.0'}
+    requiresBuild: true
     dependencies:
       ethereum-cryptography: 2.1.2
       util: 0.12.5
@@ -8027,4 +8031,5 @@ packages:
 
   /zod@3.22.2:
     resolution: {integrity: sha512-wvWkphh5WQsJbVk1tbx1l1Ly4yg+XecD+Mq280uBGt9wa5BKSWf4Mhp6GmrkPixhMxmabYY7RbzlwVP32pbGCg==}
+    requiresBuild: true
     optional: true
