@@ -1,18 +1,18 @@
 import "@moonbeam-network/api-augment";
 
-export * from "./functions/block.js";
-export * from "./functions/common.js";
-export * from "./functions/contracts.js";
-export * from "./functions/providers.js";
-export * from "./functions/logging.js";
-export * from "./functions/contextHelpers.js";
-export * from "./functions/viem.js";
-export * from "./functions/ethers.js";
+export * from "./functions/block";
+export * from "./functions/common";
+export * from "./functions/contracts";
+export * from "./functions/providers";
+export * from "./functions/logging";
+export * from "./functions/contextHelpers";
+export * from "./functions/viem";
+export * from "./functions/ethers";
 
-export * from "./classes/eth-tester.js";
+export * from "./classes/eth-tester";
 
-export * from "./constants/accounts.js";
-export * from "./constants/chain.js";
-export * from "./constants/smartContract.js";
+export * from "./constants/accounts";
+export * from "./constants/chain";
+export * from "./constants/smartContract";
 
 export type { KeyringPair } from "@polkadot/keyring/types";

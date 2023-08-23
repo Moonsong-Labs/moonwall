@@ -2,7 +2,7 @@ import chalk from "chalk";
 import { ChopsticksLaunchSpec, DevLaunchSpec, ZombieLaunchSpec } from "@moonwall/types";
 
 export function parseZombieCmd(launchSpec: ZombieLaunchSpec) {
-  if (!!launchSpec) {
+  if (launchSpec) {
     return { cmd: launchSpec.configPath };
   } else {
     throw new Error(
@@ -14,9 +14,9 @@ export function parseZombieCmd(launchSpec: ZombieLaunchSpec) {
 }
 
 export function parseRunCmd(launchSpec: DevLaunchSpec) {
-  const launch = !!!launchSpec.running ? true : launchSpec.running;
+  const launch = !launchSpec.running ? true : launchSpec.running;
   const cmd = launchSpec.binPath;
-  let args = launchSpec.options
+  const args = launchSpec.options
     ? [...launchSpec.options]
     : [
         "--no-hardware-benchmarks",
@@ -64,7 +64,7 @@ export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
   args: string[];
   launch: boolean;
 } {
-  const launch = !!!launchSpecs[0].running ? true : launchSpecs[0].running;
+  const launch = !launchSpecs[0].running ? true : launchSpecs[0].running;
   if (launchSpecs.length === 1) {
     const chopsticksCmd = "node";
     const chopsticksArgs = [

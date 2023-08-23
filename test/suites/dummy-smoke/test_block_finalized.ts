@@ -1,5 +1,5 @@
 import Bottleneck from "bottleneck";
-import semverLt from "semver/functions/lt.js";
+import semverLt from "semver/functions/lt";
 import { expect, describeSuite, ApiPromise, beforeAll, Web3 } from "@moonwall/cli";
 import { checkBlockFinalized, fetchHistoricBlockNum, getBlockTime } from "@moonwall/util";
 import Debug from "debug";

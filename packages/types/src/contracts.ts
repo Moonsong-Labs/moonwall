@@ -1,7 +1,6 @@
 import { Abi, DeployContractParameters } from "viem";
-import { DeepPartial } from "./helpers.js";
-import { EthTransactionType } from "./config.js";
-import { TransactionType } from "./eth.js";
+import { DeepPartial } from "./helpers";
+import { TransactionType } from "./eth";
 
 /**
  * Type representing a Moonwall Contract.

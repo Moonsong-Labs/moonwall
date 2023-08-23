@@ -196,6 +196,11 @@ export interface ForkLaunchSpec extends GenericLaunchSpec {}
  */
 export interface ZombieLaunchSpec extends GenericLaunchSpec {
   /**
+   * Additional configuration for the zombie network
+   */
+  additionalZombieConfig?: OrcOptionsInterface;
+
+  /**
    * Determines if the default Ethereum provider connections should be disabled.
    * When set to true, the framework will not automatically connect the Ethereum providers.
    * Default behavior (when unset or set to false) is to connect with Ethers, Viem & Web3 frameworks.
@@ -415,3 +420,15 @@ export type TypesBundle = {
 export type GenericData = {
   [key: string]: string;
 };
+
+// CopyPasta from https://github.com/paritytech/zombienet/blob/f929641e13e7591b7336c4a256756aa04eb2a14c/javascript/packages/orchestrator/src/orchestrator.ts#L61
+// Until it's exposed in the orchestrator types
+export interface OrcOptionsInterface {
+  monitor?: boolean;
+  spawnConcurrency?: number;
+  inCI?: boolean;
+  dir?: string;
+  force?: boolean;
+  silent?: boolean; // Mute logging output
+  setGlobalNetwork?: (network: object) => void;
+}

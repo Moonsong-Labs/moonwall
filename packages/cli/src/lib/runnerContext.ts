@@ -18,12 +18,12 @@ import Debug from "debug";
 import { Signer } from "ethers";
 import { afterAll, beforeAll, describe, it } from "vitest";
 import { Web3 } from "web3";
-import { importJsonConfig } from "./configReader.js";
-import { MoonwallContext, contextCreator } from "./globalContext.js";
-import { chopsticksHandler } from "./handlers/chopsticksHandler.js";
-import { devHandler } from "./handlers/devHandler.js";
-import { readOnlyHandler } from "./handlers/readOnlyHandler.js";
-import { zombieHandler } from "./handlers/zombieHandler.js";
+import { importJsonConfig } from "./configReader";
+import { MoonwallContext, contextCreator } from "./globalContext";
+import { chopsticksHandler } from "./handlers/chopsticksHandler";
+import { devHandler } from "./handlers/devHandler";
+import { readOnlyHandler } from "./handlers/readOnlyHandler";
+import { zombieHandler } from "./handlers/zombieHandler";
 
 const RT_VERSION = Number(process.env.MOON_RTVERSION);
 const RT_NAME = process.env.MOON_RTNAME;
@@ -87,7 +87,7 @@ export function describeSuite<T extends FoundationType>({
       throw new Error("MOON_TEST_ENV not set");
     }
 
-    ctx = await contextCreator(globalConfig, process.env.MOON_TEST_ENV);
+    ctx = await contextCreator();
     const env = globalConfig.environments.find(({ name }) => name === process.env.MOON_TEST_ENV)!;
 
     if (env.foundation.type === "read_only") {
@@ -141,7 +141,7 @@ export function describeSuite<T extends FoundationType>({
         );
       }
 
-      return !!!limiter
+      return !limiter
         ? (provider.api as ProviderMap[T])
         : scheduleWithBottleneck(provider.api as ProviderMap[T]);
     };
@@ -204,7 +204,7 @@ const loadParams = (config?: ReadOnlyLaunchSpec) => {
 
 const scheduleWithBottleneck = <T extends ProviderApi>(api: T): T => {
   return new Proxy(api, {
-    get(target, propKey, receiver) {
+    get(target, propKey) {
       const origMethod = target[propKey];
       if (typeof origMethod === "function" && propKey !== "rpc" && propKey !== "tx") {
         return (...args: any[]) => {

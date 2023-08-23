@@ -1,12 +1,12 @@
-import "../internal/logging.js";
+import "../internal/logging";
 import "@moonbeam-network/api-augment";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
-import { testCmd } from "./runTests.js";
-import { runNetwork } from "./runNetwork.js";
-import { generateConfig } from "../internal/cmdFunctions/initialisation.js";
-import { main } from "./main.js";
-import { fetchArtifact } from "../internal/cmdFunctions/fetchArtifact.js";
+import { testCmd } from "./runTests";
+import { runNetworkCmd } from "./runNetwork";
+import { generateConfig } from "../internal/cmdFunctions/initialisation";
+import { main } from "./main";
+import { fetchArtifact } from "../internal/cmdFunctions/fetchArtifact";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -114,12 +114,13 @@ yargs(hideBin(process.argv))
         });
     },
     async (argv) => {
-      await runNetwork(argv as any);
+      await runNetworkCmd(argv as any);
       process.exit(0);
     }
   )
   .demandCommand(1)
-  .fail(async (msg, err, instance) => {
+  .fail(async (msg) => {
+    console.log(msg);
     await main();
   })
   .help("h")

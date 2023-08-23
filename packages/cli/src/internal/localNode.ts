@@ -1,7 +1,7 @@
 import { ChildProcess, spawn } from "child_process";
 import chalk from "chalk";
 import Debug from "debug";
-import { checkAccess, checkExists } from "./fileCheckers.js";
+import { checkAccess, checkExists } from "./fileCheckers";
 import fs from "fs";
 import path from "path";
 const debugNode = Debug("global:node");
@@ -11,8 +11,6 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
     await checkExists(cmd);
     checkAccess(cmd);
   }
-
-  let runningNode: ChildProcess;
 
   const dirPath = path.join(process.cwd(), "tmp", "node_logs");
 
@@ -26,7 +24,7 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
   process.once("exit", onProcessExit);
   process.once("SIGINT", onProcessInterrupt);
 
-  runningNode = spawn(cmd, args);
+  const runningNode = spawn(cmd, args);
 
   const fsStream = fs.createWriteStream(
     path.join(

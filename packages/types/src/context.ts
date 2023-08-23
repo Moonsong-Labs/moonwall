@@ -8,9 +8,9 @@ import { AnyTuple, RegistryError } from "@polkadot/types/types";
 import { Debugger } from "debug";
 import { Signer } from "ethers";
 import { Web3 } from "web3";
-import { FoundationType, ProviderType } from "./config.js";
-import { CallType } from "./foundations.js";
-import { ViemClient } from "./runner.js";
+import { FoundationType, ProviderType } from "./config";
+import { CallType } from "./foundations";
+import { ViemClient } from "./runner";
 
 /**
  * @name MoonwallEnvironment

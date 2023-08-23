@@ -52,7 +52,7 @@ export function calculateFeePortions(amount: bigint): {
 }
 
 export interface TxWithEventAndFee extends TxWithEvent {
-  fee: RuntimeDispatchInfo;
+  fee: RuntimeDispatchInfo | RuntimeDispatchInfoV1 | undefined;
 }
 
 export interface BlockDetails {
@@ -234,8 +234,6 @@ export function mapExtrinsics(
 
         return event;
       });
-    // TODO: Fix below to work with new weights
-    //@ts-expect-error
     return { dispatchError, dispatchInfo, events, extrinsic, fee: fees ? fees[index] : undefined };
   });
 }

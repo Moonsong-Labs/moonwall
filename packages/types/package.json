@@ -46,11 +46,14 @@
   ],
   "scripts": {
     "clean": "rm -rf dist && rm -rf node_modules",
-    "build": "pnpm exec rm -rf dist && tsup src --format cjs,esm  && pnpm generate-types",
+    "build": "rm -rf dist && tsup src --format cjs,esm  && pnpm generate-types",
     "generate-types": "tsup src --format cjs,esm --dts  && pnpm schema && pnpm typecheck",
     "watch": "tsup src --format cjs,esm --dts --watch",
-    "typecheck": "pnpm exec tsc --noEmit",
-    "lint": "pnpm prettier --write --ignore-path ../../.prettierignore '**/*.(yml|js|ts|json)'",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint ./src/**/*.ts",
+    "lint:fix": "eslint './src/**/*.ts' --fix",
+    "fmt": "pnpm prettier --check --ignore-path ../../.prettierignore '**/*.(yml|js|ts|json)'",
+    "fmt:fix": "pnpm prettier --write --ignore-path ../../.prettierignore '**/*.(yml|js|ts|json)'",
     "prepublish": "pnpm run build && pnpm run generate-types",
     "schema": "typescript-json-schema --tsNodeRegister --esModuleInterop -o config_schema.json ./src/config.ts MoonwallConfig"
   },

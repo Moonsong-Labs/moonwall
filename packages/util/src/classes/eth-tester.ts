@@ -21,11 +21,11 @@ export interface TransactionOptions {
   from?: string;
   to?: string;
   privateKey?: string;
-  nonce?: number | BigInt;
-  gas?: string | number | BigInt;
-  gasPrice?: string | number | BigInt;
-  maxFeePerGas?: string | number | BigInt;
-  maxPriorityFeePerGas?: string | number | BigInt;
+  nonce?: number | bigint;
+  gas?: string | number | bigint;
+  gasPrice?: string | number | bigint;
+  maxFeePerGas?: string | number | bigint;
+  maxPriorityFeePerGas?: string | number | bigint;
   value?: string | number;
   data?: string;
   accessList?: AccessListish;
@@ -267,7 +267,7 @@ export class EthTester {
    */
   genSignedTransfer = async (
     to: string,
-    value: number | string | BigInt,
+    value: number | string | bigint,
     options: TransactionOptions = DEFAULT_TRANSACTION
   ): Promise<string> => {
     return await this.genSignedTransaction({

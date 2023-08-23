@@ -8,28 +8,28 @@ import inquirer from "inquirer";
 import PressToContinuePrompt from "inquirer-press-to-continue";
 import { createReadStream, stat } from "node:fs";
 import path from "path";
-import { clearNodeLogs, reportLogLocation } from "src/internal/cmdFunctions/tempLogs.js";
+import { clearNodeLogs, reportLogLocation } from "../internal/cmdFunctions/tempLogs";
 import WebSocket from "ws";
 import { parse } from "yaml";
 import {
   checkAlreadyRunning,
   downloadBinsIfMissing,
   promptAlreadyRunning,
-} from "../internal/fileCheckers.js";
-import { importJsonConfig, loadEnvVars, parseZombieConfigForBins } from "../lib/configReader.js";
-import { MoonwallContext, runNetworkOnly } from "../lib/globalContext.js";
-import { executeTests } from "./runTests.js";
+} from "../internal/fileCheckers";
+import { importJsonConfig, loadEnvVars, parseZombieConfigForBins } from "../lib/configReader";
+import { MoonwallContext, runNetworkOnly } from "../lib/globalContext";
+import { executeTests } from "./runTests";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
 let lastSelected = 0;
 
-export async function runNetwork(args) {
+export async function runNetworkCmd(args) {
   process.env.MOON_TEST_ENV = args.envName;
   const globalConfig = importJsonConfig();
   const env = globalConfig.environments.find(({ name }) => name === args.envName)!;
 
-  if (!!!env) {
+  if (!env) {
     const envList = globalConfig.environments.map((env) => env.name);
     throw new Error(
       `No environment found in config for: ${chalk.bgWhiteBright.blackBright(
@@ -37,6 +37,7 @@ export async function runNetwork(args) {
       )}\n Environments defined in config are: ${envList}\n`
     );
   }
+
   loadEnvVars();
 
   if (env.foundation.type == "dev") {
@@ -143,7 +144,7 @@ export async function runNetwork(args) {
     clearNodeLogs();
   }
 
-  await runNetworkOnly(globalConfig);
+  await runNetworkOnly();
   clear();
   const portsList = await reportServicePorts();
   reportLogLocation();
@@ -159,7 +160,7 @@ export async function runNetwork(args) {
     await executeTests(env, { testNamePattern: await args.GrepTest });
   }
 
-  mainloop: while (true) {
+  mainloop: for (;;) {
     const choice = await inquirer.prompt(questions.find(({ name }) => name == "MenuChoice"));
     const env = globalConfig.environments.find(({ name }) => name === args.envName)!;
 
@@ -191,12 +192,13 @@ export async function runNetwork(args) {
         lastSelected = 4;
         break;
 
-      case 6:
+      case 6: {
         const quit = await inquirer.prompt(questions.find(({ name }) => name == "Quit"));
         if (quit.Quit === true) {
           break mainloop;
         }
         break;
+      }
       default:
         throw new Error("invalid value");
     }
@@ -300,7 +302,7 @@ const resolveCommandChoice = async () => {
         : await api.rpc.engine.createBlock(true, false);
       break;
 
-    case "createNBlocks":
+    case "createNBlocks": {
       const result = await new inquirer.prompt({
         name: "n",
         type: "number",
@@ -323,6 +325,7 @@ const resolveCommandChoice = async () => {
       }
 
       break;
+    }
 
     case "back":
       break;
@@ -365,7 +368,7 @@ const resolveTestChoice = async (env: Environment) => {
 const resolveTailChoice = async () => {
   const ui = new inquirer.ui.BottomBar();
 
-  await new Promise(async (resolve) => {
+  await new Promise((resolve) => {
     const ctx = MoonwallContext.getContext();
     const onData = (chunk: any) => ui.log.write(chunk.toString());
 

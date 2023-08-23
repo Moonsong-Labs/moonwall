@@ -1,17 +1,17 @@
 import { ChopsticksBlockCreation, ChopsticksContext, FoundationHandler } from "@moonwall/types";
 import {
-  createChopsticksBlock,
-  sendSetStorageRequest,
-} from "../../internal/foundations/chopsticksHelpers.js";
-import { upgradeRuntimeChopsticks } from "../upgradeProcedures.js";
-import { MoonwallContext } from "../globalContext.js";
-import {
   ALITH_PRIVATE_KEY,
   BALTATHAR_PRIVATE_KEY,
   CHARLETH_PRIVATE_KEY,
   DOROTHY_PRIVATE_KEY,
 } from "@moonwall/util";
 import { Keyring } from "@polkadot/api";
+import {
+  createChopsticksBlock,
+  sendSetStorageRequest,
+} from "../../internal/foundations/chopsticksHelpers";
+import { MoonwallContext } from "../globalContext";
+import { upgradeRuntimeChopsticks } from "../upgradeProcedures";
 
 export const chopsticksHandler: FoundationHandler<"chopsticks"> = ({
   testCases,
@@ -46,7 +46,7 @@ export const chopsticksHandler: FoundationHandler<"chopsticks"> = ({
     };
   };
 
-  let ctx = {
+  const ctx = {
     ...context,
     get isEthereumChain() {
       return accountTypeLookup() === "AccountId20";

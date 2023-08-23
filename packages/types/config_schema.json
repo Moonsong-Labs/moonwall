@@ -236,6 +236,32 @@
             },
             "type": "object"
         },
+        "OrcOptionsInterface": {
+            "properties": {
+                "dir": {
+                    "type": "string"
+                },
+                "force": {
+                    "type": "boolean"
+                },
+                "inCI": {
+                    "type": "boolean"
+                },
+                "monitor": {
+                    "type": "boolean"
+                },
+                "setGlobalNetwork": {
+                    "type": "object"
+                },
+                "silent": {
+                    "type": "boolean"
+                },
+                "spawnConcurrency": {
+                    "type": "number"
+                }
+            },
+            "type": "object"
+        },
         "ProviderConfig": {
             "description": "The configuration object for a provider.",
             "properties": {
@@ -410,6 +436,10 @@
         "ZombieLaunchSpec": {
             "description": "A launch specification object for the \"zombie\" foundation type.",
             "properties": {
+                "additionalZombieConfig": {
+                    "$ref": "#/definitions/OrcOptionsInterface",
+                    "description": "Additional configuration for the zombie network"
+                },
                 "configPath": {
                     "description": "The path to the config file.",
                     "type": "string"

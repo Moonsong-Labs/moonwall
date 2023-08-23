@@ -60,10 +60,6 @@ export async function downloader(url: string, outputPath: string): Promise<void>
     });
   });
 
-  try {
-    fs.writeFileSync(outputPath, fs.readFileSync(tempPath));
-    fs.rmSync(tempPath);
-  } catch (e) {
-    throw e;
-  }
+  fs.writeFileSync(outputPath, fs.readFileSync(tempPath));
+  fs.rmSync(tempPath);
 }

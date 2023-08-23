@@ -77,11 +77,15 @@
     {
       "name": "zombie_test",
       "testFileDir": ["suites/zombie"],
+      "reporters": ["basic"],
       "foundation": {
         "type": "zombie",
         "rtUpgradePath": "./tmp/moonbase-runtime-2401.wasm",
         "zombieSpec": {
           "name": "zombienet",
+          "additionalZombieConfig": {
+            "silent": true
+          },
           "configPath": "./configs/zombie.json"
         }
       }

@@ -1,22 +1,22 @@
 import chalk from "chalk";
 import inquirer from "inquirer";
 import PressToContinuePrompt from "inquirer-press-to-continue";
-import { importJsonConfig } from "../lib/configReader.js";
+import { importJsonConfig } from "../lib/configReader";
 import { MoonwallConfig } from "@moonwall/types";
-import { createFolders, generateConfig } from "../internal/cmdFunctions/initialisation.js";
+import { createFolders, generateConfig } from "../internal/cmdFunctions/initialisation";
 import colors from "colors";
 import clear from "clear";
-import { runNetwork } from "./runNetwork.js";
-import { testCmd } from "./runTests.js";
-import { fetchArtifact, getVersions } from "../internal/cmdFunctions/fetchArtifact.js";
+import { runNetworkCmd } from "./runNetwork";
+import { testCmd } from "./runTests";
+import { fetchArtifact, getVersions } from "../internal/cmdFunctions/fetchArtifact";
 import pkg from "../../package.json" assert { type: "json" };
-import { SemVer, gt, lt, lte } from "semver";
+import { SemVer, lt } from "semver";
 import fetch from "node-fetch";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
 export async function main() {
-  while (true) {
+  for (;;) {
     let globalConfig;
     try {
       globalConfig = importJsonConfig();
@@ -96,13 +96,14 @@ async function mainMenu(config: MoonwallConfig) {
       await generateConfig();
       await createFolders();
       return false;
-    case "run":
+    case "run": {
       const chosenRunEnv = await chooseRunEnv(config);
       if (chosenRunEnv.envName !== "back") {
-        await runNetwork(chosenRunEnv);
+        await runNetworkCmd(chosenRunEnv);
       }
       return false;
-    case "test":
+    }
+    case "test": {
       const chosenTestEnv = await chooseTestEnv(config);
       if (chosenTestEnv.envName !== "back") {
         process.env.MOON_RUN_SCRIPTS = "true";
@@ -117,6 +118,7 @@ async function mainMenu(config: MoonwallConfig) {
         });
       }
       return false;
+    }
     case "download":
       await resolveDownloadChoice();
 
@@ -127,7 +129,7 @@ async function mainMenu(config: MoonwallConfig) {
 }
 
 async function resolveDownloadChoice() {
-  while (true) {
+  for (;;) {
     const firstChoice = await inquirer.prompt({
       name: "artifact",
       type: "list",
@@ -279,10 +281,6 @@ const resolveQuitChoice = async () => {
 const printIntro = async () => {
   const currentVersion = new SemVer(pkg.version);
 
-  interface NpmResponse {
-    version: string;
-  }
-
   interface GithubResponse {
     tag_name: `${string}@${string}`;
   }
@@ -290,7 +288,6 @@ const printIntro = async () => {
   let remoteVersion = "";
   try {
     const url = "https://api.github.com/repos/moonsong-labs/moonwall/releases";
-    // const url = "https://registry.npmjs.org/@moonwall/cli/latest"
     const resp = await fetch(url);
     const json = (await resp.json()) as GithubResponse[];
     remoteVersion = json.find((a) => a.tag_name.includes("@moonwall/cli@"))!.tag_name.split("@")[2];

@@ -1,6 +1,6 @@
 import { ApiPromise } from "@polkadot/api";
 import { FoundationHandler } from "@moonwall/types";
-import { MoonwallContext } from "../globalContext.js";
+import { MoonwallContext } from "../globalContext";
 
 export const readOnlyHandler: FoundationHandler<"read_only"> = ({
   testCases,
@@ -21,7 +21,7 @@ export const readOnlyHandler: FoundationHandler<"read_only"> = ({
           ? ctx.providers.find((prov) => prov.name === chainName && prov.type === "polkadotJs")
           : ctx.providers.find((prov) => prov.type === "polkadotJs");
 
-        if (!!!provider) {
+        if (!provider) {
           throw new Error("No PolkadotJs api found in provider config");
         }
 
@@ -29,7 +29,7 @@ export const readOnlyHandler: FoundationHandler<"read_only"> = ({
 
         const currentBlockNumber = (await api.rpc.chain.getBlock()).block.header.number.toNumber();
 
-        while (true) {
+        for (;;) {
           await new Promise((resolve) => setTimeout(resolve, 100));
           const newBlockNumber = (await api.rpc.chain.getBlock()).block.header.number.toNumber();
           if (mode === "quantity" && newBlockNumber >= currentBlockNumber + blocksToWaitFor) {

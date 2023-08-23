@@ -1,7 +1,7 @@
 import { FoundationHandler, UpgradePreferences } from "@moonwall/types";
 import { ApiPromise } from "@polkadot/api";
-import { upgradeRuntime } from "../upgradeProcedures.js";
-import { MoonwallContext } from "../globalContext.js";
+import { upgradeRuntime } from "../upgradeProcedures";
+import { MoonwallContext } from "../globalContext";
 import { alith } from "@moonwall/util";
 
 export const zombieHandler: FoundationHandler<"zombie"> = ({
@@ -21,14 +21,14 @@ export const zombieHandler: FoundationHandler<"zombie"> = ({
         const ctx = MoonwallContext.getContext();
         const provider = ctx.providers.find((prov) => prov.name === chain);
 
-        if (!!!provider) {
+        if (!provider) {
           throw new Error(`Provider '${chain}' not found`);
         }
 
         const api = provider.api as ApiPromise;
         const currentBlockNumber = (await api.rpc.chain.getBlock()).block.header.number.toNumber();
 
-        while (true) {
+        for (;;) {
           await new Promise((resolve) => setTimeout(resolve, 1000));
           const newBlockNumber = (await api.rpc.chain.getBlock()).block.header.number.toNumber();
           if (mode === "quantity" && newBlockNumber >= currentBlockNumber + blocksToWaitFor) {
@@ -42,7 +42,7 @@ export const zombieHandler: FoundationHandler<"zombie"> = ({
         const ctx = MoonwallContext.getContext();
         const provider = ctx.providers.find((prov) => prov.name === "parachain");
 
-        if (!!!provider) {
+        if (!provider) {
           throw new Error(`Provider 'parachain' not found`);
         }
         const api = provider.api as ApiPromise;

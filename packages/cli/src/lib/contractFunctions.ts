@@ -20,7 +20,7 @@ import path from "path";
 import type { Abi } from "viem";
 import { Log, decodeFunctionResult, encodeFunctionData, toHex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { importJsonConfig } from "./configReader.js";
+import { importJsonConfig } from "./configReader";
 
 function getCompiledPath(contractName: string) {
   const config = importJsonConfig();
@@ -179,8 +179,8 @@ export async function interactWithContract(
     }
   } else if (!rawTxOnly) {
     if (web3Library === "viem") {
-      const hash = await context.viem().sendTransaction({
-        account: account as any,
+      const hash = await (context.viem() as any).sendTransaction({
+        account: account,
         to: contractAddress,
         value,
         data,

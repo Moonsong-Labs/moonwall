@@ -11,7 +11,7 @@ export async function createFolders() {
 }
 
 export async function generateConfig() {
-  while (true) {
+  for (;;) {
     if (await fs.access("moonwall.config.json").catch(() => true)) {
       const answers = await inquirer.prompt(generateQuestions);
       const proceed = await inquirer.prompt(questions.find(({ name }) => name === "Confirm"));

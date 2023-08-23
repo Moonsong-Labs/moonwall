@@ -1,11 +1,11 @@
 import "@moonbeam-network/api-augment";
-import { Web3, JsonRpcResponse, Log } from "web3";
-import { alith } from "../constants/accounts.js";
-import { MIN_GAS_PRICE } from "../constants/chain.js";
+import { Web3, JsonRpcResponse } from "web3";
+import { alith } from "../constants/accounts";
+import { MIN_GAS_PRICE } from "../constants/chain";
 
 export async function customWeb3Request(web3: Web3, method: string, params: any[]) {
   return new Promise<JsonRpcResponse>((resolve, reject) => {
-    (web3.currentProvider as any).send(
+    (web3.eth.currentProvider as any).send(
       {
         jsonrpc: "2.0",
         id: 1,

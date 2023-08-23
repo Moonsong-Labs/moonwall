@@ -14,9 +14,9 @@ import chalk from "chalk";
 import Debug from "debug";
 import { setTimeout } from "timers/promises";
 import { assert } from "vitest";
-import { importJsonConfig, isEthereumDevConfig } from "../../lib/configReader.js";
-import { extractError } from "../../lib/contextHelpers.js";
-import { MoonwallContext } from "../../lib/globalContext.js";
+import { importJsonConfig, isEthereumDevConfig } from "../../lib/configReader";
+import { extractError } from "../../lib/contextHelpers";
+import { MoonwallContext } from "../../lib/globalContext";
 const debug = Debug("DevTest");
 
 export async function getDevProviderPath() {
@@ -60,7 +60,7 @@ export async function createDevBlock<
   let originalBlockNumber: bigint;
 
   const containsViem =
-    MoonwallContext.getContext().providers.find((prov) => prov.type == "viem") && !!!context.viem()
+    MoonwallContext.getContext().providers.find((prov) => prov.type == "viem") && !context.viem()
       ? true
       : false;
 
@@ -164,7 +164,7 @@ export async function createDevBlock<
   // Avoiding race condition by ensuring ethereum block is created
   if (containsViem && originalBlockNumber! !== undefined) {
     const pubClient = context.viem();
-    while (true) {
+    for (;;) {
       const blockNum = await pubClient.getBlockNumber();
       if (blockNum > originalBlockNumber) {
         break;

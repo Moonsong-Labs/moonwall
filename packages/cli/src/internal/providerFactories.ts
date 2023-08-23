@@ -48,8 +48,8 @@ export class ProviderFactory {
           initWasm: false,
           noInitWarn: true,
           isPedantic: false,
-          rpc: !!this.providerConfig.rpc ? this.providerConfig.rpc : undefined,
-          typesBundle: !!this.providerConfig.additionalTypes
+          rpc: this.providerConfig.rpc ? this.providerConfig.rpc : undefined,
+          typesBundle: this.providerConfig.additionalTypes
             ? this.providerConfig.additionalTypes
             : undefined,
         };

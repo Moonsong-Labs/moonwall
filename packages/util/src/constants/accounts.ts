@@ -1,10 +1,6 @@
 import "@moonbeam-network/api-augment";
 import { Keyring } from "@polkadot/api";
-import {
-  DEFAULT_GENESIS_BALANCE,
-  DEFAULT_GENESIS_MAPPING,
-  DEFAULT_GENESIS_STAKING,
-} from "./chain.js";
+import { DEFAULT_GENESIS_BALANCE, DEFAULT_GENESIS_MAPPING, DEFAULT_GENESIS_STAKING } from "./chain";
 import { KeyringPair } from "@polkadot/keyring/types";
 
 const keyringEth = new Keyring({ type: "ethereum" });

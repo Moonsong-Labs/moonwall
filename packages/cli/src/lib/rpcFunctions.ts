@@ -1,4 +1,4 @@
-import { importJsonConfig } from "./configReader.js";
+import { importJsonConfig } from "./configReader";
 import fetch from "node-fetch";
 
 export async function customDevRpcRequest(method: string, params: any[] = []): Promise<any> {

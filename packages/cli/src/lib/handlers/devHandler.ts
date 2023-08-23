@@ -20,13 +20,13 @@ import {
   createViemTransaction,
 } from "@moonwall/util";
 import { ApiTypes } from "@polkadot/api/types";
-import { createDevBlock } from "../../internal/foundations/devModeHelpers.js";
-import { importJsonConfig, isEthereumDevConfig } from "../configReader.js";
+import { createDevBlock } from "../../internal/foundations/devModeHelpers";
+import { importJsonConfig, isEthereumDevConfig } from "../configReader";
 import {
   deployCreateCompiledContract,
   interactWithContract,
   interactWithPrecompileContract,
-} from "../contractFunctions.js";
+} from "../contractFunctions";
 import { Keyring } from "@polkadot/api";
 
 export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testCase, logger }) => {

@@ -79,7 +79,6 @@ export async function downloadBinsIfMissing(binPath: string) {
 export function checkListeningPorts(processId: number) {
   try {
     const stdOut = execSync(`lsof -p  ${processId} | grep LISTEN`, { encoding: "utf-8" });
-
     const binName = stdOut.split("\n")[0].split(" ")[0];
     const ports = stdOut
       .split("\n")

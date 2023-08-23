@@ -1,16 +1,16 @@
 import "@moonbeam-network/api-augment";
-import fs, { readFileSync, existsSync } from "fs";
-import chalk from "chalk";
-import type { WeightV2 } from "@polkadot/types/interfaces";
-import { ApiPromise } from "@polkadot/api";
-import { blake2AsHex } from "@polkadot/util-crypto";
-import { sha256 } from "ethers";
-import { cancelReferendaWithCouncil, executeProposalWithCouncil } from "./governanceProcedures.js";
 import { ChopsticksContext, UpgradePreferences } from "@moonwall/types";
-import { getRuntimeWasm } from "./binariesHelpers.js";
+import { ApiPromise } from "@polkadot/api";
+import type { WeightV2 } from "@polkadot/types/interfaces";
+import { blake2AsHex } from "@polkadot/util-crypto";
+import chalk from "chalk";
+import { sha256 } from "ethers";
+import fs, { existsSync, readFileSync } from "fs";
+import { getRuntimeWasm } from "./binariesHelpers";
+import { cancelReferendaWithCouncil, executeProposalWithCouncil } from "./governanceProcedures";
 
 export async function upgradeRuntimeChopsticks(context: ChopsticksContext, path: string) {
-  if (!!!existsSync(path)) {
+  if (!existsSync(path)) {
     throw new Error("Runtime wasm not found at path: " + path);
   }
   const rtWasm = readFileSync(path);
@@ -68,12 +68,12 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
       if (options.useGovernance) {
         log("Using governance...");
         // TODO: remove support for old style after all chains upgraded to 2400+
-        let proposal =
+        const proposal =
           api.consts.system.version.specVersion.toNumber() >= 2400
             ? (api.tx.parachainSystem as any).authorizeUpgrade(blake2AsHex(code), false)
             : (api.tx.parachainSystem as any).authorizeUpgrade(blake2AsHex(code));
-        let encodedProposal = proposal.method.toHex();
-        let encodedHash = blake2AsHex(encodedProposal);
+        const encodedProposal = proposal.method.toHex();
+        const encodedHash = blake2AsHex(encodedProposal);
 
         log("Checking if preimage already exists...");
         // Check if already in governance

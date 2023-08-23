@@ -4,23 +4,23 @@ import { execSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "path";
-import { clearNodeLogs } from "src/internal/cmdFunctions/tempLogs.js";
+import { clearNodeLogs } from "../internal/cmdFunctions/tempLogs";
 import { UserConfig } from "vitest";
 import { startVitest } from "vitest/node";
 import {
   checkAlreadyRunning,
   downloadBinsIfMissing,
   promptAlreadyRunning,
-} from "../internal/fileCheckers.js";
-import { importJsonConfig, loadEnvVars, parseZombieConfigForBins } from "../lib/configReader.js";
-import { contextCreator } from "../lib/globalContext.js";
+} from "../internal/fileCheckers";
+import { importJsonConfig, loadEnvVars, parseZombieConfigForBins } from "../lib/configReader";
+import { contextCreator } from "../lib/globalContext";
 
-export async function testCmd(envName: string, additionalArgs?: {}) {
+export async function testCmd(envName: string, additionalArgs?: object) {
   const globalConfig = importJsonConfig();
   const env = globalConfig.environments.find(({ name }) => name === envName)!;
   process.env.MOON_TEST_ENV = envName;
 
-  if (!!!env) {
+  if (!env) {
     const envList = globalConfig.environments.map((env) => env.name);
     throw new Error(
       `No environment found in config for: ${chalk.bgWhiteBright.blackBright(
@@ -96,7 +96,7 @@ export async function testCmd(envName: string, additionalArgs?: {}) {
   }
 }
 
-export async function executeTests(env: Environment, additionalArgs?: {}) {
+export async function executeTests(env: Environment, additionalArgs?: object) {
   const globalConfig = importJsonConfig();
 
   if (env.foundation.type === "read_only") {
@@ -105,7 +105,7 @@ export async function executeTests(env: Environment, additionalArgs?: {}) {
         throw new Error("MOON_TEST_ENV not set");
       }
 
-      const ctx = await contextCreator(globalConfig, process.env.MOON_TEST_ENV);
+      const ctx = await contextCreator();
       const chainData = ctx.providers
         .filter((provider) => provider.type == "polkadotJs" && provider.name.includes("para"))
         .map((provider) => {
@@ -140,7 +140,7 @@ export async function executeTests(env: Environment, additionalArgs?: {}) {
     maxThreads: calculateCores(),
 
     include: env.include ? env.include : ["**/*{test,spec,test_,test-}*{ts,mts,cts}"],
-    onConsoleLog(log, type) {
+    onConsoleLog(log) {
       if (filterList.includes(log.trim())) return false;
       // if (log.trim() == "stdout | unknown test" || log.trim() == "<empty line>") return false;
       if (log.includes("has multiple versions, ensure that there is only one installed.")) {
