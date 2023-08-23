@@ -1,5 +1,13 @@
 # @moonwall/types
 
+## 4.0.18
+
+### Patch Changes
+
+- 50084d4: eslint
+  - [#239](https://github.com/Moonsong-Labs/moonwall/issues/239)
+  - [#238](https://github.com/Moonsong-Labs/moonwall/issues/238)
+
 ## 4.0.17
 
 ### Patch Changes
