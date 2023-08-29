@@ -40,7 +40,7 @@ jobs:
         run: |
           cd docs
           pnpm docs:build
-          touch docs/.vitepress/dist/.nojekyll
+          touch .vitepress/dist/.nojekyll
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
         with:
