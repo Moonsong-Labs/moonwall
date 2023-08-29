@@ -33,7 +33,7 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v3
       - name: Install dependencies
-        run: pnpm ci
+        run: pnpm i
       - name: Build with VitePress
         run: |
           pnpm docs:build
