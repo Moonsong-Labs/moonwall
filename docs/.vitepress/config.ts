@@ -1,16 +1,45 @@
 import { defineConfig } from 'vitepress'
 
-// https://vitepress.dev/reference/site-config
+
+const title = 'Moonwall'
+const description = "Run substrate networks and perform tests, with least fuss possible."
+
+
 export default defineConfig({
-  title: "Moonwall",
-  description: "Moonwall Docs",
+  lang: 'en-US',
+  
+  title: title,
+  titleTemplate: `:title · ${title}`,
+  description: description,
+
+  head:[
+    ['meta', { name: 'theme-color', content: '#729b1a' }],
+    ['link', { rel: 'icon', href: '/MSL.ico', sizes: 'any' }],
+    ['link', { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Exo:ital,wght@0,300;0,400;0,600;0,700;1,300&display=swap' }]
+  ],
+
+  markdown: {
+    theme: {
+      light: 'vitesse-light',
+      dark: 'vitesse-dark',
+    },
+  },
+
   themeConfig: {
-    // https://vitepress.dev/reference/default-theme-config
+    
+    externalLinkIcon: true,
+
+    logo: {light: '/MSL.svg', dark: '/MSL.svg', alt: 'Moonsong Labs'},
+    
     nav: [
       { text: 'Docs', link: '/' },
       { text: 'Config', link: '/config' },
       { text: 'FAQ', link: '/faq' },
     ],
+
+    search: {
+      provider: "local"
+    },
 
     sidebar: [
       {
@@ -21,9 +50,21 @@ export default defineConfig({
         ]
       }
     ],
+    lastUpdated: {
+      text: 'Updated at',
+      formatOptions: {
+        dateStyle: 'full',
+        timeStyle: 'medium'
+      }
+    },
+
+    editLink: {
+      pattern: 'https://github.com/Moonsong-Labs/moonwall/edit/main/docs/:path'
+    },
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/Moonsong-Labs/moonwall' }
+      { icon: 'github', link: 'https://github.com/Moonsong-Labs/moonwall' },
+      { icon: 'linkedin', link: 'https://www.linkedin.com/company/moonsong-labs/' }
     ]
   }
 })
