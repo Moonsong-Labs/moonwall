@@ -1,6 +1,6 @@
 import { defineConfig } from "vitepress";
 import { sidebarGuide, sidebarConfig } from "./sidebar";
-import { version } from "../../package.json";
+import { version } from "../package.json";
 
 const title = "Moonwall";
 const description = "Run substrate networks and perform tests, with least fuss possible.";
