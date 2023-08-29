@@ -1,5 +1,12 @@
 # @moonwall/cli
 
+## 4.0.20
+
+### Patch Changes
+
+- @moonwall/types@4.0.20
+- @moonwall/util@4.0.20
+
 ## 4.0.19
 
 ### Patch Changes
