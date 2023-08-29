@@ -8,6 +8,8 @@ const description = "Run substrate networks and perform tests, with least fuss p
 export default defineConfig({
   lang: "en-US",
 
+  base:"/moonwall/",
+
   title: title,
   titleTemplate: `:title · ${title}`,
   description: description,
@@ -50,6 +52,7 @@ export default defineConfig({
         ],
       },
     ],
+
 
     search: {
       provider: "local",
