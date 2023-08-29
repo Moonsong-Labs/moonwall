@@ -7,11 +7,3 @@
   --vp-font-family-base: 'Exo', sans-serif;
   --vp-font-family-mono: 'Exo', monospace; 
 }
-
-
-.root {
-    background-image: url('dots-15.jpg');
-    background-size: cover;  /* To make sure the image covers the entire element */
-    background-repeat: no-repeat;  /* To prevent the image from repeating */
-    background-position: center center;  /* To center the image */
-  }

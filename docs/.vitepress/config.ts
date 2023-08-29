@@ -37,9 +37,9 @@ export default defineConfig({
     logo: { light: "/MSL.svg", dark: "/MSL.svg", alt: "Moonsong Labs" },
 
     nav: [
-      { text: "Docs", link: "/guide/" },
-      { text: "Config", link: "/config/" },
-      { text: "FAQ", link: "/faq" },
+      { text: "Docs", link: "/guide/intro/getting-started" },
+      { text: "Config", link: "/config/intro" },
+      { text: "FAQ", link: "/guide/troubleshooting/faq" },
       {
         text: `v${version}`,
         items: [
@@ -60,8 +60,6 @@ export default defineConfig({
       '/guide/': { base: '/guide/', items: sidebarGuide() },
       '/config/': { base: '/config/', items: sidebarConfig() }
     },
-
-
 
     lastUpdated: {
       text: "Updated at",

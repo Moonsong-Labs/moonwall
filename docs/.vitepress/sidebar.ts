@@ -1,97 +1,98 @@
 import type { DefaultTheme } from "vitepress";
 
-export const sidebarGuide = () =>
-  [
+export function sidebarGuide(): DefaultTheme.SidebarItem[] {
+  return [
     {
       text: "Introduction",
       collapsed: false,
+      base: "/guide/intro/",
       items: [
-        { text: "What is Moonwall?", link: "/intro/what-is-a-moonwall" },
-        { text: "Getting Started", link: "/intro/getting-started" },
-        { text: "Foundations", link: "/intro/foundations" },
-        { text: "Providers Supported", link: "/intro/providers" },
-        { text: "Networks Supported", link: "/intro/networks" },
+        { text: "What is Moonwall?", link: "what-is-a-moonwall" },
+        { text: "Getting Started", link: "getting-started" },
+        { text: "Foundations", link: "foundations" },
+        { text: "Providers Supported", link: "providers" },
+        { text: "Networks Supported", link: "networks" },
       ],
     },
 
     {
       text: "Running Tests",
       collapsed: false,
+      base: "/guide/test/",
       items: [
-        { text: "Quick Start", link: "/test/quick-start" },
-        { text: "Test Reports", link: "/test/reporting" },
-        { text: "Debugging Tests", link: "/test/debug" },
-        { text: "For CI", link: "/test/ci" },
+        { text: "Quick Start", link: "quick-start" },
+        { text: "Test Reports", link: "reporting" },
+        { text: "Debugging Tests", link: "debug" },
+        { text: "For CI", link: "ci" },
       ],
     },
     {
       text: "Writing Tests",
       collapsed: false,
+      base: "/guide/write/",
       items: [
-        { text: "Quick Start", link: "/write/quick-start" },
-        { text: "Context Functions", link: "/write/context-functions" },
+        { text: "Quick Start", link: "quick-start" },
+        { text: "Context Functions", link: "context-functions" },
       ],
     },
     {
       text: "Commands",
       collapsed: false,
+      base: "/guide/cmd/",
       items: [
-        { text: "Introduction", link: "/cmd/intro" },
-        { text: "init", link: "/cmd/init" },
-        { text: "run", link: "/cmd/run" },
-        { text: "test", link: "/cmd/test" },
-        { text: "download", link: "/cmd/download" },
-        { text: "The CLI", link: "/cmd/cli" },
+        { text: "Introduction", link: "intro" },
+        { text: "Init", link: "init" },
+        { text: "Run", link: "run" },
+        { text: "Test", link: "test" },
+        { text: "Download", link: "download" },
+        { text: "The CLI", link: "cli" },
       ],
     },
     {
       text: "Utilities",
       collapsed: false,
+      base: "/guide/util/",
       items: [
-        { text: "Common Helpers", link: "/util/common" },
-        { text: "Moonbeam Specific Helpers", link: "/util/moonbeam" },
+        { text: "Common Helpers", link: "common" },
+        { text: "Moonbeam Specific Helpers", link: "moonbeam" },
       ],
     },
     {
       text: "Troubleshooting",
       collapsed: false,
+      base: "/guide/troubleshooting/",
       items: [
-        { text: "Errors", link: "/troubleshooting/errors" },
-        { text: "FAQ", link: "/troubleshooting/faq" },
+        { text: "Errors", link: "errors" },
+        { text: "FAQ", link: "faq" },
       ],
     },
     {
       text: "Guide Examples",
       collapsed: false,
+      base: "/guide/",
       items: [
-        { text: "Markdown Examples", link: "/markdown-examples" },
-        { text: "Runtime API Examples", link: "/api-examples" },
+        { text: "Markdown Examples", link: "markdown-examples" },
+        { text: "Runtime API Examples", link: "api-examples" },
       ],
     },
-  ] satisfies DefaultTheme.Sidebar;
+  ];
+}
 
-export const sidebarConfig = () =>
-  [
+export function sidebarConfig(): DefaultTheme.SidebarItem[] {
+  return [
     {
       text: "Global Config",
       collapsed: false,
       items: [
-        { text: "Introduction", link: "config/intro" },
-        { text: "Global Config FIle", link: "config/moonwall-config" },
-        { text: "Environments", link: "config/environment" },
-        { text: "Dev Foundation", link: "config/dev" },
-        { text: "Read-only Foundation", link: "config/read-only" },
-        { text: "Chopsticks Foundation", link: "config/chopsticks" },
-        { text: "Zombienet Foundation", link: "config/zombie" },
-        { text: "Runtime API Examples", link: "config/api-examples" },
+        { text: "Introduction", link: "intro" },
+        { text: "Global Config FIle", link: "moonwall-config" },
+        { text: "Environments", link: "environment" },
+        { text: "Dev Networks", link: "dev" },
+        { text: "Read-only Networks", link: "read-only" },
+        { text: "Chopsticks Networks", link: "chopsticks" },
+        { text: "Zombienet Networks", link: "zombie" },
+        { text: "Runtime API Examples", link: "api-examples" },
       ],
     },
-    {
-      text: "Config Guide Examples",
-      collapsed: false,
-      items: [
-        { text: "Markdown Examples", link: "/markdown-examples" },
-        { text: "Runtime API Examples", link: "/api-examples" },
-      ],
-    },
-  ] satisfies DefaultTheme.Sidebar;
+  ];
+}
