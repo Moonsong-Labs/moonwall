@@ -1,0 +1,15 @@
+{
+  "name": "@moonwall/docs",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Testing framework for the Moon family of projects",
+  "scripts": {
+    "docs:dev": "vitepress dev",
+    "docs:build": "vitepress build",
+    "docs:preview": "vitepress preview"
+  },
+  "devDependencies": {
+    "vitepress": "1.0.0-rc.10"
+  }
+}
