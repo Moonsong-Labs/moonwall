@@ -1,5 +1,11 @@
 # @moonwall/cli
 
+## 4.0.19
+
+### Patch Changes
+
+- 773811b: Fix for CI
+
 ## 4.0.18
 
 ### Patch Changes
