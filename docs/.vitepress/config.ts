@@ -1,6 +1,6 @@
 import { defineConfig } from "vitepress";
-import { sidebarGuide, sidebarConfig } from './sidebar'
-import { version } from '../../package.json'
+import { sidebarGuide, sidebarConfig } from "./sidebar";
+import { version } from "../../package.json";
 
 const title = "Moonwall";
 const description = "Run substrate networks and perform tests, with least fuss possible.";
@@ -8,7 +8,7 @@ const description = "Run substrate networks and perform tests, with least fuss p
 export default defineConfig({
   lang: "en-US",
 
-  base:"/moonwall/",
+  base: "/moonwall/",
 
   title: title,
   titleTemplate: `:title · ${title}`,
@@ -16,7 +16,7 @@ export default defineConfig({
 
   head: [
     ["meta", { name: "theme-color", content: "#729b1a" }],
-    ["link", { rel: "icon", href: "/MSL.ico", sizes: "any" }],
+    ["link", { rel: "icon", href: "/moonwall/logo.ico" }],
     [
       "link",
       {
@@ -46,13 +46,12 @@ export default defineConfig({
         text: `v${version}`,
         items: [
           {
-            text: 'Release Notes ',
+            text: "Release Notes ",
             link: "releases link here",
-          }
+          },
         ],
       },
     ],
-
 
     search: {
       provider: "local",
@@ -60,8 +59,8 @@ export default defineConfig({
 
     // sidebar: sidebar,
     sidebar: {
-      '/guide/': { base: '/guide/', items: sidebarGuide() },
-      '/config/': { base: '/config/', items: sidebarConfig() }
+      "/guide/": { base: "/guide/", items: sidebarGuide() },
+      "/config/": { base: "/config/", items: sidebarConfig() },
     },
 
     lastUpdated: {
