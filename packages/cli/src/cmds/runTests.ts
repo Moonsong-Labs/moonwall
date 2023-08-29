@@ -33,14 +33,14 @@ export async function testCmd(envName: string, additionalArgs?: object) {
   if (env.foundation.type == "dev") {
     const binName = path.basename(env.foundation.launchSpec[0].binPath);
     const pids = checkAlreadyRunning(binName);
-    pids.length == 0 || (await promptAlreadyRunning(pids));
+    pids.length == 0 || process.env.CI || (await promptAlreadyRunning(pids));
     await downloadBinsIfMissing(env.foundation.launchSpec[0].binPath);
   }
 
   if (env.foundation.type == "zombie") {
     const bins = parseZombieConfigForBins(env.foundation.zombieSpec.configPath);
     const pids = bins.flatMap((bin) => checkAlreadyRunning(bin));
-    pids.length == 0 || (await promptAlreadyRunning(pids));
+    pids.length == 0 || process.env.CI || (await promptAlreadyRunning(pids));
   }
 
   if (
