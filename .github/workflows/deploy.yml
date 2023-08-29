@@ -1,12 +1,9 @@
 name: Deploy Docs site to GH Pages
 
 on:
-  # Runs on pushes targeting the `main` branch. Change this to `master` if you're
-  # using the `master` branch as the default branch.
   push:
     branches: [main]
-
-  # Allows you to run this workflow manually from the Actions tab
+    
   workflow_dispatch:
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages

@@ -1,70 +1,83 @@
-import { defineConfig } from 'vitepress'
+import { defineConfig } from "vitepress";
+import { sidebarGuide, sidebarConfig } from './sidebar'
+import { version } from '../../package.json'
 
-
-const title = 'Moonwall'
-const description = "Run substrate networks and perform tests, with least fuss possible."
-
+const title = "Moonwall";
+const description = "Run substrate networks and perform tests, with least fuss possible.";
 
 export default defineConfig({
-  lang: 'en-US',
-  
+  lang: "en-US",
+
   title: title,
   titleTemplate: `:title · ${title}`,
   description: description,
 
-  head:[
-    ['meta', { name: 'theme-color', content: '#729b1a' }],
-    ['link', { rel: 'icon', href: '/MSL.ico', sizes: 'any' }],
-    ['link', { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Exo:ital,wght@0,300;0,400;0,600;0,700;1,300&display=swap' }]
+  head: [
+    ["meta", { name: "theme-color", content: "#729b1a" }],
+    ["link", { rel: "icon", href: "/MSL.ico", sizes: "any" }],
+    [
+      "link",
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Exo:ital,wght@0,300;0,400;0,600;0,700;1,300&display=swap",
+      },
+    ],
   ],
 
   markdown: {
     theme: {
-      light: 'vitesse-light',
-      dark: 'vitesse-dark',
+      light: "vitesse-light",
+      dark: "vitesse-dark",
     },
   },
 
   themeConfig: {
-    
     externalLinkIcon: true,
 
-    logo: {light: '/MSL.svg', dark: '/MSL.svg', alt: 'Moonsong Labs'},
-    
+    logo: { light: "/MSL.svg", dark: "/MSL.svg", alt: "Moonsong Labs" },
+
     nav: [
-      { text: 'Docs', link: '/' },
-      { text: 'Config', link: '/config' },
-      { text: 'FAQ', link: '/faq' },
+      { text: "Docs", link: "/guide/" },
+      { text: "Config", link: "/config/" },
+      { text: "FAQ", link: "/faq" },
+      {
+        text: `v${version}`,
+        items: [
+          {
+            text: 'Release Notes ',
+            link: "releases link here",
+          }
+        ],
+      },
     ],
 
     search: {
-      provider: "local"
+      provider: "local",
     },
 
-    sidebar: [
-      {
-        text: 'Examples',
-        items: [
-          { text: 'Markdown Examples', link: '/markdown-examples' },
-          { text: 'Runtime API Examples', link: '/api-examples' }
-        ]
-      }
-    ],
+    // sidebar: sidebar,
+    sidebar: {
+      '/guide/': { base: '/guide/', items: sidebarGuide() },
+      '/config/': { base: '/config/', items: sidebarConfig() }
+    },
+
+
+
     lastUpdated: {
-      text: 'Updated at',
+      text: "Updated at",
       formatOptions: {
-        dateStyle: 'full',
-        timeStyle: 'medium'
-      }
+        dateStyle: "full",
+        timeStyle: "medium",
+      },
     },
 
     editLink: {
-      pattern: 'https://github.com/Moonsong-Labs/moonwall/edit/main/docs/:path'
+      pattern: "https://github.com/Moonsong-Labs/moonwall/edit/main/docs/:path",
     },
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/Moonsong-Labs/moonwall' },
-      { icon: 'linkedin', link: 'https://www.linkedin.com/company/moonsong-labs/' }
-    ]
-  }
-})
+      { icon: "github", link: "https://github.com/Moonsong-Labs/moonwall" },
+      { icon: "linkedin", link: "https://www.linkedin.com/company/moonsong-labs/" },
+    ],
+  },
+});
