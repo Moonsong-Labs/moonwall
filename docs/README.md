@@ -31,14 +31,16 @@ pnpm docs:build
 pnpm docs:preview
 ```
 
-> [!NOTE]\
+> [!IMPORTANT]\
 > This using preview will host the static files generated via build, and will be done so on a different port than running `dev`.
+> It will also not be live updated based on changes made to the markdown files.
 
 ## Publishing to Prod
 
 Any changes merged to main will automatically trigger a workflow which will build a new docs site and publish it to GitHub Pages. No additional interaction required.
 
-This can be inspected in
+> [!NOTE]\
+> For the curious, this can be inspected at `.github/workflows/deploy.yml`.
 
 ---
 
