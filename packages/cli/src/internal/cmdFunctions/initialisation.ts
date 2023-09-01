@@ -123,13 +123,6 @@ export function createConfig(options: {
         foundation: {
           type: options.foundation as any,
         },
-        connections: [
-          {
-            name: "SAMPLE",
-            type: "ethers",
-            endpoints: ["wss://moonriver.api.onfinality.io/public-ws"],
-          },
-        ],
       },
     ],
   };
