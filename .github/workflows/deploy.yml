@@ -35,7 +35,8 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v3
       - name: Install dependencies
-        run: pnpm i
+        run: |
+          pnpm i
       - name: Build with VitePress
         run: |
           cd docs
@@ -57,3 +58,4 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v2
+        
