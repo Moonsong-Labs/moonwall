@@ -1,5 +1,22 @@
 # @moonwall/cli
 
+## 4.0.21
+
+### Patch Changes
+
+- e4fe8e9: # Package Updates
+
+  - Updated packages across the board
+  - Latest Zombienet version now being used
+
+  > [!WARNING]
+  > This is known issue involving plain-specs for [moonbeam](https://github.com/paritytech/zombienet/issues/1270),
+  > so you may have to use other dev account nodes on zombienet setups.
+
+- Updated dependencies [e4fe8e9]
+  - @moonwall/types@4.0.21
+  - @moonwall/util@4.0.21
+
 ## 4.0.20
 
 ### Patch Changes
