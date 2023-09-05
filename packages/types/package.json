@@ -60,14 +60,14 @@
   "dependencies": {
     "@polkadot/api": "^10.9.1",
     "@polkadot/api-base": "^10.9.1",
-    "@polkadot/keyring": "^12.4.1",
+    "@polkadot/keyring": "^12.4.2",
     "@polkadot/types": "^10.9.1",
-    "@polkadot/util": "^12.4.1",
-    "@polkadot/util-crypto": "^12.4.1",
+    "@polkadot/util": "^12.4.2",
+    "@polkadot/util-crypto": "^12.4.2",
     "bottleneck": "^2.19.5",
     "debug": "^4.3.4",
     "ethers": "^6.7.1",
-    "viem": "^1.6.4",
+    "viem": "^1.10.3",
     "web3": "4.0.3"
   },
   "publishConfig": {
@@ -75,7 +75,7 @@
   },
   "devDependencies": {
     "tsup": "^7.2.0",
-    "typescript": "^5.1.6",
+    "typescript": "^5.2.2",
     "typescript-json-schema": "^0.59.0"
   }
 }
