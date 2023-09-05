@@ -10,7 +10,7 @@ hero:
   text: "Low Fuss Substrate Test Framework"
   tagline: An all-in-one test Typescript framework for substrate based networks
   image:
-    src: logo.svg
+    src: astromoon.png
     alt: MoonsongLabs
   actions:
     - theme: brand
