@@ -236,6 +236,14 @@
             },
             "type": "object"
         },
+        "LogType": {
+            "enum": [
+                "silent",
+                "table",
+                "text"
+            ],
+            "type": "string"
+        },
         "OrcOptionsInterface": {
             "properties": {
                 "dir": {
@@ -247,14 +255,14 @@
                 "inCI": {
                     "type": "boolean"
                 },
+                "logType": {
+                    "$ref": "#/definitions/LogType"
+                },
                 "monitor": {
                     "type": "boolean"
                 },
                 "setGlobalNetwork": {
                     "type": "object"
-                },
-                "silent": {
-                    "type": "boolean"
                 },
                 "spawnConcurrency": {
                     "type": "number"

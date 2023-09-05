@@ -158,7 +158,7 @@ export class MoonwallContext {
 
     await checkZombieBins(zombieConfig);
 
-    const network = await zombie.start("", zombieConfig, { silent: true });
+    const network = await zombie.start("", zombieConfig, { logType: "silent" });
     process.env.MOON_RELAY_WSS = network.relay[0].wsUri;
     process.env.MOON_PARA_WSS = Object.values(network.paras)[0].nodes[0].wsUri;
     process.env.MOON_ZOMBIE_PATH = network.client.tmpDir;

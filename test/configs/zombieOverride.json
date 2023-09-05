@@ -26,7 +26,7 @@
       "collator": {
         "args": ["--no-hardware-benchmarks", "-lparachain=debug", "--database=paritydb"],
         "command": "tmp/moonbeam_2301",
-        "name": "alith"
+        "name": "ethan"
       }
     }
   ],
