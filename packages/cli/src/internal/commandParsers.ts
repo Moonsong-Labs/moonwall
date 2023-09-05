@@ -29,8 +29,6 @@ export function parseRunCmd(launchSpec: DevLaunchSpec) {
         "--no-prometheus",
         "--alice",
         "--chain=moonbase-dev",
-        "--in-peers=0",
-        "--out-peers=0",
         "--tmp",
       ];
 

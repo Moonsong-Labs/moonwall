@@ -301,7 +301,7 @@
           {
             "name": "moonbeam",
             "running": true,
-            "newRpcBehaviour": false,
+            "newRpcBehaviour": true,
             "binPath": "./tmp/moonbeam"
           }
         ]
@@ -318,7 +318,7 @@
           {
             "name": "moonbeam",
             "running": true,
-            "newRpcBehaviour": false,
+            "newRpcBehaviour": true,
             "binPath": "./tmp/moonbeam"
           }
         ]
@@ -334,7 +334,7 @@
           {
             "name": "moonbeam",
             "running": true,
-            "newRpcBehaviour": false,
+            "newRpcBehaviour": true,
             "binPath": "./tmp/moonbeam"
           }
         ]
@@ -484,9 +484,10 @@
             "name": "moonbeam",
             "running": false,
             "binPath": "tmp/moonbeam",
+            "newRpcBehaviour": true,
             "retainAllLogs": false,
             "ports": {
-              "wsPort": 9955
+              "rpcPort": 9955
             },
             "options": [
               "--dev",

@@ -1,4 +1,5 @@
 import Bottleneck from "bottleneck";
+import type { LogType } from "@zombienet/utils";
 
 /**
  * The main configuration object for Moonwall.
@@ -429,6 +430,6 @@ export interface OrcOptionsInterface {
   inCI?: boolean;
   dir?: string;
   force?: boolean;
-  silent?: boolean; // Mute logging output
+  logType?: LogType;
   setGlobalNetwork?: (network: object) => void;
 }
