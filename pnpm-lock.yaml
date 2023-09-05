@@ -192,9 +192,6 @@ importers:
       '@polkadot/util-crypto':
         specifier: ^12.4.2
         version: 12.4.2(@polkadot/util@12.4.2)
-      '@zombienet/orchestrator':
-        specifier: ^0.0.53
-        version: 0.0.53(@polkadot/util@12.4.2)(@types/node@20.5.9)
       '@zombienet/utils':
         specifier: ^0.0.22
         version: 0.0.22(@types/node@20.5.9)(typescript@5.2.2)
