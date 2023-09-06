@@ -103,7 +103,7 @@ import { sidebarGuide, sidebarConfig /* your new export function here */} from "
         items: [
           {
             text: "Release Notes ",
-            link: "releases link here",
+            link: `https://github.com/Moonsong-Labs/moonwall/releases?q=${version}`,
           },
         ],
       },

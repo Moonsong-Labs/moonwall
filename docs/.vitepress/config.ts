@@ -47,7 +47,7 @@ export default defineConfig({
         items: [
           {
             text: "Release Notes ",
-            link: "releases link here",
+            link: `https://github.com/Moonsong-Labs/moonwall/releases?q=${version}`,
           },
         ],
       },

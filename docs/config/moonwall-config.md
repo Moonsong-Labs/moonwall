@@ -1,12 +1,12 @@
----
+<!-- ---
 head:
   - - meta
     - name: global-config
       content: Description of the Moonwall Global Config
 outline: deep
 
-title: Global COnfig
----
+title: Global Config
+--- -->
 # Global Config File
 
 ## Description

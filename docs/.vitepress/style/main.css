@@ -3,33 +3,46 @@
   --vp-home-hero-name-background: -webkit-linear-gradient(120deg, #b14f3c 20%, #2e8e59);
   --vp-home-hero-image-background-image: linear-gradient(-45deg, #2e8e59 40%, #b14f3c);
   --vp-home-hero-image-filter: blur(200px);
-
-  --vp-font-family-base: 'Exo', sans-serif;
-  --vp-font-family-mono: 'Exo', monospace; 
+  --vp-font-family-base: "Exo", sans-serif;
+  --vp-font-family-mono: "Exo", monospace;
 }
 
-@keyframes animateGradient {
+@keyframes animateShadowGradient {
   0% {
     background-position: 0% 50%;
   }
-  100% {
+  50% {
     background-position: 100% 50%;
   }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.clip {
+  /* background: var(--vp-home-hero-name-background); */
+  background: -webkit-linear-gradient(120deg, #b14f3c 20%, #2e8e59);
+  background-size: 200% 100%; /* Adjust this value to make the strobe effect more or less pronounced */
+  animation: animateHeroNameGradient 3s infinite; /* Adjust the time to make the strobe faster or slower */
 }
 
 .VPImage {
   position: relative;
   border-radius: 15px;
   padding: 1px;
-  background: linear-gradient(270deg, 
-                              #ff00f0, 
-                              #00ffff, 
-                              #00ff00, 
-                              #ffaa00, 
-                              #ff00ff, 
-                              #00ffff); /* Neon gradient */
+  background: linear-gradient(
+    270deg,
+    #ff00f0,
+    #00ffff,
+    #00ff00,
+    #ffaa00,
+    #ff00ff,
+    #00ffff,
+    #00ff00,
+    #ffaa00
+  );
   background-size: 300% 300%;
-  animation: animateGradient 5s infinite;
+  animation: animateShadowGradient 10s infinite;
   background-clip: padding-box;
 }
 
@@ -43,5 +56,5 @@
   z-index: -1;
   background: inherit;
   border-radius: inherit;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);  /* Drop shadow */
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2); /* Drop shadow */
 }

@@ -72,7 +72,6 @@ export function sidebarGuide(): DefaultTheme.SidebarItem[] {
       base: "/guide/",
       items: [
         { text: "Markdown Examples", link: "markdown-examples" },
-        { text: "Runtime API Examples", link: "api-examples" },
       ],
     },
   ];
@@ -91,7 +90,6 @@ export function sidebarConfig(): DefaultTheme.SidebarItem[] {
         { text: "Read-only Networks", link: "read-only" },
         { text: "Chopsticks Networks", link: "chopsticks" },
         { text: "Zombienet Networks", link: "zombie" },
-        { text: "Runtime API Examples", link: "api-examples" },
       ],
     },
   ];

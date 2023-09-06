@@ -3,12 +3,12 @@ layout: home
 sidebar: false
 
 title: Moonwall
-titleTemplate: Define, run and test substrate networks; with least fuss possible.
+titleTemplate: Test Substrate with low fuss
 
 hero:
   name: "Moonwall"
-  text: "Low Fuss Substrate Test Framework"
-  tagline: An all-in-one test Typescript framework for substrate based networks
+  text: "All-in-one Substrate Test Framework 🧪"
+  tagline: The one-stop-shop Typescript test framework for Substrate based chain builders.
   image:
     src: astromoon.png
     alt: MoonsongLabs
