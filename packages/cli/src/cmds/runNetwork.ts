@@ -9,11 +9,11 @@ import PressToContinuePrompt from "inquirer-press-to-continue";
 import { createReadStream, stat } from "node:fs";
 import WebSocket from "ws";
 import { parse } from "yaml";
-import { devBinCheck, zombieBinCheck } from "../internal/cmdFunctions/initialisation";
 import { clearNodeLogs, reportLogLocation } from "../internal/cmdFunctions/tempLogs";
 import { importJsonConfig, loadEnvVars } from "../lib/configReader";
 import { MoonwallContext, runNetworkOnly } from "../lib/globalContext";
 import { executeTests } from "./runTests";
+import { devBinCheck, zombieBinCheck } from "../internal/launcherCommon";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 

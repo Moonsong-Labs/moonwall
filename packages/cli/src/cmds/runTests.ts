@@ -6,10 +6,10 @@ import os from "node:os";
 import path from "path";
 import type { UserConfig } from "vitest";
 import { startVitest } from "vitest/node";
-import { devBinCheck, zombieBinCheck } from "../internal/cmdFunctions/initialisation";
 import { clearNodeLogs } from "../internal/cmdFunctions/tempLogs";
 import { importJsonConfig, loadEnvVars } from "../lib/configReader";
 import { contextCreator } from "../lib/globalContext";
+import { devBinCheck, zombieBinCheck } from "../internal/launcherCommon";
 
 export async function testCmd(envName: string, additionalArgs?: object) {
   const globalConfig = importJsonConfig();
