@@ -1,5 +1,5 @@
 import "@moonbeam-network/api-augment";
-import { BlockCreation, ExtrinsicCreation, GenericContext } from "@moonwall/types";
+import { BlockCreation, Environment, ExtrinsicCreation, GenericContext } from "@moonwall/types";
 import {
   alith,
   createAndFinalizeBlock,
@@ -12,11 +12,13 @@ import { RegistryError } from "@polkadot/types-codec/types/registry";
 import { EventRecord } from "@polkadot/types/interfaces";
 import chalk from "chalk";
 import Debug from "debug";
+import path from "path";
 import { setTimeout } from "timers/promises";
 import { assert } from "vitest";
 import { importJsonConfig, isEthereumDevConfig } from "../../lib/configReader";
 import { extractError } from "../../lib/contextHelpers";
 import { MoonwallContext } from "../../lib/globalContext";
+import { checkAlreadyRunning, downloadBinsIfMissing, promptAlreadyRunning } from "../fileCheckers";
 const debug = Debug("DevTest");
 
 export async function getDevProviderPath() {
@@ -210,3 +212,4 @@ export async function createDevBlock<
     result: Array.isArray(transactions) ? result : (result[0] as any),
   };
 }
+

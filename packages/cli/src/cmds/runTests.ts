@@ -4,15 +4,11 @@ import { execSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "path";
-import { clearNodeLogs } from "../internal/cmdFunctions/tempLogs";
-import { UserConfig } from "vitest";
+import type { UserConfig } from "vitest";
 import { startVitest } from "vitest/node";
-import {
-  checkAlreadyRunning,
-  downloadBinsIfMissing,
-  promptAlreadyRunning,
-} from "../internal/fileCheckers";
-import { importJsonConfig, loadEnvVars, parseZombieConfigForBins } from "../lib/configReader";
+import { devBinCheck, zombieBinCheck } from "../internal/cmdFunctions/initialisation";
+import { clearNodeLogs } from "../internal/cmdFunctions/tempLogs";
+import { importJsonConfig, loadEnvVars } from "../lib/configReader";
 import { contextCreator } from "../lib/globalContext";
 
 export async function testCmd(envName: string, additionalArgs?: object) {
@@ -30,17 +26,13 @@ export async function testCmd(envName: string, additionalArgs?: object) {
   }
   loadEnvVars();
 
+  // TODO: This is begging for some Dependency Injection
   if (env.foundation.type == "dev") {
-    const binName = path.basename(env.foundation.launchSpec[0].binPath);
-    const pids = checkAlreadyRunning(binName);
-    pids.length == 0 || process.env.CI || (await promptAlreadyRunning(pids));
-    await downloadBinsIfMissing(env.foundation.launchSpec[0].binPath);
+    await devBinCheck(env);
   }
 
   if (env.foundation.type == "zombie") {
-    const bins = parseZombieConfigForBins(env.foundation.zombieSpec.configPath);
-    const pids = bins.flatMap((bin) => checkAlreadyRunning(bin));
-    pids.length == 0 || process.env.CI || (await promptAlreadyRunning(pids));
+    await zombieBinCheck(env);
   }
 
   if (
@@ -82,6 +74,7 @@ export async function testCmd(envName: string, additionalArgs?: object) {
       }
     }
   }
+
   if (env.foundation.type == "dev" && !env.foundation.launchSpec[0].retainAllLogs) {
     clearNodeLogs();
   }

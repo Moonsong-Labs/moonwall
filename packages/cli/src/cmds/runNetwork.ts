@@ -7,16 +7,11 @@ import fs from "fs/promises";
 import inquirer from "inquirer";
 import PressToContinuePrompt from "inquirer-press-to-continue";
 import { createReadStream, stat } from "node:fs";
-import path from "path";
-import { clearNodeLogs, reportLogLocation } from "../internal/cmdFunctions/tempLogs";
 import WebSocket from "ws";
 import { parse } from "yaml";
-import {
-  checkAlreadyRunning,
-  downloadBinsIfMissing,
-  promptAlreadyRunning,
-} from "../internal/fileCheckers";
-import { importJsonConfig, loadEnvVars, parseZombieConfigForBins } from "../lib/configReader";
+import { devBinCheck, zombieBinCheck } from "../internal/cmdFunctions/initialisation";
+import { clearNodeLogs, reportLogLocation } from "../internal/cmdFunctions/tempLogs";
+import { importJsonConfig, loadEnvVars } from "../lib/configReader";
 import { MoonwallContext, runNetworkOnly } from "../lib/globalContext";
 import { executeTests } from "./runTests";
 
@@ -40,17 +35,13 @@ export async function runNetworkCmd(args) {
 
   loadEnvVars();
 
+  // TODO: This is begging for some Dependency Injection
   if (env.foundation.type == "dev") {
-    const binName = path.basename(env.foundation.launchSpec[0].binPath);
-    const pids = checkAlreadyRunning(binName);
-    pids.length == 0 || process.env.CI || (await promptAlreadyRunning(pids));
-    await downloadBinsIfMissing(env.foundation.launchSpec[0].binPath);
+    await devBinCheck(env);
   }
 
   if (env.foundation.type == "zombie") {
-    const bins = parseZombieConfigForBins(env.foundation.zombieSpec.configPath);
-    const pids = bins.flatMap((bin) => checkAlreadyRunning(bin));
-    pids.length == 0 || process.env.CI || (await promptAlreadyRunning(pids));
+    await zombieBinCheck(env);
   }
 
   const testFileDirs = env.testFileDir;

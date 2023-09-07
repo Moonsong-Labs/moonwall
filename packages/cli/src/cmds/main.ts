@@ -17,7 +17,7 @@ inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
 export async function main() {
   for (;;) {
-    let globalConfig;
+    let globalConfig: MoonwallConfig | undefined;
     try {
       globalConfig = importJsonConfig();
     } catch (e) {
