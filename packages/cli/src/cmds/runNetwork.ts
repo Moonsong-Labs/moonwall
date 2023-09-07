@@ -13,7 +13,7 @@ import { clearNodeLogs, reportLogLocation } from "../internal/cmdFunctions/tempL
 import { importJsonConfig, loadEnvVars } from "../lib/configReader";
 import { MoonwallContext, runNetworkOnly } from "../lib/globalContext";
 import { executeTests } from "./runTests";
-import { devBinCheck, zombieBinCheck } from "../internal/launcherCommon";
+import { commonChecks } from "../internal/launcherCommon";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
@@ -34,15 +34,8 @@ export async function runNetworkCmd(args) {
   }
 
   loadEnvVars();
-
-  // TODO: This is begging for some Dependency Injection
-  if (env.foundation.type == "dev") {
-    await devBinCheck(env);
-  }
-
-  if (env.foundation.type == "zombie") {
-    await zombieBinCheck(env);
-  }
+  
+  await commonChecks(env);
 
   const testFileDirs = env.testFileDir;
   const foundation = env.foundation.type;

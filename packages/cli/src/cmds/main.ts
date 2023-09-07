@@ -98,6 +98,7 @@ async function mainMenu(config: MoonwallConfig) {
       return false;
     case "run": {
       const chosenRunEnv = await chooseRunEnv(config);
+      process.env.MOON_RUN_SCRIPTS = "true";
       if (chosenRunEnv.envName !== "back") {
         await runNetworkCmd(chosenRunEnv);
       }

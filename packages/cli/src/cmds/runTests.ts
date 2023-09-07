@@ -1,7 +1,5 @@
 import { Environment } from "@moonwall/types";
 import chalk from "chalk";
-import { execSync } from "node:child_process";
-import fs from "node:fs";
 import os from "node:os";
 import path from "path";
 import type { UserConfig } from "vitest";
@@ -9,7 +7,7 @@ import { startVitest } from "vitest/node";
 import { clearNodeLogs } from "../internal/cmdFunctions/tempLogs";
 import { importJsonConfig, loadEnvVars } from "../lib/configReader";
 import { contextCreator } from "../lib/globalContext";
-import { devBinCheck, zombieBinCheck } from "../internal/launcherCommon";
+import { commonChecks } from "../internal/launcherCommon";
 
 export async function testCmd(envName: string, additionalArgs?: object) {
   const globalConfig = importJsonConfig();
@@ -26,54 +24,7 @@ export async function testCmd(envName: string, additionalArgs?: object) {
   }
   loadEnvVars();
 
-  // TODO: This is begging for some Dependency Injection
-  if (env.foundation.type == "dev") {
-    await devBinCheck(env);
-  }
-
-  if (env.foundation.type == "zombie") {
-    await zombieBinCheck(env);
-  }
-
-  if (
-    process.env.MOON_RUN_SCRIPTS == "true" &&
-    globalConfig.scriptsDir &&
-    env.runScripts &&
-    env.runScripts.length > 0
-  ) {
-    const scriptsDir = globalConfig.scriptsDir;
-    const files = await fs.promises.readdir(scriptsDir);
-
-    for (const scriptCommand of env.runScripts) {
-      try {
-        const script = scriptCommand.split(" ")[0];
-        const ext = path.extname(script);
-        const scriptPath = path.join(process.cwd(), scriptsDir, scriptCommand);
-
-        if (!files.includes(script)) {
-          throw new Error(`Script ${script} not found in ${scriptsDir}`);
-        }
-
-        console.log(`========== Executing script: ${chalk.bgGrey.greenBright(script)} ==========`);
-
-        switch (ext) {
-          case ".js":
-            execSync("node " + scriptPath, { stdio: "inherit" });
-            break;
-          case ".ts":
-            execSync("pnpm tsx " + scriptPath, { stdio: "inherit" });
-            break;
-          case ".sh":
-            execSync(scriptPath, { stdio: "inherit" });
-            break;
-          default:
-            console.log(`${ext} not supported, skipping ${script}`);
-        }
-      } catch (err) {
-        console.error(`Error executing script: ${chalk.bgGrey.redBright(err)}`);
-      }
-    }
-  }
+  await commonChecks(env);
 
   if (env.foundation.type == "dev" && !env.foundation.launchSpec[0].retainAllLogs) {
     clearNodeLogs();
