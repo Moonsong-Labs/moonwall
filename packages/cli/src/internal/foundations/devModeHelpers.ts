@@ -210,4 +210,3 @@ export async function createDevBlock<
     result: Array.isArray(transactions) ? result : (result[0] as any),
   };
 }
-

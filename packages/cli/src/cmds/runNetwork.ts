@@ -34,7 +34,7 @@ export async function runNetworkCmd(args) {
   }
 
   loadEnvVars();
-  
+
   await commonChecks(env);
 
   const testFileDirs = env.testFileDir;
