@@ -1,7 +1,6 @@
 import "@moonbeam-network/api-augment";
-import { expect, describeSuite, beforeAll } from "@moonwall/cli";
-import { ethers } from "ethers";
-import { BALTATHAR_ADDRESS, alith } from "@moonwall/util";
+import { beforeAll, describeSuite, expect } from "@moonwall/cli";
+import { ALITH_ADDRESS, GLMR, baltathar } from "@moonwall/util";
 import { ApiPromise } from "@polkadot/api";
 
 describeSuite({
@@ -55,14 +54,14 @@ describeSuite({
       title: "Can connect to parachain and execute a transaction",
       timeout: 60000,
       test: async function () {
-        const balBefore = (await paraApi.query.system.account(BALTATHAR_ADDRESS)).data.free;
+        const balBefore = (await paraApi.query.system.account(ALITH_ADDRESS)).data.free;
 
         log("Please wait, this will take at least 30s for transaction to complete");
 
         await new Promise((resolve) => {
           paraApi.tx.balances
-            .transfer(BALTATHAR_ADDRESS, ethers.parseEther("2"))
-            .signAndSend(alith, ({ status, events }) => {
+            .transfer(ALITH_ADDRESS, 2n * GLMR)
+            .signAndSend(baltathar, ({ status, events }) => {
               if (status.isInBlock) {
                 log("Transaction is in block");
               }
@@ -73,7 +72,7 @@ describeSuite({
             });
         });
 
-        const balAfter = (await paraApi.query.system.account(BALTATHAR_ADDRESS)).data.free;
+        const balAfter = (await paraApi.query.system.account(ALITH_ADDRESS)).data.free;
         expect(balBefore.lt(balAfter)).to.be.true;
       },
     });
