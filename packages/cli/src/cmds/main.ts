@@ -1,17 +1,18 @@
+import { MoonwallConfig } from "@moonwall/types";
 import chalk from "chalk";
+import clear from "clear";
+import colors from "colors";
 import inquirer from "inquirer";
 import PressToContinuePrompt from "inquirer-press-to-continue";
-import { importJsonConfig } from "../lib/configReader";
-import { MoonwallConfig } from "@moonwall/types";
+import fetch from "node-fetch";
+import { SemVer, lt } from "semver";
+import pkg from "../../package.json" assert { type: "json" };
+import { fetchArtifact, getVersions } from "../internal/cmdFunctions/fetchArtifact";
 import { createFolders, generateConfig } from "../internal/cmdFunctions/initialisation";
-import colors from "colors";
-import clear from "clear";
+import { importJsonConfig } from "../lib/configReader";
+import ghRepos from "../lib/repoDefinitions";
 import { runNetworkCmd } from "./runNetwork";
 import { testCmd } from "./runTests";
-import { fetchArtifact, getVersions } from "../internal/cmdFunctions/fetchArtifact";
-import pkg from "../../package.json" assert { type: "json" };
-import { SemVer, lt } from "semver";
-import fetch from "node-fetch";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
@@ -130,25 +131,18 @@ async function mainMenu(config: MoonwallConfig) {
 }
 
 async function resolveDownloadChoice() {
+  const binList = ghRepos().reduce((acc, curr) => {
+    acc.push(...curr.binaries.map((bin) => bin.name).flat());
+    acc.push(new inquirer.Separator());
+    return acc;
+  }, [] as string[]);
+
   for (;;) {
     const firstChoice = await inquirer.prompt({
       name: "artifact",
       type: "list",
       message: `Download - which artifact?`,
-      choices: [
-        "moonbeam",
-        "polkadot",
-        "moonbase-runtime",
-        "moonriver-runtime",
-        "moonbeam-runtime",
-        new inquirer.Separator(),
-        "tanssi-node",
-        "container-chain-template-frontier-node",
-        "container-chain-template-simple-node",
-        new inquirer.Separator(),
-        "Back",
-        new inquirer.Separator(),
-      ],
+      choices: binList,
     });
     if (firstChoice.artifact === "Back") {
       return;

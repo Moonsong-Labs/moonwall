@@ -3,7 +3,46 @@
   "label": "Global Test Config 🐯",
   "defaultTestTimeout": 60000,
   "scriptsDir": "scripts/",
+  "additionalRepos": [
+    {
+      "name": "astar",
+      "ghAuthor": "AstarNetwork",
+      "ghRepo": "Astar",
+      "binaries": [
+        {
+          "name": "astar-collator*ubuntu-x86*",
+          "type": "tar",
+          "defaultArgs": ["--dev", "--sealing=manual", "--no-hardware-benchmarks", "--no-telemetry"]
+        }
+      ]
+    },
+    {
+      "name": "hydra",
+      "ghAuthor": "galacticcouncil",
+      "ghRepo": "HydraDX-node",
+      "binaries": [
+        {
+          "name": "hydradx"
+        }
+      ]
+    }
+  ],
   "environments": [
+    {
+      "name": "astar",
+      "testFileDir": ["suites/basic"],
+      "foundation": {
+        "type": "dev",
+        "launchSpec": [
+          {
+            "binPath": "./tmp/astar-collator",
+            "disableDefaultEthProviders": true,
+            "options": ["--dev", "--sealing=manual", "--no-hardware-benchmarks", "--no-telemetry"],
+            "newRpcBehaviour": true
+          }
+        ]
+      }
+    },
     {
       "name": "dev_tanssi",
       "testFileDir": ["suites/tanssi"],
@@ -15,7 +54,6 @@
             "disableDefaultEthProviders": true,
             "options": ["--dev", "--sealing=manual", "--no-hardware-benchmarks", "--no-telemetry"],
             "newRpcBehaviour": true
-
           }
         ]
       }
@@ -469,7 +507,7 @@
       "name": "dev_test",
       "testFileDir": ["suites/dev_tests"],
       "envVars": ["DEBUG_COLORS=1", "TIMBO_TEST_ENV='TIMBO timbo timbo'"],
-      "reporters": ["default"],
+      "reporters": ["default", "html"],
       "contracts": "contracts/",
       "runScripts": ["compile-contracts.ts compile -p contracts/precompiles"],
       "defaultSigner": {

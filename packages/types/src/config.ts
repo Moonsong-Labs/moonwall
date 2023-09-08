@@ -29,6 +29,12 @@ export type MoonwallConfig = {
    * An array of Environment objects for testing.
    */
   environments: Environment[];
+
+  /**
+   * Use this to specify additional repos to download binaries from.
+   * Polkadot, Tanssi and Moonbeam are available by default.
+   **/
+  additionalRepos?: RepoSpec[];
 };
 
 /**
@@ -433,3 +439,16 @@ export interface OrcOptionsInterface {
   logType?: LogType;
   setGlobalNetwork?: (network: object) => void;
 }
+
+export type RepoSpec = {
+  name: string;
+  ghAuthor: string;
+  ghRepo: string;
+  binaries: Bin[];
+};
+
+export type Bin = {
+  name: string;
+  type?: "binary" | "tar" | "zip";
+  defaultArgs?: string[];
+};

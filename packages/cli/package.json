@@ -85,6 +85,7 @@
     "ethers": "^6.7.1",
     "inquirer": "^8.2.6",
     "inquirer-press-to-continue": "^1.2.0",
+    "minimatch": "^9.0.3",
     "node-fetch": "^3.3.2",
     "semver": "^7.5.4",
     "viem": "^1.10.7",

@@ -496,6 +496,49 @@
             "description": "The JSON schema for the config.",
             "type": "string"
         },
+        "additionalRepos": {
+            "description": "Use this to specify additional repos to download binaries from.\nPolkadot, Tanssi and Moonbeam are available by default.",
+            "items": {
+                "properties": {
+                    "binaries": {
+                        "items": {
+                            "properties": {
+                                "defaultArgs": {
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "type": "array"
+                                },
+                                "name": {
+                                    "type": "string"
+                                },
+                                "type": {
+                                    "enum": [
+                                        "binary",
+                                        "tar",
+                                        "zip"
+                                    ],
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "type": "array"
+                    },
+                    "ghAuthor": {
+                        "type": "string"
+                    },
+                    "ghRepo": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "type": "array"
+        },
         "defaultTestTimeout": {
             "description": "The default timeout for tests.",
             "type": "number"

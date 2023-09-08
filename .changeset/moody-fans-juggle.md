@@ -7,4 +7,5 @@
 
 # September Update
 
-- [x] [#258](https://github.com/Moonsong-Labs/moonwall/issues/258)
+- [#258](https://github.com/Moonsong-Labs/moonwall/issues/258)
+- [#254](https://github.com/Moonsong-Labs/moonwall/issues/254)
