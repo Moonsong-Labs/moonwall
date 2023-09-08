@@ -499,9 +499,11 @@
         "additionalRepos": {
             "description": "Use this to specify additional repos to download binaries from.\nPolkadot, Tanssi and Moonbeam are available by default.",
             "items": {
+                "description": "`RepoSpec` type represents the configuration required to download binaries\nfrom a project's GitHub repository.",
                 "properties": {
                     "binaries": {
                         "items": {
+                            "description": "`Bin` type defines the binary configurations within a `RepoSpec`.",
                             "properties": {
                                 "defaultArgs": {
                                     "items": {
@@ -515,8 +517,7 @@
                                 "type": {
                                     "enum": [
                                         "binary",
-                                        "tar",
-                                        "zip"
+                                        "tar"
                                     ],
                                     "type": "string"
                                 }
@@ -585,6 +586,10 @@
                             }
                         },
                         "type": "object"
+                    },
+                    "description": {
+                        "description": "Description of the environment to display in menus.",
+                        "type": "string"
                     },
                     "envVars": {
                         "description": "An optional array of environment variable names.",

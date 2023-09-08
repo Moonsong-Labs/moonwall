@@ -45,46 +45,46 @@ async function mainMenu(config: MoonwallConfig) {
     message: `Main Menu - Please select one of the following:`,
     default: 0,
     pageSize: 12,
-    choices: [
-      {
-        name: !configPresent
-          ? "1) Initialise:                         Generate a new Moonwall Config File."
-          : chalk.dim("1) Initialise:                       ✅  CONFIG ALREADY GENERATED"),
-        value: "init",
-        disabled: configPresent,
-      },
-      {
-        name: configPresent
-          ? `2) Network Launcher & Toolbox:         Launch network, access tools: tail logs, interactive tests etc.`
-          : chalk.dim("2) Network Launcher & Toolbox            NO CONFIG FOUND"),
-        value: "run",
-        disabled: !configPresent,
-      },
-      {
-        name: configPresent
-          ? "3) Test Suite Execution:               Run automated tests, start network if needed."
-          : chalk.dim("3) Test Suite Execution:             NO CONFIG FOUND"),
-        value: "test",
+    choices: !configPresent
+      ? [
+          {
+            name: !configPresent
+              ? "1) Initialise:                         Generate a new Moonwall Config File."
+              : chalk.dim("1) Initialise:                       ✅  CONFIG ALREADY GENERATED"),
+            value: "init",
+          },
+          {
+            name: "2) Artifact Downloader:                Fetch artifacts (x86) from GitHub repos.",
+            value: "download",
+          },
+          {
+            name: `3) Quit Application`,
+            value: "quit",
+          },
+        ]
+      : [
+          {
+            name: configPresent
+              ? `1) Network Launcher & Toolbox:         Launch network, access tools: tail logs, interactive tests etc.`
+              : chalk.dim("2) Network Launcher & Toolbox            NO CONFIG FOUND"),
+            value: "run",
+          },
+          {
+            name: configPresent
+              ? "2) Test Suite Execution:               Run automated tests, start network if needed."
+              : chalk.dim("3) Test Suite Execution:             NO CONFIG FOUND"),
+            value: "test",
+          },
 
-        disabled: !configPresent,
-      },
-      {
-        name: chalk.dim("4) Batch-Run Tests:                  🏗️  NOT YET IMPLEMENTED "),
-        value: "batch",
-
-        disabled: true,
-      },
-      {
-        name: "5) Artifact Downloader:                Fetch artifacts (x86) from GitHub repos.",
-        value: "download",
-
-        disabled: false,
-      },
-      {
-        name: `6) Quit Application`,
-        value: "quit",
-      },
-    ],
+          {
+            name: "3) Artifact Downloader:                Fetch artifacts (x86) from GitHub repos.",
+            value: "download",
+          },
+          {
+            name: `4) Quit Application`,
+            value: "quit",
+          },
+        ],
     filter(val) {
       return val;
     },
@@ -133,6 +133,8 @@ async function mainMenu(config: MoonwallConfig) {
 async function resolveDownloadChoice() {
   const binList = ghRepos().reduce((acc, curr) => {
     acc.push(...curr.binaries.map((bin) => bin.name).flat());
+    acc.push(new inquirer.Separator());
+    acc.push("Back");
     acc.push(new inquirer.Separator());
     return acc;
   }, [] as string[]);
@@ -204,7 +206,7 @@ async function resolveDownloadChoice() {
 const chooseTestEnv = async (config: MoonwallConfig) => {
   const envs = config.environments
     .map((a) => ({
-      name: `Env: ${a.name}     (${a.foundation.type})`,
+      name: `[${a.foundation.type}] ${a.name}${a.description ? ": \t\t" + a.description : ""}`,
       value: a.name,
       disabled: false,
     }))
@@ -235,9 +237,11 @@ const chooseRunEnv = async (config: MoonwallConfig) => {
       a.foundation.type === "chopsticks" ||
       a.foundation.type === "zombie"
     ) {
-      result.name = `Env: ${a.name}     (${a.foundation.type})`;
+      result.name = `[${a.foundation.type}] ${a.name}${
+        a.description ? ": \t\t" + a.description : ""
+      }`;
     } else {
-      result.name = chalk.dim(`Env: ${a.name} (${a.foundation.type})     NO NETWORK TO RUN`);
+      result.name = chalk.dim(`[${a.foundation.type}] ${a.name}     NO NETWORK TO RUN`);
       result.disabled = true;
     }
     return result;

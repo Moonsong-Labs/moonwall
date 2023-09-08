@@ -52,6 +52,11 @@ export type Environment = {
   name: string;
 
   /**
+   * Description of the environment to display in menus.
+   */
+  description?: string;
+
+  /**
    * An array of directories with test files.
    */
   testFileDir: string[];
@@ -440,6 +445,29 @@ export interface OrcOptionsInterface {
   setGlobalNetwork?: (network: object) => void;
 }
 
+/**
+ * `RepoSpec` type represents the configuration required to download binaries
+ * from a project's GitHub repository.
+ *
+ * @property {string} name - A unique identifier or name for the repo configuration.
+ * @property {string} ghAuthor - The GitHub username or organization under which the repository resides.
+ * @property {string} ghRepo - The GitHub repository name.
+ * @property {Bin[]} binaries - An array of binary configurations to be downloaded.
+ *
+ * @example
+ * {
+ *   "name": "astar",
+ *   "ghAuthor": "AstarNetwork",
+ *   "ghRepo": "Astar",
+ *   "binaries": [
+ *     {
+ *       "name": "astar-collator*ubuntu-x86*",
+ *       "type": "tar",
+ *       "defaultArgs": ["--dev", "--sealing=manual", "--no-hardware-benchmarks", "--no-telemetry"]
+ *     }
+ *   ]
+ * }
+ */
 export type RepoSpec = {
   name: string;
   ghAuthor: string;
@@ -447,8 +475,27 @@ export type RepoSpec = {
   binaries: Bin[];
 };
 
+/**
+ * `Bin` type defines the binary configurations within a `RepoSpec`.
+ *
+ * @property {string} name - The name or pattern to identify the binary.
+ * @property {("binary"|"tar")?} type - The type of the binary. It's optional and can be one of "binary" or "tar".
+ * @property {string[]?} defaultArgs - An optional array of default arguments to be used with the binary.
+ *
+ * @example
+ * {
+ *   "name": "hydradx"
+ * }
+ * 
+ * @example
+ * {
+ *   "name": "astar-collator*ubuntu-x86*",
+ *   "type": "tar",
+ *   "defaultArgs": ["--dev", "--sealing=manual", "--no-hardware-benchmarks", "--no-telemetry"]
+ * }
+ */
 export type Bin = {
   name: string;
-  type?: "binary" | "tar" | "zip";
+  type?: "binary" | "tar" ;
   defaultArgs?: string[];
 };

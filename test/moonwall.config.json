@@ -46,6 +46,7 @@
     {
       "name": "dev_tanssi",
       "testFileDir": ["suites/tanssi"],
+      "description": "Basic Tanssi dev test",
       "foundation": {
         "type": "dev",
         "launchSpec": [
@@ -75,6 +76,7 @@
     },
     {
       "name": "zombie_wasm",
+      "description": "For upgrade testing using zombienet",
       "testFileDir": ["suites/zombie"],
       "foundation": {
         "type": "zombie",
@@ -142,6 +144,7 @@
     },
     {
       "name": "basic",
+      "description": "Suite of tests that doesnt involve any blockchain stuff",
       "testFileDir": ["suites/basic/"],
       "foundation": {
         "type": "read_only"
