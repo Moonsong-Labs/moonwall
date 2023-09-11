@@ -1,5 +1,5 @@
-import chalk from "chalk";
 import { ChopsticksLaunchSpec, DevLaunchSpec, RepoSpec, ZombieLaunchSpec } from "@moonwall/types";
+import chalk from "chalk";
 import path from "path";
 import { standardRepos } from "../lib/repoDefinitions";
 
@@ -30,7 +30,6 @@ function fetchDefaultArgs(binName: string, additionalRepos: RepoSpec[] = []): st
   if (!defaultArgs) {
     defaultArgs = ["--dev"];
   }
-  console.log(defaultArgs);
 
   return defaultArgs;
 }

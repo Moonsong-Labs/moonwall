@@ -12,3 +12,4 @@
 - [#251](https://github.com/Moonsong-Labs/moonwall/issues/251)
 - [#224](https://github.com/Moonsong-Labs/moonwall/issues/224)
 - [#255](https://github.com/Moonsong-Labs/moonwall/issues/255)
+- [#262](https://github.com/Moonsong-Labs/moonwall/issues/262)

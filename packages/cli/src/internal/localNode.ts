@@ -1,9 +1,9 @@
-import { ChildProcess, spawn } from "child_process";
-import chalk from "chalk";
+import { ChildProcess, execSync, spawn } from "child_process";
 import Debug from "debug";
-import { checkAccess, checkExists } from "./fileCheckers";
 import fs from "fs";
 import path from "path";
+import WebSocket from "ws";
+import { checkAccess, checkExists } from "./fileCheckers";
 const debugNode = Debug("global:node");
 
 export async function launchNode(cmd: string, args: string[], name: string): Promise<ChildProcess> {
@@ -68,33 +68,91 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
   runningNode.stderr?.on("data", writeLogToFile);
   runningNode.stdout?.on("data", writeLogToFile);
 
-  const binaryLogs: any[] = [];
-  await new Promise<void>((resolve, reject) => {
-    const timer = setTimeout(() => {
-      console.error(chalk.redBright("Failed to start Test Node."));
-      console.error(`Command: ${cmd} ${args.join(" ")}`);
-      console.error(`Logs:`);
-      console.error(binaryLogs.map((chunk) => chunk.toString()).join("\n"));
-      reject("Failed to launch node");
-    }, 70000);
-
-    const onData = async (chunk: any) => {
-      debugNode(chunk.toString());
-
-      binaryLogs.push(chunk);
-      if (
-        chunk.toString().match(/Development Service Ready/) ||
-        chunk.toString().match(/ RPC listening on port/)
-      ) {
-        clearTimeout(timer);
-        runningNode.stderr!.off("data", onData);
-        runningNode.stdout!.off("data", onData);
-        resolve();
+  probe: for (;;) {
+    try {
+      const ports = await findPortsByPid(runningNode.pid);
+      if (ports) {
+        for (const port of ports) {
+          try {
+            await checkWebSocketJSONRPC(port);
+            console.log(`Port ${port} supports WebSocket JSON RPC!`);
+            break probe;
+          } catch {
+            continue;
+          }
+        }
       }
-    };
-    runningNode.stderr!.on("data", onData);
-    runningNode.stdout!.on("data", onData);
-  });
+    } catch {
+      continue;
+    }
+  }
 
   return runningNode;
+}
+
+async function checkWebSocketJSONRPC(port: number): Promise<boolean> {
+  return new Promise((resolve, reject) => {
+    const ws = new WebSocket(`ws://localhost:${port}`);
+
+    ws.on("open", () => {
+      ws.send(
+        JSON.stringify({
+          jsonrpc: "2.0",
+          id: 1,
+          method: "system_chain",
+          params: [],
+        })
+      );
+    });
+
+    ws.on("message", (data) => {
+      try {
+        const response = JSON.parse(data.toString());
+        if (response.jsonrpc === "2.0" && response.id === 1) {
+          resolve(true);
+        } else {
+          reject(false);
+        }
+      } catch (e) {
+        reject(false);
+      }
+      ws.close();
+    });
+
+    ws.on("error", () => {
+      reject(false);
+    });
+  });
+}
+
+async function findPortsByPid(
+  pid: number,
+  retryCount: number = 600,
+  retryDelay: number = 100
+): Promise<number[]> {
+  for (let i = 0; i < retryCount; i++) {
+    try {
+      const stdout = execSync(`lsof -i -n -P | grep LISTEN | grep ${pid} | grep IPv4`).toString();
+      const ports: number[] = [];
+      const lines = stdout.split("\n");
+      for (const line of lines) {
+        const match = line.match(/127\.0\.0\.1:(\d+)/);
+        if (match) {
+          ports.push(Number(match[1]));
+        }
+      }
+
+      if (ports.length) {
+        return ports;
+      }
+    } catch (error) {
+      if (i === retryCount - 1) {
+        throw error;
+      }
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, retryDelay));
+  }
+
+  return [];
 }
