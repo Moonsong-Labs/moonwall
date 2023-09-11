@@ -10,7 +10,7 @@ import { createReadStream, stat } from "node:fs";
 import WebSocket from "ws";
 import { parse } from "yaml";
 import { clearNodeLogs, reportLogLocation } from "../internal/cmdFunctions/tempLogs";
-import { importJsonConfig, loadEnvVars } from "../lib/configReader";
+import { cacheConfig, loadEnvVars, importAsyncConfig } from "../lib/configReader";
 import { MoonwallContext, runNetworkOnly } from "../lib/globalContext";
 import { executeTests } from "./runTests";
 import { commonChecks } from "../internal/launcherCommon";
@@ -20,8 +20,9 @@ inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 let lastSelected = 0;
 
 export async function runNetworkCmd(args) {
+  await cacheConfig();
   process.env.MOON_TEST_ENV = args.envName;
-  const globalConfig = importJsonConfig();
+  const globalConfig = await importAsyncConfig();
   const env = globalConfig.environments.find(({ name }) => name === args.envName)!;
 
   if (!env) {
@@ -195,7 +196,7 @@ export async function runNetworkCmd(args) {
 const reportServicePorts = async () => {
   const ctx = MoonwallContext.getContext();
   const portsList: { port: string; name: string }[] = [];
-  const globalConfig = importJsonConfig();
+  const globalConfig = await importAsyncConfig();
   const config = globalConfig.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
   if (config.foundation.type == "dev") {
     const port =
@@ -247,7 +248,7 @@ const resolveCommandChoice = async () => {
 
   const ctx = await MoonwallContext.getContext().connectEnvironment();
   const api = ctx.providers.find((a) => a.type == "polkadotJs")!.api as ApiPromise;
-  const globalConfig = importJsonConfig();
+  const globalConfig = await importAsyncConfig();
   const config = globalConfig.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
 
   // TODO: Support multiple chains on chopsticks
@@ -419,41 +420,5 @@ const resolveTailChoice = async () => {
     }
 
     // TODO: Extend W.I.P below so support interactive tests whilst tailing logs
-
-    // ui.updateBottomBar(
-    //   `Press ${chalk.bgWhite.bgBlack("Q")} to go back, or ${chalk.bgWhite.bgBlack(
-    //     "T"
-    //   )} to execute tests ...`
-    // );
-    // inquirer
-    //   .prompt({
-    //     name: "char",
-    //     type: "input",
-    //     filter(val: string) {
-    //       const choice = val.toUpperCase();
-    //       switch (choice) {
-    //         case "Q":
-    //           runningNode.stderr!.off("data", onData);
-    //           runningNode.stdout!.off("data", onData);
-    //           return;
-
-    //         case "T":
-    //           new Promise(async (resolve)=>{
-    //             const globalConfig = importJsonConfig();
-    //             const env = globalConfig.environments.find(
-    //               ({ name }) => name === process.env.MOON_TEST_ENV
-    //             )!;
-    //             await resolveTestChoice(env);
-    //             resolve(true)
-    //           })
-    //           break;
-
-    //         default:
-    //           ui.updateBottomBar(`Invalid input: ${chalk.redBright(choice)}/n`);
-    //           break;
-    //       }
-    //     },
-    //   })
-    //   .then(() => resolve(true));
   });
 };

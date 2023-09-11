@@ -14,13 +14,13 @@ import chalk from "chalk";
 import Debug from "debug";
 import { setTimeout } from "timers/promises";
 import { assert } from "vitest";
-import { importJsonConfig, isEthereumDevConfig } from "../../lib/configReader";
+import { importAsyncConfig, isEthereumDevConfig } from "../../lib/configReader";
 import { extractError } from "../../lib/contextHelpers";
 import { MoonwallContext } from "../../lib/globalContext";
 const debug = Debug("DevTest");
 
 export async function getDevProviderPath() {
-  const globalConfig = importJsonConfig();
+  const globalConfig = await importAsyncConfig();
   const env = globalConfig.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
   return env.connections
     ? env.connections[0].endpoints[0].replace("ws://", "http://")

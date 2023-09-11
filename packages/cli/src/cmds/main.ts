@@ -9,8 +9,8 @@ import { SemVer, lt } from "semver";
 import pkg from "../../package.json" assert { type: "json" };
 import { fetchArtifact, getVersions } from "../internal/cmdFunctions/fetchArtifact";
 import { createFolders, generateConfig } from "../internal/cmdFunctions/initialisation";
-import { importJsonConfig } from "../lib/configReader";
-import ghRepos from "../lib/repoDefinitions";
+import { importAsyncConfig } from "../lib/configReader";
+import { allReposAsync } from "../lib/repoDefinitions";
 import { runNetworkCmd } from "./runNetwork";
 import { testCmd } from "./runTests";
 
@@ -20,7 +20,7 @@ export async function main() {
   for (;;) {
     let globalConfig: MoonwallConfig | undefined;
     try {
-      globalConfig = importJsonConfig();
+      globalConfig = await importAsyncConfig();
     } catch (e) {
       console.log(e);
     }
@@ -131,7 +131,7 @@ async function mainMenu(config: MoonwallConfig) {
 }
 
 async function resolveDownloadChoice() {
-  const binList = ghRepos().reduce((acc, curr) => {
+  const binList = (await allReposAsync()).reduce((acc, curr) => {
     acc.push(...curr.binaries.map((bin) => bin.name).flat());
     acc.push(new inquirer.Separator());
     acc.push("Back");

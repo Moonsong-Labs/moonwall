@@ -23,7 +23,7 @@ import {
   vitestAutoUrl,
 } from "../internal/providerFactories";
 import {
-  importJsonConfig,
+  importAsyncConfig,
   isEthereumDevConfig,
   isEthereumZombieConfig,
   isOptionSet,
@@ -47,7 +47,7 @@ export class MoonwallContext {
 
     const foundationHandlers: Record<
       FoundationType,
-      (env: Environment) => IGlobalContextFoundation
+      (env: Environment, config?: MoonwallConfig) => IGlobalContextFoundation
     > = {
       read_only: this.handleReadOnly,
       chopsticks: this.handleChopsticks,
@@ -57,7 +57,7 @@ export class MoonwallContext {
     };
 
     const foundationHandler = foundationHandlers[env.foundation.type];
-    this.environment = { providers: [], nodes: [], ...foundationHandler.call(this, env) };
+    this.environment = { providers: [], nodes: [], ...foundationHandler.call(this, env, config) };
   }
 
   private handleZombie(env: Environment): IGlobalContextFoundation {
@@ -81,12 +81,15 @@ export class MoonwallContext {
     };
   }
 
-  private handleDev(env: Environment): IGlobalContextFoundation {
+  private handleDev(env: Environment, config: MoonwallConfig): IGlobalContextFoundation {
     if (env.foundation.type !== "dev") {
       throw new Error(`Foundation type must be 'dev'`);
     }
 
-    const { cmd, args, launch } = parseRunCmd(env.foundation.launchSpec![0]);
+    const { cmd, args, launch } = parseRunCmd(
+      env.foundation.launchSpec![0],
+      config.additionalRepos
+    );
     return {
       name: env.name,
       foundationType: "dev",
@@ -144,7 +147,7 @@ export class MoonwallContext {
   }
 
   private async startZombieNetwork() {
-    const config = importJsonConfig();
+    const config = await importAsyncConfig();
     const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
 
     if (env.foundation.type !== "zombie") {
@@ -221,7 +224,7 @@ export class MoonwallContext {
   }
 
   public async connectEnvironment(): Promise<MoonwallContext> {
-    const config = importJsonConfig();
+    const config = await importAsyncConfig();
     const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
 
     if (this.environment.foundationType == "zombie") {
@@ -358,7 +361,7 @@ export class MoonwallContext {
 }
 
 export const contextCreator = async () => {
-  const config = importJsonConfig();
+  const config = await importAsyncConfig();
   const ctx = MoonwallContext.getContext(config);
   await runNetworkOnly();
   await ctx.connectEnvironment();
@@ -366,7 +369,7 @@ export const contextCreator = async () => {
 };
 
 export const runNetworkOnly = async () => {
-  const config = importJsonConfig();
+  const config = await importAsyncConfig();
   const ctx = MoonwallContext.getContext(config);
   await ctx.startNetwork();
 };

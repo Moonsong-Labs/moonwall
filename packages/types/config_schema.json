@@ -513,13 +513,6 @@
                                 },
                                 "name": {
                                     "type": "string"
-                                },
-                                "type": {
-                                    "enum": [
-                                        "binary",
-                                        "tar"
-                                    ],
-                                    "type": "string"
                                 }
                             },
                             "type": "object"

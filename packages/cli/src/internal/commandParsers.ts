@@ -1,5 +1,7 @@
 import chalk from "chalk";
-import { ChopsticksLaunchSpec, DevLaunchSpec, ZombieLaunchSpec } from "@moonwall/types";
+import { ChopsticksLaunchSpec, DevLaunchSpec, RepoSpec, ZombieLaunchSpec } from "@moonwall/types";
+import path from "path";
+import { standardRepos } from "../lib/repoDefinitions";
 
 export function parseZombieCmd(launchSpec: ZombieLaunchSpec) {
   if (launchSpec) {
@@ -13,24 +15,32 @@ export function parseZombieCmd(launchSpec: ZombieLaunchSpec) {
   }
 }
 
-export function parseRunCmd(launchSpec: DevLaunchSpec) {
+function fetchDefaultArgs(binName: string, additionalRepos: RepoSpec[] = []): string[] {
+  let defaultArgs: string[] | undefined;
+
+  const repos = [...standardRepos(), ...additionalRepos];
+  for (const repo of repos) {
+    const foundBin = repo.binaries.find((bin) => bin.name === binName);
+    if (foundBin) {
+      defaultArgs = foundBin.defaultArgs;
+      break;
+    }
+  }
+
+  if (!defaultArgs) {
+    defaultArgs = ["--dev"];
+  }
+  console.log(defaultArgs);
+
+  return defaultArgs;
+}
+
+export function parseRunCmd(launchSpec: DevLaunchSpec, additionalRepos?: RepoSpec[]) {
   const launch = !launchSpec.running ? true : launchSpec.running;
   const cmd = launchSpec.binPath;
   const args = launchSpec.options
     ? [...launchSpec.options]
-    : [
-        "--no-hardware-benchmarks",
-        "--no-telemetry",
-        "--reserved-only",
-        "--rpc-cors=all",
-        "--no-grandpa",
-        "--sealing=manual",
-        "--force-authoring",
-        "--no-prometheus",
-        "--alice",
-        "--chain=moonbase-dev",
-        "--tmp",
-      ];
+    : fetchDefaultArgs(path.basename(launchSpec.binPath), additionalRepos);
 
   `ws://127.0.0.1:${10000 + Number(process.env.VITEST_POOL_ID) * 100}`;
 

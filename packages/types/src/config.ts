@@ -479,23 +479,20 @@ export type RepoSpec = {
  * `Bin` type defines the binary configurations within a `RepoSpec`.
  *
  * @property {string} name - The name or pattern to identify the binary.
- * @property {("binary"|"tar")?} type - The type of the binary. It's optional and can be one of "binary" or "tar".
  * @property {string[]?} defaultArgs - An optional array of default arguments to be used with the binary.
  *
  * @example
  * {
  *   "name": "hydradx"
  * }
- * 
+ *
  * @example
  * {
  *   "name": "astar-collator*ubuntu-x86*",
- *   "type": "tar",
  *   "defaultArgs": ["--dev", "--sealing=manual", "--no-hardware-benchmarks", "--no-telemetry"]
  * }
  */
 export type Bin = {
   name: string;
-  type?: "binary" | "tar" ;
   defaultArgs?: string[];
 };

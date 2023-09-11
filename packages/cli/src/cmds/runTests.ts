@@ -5,12 +5,13 @@ import path from "path";
 import type { UserConfig } from "vitest";
 import { startVitest } from "vitest/node";
 import { clearNodeLogs } from "../internal/cmdFunctions/tempLogs";
-import { importJsonConfig, loadEnvVars } from "../lib/configReader";
+import { cacheConfig, loadEnvVars, importAsyncConfig } from "../lib/configReader";
 import { contextCreator } from "../lib/globalContext";
 import { commonChecks } from "../internal/launcherCommon";
 
 export async function testCmd(envName: string, additionalArgs?: object) {
-  const globalConfig = importJsonConfig();
+  await cacheConfig();
+  const globalConfig = await importAsyncConfig();
   const env = globalConfig.environments.find(({ name }) => name === envName)!;
   process.env.MOON_TEST_ENV = envName;
 
@@ -41,8 +42,7 @@ export async function testCmd(envName: string, additionalArgs?: object) {
 }
 
 export async function executeTests(env: Environment, additionalArgs?: object) {
-  const globalConfig = importJsonConfig();
-
+  const globalConfig = await importAsyncConfig();
   if (env.foundation.type === "read_only") {
     try {
       if (!process.env.MOON_TEST_ENV) {
@@ -117,6 +117,7 @@ export async function executeTests(env: Environment, additionalArgs?: object) {
 
   try {
     const folders = env.testFileDir.map((folder) => path.join(".", folder, "/"));
+    console.log("hello");
     return await startVitest("test", folders, { ...options, ...additionalArgs });
   } catch (e) {
     console.error(e);

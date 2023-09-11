@@ -3,11 +3,11 @@ import chalk from "chalk";
 import { execSync } from "child_process";
 import fs from "fs";
 import path from "path";
-import { importJsonConfig, parseZombieConfigForBins } from "../lib/configReader";
+import { importAsyncConfig, parseZombieConfigForBins } from "../lib/configReader";
 import { checkAlreadyRunning, downloadBinsIfMissing, promptAlreadyRunning } from "./fileCheckers";
 
 export async function commonChecks(env: Environment) {
-  const globalConfig = importJsonConfig();
+  const globalConfig = await importAsyncConfig();
 
   // TODO: This is begging for some Dependency Injection
   if (env.foundation.type == "dev") {
@@ -52,7 +52,7 @@ async function devBinCheck(env: Environment) {
 }
 
 async function executeScript(scriptCommand: string) {
-  const scriptsDir = importJsonConfig().scriptsDir;
+  const scriptsDir = (await importAsyncConfig()).scriptsDir;
   const files = await fs.promises.readdir(scriptsDir);
 
   try {

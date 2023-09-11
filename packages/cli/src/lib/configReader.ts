@@ -1,8 +1,10 @@
 import "@moonbeam-network/api-augment";
 import { MoonwallConfig } from "@moonwall/types";
-import fs from "fs/promises";
+import fs, { readFile } from "fs/promises";
 import { readFileSync } from "fs";
 import path from "path";
+
+let cachedConfig: MoonwallConfig | undefined;
 
 export async function loadConfig(path: string): Promise<MoonwallConfig> {
   if (
@@ -43,7 +45,25 @@ export function isEthereumDevConfig(): boolean {
   return env.foundation.type == "dev" && !env.foundation.launchSpec[0].disableDefaultEthProviders;
 }
 
+export async function cacheConfig() {
+  const configPath = process.env.MOON_CONFIG_PATH!;
+  const filePath = path.isAbsolute(configPath) ? configPath : path.join(process.cwd(), configPath);
+  try {
+    const file = await readFile(filePath, "utf8");
+    const json = JSON.parse(file);
+    const replacedJson = replaceEnvVars(json);
+    cachedConfig = replacedJson as MoonwallConfig;
+  } catch (e) {
+    console.error(e);
+    throw new Error(`Error import config at ${filePath}`);
+  }
+}
+
 export function importJsonConfig(): MoonwallConfig {
+  if (cachedConfig) {
+    return cachedConfig;
+  }
+
   const configPath = process.env.MOON_CONFIG_PATH!;
   const filePath = path.isAbsolute(configPath) ? configPath : path.join(process.cwd(), configPath);
 
@@ -52,7 +72,29 @@ export function importJsonConfig(): MoonwallConfig {
     const json = JSON.parse(file);
     const replacedJson = replaceEnvVars(json);
 
-    return replacedJson as MoonwallConfig;
+    cachedConfig = replacedJson as MoonwallConfig;
+    return cachedConfig;
+  } catch (e) {
+    console.error(e);
+    throw new Error(`Error import config at ${filePath}`);
+  }
+}
+
+export async function importAsyncConfig(): Promise<MoonwallConfig> {
+  if (cachedConfig) {
+    return cachedConfig;
+  }
+
+  const configPath = process.env.MOON_CONFIG_PATH!;
+  const filePath = path.isAbsolute(configPath) ? configPath : path.join(process.cwd(), configPath);
+
+  try {
+    const file = await readFile(filePath, "utf8");
+    const json = JSON.parse(file);
+    const replacedJson = replaceEnvVars(json);
+
+    cachedConfig = replacedJson as MoonwallConfig;
+    return cachedConfig;
   } catch (e) {
     console.error(e);
     throw new Error(`Error import config at ${filePath}`);

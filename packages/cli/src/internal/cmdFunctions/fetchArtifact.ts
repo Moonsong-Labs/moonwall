@@ -6,7 +6,7 @@ import chalk from "chalk";
 import { runTask } from "../processHelpers";
 import { minimatch } from "minimatch";
 import { downloader } from "./downloader";
-import ghRepos from "../../lib/repoDefinitions";
+import { allReposAsync } from "../../lib/repoDefinitions";
 import { execSync } from "node:child_process";
 
 export async function fetchArtifact(args) {
@@ -16,7 +16,9 @@ export async function fetchArtifact(args) {
   }
 
   const binary: string = args.bin;
-  const repo = ghRepos().find((network) => network.binaries.find((bin) => bin.name === binary));
+  const repo = (await allReposAsync()).find((network) =>
+    network.binaries.find((bin) => bin.name === binary)
+  );
 
   if (!repo) {
     throw new Error(`Downloading ${binary} unsupported`);
@@ -37,7 +39,7 @@ export async function fetchArtifact(args) {
     : args.ver === "latest"
     ? releases.find((release) => release.assets.find((asset) => asset.name === binary))
     : releases
-        .filter((release) => release.tag_name.includes("v" + args.ver))
+        .filter((release) => release.tag_name.includes(args.ver))
         .find((release) => release.assets.find((asset) => minimatch(asset.name, binary)));
 
   if (release == null) {
@@ -77,7 +79,9 @@ export async function fetchArtifact(args) {
 }
 
 export async function getVersions(name: string, runtime: boolean = false) {
-  const repo = ghRepos().find((network) => network.binaries.find((bin) => bin.name === name));
+  const repo = (await allReposAsync()).find((network) =>
+    network.binaries.find((bin) => bin.name === name)
+  );
   if (!repo) {
     throw new Error(`Network not found for ${name}`);
   }

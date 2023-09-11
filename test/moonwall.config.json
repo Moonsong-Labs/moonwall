@@ -25,12 +25,39 @@
           "name": "hydradx"
         }
       ]
+    },
+    {
+      "name": "interlay",
+      "ghAuthor": "interlay",
+      "ghRepo": "interbtc",
+      "binaries": [
+        {
+          "name": "interbtc-parachain"
+        }
+      ]
     }
   ],
   "environments": [
     {
+      "name": "interbtc",
+      "testFileDir": ["suites/basic"],
+      "description": "A star is born",
+      "foundation": {
+        "type": "dev",
+        "launchSpec": [
+          {
+            "binPath": "./tmp/interbtc-parachain",
+            "disableDefaultEthProviders": true,
+            "options": ["--dev", "--sealing=manual", "--no-hardware-benchmarks", "--no-telemetry"],
+            "newRpcBehaviour": true
+          }
+        ]
+      }
+    },
+    {
       "name": "astar",
       "testFileDir": ["suites/basic"],
+      "description": "A star is born",
       "foundation": {
         "type": "dev",
         "launchSpec": [
@@ -53,7 +80,6 @@
           {
             "binPath": "./tmp/tanssi-node",
             "disableDefaultEthProviders": true,
-            "options": ["--dev", "--sealing=manual", "--no-hardware-benchmarks", "--no-telemetry"],
             "newRpcBehaviour": true
           }
         ]
