@@ -3,7 +3,7 @@ import { ApiPromise } from "@polkadot/api";
 import chalk from "chalk";
 import clear from "clear";
 import { watch } from "fs";
-import fs from "fs/promises";
+import fs, { promises as fsPromises } from "fs";
 import inquirer from "inquirer";
 import PressToContinuePrompt from "inquirer-press-to-continue";
 import { createReadStream, stat } from "node:fs";
@@ -152,7 +152,7 @@ export async function runNetworkCmd(args) {
     switch (choice.MenuChoice) {
       case 1:
         clear();
-        await resolveTailChoice();
+        await resolveTailChoice(env);
         lastSelected = 0;
         clear();
         break;
@@ -208,7 +208,7 @@ const reportServicePorts = async () => {
     portsList.push(
       ...(await Promise.all(
         config.foundation.launchSpec.map(async ({ configPath, name }) => {
-          const yaml = parse((await fs.readFile(configPath)).toString());
+          const yaml = parse((await fsPromises.readFile(configPath)).toString());
           return { name, port: yaml.port || "8000" };
         })
       ))
@@ -257,7 +257,7 @@ const resolveCommandChoice = async () => {
       config.foundation.type == "chopsticks"
         ? await Promise.all(
             config.foundation.launchSpec.map(async ({ configPath }) => {
-              const yaml = parse((await fs.readFile(configPath)).toString());
+              const yaml = parse((await fsPromises.readFile(configPath)).toString());
               return yaml.port || "8000";
             })
           )
@@ -331,7 +331,7 @@ const resolveInfoChoice = async (env: Environment) => {
   );
 };
 
-const resolveGrepChoice = async (env: Environment) => {
+const resolveGrepChoice = async (env: Environment, silent: boolean = false) => {
   const choice = await inquirer.prompt({
     name: "grep",
     type: "input",
@@ -339,21 +339,34 @@ const resolveGrepChoice = async (env: Environment) => {
     default: process.env.MOON_GREP || "D01T01",
   });
   process.env.MOON_RECYCLE = "true";
-
-  console.log(`Running tests with grep pattern: ${await choice.grep}`);
   process.env.MOON_GREP = await choice.grep;
-  return await executeTests(env, { testNamePattern: await choice.grep });
+  const opts = { testNamePattern: await choice.grep, silent };
+  if (silent) {
+    opts["reporters"] = ["dot"];
+  }
+  return await executeTests(env, opts);
 };
 
-const resolveTestChoice = async (env: Environment) => {
+const resolveTestChoice = async (env: Environment, silent: boolean = false) => {
   process.env.MOON_RECYCLE = "true";
-  return await executeTests(env);
+  const opts = { silent };
+  if (silent) {
+    opts["reporters"] = ["dot"];
+  }
+  return await executeTests(env, opts);
 };
 
-const resolveTailChoice = async () => {
-  const ui = new inquirer.ui.BottomBar();
+const resolveTailChoice = async (env: Environment) => {
 
-  await new Promise((resolve) => {
+  // TODO: Add Pause/Continue tail toggle
+  // TODO: Add 
+  const ui = new inquirer.ui.BottomBar({
+    bottomBar: `📜 Tailing Logs, commands: ${chalk.bgWhite.black(
+      "[q]"
+    )} - quit, ${chalk.bgWhite.black("[t]")} - test, ${chalk.bgWhite.black("[g]")} - grep test\n`,
+  });
+  process.stdin.setEncoding("utf8");
+  await new Promise(async (resolve) => {
     const ctx = MoonwallContext.getContext();
     const onData = (chunk: any) => ui.log.write(chunk.toString());
 
@@ -402,23 +415,60 @@ const resolveTailChoice = async () => {
           resolve("");
         });
     } else {
-      const runningNode = ctx.nodes[0];
-      runningNode.stderr!.on("data", onData);
-      runningNode.stdout!.on("data", onData);
-      inquirer
-        .prompt({
-          name: "exitTail",
-          type: "press-to-continue",
-          anyKey: true,
-          pressToContinueMessage: " Press any key to stop tailing logs and go back  ↩️",
-        })
-        .then(() => {
-          runningNode.stderr!.off("data", onData);
-          runningNode.stdout!.off("data", onData);
-          resolve("");
+      const logFilePath = reportLogLocation(true);
+      // eslint-disable-next-line prefer-const
+      let currentReadPosition = 0;
+      process.stdin.resume();
+      const printLogs = (newReadPosition: number, currentReadPosition: number) => {
+        const stream = fs.createReadStream(logFilePath, {
+          start: currentReadPosition,
+          end: newReadPosition,
         });
-    }
+        stream.on("data", onData);
+        stream.on("end", () => {
+          currentReadPosition = newReadPosition;
+        });
+      };
 
-    // TODO: Extend W.I.P below so support interactive tests whilst tailing logs
+      const readLog = () => {
+        const stats = fs.statSync(logFilePath);
+        const newReadPosition = stats.size;
+
+        if (newReadPosition > currentReadPosition) {
+          printLogs(newReadPosition, currentReadPosition);
+        }
+        process.stdin.resume();
+      };
+
+      printLogs(fs.statSync(logFilePath).size, 0);
+
+      process.stdin.on("data", async (key) => {
+        process.stdin.pause();
+        const char = key.toString().trim();
+
+        if (char === "q") {
+          fs.unwatchFile(logFilePath);
+          process.stdin.pause();
+          resolve("");
+        }
+
+        if (char === "t") {
+          await resolveTestChoice(env, true);
+          process.stdin.resume();
+        }
+
+        if (char === "g") {
+          process.stdin.pause();
+          await resolveGrepChoice(env, true);
+          process.stdin.resume();
+        }
+
+        process.stdin.resume();
+      });
+
+      fs.watchFile(logFilePath, () => {
+        readLog();
+      });
+    }
   });
 };
