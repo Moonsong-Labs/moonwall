@@ -13,6 +13,9 @@ import { importAsyncConfig } from "../lib/configReader";
 import { allReposAsync } from "../lib/repoDefinitions";
 import { runNetworkCmd } from "./runNetwork";
 import { testCmd } from "./runTests";
+import fs from "fs";
+import { executeScript } from "../internal/launcherCommon";
+import path from "path";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
@@ -49,12 +52,12 @@ async function mainMenu(config: MoonwallConfig) {
       ? [
           {
             name: !configPresent
-              ? "1) Initialise:                         Generate a new Moonwall Config File."
+              ? "1) Initialise:                         Generate a new Moonwall Config File"
               : chalk.dim("1) Initialise:                       ✅  CONFIG ALREADY GENERATED"),
             value: "init",
           },
           {
-            name: "2) Artifact Downloader:                Fetch artifacts (x86) from GitHub repos.",
+            name: "2) Artifact Downloader:                Fetch artifacts (x86) from GitHub repos",
             value: "download",
           },
           {
@@ -64,24 +67,24 @@ async function mainMenu(config: MoonwallConfig) {
         ]
       : [
           {
-            name: configPresent
-              ? `1) Network Launcher & Toolbox:         Launch network, access tools: tail logs, interactive tests etc.`
-              : chalk.dim("2) Network Launcher & Toolbox            NO CONFIG FOUND"),
+            name: `1) Execute Script:                     Run scripts placed in your config defined script directory`,
+            value: "exec",
+          },
+          {
+            name: `2) Network Launcher & Toolbox:         Launch network, access tools: tail logs, interactive tests etc`,
             value: "run",
           },
           {
-            name: configPresent
-              ? "2) Test Suite Execution:               Run automated tests, start network if needed."
-              : chalk.dim("3) Test Suite Execution:             NO CONFIG FOUND"),
+            name: "3) Test Suite Execution:               Run automated tests, start network if needed",
             value: "test",
           },
 
           {
-            name: "3) Artifact Downloader:                Fetch artifacts (x86) from GitHub repos.",
+            name: "4) Artifact Downloader:                Fetch artifacts (x86) from GitHub repos",
             value: "download",
           },
           {
-            name: `4) Quit Application`,
+            name: `5) Quit Application`,
             value: "quit",
           },
         ],
@@ -123,10 +126,106 @@ async function mainMenu(config: MoonwallConfig) {
     }
     case "download":
       await resolveDownloadChoice();
-
       return false;
+
     case "quit":
       return await resolveQuitChoice();
+
+    case "exec":
+      return await resolveExecChoice(config);
+
+    default:
+      throw new Error("Invalid choice");
+  }
+}
+
+async function resolveExecChoice(config: MoonwallConfig) {
+  const scriptDir = config.scriptsDir;
+
+  if (!scriptDir) {
+    await inquirer.prompt({
+      name: "test complete",
+      type: "press-to-continue",
+      anyKey: true,
+      pressToContinueMessage: `ℹ️  No scriptDir property defined at ${chalk.bgWhiteBright.black(
+        "moonwall.config.json"
+      )}\n Press any key to continue...\n`,
+    });
+    return false;
+  }
+
+  if (!fs.existsSync(scriptDir)) {
+    await inquirer.prompt({
+      name: "test complete",
+      type: "press-to-continue",
+      anyKey: true,
+      pressToContinueMessage: `ℹ️  No scriptDir found at at ${chalk.bgWhiteBright.black(
+        path.join(process.cwd(), scriptDir)
+      )}\n Press any key to continue...\n`,
+    });
+    return false;
+  }
+
+  const files = await fs.promises.readdir(scriptDir);
+
+  if (!files) {
+    await inquirer.prompt({
+      name: "test complete",
+      type: "press-to-continue",
+      anyKey: true,
+      pressToContinueMessage: `ℹ️  No scripts found at ${chalk.bgWhiteBright.black(
+        path.join(process.cwd(), config.scriptsDir)
+      )}\n Press any key to continue...\n`,
+    });
+  }
+
+  const choices = files.map((file) => {
+    const ext = getExtString(file);
+    return { name: `${ext}:    ${path.basename(file, "")}`, value: file };
+  });
+
+  for (;;) {
+    const result = await inquirer.prompt({
+      name: "selections",
+      message: "Select which scripts you'd like to run (press ↩️ with none selected to go 🔙)\n",
+      type: "checkbox",
+      choices,
+    });
+
+    if (result.selections.length === 0) {
+      const result = await inquirer.prompt({
+        name: "none-selected",
+        message: "No scripts have been selected to run, do you wish to exit?",
+        type: "confirm",
+        default: true,
+      });
+
+      if (result["none-selected"]) {
+        return false;
+      } else {
+        continue;
+      }
+    }
+
+    for (const script of result.selections) {
+      const result = await inquirer.prompt({
+        name: "args",
+        message: `Enter any arguments for ${chalk.bgWhiteBright.black(
+          script
+        )} (press enter for none)`,
+        type: "input",
+      });
+
+      await executeScript(script, result.args);
+    }
+
+    await inquirer.prompt({
+      name: "test complete",
+      type: "press-to-continue",
+      anyKey: true,
+      pressToContinueMessage: `Press any key to continue...\n`,
+    });
+    return false;
   }
 }
 
@@ -308,19 +407,14 @@ const printIntro = async () => {
                        ##################################################       
                        ##################################################       
 `) +
-    chalk.magenta(`                                                                                
-            ***   ************************************************************  
-                                                                                
-****  *********************************************                                                     
-                                                                                
-            ***   ******************************************************        
-                                                                                
-    **   ***********************   *********************************************
-    **   ***********************    ********************************************
-                                                                                
-                                      ***  ******************************       
-                                                                                
-                      ****  *****************************                       
+    chalk.red(`                                                                                
+🧱🧱🧱   🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱  🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱
+  🧱🧱🧱🧱  🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱
+              🧱🧱🧱   🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱
+      🧱🧱   🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱   🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱
+        🧱🧱   🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱    🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱
+                                       🧱🧱🧱  🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱
+                      🧱🧱🧱🧱  🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱      
                                                                                                                                                               
 \n`);
   process.stdout.write(logo);
@@ -349,4 +443,18 @@ const printIntro = async () => {
       "================================================================================\n"
     )
   );
+};
+
+const getExtString = (file: string) => {
+  const ext = path.extname(file);
+  switch (ext) {
+    case ".js":
+      return chalk.bgYellow.black(ext);
+    case ".ts":
+      return chalk.bgBlue.black(ext);
+    case ".sh":
+      return chalk.bgGreen.black(ext);
+    default:
+      return chalk.bgRed.black(ext);
+  }
 };

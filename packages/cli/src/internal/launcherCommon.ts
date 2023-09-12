@@ -51,7 +51,7 @@ async function devBinCheck(env: Environment) {
   await downloadBinsIfMissing(env.foundation.launchSpec[0].binPath);
 }
 
-async function executeScript(scriptCommand: string) {
+export async function executeScript(scriptCommand: string, args?: string) {
   const scriptsDir = (await importAsyncConfig()).scriptsDir;
   const files = await fs.promises.readdir(scriptsDir);
 
@@ -68,13 +68,13 @@ async function executeScript(scriptCommand: string) {
 
     switch (ext) {
       case ".js":
-        execSync("node " + scriptPath, { stdio: "inherit" });
+        execSync("node " + scriptPath + ` ${args}`, { stdio: "inherit" });
         break;
       case ".ts":
-        execSync("pnpm tsx " + scriptPath, { stdio: "inherit" });
+        execSync("pnpm tsx " + scriptPath + ` ${args}`, { stdio: "inherit" });
         break;
       case ".sh":
-        execSync(scriptPath, { stdio: "inherit" });
+        execSync(scriptPath + ` ${args}`, { stdio: "inherit" });
         break;
       default:
         console.log(`${ext} not supported, skipping ${script}`);
