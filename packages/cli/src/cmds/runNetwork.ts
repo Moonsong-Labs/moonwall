@@ -2,10 +2,9 @@ import { Environment } from "@moonwall/types";
 import { ApiPromise } from "@polkadot/api";
 import chalk from "chalk";
 import clear from "clear";
-import fs, { promises as fsPromises, watch } from "fs";
+import fs, { promises as fsPromises } from "fs";
 import inquirer from "inquirer";
 import PressToContinuePrompt from "inquirer-press-to-continue";
-import { createReadStream, stat } from "node:fs";
 import WebSocket from "ws";
 import { parse } from "yaml";
 import { clearNodeLogs, reportLogLocation } from "../internal/cmdFunctions/tempLogs";
@@ -370,127 +369,80 @@ const resolveTailChoice = async (env: Environment) => {
   });
 
   await new Promise(async (resolve) => {
-    const ctx = MoonwallContext.getContext();
     const onData = (chunk: any) => ui.log.write(chunk.toString());
+    const logFilePath = process.env.MOON_MONITORED_NODE
+      ? process.env.MOON_MONITORED_NODE
+      : process.env.MOON_LOG_LOCATION;
 
-    if (ctx.foundation == "zombie") {
-      const logPath = process.env.MOON_MONITORED_NODE!;
-      let currentReadPosition = 0;
+    // eslint-disable-next-line prefer-const
+    let currentReadPosition = 0;
 
-      const readLog = () => {
-        stat(logPath, (err, stats) => {
-          if (err) {
-            console.error("Error reading log: ", err);
-            return;
-          }
-
-          const newReadPosition = stats.size;
-
-          if (newReadPosition > currentReadPosition) {
-            const stream = createReadStream(logPath, {
-              start: currentReadPosition,
-              end: newReadPosition,
-            });
-            stream.on("data", onData);
-            stream.on("end", () => {
-              currentReadPosition = newReadPosition;
-            });
-          }
-        });
-      };
-
-      const watcher = watch(logPath, (eventType) => {
-        if (eventType === "change") {
-          readLog();
-        }
+    const printLogs = (newReadPosition: number, currentReadPosition: number) => {
+      const stream = fs.createReadStream(logFilePath, {
+        start: currentReadPosition,
+        end: newReadPosition,
       });
+      stream.on("data", onData);
+      stream.on("end", () => {
+        currentReadPosition = newReadPosition;
+      });
+    };
 
-      readLog();
-      inquirer
-        .prompt({
-          name: "exitTail",
-          type: "press-to-continue",
-          anyKey: true,
-          pressToContinueMessage: " Press any key to stop tailing logs and go back  ↩️",
-        })
-        .then(() => {
-          watcher.close();
-          resolve("");
-        });
-    } else {
-      const logFilePath = process.env.MOON_LOG_LOCATION;
+    const readLog = () => {
+      const stats = fs.statSync(logFilePath);
+      const newReadPosition = stats.size;
 
-      // eslint-disable-next-line prefer-const
-      let currentReadPosition = 0;
+      if (newReadPosition > currentReadPosition && tailing) {
+        printLogs(newReadPosition, currentReadPosition);
+      }
+    };
 
-      const printLogs = (newReadPosition: number, currentReadPosition: number) => {
-        const stream = fs.createReadStream(logFilePath, {
-          start: currentReadPosition,
-          end: newReadPosition,
-        });
-        stream.on("data", onData);
-        stream.on("end", () => {
-          currentReadPosition = newReadPosition;
-        });
-      };
+    printLogs(fs.statSync(logFilePath).size, 0);
 
-      const readLog = () => {
-        const stats = fs.statSync(logFilePath);
-        const newReadPosition = stats.size;
+    const handleInputData = async (key: any) => {
+      ui.rl.input.pause();
+      const char = key.toString().trim();
 
-        if (newReadPosition > currentReadPosition && tailing) {
-          printLogs(newReadPosition, currentReadPosition);
-        }
-      };
+      if (char === "p") {
+        tailing = false;
+        ui.updateBottomBar(bottomBarContents + resumePauseProse[1]);
+      }
 
-      printLogs(fs.statSync(logFilePath).size, 0);
+      if (char === "r") {
+        printLogs(fs.statSync(logFilePath).size, currentReadPosition);
+        tailing = true;
+        ui.updateBottomBar(bottomBarContents + resumePauseProse[0]);
+      }
 
-      const handleInputData = async (key: any) => {
+      if (char === "q") {
+        ui.rl.input.removeListener("data", handleInputData);
         ui.rl.input.pause();
-        const char = key.toString().trim();
+        fs.unwatchFile(logFilePath);
+        resolve("");
+      }
 
-        if (char === "p") {
-          tailing = false;
-          // printLogs(fs.statSync(logFilePath).size, currentReadPosition);
-          ui.updateBottomBar(bottomBarContents + resumePauseProse[1]);
-        }
+      if (char === "t") {
+        await resolveTestChoice(env, true);
+        ui.updateBottomBar(bottomBarContents + resumePauseProse[tailing ? 0 : 1]);
+      }
 
-        if (char === "r") {
-          printLogs(fs.statSync(logFilePath).size, currentReadPosition);
-          tailing = true;
-          ui.updateBottomBar(bottomBarContents + resumePauseProse[0]);
-        }
-
-        if (char === "q") {
-          ui.rl.input.removeListener("data", handleInputData);
-          ui.rl.input.pause();
-          fs.unwatchFile(logFilePath);
-          resolve("");
-        }
-
-        if (char === "t") {
-          await resolveTestChoice(env, true);
-          ui.updateBottomBar(bottomBarContents + resumePauseProse[tailing ? 0 : 1]);
-        }
-
-        if (char === "g") {
-          ui.rl.input.pause();
-          tailing = false;
-          await resolveGrepChoice(env, true);
-          ui.updateBottomBar(bottomBarContents + resumePauseProse[tailing ? 0 : 1]);
-          tailing = true;
-          ui.rl.input.resume();
-        }
-
+      if (char === "g") {
+        ui.rl.input.pause();
+        tailing = false;
+        await resolveGrepChoice(env, true);
+        ui.updateBottomBar(bottomBarContents + resumePauseProse[tailing ? 0 : 1]);
+        tailing = true;
         ui.rl.input.resume();
-      };
+      }
 
-      ui.rl.input.on("data", handleInputData);
+      ui.rl.input.resume();
+    };
 
-      fs.watchFile(logFilePath, () => {
-        readLog();
-      });
-    }
+    ui.rl.input.on("data", handleInputData);
+
+    fs.watchFile(logFilePath, () => {
+      readLog();
+    });
   });
 
   ui.close();
