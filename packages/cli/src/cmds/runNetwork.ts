@@ -418,7 +418,7 @@ const resolveTailChoice = async (env: Environment) => {
           resolve("");
         });
     } else {
-      const logFilePath = reportLogLocation(true);
+      const logFilePath = process.env.MOON_LOG_LOCATION;
 
       // eslint-disable-next-line prefer-const
       let currentReadPosition = 0;
@@ -451,11 +451,12 @@ const resolveTailChoice = async (env: Environment) => {
 
         if (char === "p") {
           tailing = false;
-          printLogs(fs.statSync(logFilePath).size, 0);
+          // printLogs(fs.statSync(logFilePath).size, currentReadPosition);
           ui.updateBottomBar(bottomBarContents + resumePauseProse[1]);
         }
 
         if (char === "r") {
+          printLogs(fs.statSync(logFilePath).size, currentReadPosition);
           tailing = true;
           ui.updateBottomBar(bottomBarContents + resumePauseProse[0]);
         }
@@ -469,12 +470,14 @@ const resolveTailChoice = async (env: Environment) => {
 
         if (char === "t") {
           await resolveTestChoice(env, true);
+          ui.updateBottomBar(bottomBarContents + resumePauseProse[tailing ? 0 : 1]);
         }
 
         if (char === "g") {
           ui.rl.input.pause();
           tailing = false;
           await resolveGrepChoice(env, true);
+          ui.updateBottomBar(bottomBarContents + resumePauseProse[tailing ? 0 : 1]);
           tailing = true;
           ui.rl.input.resume();
         }

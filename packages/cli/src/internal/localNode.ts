@@ -25,15 +25,18 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
   process.once("SIGINT", onProcessInterrupt);
 
   const runningNode = spawn(cmd, args);
-
-  const fsStream = fs.createWriteStream(
-    path.join(
+  const logLocation = path
+    .join(
       dirPath,
       `${path.basename(cmd)}_node_${args.find((a) => a.includes("port"))?.split("=")[1]}_${
         runningNode.pid
       }.log`
     )
-  );
+    .replaceAll("node_node_undefined", "chopsticks");
+
+  process.env.MOON_LOG_LOCATION = logLocation;
+
+  const fsStream = fs.createWriteStream(logLocation);
 
   runningNode.once("exit", () => {
     process.removeListener("exit", onProcessExit);

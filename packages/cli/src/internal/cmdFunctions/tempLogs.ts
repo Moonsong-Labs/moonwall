@@ -22,7 +22,9 @@ export function reportLogLocation(silent: boolean = false) {
   let consoleMessage = "";
   let filePath = "";
   try {
-    filePath = path.join(dirPath, result.find((file) => path.extname(file) == ".log")!);
+    filePath = process.env.MOON_LOG_LOCATION
+      ? process.env.MOON_LOG_LOCATION
+      : path.join(dirPath, result.find((file) => path.extname(file) == ".log")!);
     consoleMessage = `  🪵   Log location: ${filePath}`;
   } catch (e) {
     console.error(e);
