@@ -75,7 +75,7 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
         for (const port of ports) {
           try {
             await checkWebSocketJSONRPC(port);
-            console.log(`Port ${port} supports WebSocket JSON RPC!`);
+            // console.log(`Port ${port} supports WebSocket JSON RPC!`);
             break probe;
           } catch {
             continue;
@@ -132,11 +132,12 @@ async function findPortsByPid(
 ): Promise<number[]> {
   for (let i = 0; i < retryCount; i++) {
     try {
-      const stdout = execSync(`lsof -i -n -P | grep LISTEN | grep ${pid} | grep IPv4`).toString();
+      const stdout = execSync(`lsof -i -n -P | grep LISTEN | grep ${pid}`).toString();
       const ports: number[] = [];
       const lines = stdout.split("\n");
       for (const line of lines) {
-        const match = line.match(/127\.0\.0\.1:(\d+)/);
+        const regex = /(?:\*|127\.0\.0\.1):(\d+)/;
+        const match = line.match(regex);
         if (match) {
           ports.push(Number(match[1]));
         }
