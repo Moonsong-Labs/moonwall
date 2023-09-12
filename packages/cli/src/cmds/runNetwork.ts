@@ -2,18 +2,17 @@ import { Environment } from "@moonwall/types";
 import { ApiPromise } from "@polkadot/api";
 import chalk from "chalk";
 import clear from "clear";
-import { watch } from "fs";
-import fs, { promises as fsPromises } from "fs";
+import fs, { promises as fsPromises, watch } from "fs";
 import inquirer from "inquirer";
 import PressToContinuePrompt from "inquirer-press-to-continue";
 import { createReadStream, stat } from "node:fs";
 import WebSocket from "ws";
 import { parse } from "yaml";
 import { clearNodeLogs, reportLogLocation } from "../internal/cmdFunctions/tempLogs";
-import { cacheConfig, loadEnvVars, importAsyncConfig } from "../lib/configReader";
+import { commonChecks } from "../internal/launcherCommon";
+import { cacheConfig, importAsyncConfig, loadEnvVars } from "../lib/configReader";
 import { MoonwallContext, runNetworkOnly } from "../lib/globalContext";
 import { executeTests } from "./runTests";
-import { commonChecks } from "../internal/launcherCommon";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
@@ -357,15 +356,19 @@ const resolveTestChoice = async (env: Environment, silent: boolean = false) => {
 };
 
 const resolveTailChoice = async (env: Environment) => {
+  let tailing: boolean = true;
+  const resumePauseProse = [
+    `, ${chalk.bgWhite.black("[p]")} - pause tail\n`,
+    `, ${chalk.bgWhite.black("[r]")} - resume tail\n`,
+  ];
+  const bottomBarContents = `📜 Tailing Logs, commands: ${chalk.bgWhite.black(
+    "[q]"
+  )} - quit, ${chalk.bgWhite.black("[t]")} - test, ${chalk.bgWhite.black("[g]")} - grep test`;
 
-  // TODO: Add Pause/Continue tail toggle
-  // TODO: Add 
   const ui = new inquirer.ui.BottomBar({
-    bottomBar: `📜 Tailing Logs, commands: ${chalk.bgWhite.black(
-      "[q]"
-    )} - quit, ${chalk.bgWhite.black("[t]")} - test, ${chalk.bgWhite.black("[g]")} - grep test\n`,
+    bottomBar: bottomBarContents + resumePauseProse[0],
   });
-  process.stdin.setEncoding("utf8");
+
   await new Promise(async (resolve) => {
     const ctx = MoonwallContext.getContext();
     const onData = (chunk: any) => ui.log.write(chunk.toString());
@@ -416,9 +419,10 @@ const resolveTailChoice = async (env: Environment) => {
         });
     } else {
       const logFilePath = reportLogLocation(true);
+
       // eslint-disable-next-line prefer-const
       let currentReadPosition = 0;
-      process.stdin.resume();
+
       const printLogs = (newReadPosition: number, currentReadPosition: number) => {
         const stream = fs.createReadStream(logFilePath, {
           start: currentReadPosition,
@@ -434,41 +438,57 @@ const resolveTailChoice = async (env: Environment) => {
         const stats = fs.statSync(logFilePath);
         const newReadPosition = stats.size;
 
-        if (newReadPosition > currentReadPosition) {
+        if (newReadPosition > currentReadPosition && tailing) {
           printLogs(newReadPosition, currentReadPosition);
         }
-        process.stdin.resume();
       };
 
       printLogs(fs.statSync(logFilePath).size, 0);
 
-      process.stdin.on("data", async (key) => {
-        process.stdin.pause();
+      const handleInputData = async (key: any) => {
+        ui.rl.input.pause();
         const char = key.toString().trim();
 
+        if (char === "p") {
+          tailing = false;
+          printLogs(fs.statSync(logFilePath).size, 0);
+          ui.updateBottomBar(bottomBarContents + resumePauseProse[1]);
+        }
+
+        if (char === "r") {
+          tailing = true;
+          ui.updateBottomBar(bottomBarContents + resumePauseProse[0]);
+        }
+
         if (char === "q") {
+          ui.rl.input.removeListener("data", handleInputData);
+          ui.rl.input.pause();
           fs.unwatchFile(logFilePath);
-          process.stdin.pause();
           resolve("");
         }
 
         if (char === "t") {
           await resolveTestChoice(env, true);
-          process.stdin.resume();
         }
 
         if (char === "g") {
-          process.stdin.pause();
+          ui.rl.input.pause();
+          tailing = false;
           await resolveGrepChoice(env, true);
-          process.stdin.resume();
+          tailing = true;
+          ui.rl.input.resume();
         }
 
-        process.stdin.resume();
-      });
+        ui.rl.input.resume();
+      };
+
+      ui.rl.input.on("data", handleInputData);
 
       fs.watchFile(logFilePath, () => {
         readLog();
       });
     }
   });
+
+  ui.close();
 };
