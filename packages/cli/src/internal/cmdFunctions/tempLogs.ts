@@ -16,19 +16,23 @@ export function clearNodeLogs() {
   }
 }
 
-export function reportLogLocation() {
+export function reportLogLocation(silent: boolean = false) {
   const dirPath = path.join(process.cwd(), "tmp", "node_logs");
   const result = fs.readdirSync(dirPath);
+  let consoleMessage = "";
   let filePath = "";
   try {
-    filePath = `  🪵   Log location: ${path.join(
-      dirPath,
-      result.find((file) => path.extname(file) == ".log")!
-    )}`;
+    filePath = process.env.MOON_LOG_LOCATION
+      ? process.env.MOON_LOG_LOCATION
+      : path.join(dirPath, result.find((file) => path.extname(file) == ".log")!);
+    consoleMessage = `  🪵   Log location: ${filePath}`;
   } catch (e) {
     console.error(e);
   }
 
-  console.log(filePath);
-  return filePath;
+  if (!silent) {
+    console.log(consoleMessage);
+  }
+
+  return filePath.trim();
 }

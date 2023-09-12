@@ -18,7 +18,7 @@ import Debug from "debug";
 import { Signer } from "ethers";
 import { afterAll, beforeAll, describe, it } from "vitest";
 import { Web3 } from "web3";
-import { importJsonConfig } from "./configReader";
+import { importAsyncConfig } from "./configReader";
 import { MoonwallContext, contextCreator } from "./globalContext";
 import { chopsticksHandler } from "./handlers/chopsticksHandler";
 import { devHandler } from "./handlers/devHandler";
@@ -81,7 +81,7 @@ export function describeSuite<T extends FoundationType>({
   }
 
   beforeAll(async function () {
-    const globalConfig = importJsonConfig();
+    const globalConfig = await importAsyncConfig();
 
     if (!process.env.MOON_TEST_ENV) {
       throw new Error("MOON_TEST_ENV not set");

@@ -26,7 +26,7 @@
         "args": ["--no-hardware-benchmarks", "-lparachain=debug", "--database=paritydb"],
         "ws_port": 33345,
         "command": "tmp/moonbeam",
-        "name": "ethan"
+        "name": "alith"
       }
     },
     {
@@ -36,7 +36,7 @@
         "args": ["--no-hardware-benchmarks", "-lparachain=debug", "--database=paritydb"],
         "ws_port": 22345,
         "command": "tmp/moonbeam",
-        "name": "faith"
+        "name": "baltathar"
       }
     }
   ],

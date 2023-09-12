@@ -4,37 +4,10 @@ import fetch from "node-fetch";
 import semver from "semver";
 import chalk from "chalk";
 import { runTask } from "../processHelpers";
+import { minimatch } from "minimatch";
 import { downloader } from "./downloader";
-
-type NetworkArtifacts = {
-  network: string;
-  binaries: string[];
-  repo: string;
-};
-
-// TODO: move to config
-// Maybe even make a class with methods to fetch binaries
-const Artifacts: NetworkArtifacts[] = [
-  {
-    network: "moonbeam",
-    binaries: ["moonbeam", "moonbase-runtime", "moonbeam-runtime", "moonriver-runtime"],
-    repo: "https://api.github.com/repos/purestake/moonbeam/releases",
-  },
-  {
-    network: "polkadot",
-    binaries: ["polkadot"],
-    repo: "https://api.github.com/repos/paritytech/polkadot/releases",
-  },
-  {
-    network: "tanssi",
-    binaries: [
-      "tanssi-node",
-      "container-chain-template-simple-node",
-      "container-chain-template-frontier-node",
-    ],
-    repo: "https://api.github.com/repos/moondance-labs/tanssi/releases",
-  },
-];
+import { allReposAsync } from "../../lib/repoDefinitions";
+import { execSync } from "node:child_process";
 
 export async function fetchArtifact(args) {
   if (await fs.access(args.path).catch(() => true)) {
@@ -42,14 +15,17 @@ export async function fetchArtifact(args) {
     fs.mkdir(args.path);
   }
 
-  const binary = args.bin;
-  const result = Artifacts.find((network) => network.binaries.includes(binary));
-  if (!result) {
+  const binary: string = args.bin;
+  const repo = (await allReposAsync()).find((network) =>
+    network.binaries.find((bin) => bin.name === binary)
+  );
+
+  if (!repo) {
     throw new Error(`Downloading ${binary} unsupported`);
   }
-  const url = result.repo;
+  const url = `https://api.github.com/repos/${repo.ghAuthor}/${repo.ghRepo}/releases`;
   const enteredPath = args.path ? args.path : "tmp/";
-  const binaryPath = path.join("./", enteredPath, binary);
+  // const binaryPath = path.join("./", enteredPath, binary);
 
   const releases = (await (await fetch(url)).json()) as Release[];
   const release = binary.includes("-runtime")
@@ -63,8 +39,8 @@ export async function fetchArtifact(args) {
     : args.ver === "latest"
     ? releases.find((release) => release.assets.find((asset) => asset.name === binary))
     : releases
-        .filter((release) => release.tag_name.includes("v" + args.ver))
-        .find((release) => release.assets.find((asset) => asset.name === binary));
+        .filter((release) => release.tag_name.includes(args.ver))
+        .find((release) => release.assets.find((asset) => minimatch(asset.name, binary)));
 
   if (release == null) {
     throw new Error(`Release not found for ${args.ver}`);
@@ -72,27 +48,44 @@ export async function fetchArtifact(args) {
 
   const asset = binary.includes("-runtime")
     ? release.assets.find((asset) => asset.name.includes(binary) && asset.name.includes("wasm"))
-    : release.assets.find((asset) => asset.name === binary);
+    : release.assets.find((asset) => minimatch(asset.name, binary));
 
   if (!binary.includes("-runtime")) {
-    await downloader(asset!.browser_download_url, binaryPath);
-    await fs.chmod(binaryPath, "755");
-    const version = (await runTask(`./${binaryPath} --version`)).trim();
-    process.stdout.write(` ${chalk.green(version.trim())} ✓\n`);
+    const url = asset!.browser_download_url;
+    const filename = path.basename(url);
+    const binPath = path.join("./", enteredPath, filename);
+
+    await downloader(url, binPath);
+    await fs.chmod(binPath, "755");
+
+    if (filename.endsWith(".tar.gz")) {
+      const outputBuffer = execSync(`tar -xzvf ${binPath}`);
+      const cleaned = outputBuffer.toString().split("\n")[0].split("/")[0];
+      const version = (await runTask(`./${cleaned} --version`)).trim();
+      process.stdout.write(` ${chalk.green(version.trim())} ✓\n`);
+      return;
+    } else {
+      const version = (await runTask(`./${binPath} --version`)).trim();
+      process.stdout.write(` ${chalk.green(version.trim())} ✓\n`);
+      return;
+    }
   } else {
     const binaryPath = path.join("./", args.path, `${args.bin}-${args.ver}.wasm`);
     await downloader(asset!.browser_download_url, binaryPath);
     await fs.chmod(binaryPath, "755");
     process.stdout.write(` ${chalk.green("done")} ✓\n`);
+    return;
   }
 }
 
 export async function getVersions(name: string, runtime: boolean = false) {
-  const result = Artifacts.find((network) => network.binaries.includes(name));
-  if (!result) {
+  const repo = (await allReposAsync()).find((network) =>
+    network.binaries.find((bin) => bin.name === name)
+  );
+  if (!repo) {
     throw new Error(`Network not found for ${name}`);
   }
-  const url = result.repo;
+  const url = `https://api.github.com/repos/${repo.ghAuthor}/${repo.ghRepo}/releases`;
   const releases = (await (await fetch(url)).json()) as Release[];
   const versions = releases
     .map((release) => {
@@ -114,7 +107,9 @@ export async function getVersions(name: string, runtime: boolean = false) {
   const set = new Set(versions);
   return runtime
     ? [...set]
-    : [...set].sort((a, b) => (semver.valid(a) && semver.valid(b) ? semver.rcompare(a, b) : a));
+    : [...set].sort(
+        (a, b) => (semver.valid(a) && semver.valid(b) ? semver.rcompare(a, b) : a) as any
+      );
 }
 
 export interface Release {

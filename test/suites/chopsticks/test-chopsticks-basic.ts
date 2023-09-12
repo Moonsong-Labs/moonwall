@@ -16,7 +16,7 @@ describeSuite({
     });
 
     it({
-      id: "T1",
+      id: "T01",
       title: "Query the chain",
       timeout: 60000,
       // modifier:"only",
@@ -33,7 +33,7 @@ describeSuite({
     });
 
     it({
-      id: "T2",
+      id: "T02",
       title: "Send a transaction ",
       timeout: 60000,
       test: async function () {
@@ -47,7 +47,7 @@ describeSuite({
     });
 
     it({
-      id: "T3",
+      id: "T03",
       title: "Skips multiple blocks ",
       timeout: 60000,
       test: async function () {
@@ -59,7 +59,7 @@ describeSuite({
     });
 
     it({
-      id: "T4",
+      id: "T04",
       title: "Can overwrite storage values",
       timeout: 60000,
       test: async function () {
@@ -94,7 +94,7 @@ describeSuite({
     });
 
     it({
-      id: "T5",
+      id: "T05",
       title: "Do an upgrade test",
       timeout: 120000,
       modifier: "skip",
@@ -109,7 +109,7 @@ describeSuite({
     });
 
     it({
-      id: "T6",
+      id: "T06",
       title: "Create block and check events",
       timeout: 60000,
       test: async function () {
@@ -126,7 +126,7 @@ describeSuite({
     });
 
     it({
-      id: "T7",
+      id: "T07",
       title: "Create block, allow failures and check events",
       timeout: 60000,
       test: async function () {

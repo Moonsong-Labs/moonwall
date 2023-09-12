@@ -107,7 +107,9 @@ export function checkListeningPorts(processId: number) {
 
 export function checkAlreadyRunning(binaryName: string): number[] {
   try {
-    const stdOut = execFileSync("pgrep", [binaryName], { encoding: "utf-8" });
+    console.log(`Checking if ${chalk.bgWhiteBright.blackBright(binaryName)} is already running...`);
+    // pgrep only supports 15 characters
+    const stdOut = execFileSync("pgrep", [binaryName.slice(0, 14)], { encoding: "utf-8" });
     const pIdStrings = stdOut.split("\n").filter(Boolean);
     return pIdStrings.map((pId) => parseInt(pId, 10));
   } catch (error: any) {

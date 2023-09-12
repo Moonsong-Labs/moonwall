@@ -16,7 +16,6 @@ describeSuite({
       id: "T01",
       title: "This is a bool test case",
       test: function () {
-        log("hello");
         expect(true).to.be.true;
       },
     });

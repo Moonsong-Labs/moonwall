@@ -18,7 +18,7 @@ describeSuite({
     });
 
     it({
-      id: "T1",
+      id: "T01",
       title: "Check initial balance is zero",
       test: async function () {
         const currentBalance = (await api.query.system.account(RANDOM_ADDRESS)).data.free;
@@ -27,7 +27,7 @@ describeSuite({
     });
 
     it({
-      id: "T2",
+      id: "T02",
       title: "Send a transaction ",
       test: async function () {
         const currentBalance = (await api.query.system.account(RANDOM_ADDRESS)).data.free;

@@ -2,21 +2,14 @@ import { Environment } from "@moonwall/types";
 import { ApiPromise } from "@polkadot/api";
 import chalk from "chalk";
 import clear from "clear";
-import { watch } from "fs";
-import fs from "fs/promises";
+import fs, { promises as fsPromises } from "fs";
 import inquirer from "inquirer";
 import PressToContinuePrompt from "inquirer-press-to-continue";
-import { createReadStream, stat } from "node:fs";
-import path from "path";
-import { clearNodeLogs, reportLogLocation } from "../internal/cmdFunctions/tempLogs";
 import WebSocket from "ws";
 import { parse } from "yaml";
-import {
-  checkAlreadyRunning,
-  downloadBinsIfMissing,
-  promptAlreadyRunning,
-} from "../internal/fileCheckers";
-import { importJsonConfig, loadEnvVars, parseZombieConfigForBins } from "../lib/configReader";
+import { clearNodeLogs, reportLogLocation } from "../internal/cmdFunctions/tempLogs";
+import { commonChecks } from "../internal/launcherCommon";
+import { cacheConfig, importAsyncConfig, loadEnvVars } from "../lib/configReader";
 import { MoonwallContext, runNetworkOnly } from "../lib/globalContext";
 import { executeTests } from "./runTests";
 
@@ -25,8 +18,9 @@ inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 let lastSelected = 0;
 
 export async function runNetworkCmd(args) {
+  await cacheConfig();
   process.env.MOON_TEST_ENV = args.envName;
-  const globalConfig = importJsonConfig();
+  const globalConfig = await importAsyncConfig();
   const env = globalConfig.environments.find(({ name }) => name === args.envName)!;
 
   if (!env) {
@@ -40,18 +34,7 @@ export async function runNetworkCmd(args) {
 
   loadEnvVars();
 
-  if (env.foundation.type == "dev") {
-    const binName = path.basename(env.foundation.launchSpec[0].binPath);
-    const pids = checkAlreadyRunning(binName);
-    pids.length == 0 || process.env.CI || (await promptAlreadyRunning(pids));
-    await downloadBinsIfMissing(env.foundation.launchSpec[0].binPath);
-  }
-
-  if (env.foundation.type == "zombie") {
-    const bins = parseZombieConfigForBins(env.foundation.zombieSpec.configPath);
-    const pids = bins.flatMap((bin) => checkAlreadyRunning(bin));
-    pids.length == 0 || process.env.CI || (await promptAlreadyRunning(pids));
-  }
+  await commonChecks(env);
 
   const testFileDirs = env.testFileDir;
   const foundation = env.foundation.type;
@@ -167,7 +150,7 @@ export async function runNetworkCmd(args) {
     switch (choice.MenuChoice) {
       case 1:
         clear();
-        await resolveTailChoice();
+        await resolveTailChoice(env);
         lastSelected = 0;
         clear();
         break;
@@ -211,7 +194,7 @@ export async function runNetworkCmd(args) {
 const reportServicePorts = async () => {
   const ctx = MoonwallContext.getContext();
   const portsList: { port: string; name: string }[] = [];
-  const globalConfig = importJsonConfig();
+  const globalConfig = await importAsyncConfig();
   const config = globalConfig.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
   if (config.foundation.type == "dev") {
     const port =
@@ -223,7 +206,7 @@ const reportServicePorts = async () => {
     portsList.push(
       ...(await Promise.all(
         config.foundation.launchSpec.map(async ({ configPath, name }) => {
-          const yaml = parse((await fs.readFile(configPath)).toString());
+          const yaml = parse((await fsPromises.readFile(configPath)).toString());
           return { name, port: yaml.port || "8000" };
         })
       ))
@@ -263,7 +246,7 @@ const resolveCommandChoice = async () => {
 
   const ctx = await MoonwallContext.getContext().connectEnvironment();
   const api = ctx.providers.find((a) => a.type == "polkadotJs")!.api as ApiPromise;
-  const globalConfig = importJsonConfig();
+  const globalConfig = await importAsyncConfig();
   const config = globalConfig.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
 
   // TODO: Support multiple chains on chopsticks
@@ -272,7 +255,7 @@ const resolveCommandChoice = async () => {
       config.foundation.type == "chopsticks"
         ? await Promise.all(
             config.foundation.launchSpec.map(async ({ configPath }) => {
-              const yaml = parse((await fs.readFile(configPath)).toString());
+              const yaml = parse((await fsPromises.readFile(configPath)).toString());
               return yaml.port || "8000";
             })
           )
@@ -346,7 +329,7 @@ const resolveInfoChoice = async (env: Environment) => {
   );
 };
 
-const resolveGrepChoice = async (env: Environment) => {
+const resolveGrepChoice = async (env: Environment, silent: boolean = false) => {
   const choice = await inquirer.prompt({
     name: "grep",
     type: "input",
@@ -354,122 +337,113 @@ const resolveGrepChoice = async (env: Environment) => {
     default: process.env.MOON_GREP || "D01T01",
   });
   process.env.MOON_RECYCLE = "true";
-
-  console.log(`Running tests with grep pattern: ${await choice.grep}`);
   process.env.MOON_GREP = await choice.grep;
-  return await executeTests(env, { testNamePattern: await choice.grep });
+  const opts = { testNamePattern: await choice.grep, silent };
+  if (silent) {
+    opts["reporters"] = ["dot"];
+  }
+  return await executeTests(env, opts);
 };
 
-const resolveTestChoice = async (env: Environment) => {
+const resolveTestChoice = async (env: Environment, silent: boolean = false) => {
   process.env.MOON_RECYCLE = "true";
-  return await executeTests(env);
+  const opts = { silent };
+  if (silent) {
+    opts["reporters"] = ["dot"];
+  }
+  return await executeTests(env, opts);
 };
 
-const resolveTailChoice = async () => {
-  const ui = new inquirer.ui.BottomBar();
+const resolveTailChoice = async (env: Environment) => {
+  let tailing: boolean = true;
+  const resumePauseProse = [
+    `, ${chalk.bgWhite.black("[p]")} - pause tail\n`,
+    `, ${chalk.bgWhite.black("[r]")} - resume tail\n`,
+  ];
+  const bottomBarContents = `📜 Tailing Logs, commands: ${chalk.bgWhite.black(
+    "[q]"
+  )} - quit, ${chalk.bgWhite.black("[t]")} - test, ${chalk.bgWhite.black("[g]")} - grep test`;
 
-  await new Promise((resolve) => {
-    const ctx = MoonwallContext.getContext();
-    const onData = (chunk: any) => ui.log.write(chunk.toString());
-
-    if (ctx.foundation == "zombie") {
-      const logPath = process.env.MOON_MONITORED_NODE!;
-      let currentReadPosition = 0;
-
-      const readLog = () => {
-        stat(logPath, (err, stats) => {
-          if (err) {
-            console.error("Error reading log: ", err);
-            return;
-          }
-
-          const newReadPosition = stats.size;
-
-          if (newReadPosition > currentReadPosition) {
-            const stream = createReadStream(logPath, {
-              start: currentReadPosition,
-              end: newReadPosition,
-            });
-            stream.on("data", onData);
-            stream.on("end", () => {
-              currentReadPosition = newReadPosition;
-            });
-          }
-        });
-      };
-
-      const watcher = watch(logPath, (eventType) => {
-        if (eventType === "change") {
-          readLog();
-        }
-      });
-
-      readLog();
-      inquirer
-        .prompt({
-          name: "exitTail",
-          type: "press-to-continue",
-          anyKey: true,
-          pressToContinueMessage: " Press any key to stop tailing logs and go back  ↩️",
-        })
-        .then(() => {
-          watcher.close();
-          resolve("");
-        });
-    } else {
-      const runningNode = ctx.nodes[0];
-      runningNode.stderr!.on("data", onData);
-      runningNode.stdout!.on("data", onData);
-      inquirer
-        .prompt({
-          name: "exitTail",
-          type: "press-to-continue",
-          anyKey: true,
-          pressToContinueMessage: " Press any key to stop tailing logs and go back  ↩️",
-        })
-        .then(() => {
-          runningNode.stderr!.off("data", onData);
-          runningNode.stdout!.off("data", onData);
-          resolve("");
-        });
-    }
-
-    // TODO: Extend W.I.P below so support interactive tests whilst tailing logs
-
-    // ui.updateBottomBar(
-    //   `Press ${chalk.bgWhite.bgBlack("Q")} to go back, or ${chalk.bgWhite.bgBlack(
-    //     "T"
-    //   )} to execute tests ...`
-    // );
-    // inquirer
-    //   .prompt({
-    //     name: "char",
-    //     type: "input",
-    //     filter(val: string) {
-    //       const choice = val.toUpperCase();
-    //       switch (choice) {
-    //         case "Q":
-    //           runningNode.stderr!.off("data", onData);
-    //           runningNode.stdout!.off("data", onData);
-    //           return;
-
-    //         case "T":
-    //           new Promise(async (resolve)=>{
-    //             const globalConfig = importJsonConfig();
-    //             const env = globalConfig.environments.find(
-    //               ({ name }) => name === process.env.MOON_TEST_ENV
-    //             )!;
-    //             await resolveTestChoice(env);
-    //             resolve(true)
-    //           })
-    //           break;
-
-    //         default:
-    //           ui.updateBottomBar(`Invalid input: ${chalk.redBright(choice)}/n`);
-    //           break;
-    //       }
-    //     },
-    //   })
-    //   .then(() => resolve(true));
+  const ui = new inquirer.ui.BottomBar({
+    bottomBar: bottomBarContents + resumePauseProse[0],
   });
+
+  await new Promise(async (resolve) => {
+    const onData = (chunk: any) => ui.log.write(chunk.toString());
+    const logFilePath = process.env.MOON_MONITORED_NODE
+      ? process.env.MOON_MONITORED_NODE
+      : process.env.MOON_LOG_LOCATION;
+
+    // eslint-disable-next-line prefer-const
+    let currentReadPosition = 0;
+
+    const printLogs = (newReadPosition: number, currentReadPosition: number) => {
+      const stream = fs.createReadStream(logFilePath, {
+        start: currentReadPosition,
+        end: newReadPosition,
+      });
+      stream.on("data", onData);
+      stream.on("end", () => {
+        currentReadPosition = newReadPosition;
+      });
+    };
+
+    const readLog = () => {
+      const stats = fs.statSync(logFilePath);
+      const newReadPosition = stats.size;
+
+      if (newReadPosition > currentReadPosition && tailing) {
+        printLogs(newReadPosition, currentReadPosition);
+      }
+    };
+
+    printLogs(fs.statSync(logFilePath).size, 0);
+
+    const handleInputData = async (key: any) => {
+      ui.rl.input.pause();
+      const char = key.toString().trim();
+
+      if (char === "p") {
+        tailing = false;
+        ui.updateBottomBar(bottomBarContents + resumePauseProse[1]);
+      }
+
+      if (char === "r") {
+        printLogs(fs.statSync(logFilePath).size, currentReadPosition);
+        tailing = true;
+        ui.updateBottomBar(bottomBarContents + resumePauseProse[0]);
+      }
+
+      if (char === "q") {
+        ui.rl.input.removeListener("data", handleInputData);
+        ui.rl.input.pause();
+        fs.unwatchFile(logFilePath);
+        resolve("");
+      }
+
+      if (char === "t") {
+        await resolveTestChoice(env, true);
+        ui.updateBottomBar(bottomBarContents + resumePauseProse[tailing ? 0 : 1]);
+      }
+
+      if (char === "g") {
+        ui.rl.input.pause();
+        tailing = false;
+        await resolveGrepChoice(env, true);
+        ui.updateBottomBar(bottomBarContents + resumePauseProse[tailing ? 0 : 1]);
+        tailing = true;
+        ui.rl.input.resume();
+      }
+
+      ui.rl.input.resume();
+    };
+
+    ui.rl.input.on("data", handleInputData);
+
+    fs.watchFile(logFilePath, () => {
+      readLog();
+    });
+  });
+
+  ui.close();
 };

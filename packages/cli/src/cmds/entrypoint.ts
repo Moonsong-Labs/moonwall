@@ -114,6 +114,7 @@ yargs(hideBin(process.argv))
         });
     },
     async (argv) => {
+      process.env.MOON_RUN_SCRIPTS = "true";
       await runNetworkCmd(argv as any);
       process.exit(0);
     }

@@ -1,22 +1,17 @@
 import { Environment } from "@moonwall/types";
 import chalk from "chalk";
-import { execSync } from "node:child_process";
-import fs from "node:fs";
 import os from "node:os";
 import path from "path";
-import { clearNodeLogs } from "../internal/cmdFunctions/tempLogs";
-import { UserConfig } from "vitest";
+import type { UserConfig } from "vitest";
 import { startVitest } from "vitest/node";
-import {
-  checkAlreadyRunning,
-  downloadBinsIfMissing,
-  promptAlreadyRunning,
-} from "../internal/fileCheckers";
-import { importJsonConfig, loadEnvVars, parseZombieConfigForBins } from "../lib/configReader";
+import { clearNodeLogs } from "../internal/cmdFunctions/tempLogs";
+import { cacheConfig, loadEnvVars, importAsyncConfig } from "../lib/configReader";
 import { contextCreator } from "../lib/globalContext";
+import { commonChecks } from "../internal/launcherCommon";
 
 export async function testCmd(envName: string, additionalArgs?: object) {
-  const globalConfig = importJsonConfig();
+  await cacheConfig();
+  const globalConfig = await importAsyncConfig();
   const env = globalConfig.environments.find(({ name }) => name === envName)!;
   process.env.MOON_TEST_ENV = envName;
 
@@ -30,58 +25,8 @@ export async function testCmd(envName: string, additionalArgs?: object) {
   }
   loadEnvVars();
 
-  if (env.foundation.type == "dev") {
-    const binName = path.basename(env.foundation.launchSpec[0].binPath);
-    const pids = checkAlreadyRunning(binName);
-    pids.length == 0 || process.env.CI || (await promptAlreadyRunning(pids));
-    await downloadBinsIfMissing(env.foundation.launchSpec[0].binPath);
-  }
+  await commonChecks(env);
 
-  if (env.foundation.type == "zombie") {
-    const bins = parseZombieConfigForBins(env.foundation.zombieSpec.configPath);
-    const pids = bins.flatMap((bin) => checkAlreadyRunning(bin));
-    pids.length == 0 || process.env.CI || (await promptAlreadyRunning(pids));
-  }
-
-  if (
-    process.env.MOON_RUN_SCRIPTS == "true" &&
-    globalConfig.scriptsDir &&
-    env.runScripts &&
-    env.runScripts.length > 0
-  ) {
-    const scriptsDir = globalConfig.scriptsDir;
-    const files = await fs.promises.readdir(scriptsDir);
-
-    for (const scriptCommand of env.runScripts) {
-      try {
-        const script = scriptCommand.split(" ")[0];
-        const ext = path.extname(script);
-        const scriptPath = path.join(process.cwd(), scriptsDir, scriptCommand);
-
-        if (!files.includes(script)) {
-          throw new Error(`Script ${script} not found in ${scriptsDir}`);
-        }
-
-        console.log(`========== Executing script: ${chalk.bgGrey.greenBright(script)} ==========`);
-
-        switch (ext) {
-          case ".js":
-            execSync("node " + scriptPath, { stdio: "inherit" });
-            break;
-          case ".ts":
-            execSync("pnpm tsx " + scriptPath, { stdio: "inherit" });
-            break;
-          case ".sh":
-            execSync(scriptPath, { stdio: "inherit" });
-            break;
-          default:
-            console.log(`${ext} not supported, skipping ${script}`);
-        }
-      } catch (err) {
-        console.error(`Error executing script: ${chalk.bgGrey.redBright(err)}`);
-      }
-    }
-  }
   if (env.foundation.type == "dev" && !env.foundation.launchSpec[0].retainAllLogs) {
     clearNodeLogs();
   }
@@ -97,8 +42,7 @@ export async function testCmd(envName: string, additionalArgs?: object) {
 }
 
 export async function executeTests(env: Environment, additionalArgs?: object) {
-  const globalConfig = importJsonConfig();
-
+  const globalConfig = await importAsyncConfig();
   if (env.foundation.type === "read_only") {
     try {
       if (!process.env.MOON_TEST_ENV) {

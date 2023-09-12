@@ -1,7 +1,7 @@
-import fs from "node:fs";
 import { LaunchConfig } from "@zombienet/orchestrator";
-import { checkAccess, checkExists } from "../fileCheckers";
 import chalk from "chalk";
+import fs from "node:fs";
+import { checkAccess, checkExists } from "../fileCheckers";
 
 export async function checkZombieBins(config: LaunchConfig) {
   const relayBinPath = config.relaychain.default_command!;

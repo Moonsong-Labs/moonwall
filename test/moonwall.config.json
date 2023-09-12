@@ -3,19 +3,82 @@
   "label": "Global Test Config 🐯",
   "defaultTestTimeout": 60000,
   "scriptsDir": "scripts/",
+  "additionalRepos": [
+    {
+      "name": "astar",
+      "ghAuthor": "AstarNetwork",
+      "ghRepo": "Astar",
+      "binaries": [
+        {
+          "name": "astar-collator*ubuntu-x86*",
+          "type": "tar",
+          "defaultArgs": ["--dev", "--sealing=manual", "--no-hardware-benchmarks", "--no-telemetry"]
+        }
+      ]
+    },
+    {
+      "name": "hydra",
+      "ghAuthor": "galacticcouncil",
+      "ghRepo": "HydraDX-node",
+      "binaries": [
+        {
+          "name": "hydradx"
+        }
+      ]
+    },
+    {
+      "name": "interlay",
+      "ghAuthor": "interlay",
+      "ghRepo": "interbtc",
+      "binaries": [
+        {
+          "name": "interbtc-parachain"
+        }
+      ]
+    }
+  ],
   "environments": [
+    {
+      "name": "interbtc",
+      "testFileDir": ["suites/basic"],
+      "description": "A star is born",
+      "foundation": {
+        "type": "dev",
+        "launchSpec": [
+          {
+            "binPath": "./tmp/interbtc-parachain",
+            "disableDefaultEthProviders": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "astar",
+      "testFileDir": ["suites/basic"],
+      "description": "A star is born",
+      "foundation": {
+        "type": "dev",
+        "launchSpec": [
+          {
+            "binPath": "./tmp/astar-collator",
+            "disableDefaultEthProviders": true,
+            "options": ["--dev", "--sealing=manual", "--no-hardware-benchmarks", "--no-telemetry"],
+            "newRpcBehaviour": true
+          }
+        ]
+      }
+    },
     {
       "name": "dev_tanssi",
       "testFileDir": ["suites/tanssi"],
+      "description": "Basic Tanssi dev test",
       "foundation": {
         "type": "dev",
         "launchSpec": [
           {
             "binPath": "./tmp/tanssi-node",
             "disableDefaultEthProviders": true,
-            "options": ["--dev", "--sealing=manual", "--no-hardware-benchmarks", "--no-telemetry"],
             "newRpcBehaviour": true
-
           }
         ]
       }
@@ -37,6 +100,7 @@
     },
     {
       "name": "zombie_wasm",
+      "description": "For upgrade testing using zombienet",
       "testFileDir": ["suites/zombie"],
       "foundation": {
         "type": "zombie",
@@ -104,6 +168,7 @@
     },
     {
       "name": "basic",
+      "description": "Suite of tests that doesnt involve any blockchain stuff",
       "testFileDir": ["suites/basic/"],
       "foundation": {
         "type": "read_only"
@@ -469,7 +534,7 @@
       "name": "dev_test",
       "testFileDir": ["suites/dev_tests"],
       "envVars": ["DEBUG_COLORS=1", "TIMBO_TEST_ENV='TIMBO timbo timbo'"],
-      "reporters": ["default"],
+      "reporters": ["default", "html"],
       "contracts": "contracts/",
       "runScripts": ["compile-contracts.ts compile -p contracts/precompiles"],
       "defaultSigner": {

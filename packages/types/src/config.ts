@@ -29,6 +29,12 @@ export type MoonwallConfig = {
    * An array of Environment objects for testing.
    */
   environments: Environment[];
+
+  /**
+   * Use this to specify additional repos to download binaries from.
+   * Polkadot, Tanssi and Moonbeam are available by default.
+   **/
+  additionalRepos?: RepoSpec[];
 };
 
 /**
@@ -44,6 +50,11 @@ export type Environment = {
    * The name of the environment.
    */
   name: string;
+
+  /**
+   * Description of the environment to display in menus.
+   */
+  description?: string;
 
   /**
    * An array of directories with test files.
@@ -433,3 +444,55 @@ export interface OrcOptionsInterface {
   logType?: LogType;
   setGlobalNetwork?: (network: object) => void;
 }
+
+/**
+ * `RepoSpec` type represents the configuration required to download binaries
+ * from a project's GitHub repository.
+ *
+ * @property {string} name - A unique identifier or name for the repo configuration.
+ * @property {string} ghAuthor - The GitHub username or organization under which the repository resides.
+ * @property {string} ghRepo - The GitHub repository name.
+ * @property {Bin[]} binaries - An array of binary configurations to be downloaded.
+ *
+ * @example
+ * {
+ *   "name": "astar",
+ *   "ghAuthor": "AstarNetwork",
+ *   "ghRepo": "Astar",
+ *   "binaries": [
+ *     {
+ *       "name": "astar-collator*ubuntu-x86*",
+ *       "type": "tar",
+ *       "defaultArgs": ["--dev", "--sealing=manual", "--no-hardware-benchmarks", "--no-telemetry"]
+ *     }
+ *   ]
+ * }
+ */
+export type RepoSpec = {
+  name: string;
+  ghAuthor: string;
+  ghRepo: string;
+  binaries: Bin[];
+};
+
+/**
+ * `Bin` type defines the binary configurations within a `RepoSpec`.
+ *
+ * @property {string} name - The name or pattern to identify the binary.
+ * @property {string[]?} defaultArgs - An optional array of default arguments to be used with the binary.
+ *
+ * @example
+ * {
+ *   "name": "hydradx"
+ * }
+ *
+ * @example
+ * {
+ *   "name": "astar-collator*ubuntu-x86*",
+ *   "defaultArgs": ["--dev", "--sealing=manual", "--no-hardware-benchmarks", "--no-telemetry"]
+ * }
+ */
+export type Bin = {
+  name: string;
+  defaultArgs?: string[];
+};

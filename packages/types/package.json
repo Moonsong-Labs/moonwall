@@ -68,7 +68,7 @@
     "bottleneck": "^2.19.5",
     "debug": "^4.3.4",
     "ethers": "^6.7.1",
-    "viem": "^1.10.3",
+    "viem": "^1.10.7",
     "web3": "4.0.3"
   },
   "publishConfig": {

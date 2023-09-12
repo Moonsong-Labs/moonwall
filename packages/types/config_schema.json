@@ -496,6 +496,43 @@
             "description": "The JSON schema for the config.",
             "type": "string"
         },
+        "additionalRepos": {
+            "description": "Use this to specify additional repos to download binaries from.\nPolkadot, Tanssi and Moonbeam are available by default.",
+            "items": {
+                "description": "`RepoSpec` type represents the configuration required to download binaries\nfrom a project's GitHub repository.",
+                "properties": {
+                    "binaries": {
+                        "items": {
+                            "description": "`Bin` type defines the binary configurations within a `RepoSpec`.",
+                            "properties": {
+                                "defaultArgs": {
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "type": "array"
+                                },
+                                "name": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "type": "array"
+                    },
+                    "ghAuthor": {
+                        "type": "string"
+                    },
+                    "ghRepo": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "type": "array"
+        },
         "defaultTestTimeout": {
             "description": "The default timeout for tests.",
             "type": "number"
@@ -542,6 +579,10 @@
                             }
                         },
                         "type": "object"
+                    },
+                    "description": {
+                        "description": "Description of the environment to display in menus.",
+                        "type": "string"
                     },
                     "envVars": {
                         "description": "An optional array of environment variable names.",
