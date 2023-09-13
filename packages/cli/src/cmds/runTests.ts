@@ -74,6 +74,7 @@ export async function executeTests(env: Environment, additionalArgs?: object) {
     watch: false,
     globals: true,
     reporters: env.reporters ? env.reporters : ["default"],
+    outputFile: env.reportFile,
     testTimeout: globalConfig.defaultTestTimeout,
     hookTimeout: 500000,
     useAtomics: true,

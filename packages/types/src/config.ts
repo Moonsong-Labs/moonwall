@@ -47,6 +47,12 @@ export type Environment = {
   reporters?: string[];
 
   /**
+   * Write test results to a file when the using JSON or HTML reporter.
+   * By providing an object instead of a string you can define individual outputs when using multiple reporters.
+   */
+  reportFile?: string | { [reporterName: string]: string };
+
+  /**
    * The name of the environment.
    */
   name: string;

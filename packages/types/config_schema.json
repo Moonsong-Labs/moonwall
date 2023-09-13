@@ -621,6 +621,20 @@
                         "description": "The name of the environment.",
                         "type": "string"
                     },
+                    "reportFile": {
+                        "anyOf": [
+                            {
+                                "additionalProperties": {
+                                    "type": "string"
+                                },
+                                "type": "object"
+                            },
+                            {
+                                "type": "string"
+                            }
+                        ],
+                        "description": "Write test results to a file when the using JSON or HTML reporter.\nBy providing an object instead of a string you can define individual outputs when using multiple reporters."
+                    },
                     "reporters": {
                         "description": "An optional array of reporter names.",
                         "items": {
