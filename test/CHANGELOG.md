@@ -1,5 +1,12 @@
 # @moonwall/tests
 
+## 4.1.1
+
+### Patch Changes
+
+- 4973189: Added reporter outputs
+- 94e4758: JSON reporting options
+
 ## 4.1.0
 
 ### Minor Changes

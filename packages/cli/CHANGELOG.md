@@ -1,5 +1,16 @@
 # @moonwall/cli
 
+## 4.1.1
+
+### Patch Changes
+
+- 4973189: Added reporter outputs
+- 94e4758: JSON reporting options
+- Updated dependencies [4973189]
+- Updated dependencies [94e4758]
+  - @moonwall/types@4.1.1
+  - @moonwall/util@4.1.1
+
 ## 4.1.0
 
 ### Minor Changes
