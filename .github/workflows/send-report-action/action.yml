@@ -1,0 +1,35 @@
+# send-report-action/action.yml
+
+name: 'Send Report Action'
+description: 'Send a report using a REST call'
+inputs:
+  moonscope:
+    description: 'Connection string of the moonscope server'
+    # e.g. https://moonscope.boo:3002
+    required: true
+  table:
+    description: 'Table name'
+    required: true
+  moonwallenv:
+    description: 'Moonwall Environment'
+    required: true
+  report_file_path:
+    description: 'Path to the report file'
+    required: true
+    default: 'tmp/testReports.json'
+runs:
+  using: "composite"
+  steps:
+    - name: Read report file
+      id: read_file
+      run: echo "::set-output name=data::$(cat ${{ inputs.report_file_path }})"
+      shell: bash
+
+    - name: Send REST Call
+      run: |
+        curl --location '${{ inputs.report_file_path }}/insert' \
+        --header 'moonwallenv: ${{ inputs.moonwallenv }}' \
+        --header 'table: ${{ inputs.table }}' \
+        --header 'Content-Type: application/json' \
+        --data '${{ steps.read_file.outputs.data }}'
+      shell: bash

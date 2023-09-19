@@ -209,6 +209,8 @@
       "name": "chopsticks",
       "testFileDir": ["suites/chopsticks/"],
       "include": ["**/*basic*"],
+      "reporters": ["default", "json"],
+      "reportFile": { "json": "tmp/testResults.json" },
       "foundation": {
         "type": "chopsticks",
         "rtUpgradePath": "./tmp/moonriver_runtime.compact.compressed.wasm",
@@ -535,7 +537,7 @@
       "testFileDir": ["suites/dev_tests"],
       "envVars": ["DEBUG_COLORS=1", "TIMBO_TEST_ENV='TIMBO timbo timbo'"],
       "reporters": ["default", "html", "json"],
-      "reportFile": { "json": "tmp/report444.json" },
+      "reportFile": { "json": "tmp/testResults.json" },
       "contracts": "contracts/",
       "runScripts": ["compile-contracts.ts compile -p contracts/precompiles"],
       "defaultSigner": {
