@@ -166,6 +166,16 @@ jobs:
           cd test
           bun moonwall test chopsticks
 
+      # disabled until we have an available instance of moonscope running
+      # - name: Use Send Report Action
+      #   if: always()
+      #   uses: ./.github/send-report-action
+      #   with:
+      #     table: dev_reports
+      #     moonwallenv: moonwall_chopsticks
+      #     report_file_path: tmp/testReports.json
+      #     moonscope: "https://moonscope.boo:3345"
+
   test_readonly:
     runs-on: ubuntu-latest
     needs: ["build"]

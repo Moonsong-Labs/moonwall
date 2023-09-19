@@ -20,5 +20,5 @@
     "noUncheckedIndexedAccess": true,
     "strict": false //renable this oneday
   },
-  "exclude": ["test/**", "**/dist/**", "./packages/*/*.d.ts", "./packages/*/*.d.cts"]
+  "exclude": ["**/dist/**", "./packages/*/*.d.ts", "./packages/*/*.d.cts", "node_modules"]
 }
