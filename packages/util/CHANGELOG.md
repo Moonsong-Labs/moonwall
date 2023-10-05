@@ -1,5 +1,12 @@
 # @moonwall/util
 
+## 4.1.4
+
+### Patch Changes
+
+- 770bfaa: Prevent ether for querying nonce is not needed
+  - @moonwall/types@4.1.4
+
 ## 4.1.3
 
 ### Patch Changes

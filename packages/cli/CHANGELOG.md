@@ -1,5 +1,13 @@
 # @moonwall/cli
 
+## 4.1.4
+
+### Patch Changes
+
+- Updated dependencies [770bfaa]
+  - @moonwall/util@4.1.4
+  - @moonwall/types@4.1.4
+
 ## 4.1.3
 
 ### Patch Changes
