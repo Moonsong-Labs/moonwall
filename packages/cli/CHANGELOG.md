@@ -1,5 +1,13 @@
 # @moonwall/cli
 
+## 4.1.3
+
+### Patch Changes
+
+- d963843: Change polkadot repository to the new polkadot-sdk
+  - @moonwall/types@4.1.3
+  - @moonwall/util@4.1.3
+
 ## 4.1.1
 
 ### Patch Changes
