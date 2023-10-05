@@ -4,7 +4,7 @@ const repo: RepoSpec = {
   name: "polkadot",
   binaries: [{ name: "polkadot" }],
   ghAuthor: "paritytech",
-  ghRepo: "polkadot",
+  ghRepo: "polkadot-sdk",
 };
 
 export default repo;

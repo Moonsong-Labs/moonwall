@@ -35,7 +35,7 @@ export async function getMoonbeamReleaseBinary(binaryTag: string): Promise<strin
 export async function getPolkadotReleaseBinary(binaryTag: string): Promise<string> {
   const binaryPath = path.join(BINARY_DIRECTORY, `polkadot-${binaryTag}`);
   return getGithubReleaseBinary(
-    `https://github.com/paritytech/polkadot/releases/download/${binaryTag}/polkadot`,
+    `https://github.com/paritytech/polkadot-sdk/releases/download/${binaryTag}/polkadot`,
     binaryPath
   );
 }
