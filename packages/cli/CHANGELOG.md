@@ -1,5 +1,14 @@
 # @moonwall/cli
 
+## 4.1.5
+
+### Patch Changes
+
+- bb56086: October Deps Update
+- Updated dependencies [bb56086]
+  - @moonwall/types@4.1.5
+  - @moonwall/util@4.1.5
+
 ## 4.1.4
 
 ### Patch Changes
