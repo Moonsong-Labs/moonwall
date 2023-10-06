@@ -11,7 +11,7 @@
     "test": "bun moonwall test 'basic chopsticks'"
   },
   "devDependencies": {
-    "@acala-network/chopsticks": "^0.8.1",
+    "@acala-network/chopsticks": "^0.7.3",
     "@moonbeam-network/api-augment": "^0.2400.0",
     "@moonwall/cli": "workspace:*",
     "@moonwall/types": "workspace:*",
