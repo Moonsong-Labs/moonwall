@@ -5,7 +5,6 @@
   "private": true,
   "packageManager": "pnpm@7.23.0",
   "description": "Testing framework for the Moon family of projects",
-  "workspaces": ["packages/*", "test"],
   "scripts": {
     "build": "pnpm -r --filter='./packages/**' run build",
     "generate-types": "pnpm -r --filter='./packages/**' run generate-types",
