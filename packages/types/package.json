@@ -47,7 +47,7 @@
   "scripts": {
     "clean": "rm -rf dist && rm -rf node_modules",
     "build": "rm -rf dist && tsup src --format cjs,esm  && pnpm generate-types",
-    "generate-types": "tsup src --format cjs,esm --dts  && pnpm schema && pnpm typecheck",
+    "generate-types": "tsup src --format cjs,esm --dts  && pnpm schema",
     "watch": "tsup src --format cjs,esm --dts --watch",
     "typecheck": "tsc --noEmit",
     "lint": "eslint ./src/**/*.ts",
