@@ -59,7 +59,7 @@ jobs:
       - name: Build like before
         run: |
           bun install   
-          bun run build
+          pnpm run build
       - name: Run standard dev test
         run: |
           cd test
@@ -85,7 +85,7 @@ jobs:
       - name: Build like before
         run: |
           bun install  
-          bun run build
+          pnpm run build
       - name: Download tanssi binary
         run: |
           cd test
@@ -116,7 +116,7 @@ jobs:
       - name: Build like before
         run: |
           bun install  
-          bun run build
+          pnpm run build
       - name: Download moonbeam binary
         run: |
           cd test
@@ -152,7 +152,7 @@ jobs:
       - name: Build like before
         run: |
           bun install   
-          bun run build
+          pnpm run build
       - name: Run standard chopsticks run
         run: |
           cd test
@@ -186,7 +186,7 @@ jobs:
       - name: Build like before
         run: |
           bun install   
-          bun run build
+          pnpm run build
       - name: Run standard ethers run
         run: |
           cd test
@@ -217,7 +217,7 @@ jobs:
       - name: Build like before
         run: |
           bun install   
-          bun run build
+          pnpm run build
       - name: Download binaries
         run: |
           cd test
@@ -248,7 +248,7 @@ jobs:
       - name: Build like before
         run: |
           bun install   
-          bun run build
+          pnpm run build
       - name: Download binaries
         run: |
           cd test

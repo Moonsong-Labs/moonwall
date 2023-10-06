@@ -1,10 +1,10 @@
 import { CompiledContract } from "@moonwall/cli";
 import chalk from "chalk";
-import crypto from "crypto";
 import fs from "fs/promises";
 import path from "path";
 import solc from "solc";
 import { Abi } from "viem";
+import crypto from "crypto";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 
@@ -62,7 +62,7 @@ async function main(args: any) {
       compile: true,
     })),
     {
-      filepath: path.join(process.cwd(), "..", "node_modules/@openzeppelin"),
+      filepath: path.join(process.cwd(), "node_modules/@openzeppelin"),
       importPath: "@openzeppelin", // Reference in contracts are local
       compile: false,
     },
