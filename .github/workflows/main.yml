@@ -231,6 +231,8 @@ jobs:
           cd test
           bun moonwall download moonbeam latest ./tmp
           bun moonwall download polkadot latest ./tmp
+          bun moonwall download polkadot-execute-worker latest ./tmp
+          bun moonwall download polkadot-prepare-worker latest ./tmp
       - name: Run standard zombie test
         run: |
           cd test
@@ -260,6 +262,8 @@ jobs:
           cd test
           bun moonwall download moonbeam latest ./tmp
           bun moonwall download polkadot latest ./tmp
+          bun moonwall download polkadot-execute-worker latest ./tmp
+          bun moonwall download polkadot-prepare-worker latest ./tmp
       - name: Run multi zombie test
         run: |
           cd test
