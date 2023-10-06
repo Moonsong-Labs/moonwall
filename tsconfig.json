@@ -15,10 +15,10 @@
     "preserveConstEnums": true,
     "sourceMap": false,
     "esModuleInterop": true,
-    // "resolveJsonModule": true,
+    "resolveJsonModule": true,
     "noEmit": true,
     "noUncheckedIndexedAccess": true,
     "strict": false //renable this oneday
   },
-  "exclude": ["**/dist/**", "./packages/*/*.d.ts", "./packages/*/*.d.cts",  "**/node_modules/**"]
+  "exclude": ["**/dist/**", "./packages/*/*.d.ts", "./packages/*/*.d.cts", "node_modules"]
 }
