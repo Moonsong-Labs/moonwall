@@ -1,5 +1,11 @@
 # @moonwall/types
 
+## 4.1.6
+
+### Patch Changes
+
+- cc9e654: Chopsticks fix
+
 ## 4.1.5
 
 ### Patch Changes
