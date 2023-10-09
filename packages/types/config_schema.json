@@ -13,6 +13,10 @@
         "ChopsticksLaunchSpec": {
             "description": "A launch specification object for the \"chopsticks\" foundation type.",
             "properties": {
+                "allowUnresolvedImports": {
+                    "description": "An optional flag to NOT throw when the host fails to export a function expected by the runtime.",
+                    "type": "boolean"
+                },
                 "buildBlockMode": {
                     "description": "An optional block building mode, can be \"batch\", \"manual\" or \"instant\".\nThis is only supported for single mode chopsticks.",
                     "enum": [

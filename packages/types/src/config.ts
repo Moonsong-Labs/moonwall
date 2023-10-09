@@ -276,6 +276,11 @@ export interface ChopsticksLaunchSpec extends GenericLaunchSpec {
   wasmOverride?: string;
 
   /**
+   * An optional flag to NOT throw when the host fails to export a function expected by the runtime.
+   */
+  allowUnresolvedImports?: boolean;
+
+  /**
    * An optional block building mode, can be "batch", "manual" or "instant".
    * This is only supported for single mode chopsticks.
    */
