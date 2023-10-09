@@ -1,5 +1,14 @@
 # @moonwall/cli
 
+## 4.1.6
+
+### Patch Changes
+
+- cc9e654: Chopsticks fix
+- Updated dependencies [cc9e654]
+  - @moonwall/types@4.1.6
+  - @moonwall/util@4.1.6
+
 ## 4.1.5
 
 ### Patch Changes
