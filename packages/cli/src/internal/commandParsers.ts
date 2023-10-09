@@ -91,6 +91,10 @@ export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
       chopsticksArgs.push(`--wasm-override=${launchSpecs[0].wasmOverride}`);
     }
 
+    if (launchSpecs[0].allowUnresolvedImports) {
+      chopsticksArgs.push("--allow-unresolved-imports");
+    }
+
     return {
       cmd: chopsticksCmd,
       args: chopsticksArgs,
