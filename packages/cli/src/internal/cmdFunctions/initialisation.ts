@@ -33,7 +33,6 @@ export async function generateConfig() {
       );
 
       await fs.writeFile("moonwall.config.json", JSONBlob, "utf-8");
-      // await fs.writeFile("moonwall.config.ts", getBody(answers), "utf-8");
       break;
     } else {
       console.log("ℹ️  Config file already exists at this location. Quitting.");

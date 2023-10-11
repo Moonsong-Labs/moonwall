@@ -609,17 +609,18 @@
                     "multiThreads": {
                         "anyOf": [
                             {
-                                "enum": [
-                                    false,
-                                    true,
-                                    "turbo"
-                                ]
+                                "additionalProperties": true,
+                                "properties": {},
+                                "type": "object"
                             },
                             {
-                                "type": "number"
+                                "type": [
+                                    "number",
+                                    "boolean"
+                                ]
                             }
                         ],
-                        "description": "An optional boolean to indicate if multi-threading is enabled.\nTurbo is an experimental feature which may cause memory leaks 😰"
+                        "description": "An optional boolean to indicate if multi-threading is enabled.\nOptionally, you can specify your own threadPool spec using a PoolOptions config object.\nVisit https://vitest.dev/config/#pooloptions for more info"
                     },
                     "name": {
                         "description": "The name of the environment.",

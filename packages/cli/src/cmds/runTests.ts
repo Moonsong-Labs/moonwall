@@ -1,13 +1,13 @@
 import { Environment } from "@moonwall/types";
 import chalk from "chalk";
-import os from "node:os";
 import path from "path";
+import { fileURLToPath } from "url";
 import type { UserConfig } from "vitest";
 import { startVitest } from "vitest/node";
 import { clearNodeLogs } from "../internal/cmdFunctions/tempLogs";
-import { cacheConfig, loadEnvVars, importAsyncConfig } from "../lib/configReader";
-import { contextCreator } from "../lib/globalContext";
 import { commonChecks } from "../internal/launcherCommon";
+import { cacheConfig, importAsyncConfig, loadEnvVars } from "../lib/configReader";
+import { contextCreator, runNetworkOnly } from "../lib/globalContext";
 
 export async function testCmd(envName: string, additionalArgs?: object) {
   await cacheConfig();
@@ -70,19 +70,14 @@ export async function executeTests(env: Environment, additionalArgs?: object) {
     }
   }
 
-  const options: UserConfig = {
+  const baseOptions = {
     watch: false,
     globals: true,
     reporters: env.reporters ? env.reporters : ["default"],
     outputFile: env.reportFile,
     testTimeout: globalConfig.defaultTestTimeout,
     hookTimeout: 500000,
-    useAtomics: true,
     passWithNoTests: false,
-    isolate: false,
-    threads: true,
-    minThreads: 1,
-    maxThreads: calculateCores(),
 
     include: env.include ? env.include : ["**/*{test,spec,test_,test-}*{ts,mts,cts}"],
     onConsoleLog(log) {
@@ -92,28 +87,18 @@ export async function executeTests(env: Environment, additionalArgs?: object) {
         return false;
       }
     },
-  };
+  } satisfies UserConfig;
+
+  // TODO: Create options builder class
+  const optionsWithThreads = addThreadConfig(baseOptions, env.multiThreads);
+  const options = addGlobalsConfig(optionsWithThreads);
 
   if (
-    !env.multiThreads ||
-    process.env.MOON_SINGLE_THREAD === "true" ||
-    process.env.MOON_RECYCLE === "true"
+    globalConfig.environments.find((env) => env.name === process.env.MOON_TEST_ENV)?.foundation
+      .type == "zombie"
   ) {
-    options.threads = false;
-  }
-
-  if (typeof env.multiThreads === "number") {
-    options.minThreads = 1;
-    options.maxThreads = Math.floor(env.multiThreads);
-  } else if (
-    env.multiThreads === "turbo" &&
-    process.env.MOON_SINGLE_THREAD !== "true" &&
-    process.env.MOON_RECYCLE !== "true"
-  ) {
-    delete options.threads;
-    delete options.isolate;
-    options.experimentalVmThreads = true;
-    options.experimentalVmWorkerMemoryLimit = 0.75;
+    await runNetworkOnly();
+    process.env.MOON_RECYCLE = "true";
   }
 
   try {
@@ -127,7 +112,62 @@ export async function executeTests(env: Environment, additionalArgs?: object) {
 
 const filterList = ["<empty line>", "", "stdout | unknown test"];
 
-const calculateCores = () => {
-  const cores = os.cpus().length;
-  return Math.max(Math.floor(cores * 0.5), 1);
-};
+function addThreadConfig(
+  config: UserConfig,
+  threads: number | boolean | object = false
+): UserConfig {
+  const configWithThreads = {
+    ...config,
+    pool: "threads",
+    poolOptions: {
+      threads: {
+        isolate: false,
+        minThreads: 1,
+        maxThreads: 3,
+        singleThread: false,
+        useAtomics: false,
+      },
+    },
+  };
+
+  if (!threads || process.env.MOON_RECYCLE === "true") {
+    configWithThreads.poolOptions.threads = {
+      isolate: false,
+      minThreads: 1,
+      maxThreads: 1,
+      singleThread: true,
+      useAtomics: false,
+    };
+  }
+
+  if (typeof threads === "number") {
+    config.poolOptions.threads.maxThreads = threads;
+  }
+
+  if (typeof threads === "object") {
+    configWithThreads.pool = Object.keys(threads)[0];
+    configWithThreads.poolOptions = Object.values(threads)[0];
+  }
+
+  return configWithThreads;
+}
+function addGlobalsConfig(config: UserConfig): UserConfig {
+  const configWithGlobals = {
+    ...config,
+  };
+
+  if (process.env.MOON_RECYCLE !== "true") {
+    configWithGlobals.globals = true;
+    configWithGlobals.setupFiles = [path.resolve(getDirname(), "./internal/vitestSetup.js")];
+  }
+
+  return configWithGlobals;
+}
+
+function getDirname() {
+  try {
+    return __dirname;
+  } catch {
+    return path.dirname(fileURLToPath(import.meta.url));
+  }
+}

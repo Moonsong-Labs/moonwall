@@ -360,7 +360,76 @@
     {
       "name": "dev_multi",
       "testFileDir": ["suites/test_separation"],
+      "reporters": ["basic", "html"],
       "multiThreads": true,
+      "foundation": {
+        "type": "dev",
+        "launchSpec": [
+          {
+            "name": "moonbeam",
+            "running": true,
+            "newRpcBehaviour": true,
+            "binPath": "./tmp/moonbeam"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dev_threadsingle",
+      "testFileDir": ["suites/test_separation"],
+      "reporters": ["basic", "html"],
+      "multiThreads": {
+        "threads": {
+          "isolate": false,
+          "singleThread": true,
+          "useAtomics": false
+        }
+      },
+      "foundation": {
+        "type": "dev",
+        "launchSpec": [
+          {
+            "name": "moonbeam",
+            "running": true,
+            "newRpcBehaviour": true,
+            "binPath": "./tmp/moonbeam"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dev_forksingle",
+      "testFileDir": ["suites/test_separation"],
+      "reporters": ["basic", "html"],
+      "multiThreads": {
+        "forks": {
+          "minForks": 1,
+          "maxForks": 1,
+          "isolate": false,
+          "singleFork": true
+        }
+      },
+      "foundation": {
+        "type": "dev",
+        "launchSpec": [
+          {
+            "name": "moonbeam",
+            "running": true,
+            "newRpcBehaviour": true,
+            "binPath": "./tmp/moonbeam"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dev_forkMulti",
+      "testFileDir": ["suites/test_separation"],
+      "multiThreads": {
+        "forks": {
+          "isolate": false,
+          "singleFork": false
+        }
+      },
       "reporters": ["basic", "html"],
       "foundation": {
         "type": "dev",
@@ -375,9 +444,38 @@
       }
     },
     {
-      "name": "dev_turbo",
+      "name": "dev_vmsingle",
       "testFileDir": ["suites/test_separation"],
-      "multiThreads": "turbo",
+      "reporters": ["basic", "html"],
+      "multiThreads": {
+        "vmThreads": {
+          "minThreads": 1,
+          "maxThreads": 1,
+          "useAtomics": false,
+          "memoryLimit": 0.25
+        }
+      },
+      "foundation": {
+        "type": "dev",
+        "launchSpec": [
+          {
+            "name": "moonbeam",
+            "running": true,
+            "newRpcBehaviour": true,
+            "binPath": "./tmp/moonbeam"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dev_vmMulti",
+      "testFileDir": ["suites/test_separation"],
+      "multiThreads": {
+        "vmThreads": {
+          "useAtomics": false,
+          "memoryLimit": 0.25
+        }
+      },
       "reporters": ["basic", "html"],
       "foundation": {
         "type": "dev",
@@ -545,6 +643,7 @@
         "privateKey": "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
       },
       "defaultAllowFailures": false,
+      "multiThreads": false,
       "foundation": {
         "type": "dev",
         "launchSpec": [

@@ -18,7 +18,7 @@ describeSuite({
       id: "T1",
       title: "this is a test case",
       test: async function (context) {
-        log(context.meta.mode)
+        log(context);
         expect(true).toBe(true);
       },
     });
