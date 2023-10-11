@@ -200,7 +200,7 @@ export class MoonwallContext {
 
   public async startNetwork() {
     if (process.env.MOON_RECYCLE == "true") {
-      debugSetup("Network has already been started, skipping command");
+      console.log("Network has already been started, skipping command");
       return MoonwallContext.getContext();
     }
 

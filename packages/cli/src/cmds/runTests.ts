@@ -7,7 +7,7 @@ import { startVitest } from "vitest/node";
 import { clearNodeLogs } from "../internal/cmdFunctions/tempLogs";
 import { commonChecks } from "../internal/launcherCommon";
 import { cacheConfig, importAsyncConfig, loadEnvVars } from "../lib/configReader";
-import { contextCreator } from "../lib/globalContext";
+import { contextCreator, runNetworkOnly } from "../lib/globalContext";
 
 export async function testCmd(envName: string, additionalArgs?: object) {
   await cacheConfig();
@@ -93,6 +93,14 @@ export async function executeTests(env: Environment, additionalArgs?: object) {
   const optionsWithThreads = addThreadConfig(baseOptions, env.multiThreads);
   const options = addGlobalsConfig(optionsWithThreads);
 
+  if (
+    globalConfig.environments.find((env) => env.name === process.env.MOON_TEST_ENV)?.foundation
+      .type == "zombie"
+  ) {
+    await runNetworkOnly();
+    process.env.MOON_RECYCLE = "true";
+  }
+
   try {
     const folders = env.testFileDir.map((folder) => path.join(".", folder, "/"));
     return await startVitest("test", folders, { ...options, ...additionalArgs });
@@ -122,11 +130,7 @@ function addThreadConfig(
     },
   };
 
-  if (
-    !threads ||
-    process.env.MOON_SINGLE_THREAD === "true" ||
-    process.env.MOON_RECYCLE === "true"
-  ) {
+  if (!threads || process.env.MOON_RECYCLE === "true") {
     configWithThreads.poolOptions.threads = {
       isolate: false,
       minThreads: 1,
@@ -151,10 +155,10 @@ function addGlobalsConfig(config: UserConfig): UserConfig {
   const configWithGlobals = {
     ...config,
   };
+
   if (process.env.MOON_RECYCLE !== "true") {
     configWithGlobals.globals = true;
-    configWithGlobals.setupFiles = [path.resolve(getDirname(), "./internal/multiThreadSetup.js")];
-    // configWithGlobals.globalSetup = ["./internal/vitestGlobalsSetup.ts"];
+    configWithGlobals.setupFiles = [path.resolve(getDirname(), "./internal/vitestSetup.js")];
   }
 
   return configWithGlobals;
