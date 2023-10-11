@@ -1,5 +1,11 @@
 # @moonwall/tests
 
+## 4.2.0
+
+### Minor Changes
+
+- dddc056: New Pool Options
+
 ## 4.1.6
 
 ## 4.1.5
