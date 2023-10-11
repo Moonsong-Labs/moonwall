@@ -89,9 +89,10 @@ export type Environment = {
 
   /**
    * An optional boolean to indicate if multi-threading is enabled.
-   * Turbo is an experimental feature which may cause memory leaks 😰
+   * Optionally, you can specify your own threadPool spec using a PoolOptions config object.
+   * Visit https://vitest.dev/config/#pooloptions for more info
    */
-  multiThreads?: boolean | number | "turbo";
+  multiThreads?: boolean | number | object;
 
   /**
    * Path to directory containing smart contracts for testing against.
