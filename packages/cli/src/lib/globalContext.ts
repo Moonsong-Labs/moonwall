@@ -206,7 +206,7 @@ export class MoonwallContext {
 
     const activeNodes = this.nodes.filter((node) => !node.killed);
     if (activeNodes.length > 0) {
-      console.log("Nodes already started! Skipping command");
+      // console.log("Nodes already started! Skipping command");
       return MoonwallContext.getContext();
     }
     const nodes = MoonwallContext.getContext().environment.nodes;

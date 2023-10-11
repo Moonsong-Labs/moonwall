@@ -16,7 +16,7 @@ import { ApiPromise } from "@polkadot/api";
 import Bottleneck from "bottleneck";
 import Debug from "debug";
 import { Signer } from "ethers";
-import { afterAll, beforeAll, describe, it } from "vitest";
+import { beforeAll, describe, it } from "vitest";
 import { Web3 } from "web3";
 import { importAsyncConfig } from "./configReader";
 import { MoonwallContext, contextCreator } from "./globalContext";
@@ -94,10 +94,6 @@ export function describeSuite<T extends FoundationType>({
       const settings = loadParams(env.foundation.launchSpec);
       limiter = new Bottleneck(settings);
     }
-  });
-
-  afterAll(async function () {
-    await MoonwallContext.destroy();
   });
 
   const testCase = (params: ITestCase) => {

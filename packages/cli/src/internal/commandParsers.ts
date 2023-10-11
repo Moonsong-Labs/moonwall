@@ -41,8 +41,6 @@ export function parseRunCmd(launchSpec: DevLaunchSpec, additionalRepos?: RepoSpe
     ? [...launchSpec.options]
     : fetchDefaultArgs(path.basename(launchSpec.binPath), additionalRepos);
 
-  `ws://127.0.0.1:${10000 + Number(process.env.VITEST_POOL_ID) * 100}`;
-
   if (launchSpec.ports) {
     const ports = launchSpec.ports;
     if (ports.p2pPort) {
@@ -60,8 +58,6 @@ export function parseRunCmd(launchSpec: DevLaunchSpec, additionalRepos?: RepoSpe
     } else {
       args.push(`--ws-port=${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`);
     }
-    args.push(`--port=${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100 + 2}`);
-    // args.push(`--rpc-port=${10000 + (Number(process.env.VITEST_POOL_ID || 1) * 100 + 1)}`);
   }
   return { cmd, args, launch };
 }

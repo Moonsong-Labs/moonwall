@@ -1,12 +1,13 @@
 import { Environment } from "@moonwall/types";
 import chalk from "chalk";
 import path from "path";
+import { fileURLToPath } from "url";
 import type { UserConfig } from "vitest";
 import { startVitest } from "vitest/node";
 import { clearNodeLogs } from "../internal/cmdFunctions/tempLogs";
-import { cacheConfig, loadEnvVars, importAsyncConfig } from "../lib/configReader";
-import { contextCreator } from "../lib/globalContext";
 import { commonChecks } from "../internal/launcherCommon";
+import { cacheConfig, importAsyncConfig, loadEnvVars } from "../lib/configReader";
+import { contextCreator } from "../lib/globalContext";
 
 export async function testCmd(envName: string, additionalArgs?: object) {
   await cacheConfig();
@@ -88,7 +89,9 @@ export async function executeTests(env: Environment, additionalArgs?: object) {
     },
   } satisfies UserConfig;
 
-  const options = addThreadConfig(baseOptions, env.multiThreads);
+  // TODO: Create options builder class
+  const optionsWithThreads = addThreadConfig(baseOptions, env.multiThreads);
+  const options = addGlobalsConfig(optionsWithThreads);
 
   try {
     const folders = env.testFileDir.map((folder) => path.join(".", folder, "/"));
@@ -103,7 +106,7 @@ const filterList = ["<empty line>", "", "stdout | unknown test"];
 
 function addThreadConfig(
   config: UserConfig,
-  threads: number | boolean | object = true
+  threads: number | boolean | object = false
 ): UserConfig {
   const configWithThreads = {
     ...config,
@@ -143,4 +146,24 @@ function addThreadConfig(
   }
 
   return configWithThreads;
+}
+function addGlobalsConfig(config: UserConfig): UserConfig {
+  const configWithGlobals = {
+    ...config,
+  };
+  if (process.env.MOON_RECYCLE !== "true") {
+    configWithGlobals.globals = true;
+    configWithGlobals.setupFiles = [path.resolve(getDirname(), "./internal/multiThreadSetup.js")];
+    // configWithGlobals.globalSetup = ["./internal/vitestGlobalsSetup.ts"];
+  }
+
+  return configWithGlobals;
+}
+
+function getDirname() {
+  try {
+    return __dirname;
+  } catch {
+    return path.dirname(fileURLToPath(import.meta.url));
+  }
 }
