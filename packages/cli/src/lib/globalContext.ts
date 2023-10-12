@@ -13,7 +13,7 @@ import Debug from "debug";
 import fs from "fs";
 import { ChildProcess, exec } from "node:child_process";
 import readline from "readline";
-import { setTimeout } from "timers/promises";
+import { setTimeout as timer } from "timers/promises";
 import { parseChopsticksRunCmd, parseRunCmd, parseZombieCmd } from "../internal/commandParsers";
 import { checkZombieBins, getZombieConfig } from "../internal/foundations/zombieHelpers";
 import { launchNode } from "../internal/localNode";
@@ -287,7 +287,7 @@ export class MoonwallContext {
                 await (provider.api as ApiPromise).rpc.chain.getBlock()
               ).block.header.number.toNumber() == 0
             ) {
-              await setTimeout(500);
+              await timer(500);
             }
             console.log(`✅ Chain ${provider.name} producing blocks, continuing`);
             resolve("");
@@ -338,17 +338,32 @@ export class MoonwallContext {
   public static async destroy() {
     const ctx = MoonwallContext.getContext();
     try {
-      ctx.disconnect();
+      await ctx.disconnect();
     } catch {
       console.log("🛑  All connections disconnected");
     }
     const promises = ctx.nodes.map((process) => {
-      return new Promise((resolve) => {
-        process.kill();
-        if (process.killed) {
-          resolve(`process ${process.pid} killed`);
-        }
+      return new Promise((resolve, reject) => {
+        process.kill(); // SIGTERM
+
+        // If the process hasn't exited after 5 seconds, we'll forcefully kill it
+        const timeout = 5000;
+        setTimeout(() => {
+          if (!process.killed) {
+            // If the process hasn't exited, forcefully kill it
+            process.kill("SIGKILL");
+            reject(`process ${process.pid} had to be forcefully killed`);
+          } else {
+            resolve(`process ${process.pid} killed gracefully`);
+          }
+        }, timeout);
       });
+      // return new Promise((resolve) => {
+      //   process.kill();
+      //   if (process.killed) {
+      //     resolve(`process ${process.pid} killed`);
+      //   }
+      // });
     });
 
     await Promise.all(promises);

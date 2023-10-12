@@ -1,7 +1,6 @@
 import { Environment } from "@moonwall/types";
 import chalk from "chalk";
 import path from "path";
-import { fileURLToPath } from "url";
 import type { UserConfig } from "vitest";
 import { startVitest } from "vitest/node";
 import { clearNodeLogs } from "../internal/cmdFunctions/tempLogs";
@@ -90,8 +89,7 @@ export async function executeTests(env: Environment, additionalArgs?: object) {
   } satisfies UserConfig;
 
   // TODO: Create options builder class
-  const optionsWithThreads = addThreadConfig(baseOptions, env.multiThreads);
-  const options = addGlobalsConfig(optionsWithThreads);
+  const options = addThreadConfig(baseOptions, env.multiThreads);
 
   if (
     globalConfig.environments.find((env) => env.name === process.env.MOON_TEST_ENV)?.foundation
@@ -130,7 +128,7 @@ function addThreadConfig(
     },
   };
 
-  if (threads == true || process.env.MOON_RECYCLE !== "true") {
+  if (threads == true && process.env.MOON_RECYCLE !== "true") {
     configWithThreads.poolOptions.threads = {
       isolate: false,
       minThreads: 1,
@@ -149,26 +147,5 @@ function addThreadConfig(
     configWithThreads.pool = Object.keys(threads)[0];
     configWithThreads.poolOptions = Object.values(threads)[0];
   }
-
   return configWithThreads;
-}
-function addGlobalsConfig(config: UserConfig): UserConfig {
-  const configWithGlobals = {
-    ...config,
-  };
-
-  if (process.env.MOON_RECYCLE !== "true") {
-    configWithGlobals.globals = true;
-    configWithGlobals.setupFiles = [path.resolve(getDirname(), "./internal/vitestSetup.js")];
-  }
-
-  return configWithGlobals;
-}
-
-function getDirname() {
-  try {
-    return __dirname;
-  } catch {
-    return path.dirname(fileURLToPath(import.meta.url));
-  }
 }
