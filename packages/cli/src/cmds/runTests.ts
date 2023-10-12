@@ -123,25 +123,26 @@ function addThreadConfig(
       threads: {
         isolate: false,
         minThreads: 1,
-        maxThreads: 3,
-        singleThread: false,
+        maxThreads: 1,
+        singleThread: true,
         useAtomics: false,
       },
     },
   };
 
-  if (!threads || process.env.MOON_RECYCLE === "true") {
+  if (threads == true || process.env.MOON_RECYCLE !== "true") {
     configWithThreads.poolOptions.threads = {
       isolate: false,
       minThreads: 1,
-      maxThreads: 1,
-      singleThread: true,
+      maxThreads: 3,
+      singleThread: false,
       useAtomics: false,
     };
   }
 
   if (typeof threads === "number") {
     configWithThreads.poolOptions.threads.maxThreads = threads;
+    configWithThreads.poolOptions.threads.singleThread = false;
   }
 
   if (typeof threads === "object") {
