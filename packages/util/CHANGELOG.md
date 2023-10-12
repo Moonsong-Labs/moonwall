@@ -1,5 +1,16 @@
 # @moonwall/util
 
+## 4.2.0
+
+### Minor Changes
+
+- dddc056: New Pool Options
+
+### Patch Changes
+
+- Updated dependencies [dddc056]
+  - @moonwall/types@4.2.0
+
 ## 4.1.6
 
 ### Patch Changes
