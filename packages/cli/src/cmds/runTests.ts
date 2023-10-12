@@ -141,7 +141,7 @@ function addThreadConfig(
   }
 
   if (typeof threads === "number") {
-    config.poolOptions.threads.maxThreads = threads;
+    configWithThreads.poolOptions.threads.maxThreads = threads;
   }
 
   if (typeof threads === "object") {
