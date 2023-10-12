@@ -1,5 +1,13 @@
 # @moonwall/cli
 
+## 4.2.2
+
+### Patch Changes
+
+- 777706f: thread defaults
+  - @moonwall/types@4.2.2
+  - @moonwall/util@4.2.2
+
 ## 4.2.1
 
 ### Patch Changes
