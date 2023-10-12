@@ -1,5 +1,13 @@
 # @moonwall/cli
 
+## 4.2.1
+
+### Patch Changes
+
+- a6a23f2: Small fix
+  - @moonwall/types@4.2.1
+  - @moonwall/util@4.2.1
+
 ## 4.2.0
 
 ### Minor Changes
