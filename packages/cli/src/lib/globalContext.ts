@@ -387,7 +387,7 @@ export interface IGlobalContextFoundation {
 
 function isPidRunning(pid: number): Promise<boolean> {
   return new Promise((resolve) => {
-    exec(`ps -p ${pid} -o pid=`, (error, stdout, stderr) => {
+    exec(`ps -p ${pid} -o pid=`, (error, stdout) => {
       resolve(!error && stdout.trim() !== "");
     });
   });
