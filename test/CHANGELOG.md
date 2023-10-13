@@ -1,5 +1,11 @@
 # @moonwall/tests
 
+## 4.2.4
+
+### Patch Changes
+
+- 62c340e: bump
+
 ## 4.2.3
 
 ## 4.2.2

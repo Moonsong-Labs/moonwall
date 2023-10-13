@@ -1,5 +1,13 @@
 # @moonwall/util
 
+## 4.2.4
+
+### Patch Changes
+
+- 62c340e: bump
+- Updated dependencies [62c340e]
+  - @moonwall/types@4.2.4
+
 ## 4.2.3
 
 ### Patch Changes
