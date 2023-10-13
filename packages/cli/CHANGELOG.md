@@ -1,5 +1,13 @@
 # @moonwall/cli
 
+## 4.2.3
+
+### Patch Changes
+
+- cd36fb6: Fix Threading
+  - @moonwall/types@4.2.3
+  - @moonwall/util@4.2.3
+
 ## 4.2.2
 
 ### Patch Changes
