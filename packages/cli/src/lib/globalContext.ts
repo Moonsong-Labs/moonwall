@@ -336,37 +336,20 @@ export class MoonwallContext {
   }
 
   public static async destroy() {
-    const ctx = MoonwallContext.getContext();
+    const ctx = this.instance;
+
     try {
       await ctx.disconnect();
     } catch {
       console.log("🛑  All connections disconnected");
     }
-    const promises = ctx.nodes.map((process) => {
-      return new Promise((resolve, reject) => {
-        process.kill(); // SIGTERM
 
-        // If the process hasn't exited after 5 seconds, we'll forcefully kill it
-        const timeout = 5000;
-        setTimeout(() => {
-          if (!process.killed) {
-            // If the process hasn't exited, forcefully kill it
-            process.kill("SIGKILL");
-            reject(`process ${process.pid} had to be forcefully killed`);
-          } else {
-            resolve(`process ${process.pid} killed gracefully`);
-          }
-        }, timeout);
-      });
-      // return new Promise((resolve) => {
-      //   process.kill();
-      //   if (process.killed) {
-      //     resolve(`process ${process.pid} killed`);
-      //   }
-      // });
-    });
-
-    await Promise.all(promises);
+    for (const node of ctx.nodes) {
+      node.kill();
+      while (await isPidRunning(node.pid)) {
+        await timer(100);
+      }
+    }
 
     if (ctx.zombieNetwork) {
       console.log("🪓  Killing zombie nodes");
@@ -400,4 +383,12 @@ export interface IGlobalContextFoundation {
     launch: boolean;
   }[];
   foundationType: FoundationType;
+}
+
+function isPidRunning(pid: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    exec(`ps -p ${pid} -o pid=`, (error, stdout, stderr) => {
+      resolve(!error && stdout.trim() !== "");
+    });
+  });
 }
