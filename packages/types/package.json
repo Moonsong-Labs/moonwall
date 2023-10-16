@@ -58,18 +58,18 @@
     "schema": "typescript-json-schema --tsNodeRegister --esModuleInterop -o config_schema.json ./src/config.ts MoonwallConfig"
   },
   "dependencies": {
-    "@polkadot/api": "^10.9.1",
-    "@polkadot/api-base": "^10.9.1",
+    "@polkadot/api": "^10.10.1",
+    "@polkadot/api-base": "^10.10.1",
     "@polkadot/keyring": "^12.5.1",
-    "@polkadot/types": "^10.9.1",
+    "@polkadot/types": "^10.10.1",
     "@polkadot/util": "^12.5.1",
     "@polkadot/util-crypto": "^12.5.1",
-    "@types/node": "^20.8.2",
+    "@types/node": "^20.8.6",
     "@zombienet/utils": "^0.0.22",
     "bottleneck": "^2.19.5",
     "debug": "^4.3.4",
     "ethers": "^6.7.1",
-    "viem": "^1.15.4",
+    "viem": "^1.16.5",
     "web3": "4.0.3"
   },
   "publishConfig": {
