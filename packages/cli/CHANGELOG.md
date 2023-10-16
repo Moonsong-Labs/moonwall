@@ -1,5 +1,14 @@
 # @moonwall/cli
 
+## 4.2.5
+
+### Patch Changes
+
+- 4432c7e: Pkg Updates
+- Updated dependencies [4432c7e]
+  - @moonwall/types@4.2.5
+  - @moonwall/util@4.2.5
+
 ## 4.2.4
 
 ### Patch Changes
