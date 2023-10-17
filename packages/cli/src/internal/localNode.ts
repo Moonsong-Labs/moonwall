@@ -17,12 +17,10 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
   const onProcessExit = () => {
     runningNode && runningNode.kill();
   };
-  const onProcessInterrupt = () => {
-    runningNode && runningNode.kill();
-  };
 
   process.once("exit", onProcessExit);
-  process.once("SIGINT", onProcessInterrupt);
+  process.once("close", onProcessExit);
+  process.once("SIGINT", onProcessExit);
 
   const runningNode = spawn(cmd, args);
   const logLocation = path
@@ -40,7 +38,7 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
 
   runningNode.once("exit", () => {
     process.removeListener("exit", onProcessExit);
-    process.removeListener("SIGINT", onProcessInterrupt);
+    process.removeListener("SIGINT", onProcessExit);
 
     runningNode.stderr?.off("data", writeLogToFile);
     runningNode.stdout?.off("data", writeLogToFile);

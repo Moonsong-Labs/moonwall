@@ -77,7 +77,9 @@ export async function executeTests(env: Environment, additionalArgs?: object) {
     testTimeout: globalConfig.defaultTestTimeout,
     hookTimeout: 500000,
     passWithNoTests: false,
-
+    deps: {
+      optimizer: { ssr: { enabled: false }, web: { enabled: false } },
+    },
     include: env.include ? env.include : ["**/*{test,spec,test_,test-}*{ts,mts,cts}"],
     onConsoleLog(log) {
       if (filterList.includes(log.trim())) return false;
@@ -119,7 +121,7 @@ function addThreadConfig(
     pool: "threads",
     poolOptions: {
       threads: {
-        isolate: false,
+        isolate: true,
         minThreads: 1,
         maxThreads: 1,
         singleThread: true,
@@ -130,7 +132,7 @@ function addThreadConfig(
 
   if (threads == true && process.env.MOON_RECYCLE !== "true") {
     configWithThreads.poolOptions.threads = {
-      isolate: false,
+      isolate: true,
       minThreads: 1,
       maxThreads: 3,
       singleThread: false,
