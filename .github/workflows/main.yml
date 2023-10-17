@@ -230,9 +230,11 @@ jobs:
         run: |
           cd test
           bun moonwall download moonbeam latest ./tmp
-          bun moonwall download polkadot latest ./tmp
-          bun moonwall download polkadot-execute-worker latest ./tmp
-          bun moonwall download polkadot-prepare-worker latest ./tmp
+          
+          # Change these to latest once MB is compatible with 1.2.0
+          bun moonwall download polkadot 1.1.0 ./tmp
+          bun moonwall download polkadot-execute-worker 1.1.0 ./tmp
+          bun moonwall download polkadot-prepare-worker 1.1.0 ./tmp
       - name: Run standard zombie test
         run: |
           cd test
@@ -261,9 +263,11 @@ jobs:
         run: |
           cd test
           bun moonwall download moonbeam latest ./tmp
-          bun moonwall download polkadot latest ./tmp
-          bun moonwall download polkadot-execute-worker latest ./tmp
-          bun moonwall download polkadot-prepare-worker latest ./tmp
+
+          # Change these to latest once MB is compatible with 1.2.0
+          bun moonwall download polkadot 1.1.0 ./tmp
+          bun moonwall download polkadot-execute-worker 1.1.0 ./tmp
+          bun moonwall download polkadot-prepare-worker 1.1.0 ./tmp
       - name: Run multi zombie test
         run: |
           cd test

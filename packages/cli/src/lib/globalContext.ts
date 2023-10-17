@@ -200,13 +200,11 @@ export class MoonwallContext {
 
   public async startNetwork() {
     if (process.env.MOON_RECYCLE == "true") {
-      console.log("Network has already been started, skipping command");
       return MoonwallContext.getContext();
     }
 
     const activeNodes = this.nodes.filter((node) => !node.killed);
     if (activeNodes.length > 0) {
-      // console.log("Nodes already started! Skipping command");
       return MoonwallContext.getContext();
     }
     const nodes = MoonwallContext.getContext().environment.nodes;
@@ -314,6 +312,16 @@ export class MoonwallContext {
     }
   }
 
+  public async killNodes() {
+    const node = this.nodes[0];
+    const pid = node.pid;
+    node.stdout.pause();
+    node.kill();
+    while (await isPidRunning(pid)) {
+      await timer(100);
+    }
+  }
+
   public static printStats() {
     if (MoonwallContext) {
       console.dir(MoonwallContext.getContext(), { depth: 1 });
@@ -337,6 +345,7 @@ export class MoonwallContext {
 
   public static async destroy() {
     const ctx = this.instance;
+    const MAX_RETRIES = 10;
 
     try {
       await ctx.disconnect();
@@ -344,9 +353,27 @@ export class MoonwallContext {
       console.log("🛑  All connections disconnected");
     }
 
-    for (const node of ctx.nodes) {
+    while (ctx.nodes.length > 0) {
+      const node = ctx.nodes.pop();
+      const pid = node.pid;
+      node.stdout.pause();
       node.kill();
-      while (await isPidRunning(node.pid)) {
+
+      let retries = 0;
+      try {
+        while ((await isPidRunning(pid)) && retries < MAX_RETRIES) {
+          await timer(100);
+          retries++;
+        }
+
+        if (retries === MAX_RETRIES) {
+          console.error(`Failed to stop process with PID ${pid} after ${MAX_RETRIES} retries.`);
+        }
+      } catch (error) {
+        console.error(`Error while checking if PID ${pid} is running:`, error);
+      }
+
+      while (await isPidRunning(pid)) {
         await timer(100);
       }
     }
@@ -385,7 +412,7 @@ export interface IGlobalContextFoundation {
   foundationType: FoundationType;
 }
 
-function isPidRunning(pid: number): Promise<boolean> {
+async function isPidRunning(pid: number): Promise<boolean> {
   return new Promise((resolve) => {
     exec(`ps -p ${pid} -o pid=`, (error, stdout) => {
       resolve(!error && stdout.trim() !== "");

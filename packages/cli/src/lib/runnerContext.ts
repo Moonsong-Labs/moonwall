@@ -27,7 +27,6 @@ import { zombieHandler } from "./handlers/zombieHandler";
 
 const RT_VERSION = Number(process.env.MOON_RTVERSION);
 const RT_NAME = process.env.MOON_RTNAME;
-let ctx: MoonwallContext | undefined = undefined;
 let limiter: Bottleneck | undefined = undefined;
 
 // About: This has been designed in the handler pattern so that eventually we can integrate it to vitest
@@ -55,7 +54,7 @@ let limiter: Bottleneck | undefined = undefined;
  *          it({
  *            id: "T01",
  *            title: "Sample test case",
- *            test: async function () {
+ *            testds: async function () {
  *              expect(true).to.be.true;
  *            },
  *          });
@@ -79,6 +78,7 @@ export function describeSuite<T extends FoundationType>({
     describe.skip(`🗃️  #${suiteId} ${title}`);
     return;
   }
+  let ctx: MoonwallContext | undefined = undefined;
 
   beforeAll(async function () {
     const globalConfig = await importAsyncConfig();
@@ -96,7 +96,7 @@ export function describeSuite<T extends FoundationType>({
     }
   });
 
-  afterAll(async () => {
+  afterAll(async function () {
     await MoonwallContext.destroy();
   });
 
