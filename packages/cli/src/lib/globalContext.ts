@@ -200,13 +200,11 @@ export class MoonwallContext {
 
   public async startNetwork() {
     if (process.env.MOON_RECYCLE == "true") {
-      console.log("Network has already been started, skipping command");
       return MoonwallContext.getContext();
     }
 
     const activeNodes = this.nodes.filter((node) => !node.killed);
     if (activeNodes.length > 0) {
-      // console.log("Nodes already started! Skipping command");
       return MoonwallContext.getContext();
     }
     const nodes = MoonwallContext.getContext().environment.nodes;
