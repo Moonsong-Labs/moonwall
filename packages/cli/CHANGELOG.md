@@ -1,5 +1,13 @@
 # @moonwall/cli
 
+## 4.2.6
+
+### Patch Changes
+
+- e1c3dca: Fix Concurrency
+  - @moonwall/types@4.2.6
+  - @moonwall/util@4.2.6
+
 ## 4.2.5
 
 ### Patch Changes
