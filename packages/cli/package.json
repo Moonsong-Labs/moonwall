@@ -37,7 +37,7 @@
     "moonwall": "./moonwall.mjs"
   },
   "engines": {
-    "node": ">=14.16.0",
+    "node": ">=20.0.0",
     "pnpm": ">=7"
   },
   "files": [
@@ -83,6 +83,7 @@
     "debug": "^4.3.4",
     "dotenv": "^16.3.1",
     "ethers": "^6.7.1",
+    "execa": "^8.0.1",
     "inquirer": "^9.2.11",
     "inquirer-press-to-continue": "^1.2.0",
     "minimatch": "^9.0.3",
