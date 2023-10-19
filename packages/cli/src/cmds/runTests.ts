@@ -8,7 +8,7 @@ import { commonChecks } from "../internal/launcherCommon";
 import { cacheConfig, importAsyncConfig, loadEnvVars } from "../lib/configReader";
 import { contextCreator, runNetworkOnly } from "../lib/globalContext";
 
-export async function testCmd(envName: string, additionalArgs?: object) {
+export async function testCmd(envName: string, additionalArgs?: object): Promise<boolean> {
   await cacheConfig();
   const globalConfig = await importAsyncConfig();
   const env = globalConfig.environments.find(({ name }) => name === envName)!;
@@ -34,9 +34,9 @@ export async function testCmd(envName: string, additionalArgs?: object) {
 
   if (failed.length > 0) {
     process.stderr.write("Tests failed\n");
-    process.exit(1);
+    return false;
   } else {
-    process.exit(0);
+    return true;
   }
 }
 
@@ -75,7 +75,7 @@ export async function executeTests(env: Environment, additionalArgs?: object) {
     reporters: env.reporters ? env.reporters : ["default"],
     outputFile: env.reportFile,
     testTimeout: globalConfig.defaultTestTimeout,
-    hookTimeout: 500000,
+    hookTimeout: globalConfig.defaultTestTimeout,
     passWithNoTests: false,
     deps: {
       optimizer: { ssr: { enabled: false }, web: { enabled: false } },

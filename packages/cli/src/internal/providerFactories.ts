@@ -1,8 +1,8 @@
+import "@moonbeam-network/api-augment";
 import { MoonwallProvider, ProviderConfig, ProviderType, ViemClient } from "@moonwall/types";
 import { ALITH_PRIVATE_KEY, deriveViemChain } from "@moonwall/util";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { ApiOptions } from "@polkadot/api/types";
-import chalk from "chalk";
 import Debug from "debug";
 import { Signer, Wallet, ethers } from "ethers";
 import { createWalletClient, http, publicActions } from "viem";
@@ -73,12 +73,6 @@ export class ProviderFactory {
           {},
           { delay: 50, autoReconnect: false, maxAttempts: 10 }
         );
-
-        provider.on("error", () => {
-          throw new Error(
-            `Cannot connect to Web3 provider ${chalk.bgWhiteBright.blackBright(this.url)}`
-          );
-        });
 
         return new Web3(provider);
       },
@@ -234,12 +228,12 @@ export class ProviderInterfaceFactory {
       greet: () => {
         debug(
           `👋  Provider ${this.name} is connected to chain` +
-            ` ${api.consts.system.version.specName.toString()} ` +
-            `RT${api.consts.system.version.specVersion.toNumber()}`
+            ` ${(api.consts.system.version as any).specName.toString()} ` +
+            `RT${(api.consts.system.version as any).specVersion.toNumber()}`
         );
         return {
-          rtVersion: api.consts.system.version.specVersion.toNumber(),
-          rtName: api.consts.system.version.specName.toString(),
+          rtVersion: (api.consts.system.version as any).specVersion.toNumber(),
+          rtName: (api.consts.system.version as any).specName.toString(),
         };
       },
       disconnect: async () => api.disconnect(),

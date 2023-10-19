@@ -9,14 +9,14 @@ import {
 } from "@moonwall/types";
 import { ApiPromise } from "@polkadot/api";
 import zombie, { Network } from "@zombienet/orchestrator";
+import { execaCommand, execaCommandSync } from "execa";
 import Debug from "debug";
 import fs from "fs";
-import { ChildProcess, exec } from "node:child_process";
 import readline from "readline";
 import { setTimeout as timer } from "timers/promises";
 import { parseChopsticksRunCmd, parseRunCmd, parseZombieCmd } from "../internal/commandParsers";
 import { checkZombieBins, getZombieConfig } from "../internal/foundations/zombieHelpers";
-import { launchNode } from "../internal/localNode";
+import { LaunchedNode, launchNode } from "../internal/localNode";
 import {
   ProviderFactory,
   ProviderInterfaceFactory,
@@ -34,7 +34,7 @@ export class MoonwallContext {
   private static instance: MoonwallContext | undefined;
   environment!: MoonwallEnvironment;
   providers: ConnectedProvider[];
-  nodes: ChildProcess[];
+  nodes: LaunchedNode[];
   foundation: FoundationType;
   zombieNetwork?: Network;
   rtUpgradePath?: string;
@@ -181,11 +181,11 @@ export class MoonwallContext {
       .map((process) => process!["pid"]);
 
     const onProcessExit = () => {
-      exec(`kill ${processIds.join(" ")}`, (error) => {
-        if (error) {
-          console.error(`Error killing process: ${error.message}`);
-        }
-      });
+      try {
+        execaCommandSync(`kill ${processIds.join(" ")}`);
+      } catch (err) {
+        console.log("Failed to kill zombie nodes");
+      }
     };
 
     process.once("exit", onProcessExit);
@@ -203,8 +203,8 @@ export class MoonwallContext {
       return MoonwallContext.getContext();
     }
 
-    const activeNodes = this.nodes.filter((node) => !node.killed);
-    if (activeNodes.length > 0) {
+    // const activeNodes = this.nodes.filter((node) => !node.killed);
+    if (this.nodes.length > 0) {
       return MoonwallContext.getContext();
     }
     const nodes = MoonwallContext.getContext().environment.nodes;
@@ -213,11 +213,16 @@ export class MoonwallContext {
       return await this.startZombieNetwork();
     }
 
-    const promises = nodes.map(
-      async ({ cmd, args, name, launch }) =>
-        launch && this.nodes.push(await launchNode(cmd, args, name!))
-    );
-    await Promise.all(promises);
+    const promises = nodes.map(async ({ cmd, args, name, launch }) => {
+      if (launch) {
+        const result = await launchNode(cmd, args, name!);
+        this.nodes.push(result);
+      } else {
+        return Promise.resolve();
+      }
+    });
+    await Promise.allSettled(promises);
+
     return MoonwallContext.getContext();
   }
 
@@ -312,16 +317,6 @@ export class MoonwallContext {
     }
   }
 
-  public async killNodes() {
-    const node = this.nodes[0];
-    const pid = node.pid;
-    node.stdout.pause();
-    node.kill();
-    while (await isPidRunning(pid)) {
-      await timer(100);
-    }
-  }
-
   public static printStats() {
     if (MoonwallContext) {
       console.dir(MoonwallContext.getContext(), { depth: 1 });
@@ -343,9 +338,18 @@ export class MoonwallContext {
     return MoonwallContext.instance;
   }
 
+  private killAllChildProcesses() {
+    this.nodes.forEach((child) => {
+      try {
+        child.kill();
+      } catch (err) {
+        console.error("Failed to kill child process", err);
+      }
+    });
+  }
+
   public static async destroy() {
     const ctx = this.instance;
-    const MAX_RETRIES = 10;
 
     try {
       await ctx.disconnect();
@@ -356,25 +360,13 @@ export class MoonwallContext {
     while (ctx.nodes.length > 0) {
       const node = ctx.nodes.pop();
       const pid = node.pid;
-      node.stdout.pause();
-      node.kill();
-
-      let retries = 0;
-      try {
-        while ((await isPidRunning(pid)) && retries < MAX_RETRIES) {
-          await timer(100);
-          retries++;
+      node.kill("SIGKILL", { forceKillAfterTimeout: 2000 });
+      for (;;) {
+        if (await isPidRunning(pid)) {
+          await timer(10);
+        } else {
+          break;
         }
-
-        if (retries === MAX_RETRIES) {
-          console.error(`Failed to stop process with PID ${pid} after ${MAX_RETRIES} retries.`);
-        }
-      } catch (error) {
-        console.error(`Error while checking if PID ${pid} is running:`, error);
-      }
-
-      while (await isPidRunning(pid)) {
-        await timer(100);
       }
     }
 
@@ -413,9 +405,10 @@ export interface IGlobalContextFoundation {
 }
 
 async function isPidRunning(pid: number): Promise<boolean> {
-  return new Promise((resolve) => {
-    exec(`ps -p ${pid} -o pid=`, (error, stdout) => {
-      resolve(!error && stdout.trim() !== "");
-    });
-  });
+  try {
+    await execaCommand(`ps -p ${pid} -o pid=`);
+    return true;
+  } catch {
+    return false;
+  }
 }
