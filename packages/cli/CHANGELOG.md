@@ -1,5 +1,13 @@
 # @moonwall/cli
 
+## 4.2.7
+
+### Patch Changes
+
+- 13c90e6: Updates to Threading logic
+  - @moonwall/types@4.2.7
+  - @moonwall/util@4.2.7
+
 ## 4.2.6
 
 ### Patch Changes
