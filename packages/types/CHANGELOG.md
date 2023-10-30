@@ -1,5 +1,11 @@
 # @moonwall/types
 
+## 4.2.8
+
+### Patch Changes
+
+- 568726d: Pkg Bumps
+
 ## 4.2.7
 
 ## 4.2.6
