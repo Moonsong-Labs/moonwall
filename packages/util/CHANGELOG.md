@@ -1,5 +1,13 @@
 # @moonwall/util
 
+## 4.2.8
+
+### Patch Changes
+
+- 568726d: Pkg Bumps
+- Updated dependencies [568726d]
+  - @moonwall/types@4.2.8
+
 ## 4.2.7
 
 ### Patch Changes
