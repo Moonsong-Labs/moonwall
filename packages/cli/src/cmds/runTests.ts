@@ -116,7 +116,7 @@ function addThreadConfig(
   config: UserConfig,
   threads: number | boolean | object = false
 ): UserConfig {
-  const configWithThreads = {
+  const configWithThreads: UserConfig = {
     ...config,
     pool: "threads",
     poolOptions: {
@@ -146,8 +146,13 @@ function addThreadConfig(
   }
 
   if (typeof threads === "object") {
-    configWithThreads.pool = Object.keys(threads)[0];
-    configWithThreads.poolOptions = Object.values(threads)[0];
+    const key = Object.keys(threads)[0];
+    if (["threads", "forks", "vmThreads", "typescript"].includes(key)) {
+      configWithThreads.pool = key as "threads" | "forks" | "vmThreads" | "typescript";
+      configWithThreads.poolOptions = Object.values(threads)[0];
+    } else {
+      throw new Error(`Invalid pool type: ${key}`);
+    }
   }
   return configWithThreads;
 }

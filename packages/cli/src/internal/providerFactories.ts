@@ -74,7 +74,7 @@ export class ProviderFactory {
           { delay: 50, autoReconnect: false, maxAttempts: 10 }
         );
 
-        return new Web3(provider);
+        return new Web3(provider) as Web3<any>;
       },
     };
   }
