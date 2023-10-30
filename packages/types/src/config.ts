@@ -63,6 +63,11 @@ export type Environment = {
   description?: string;
 
   /**
+   * The default timeout for tests and hooks
+   */
+  timeout?: number;
+
+  /**
    * An array of directories with test files.
    */
   testFileDir: string[];

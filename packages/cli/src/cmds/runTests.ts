@@ -74,8 +74,8 @@ export async function executeTests(env: Environment, additionalArgs?: object) {
     globals: true,
     reporters: env.reporters ? env.reporters : ["default"],
     outputFile: env.reportFile,
-    testTimeout: globalConfig.defaultTestTimeout,
-    hookTimeout: globalConfig.defaultTestTimeout,
+    testTimeout: env.timeout || globalConfig.defaultTestTimeout,
+    hookTimeout: env.timeout || globalConfig.defaultTestTimeout,
     passWithNoTests: false,
     deps: {
       optimizer: { ssr: { enabled: false }, web: { enabled: false } },

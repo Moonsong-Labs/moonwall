@@ -660,6 +660,10 @@
                             "type": "string"
                         },
                         "type": "array"
+                    },
+                    "timeout": {
+                        "description": "The default timeout for tests and hooks",
+                        "type": "number"
                     }
                 },
                 "type": "object"
