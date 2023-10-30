@@ -1,5 +1,14 @@
 # @moonwall/cli
 
+## 4.2.9
+
+### Patch Changes
+
+- 8bbcefd: Fix process exit val
+  - Added new timeout config option for environments
+  - @moonwall/types@4.2.9
+  - @moonwall/util@4.2.9
+
 ## 4.2.8
 
 ### Patch Changes

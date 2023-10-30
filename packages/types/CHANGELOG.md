@@ -1,5 +1,7 @@
 # @moonwall/types
 
+## 4.2.9
+
 ## 4.2.8
 
 ### Patch Changes
