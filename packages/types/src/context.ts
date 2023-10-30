@@ -38,7 +38,7 @@ export type MoonwallEnvironment = {
 export interface MoonwallProvider {
   name: string;
   type: ProviderType;
-  connect: () => Promise<ApiPromise> | Signer | Web3 | Promise<ViemClient> | void;
+  connect: () => Promise<ApiPromise> | Signer | Web3<any> | Promise<ViemClient> | void;
   ws?: () => WsProvider;
 }
 

@@ -59,52 +59,13 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
 
 const WEB_SOCKET_TIMEOUT = 5000; // e.g., 5 seconds
 
-async function checkWebSocketJSONRPC(port: number): Promise<boolean> {
-  return new Promise((resolve, reject) => {
-    const ws = new WebSocket(`ws://localhost:${port}`);
-    const timeout = setTimeout(() => {
-      ws.close();
-      reject(new Error("WebSocket response timeout"));
-    }, WEB_SOCKET_TIMEOUT);
-
-    ws.once("open", () => {
-      ws.send(
-        JSON.stringify({
-          jsonrpc: "2.0",
-          id: 1,
-          method: "system_chain",
-          params: [],
-        })
-      );
-    });
-
-    ws.once("message", (data) => {
-      clearTimeout(timeout);
-      try {
-        const { jsonrpc, id } = JSON.parse(data.toString());
-        if (jsonrpc === "2.0" && id === 1) {
-          resolve(true);
-        } else {
-          reject(new Error("Invalid JSON-RPC response"));
-        }
-      } catch (e) {
-        reject(new Error("Failed to parse WebSocket message"));
-      } finally {
-        ws.close();
-      }
-    });
-
-    ws.once("error", (err) => {
-      clearTimeout(timeout);
-      ws.close();
-      reject(new Error(`WebSocket error: ${err.message}`));
-    });
-  });
-}
-
 // async function checkWebSocketJSONRPC(port: number): Promise<boolean> {
 //   return new Promise((resolve, reject) => {
 //     const ws = new WebSocket(`ws://localhost:${port}`);
+//     const timeout = setTimeout(() => {
+//       ws.close();
+//       reject(new Error("WebSocket response timeout"));
+//     }, WEB_SOCKET_TIMEOUT);
 
 //     ws.once("open", () => {
 //       ws.send(
@@ -118,27 +79,78 @@ async function checkWebSocketJSONRPC(port: number): Promise<boolean> {
 //     });
 
 //     ws.once("message", (data) => {
+//       clearTimeout(timeout);
 //       try {
-//         const response = JSON.parse(data.toString());
-//         if (response.jsonrpc === "2.0" && response.id === 1) {
-//           ws.close();
+//         const { jsonrpc, id } = JSON.parse(data.toString());
+//         if (jsonrpc === "2.0" && id === 1) {
 //           resolve(true);
 //         } else {
-//           ws.close();
-//           reject(false);
+//           reject(new Error("Invalid JSON-RPC response"));
 //         }
 //       } catch (e) {
+//         reject(new Error("Failed to parse WebSocket message"));
+//       } finally {
 //         ws.close();
-//         reject(false);
 //       }
 //     });
 
-//     ws.once("error", () => {
+//     ws.once("error", (err) => {
+//       clearTimeout(timeout);
 //       ws.close();
-//       reject(false);
+//       reject(new Error(`WebSocket error: ${err.message}`));
 //     });
 //   });
 // }
+
+async function checkWebSocketJSONRPC(port: number): Promise<boolean> {
+  return new Promise((resolve, reject) => {
+    const ws = new WebSocket(`ws://localhost:${port}`);
+    const timeout = setTimeout(() => {
+      ws.close();
+      reject(new Error("WebSocket response timeout"));
+    }, WEB_SOCKET_TIMEOUT);
+
+    const openHandler = () => {
+      ws.send(
+        JSON.stringify({
+          jsonrpc: "2.0",
+          id: 1,
+          method: "system_chain",
+          params: [],
+        })
+      );
+    };
+
+    const messageHandler = (data: string) => {
+      clearTimeout(timeout);
+      try {
+        const { jsonrpc, id } = JSON.parse(data.toString());
+        if (jsonrpc === "2.0" && id === 1) {
+          resolve(true);
+        } else {
+          reject(new Error("Invalid JSON-RPC response"));
+        }
+      } catch (e) {
+        reject(new Error("Failed to parse WebSocket message"));
+      } finally {
+        ws.removeListener("error", errorHandler);
+        ws.close();
+      }
+    };
+
+    const errorHandler = (err: Error) => {
+      clearTimeout(timeout);
+      ws.removeListener("open", openHandler);
+      ws.removeListener("message", messageHandler);
+      ws.close();
+      reject(new Error(`WebSocket error: ${err.message}`));
+    };
+
+    ws.once("open", openHandler);
+    ws.once("message", messageHandler);
+    ws.once("error", errorHandler);
+  });
+}
 
 function findPortsByPid(pid: number, retryDelay: number = 10000) {
   for (;;) {

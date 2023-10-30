@@ -64,13 +64,13 @@
     "@polkadot/types": "^10.10.1",
     "@polkadot/util": "^12.5.1",
     "@polkadot/util-crypto": "^12.5.1",
-    "@types/node": "^20.8.6",
+    "@types/node": "^20.8.9",
     "@zombienet/utils": "^0.0.22",
     "bottleneck": "^2.19.5",
     "debug": "^4.3.4",
-    "ethers": "^6.7.1",
-    "viem": "^1.16.5",
-    "web3": "4.0.3"
+    "ethers": "^6.8.0",
+    "viem": "^1.18.0",
+    "web3": "4.2.1"
   },
   "publishConfig": {
     "access": "public"
