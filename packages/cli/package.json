@@ -62,7 +62,7 @@
   },
   "dependencies": {
     "@acala-network/chopsticks": "^0.8.4",
-    "@moonbeam-network/api-augment": "^0.2400.0",
+    "@moonbeam-network/api-augment": "^0.2500.0",
     "@moonwall/types": "workspace:*",
     "@moonwall/util": "workspace:*",
     "@polkadot/api": "^10.10.1",
@@ -92,7 +92,7 @@
     "viem": "^1.18.0",
     "vitest": "1.0.0-beta.3",
     "web3": "4.2.1",
-    "web3-providers-ws": "4.0.3",
+    "web3-providers-ws": "4.0.7",
     "ws": "^8.14.2",
     "yaml": "^2.3.3",
     "yargs": "^17.7.2"

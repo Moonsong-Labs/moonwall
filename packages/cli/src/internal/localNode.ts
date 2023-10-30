@@ -31,7 +31,7 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
 
   const runningNode = execaCommand(`${cmd} ${args.join(" ")}`, {
     all: true,
-    cleanup: true,
+    cleanup: false,
     detached: false,
   }).pipeAll(logLocation);
 
@@ -155,7 +155,7 @@ async function checkWebSocketJSONRPC(port: number): Promise<boolean> {
 function findPortsByPid(pid: number, retryDelay: number = 10000) {
   for (;;) {
     const command = `lsof -i -n -P | grep LISTEN | grep ${pid} || true`;
-    const { stdout } = execaCommandSync(command, { shell: true });
+    const { stdout } = execaCommandSync(command, { shell: true, cleanup: true });
     const ports: number[] = [];
     const lines = stdout.split("\n");
 

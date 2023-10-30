@@ -406,7 +406,7 @@ export interface IGlobalContextFoundation {
 
 async function isPidRunning(pid: number): Promise<boolean> {
   try {
-    await execaCommand(`ps -p ${pid} -o pid=`);
+    await execaCommand(`ps -p ${pid} -o pid=`, { cleanup: true });
     return true;
   } catch {
     return false;
