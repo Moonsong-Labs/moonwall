@@ -114,7 +114,7 @@
     {
       "name": "zombie_multi_para",
       "testFileDir": ["suites/multizombie"],
-
+      "timeout": 300000,
       "foundation": {
         "type": "zombie",
         "zombieSpec": {
