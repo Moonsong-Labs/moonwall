@@ -1,5 +1,13 @@
 # @moonwall/cli
 
+## 4.2.10
+
+### Patch Changes
+
+- 49b9a0e: Pkg Update
+  - @moonwall/types@4.2.10
+  - @moonwall/util@4.2.10
+
 ## 4.2.9
 
 ### Patch Changes
