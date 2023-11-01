@@ -359,16 +359,18 @@ const resolveTailChoice = async (env: Environment) => {
   let zombieNodePointer: number = 0;
   let bottomBarContents = "";
   let switchNode: boolean;
+  let zombieContent: string;
   let zombieNodes: string[] | undefined;
 
   const resumePauseProse = [
-    `, ${chalk.bgWhite.black("[p]")} - pause tail`,
-    `, ${chalk.bgWhite.black("[r]")} - resume tail`,
+    `, ${chalk.bgWhite.black("[p]")} Pause tail`,
+    `, ${chalk.bgWhite.black("[r]")} Resume tail`,
   ];
 
   const bottomBarBase = `📜 Tailing Logs, commands: ${chalk.bgWhite.black(
     "[q]"
-  )} - quit, ${chalk.bgWhite.black("[t]")} - test, ${chalk.bgWhite.black("[g]")} - grep test`;
+  )} Quit, ${chalk.bgWhite.black("[t]")} Test, ${chalk.bgWhite.black("[g]")} Grep test`;
+
   bottomBarContents = bottomBarBase + resumePauseProse[0];
 
   const ui = new inquirer.ui.BottomBar({
@@ -381,15 +383,15 @@ const resolveTailChoice = async (env: Environment) => {
         ? process.env.MOON_ZOMBIE_NODES.split("|")
         : undefined;
 
-      bottomBarContents =
-        bottomBarBase +
-        resumePauseProse[0] +
-        `, ${chalk.bgWhite.black("[,]")} Next Log, ${chalk.bgWhite.black(
-          "[.]"
-        )} Previous Log  | CurrentLog: ${`${zombieNodes[zombieNodePointer]} (${
-          zombieNodePointer + 1
-        }/${zombieNodes.length})`}`;
-      ui.updateBottomBar(bottomBarContents + "\n");
+      zombieContent = `, ${chalk.bgWhite.black("[,]")} Next Log, ${chalk.bgWhite.black(
+        "[.]"
+      )} Previous Log  | CurrentLog: ${`${zombieNodes[zombieNodePointer]} (${
+        zombieNodePointer + 1
+      }/${zombieNodes.length})`}`;
+
+      bottomBarContents = bottomBarBase + resumePauseProse[tailing ? 0 : 1] + zombieContent;
+
+      ui.updateBottomBar(bottomBarContents, "\n");
     }
 
     switchNode = false;
@@ -427,13 +429,13 @@ const resolveTailChoice = async (env: Environment) => {
       };
 
       const decrPtr = () => {
-        zombieNodePointer = (zombieNodePointer - 1) % zombieNodes.length;
+        zombieNodePointer = (zombieNodePointer - 1 + zombieNodes.length) % zombieNodes.length;
       };
 
       printLogs(fs.statSync(logFilePath).size, 0);
 
       const renderBottomBar = (...parts: any[]) => {
-        ui.updateBottomBar(bottomBarBase + " " + parts?.join(" ") + "\n");
+        ui.updateBottomBar(bottomBarBase + " " + parts?.join(" ") + zombieContent + "\n");
       };
 
       const handleInputData = async (key: any) => {
