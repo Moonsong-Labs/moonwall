@@ -356,94 +356,154 @@ const resolveTestChoice = async (env: Environment, silent: boolean = false) => {
 
 const resolveTailChoice = async (env: Environment) => {
   let tailing: boolean = true;
+  let zombieNodePointer: number = 0;
+  let bottomBarContents = "";
+  let switchNode: boolean;
+  let zombieNodes: string[] | undefined;
+
   const resumePauseProse = [
-    `, ${chalk.bgWhite.black("[p]")} - pause tail\n`,
-    `, ${chalk.bgWhite.black("[r]")} - resume tail\n`,
+    `, ${chalk.bgWhite.black("[p]")} - pause tail`,
+    `, ${chalk.bgWhite.black("[r]")} - resume tail`,
   ];
-  const bottomBarContents = `📜 Tailing Logs, commands: ${chalk.bgWhite.black(
+
+  const bottomBarBase = `📜 Tailing Logs, commands: ${chalk.bgWhite.black(
     "[q]"
   )} - quit, ${chalk.bgWhite.black("[t]")} - test, ${chalk.bgWhite.black("[g]")} - grep test`;
+  bottomBarContents = bottomBarBase + resumePauseProse[0];
 
   const ui = new inquirer.ui.BottomBar({
-    bottomBar: bottomBarContents + resumePauseProse[0],
+    bottomBar: bottomBarContents + "\n",
   });
 
-  await new Promise(async (resolve) => {
-    const onData = (chunk: any) => ui.log.write(chunk.toString());
-    const logFilePath = process.env.MOON_MONITORED_NODE
-      ? process.env.MOON_MONITORED_NODE
-      : process.env.MOON_LOG_LOCATION;
+  for (;;) {
+    if (process.env.MOON_ZOMBIE_NODES) {
+      zombieNodes = process.env.MOON_ZOMBIE_NODES
+        ? process.env.MOON_ZOMBIE_NODES.split("|")
+        : undefined;
 
-    // eslint-disable-next-line prefer-const
-    let currentReadPosition = 0;
+      bottomBarContents =
+        bottomBarBase +
+        resumePauseProse[0] +
+        `, ${chalk.bgWhite.black("[,]")} Next Log, ${chalk.bgWhite.black(
+          "[.]"
+        )} Previous Log  | CurrentLog: ${`${zombieNodes[zombieNodePointer]} (${
+          zombieNodePointer + 1
+        }/${zombieNodes.length})`}`;
+      ui.updateBottomBar(bottomBarContents + "\n");
+    }
 
-    const printLogs = (newReadPosition: number, currentReadPosition: number) => {
-      const stream = fs.createReadStream(logFilePath, {
-        start: currentReadPosition,
-        end: newReadPosition,
-      });
-      stream.on("data", onData);
-      stream.on("end", () => {
-        currentReadPosition = newReadPosition;
-      });
-    };
+    switchNode = false;
+    await new Promise(async (resolve) => {
+      const onData = (chunk: any) => ui.log.write(chunk.toString());
+      const logFilePath = process.env.MOON_MONITORED_NODE
+        ? process.env.MOON_MONITORED_NODE
+        : process.env.MOON_LOG_LOCATION;
 
-    const readLog = () => {
-      const stats = fs.statSync(logFilePath);
-      const newReadPosition = stats.size;
+      // eslint-disable-next-line prefer-const
+      let currentReadPosition = 0;
 
-      if (newReadPosition > currentReadPosition && tailing) {
-        printLogs(newReadPosition, currentReadPosition);
-      }
-    };
+      const printLogs = (newReadPosition: number, currentReadPosition: number) => {
+        const stream = fs.createReadStream(logFilePath, {
+          start: currentReadPosition,
+          end: newReadPosition,
+        });
+        stream.on("data", onData);
+        stream.on("end", () => {
+          currentReadPosition = newReadPosition;
+        });
+      };
 
-    printLogs(fs.statSync(logFilePath).size, 0);
+      const readLog = () => {
+        const stats = fs.statSync(logFilePath);
+        const newReadPosition = stats.size;
 
-    const handleInputData = async (key: any) => {
-      ui.rl.input.pause();
-      const char = key.toString().trim();
+        if (newReadPosition > currentReadPosition && tailing) {
+          printLogs(newReadPosition, currentReadPosition);
+        }
+      };
 
-      if (char === "p") {
-        tailing = false;
-        ui.updateBottomBar(bottomBarContents + resumePauseProse[1]);
-      }
+      const incrPtr = () => {
+        zombieNodePointer = (zombieNodePointer + 1) % zombieNodes.length;
+      };
 
-      if (char === "r") {
-        printLogs(fs.statSync(logFilePath).size, currentReadPosition);
-        tailing = true;
-        ui.updateBottomBar(bottomBarContents + resumePauseProse[0]);
-      }
+      const decrPtr = () => {
+        zombieNodePointer = (zombieNodePointer - 1) % zombieNodes.length;
+      };
 
-      if (char === "q") {
-        ui.rl.input.removeListener("data", handleInputData);
+      printLogs(fs.statSync(logFilePath).size, 0);
+
+      const renderBottomBar = (...parts: any[]) => {
+        ui.updateBottomBar(bottomBarBase + " " + parts?.join(" ") + "\n");
+      };
+
+      const handleInputData = async (key: any) => {
         ui.rl.input.pause();
-        fs.unwatchFile(logFilePath);
-        resolve("");
-      }
+        const char = key.toString().trim();
 
-      if (char === "t") {
-        await resolveTestChoice(env, true);
-        ui.updateBottomBar(bottomBarContents + resumePauseProse[tailing ? 0 : 1]);
-      }
+        if (char === "p") {
+          tailing = false;
+          renderBottomBar(resumePauseProse[1]);
+        }
 
-      if (char === "g") {
-        ui.rl.input.pause();
-        tailing = false;
-        await resolveGrepChoice(env, true);
-        ui.updateBottomBar(bottomBarContents + resumePauseProse[tailing ? 0 : 1]);
-        tailing = true;
+        if (char === "r") {
+          printLogs(fs.statSync(logFilePath).size, currentReadPosition);
+          tailing = true;
+          renderBottomBar(resumePauseProse[0]);
+        }
+
+        if (char === "q") {
+          ui.rl.input.removeListener("data", handleInputData);
+          ui.rl.input.pause();
+          fs.unwatchFile(logFilePath);
+          resolve("");
+        }
+
+        if (char === "t") {
+          await resolveTestChoice(env, true);
+          renderBottomBar(resumePauseProse[tailing ? 0 : 1]);
+        }
+
+        if (char === ",") {
+          ui.rl.input.removeListener("data", handleInputData);
+          ui.rl.input.pause();
+          fs.unwatchFile(logFilePath);
+          switchNode = true;
+          incrPtr();
+          resolve("");
+        }
+
+        if (char === ".") {
+          ui.rl.input.removeListener("data", handleInputData);
+          ui.rl.input.pause();
+          fs.unwatchFile(logFilePath);
+          switchNode = true;
+          decrPtr();
+          resolve("");
+        }
+
+        if (char === "g") {
+          ui.rl.input.pause();
+          tailing = false;
+          await resolveGrepChoice(env, true);
+          renderBottomBar(resumePauseProse[tailing ? 0 : 1]);
+          tailing = true;
+          ui.rl.input.resume();
+        }
+
         ui.rl.input.resume();
-      }
+      };
 
-      ui.rl.input.resume();
-    };
+      ui.rl.input.on("data", handleInputData);
 
-    ui.rl.input.on("data", handleInputData);
-
-    fs.watchFile(logFilePath, () => {
-      readLog();
+      fs.watchFile(logFilePath, () => {
+        readLog();
+      });
     });
-  });
+
+    if (!switchNode) {
+      break;
+    }
+  }
 
   ui.close();
 };

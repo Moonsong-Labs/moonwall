@@ -164,8 +164,6 @@ export class MoonwallContext {
     const network = await zombie.start("", zombieConfig, { logType: "silent" });
     process.env.MOON_RELAY_WSS = network.relay[0].wsUri;
     process.env.MOON_PARA_WSS = Object.values(network.paras)[0].nodes[0].wsUri;
-    process.env.MOON_ZOMBIE_PATH = network.client.tmpDir;
-
     if (
       env.foundation.type == "zombie" &&
       env.foundation.zombieSpec.monitoredNode &&
@@ -174,6 +172,7 @@ export class MoonwallContext {
       process.env.MOON_MONITORED_NODE = `${network.tmpDir}/${env.foundation.zombieSpec.monitoredNode}.log`;
     }
     const nodeNames = Object.keys(network.nodesByName);
+    process.env.MOON_ZOMBIE_DIR = `${network.tmpDir}`;
     process.env.MOON_ZOMBIE_NODES = nodeNames.join("|");
 
     const processIds = Object.values((network.client as any).processMap)
@@ -254,10 +253,10 @@ export class MoonwallContext {
     if (this.foundation == "zombie") {
       let readStreams: any[];
       if (!isOptionSet("disableLogEavesdropping")) {
-        console.log(`🦻 Eavesdropping on node logs at ${process.env.MOON_ZOMBIE_PATH}`);
+        console.log(`🦻 Eavesdropping on node logs at ${process.env.MOON_ZOMBIE_DIR}`);
         const zombieNodeLogs = process.env
           .MOON_ZOMBIE_NODES!.split("|")
-          .map((nodeName) => `${process.env.MOON_ZOMBIE_PATH}/${nodeName}.log`);
+          .map((nodeName) => `${process.env.MOON_ZOMBIE_DIR}/${nodeName}.log`);
 
         readStreams = zombieNodeLogs.map((logPath) => {
           const readStream = fs.createReadStream(logPath, { encoding: "utf8" });
