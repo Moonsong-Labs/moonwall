@@ -385,9 +385,9 @@ const resolveTailChoice = async (env: Environment) => {
 
       zombieContent = `, ${chalk.bgWhite.black("[,]")} Next Log, ${chalk.bgWhite.black(
         "[.]"
-      )} Previous Log  | CurrentLog: ${`${zombieNodes[zombieNodePointer]} (${
-        zombieNodePointer + 1
-      }/${zombieNodes.length})`}`;
+      )} Previous Log  | CurrentLog: ${chalk.bgWhite.black(
+        `${zombieNodes[zombieNodePointer]} (${zombieNodePointer + 1}/${zombieNodes.length})`
+      )}`;
 
       bottomBarContents = bottomBarBase + resumePauseProse[tailing ? 0 : 1] + zombieContent;
 
