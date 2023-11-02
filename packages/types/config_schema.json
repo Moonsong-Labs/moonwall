@@ -41,6 +41,10 @@
                     },
                     "type": "array"
                 },
+                "retainAllLogs": {
+                    "description": "An optional flag to retain node logs from previous runs.",
+                    "type": "boolean"
+                },
                 "running": {
                     "description": "UNUSED",
                     "type": "boolean"

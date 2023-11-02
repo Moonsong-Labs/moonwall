@@ -291,6 +291,11 @@ export interface ChopsticksLaunchSpec extends GenericLaunchSpec {
    * This is only supported for single mode chopsticks.
    */
   buildBlockMode?: "batch" | "manual" | "instant";
+
+  /**
+   * An optional flag to retain node logs from previous runs.
+   */
+  retainAllLogs?: boolean;
 }
 
 /**
@@ -318,11 +323,6 @@ export interface DevLaunchSpec extends GenericLaunchSpec {
   newRpcBehaviour?: boolean;
 
   /**
-   * An optional flag to retain node logs from previous runs.
-   */
-  retainAllLogs?: boolean;
-
-  /**
    * An optional object with p2pPort, wsPort, and rpcPort.
    */
   ports?: {
@@ -341,6 +341,11 @@ export interface DevLaunchSpec extends GenericLaunchSpec {
      */
     wsPort: number;
   };
+
+  /**
+   * An optional flag to retain node logs from previous runs.
+   */
+  retainAllLogs?: boolean;
 }
 
 /**
