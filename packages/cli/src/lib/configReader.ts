@@ -2,9 +2,30 @@ import "@moonbeam-network/api-augment";
 import { MoonwallConfig } from "@moonwall/types";
 import fs, { readFile } from "fs/promises";
 import { readFileSync } from "fs";
-import path from "path";
+import JSONC from "jsonc-parser";
+import path, { extname } from "path";
 
 let cachedConfig: MoonwallConfig | undefined;
+
+async function parseConfig(filePath: string) {
+  let result: any;
+
+  const file = await readFile(filePath, "utf8");
+
+  switch (extname(filePath)) {
+    case ".json":
+      result = JSON.parse(file);
+      break;
+    case ".config":
+      result = JSONC.parse(file);
+      break;
+    default:
+      result = undefined;
+      break;
+  }
+
+  return result;
+}
 
 export async function loadConfig(path: string): Promise<MoonwallConfig> {
   if (
@@ -89,11 +110,13 @@ export async function importAsyncConfig(): Promise<MoonwallConfig> {
   const filePath = path.isAbsolute(configPath) ? configPath : path.join(process.cwd(), configPath);
 
   try {
-    const file = await readFile(filePath, "utf8");
-    const json = JSON.parse(file);
-    const replacedJson = replaceEnvVars(json);
+    // const file = await readFile(filePath, "utf8");
+    // const json = JSON.parse(file);
 
-    cachedConfig = replacedJson as MoonwallConfig;
+    const config = await parseConfig(filePath);
+    const replacedConfig = replaceEnvVars(config);
+
+    cachedConfig = replacedConfig as MoonwallConfig;
     return cachedConfig;
   } catch (e) {
     console.error(e);
