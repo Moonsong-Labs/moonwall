@@ -12,6 +12,7 @@ import zombie, { Network } from "@zombienet/orchestrator";
 import { execaCommand, execaCommandSync } from "execa";
 import Debug from "debug";
 import fs from "fs";
+import net from "net";
 import readline from "readline";
 import { setTimeout as timer } from "timers/promises";
 import { parseChopsticksRunCmd, parseRunCmd, parseZombieCmd } from "../internal/commandParsers";
@@ -38,6 +39,7 @@ export class MoonwallContext {
   foundation: FoundationType;
   zombieNetwork?: Network;
   rtUpgradePath?: string;
+  ipcServer?: net.Server;
 
   constructor(config: MoonwallConfig) {
     const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
@@ -187,6 +189,47 @@ export class MoonwallContext {
       }
     };
 
+    const socketPath = `${network.tmpDir}/node-ipc.sock`;
+
+    const server = net.createServer((client) => {
+      client.on("end", () => {
+        console.log("📨 IPC client disconnected");
+      });
+
+      client.on("data", async (data) => {
+        try {
+          const message = JSON.parse(data.toString());
+
+          if (message.cmd === "restart") {
+            console.log(`Restarting ${message.node}, please wait...`);
+            await network.client.restartNode(message.node, 0);
+            console.log(`✅ Node: "${message.node}" restarted`);
+
+            // change the process map to use the new PID
+            await this.disconnect();
+            await this.connectEnvironment(true);
+
+            if (client.writable) {
+              client.write(
+                JSON.stringify({ status: "success", message: `${message.node} restarted` })
+              );
+            } else {
+              console.log("Client disconnected, cannot send response.");
+            }
+          }
+        } catch (e) {
+          console.log("📨 Message from client:", data.toString());
+        }
+      });
+    });
+
+    server.listen(socketPath, () => {
+      console.log("📨 IPC Server listening on", socketPath);
+    });
+
+    this.ipcServer = server;
+    process.env.MOON_IPC_SOCKET = socketPath;
+
     process.once("exit", onProcessExit);
     process.once("SIGINT", onProcessExit);
 
@@ -225,7 +268,7 @@ export class MoonwallContext {
     return MoonwallContext.getContext();
   }
 
-  public async connectEnvironment(): Promise<MoonwallContext> {
+  public async connectEnvironment(silent: boolean = false): Promise<MoonwallContext> {
     const config = await importAsyncConfig();
     const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
 
@@ -253,7 +296,7 @@ export class MoonwallContext {
     if (this.foundation == "zombie") {
       let readStreams: any[];
       if (!isOptionSet("disableLogEavesdropping")) {
-        console.log(`🦻 Eavesdropping on node logs at ${process.env.MOON_ZOMBIE_DIR}`);
+        !silent && console.log(`🦻 Eavesdropping on node logs at ${process.env.MOON_ZOMBIE_DIR}`);
         const zombieNodeLogs = process.env
           .MOON_ZOMBIE_NODES!.split("|")
           .map((nodeName) => `${process.env.MOON_ZOMBIE_DIR}/${nodeName}.log`);
@@ -283,7 +326,7 @@ export class MoonwallContext {
         )
         .map(async (provider) => {
           return await new Promise(async (resolve) => {
-            console.log(`⏲️  Waiting for chain ${provider.name} to produce blocks...`);
+            !silent && console.log(`⏲️  Waiting for chain ${provider.name} to produce blocks...`);
             while (
               (
                 await (provider.api as ApiPromise).rpc.chain.getBlock()
@@ -291,7 +334,7 @@ export class MoonwallContext {
             ) {
               await timer(500);
             }
-            console.log(`✅ Chain ${provider.name} producing blocks, continuing`);
+            !silent && console.log(`✅ Chain ${provider.name} producing blocks, continuing`);
             resolve("");
           });
         });
@@ -337,16 +380,6 @@ export class MoonwallContext {
     return MoonwallContext.instance;
   }
 
-  private killAllChildProcesses() {
-    this.nodes.forEach((child) => {
-      try {
-        child.kill();
-      } catch (err) {
-        console.error("Failed to kill child process", err);
-      }
-    });
-  }
-
   public static async destroy() {
     const ctx = this.instance;
 
@@ -372,6 +405,8 @@ export class MoonwallContext {
     if (ctx.zombieNetwork) {
       console.log("🪓  Killing zombie nodes");
       await ctx.zombieNetwork.stop();
+      ctx.ipcServer?.close();
+      ctx.ipcServer?.removeAllListeners();
     }
   }
 }

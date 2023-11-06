@@ -1,7 +1,10 @@
 import "@moonbeam-network/api-augment";
+import "@polkadot/api-augment";
 import { beforeAll, describeSuite, expect } from "@moonwall/cli";
+import net from "net";
 import { ALITH_ADDRESS, GLMR, baltathar } from "@moonwall/util";
 import { ApiPromise } from "@polkadot/api";
+import { setTimeout } from "timers/promises";
 
 describeSuite({
   id: "Z1",
@@ -10,16 +13,39 @@ describeSuite({
   testCases: function ({ it, context, log }) {
     let paraApi: ApiPromise;
     let relayApi: ApiPromise;
+    let client: net.Socket;
+    let resume = false;
 
-    beforeAll(() => {
+    beforeAll(async () => {
       paraApi = context.polkadotJs("parachain");
       relayApi = context.polkadotJs("relaychain");
-    });
+
+      // TODO: Turn this into runner function
+      // TODO: Raise zombienet PR to remove logging
+      client = net.createConnection({ path: process.env.MOON_IPC_SOCKET }, () => {
+        client.write("Connected to server!");
+      });
+
+      client.on("data", (data) => {
+        const message = JSON.parse(data.toString());
+        log(message);
+        if (message.status === "success") {
+          resume = true;
+        }
+      });
+
+      for (;;) {
+        if (!client.connecting) {
+          break;
+        }
+        await setTimeout(100);
+      }
+    }, 10000);
 
     it({
       id: "T01",
       title: "Check relaychain api correctly connected",
-      test: function () {
+      test: async function () {
         const rt = relayApi.consts.system.version.specVersion.toNumber();
         expect(rt).to.be.greaterThan(0);
 
@@ -32,6 +58,11 @@ describeSuite({
       id: "T02",
       title: "Check parachain api correctly connected",
       test: async function () {
+        const socketPath = process.env.MOON_IPC_SOCKET;
+        const client = net.createConnection({ path: socketPath }, () => {
+          client.write("Hello from client again");
+        });
+
         const network = paraApi.consts.system.version.specName.toString();
         expect(network).to.contain("moonbase");
 
@@ -74,6 +105,7 @@ describeSuite({
 
         const balAfter = (await paraApi.query.system.account(ALITH_ADDRESS)).data.free;
         expect(balBefore.lt(balAfter)).to.be.true;
+        client.write("test case 4 after");
       },
     });
 
@@ -87,6 +119,32 @@ describeSuite({
         log((await paraApi.rpc.chain.getBlock()).block.header.number.toNumber());
         await context.waitBlock(5, "parachain");
         log((await paraApi.rpc.chain.getBlock()).block.header.number.toNumber());
+      },
+    });
+
+    it({
+      id: "T06",
+      title: "Restart a node from test",
+      timeout: 600000,
+      test: async function () {
+        const message = {
+          message: "Restarting node 1",
+          cmd: "restart",
+          node: "alith",
+        };
+
+        await new Promise((resolve) => {
+          client.write(JSON.stringify(message), () => resolve("Sent!"));
+        });
+
+        for (;;) {
+          if (resume) {
+            break;
+          }
+          await setTimeout(100);
+        }
+
+        await context.waitBlock(2, "parachain", "quantity");
       },
     });
   },
