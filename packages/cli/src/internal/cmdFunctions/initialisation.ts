@@ -33,7 +33,7 @@ export async function generateConfig() {
       );
 
       await fs.writeFile("moonwall.config", textBlob + JSONBlob, "utf-8");
-      process.env.MOON_CONFIG_PATH = "./moonwall.config"
+      process.env.MOON_CONFIG_PATH = "./moonwall.config";
       break;
     } else {
       console.log("ℹ️  Config file already exists at this location. Quitting.");
@@ -126,5 +126,4 @@ export function createConfig(options: {
   };
 }
 
-
-const textBlob = `// TEST TEST TEST\n`
+const textBlob = `// TEST TEST TEST\n`;
