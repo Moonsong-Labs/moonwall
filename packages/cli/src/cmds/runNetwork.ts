@@ -438,7 +438,10 @@ const resolveTailChoice = async (env: Environment) => {
       printLogs(fs.statSync(logFilePath).size, 0);
 
       const renderBottomBar = (...parts: any[]) => {
-        ui.updateBottomBar(bottomBarBase + " " + parts?.join(" ") + zombieContent + "\n");
+        const content = process.env.MOON_ZOMBIE_NODES
+          ? bottomBarBase + " " + parts?.join(" ") + zombieContent + "\n"
+          : bottomBarBase + " " + parts?.join(" ") + "\n";
+        ui.updateBottomBar(content);
       };
 
       const handleInputData = async (key: any) => {

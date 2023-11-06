@@ -159,7 +159,7 @@ async function checkWebSocketJSONRPC(port: number): Promise<boolean> {
 function findPortsByPid(pid: number, retryDelay: number = 10000) {
   for (;;) {
     const command = `lsof -i -n -P | grep LISTEN | grep ${pid} || true`;
-    const { stdout } = execaCommandSync(command, { shell: true, cleanup: true });
+    const { stdout } = execaCommandSync(command, { shell: true, cleanup: true, timeout: 2000 });
     const ports: number[] = [];
     const lines = stdout.split("\n");
 

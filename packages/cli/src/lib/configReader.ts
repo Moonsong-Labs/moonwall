@@ -26,7 +26,7 @@ async function parseConfig(filePath: string) {
 
   return result;
 }
- function parseConfigSync(filePath: string) {
+function parseConfigSync(filePath: string) {
   let result: any;
 
   const file = readFileSync(filePath, "utf8");
@@ -45,7 +45,6 @@ async function parseConfig(filePath: string) {
 
   return result;
 }
-
 
 export async function importConfig(configPath: string): Promise<MoonwallConfig> {
   return await import(configPath);
