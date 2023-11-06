@@ -44,7 +44,7 @@ yargs(hideBin(process.argv))
       type: "string",
       alias: "c",
       description: "path to MoonwallConfig file",
-      default: "./moonwall.config.json",
+      default: defaultConfigFile,
     },
   })
   .middleware((argv) => {

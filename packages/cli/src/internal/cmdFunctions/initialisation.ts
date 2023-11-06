@@ -32,7 +32,8 @@ export async function generateConfig() {
         3
       );
 
-      await fs.writeFile("moonwall.config.json", JSONBlob, "utf-8");
+      await fs.writeFile("moonwall.config", textBlob + JSONBlob, "utf-8");
+      process.env.MOON_CONFIG_PATH = "./moonwall.config"
       break;
     } else {
       console.log("ℹ️  Config file already exists at this location. Quitting.");
@@ -111,8 +112,6 @@ export function createConfig(options: {
   testDir: string;
 }): MoonwallConfig {
   return {
-    $schema:
-      "https://raw.githubusercontent.com/Moonsong-Labs/moonwall/main/packages/types/config_schema.json",
     label: options.label,
     defaultTestTimeout: options.timeout,
     environments: [
@@ -126,3 +125,6 @@ export function createConfig(options: {
     ],
   };
 }
+
+
+const textBlob = `// TEST TEST TEST\n`

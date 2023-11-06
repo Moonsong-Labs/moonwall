@@ -6,11 +6,6 @@ import type { LogType } from "@zombienet/utils";
  */
 export type MoonwallConfig = {
   /**
-   * The JSON schema for the config.
-   */
-  $schema: string;
-
-  /**
    * A label for the config.
    */
   label: string;

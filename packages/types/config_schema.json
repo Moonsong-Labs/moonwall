@@ -500,10 +500,6 @@
     },
     "description": "The main configuration object for Moonwall.",
     "properties": {
-        "$schema": {
-            "description": "The JSON schema for the config.",
-            "type": "string"
-        },
         "additionalRepos": {
             "description": "Use this to specify additional repos to download binaries from.\nPolkadot, Tanssi and Moonbeam are available by default.",
             "items": {
