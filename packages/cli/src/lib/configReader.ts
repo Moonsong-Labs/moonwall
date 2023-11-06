@@ -1,6 +1,6 @@
 import "@moonbeam-network/api-augment";
 import { MoonwallConfig } from "@moonwall/types";
-import fs, { readFile } from "fs/promises";
+import { readFile } from "fs/promises";
 import { readFileSync } from "fs";
 import JSONC from "jsonc-parser";
 import path, { extname } from "path";
@@ -26,21 +26,26 @@ async function parseConfig(filePath: string) {
 
   return result;
 }
+ function parseConfigSync(filePath: string) {
+  let result: any;
 
-export async function loadConfig(path: string): Promise<MoonwallConfig> {
-  if (
-    !(await fs
-      .access(path)
-      .then(() => true)
-      .catch(() => false))
-  ) {
-    throw new Error(`Moonwall Config file ${path} cannot be found`);
+  const file = readFileSync(filePath, "utf8");
+
+  switch (extname(filePath)) {
+    case ".json":
+      result = JSON.parse(file);
+      break;
+    case ".config":
+      result = JSONC.parse(file);
+      break;
+    default:
+      result = undefined;
+      break;
   }
 
-  const file = await fs.readFile(path, { encoding: "utf-8" });
-  const json: MoonwallConfig = JSON.parse(file);
-  return json;
+  return result;
 }
+
 
 export async function importConfig(configPath: string): Promise<MoonwallConfig> {
   return await import(configPath);
@@ -70,10 +75,9 @@ export async function cacheConfig() {
   const configPath = process.env.MOON_CONFIG_PATH!;
   const filePath = path.isAbsolute(configPath) ? configPath : path.join(process.cwd(), configPath);
   try {
-    const file = await readFile(filePath, "utf8");
-    const json = JSON.parse(file);
-    const replacedJson = replaceEnvVars(json);
-    cachedConfig = replacedJson as MoonwallConfig;
+    const config = parseConfigSync(filePath);
+    const replacedConfig = replaceEnvVars(config);
+    cachedConfig = replacedConfig as MoonwallConfig;
   } catch (e) {
     console.error(e);
     throw new Error(`Error import config at ${filePath}`);
@@ -89,11 +93,9 @@ export function importJsonConfig(): MoonwallConfig {
   const filePath = path.isAbsolute(configPath) ? configPath : path.join(process.cwd(), configPath);
 
   try {
-    const file = readFileSync(filePath, "utf8");
-    const json = JSON.parse(file);
-    const replacedJson = replaceEnvVars(json);
-
-    cachedConfig = replacedJson as MoonwallConfig;
+    const config = parseConfigSync(filePath);
+    const replacedConfig = replaceEnvVars(config);
+    cachedConfig = replacedConfig as MoonwallConfig;
     return cachedConfig;
   } catch (e) {
     console.error(e);
@@ -110,9 +112,6 @@ export async function importAsyncConfig(): Promise<MoonwallConfig> {
   const filePath = path.isAbsolute(configPath) ? configPath : path.join(process.cwd(), configPath);
 
   try {
-    // const file = await readFile(filePath, "utf8");
-    // const json = JSON.parse(file);
-
     const config = await parseConfig(filePath);
     const replacedConfig = replaceEnvVars(config);
 

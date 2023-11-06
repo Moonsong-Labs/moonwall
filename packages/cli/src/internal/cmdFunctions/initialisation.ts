@@ -126,4 +126,8 @@ export function createConfig(options: {
   };
 }
 
-const textBlob = `// TEST TEST TEST\n`;
+const textBlob = `// This Moonwall Config file should be modified to include all types
+// of environments you wish to test against.
+
+// For more information on how to configure Moonwall, please visit:
+// https://moonsong-labs.github.io/moonwall/config/intro.html\n`;
