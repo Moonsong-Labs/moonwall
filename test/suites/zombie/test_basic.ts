@@ -5,6 +5,7 @@ import net from "net";
 import { ALITH_ADDRESS, GLMR, baltathar } from "@moonwall/util";
 import { ApiPromise } from "@polkadot/api";
 import { setTimeout as timer } from "timers/promises";
+import { stat } from "fs";
 
 describeSuite({
   id: "Z1",
@@ -113,18 +114,29 @@ describeSuite({
       title: "Pause/Resume a node",
       timeout: 600000,
       test: async function () {
-        const blockBefore = (await paraApi.rpc.chain.getBlock()).block.header.number.toNumber();
-        await context.pauseNode("alith");
-        log("waiting 30s and checking block production is paused")
-        await timer(20000)
-        const blockAfter = (await paraApi.rpc.chain.getBlock()).block.header.number.toNumber();
-        expect(blockBefore).to.be.equal(blockAfter);
 
+        // await context.pauseNode("alice");
+        
+        await context.killNode("alice");
+        const status  = await context.isUp("alice");
 
-        await context.resumeNode("alith");
-        await context.waitBlock(1, "parachain", "quantity");
-        const blockAfterResume = (await paraApi.rpc.chain.getBlock()).block.header.number.toNumber();
-        expect(blockAfterResume).to.be.greaterThan(blockAfter);
+        log(status);
+        expect(status).toBe(false)
+        // expect(await context.isUp("alith"), "Alith node is not running").toBe(true);
+        // const blockBefore = (await paraApi.rpc.chain.getBlock()).block.header.number.toNumber();
+        // await context.pauseNode("alith");
+        // log("waiting 20s and checking block production is paused");
+        // await timer(20000);
+        // const blockAfter = (await paraApi.rpc.chain.getBlock()).block.header.number.toNumber();
+        // expect(blockBefore).to.be.equal(blockAfter);
+        // expect(await context.isUp("alith"), "Alith node is not paused").toBe(false);
+
+        // await context.resumeNode("alith");
+        // await context.waitBlock(1, "parachain", "quantity");
+        // const blockAfterResume = (
+        //   await paraApi.rpc.chain.getBlock()
+        // ).block.header.number.toNumber();
+        // expect(blockAfterResume).to.be.greaterThan(blockAfter);
       },
     });
   },

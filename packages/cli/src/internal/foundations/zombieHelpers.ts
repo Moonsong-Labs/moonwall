@@ -52,8 +52,8 @@ export function getZombieConfig(path: string) {
 
 export type IPCRequestMessage = {
   text: string;
-  cmd: "restart" | "pause" | "resume" | "kill" | "isup";
-  nodeName: string;
+  cmd: "restart" | "pause" | "resume" | "kill" | "isup" | "init";
+  nodeName?: string;
 };
 
 export type IPCResponseMessage = {
@@ -66,8 +66,14 @@ export async function sendIpcMessage(message: IPCRequestMessage) {
   let resume = false;
   let response: IPCResponseMessage;
   const ipcPath = process.env.MOON_IPC_SOCKET;
-  const client = net.createConnection({ path: ipcPath }, () => {
-    client.write("Connected to server!");
+  const client = net.createConnection({ path: ipcPath }, async () => {
+    // const msg: IPCRequestMessage = {
+    //   cmd: "init",
+    //   text: "Connected to server",
+    // };
+    // await new Promise((resolve) => {
+    //   client.write(JSON.stringify(msg), () => resolve("Sent!"));
+    // });
   });
 
   // Listener to return control flow after server responds

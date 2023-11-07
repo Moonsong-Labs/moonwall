@@ -197,9 +197,9 @@ export class MoonwallContext {
     const socketPath = `${network.tmpDir}/node-ipc.sock`;
 
     const server = net.createServer((client) => {
-      client.on("end", () => {
-        console.log("📨 IPC client disconnected");
-      });
+      // client.on("end", () => {
+      //   console.log("📨 IPC client disconnected");
+      // });
 
       // Client message handling
       client.on("data", async (data) => {
@@ -215,11 +215,12 @@ export class MoonwallContext {
           const message: IPCRequestMessage = JSON.parse(data.toString());
 
           const node = network.getNodeByName(message.nodeName);
+          const zombieClient = network.client;
 
           switch (message.cmd) {
             case "restart": {
-              await node.restart();
               await this.disconnect();
+              await zombieClient.restartNode(message.nodeName, null);
               await this.connectEnvironment(true);
               writeToClient({
                 status: "success",
@@ -230,7 +231,10 @@ export class MoonwallContext {
             }
 
             case "resume": {
+              await this.disconnect();
               const result = await node.resume();
+              await (zombieClient as any).wait_node_ready(message.nodeName);
+              await this.connectEnvironment(true);
               writeToClient({
                 status: "success",
                 result,
@@ -238,8 +242,11 @@ export class MoonwallContext {
               });
               break;
             }
+
             case "pause": {
+              await this.disconnect();
               const result = await node.pause();
+              await timer(1000); // TODO: Replace when zombienet has an appropriate fn
               writeToClient({
                 status: "success",
                 result,
@@ -247,9 +254,13 @@ export class MoonwallContext {
               });
               break;
             }
+
             case "kill": {
+              // await this.disconnect();
               const pid = (network.client as any).processMap[message.nodeName].pid;
+              delete (network.client as any).processMap[message.nodeName];
               const result = await execaCommand(`kill ${pid}`, { timeout: 1000 });
+              // await this.connectEnvironment(true);
               writeToClient({
                 status: "success",
                 result: result.exitCode === 0,

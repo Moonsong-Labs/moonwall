@@ -142,6 +142,7 @@
       "name": "zombie_test",
       "testFileDir": ["suites/zombie"],
       "timeout": 300000,
+      "envVars": ["DEBUG_COLORS=1"],
       "reporters": ["basic"],
       "foundation": {
         "type": "zombie",
