@@ -1,6 +1,7 @@
 import Debug from "debug";
 import { execaCommand, execaCommandSync } from "execa";
 import path from "path";
+import fs from "fs";
 import WebSocket from "ws";
 import { checkAccess, checkExists } from "./fileCheckers";
 const debugNode = Debug("global:node");
@@ -17,6 +18,9 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
   }
 
   const dirPath = path.join(process.cwd(), "tmp", "node_logs");
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
 
   debugNode(`Launching dev node: ${name}`);
   const logLocation = path
@@ -155,7 +159,7 @@ async function checkWebSocketJSONRPC(port: number): Promise<boolean> {
 function findPortsByPid(pid: number, retryDelay: number = 10000) {
   for (;;) {
     const command = `lsof -i -n -P | grep LISTEN | grep ${pid} || true`;
-    const { stdout } = execaCommandSync(command, { shell: true, cleanup: true });
+    const { stdout } = execaCommandSync(command, { shell: true, cleanup: true, timeout: 2000 });
     const ports: number[] = [];
     const lines = stdout.split("\n");
 

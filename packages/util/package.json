@@ -75,7 +75,7 @@
     "colors": "^1.4.0",
     "debug": "^4.3.4",
     "dotenv": "^16.3.1",
-    "ethers": "^6.8.0",
+    "ethers": "^6.8.1",
     "inquirer": "^9.2.11",
     "inquirer-press-to-continue": "^1.2.0",
     "node-fetch": "^3.3.2",

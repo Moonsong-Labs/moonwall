@@ -3,6 +3,7 @@ import { ApiPromise } from "@polkadot/api";
 import { upgradeRuntime } from "../upgradeProcedures";
 import { MoonwallContext } from "../globalContext";
 import { alith } from "@moonwall/util";
+import { sendIpcMessage } from "../../internal/foundations/zombieHelpers";
 
 export const zombieHandler: FoundationHandler<"zombie"> = ({
   testCases,
@@ -38,6 +39,7 @@ export const zombieHandler: FoundationHandler<"zombie"> = ({
           }
         }
       },
+
       upgradeRuntime: async (options: UpgradePreferences = {}) => {
         const ctx = MoonwallContext.getContext();
         const provider = ctx.providers.find((prov) => prov.name === "parachain");
@@ -61,6 +63,47 @@ export const zombieHandler: FoundationHandler<"zombie"> = ({
         }
 
         await upgradeRuntime(api, params);
+      },
+
+      restartNode: async (nodeName: string): Promise<void> => {
+        await sendIpcMessage({
+          text: `Restarting node ${nodeName}`,
+          cmd: "restart",
+          nodeName: nodeName,
+        });
+      },
+
+      pauseNode: async (nodeName: string): Promise<void> => {
+        await sendIpcMessage({
+          text: `Pausing node ${nodeName}`,
+          cmd: "pause",
+          nodeName: nodeName,
+        });
+      },
+
+      resumeNode: async (nodeName: string): Promise<void> => {
+        await sendIpcMessage({
+          text: `Resuming node ${nodeName}`,
+          cmd: "resume",
+          nodeName: nodeName,
+        });
+      },
+
+      killNode: async (nodeName: string): Promise<void> => {
+        await sendIpcMessage({
+          text: `Killing node ${nodeName}`,
+          cmd: "kill",
+          nodeName: nodeName,
+        });
+      },
+
+      isUp: async (nodeName: string): Promise<boolean> => {
+        const response = await sendIpcMessage({
+          text: `Checking if node ${nodeName} is up`,
+          cmd: "isup",
+          nodeName: nodeName,
+        });
+        return response.status === "success";
       },
     },
     it: testCase,

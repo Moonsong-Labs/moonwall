@@ -92,7 +92,6 @@ After following the wizard, the following json file will be created:
 
 ```json
 {
-   "$schema": "https://raw.githubusercontent.com/Moonsong-Labs/moonwall/main/packages/types/config_schema.json",
    "label": "moonwall_config",
    "defaultTestTimeout": 30000,
    "environments": [
@@ -165,7 +164,6 @@ Open your code editor and edit the `moonwall.config.json` so that it now has the
 
 ```json{12-16}
 {
-   "$schema": "https://raw.githubusercontent.com/Moonsong-Labs/moonwall/main/packages/types/config_schema.json",
    "label": "moonwall_config",
    "defaultTestTimeout": 30000,
    "environments": [

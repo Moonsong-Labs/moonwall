@@ -2,6 +2,7 @@ import "@moonbeam-network/api-augment";
 import { beforeAll, describeSuite, expect } from "@moonwall/cli";
 import { ALITH_ADDRESS, GLMR, baltathar } from "@moonwall/util";
 import { ApiPromise } from "@polkadot/api";
+import "@polkadot/api-augment";
 
 describeSuite({
   id: "Z1",
@@ -11,15 +12,15 @@ describeSuite({
     let paraApi: ApiPromise;
     let relayApi: ApiPromise;
 
-    beforeAll(() => {
+    beforeAll(async () => {
       paraApi = context.polkadotJs("parachain");
       relayApi = context.polkadotJs("relaychain");
-    });
+    }, 10000);
 
     it({
       id: "T01",
       title: "Check relaychain api correctly connected",
-      test: function () {
+      test: async function () {
         const rt = relayApi.consts.system.version.specVersion.toNumber();
         expect(rt).to.be.greaterThan(0);
 
@@ -89,5 +90,16 @@ describeSuite({
         log((await paraApi.rpc.chain.getBlock()).block.header.number.toNumber());
       },
     });
+
+    it({
+      id: "T06",
+      title: "Restart a node from test script",
+      timeout: 600000,
+      test: async function () {
+        await context.restartNode("alith");
+        await context.waitBlock(2, "parachain", "quantity");
+      },
+    });
+
   },
 });

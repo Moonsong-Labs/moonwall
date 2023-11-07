@@ -121,7 +121,6 @@
           "name": "zombienet",
           "configPath": "./configs/zombieMulti.json",
           "disableLogEavesdropping": true,
-          "monitoredNode": "alice",
           "skipBlockCheck": ["para2"]
         }
       },
@@ -142,6 +141,7 @@
       "name": "zombie_test",
       "testFileDir": ["suites/zombie"],
       "timeout": 300000,
+      "envVars": ["DEBUG_COLORS=1"],
       "reporters": ["basic"],
       "foundation": {
         "type": "zombie",

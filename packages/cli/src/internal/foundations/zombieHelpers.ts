@@ -2,6 +2,8 @@ import { LaunchConfig } from "@zombienet/orchestrator";
 import chalk from "chalk";
 import fs from "node:fs";
 import { checkAccess, checkExists } from "../fileCheckers";
+import { setTimeout as timer } from "timers/promises";
+import net from "net";
 
 export async function checkZombieBins(config: LaunchConfig) {
   const relayBinPath = config.relaychain.default_command!;
@@ -46,4 +48,63 @@ export function getZombieConfig(path: string) {
 
   const buffer = fs.readFileSync(path, "utf-8");
   return JSON.parse(buffer) as LaunchConfig;
+}
+
+export type IPCRequestMessage = {
+  text: string;
+  cmd: "restart" | "pause" | "resume" | "kill" | "isup" | "init" | "networkmap";
+  nodeName?: string;
+};
+
+export type IPCResponseMessage = {
+  status: "success" | "failure";
+  result: boolean | object;
+  message: string;
+};
+
+export async function sendIpcMessage(message: IPCRequestMessage): Promise<IPCResponseMessage> {
+  return new Promise(async (resolve, reject) => {
+    let response: IPCResponseMessage;
+    const ipcPath = process.env.MOON_IPC_SOCKET;
+    const client = net.createConnection({ path: ipcPath });
+
+    // Listener to return control flow after server responds
+    client.on("data", async (data) => {
+      response = JSON.parse(data.toString());
+      if (response.status === "success") {
+        client.end();
+
+        for (let i = 0; ; i++) {
+          if (client.closed) {
+            break;
+          }
+
+          if (i > 100) {
+            reject(new Error(`Closing IPC connection failed`));
+          }
+          await timer(200);
+        }
+        resolve(response);
+      }
+
+      if (response.status === "failure") {
+        reject(new Error(JSON.stringify(response)));
+      }
+    });
+
+    for (let i = 0; ; i++) {
+      if (!client.connecting) {
+        break;
+      }
+
+      if (i > 100) {
+        reject(new Error(`Connection to ${ipcPath} failed`));
+      }
+      await timer(200);
+    }
+
+    await new Promise((resolve) => {
+      client.write(JSON.stringify(message), () => resolve("Sent!"));
+    });
+  });
 }

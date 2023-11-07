@@ -26,7 +26,10 @@ export async function testCmd(envName: string, additionalArgs?: object): Promise
 
   await commonChecks(env);
 
-  if (env.foundation.type == "dev" && !env.foundation.launchSpec[0].retainAllLogs) {
+  if (
+    (env.foundation.type == "dev" && !env.foundation.launchSpec[0].retainAllLogs) ||
+    (env.foundation.type == "chopsticks" && !env.foundation.launchSpec[0].retainAllLogs)
+  ) {
     clearNodeLogs();
   }
   const vitest = await executeTests(env, additionalArgs);

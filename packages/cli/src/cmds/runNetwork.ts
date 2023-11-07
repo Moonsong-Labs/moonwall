@@ -12,6 +12,7 @@ import { commonChecks } from "../internal/launcherCommon";
 import { cacheConfig, importAsyncConfig, loadEnvVars } from "../lib/configReader";
 import { MoonwallContext, runNetworkOnly } from "../lib/globalContext";
 import { executeTests } from "./runTests";
+import { sendIpcMessage } from "../internal/foundations/zombieHelpers";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
@@ -71,16 +72,14 @@ export async function runNetworkCmd(args) {
         },
         {
           name:
-            foundation == "dev" || foundation == "chopsticks"
-              ? `Command:   Run command on network (e.g. createBlock) (${chalk.bgGrey.cyanBright(
-                  foundation
-                )})`
+            foundation == "dev" || foundation == "chopsticks" || foundation == "zombie"
+              ? `Command:   Run command on network (${chalk.bgGrey.cyanBright(foundation)})`
               : chalk.dim(
                   `Not applicable for foundation type (${chalk.bgGrey.cyanBright(foundation)})`
                 ),
           value: 3,
           short: "cmd",
-          disabled: foundation !== "dev" && foundation !== "chopsticks",
+          disabled: foundation !== "dev" && foundation !== "chopsticks" && foundation !== "zombie",
         },
         {
           name:
@@ -123,7 +122,10 @@ export async function runNetworkCmd(args) {
     },
   ];
 
-  if (env.foundation.type == "dev" && !env.foundation.launchSpec[0].retainAllLogs) {
+  if (
+    (env.foundation.type == "dev" && !env.foundation.launchSpec[0].retainAllLogs) ||
+    (env.foundation.type == "chopsticks" && !env.foundation.launchSpec[0].retainAllLogs)
+  ) {
     clearNodeLogs();
   }
 
@@ -161,7 +163,9 @@ export async function runNetworkCmd(args) {
         break;
 
       case 3:
-        await resolveCommandChoice();
+        env.foundation.type !== "zombie"
+          ? await resolveCommandChoice()
+          : await resolveZombieCommandChoice();
         lastSelected = 2;
         break;
 
@@ -227,6 +231,44 @@ const reportServicePorts = async () => {
   );
 
   return portsList;
+};
+
+const resolveZombieCommandChoice = async () => {
+  const choice = await inquirer.prompt({
+    name: "cmd",
+    type: "list",
+    choices: [
+      { name: "♻️  Restart Node", value: "restart" },
+      { name: "🗡️  Kill Node", value: "kill" },
+      new inquirer.Separator(),
+      { name: "🔙  Go Back", value: "back" },
+    ],
+    message: "What command would you like to run? ",
+    default: "back",
+  });
+
+  if (choice.cmd == "back") {
+    return;
+  } else {
+    const whichNode = await inquirer.prompt({
+      name: "nodeName",
+      type: "input",
+      message: `Which node would you like to ${choice.cmd}? `,
+    });
+
+    try {
+      await sendIpcMessage({
+        cmd: choice.cmd,
+        nodeName: whichNode.nodeName,
+        text: `Running ${choice.cmd} on ${whichNode.nodeName}`,
+      });
+    } catch (e) {
+      console.error("Error: ");
+      console.error(e.message);
+    }
+  }
+
+  return;
 };
 
 const resolveCommandChoice = async () => {
@@ -356,94 +398,158 @@ const resolveTestChoice = async (env: Environment, silent: boolean = false) => {
 
 const resolveTailChoice = async (env: Environment) => {
   let tailing: boolean = true;
+  let zombieNodePointer: number = 0;
+  let bottomBarContents = "";
+  let switchNode: boolean;
+  let zombieContent: string;
+  let zombieNodes: string[] | undefined;
+
   const resumePauseProse = [
-    `, ${chalk.bgWhite.black("[p]")} - pause tail\n`,
-    `, ${chalk.bgWhite.black("[r]")} - resume tail\n`,
+    `, ${chalk.bgWhite.black("[p]")} Pause tail`,
+    `, ${chalk.bgWhite.black("[r]")} Resume tail`,
   ];
-  const bottomBarContents = `📜 Tailing Logs, commands: ${chalk.bgWhite.black(
+
+  const bottomBarBase = `📜 Tailing Logs, commands: ${chalk.bgWhite.black(
     "[q]"
-  )} - quit, ${chalk.bgWhite.black("[t]")} - test, ${chalk.bgWhite.black("[g]")} - grep test`;
+  )} Quit, ${chalk.bgWhite.black("[t]")} Test, ${chalk.bgWhite.black("[g]")} Grep test`;
+
+  bottomBarContents = bottomBarBase + resumePauseProse[0];
 
   const ui = new inquirer.ui.BottomBar({
-    bottomBar: bottomBarContents + resumePauseProse[0],
+    bottomBar: bottomBarContents + "\n",
   });
 
-  await new Promise(async (resolve) => {
-    const onData = (chunk: any) => ui.log.write(chunk.toString());
-    const logFilePath = process.env.MOON_MONITORED_NODE
-      ? process.env.MOON_MONITORED_NODE
-      : process.env.MOON_LOG_LOCATION;
+  for (;;) {
+    clear();
+    if (process.env.MOON_ZOMBIE_NODES) {
+      zombieNodes = process.env.MOON_ZOMBIE_NODES
+        ? process.env.MOON_ZOMBIE_NODES.split("|")
+        : undefined;
 
-    // eslint-disable-next-line prefer-const
-    let currentReadPosition = 0;
+      zombieContent = `, ${chalk.bgWhite.black("[,]")} Next Log, ${chalk.bgWhite.black(
+        "[.]"
+      )} Previous Log  | CurrentLog: ${chalk.bgWhite.black(
+        `${zombieNodes[zombieNodePointer]} (${zombieNodePointer + 1}/${zombieNodes.length})`
+      )}`;
 
-    const printLogs = (newReadPosition: number, currentReadPosition: number) => {
-      const stream = fs.createReadStream(logFilePath, {
-        start: currentReadPosition,
-        end: newReadPosition,
-      });
-      stream.on("data", onData);
-      stream.on("end", () => {
-        currentReadPosition = newReadPosition;
-      });
-    };
+      bottomBarContents = bottomBarBase + resumePauseProse[tailing ? 0 : 1] + zombieContent;
 
-    const readLog = () => {
-      const stats = fs.statSync(logFilePath);
-      const newReadPosition = stats.size;
+      ui.updateBottomBar(bottomBarContents, "\n");
+    }
 
-      if (newReadPosition > currentReadPosition && tailing) {
-        printLogs(newReadPosition, currentReadPosition);
-      }
-    };
+    switchNode = false;
+    await new Promise(async (resolve) => {
+      const onData = (chunk: any) => ui.log.write(chunk.toString());
+      const logFilePath = `${process.env.MOON_ZOMBIE_DIR}/${zombieNodes[zombieNodePointer]}.log`;
 
-    printLogs(fs.statSync(logFilePath).size, 0);
+      // eslint-disable-next-line prefer-const
+      let currentReadPosition = 0;
 
-    const handleInputData = async (key: any) => {
-      ui.rl.input.pause();
-      const char = key.toString().trim();
+      const printLogs = (newReadPosition: number, currentReadPosition: number) => {
+        const stream = fs.createReadStream(logFilePath, {
+          start: currentReadPosition,
+          end: newReadPosition,
+        });
+        stream.on("data", onData);
+        stream.on("end", () => {
+          currentReadPosition = newReadPosition;
+        });
+      };
 
-      if (char === "p") {
-        tailing = false;
-        ui.updateBottomBar(bottomBarContents + resumePauseProse[1]);
-      }
+      const readLog = () => {
+        const stats = fs.statSync(logFilePath);
+        const newReadPosition = stats.size;
 
-      if (char === "r") {
-        printLogs(fs.statSync(logFilePath).size, currentReadPosition);
-        tailing = true;
-        ui.updateBottomBar(bottomBarContents + resumePauseProse[0]);
-      }
+        if (newReadPosition > currentReadPosition && tailing) {
+          printLogs(newReadPosition, currentReadPosition);
+        }
+      };
 
-      if (char === "q") {
-        ui.rl.input.removeListener("data", handleInputData);
+      const incrPtr = () => {
+        zombieNodePointer = (zombieNodePointer + 1) % zombieNodes.length;
+      };
+
+      const decrPtr = () => {
+        zombieNodePointer = (zombieNodePointer - 1 + zombieNodes.length) % zombieNodes.length;
+      };
+
+      printLogs(fs.statSync(logFilePath).size, 0);
+
+      const renderBottomBar = (...parts: any[]) => {
+        const content = process.env.MOON_ZOMBIE_NODES
+          ? bottomBarBase + " " + parts?.join(" ") + zombieContent + "\n"
+          : bottomBarBase + " " + parts?.join(" ") + "\n";
+        ui.updateBottomBar(content);
+      };
+
+      const handleInputData = async (key: any) => {
         ui.rl.input.pause();
-        fs.unwatchFile(logFilePath);
-        resolve("");
-      }
+        const char = key.toString().trim();
 
-      if (char === "t") {
-        await resolveTestChoice(env, true);
-        ui.updateBottomBar(bottomBarContents + resumePauseProse[tailing ? 0 : 1]);
-      }
+        if (char === "p") {
+          tailing = false;
+          renderBottomBar(resumePauseProse[1]);
+        }
 
-      if (char === "g") {
-        ui.rl.input.pause();
-        tailing = false;
-        await resolveGrepChoice(env, true);
-        ui.updateBottomBar(bottomBarContents + resumePauseProse[tailing ? 0 : 1]);
-        tailing = true;
+        if (char === "r") {
+          printLogs(fs.statSync(logFilePath).size, currentReadPosition);
+          tailing = true;
+          renderBottomBar(resumePauseProse[0]);
+        }
+
+        if (char === "q") {
+          ui.rl.input.removeListener("data", handleInputData);
+          ui.rl.input.pause();
+          fs.unwatchFile(logFilePath);
+          resolve("");
+        }
+
+        if (char === "t") {
+          await resolveTestChoice(env, true);
+          renderBottomBar(resumePauseProse[tailing ? 0 : 1]);
+        }
+
+        if (char === ",") {
+          ui.rl.input.removeListener("data", handleInputData);
+          ui.rl.input.pause();
+          fs.unwatchFile(logFilePath);
+          switchNode = true;
+          incrPtr();
+          resolve("");
+        }
+
+        if (char === ".") {
+          ui.rl.input.removeListener("data", handleInputData);
+          ui.rl.input.pause();
+          fs.unwatchFile(logFilePath);
+          switchNode = true;
+          decrPtr();
+          resolve("");
+        }
+
+        if (char === "g") {
+          ui.rl.input.pause();
+          tailing = false;
+          await resolveGrepChoice(env, true);
+          renderBottomBar(resumePauseProse[tailing ? 0 : 1]);
+          tailing = true;
+          ui.rl.input.resume();
+        }
+
         ui.rl.input.resume();
-      }
+      };
 
-      ui.rl.input.resume();
-    };
+      ui.rl.input.on("data", handleInputData);
 
-    ui.rl.input.on("data", handleInputData);
-
-    fs.watchFile(logFilePath, () => {
-      readLog();
+      fs.watchFile(logFilePath, () => {
+        readLog();
+      });
     });
-  });
+
+    if (!switchNode) {
+      break;
+    }
+  }
 
   ui.close();
 };

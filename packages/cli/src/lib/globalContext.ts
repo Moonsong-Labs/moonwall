@@ -12,10 +12,16 @@ import zombie, { Network } from "@zombienet/orchestrator";
 import { execaCommand, execaCommandSync } from "execa";
 import Debug from "debug";
 import fs from "fs";
+import net from "net";
 import readline from "readline";
 import { setTimeout as timer } from "timers/promises";
 import { parseChopsticksRunCmd, parseRunCmd, parseZombieCmd } from "../internal/commandParsers";
-import { checkZombieBins, getZombieConfig } from "../internal/foundations/zombieHelpers";
+import {
+  IPCRequestMessage,
+  IPCResponseMessage,
+  checkZombieBins,
+  getZombieConfig,
+} from "../internal/foundations/zombieHelpers";
 import { LaunchedNode, launchNode } from "../internal/localNode";
 import {
   ProviderFactory,
@@ -38,6 +44,7 @@ export class MoonwallContext {
   foundation: FoundationType;
   zombieNetwork?: Network;
   rtUpgradePath?: string;
+  ipcServer?: net.Server;
 
   constructor(config: MoonwallConfig) {
     const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
@@ -164,36 +171,145 @@ export class MoonwallContext {
     const network = await zombie.start("", zombieConfig, { logType: "silent" });
     process.env.MOON_RELAY_WSS = network.relay[0].wsUri;
     process.env.MOON_PARA_WSS = Object.values(network.paras)[0].nodes[0].wsUri;
-    process.env.MOON_ZOMBIE_PATH = network.client.tmpDir;
 
-    if (
-      env.foundation.type == "zombie" &&
-      env.foundation.zombieSpec.monitoredNode &&
-      env.foundation.zombieSpec.monitoredNode in network.nodesByName
-    ) {
-      process.env.MOON_MONITORED_NODE = `${network.tmpDir}/${env.foundation.zombieSpec.monitoredNode}.log`;
-    }
     const nodeNames = Object.keys(network.nodesByName);
+    process.env.MOON_ZOMBIE_DIR = `${network.tmpDir}`;
     process.env.MOON_ZOMBIE_NODES = nodeNames.join("|");
-
-    const processIds = Object.values((network.client as any).processMap)
-      .filter((item) => item!["pid"])
-      .map((process) => process!["pid"]);
 
     const onProcessExit = () => {
       try {
+        const processIds = Object.values((this.zombieNetwork.client as any).processMap)
+          .filter((item) => item!["pid"])
+          .map((process) => process!["pid"]);
         execaCommandSync(`kill ${processIds.join(" ")}`);
       } catch (err) {
+        console.log(err);
         console.log("Failed to kill zombie nodes");
       }
     };
 
+    const socketPath = `${network.tmpDir}/node-ipc.sock`;
+
+    const server = net.createServer((client) => {
+      // client.on("end", () => {
+      //   console.log("📨 IPC client disconnected");
+      // });
+
+      // Client message handling
+      client.on("data", async (data) => {
+        const writeToClient = (message: IPCResponseMessage) => {
+          if (client.writable) {
+            client.write(JSON.stringify(message));
+          } else {
+            console.log("Client disconnected, cannot send response.");
+          }
+        };
+
+        try {
+          const message: IPCRequestMessage = JSON.parse(data.toString());
+
+          const zombieClient = network.client;
+
+          switch (message.cmd) {
+            case "networkmap": {
+              const result = Object.keys(network.nodesByName);
+              writeToClient({
+                status: "success",
+                result: network.nodesByName,
+                message: result.join("|"),
+              });
+              break;
+            }
+
+            case "restart": {
+              await this.disconnect();
+              await zombieClient.restartNode(message.nodeName, null);
+              await timer(1000); // TODO: Replace when zombienet has an appropriate fn
+              await this.connectEnvironment(true);
+              writeToClient({
+                status: "success",
+                result: true,
+                message: `${message.nodeName} restarted`,
+              });
+              break;
+            }
+
+            case "resume": {
+              const node = network.getNodeByName(message.nodeName);
+              await this.disconnect();
+              const result = await node.resume();
+              await (zombieClient as any).wait_node_ready(message.nodeName);
+              await this.connectEnvironment(true);
+              writeToClient({
+                status: "success",
+                result,
+                message: `${message.nodeName} resumed with result ${result}`,
+              });
+              break;
+            }
+
+            case "pause": {
+              const node = network.getNodeByName(message.nodeName);
+              await this.disconnect();
+              const result = await node.pause();
+              await timer(1000); // TODO: Replace when zombienet has an appropriate fn
+              writeToClient({
+                status: "success",
+                result,
+                message: `${message.nodeName} paused with result ${result}`,
+              });
+              break;
+            }
+
+            case "kill": {
+              // await this.disconnect();
+              const pid = (network.client as any).processMap[message.nodeName].pid;
+              delete (network.client as any).processMap[message.nodeName];
+              const result = await execaCommand(`kill ${pid}`, { timeout: 1000 });
+              // await this.connectEnvironment(true);
+              writeToClient({
+                status: "success",
+                result: result.exitCode === 0,
+                message: `${message.nodeName}, pid ${pid} killed with exitCode ${result.exitCode}`,
+              });
+              break;
+            }
+
+            case "isup": {
+              const node = network.getNodeByName(message.nodeName);
+              const result = await node.isUp();
+              writeToClient({
+                status: "success",
+                result,
+                message: `${message.nodeName} isUp result is ${result}`,
+              });
+              break;
+            }
+
+            default:
+              throw new Error(`Invalid command received: ${message.cmd}`);
+          }
+        } catch (e) {
+          console.log("📨 Error processing message from client:", data.toString());
+          console.error(e.message);
+          writeToClient({ status: "failure", result: false, message: e.message });
+        }
+      });
+    });
+
+    server.listen(socketPath, () => {
+      console.log("📨 IPC Server listening on", socketPath);
+    });
+
+    this.ipcServer = server;
+    process.env.MOON_IPC_SOCKET = socketPath;
+
     process.once("exit", onProcessExit);
     process.once("SIGINT", onProcessExit);
 
-    process.env.MOON_MONITORED_NODE = zombieConfig.parachains[0].collator
-      ? `${network.tmpDir}/${zombieConfig.parachains[0].collator.name}.log`
-      : `${network.tmpDir}/${zombieConfig.parachains[0].collators![0].name}.log`;
+    // process.env.MOON_MONITORED_NODE = zombieConfig.parachains[0].collator
+    //   ? `${network.tmpDir}/${zombieConfig.parachains[0].collator.name}.log`
+    //   : `${network.tmpDir}/${zombieConfig.parachains[0].collators![0].name}.log`;
     this.zombieNetwork = network;
     return;
   }
@@ -226,7 +342,7 @@ export class MoonwallContext {
     return MoonwallContext.getContext();
   }
 
-  public async connectEnvironment(): Promise<MoonwallContext> {
+  public async connectEnvironment(silent: boolean = false): Promise<MoonwallContext> {
     const config = await importAsyncConfig();
     const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
 
@@ -254,10 +370,10 @@ export class MoonwallContext {
     if (this.foundation == "zombie") {
       let readStreams: any[];
       if (!isOptionSet("disableLogEavesdropping")) {
-        console.log(`🦻 Eavesdropping on node logs at ${process.env.MOON_ZOMBIE_PATH}`);
+        !silent && console.log(`🦻 Eavesdropping on node logs at ${process.env.MOON_ZOMBIE_DIR}`);
         const zombieNodeLogs = process.env
           .MOON_ZOMBIE_NODES!.split("|")
-          .map((nodeName) => `${process.env.MOON_ZOMBIE_PATH}/${nodeName}.log`);
+          .map((nodeName) => `${process.env.MOON_ZOMBIE_DIR}/${nodeName}.log`);
 
         readStreams = zombieNodeLogs.map((logPath) => {
           const readStream = fs.createReadStream(logPath, { encoding: "utf8" });
@@ -284,7 +400,7 @@ export class MoonwallContext {
         )
         .map(async (provider) => {
           return await new Promise(async (resolve) => {
-            console.log(`⏲️  Waiting for chain ${provider.name} to produce blocks...`);
+            !silent && console.log(`⏲️  Waiting for chain ${provider.name} to produce blocks...`);
             while (
               (
                 await (provider.api as ApiPromise).rpc.chain.getBlock()
@@ -292,7 +408,7 @@ export class MoonwallContext {
             ) {
               await timer(500);
             }
-            console.log(`✅ Chain ${provider.name} producing blocks, continuing`);
+            !silent && console.log(`✅ Chain ${provider.name} producing blocks, continuing`);
             resolve("");
           });
         });
@@ -338,16 +454,6 @@ export class MoonwallContext {
     return MoonwallContext.instance;
   }
 
-  private killAllChildProcesses() {
-    this.nodes.forEach((child) => {
-      try {
-        child.kill();
-      } catch (err) {
-        console.error("Failed to kill child process", err);
-      }
-    });
-  }
-
   public static async destroy() {
     const ctx = this.instance;
 
@@ -373,6 +479,8 @@ export class MoonwallContext {
     if (ctx.zombieNetwork) {
       console.log("🪓  Killing zombie nodes");
       await ctx.zombieNetwork.stop();
+      ctx.ipcServer?.close();
+      ctx.ipcServer?.removeAllListeners();
     }
   }
 }

@@ -209,10 +209,71 @@ export interface ReadOnlyContext extends GenericContext {
 }
 
 /**
- * ZombieContext - Interface that extends from GenericContext and includes methods for upgrading runtime and waiting a certain number of blocks.
+ * ZombieContext - Interface that extends from GenericContext and includes methods for managing runtime upgrades and node operations within a blockchain network.
  */
 export interface ZombieContext extends GenericContext {
+  /**
+   * Initiates the runtime upgrade process with the provided upgrade preferences.
+   *
+   * @param {UpgradePreferences} options The configuration options for the upgrade, including runtime details and migration settings.
+   * @returns {Promise<void>} A promise that resolves when the upgrade process has been initiated.
+   */
   upgradeRuntime: (options: UpgradePreferences) => Promise<void>;
+
+  /**
+   * ⚠️ WARNING: This doesn't seem to be working yet. ⚠️
+   *
+   * Checks if the specified node is running.
+   *
+   * @param {string} nodeName The name of the node to check.
+   * @returns {Promise<boolean>} A promise that resolves to a boolean indicating whether the node is up and running.
+   */
+  isUp?: (nodeName: string) => Promise<boolean>;
+
+  /**
+   * Restarts the node with the given name.
+   *
+   * @param {string} nodeName The name of the node to restart.
+   * @returns {Promise<void>} A promise that resolves when the node restart has been completed.
+   */
+  restartNode: (nodeName: string) => Promise<void>;
+
+  /**
+   * * ⚠️ WARNING: This doesn't seem to be working yet. ⚠️
+   *
+   * Pauses the node with the specified name.
+   *
+   * @param {string} nodeName The name of the node to pause.
+   * @returns {Promise<void>} A promise that resolves when the node has been successfully paused.
+   */
+  pauseNode?: (nodeName: string) => Promise<void>;
+
+  /**
+   * ⚠️ WARNING: This doesn't seem to be working yet. ⚠️
+   *
+   * Resumes the operation of a paused node with the given name.
+   *
+   * @param {string} nodeName The name of the node to resume.
+   * @returns {Promise<void>} A promise that resolves when the node has resumed operations.
+   */
+  resumeNode?: (nodeName: string) => Promise<void>;
+
+  /**
+   * Terminates the node with the provided name.
+   *
+   * @param {string} nodeName The name of the node to terminate.
+   * @returns {Promise<void>} A promise that resolves when the node has been successfully terminated.
+   */
+  killNode: (nodeName: string) => Promise<void>;
+
+  /**
+   * Waits for a specified number of blocks before resolving. This can be based on block height or quantity, depending on the mode.
+   *
+   * @param {number} [blocksToWaitFor] The number of blocks to wait for before the promise resolves. If not provided, defaults to some predetermined quantity.
+   * @param {string} [chain] The name of the blockchain to monitor for block production.
+   * @param {"height" | "quantity"} [mode] The mode to determine the block wait criteria - by height or by quantity.
+   * @returns {Promise<void>} A promise that resolves after waiting for the specified number of blocks.
+   */
   waitBlock: (
     blocksToWaitFor?: number,
     chain?: string,

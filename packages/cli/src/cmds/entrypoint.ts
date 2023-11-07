@@ -1,6 +1,7 @@
 import "../internal/logging";
 import "@moonbeam-network/api-augment";
 import yargs from "yargs";
+import fs from "fs";
 import { hideBin } from "yargs/helpers";
 import { testCmd } from "./runTests";
 import { runNetworkCmd } from "./runNetwork";
@@ -10,6 +11,18 @@ import { fetchArtifact } from "../internal/cmdFunctions/fetchArtifact";
 import dotenv from "dotenv";
 dotenv.config();
 
+const defaultConfigFiles = ["./moonwall.config", "./moonwall.config.json"];
+
+function findExistingConfig(files: string[]): string | undefined {
+  for (const file of files) {
+    if (fs.existsSync(file)) {
+      return file;
+    }
+  }
+}
+
+const defaultConfigFile = findExistingConfig(defaultConfigFiles) || "./moonwall.config.json";
+
 // Hack to expose config-path to all commands and fallback
 const parsed = yargs(hideBin(process.argv))
   .options({
@@ -17,7 +30,7 @@ const parsed = yargs(hideBin(process.argv))
       type: "string",
       alias: "c",
       description: "path to MoonwallConfig file",
-      default: "./moonwall.config.json",
+      default: defaultConfigFile,
     },
   })
   .parseSync();
@@ -31,7 +44,7 @@ yargs(hideBin(process.argv))
       type: "string",
       alias: "c",
       description: "path to MoonwallConfig file",
-      default: "./moonwall.config.json",
+      default: defaultConfigFile,
     },
   })
   .middleware((argv) => {
