@@ -13,7 +13,7 @@
     "preserveSymlinks": true,
     "skipDefaultLibCheck": true,
     "preserveConstEnums": true,
-    "sourceMap": false,
+    "sourceMap": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "noEmit": true,

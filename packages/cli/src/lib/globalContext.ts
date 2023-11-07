@@ -16,7 +16,12 @@ import net from "net";
 import readline from "readline";
 import { setTimeout as timer } from "timers/promises";
 import { parseChopsticksRunCmd, parseRunCmd, parseZombieCmd } from "../internal/commandParsers";
-import { checkZombieBins, getZombieConfig } from "../internal/foundations/zombieHelpers";
+import {
+  IPCRequestMessage,
+  IPCResponseMessage,
+  checkZombieBins,
+  getZombieConfig,
+} from "../internal/foundations/zombieHelpers";
 import { LaunchedNode, launchNode } from "../internal/localNode";
 import {
   ProviderFactory,
@@ -177,14 +182,14 @@ export class MoonwallContext {
     process.env.MOON_ZOMBIE_DIR = `${network.tmpDir}`;
     process.env.MOON_ZOMBIE_NODES = nodeNames.join("|");
 
-    const processIds = Object.values((network.client as any).processMap)
-      .filter((item) => item!["pid"])
-      .map((process) => process!["pid"]);
-
     const onProcessExit = () => {
       try {
+        const processIds = Object.values((this.zombieNetwork.client as any).processMap)
+          .filter((item) => item!["pid"])
+          .map((process) => process!["pid"]);
         execaCommandSync(`kill ${processIds.join(" ")}`);
       } catch (err) {
+        console.log(err);
         console.log("Failed to kill zombie nodes");
       }
     };
@@ -196,29 +201,79 @@ export class MoonwallContext {
         console.log("📨 IPC client disconnected");
       });
 
+      // Client message handling
       client.on("data", async (data) => {
+        const writeToClient = (message: IPCResponseMessage) => {
+          if (client.writable) {
+            client.write(JSON.stringify(message));
+          } else {
+            console.log("Client disconnected, cannot send response.");
+          }
+        };
+
         try {
-          const message = JSON.parse(data.toString());
+          const message: IPCRequestMessage = JSON.parse(data.toString());
 
-          if (message.cmd === "restart") {
-            console.log(`Restarting ${message.node}, please wait...`);
-            await network.client.restartNode(message.node, 0);
-            console.log(`✅ Node: "${message.node}" restarted`);
+          const node = network.getNodeByName(message.nodeName);
 
-            // change the process map to use the new PID
-            await this.disconnect();
-            await this.connectEnvironment(true);
-
-            if (client.writable) {
-              client.write(
-                JSON.stringify({ status: "success", message: `${message.node} restarted` })
-              );
-            } else {
-              console.log("Client disconnected, cannot send response.");
+          switch (message.cmd) {
+            case "restart": {
+              await node.restart();
+              await this.disconnect();
+              await this.connectEnvironment(true);
+              writeToClient({
+                status: "success",
+                result: true,
+                message: `${message.nodeName} restarted`,
+              });
+              break;
             }
+
+            case "resume": {
+              const result = await node.resume();
+              writeToClient({
+                status: "success",
+                result,
+                message: `${message.nodeName} resumed with result ${result}`,
+              });
+              break;
+            }
+            case "pause": {
+              const result = await node.pause();
+              writeToClient({
+                status: "success",
+                result,
+                message: `${message.nodeName} paused with result ${result}`,
+              });
+              break;
+            }
+            case "kill": {
+              const pid = (network.client as any).processMap[message.nodeName].pid;
+              const result = await execaCommand(`kill ${pid}`, { timeout: 1000 });
+              writeToClient({
+                status: "success",
+                result: result.exitCode === 0,
+                message: `${message.nodeName}, pid ${pid} killed with exitCode ${result.exitCode}`,
+              });
+              break;
+            }
+
+            case "isup": {
+              const result = await node.isUp();
+              writeToClient({
+                status: "success",
+                result,
+                message: `${message.nodeName} isUp result is ${result}`,
+              });
+              break;
+            }
+
+            default:
+              throw new Error(`Invalid command received: ${message.cmd}`);
           }
         } catch (e) {
           console.log("📨 Message from client:", data.toString());
+          writeToClient({ status: "failure", result: false, message: e });
         }
       });
     });
