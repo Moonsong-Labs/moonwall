@@ -224,7 +224,7 @@ export class MoonwallContext {
             case "restart": {
               await this.disconnect();
               await zombieClient.restartNode(message.nodeName, null);
-              await timer(1000) // TODO: Replace when zombienet has an appropriate fn
+              await timer(1000); // TODO: Replace when zombienet has an appropriate fn
               await this.connectEnvironment(true);
               writeToClient({
                 status: "success",
