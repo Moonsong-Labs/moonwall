@@ -1,5 +1,21 @@
 # @moonwall/cli
 
+## 4.3.0
+
+### Minor Changes
+
+- 52b1d64: Fixes for tanssi
+  - [#295](https://github.com/Moonsong-Labs/moonwall/issues/295)
+  - [#297](https://github.com/Moonsong-Labs/moonwall/issues/297)
+  - [#278](https://github.com/Moonsong-Labs/moonwall/issues/278)
+  - [#221](https://github.com/Moonsong-Labs/moonwall/issues/221)
+  - [#290](https://github.com/Moonsong-Labs/moonwall/issues/290)
+
+### Patch Changes
+
+- @moonwall/types@4.3.0
+- @moonwall/util@4.3.0
+
 ## 4.2.10
 
 ### Patch Changes
