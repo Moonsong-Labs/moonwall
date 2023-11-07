@@ -1,11 +1,8 @@
 import "@moonbeam-network/api-augment";
-import "@polkadot/api-augment";
 import { beforeAll, describeSuite, expect } from "@moonwall/cli";
-import net from "net";
 import { ALITH_ADDRESS, GLMR, baltathar } from "@moonwall/util";
 import { ApiPromise } from "@polkadot/api";
-import { setTimeout as timer } from "timers/promises";
-import { stat } from "fs";
+import "@polkadot/api-augment";
 
 describeSuite({
   id: "Z1",
@@ -36,11 +33,6 @@ describeSuite({
       id: "T02",
       title: "Check parachain api correctly connected",
       test: async function () {
-        const socketPath = process.env.MOON_IPC_SOCKET;
-        const client = net.createConnection({ path: socketPath }, () => {
-          client.write("Hello from client again");
-        });
-
         const network = paraApi.consts.system.version.specName.toString();
         expect(network).to.contain("moonbase");
 

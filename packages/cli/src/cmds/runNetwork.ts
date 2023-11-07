@@ -12,6 +12,7 @@ import { commonChecks } from "../internal/launcherCommon";
 import { cacheConfig, importAsyncConfig, loadEnvVars } from "../lib/configReader";
 import { MoonwallContext, runNetworkOnly } from "../lib/globalContext";
 import { executeTests } from "./runTests";
+import { sendIpcMessage } from "../internal/foundations/zombieHelpers";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
@@ -71,16 +72,14 @@ export async function runNetworkCmd(args) {
         },
         {
           name:
-            foundation == "dev" || foundation == "chopsticks"
-              ? `Command:   Run command on network (e.g. createBlock) (${chalk.bgGrey.cyanBright(
-                  foundation
-                )})`
+            foundation == "dev" || foundation == "chopsticks" || foundation == "zombie"
+              ? `Command:   Run command on network (${chalk.bgGrey.cyanBright(foundation)})`
               : chalk.dim(
                   `Not applicable for foundation type (${chalk.bgGrey.cyanBright(foundation)})`
                 ),
           value: 3,
           short: "cmd",
-          disabled: foundation !== "dev" && foundation !== "chopsticks",
+          disabled: foundation !== "dev" && foundation !== "chopsticks" && foundation !== "zombie",
         },
         {
           name:
@@ -164,7 +163,9 @@ export async function runNetworkCmd(args) {
         break;
 
       case 3:
-        await resolveCommandChoice();
+        env.foundation.type !== "zombie"
+          ? await resolveCommandChoice()
+          : await resolveZombieCommandChoice();
         lastSelected = 2;
         break;
 
@@ -230,6 +231,44 @@ const reportServicePorts = async () => {
   );
 
   return portsList;
+};
+
+const resolveZombieCommandChoice = async () => {
+  const choice = await inquirer.prompt({
+    name: "cmd",
+    type: "list",
+    choices: [
+      { name: "♻️  Restart Node", value: "restart" },
+      { name: "🗡️  Kill Node", value: "kill" },
+      new inquirer.Separator(),
+      { name: "🔙  Go Back", value: "back" },
+    ],
+    message: "What command would you like to run? ",
+    default: "back",
+  });
+
+  if (choice.cmd == "back") {
+    return;
+  } else {
+    const whichNode = await inquirer.prompt({
+      name: "nodeName",
+      type: "input",
+      message: `Which node would you like to ${choice.cmd}? `,
+    });
+
+    try {
+      await sendIpcMessage({
+        cmd: choice.cmd,
+        nodeName: whichNode.nodeName,
+        text: `Running ${choice.cmd} on ${whichNode.nodeName}`,
+      });
+    } catch (e) {
+      console.error("Error: ");
+      console.error(e.message);
+    }
+  }
+
+  return;
 };
 
 const resolveCommandChoice = async () => {

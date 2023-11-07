@@ -62,66 +62,49 @@ export type IPCResponseMessage = {
   message: string;
 };
 
-export async function sendIpcMessage(message: IPCRequestMessage) {
-  let resume = false;
-  let response: IPCResponseMessage;
-  const ipcPath = process.env.MOON_IPC_SOCKET;
-  const client = net.createConnection({ path: ipcPath }, async () => {
-    // const msg: IPCRequestMessage = {
-    //   cmd: "init",
-    //   text: "Connected to server",
-    // };
-    // await new Promise((resolve) => {
-    //   client.write(JSON.stringify(msg), () => resolve("Sent!"));
-    // });
+export async function sendIpcMessage(message: IPCRequestMessage): Promise<IPCResponseMessage> {
+  return new Promise(async (resolve, reject) => {
+    let response: IPCResponseMessage;
+    const ipcPath = process.env.MOON_IPC_SOCKET;
+    const client = net.createConnection({ path: ipcPath });
+
+    // Listener to return control flow after server responds
+    client.on("data", async (data) => {
+      response = JSON.parse(data.toString());
+      if (response.status === "success") {
+        client.end();
+
+        for (let i = 0; ; i++) {
+          if (client.closed) {
+            break;
+          }
+
+          if (i > 100) {
+            reject(new Error(`Closing IPC connection failed`));
+          }
+          await timer(200);
+        }
+        resolve(response);
+      }
+
+      if (response.status === "failure") {
+        reject(new Error(JSON.stringify(response)));
+      }
+    });
+
+    for (let i = 0; ; i++) {
+      if (!client.connecting) {
+        break;
+      }
+
+      if (i > 100) {
+        reject(new Error(`Connection to ${ipcPath} failed`));
+      }
+      await timer(200);
+    }
+
+    await new Promise((resolve) => {
+      client.write(JSON.stringify(message), () => resolve("Sent!"));
+    });
   });
-
-  // Listener to return control flow after server responds
-  client.on("data", (data) => {
-    response = JSON.parse(data.toString());
-    if (response.status === "success") {
-      resume = true;
-    }
-  });
-
-  for (let i = 0; ; i++) {
-    if (!client.connecting) {
-      break;
-    }
-
-    if (i > 100) {
-      throw new Error(`Connection to ${ipcPath} failed`);
-    }
-    await timer(100);
-  }
-
-  await new Promise((resolve) => {
-    client.write(JSON.stringify(message), () => resolve("Sent!"));
-  });
-
-  for (let i = 0; ; i++) {
-    if (resume) {
-      break;
-    }
-
-    if (i > 100) {
-      throw new Error(`${message.text} failed`);
-    }
-    await timer(100);
-  }
-
-  client.end();
-
-  for (let i = 0; ; i++) {
-    if (client.closed) {
-      break;
-    }
-
-    if (i > 100) {
-      throw new Error(`Closing IPC connection failed`);
-    }
-    await timer(100);
-  }
-
-  return response;
 }

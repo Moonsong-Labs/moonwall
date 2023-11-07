@@ -283,8 +283,9 @@ export class MoonwallContext {
               throw new Error(`Invalid command received: ${message.cmd}`);
           }
         } catch (e) {
-          console.log("📨 Message from client:", data.toString());
-          writeToClient({ status: "failure", result: false, message: e });
+          console.log("📨 Error processing message from client:", data.toString());
+          console.error(e.message);
+          writeToClient({ status: "failure", result: false, message: e.message });
         }
       });
     });
