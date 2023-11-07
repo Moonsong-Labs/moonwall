@@ -7,3 +7,4 @@ Fixes for tanssi
 - [#297](https://github.com/Moonsong-Labs/moonwall/issues/297)
 - [#278](https://github.com/Moonsong-Labs/moonwall/issues/278)
 - [#221](https://github.com/Moonsong-Labs/moonwall/issues/221)
+- [#290](https://github.com/Moonsong-Labs/moonwall/issues/290)

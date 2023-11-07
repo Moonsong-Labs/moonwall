@@ -171,13 +171,7 @@ export class MoonwallContext {
     const network = await zombie.start("", zombieConfig, { logType: "silent" });
     process.env.MOON_RELAY_WSS = network.relay[0].wsUri;
     process.env.MOON_PARA_WSS = Object.values(network.paras)[0].nodes[0].wsUri;
-    if (
-      env.foundation.type == "zombie" &&
-      env.foundation.zombieSpec.monitoredNode &&
-      env.foundation.zombieSpec.monitoredNode in network.nodesByName
-    ) {
-      process.env.MOON_MONITORED_NODE = `${network.tmpDir}/${env.foundation.zombieSpec.monitoredNode}.log`;
-    }
+
     const nodeNames = Object.keys(network.nodesByName);
     process.env.MOON_ZOMBIE_DIR = `${network.tmpDir}`;
     process.env.MOON_ZOMBIE_NODES = nodeNames.join("|");
@@ -214,10 +208,19 @@ export class MoonwallContext {
         try {
           const message: IPCRequestMessage = JSON.parse(data.toString());
 
-          const node = network.getNodeByName(message.nodeName);
           const zombieClient = network.client;
 
           switch (message.cmd) {
+            case "networkmap": {
+              const result = Object.keys(network.nodesByName);
+              writeToClient({
+                status: "success",
+                result: network.nodesByName,
+                message: result.join("|"),
+              });
+              break;
+            }
+
             case "restart": {
               await this.disconnect();
               await zombieClient.restartNode(message.nodeName, null);
@@ -231,6 +234,7 @@ export class MoonwallContext {
             }
 
             case "resume": {
+              const node = network.getNodeByName(message.nodeName);
               await this.disconnect();
               const result = await node.resume();
               await (zombieClient as any).wait_node_ready(message.nodeName);
@@ -244,6 +248,7 @@ export class MoonwallContext {
             }
 
             case "pause": {
+              const node = network.getNodeByName(message.nodeName);
               await this.disconnect();
               const result = await node.pause();
               await timer(1000); // TODO: Replace when zombienet has an appropriate fn
@@ -270,6 +275,7 @@ export class MoonwallContext {
             }
 
             case "isup": {
+              const node = network.getNodeByName(message.nodeName);
               const result = await node.isUp();
               writeToClient({
                 status: "success",
@@ -300,9 +306,9 @@ export class MoonwallContext {
     process.once("exit", onProcessExit);
     process.once("SIGINT", onProcessExit);
 
-    process.env.MOON_MONITORED_NODE = zombieConfig.parachains[0].collator
-      ? `${network.tmpDir}/${zombieConfig.parachains[0].collator.name}.log`
-      : `${network.tmpDir}/${zombieConfig.parachains[0].collators![0].name}.log`;
+    // process.env.MOON_MONITORED_NODE = zombieConfig.parachains[0].collator
+    //   ? `${network.tmpDir}/${zombieConfig.parachains[0].collator.name}.log`
+    //   : `${network.tmpDir}/${zombieConfig.parachains[0].collators![0].name}.log`;
     this.zombieNetwork = network;
     return;
   }

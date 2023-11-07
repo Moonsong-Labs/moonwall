@@ -52,13 +52,13 @@ export function getZombieConfig(path: string) {
 
 export type IPCRequestMessage = {
   text: string;
-  cmd: "restart" | "pause" | "resume" | "kill" | "isup" | "init";
+  cmd: "restart" | "pause" | "resume" | "kill" | "isup" | "init" | "networkmap";
   nodeName?: string;
 };
 
 export type IPCResponseMessage = {
   status: "success" | "failure";
-  result: boolean;
+  result: boolean | object;
   message: string;
 };
 

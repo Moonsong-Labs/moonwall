@@ -468,10 +468,6 @@
                     "description": "Specifies whether the framework should eavesdrop and log WARN, ERROR from the node logs.\nIf set to true, the eavesdropping on node logs is disabled.\nDefault behavior (when unset or set to false) is to listen to the logs.",
                     "type": "boolean"
                 },
-                "monitoredNode": {
-                    "description": "An optional monitored node.",
-                    "type": "string"
-                },
                 "name": {
                     "description": "The name of the launch spec.",
                     "type": "string"

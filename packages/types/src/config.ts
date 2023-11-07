@@ -239,11 +239,6 @@ export interface ZombieLaunchSpec extends GenericLaunchSpec {
   configPath: string;
 
   /**
-   * An optional monitored node.
-   */
-  monitoredNode?: string;
-
-  /**
    * An optional array of blocks to skip checking.
    */
   skipBlockCheck?: string[];
