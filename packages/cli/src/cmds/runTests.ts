@@ -36,7 +36,6 @@ export async function testCmd(envName: string, additionalArgs?: object): Promise
   const failed = vitest!.state.getFiles().filter((file) => file.result!.state === "fail");
 
   if (failed.length > 0) {
-    process.stderr.write("Tests failed\n");
     return false;
   } else {
     return true;
