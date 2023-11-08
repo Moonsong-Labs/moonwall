@@ -1,5 +1,13 @@
 # @moonwall/cli
 
+## 4.3.1
+
+### Patch Changes
+
+- 25a52c3: Force exit on failure
+  - @moonwall/types@4.3.1
+  - @moonwall/util@4.3.1
+
 ## 4.3.0
 
 ### Minor Changes
