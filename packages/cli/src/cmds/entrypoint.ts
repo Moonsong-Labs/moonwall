@@ -109,7 +109,7 @@ yargs(hideBin(process.argv))
           process.exit(0);
         } else {
           console.log("❌ Some tests failed");
-          process.kill(process.pid, 'SIGTERM');
+          process.kill(process.pid, "SIGTERM");
         }
       } else {
         console.log("❌ No environment specified");
