@@ -60,7 +60,7 @@ export async function createDevBlock<
   let originalBlockNumber: bigint;
 
   const containsViem =
-    MoonwallContext.getContext().providers.find((prov) => prov.type == "viem") && !context.viem()
+    context.viem() && MoonwallContext.getContext().providers.find((prov) => prov.type == "viem")
       ? true
       : false;
 
@@ -169,11 +169,14 @@ export async function createDevBlock<
       if (blockNum > originalBlockNumber) {
         break;
       }
-      await setTimeout(1);
+      await setTimeout(5);
     }
   } else if (results.find((r) => r.type == "eth")) {
     await setTimeout(10);
   }
+
+  // TODO: investigate why new block is created but transaction receipts not found
+  await setTimeout(50); // needed to stop timing issues for some reason
 
   const actualEvents = result.flatMap((resp) => resp.events);
 
