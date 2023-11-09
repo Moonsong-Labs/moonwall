@@ -71,7 +71,7 @@ export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
   if (launchSpecs.length === 1) {
     const chopsticksCmd = "node";
     const chopsticksArgs = [
-      "node_modules/@acala-network/chopsticks/chopsticks.js",
+      "node_modules/@acala-network/chopsticks/chopsticks.cjs",
       `--config=${launchSpecs[0].configPath}`,
     ];
 
@@ -99,7 +99,7 @@ export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
   }
 
   const chopsticksCmd = "node";
-  const chopsticksArgs = ["node_modules/@acala-network/chopsticks/chopsticks.js", "xcm"];
+  const chopsticksArgs = ["node_modules/@acala-network/chopsticks/chopsticks.cjs", "xcm"];
 
   launchSpecs.forEach((spec) => {
     const type = spec.type ? spec.type : "parachain";
