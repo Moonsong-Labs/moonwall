@@ -1,5 +1,13 @@
 # @moonwall/util
 
+## 4.3.2
+
+### Patch Changes
+
+- 3978aed: Package Ver Updates
+- Updated dependencies [3978aed]
+  - @moonwall/types@4.3.2
+
 ## 4.3.1
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @moonwall/tests
 
+## 4.3.2
+
+### Patch Changes
+
+- 3978aed: Package Ver Updates
+
 ## 4.3.1
 
 ## 4.3.0
