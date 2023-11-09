@@ -91,7 +91,7 @@
     "node-fetch": "^3.3.2",
     "semver": "^7.5.4",
     "viem": "^1.18.9",
-    "vitest": "1.0.0-beta.3",
+    "vitest": "1.0.0-beta.4",
     "web3": "4.2.1",
     "web3-providers-ws": "4.0.7",
     "ws": "^8.14.2",
