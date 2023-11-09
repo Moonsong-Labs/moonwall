@@ -1,5 +1,5 @@
 import "@moonbeam-network/api-augment";
-import { BlockCreation, ExtrinsicCreation, GenericContext } from "@moonwall/types";
+import { BlockCreation, DevModeContext, ExtrinsicCreation, GenericContext } from "@moonwall/types";
 import {
   alith,
   createAndFinalizeBlock,
@@ -60,7 +60,9 @@ export async function createDevBlock<
   let originalBlockNumber: bigint;
 
   const containsViem =
-    context.viem() && MoonwallContext.getContext().providers.find((prov) => prov.type == "viem")
+    (context as DevModeContext).isEthereumChain &&
+    context.viem() &&
+    MoonwallContext.getContext().providers.find((prov) => prov.type == "viem")
       ? true
       : false;
 
