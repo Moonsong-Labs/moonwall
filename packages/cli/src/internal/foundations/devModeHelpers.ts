@@ -161,22 +161,10 @@ export async function createDevBlock<
     };
   });
 
-  // Avoiding race condition by ensuring ethereum block is created
-  if (containsViem && originalBlockNumber! !== undefined) {
-    const pubClient = context.viem();
-    for (;;) {
-      const blockNum = await pubClient.getBlockNumber();
-      if (blockNum > originalBlockNumber) {
-        break;
-      }
-      await setTimeout(5);
-    }
-  } else if (results.find((r) => r.type == "eth")) {
-    await setTimeout(10);
+  if (results.find((r) => r.type == "eth")) {
+    // TODO: investigate why new block is created but transaction receipts not found
+    await setTimeout(80); // needed to stop timing issues for some reason
   }
-
-  // TODO: investigate why new block is created but transaction receipts not found
-  await setTimeout(50); // needed to stop timing issues for some reason
 
   const actualEvents = result.flatMap((resp) => resp.events);
 
