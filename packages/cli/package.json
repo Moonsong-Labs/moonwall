@@ -62,7 +62,7 @@
   },
   "dependencies": {
     "@acala-network/chopsticks": "^0.9.1",
-    "@moonbeam-network/api-augment": "^0.2500.0",
+    "@moonbeam-network/api-augment": "^0.2600.0",
     "@moonwall/types": "workspace:*",
     "@moonwall/util": "workspace:*",
     "@polkadot/api": "^10.10.1",
@@ -92,7 +92,7 @@
     "semver": "^7.5.4",
     "viem": "^1.18.9",
     "vitest": "1.0.0-beta.4",
-    "web3": "4.2.1",
+    "web3": "4.2.2",
     "web3-providers-ws": "4.0.7",
     "ws": "^8.14.2",
     "yaml": "^2.3.4",
@@ -103,9 +103,9 @@
     "@types/debug": "^4.1.12",
     "@types/node": "^20.9.0",
     "@types/yargs": "^17.0.31",
-    "prettier": "^2.8.8",
+    "prettier": "^3.0.3",
     "tsup": "^7.2.0",
-    "tsx": "^3.14.0",
+    "tsx": "^4.1.0",
     "typescript": "^5.2.2"
   },
   "publishConfig": {

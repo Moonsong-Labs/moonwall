@@ -14,11 +14,11 @@
   },
   "devDependencies": {
     "@acala-network/chopsticks": "^0.9.1",
-    "@moonbeam-network/api-augment": "^0.2500.0",
+    "@moonbeam-network/api-augment": "^0.2600.0",
     "@moonwall/cli": "workspace:*",
     "@moonwall/types": "workspace:*",
     "@moonwall/util": "workspace:*",
-    "@openzeppelin/contracts": "^4.9.3",
+    "@openzeppelin/contracts": "^5.0.0",
     "@polkadot/api": "^10.10.1",
     "@polkadot/api-augment": "^10.10.1",
     "@polkadot/util": "^12.5.1",
@@ -28,14 +28,14 @@
     "chai": "^4.3.10",
     "chalk": "^5.3.0",
     "ethers": "^6.8.1",
-    "pnpm": "8.6.2",
-    "prettier": "^2.8.8",
+    "pnpm": "8.10.2",
+    "prettier": "^3.0.3",
     "solc": "^0.8.23",
-    "tsx": "^3.14.0",
+    "tsx": "^4.1.0",
     "typescript": "^5.2.2",
     "viem": "^1.18.9",
     "vitest": "1.0.0-beta.4",
-    "web3": "4.2.1",
+    "web3": "4.2.2",
     "yargs": "^17.7.2"
   }
 }

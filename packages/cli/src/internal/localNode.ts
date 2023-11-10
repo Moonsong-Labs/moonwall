@@ -26,9 +26,9 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
   const logLocation = path
     .join(
       dirPath,
-      `${path.basename(cmd)}_node_${
-        args.find((a) => a.includes("port"))?.split("=")[1]
-      }_${new Date().getTime()}.log`
+      `${path.basename(cmd)}_node_${args
+        .find((a) => a.includes("port"))
+        ?.split("=")[1]}_${new Date().getTime()}.log`
     )
     .replaceAll("node_node_undefined", "chopsticks");
   process.env.MOON_LOG_LOCATION = logLocation;
