@@ -1,7 +1,7 @@
 import { Environment } from "@moonwall/types";
 import chalk from "chalk";
 import path from "path";
-import type { UserConfig } from "vitest";
+import type { UserConfig, Vitest } from "vitest";
 import { startVitest } from "vitest/node";
 import { clearNodeLogs } from "../internal/cmdFunctions/tempLogs";
 import { commonChecks } from "../internal/launcherCommon";
@@ -9,107 +9,113 @@ import { cacheConfig, importAsyncConfig, loadEnvVars } from "../lib/configReader
 import { contextCreator, runNetworkOnly } from "../lib/globalContext";
 
 export async function testCmd(envName: string, additionalArgs?: object): Promise<boolean> {
-  await cacheConfig();
-  const globalConfig = await importAsyncConfig();
-  const env = globalConfig.environments.find(({ name }) => name === envName)!;
-  process.env.MOON_TEST_ENV = envName;
+  return new Promise<boolean>(async (resolve, reject) => {
+    await cacheConfig();
+    const globalConfig = await importAsyncConfig();
+    const env = globalConfig.environments.find(({ name }) => name === envName)!;
+    process.env.MOON_TEST_ENV = envName;
 
-  if (!env) {
-    const envList = globalConfig.environments.map((env) => env.name);
-    throw new Error(
-      `No environment found in config for: ${chalk.bgWhiteBright.blackBright(
-        envName
-      )}\n Environments defined in config are: ${envList}\n`
-    );
-  }
-  loadEnvVars();
+    if (!env) {
+      const envList = globalConfig.environments.map((env) => env.name);
+      reject(
+        new Error(
+          `No environment found in config for: ${chalk.bgWhiteBright.blackBright(
+            envName
+          )}\n Environments defined in config are: ${envList}\n`
+        )
+      );
+    }
+    loadEnvVars();
 
-  await commonChecks(env);
+    await commonChecks(env);
 
-  if (
-    (env.foundation.type == "dev" && !env.foundation.launchSpec[0].retainAllLogs) ||
-    (env.foundation.type == "chopsticks" && !env.foundation.launchSpec[0].retainAllLogs)
-  ) {
-    clearNodeLogs();
-  }
-  const vitest = await executeTests(env, additionalArgs);
-  const failed = vitest!.state.getFiles().filter((file) => file.result!.state === "fail");
+    if (
+      (env.foundation.type == "dev" && !env.foundation.launchSpec[0].retainAllLogs) ||
+      (env.foundation.type == "chopsticks" && !env.foundation.launchSpec[0].retainAllLogs)
+    ) {
+      clearNodeLogs();
+    }
+    const vitest = await executeTests(env, additionalArgs);
+    const failed = vitest!.state.getFiles().filter((file) => file.result!.state === "fail");
 
-  if (failed.length > 0) {
-    return false;
-  } else {
-    return true;
-  }
+    if (failed.length > 0) {
+      resolve(false);
+    } else {
+      resolve(true);
+    }
+  });
 }
 
 export async function executeTests(env: Environment, additionalArgs?: object) {
-  const globalConfig = await importAsyncConfig();
-  if (env.foundation.type === "read_only") {
-    try {
-      if (!process.env.MOON_TEST_ENV) {
-        throw new Error("MOON_TEST_ENV not set");
-      }
+  return new Promise<Vitest>(async (resolve, reject) => {
+    const globalConfig = await importAsyncConfig();
+    if (env.foundation.type === "read_only") {
+      try {
+        if (!process.env.MOON_TEST_ENV) {
+          throw new Error("MOON_TEST_ENV not set");
+        }
 
-      const ctx = await contextCreator();
-      const chainData = ctx.providers
-        .filter((provider) => provider.type == "polkadotJs" && provider.name.includes("para"))
-        .map((provider) => {
-          return {
-            [provider.name]: {
-              rtName: (provider.greet() as any).rtName,
-              rtVersion: (provider.greet() as any).rtVersion,
-            },
-          };
-        });
-      // TODO: Extend/develop this feature to respect para/relay chain specifications
-      const { rtVersion, rtName } = Object.values(chainData[0])[0];
-      process.env.MOON_RTVERSION = rtVersion;
-      process.env.MOON_RTNAME = rtName;
-      await ctx.disconnect();
-    } catch {
-      // No chain to test against
+        const ctx = await contextCreator();
+        const chainData = ctx.providers
+          .filter((provider) => provider.type == "polkadotJs" && provider.name.includes("para"))
+          .map((provider) => {
+            return {
+              [provider.name]: {
+                rtName: (provider.greet() as any).rtName,
+                rtVersion: (provider.greet() as any).rtVersion,
+              },
+            };
+          });
+        // TODO: Extend/develop this feature to respect para/relay chain specifications
+        const { rtVersion, rtName } = Object.values(chainData[0])[0];
+        process.env.MOON_RTVERSION = rtVersion;
+        process.env.MOON_RTNAME = rtName;
+        await ctx.disconnect();
+      } catch {
+        // No chain to test against
+      }
     }
-  }
 
-  const baseOptions = {
-    watch: false,
-    globals: true,
-    reporters: env.reporters ? env.reporters : ["default"],
-    outputFile: env.reportFile,
-    testTimeout: env.timeout || globalConfig.defaultTestTimeout,
-    hookTimeout: env.timeout || globalConfig.defaultTestTimeout,
-    passWithNoTests: false,
-    deps: {
-      optimizer: { ssr: { enabled: false }, web: { enabled: false } },
-    },
-    include: env.include ? env.include : ["**/*{test,spec,test_,test-}*{ts,mts,cts}"],
-    onConsoleLog(log) {
-      if (filterList.includes(log.trim())) return false;
-      // if (log.trim() == "stdout | unknown test" || log.trim() == "<empty line>") return false;
-      if (log.includes("has multiple versions, ensure that there is only one installed.")) {
-        return false;
-      }
-    },
-  } satisfies UserConfig;
+    const baseOptions = {
+      watch: false,
+      globals: true,
+      reporters: env.reporters ? env.reporters : ["default"],
+      outputFile: env.reportFile,
+      testTimeout: env.timeout || globalConfig.defaultTestTimeout,
+      hookTimeout: env.timeout || globalConfig.defaultTestTimeout,
+      passWithNoTests: false,
+      deps: {
+        optimizer: { ssr: { enabled: false }, web: { enabled: false } },
+      },
+      include: env.include ? env.include : ["**/*{test,spec,test_,test-}*{ts,mts,cts}"],
+      onConsoleLog(log) {
+        if (filterList.includes(log.trim())) return false;
+        // if (log.trim() == "stdout | unknown test" || log.trim() == "<empty line>") return false;
+        if (log.includes("has multiple versions, ensure that there is only one installed.")) {
+          return false;
+        }
+      },
+    } satisfies UserConfig;
 
-  // TODO: Create options builder class
-  const options = addThreadConfig(baseOptions, env.multiThreads);
+    // TODO: Create options builder class
+    const options = addThreadConfig(baseOptions, env.multiThreads);
 
-  if (
-    globalConfig.environments.find((env) => env.name === process.env.MOON_TEST_ENV)?.foundation
-      .type == "zombie"
-  ) {
-    await runNetworkOnly();
-    process.env.MOON_RECYCLE = "true";
-  }
+    if (
+      globalConfig.environments.find((env) => env.name === process.env.MOON_TEST_ENV)?.foundation
+        .type == "zombie"
+    ) {
+      await runNetworkOnly();
+      process.env.MOON_RECYCLE = "true";
+    }
 
-  try {
-    const folders = env.testFileDir.map((folder) => path.join(".", folder, "/"));
-    return await startVitest("test", folders, { ...options, ...additionalArgs });
-  } catch (e) {
-    console.error(e);
-    process.exit(1);
-  }
+    try {
+      const folders = env.testFileDir.map((folder) => path.join(".", folder, "/"));
+      resolve(await startVitest("test", folders, { ...options, ...additionalArgs }));
+    } catch (e) {
+      console.error(e);
+      reject(e);
+    }
+  });
 }
 
 const filterList = ["<empty line>", "", "stdout | unknown test"];

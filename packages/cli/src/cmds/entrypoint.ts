@@ -101,20 +101,25 @@ yargs(hideBin(process.argv))
           description: "Pattern to grep test ID/Description to run",
         });
     },
-    async (args) => {
+    (args) => {
       if (args.envName) {
         process.env.MOON_RUN_SCRIPTS = "true";
-        if (await testCmd(args.envName.toString(), { testNamePattern: args.GrepTest })) {
-          console.log("✅ All tests passed");
-          process.exit(0);
-        } else {
-          console.log("❌ Some tests failed");
-          process.kill(process.pid, "SIGTERM");
-        }
+
+        testCmd(args.envName.toString(), {
+          testNamePattern: args.GrepTest,
+        }).then((testsPassed) => {
+          if (testsPassed) {
+            console.log("✅ All tests passed");
+            process.exit(0);
+          } else {
+            console.log("❌ Some tests failed");
+            process.exit(1);
+          }
+        });
       } else {
         console.log("❌ No environment specified");
         console.log(`👉 Run 'pnpm moonwall --help' for more information`);
-        process.exit(1);
+        process.exitCode = 1;
       }
     }
   )
@@ -134,7 +139,7 @@ yargs(hideBin(process.argv))
     async (argv) => {
       process.env.MOON_RUN_SCRIPTS = "true";
       await runNetworkCmd(argv as any);
-      process.exit(0);
+      process.exitCode = 0;
     }
   )
   .demandCommand(1)

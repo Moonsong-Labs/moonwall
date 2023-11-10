@@ -57,24 +57,20 @@ export async function createDevBlock<
   ApiType extends ApiTypes,
   Calls extends CallType<ApiType> | Array<CallType<ApiType>>
 >(context: GenericContext, options: BlockCreation, transactions?: Calls) {
-  let originalBlockNumber: bigint;
-
   const containsViem =
     (context as DevModeContext).isEthereumChain &&
     context.viem() &&
     MoonwallContext.getContext().providers.find((prov) => prov.type == "viem")
       ? true
       : false;
+  const api = context.polkadotJs();
 
-  if (containsViem) {
-    originalBlockNumber = await context.viem().getBlockNumber();
-  }
+  const originalBlockNumber = (await api.rpc.chain.getHeader()).number.toBigInt();
 
   const signer = options.signer !== undefined ? returnSigner(options) : returnDefaultSigner();
 
   const results: ({ type: "eth"; hash: string } | { type: "sub"; hash: string })[] = [];
 
-  const api = context.polkadotJs();
   const txs =
     transactions == undefined ? [] : Array.isArray(transactions) ? transactions : [transactions];
 
@@ -128,9 +124,7 @@ export async function createDevBlock<
     };
   }
 
-  // We retrieve the events for that block
   const allRecords: EventRecord[] = await (await api.at(blockResult.hash)).query.system.events();
-  // We retrieve the block (including the extrinsics)
   const blockData = await api.rpc.chain.getBlock(blockResult.hash);
 
   const result: ExtrinsicCreation[] = results.map((result) => {
@@ -163,9 +157,16 @@ export async function createDevBlock<
     };
   });
 
-  if (results.find((r) => r.type == "eth")) {
-    // TODO: investigate why new block is created but transaction receipts not found
-    await setTimeout(80); // needed to stop timing issues for some reason
+  if (results.find((res) => res.type == "eth")) {
+    // Wait until new block is actually created
+    for (;;) {
+      const currentBlock = (await api.rpc.chain.getHeader()).number.toBigInt();
+
+      if (currentBlock > originalBlockNumber) {
+        break;
+      }
+      await setTimeout(10);
+    }
   }
 
   const actualEvents = result.flatMap((resp) => resp.events);

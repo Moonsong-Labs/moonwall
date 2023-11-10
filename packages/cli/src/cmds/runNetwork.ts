@@ -192,7 +192,6 @@ export async function runNetworkCmd(args) {
   }
   await MoonwallContext.destroy();
   console.log(`Goodbye! 👋`);
-  process.exit(0);
 }
 
 const reportServicePorts = async () => {
