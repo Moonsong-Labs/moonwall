@@ -1,7 +1,7 @@
 import { Environment } from "@moonwall/types";
 import chalk from "chalk";
 import path from "path";
-import type { UserConfig } from "vitest";
+import type { UserConfig, Vitest } from "vitest";
 import { startVitest } from "vitest/node";
 import { clearNodeLogs } from "../internal/cmdFunctions/tempLogs";
 import { commonChecks } from "../internal/launcherCommon";
@@ -47,7 +47,7 @@ export async function testCmd(envName: string, additionalArgs?: object): Promise
 }
 
 export async function executeTests(env: Environment, additionalArgs?: object) {
-  return new Promise(async (resolve, reject) => {
+  return new Promise<Vitest>(async (resolve, reject) => {
     const globalConfig = await importAsyncConfig();
     if (env.foundation.type === "read_only") {
       try {
