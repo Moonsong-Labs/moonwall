@@ -78,7 +78,7 @@ export function describeSuite<T extends FoundationType>({
     describe.skip(`🗃️  #${suiteId} ${title}`);
     return;
   }
-  let ctx: MoonwallContext | undefined = undefined;
+  let ctx: MoonwallContext | null = null;
 
   beforeAll(async function () {
     const globalConfig = await importAsyncConfig();
@@ -98,6 +98,7 @@ export function describeSuite<T extends FoundationType>({
 
   afterAll(async function () {
     await MoonwallContext.destroy();
+    ctx = null;
   });
 
   const testCase = (params: ITestCase) => {
