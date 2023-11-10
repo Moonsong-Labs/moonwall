@@ -343,7 +343,7 @@ export const executeProposalWithCouncil = async (api: ApiPromise, encodedHash: s
   }
   process.stdout.write(`${referenda.asFinished.approved ? `✅` : `❌`} \n`);
   if (!referenda.asFinished.approved) {
-    throw new Error("Finished Referendum was not approved")
+    throw new Error("Finished Referendum was not approved");
   }
 };
 

@@ -73,7 +73,7 @@ export async function downloadBinsIfMissing(binPath: string) {
         process.arch
       )} architecture, you will need to build it manually from source 🛠️`
     );
-    throw new Error("Executable binary not available")
+    throw new Error("Executable binary not available");
   }
 }
 
@@ -154,7 +154,7 @@ export async function promptAlreadyRunning(pids: number[]) {
       break;
 
     case "abort":
-      throw new Error("Abort Signal Picked")
+      throw new Error("Abort Signal Picked");
   }
 }
 

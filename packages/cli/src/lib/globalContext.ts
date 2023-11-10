@@ -444,7 +444,7 @@ export class MoonwallContext {
   public static getContext(config?: MoonwallConfig, force: boolean = false): MoonwallContext {
     if (!MoonwallContext.instance || force) {
       if (!config) {
-        throw new Error("❌ Config must be provided on Global Context instantiation")
+        throw new Error("❌ Config must be provided on Global Context instantiation");
       }
       MoonwallContext.instance = new MoonwallContext(config);
 
