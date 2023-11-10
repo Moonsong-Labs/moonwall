@@ -1,5 +1,13 @@
 # @moonwall/util
 
+## 4.3.5
+
+### Patch Changes
+
+- bd6ef1d: Reverting to old exitlogic
+- Updated dependencies [bd6ef1d]
+  - @moonwall/types@4.3.5
+
 ## 4.3.4
 
 ### Patch Changes
