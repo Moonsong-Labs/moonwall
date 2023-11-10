@@ -34,6 +34,7 @@ import {
   isEthereumZombieConfig,
   isOptionSet,
 } from "./configReader";
+import { checkAlreadyRunning } from "../internal/fileCheckers";
 const debugSetup = Debug("global:context");
 
 export class MoonwallContext {
@@ -478,6 +479,12 @@ export class MoonwallContext {
     if (ctx.zombieNetwork) {
       console.log("🪓  Killing zombie nodes");
       await ctx.zombieNetwork.stop();
+      const processIds = Object.values((ctx.zombieNetwork.client as any).processMap)
+        .filter((item) => item!["pid"])
+        .map((process) => process!["pid"]);
+
+      await waitForPidsToDie(processIds);
+
       ctx.ipcServer?.close();
       ctx.ipcServer?.removeAllListeners();
     }
@@ -517,5 +524,17 @@ async function isPidRunning(pid: number): Promise<boolean> {
     return true;
   } catch {
     return false;
+  }
+}
+
+async function waitForPidsToDie(pids: number[]): Promise<void> {
+  const checkPids = async (): Promise<boolean> => {
+    const checks = pids.map(async (pid) => await isPidRunning(pid));
+    const results = await Promise.all(checks);
+    return results.every((running) => !running);
+  };
+
+  while (!(await checkPids())) {
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   }
 }
