@@ -11,6 +11,16 @@ import { fetchArtifact } from "../internal/cmdFunctions/fetchArtifact";
 import dotenv from "dotenv";
 dotenv.config();
 
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+  process.exit(1);
+});
+
+process.on("uncaughtException", (error) => {
+  console.error("Uncaught Exception:", error);
+  process.exit(1);
+});
+
 const defaultConfigFiles = ["./moonwall.config", "./moonwall.config.json"];
 
 function findExistingConfig(files: string[]): string | undefined {
@@ -101,20 +111,11 @@ yargs(hideBin(process.argv))
           description: "Pattern to grep test ID/Description to run",
         });
     },
-    (args) => {
+    async (args) => {
       if (args.envName) {
         process.env.MOON_RUN_SCRIPTS = "true";
-
-        testCmd(args.envName.toString(), {
+        await testCmd(args.envName.toString(), {
           testNamePattern: args.GrepTest,
-        }).then((testsPassed) => {
-          if (testsPassed) {
-            console.log("✅ All tests passed");
-            process.exit(0);
-          } else {
-            console.log("❌ Some tests failed");
-            process.exit(1);
-          }
         });
       } else {
         console.log("❌ No environment specified");
