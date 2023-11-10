@@ -106,16 +106,18 @@ yargs(hideBin(process.argv))
         process.env.MOON_RUN_SCRIPTS = "true";
         if (await testCmd(args.envName.toString(), { testNamePattern: args.GrepTest })) {
           console.log("✅ All tests passed");
-          process.exit(0);
+          process.exitCode = 0;
         } else {
           console.log("❌ Some tests failed");
-          process.kill(process.pid, "SIGTERM");
+          process.exitCode = 1;
         }
+        process.exit();
       } else {
         console.log("❌ No environment specified");
         console.log(`👉 Run 'pnpm moonwall --help' for more information`);
-        process.exit(1);
+        process.exitCode = 1;
       }
+      process.exit();
     }
   )
   .command(

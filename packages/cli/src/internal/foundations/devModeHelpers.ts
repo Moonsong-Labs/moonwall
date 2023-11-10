@@ -163,7 +163,7 @@ export async function createDevBlock<
     };
   });
 
-  if (results.find((r) => r.type == "eth")) {
+  if (results.find((res) => res.type == "eth")) {
     // TODO: investigate why new block is created but transaction receipts not found
     await setTimeout(80); // needed to stop timing issues for some reason
   }

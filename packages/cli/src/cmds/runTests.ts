@@ -9,37 +9,41 @@ import { cacheConfig, importAsyncConfig, loadEnvVars } from "../lib/configReader
 import { contextCreator, runNetworkOnly } from "../lib/globalContext";
 
 export async function testCmd(envName: string, additionalArgs?: object): Promise<boolean> {
-  await cacheConfig();
-  const globalConfig = await importAsyncConfig();
-  const env = globalConfig.environments.find(({ name }) => name === envName)!;
-  process.env.MOON_TEST_ENV = envName;
+  return new Promise<boolean>(async (resolve, reject) => {
+    await cacheConfig();
+    const globalConfig = await importAsyncConfig();
+    const env = globalConfig.environments.find(({ name }) => name === envName)!;
+    process.env.MOON_TEST_ENV = envName;
 
-  if (!env) {
-    const envList = globalConfig.environments.map((env) => env.name);
-    throw new Error(
-      `No environment found in config for: ${chalk.bgWhiteBright.blackBright(
-        envName
-      )}\n Environments defined in config are: ${envList}\n`
-    );
-  }
-  loadEnvVars();
+    if (!env) {
+      const envList = globalConfig.environments.map((env) => env.name);
+      reject(
+        new Error(
+          `No environment found in config for: ${chalk.bgWhiteBright.blackBright(
+            envName
+          )}\n Environments defined in config are: ${envList}\n`
+        )
+      );
+    }
+    loadEnvVars();
 
-  await commonChecks(env);
+    await commonChecks(env);
 
-  if (
-    (env.foundation.type == "dev" && !env.foundation.launchSpec[0].retainAllLogs) ||
-    (env.foundation.type == "chopsticks" && !env.foundation.launchSpec[0].retainAllLogs)
-  ) {
-    clearNodeLogs();
-  }
-  const vitest = await executeTests(env, additionalArgs);
-  const failed = vitest!.state.getFiles().filter((file) => file.result!.state === "fail");
+    if (
+      (env.foundation.type == "dev" && !env.foundation.launchSpec[0].retainAllLogs) ||
+      (env.foundation.type == "chopsticks" && !env.foundation.launchSpec[0].retainAllLogs)
+    ) {
+      clearNodeLogs();
+    }
+    const vitest = await executeTests(env, additionalArgs);
+    const failed = vitest!.state.getFiles().filter((file) => file.result!.state === "fail");
 
-  if (failed.length > 0) {
-    return false;
-  } else {
-    return true;
-  }
+    if (failed.length > 0) {
+      resolve(false);
+    } else {
+      resolve(true);
+    }
+  });
 }
 
 export async function executeTests(env: Environment, additionalArgs?: object) {
