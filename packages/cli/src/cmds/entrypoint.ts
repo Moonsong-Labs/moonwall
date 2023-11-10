@@ -104,20 +104,22 @@ yargs(hideBin(process.argv))
     async (args) => {
       if (args.envName) {
         process.env.MOON_RUN_SCRIPTS = "true";
-        if (await testCmd(args.envName.toString(), { testNamePattern: args.GrepTest })) {
+        const testsPassed = await testCmd(args.envName.toString(), {
+          testNamePattern: args.GrepTest,
+        });
+
+        if (testsPassed) {
           console.log("✅ All tests passed");
           process.exitCode = 0;
         } else {
           console.log("❌ Some tests failed");
           process.exitCode = 1;
         }
-        process.exit();
       } else {
         console.log("❌ No environment specified");
         console.log(`👉 Run 'pnpm moonwall --help' for more information`);
         process.exitCode = 1;
       }
-      process.exit();
     }
   )
   .command(
@@ -136,7 +138,7 @@ yargs(hideBin(process.argv))
     async (argv) => {
       process.env.MOON_RUN_SCRIPTS = "true";
       await runNetworkCmd(argv as any);
-      process.exit(0);
+      process.exitCode = 0;
     }
   )
   .demandCommand(1)

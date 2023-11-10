@@ -47,73 +47,75 @@ export async function testCmd(envName: string, additionalArgs?: object): Promise
 }
 
 export async function executeTests(env: Environment, additionalArgs?: object) {
-  const globalConfig = await importAsyncConfig();
-  if (env.foundation.type === "read_only") {
-    try {
-      if (!process.env.MOON_TEST_ENV) {
-        throw new Error("MOON_TEST_ENV not set");
-      }
+  return new Promise(async (resolve, reject) => {
+    const globalConfig = await importAsyncConfig();
+    if (env.foundation.type === "read_only") {
+      try {
+        if (!process.env.MOON_TEST_ENV) {
+          throw new Error("MOON_TEST_ENV not set");
+        }
 
-      const ctx = await contextCreator();
-      const chainData = ctx.providers
-        .filter((provider) => provider.type == "polkadotJs" && provider.name.includes("para"))
-        .map((provider) => {
-          return {
-            [provider.name]: {
-              rtName: (provider.greet() as any).rtName,
-              rtVersion: (provider.greet() as any).rtVersion,
-            },
-          };
-        });
-      // TODO: Extend/develop this feature to respect para/relay chain specifications
-      const { rtVersion, rtName } = Object.values(chainData[0])[0];
-      process.env.MOON_RTVERSION = rtVersion;
-      process.env.MOON_RTNAME = rtName;
-      await ctx.disconnect();
-    } catch {
-      // No chain to test against
+        const ctx = await contextCreator();
+        const chainData = ctx.providers
+          .filter((provider) => provider.type == "polkadotJs" && provider.name.includes("para"))
+          .map((provider) => {
+            return {
+              [provider.name]: {
+                rtName: (provider.greet() as any).rtName,
+                rtVersion: (provider.greet() as any).rtVersion,
+              },
+            };
+          });
+        // TODO: Extend/develop this feature to respect para/relay chain specifications
+        const { rtVersion, rtName } = Object.values(chainData[0])[0];
+        process.env.MOON_RTVERSION = rtVersion;
+        process.env.MOON_RTNAME = rtName;
+        await ctx.disconnect();
+      } catch {
+        // No chain to test against
+      }
     }
-  }
 
-  const baseOptions = {
-    watch: false,
-    globals: true,
-    reporters: env.reporters ? env.reporters : ["default"],
-    outputFile: env.reportFile,
-    testTimeout: env.timeout || globalConfig.defaultTestTimeout,
-    hookTimeout: env.timeout || globalConfig.defaultTestTimeout,
-    passWithNoTests: false,
-    deps: {
-      optimizer: { ssr: { enabled: false }, web: { enabled: false } },
-    },
-    include: env.include ? env.include : ["**/*{test,spec,test_,test-}*{ts,mts,cts}"],
-    onConsoleLog(log) {
-      if (filterList.includes(log.trim())) return false;
-      // if (log.trim() == "stdout | unknown test" || log.trim() == "<empty line>") return false;
-      if (log.includes("has multiple versions, ensure that there is only one installed.")) {
-        return false;
-      }
-    },
-  } satisfies UserConfig;
+    const baseOptions = {
+      watch: false,
+      globals: true,
+      reporters: env.reporters ? env.reporters : ["default"],
+      outputFile: env.reportFile,
+      testTimeout: env.timeout || globalConfig.defaultTestTimeout,
+      hookTimeout: env.timeout || globalConfig.defaultTestTimeout,
+      passWithNoTests: false,
+      deps: {
+        optimizer: { ssr: { enabled: false }, web: { enabled: false } },
+      },
+      include: env.include ? env.include : ["**/*{test,spec,test_,test-}*{ts,mts,cts}"],
+      onConsoleLog(log) {
+        if (filterList.includes(log.trim())) return false;
+        // if (log.trim() == "stdout | unknown test" || log.trim() == "<empty line>") return false;
+        if (log.includes("has multiple versions, ensure that there is only one installed.")) {
+          return false;
+        }
+      },
+    } satisfies UserConfig;
 
-  // TODO: Create options builder class
-  const options = addThreadConfig(baseOptions, env.multiThreads);
+    // TODO: Create options builder class
+    const options = addThreadConfig(baseOptions, env.multiThreads);
 
-  if (
-    globalConfig.environments.find((env) => env.name === process.env.MOON_TEST_ENV)?.foundation
-      .type == "zombie"
-  ) {
-    await runNetworkOnly();
-    process.env.MOON_RECYCLE = "true";
-  }
+    if (
+      globalConfig.environments.find((env) => env.name === process.env.MOON_TEST_ENV)?.foundation
+        .type == "zombie"
+    ) {
+      await runNetworkOnly();
+      process.env.MOON_RECYCLE = "true";
+    }
 
-  try {
-    const folders = env.testFileDir.map((folder) => path.join(".", folder, "/"));
-    return await startVitest("test", folders, { ...options, ...additionalArgs });
-  } catch (e) {
-    console.error(e);
-    process.exit(1);
-  }
+    try {
+      const folders = env.testFileDir.map((folder) => path.join(".", folder, "/"));
+      resolve(await startVitest("test", folders, { ...options, ...additionalArgs }));
+    } catch (e) {
+      console.error(e);
+      reject(e);
+    }
+  });
 }
 
 const filterList = ["<empty line>", "", "stdout | unknown test"];
