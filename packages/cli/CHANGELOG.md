@@ -1,5 +1,13 @@
 # @moonwall/cli
 
+## 4.3.4
+
+### Patch Changes
+
+- 2e5b977: Encapsulation fix
+  - @moonwall/types@4.3.4
+  - @moonwall/util@4.3.4
+
 ## 4.3.3
 
 ### Patch Changes
