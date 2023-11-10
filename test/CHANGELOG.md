@@ -1,5 +1,11 @@
 # @moonwall/tests
 
+## 4.3.5
+
+### Patch Changes
+
+- bd6ef1d: Reverting to old exitlogic
+
 ## 4.3.4
 
 ## 4.3.3
