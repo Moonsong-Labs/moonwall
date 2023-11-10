@@ -267,7 +267,7 @@ export class ProviderInterfaceFactory {
           `👋  Provider ${this.name} is connected to chain ` +
             (await api.provider!.getNetwork()).chainId
         ),
-      disconnect: async () => api.provider!.destroy(),
+      disconnect: () => api.provider!.destroy(),
     };
   }
 

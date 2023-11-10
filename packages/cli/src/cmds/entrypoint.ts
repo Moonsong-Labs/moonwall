@@ -101,20 +101,21 @@ yargs(hideBin(process.argv))
           description: "Pattern to grep test ID/Description to run",
         });
     },
-    async (args) => {
+    (args) => {
       if (args.envName) {
         process.env.MOON_RUN_SCRIPTS = "true";
-        const testsPassed = await testCmd(args.envName.toString(), {
-          testNamePattern: args.GrepTest,
-        });
 
-        if (testsPassed) {
-          console.log("✅ All tests passed");
-          process.exitCode = 0;
-        } else {
-          console.log("❌ Some tests failed");
-          process.exitCode = 1;
-        }
+        testCmd(args.envName.toString(), {
+          testNamePattern: args.GrepTest,
+        }).then((testsPassed) => {
+          if (testsPassed) {
+            console.log("✅ All tests passed");
+            process.exit(0);
+          } else {
+            console.log("❌ Some tests failed");
+            process.exit(1);
+          }
+        });
       } else {
         console.log("❌ No environment specified");
         console.log(`👉 Run 'pnpm moonwall --help' for more information`);
