@@ -34,7 +34,6 @@ import {
   isEthereumZombieConfig,
   isOptionSet,
 } from "./configReader";
-import { checkAlreadyRunning } from "../internal/fileCheckers";
 const debugSetup = Debug("global:context");
 
 export class MoonwallContext {
@@ -308,9 +307,6 @@ export class MoonwallContext {
     process.once("exit", onProcessExit);
     process.once("SIGINT", onProcessExit);
 
-    // process.env.MOON_MONITORED_NODE = zombieConfig.parachains[0].collator
-    //   ? `${network.tmpDir}/${zombieConfig.parachains[0].collator.name}.log`
-    //   : `${network.tmpDir}/${zombieConfig.parachains[0].collators![0].name}.log`;
     this.zombieNetwork = network;
     return;
   }
@@ -482,6 +478,8 @@ export class MoonwallContext {
       const processIds = Object.values((ctx.zombieNetwork.client as any).processMap)
         .filter((item) => item!["pid"])
         .map((process) => process!["pid"]);
+
+      execaCommandSync(`kill ${processIds.join(" ")}`);
 
       await waitForPidsToDie(processIds);
 
