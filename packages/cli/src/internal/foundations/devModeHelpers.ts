@@ -167,6 +167,8 @@ export async function createDevBlock<
       }
       await setTimeout(10);
     }
+    // TODO: Investigate why extra time needed
+    await setTimeout(100);
   }
 
   const actualEvents = result.flatMap((resp) => resp.events);

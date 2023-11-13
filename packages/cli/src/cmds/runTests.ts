@@ -6,7 +6,7 @@ import { startVitest } from "vitest/node";
 import { clearNodeLogs } from "../internal/cmdFunctions/tempLogs";
 import { commonChecks } from "../internal/launcherCommon";
 import { cacheConfig, importAsyncConfig, loadEnvVars } from "../lib/configReader";
-import { contextCreator, runNetworkOnly } from "../lib/globalContext";
+import { MoonwallContext, contextCreator, runNetworkOnly } from "../lib/globalContext";
 
 export async function testCmd(envName: string, additionalArgs?: object): Promise<boolean> {
   await cacheConfig();
@@ -37,10 +37,10 @@ export async function testCmd(envName: string, additionalArgs?: object): Promise
 
   if (failed.length === 0) {
     console.log("✅ All tests passed");
-    process.exit(0);
+    return true;
   } else {
     console.log("❌ Some tests failed");
-    process.exit(1);
+    return false;
   }
 }
 
@@ -68,7 +68,7 @@ export async function executeTests(env: Environment, additionalArgs?: object) {
         const { rtVersion, rtName } = Object.values(chainData[0])[0];
         process.env.MOON_RTVERSION = rtVersion;
         process.env.MOON_RTNAME = rtName;
-        await ctx.disconnect();
+        await MoonwallContext.destroy();
       } catch {
         // No chain to test against
       }
