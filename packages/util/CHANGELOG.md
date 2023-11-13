@@ -1,5 +1,15 @@
 # @moonwall/util
 
+## 4.4.0
+
+### Minor Changes
+
+- f53a25f: Switched to Fibre-based Runtime
+
+### Patch Changes
+
+- @moonwall/types@4.4.0
+
 ## 4.3.5
 
 ### Patch Changes
