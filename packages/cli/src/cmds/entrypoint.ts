@@ -134,7 +134,7 @@ const cliStart = Effect.try(() => {
         const effect = pipe(
           Effect.gen(function* (_) {
             if (envName) {
-              yield* _(runTestEffect(envName as any, GrepTest));
+              return yield* _(runTestEffect(envName as any, GrepTest));
             } else {
               yield* _(Effect.logError("👉 Run 'pnpm moonwall --help' for more information"));
               yield* _(Effect.fail("❌ No environment specified"));
@@ -143,7 +143,7 @@ const cliStart = Effect.try(() => {
           Effect.catchAll((error: any) => Effect.logError(`Error: ${error.message}`))
         );
 
-        await Effect.runPromiseExit(effect);
+        await Effect.runPromise(effect);
       }
     )
     .command(
