@@ -1,5 +1,17 @@
 # @moonwall/cli
 
+## 4.4.0
+
+### Minor Changes
+
+- f53a25f: Switched to Fibre-based Runtime
+
+### Patch Changes
+
+- Updated dependencies [f53a25f]
+  - @moonwall/util@4.4.0
+  - @moonwall/types@4.4.0
+
 ## 4.3.5
 
 ### Patch Changes
