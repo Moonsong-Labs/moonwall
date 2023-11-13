@@ -10,6 +10,7 @@ import { fetchArtifact } from "../internal/cmdFunctions/fetchArtifact";
 import dotenv from "dotenv";
 import { Effect, Console, pipe } from "effect";
 import { main } from "./main";
+import { set } from "effect/HashMap";
 dotenv.config();
 
 const defaultConfigFiles = ["./moonwall.config", "./moonwall.config.json"];
@@ -59,7 +60,6 @@ const cliStart = Effect.try(() => {
     .parseSync();
 
   if (!argv._.length) {
-    console.log(process.env.MOON_CONFIG_PATH);
     return main();
   }
 
@@ -143,7 +143,6 @@ const cliStart = Effect.try(() => {
           await Effect.runPromiseExit(effect);
         }
       )
-      // TODO: Turn this into an Effect
       .command(
         `run <envName> [GrepTest]`,
         "Start new network found in global config",
@@ -157,8 +156,12 @@ const cliStart = Effect.try(() => {
               description: "Pattern to grep test ID/Description to run",
             }),
         async (argv) => {
-          process.env.MOON_RUN_SCRIPTS = "true";
-          await runNetworkCmd(argv as any);
+          const effect = Effect.gen(function* (_) {
+            yield* _(setEnvVar("MOON_RUN_SCRIPTS", "true"));
+            yield* _(Effect.tryPromise(() => runNetworkCmd(argv as any)));
+          });
+
+          await Effect.runPromise(effect);
           process.exitCode = 0;
         }
       )
@@ -179,7 +182,8 @@ const runTestEffect = (envName: string, grepTest?: string) =>
     )
   );
 
-const cli = setupConfigFileEnv.pipe(
+const cli = pipe(
+  setupConfigFileEnv,
   Effect.flatMap(() => cliStart),
   Effect.catchAll((error: any) => Effect.logError(`Error: ${error.message}`))
 );
