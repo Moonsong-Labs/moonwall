@@ -1,12 +1,57 @@
 import { Environment } from "@moonwall/types";
 import chalk from "chalk";
 import path from "path";
+import { Effect } from "effect";
 import type { UserConfig, Vitest } from "vitest";
 import { startVitest } from "vitest/node";
 import { clearNodeLogs } from "../internal/cmdFunctions/tempLogs";
 import { commonChecks } from "../internal/launcherCommon";
 import { cacheConfig, importAsyncConfig, loadEnvVars } from "../lib/configReader";
 import { MoonwallContext, contextCreator, runNetworkOnly } from "../lib/globalContext";
+
+export const testEffect = (envName: string, additionalArgs?: object) => {
+  return Effect.gen(function* (_) {
+    yield* _(Effect.tryPromise(() => cacheConfig()));
+    const globalConfig = yield* _(Effect.tryPromise(() => importAsyncConfig()));
+    const env = yield* _(
+      Effect.sync(() => globalConfig.environments.find(({ name }) => name === envName)!)
+    );
+    yield* _(Effect.sync(() => (process.env.MOON_TEST_ENV = envName)));
+
+    if (!env) {
+      const envList = yield* _(Effect.sync(() => globalConfig.environments.map((env) => env.name)));
+      return Effect.fail(
+        `No environment found in config for: ${chalk.bgWhiteBright.blackBright(
+          envName
+        )}\n Environments defined in config are: ${envList}\n`
+      );
+    }
+
+    yield* _(Effect.sync(() => loadEnvVars()));
+    yield* _(Effect.promise(() => commonChecks(env)));
+
+    if (
+      (env.foundation.type == "dev" && !env.foundation.launchSpec[0].retainAllLogs) ||
+      (env.foundation.type == "chopsticks" && !env.foundation.launchSpec[0].retainAllLogs)
+    ) {
+      yield* _(Effect.sync(() => clearNodeLogs()));
+    }
+    const vitest = yield* _(Effect.promise(() => executeTests(env, additionalArgs)));
+    const failed = yield* _(
+      Effect.sync(() => vitest!.state.getFiles().filter((file) => file.result!.state === "fail"))
+    );
+
+    if (failed.length === 0) {
+      console.log("✅ All tests passed");
+      Effect.logInfo("✅ All tests passed");
+      return true;
+    } else {
+      console.log("❌ Some tests failed");
+      Effect.logInfo("❌ Some tests failed");
+      return Effect.fail("❌ Some tests failed");
+    }
+  });
+};
 
 export async function testCmd(envName: string, additionalArgs?: object): Promise<boolean> {
   await cacheConfig();

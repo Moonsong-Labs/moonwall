@@ -3,7 +3,7 @@ import "@moonbeam-network/api-augment";
 import yargs from "yargs";
 import fs from "fs";
 import { hideBin } from "yargs/helpers";
-import { testCmd } from "./runTests";
+import { testEffect } from "./runTests";
 import { runNetworkCmd } from "./runNetwork";
 import { generateConfig } from "../internal/cmdFunctions/initialisation";
 import { fetchArtifact } from "../internal/cmdFunctions/fetchArtifact";
@@ -119,6 +119,7 @@ const cliStart = Effect.try(() => {
     .command(
       `test <envName> [GrepTest]`,
       "Run tests for a given Environment",
+
       (yargs) =>
         yargs
           .positional("envName", {
@@ -130,18 +131,19 @@ const cliStart = Effect.try(() => {
             type: "string",
             description: "Pattern to grep test ID/Description to run",
           }),
+
       async ({ envName, GrepTest }) => {
-        const effect = pipe(
+        const effect = Effect.all([
+          setEnvVar("MOON_RUN_SCRIPTS", "true"),
           Effect.gen(function* (_) {
             if (envName) {
-              return yield* _(runTestEffect(envName as any, GrepTest));
+              return yield* _(testEffect(envName as any, { testNamePattern: GrepTest }));
             } else {
               yield* _(Effect.logError("👉 Run 'pnpm moonwall --help' for more information"));
-              yield* _(Effect.fail("❌ No environment specified"));
+              return yield* _(Effect.fail("❌ No environment specified"));
             }
           }),
-          Effect.catchAll((error: any) => Effect.logError(`Error: ${error.message}`))
-        );
+        ]);
 
         await Effect.runPromise(effect);
       }
@@ -159,10 +161,12 @@ const cliStart = Effect.try(() => {
             description: "Pattern to grep test ID/Description to run",
           }),
       async (argv) => {
-        const effect = Effect.gen(function* (_) {
-          yield* _(setEnvVar("MOON_RUN_SCRIPTS", "true"));
-          yield* _(Effect.tryPromise(() => runNetworkCmd(argv as any)));
-        });
+        const effect = Effect.all([
+          setEnvVar("MOON_RUN_SCRIPTS", "true"),
+          Effect.gen(function* (_) {
+            yield* _(Effect.tryPromise(() => runNetworkCmd(argv as any)));
+          }),
+        ]);
 
         await Effect.runPromise(effect);
       }
@@ -171,17 +175,6 @@ const cliStart = Effect.try(() => {
     .alias("h", "help")
     .parse();
 });
-
-const runTestEffect = (envName: string, grepTest?: string) =>
-  pipe(
-    setEnvVar("MOON_RUN_SCRIPTS", "true"),
-    Effect.flatMap(() => Effect.tryPromise(() => testCmd(envName, { testNamePattern: grepTest }))),
-    Effect.tap((result) =>
-      Effect.succeed(() => {
-        process.exitCode = result ? 0 : 1;
-      })
-    )
-  );
 
 const cli = pipe(
   setupConfigFileEnv,
