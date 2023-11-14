@@ -202,7 +202,7 @@ export interface ReadOnlyLaunchSpec extends GenericLaunchSpec {
    */
   rateLimiter?: boolean | Bottleneck.ConstructorOptions;
 
-   /**
+  /**
    * Disable runtime version check.
    * RT Version check is enabled by default.
    */

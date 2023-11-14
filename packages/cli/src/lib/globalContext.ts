@@ -181,10 +181,11 @@ export class MoonwallContext {
         const processIds = Object.values((this.zombieNetwork.client as any).processMap)
           .filter((item) => item!["pid"])
           .map((process) => process!["pid"]);
-        execaCommandSync(`kill ${processIds.join(" ")}`);
+        execaCommand(`kill ${processIds.join(" ")}`, {
+          reject: false,
+        });
       } catch (err) {
-        console.log(err);
-        console.log("Failed to kill zombie nodes");
+        // console.log(err.message);
       }
     };
 
@@ -479,7 +480,12 @@ export class MoonwallContext {
         .filter((item) => item!["pid"])
         .map((process) => process!["pid"]);
 
-      execaCommandSync(`kill ${processIds.join(" ")}`);
+      try {
+        execaCommandSync(`kill ${processIds.join(" ")}`, {});
+      } catch (e) {
+        console.log(e.message);
+        console.log("continuing...");
+      }
 
       await waitForPidsToDie(processIds);
 

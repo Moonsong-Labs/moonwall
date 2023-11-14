@@ -130,7 +130,10 @@ export const executeTestEffect = (env: Environment, additionalArgs?: object) => 
       })
     );
 
-    if (env.foundation.type === "read_only" && env.foundation.launchSpec.disableRuntimeVersionCheck !== true) {
+    if (
+      env.foundation.type === "read_only" &&
+      env.foundation.launchSpec.disableRuntimeVersionCheck !== true
+    ) {
       yield* _(Effect.config(Config.string("MOON_TEST_ENV")));
 
       const ctx = yield* _(
