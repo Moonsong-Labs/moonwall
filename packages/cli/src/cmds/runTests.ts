@@ -9,26 +9,55 @@ import { commonChecks } from "../internal/launcherCommon";
 import { cacheConfig, importAsyncConfig, loadEnvVars } from "../lib/configReader";
 import { MoonwallContext, contextCreator, runNetworkOnly } from "../lib/globalContext";
 
+class EnvironmentMissingError {
+  readonly _tag = "EnvironmentMissingError";
+  constructor(readonly env: string) {}
+}
+
+class TestsFailedError {
+  readonly _tag = "TestsFailedError";
+}
+
+class CommonCheckError {
+  readonly _tag = "CommonCheckError";
+}
+
+class ConfigError {
+  readonly _tag = "ConfigError";
+}
+
 export const testEffect = (envName: string, additionalArgs?: object) => {
   return Effect.gen(function* (_) {
-    yield* _(Effect.tryPromise(() => cacheConfig()));
-    const globalConfig = yield* _(Effect.tryPromise(() => importAsyncConfig()));
-    const env = yield* _(
-      Effect.sync(() => globalConfig.environments.find(({ name }) => name === envName)!)
+    yield* _(
+      Effect.tryPromise({
+        try: () => cacheConfig(),
+        catch: () => new ConfigError(),
+      })
     );
+    const globalConfig = yield* _(
+      Effect.tryPromise({
+        try: () => importAsyncConfig(),
+        catch: () => new ConfigError(),
+      })
+    );
+
+    const env = yield* _(
+      Effect.filterOrFail(
+        Effect.sync(() => globalConfig.environments.find(({ name }) => name === envName)),
+        (env) => !!env,
+        () => new EnvironmentMissingError(envName)
+      )
+    );
+
     yield* _(Effect.sync(() => (process.env.MOON_TEST_ENV = envName)));
-
-    if (!env) {
-      const envList = yield* _(Effect.sync(() => globalConfig.environments.map((env) => env.name)));
-      return Effect.fail(
-        `No environment found in config for: ${chalk.bgWhiteBright.blackBright(
-          envName
-        )}\n Environments defined in config are: ${envList}\n`
-      );
-    }
-
     yield* _(Effect.sync(() => loadEnvVars()));
-    yield* _(Effect.promise(() => commonChecks(env)));
+
+    yield* _(
+      Effect.tryPromise({
+        try: () => commonChecks(env),
+        catch: () => new CommonCheckError(),
+      })
+    );
 
     if (
       (env.foundation.type == "dev" && !env.foundation.launchSpec[0].retainAllLogs) ||
@@ -42,13 +71,11 @@ export const testEffect = (envName: string, additionalArgs?: object) => {
     );
 
     if (failed.length === 0) {
-      console.log("✅ All tests passed");
-      Effect.logInfo("✅ All tests passed");
+      yield* _(Effect.sync(() => console.log("✅ All tests passed")));
       return true;
     } else {
-      console.log("❌ Some tests failed");
-      Effect.logInfo("❌ Some tests failed");
-      return Effect.fail("❌ Some tests failed");
+      yield* _(Effect.sync(() => console.log("❌ Some tests failed")));
+      yield* _(Effect.fail(new TestsFailedError()));
     }
   });
 };
