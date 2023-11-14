@@ -88,7 +88,10 @@
       "testFileDir": ["suites/viem"],
       "envVars": [""],
       "foundation": {
-        "type": "read_only"
+        "type": "read_only",
+        "launchSpec": {
+          "disableRuntimeVersionCheck": true
+        }
       },
       "connections": [
         {
@@ -172,11 +175,14 @@
       "description": "Suite of tests that doesnt involve any blockchain stuff",
       "testFileDir": ["suites/basic/"],
       "foundation": {
+        "launchSpec": {
+          "disableRuntimeVersionCheck": true
+        },
         "type": "read_only"
       },
       "runScripts": [
         "compile-contracts.ts compile -p contracts/precompiles",
-        "greeting.js",
+        "greeting.js timbo",
         "shelley_prose.sh"
       ],
       "connections": []
@@ -597,6 +603,11 @@
         }
       },
       "connections": [
+        {
+          "name": "para",
+          "type": "polkadotJs",
+          "endpoints": ["wss://wss.api.moonbeam.network"]
+        },
         {
           "name": "eth",
           "type": "ethers",

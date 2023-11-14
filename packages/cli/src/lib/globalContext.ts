@@ -124,7 +124,7 @@ export class MoonwallContext {
 
   private handleReadOnly(env: Environment): IGlobalContextFoundation {
     if (env.foundation.type !== "read_only") {
-      throw new Error(`Foundation type must be 'dev'`);
+      throw new Error(`Foundation type must be 'read_only'`);
     }
 
     if (!env.connections) {
@@ -141,7 +141,7 @@ export class MoonwallContext {
 
   private handleChopsticks(env: Environment): IGlobalContextFoundation {
     if (env.foundation.type !== "chopsticks") {
-      throw new Error(`Foundation type must be 'dev'`);
+      throw new Error(`Foundation type must be 'chopsticks'`);
     }
 
     this.rtUpgradePath = env.foundation.rtUpgradePath;
@@ -181,10 +181,11 @@ export class MoonwallContext {
         const processIds = Object.values((this.zombieNetwork.client as any).processMap)
           .filter((item) => item!["pid"])
           .map((process) => process!["pid"]);
-        execaCommandSync(`kill ${processIds.join(" ")}`);
+        execaCommand(`kill ${processIds.join(" ")}`, {
+          reject: false,
+        });
       } catch (err) {
-        console.log(err);
-        console.log("Failed to kill zombie nodes");
+        // console.log(err.message);
       }
     };
 
@@ -479,7 +480,12 @@ export class MoonwallContext {
         .filter((item) => item!["pid"])
         .map((process) => process!["pid"]);
 
-      execaCommandSync(`kill ${processIds.join(" ")}`);
+      try {
+        execaCommandSync(`kill ${processIds.join(" ")}`, {});
+      } catch (e) {
+        console.log(e.message);
+        console.log("continuing...");
+      }
 
       await waitForPidsToDie(processIds);
 
