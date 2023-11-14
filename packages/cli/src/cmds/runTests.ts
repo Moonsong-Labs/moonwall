@@ -1,7 +1,7 @@
 import { Environment } from "@moonwall/types";
 import chalk from "chalk";
 import path from "path";
-import { Effect } from "effect";
+import { Effect, Config } from "effect";
 import type { UserConfig, Vitest } from "vitest";
 import { startVitest } from "vitest/node";
 import { clearNodeLogs } from "../internal/cmdFunctions/tempLogs";
@@ -24,6 +24,11 @@ class CommonCheckError {
 
 class ConfigError {
   readonly _tag = "ConfigError";
+  constructor(readonly customMessage?: string) {}
+}
+
+class MoonwallContextError {
+  readonly _tag = "MoonwallContextError";
 }
 
 export const testEffect = (envName: string, additionalArgs?: object) => {
@@ -65,14 +70,14 @@ export const testEffect = (envName: string, additionalArgs?: object) => {
     ) {
       yield* _(Effect.sync(() => clearNodeLogs()));
     }
-    const vitest = yield* _(Effect.promise(() => executeTests(env, additionalArgs)));
+    const vitest = yield* _(executeTestEffect(env, additionalArgs));
     const failed = yield* _(
       Effect.sync(() => vitest!.state.getFiles().filter((file) => file.result!.state === "fail"))
     );
 
     if (failed.length === 0) {
       yield* _(Effect.sync(() => console.log("✅ All tests passed")));
-      return true;
+      return;
     } else {
       yield* _(Effect.sync(() => console.log("❌ Some tests failed")));
       yield* _(Effect.fail(new TestsFailedError()));
@@ -115,6 +120,111 @@ export async function testCmd(envName: string, additionalArgs?: object): Promise
     return false;
   }
 }
+
+export const executeTestEffect = (env: Environment, additionalArgs?: object) => {
+  return Effect.gen(function* (_) {
+    const globalConfig = yield* _(
+      Effect.tryPromise({
+        try: () => importAsyncConfig(),
+        catch: () => new ConfigError(),
+      })
+    );
+
+    if (env.foundation.type === "read_only" && env.foundation.launchSpec.disableRuntimeVersionCheck !== true) {
+      yield* _(Effect.config(Config.string("MOON_TEST_ENV")));
+
+      const ctx = yield* _(
+        Effect.tryPromise({
+          try: () => contextCreator(),
+          catch: () => new MoonwallContextError(),
+        })
+      );
+
+      const chainData = yield* _(
+        Effect.filterOrFail(
+          Effect.sync(() =>
+            ctx.providers
+              .filter((provider) => provider.type == "polkadotJs" && provider.name.includes("para"))
+              .map((provider) => {
+                return {
+                  [provider.name]: {
+                    rtName: (provider.greet() as any).rtName,
+                    rtVersion: (provider.greet() as any).rtVersion,
+                  },
+                };
+              })
+          ),
+          (data) => data.length > 0,
+          () =>
+            new ConfigError(
+              "No polkadotJs provider named 'para' found (this is required for read_only foundations)"
+            )
+        )
+      );
+
+      const { rtVersion, rtName } = yield* _(Effect.sync(() => Object.values(chainData[0])[0]));
+      process.env.MOON_RTVERSION = rtVersion;
+      process.env.MOON_RTNAME = rtName;
+
+      yield* _(
+        Effect.tryPromise({
+          try: () => MoonwallContext.destroy(),
+          catch: () => new MoonwallContextError(),
+        })
+      );
+    }
+
+    const baseOptions = {
+      watch: false,
+      globals: true,
+      reporters: env.reporters ? env.reporters : ["default"],
+      outputFile: env.reportFile,
+      testTimeout: env.timeout || globalConfig.defaultTestTimeout,
+      hookTimeout: env.timeout || globalConfig.defaultTestTimeout,
+      passWithNoTests: false,
+      deps: {
+        optimizer: { ssr: { enabled: false }, web: { enabled: false } },
+      },
+      include: env.include ? env.include : ["**/*{test,spec,test_,test-}*{ts,mts,cts}"],
+      onConsoleLog(log) {
+        if (filterList.includes(log.trim())) return false;
+        // if (log.trim() == "stdout | unknown test" || log.trim() == "<empty line>") return false;
+        if (log.includes("has multiple versions, ensure that there is only one installed.")) {
+          return false;
+        }
+      },
+    } satisfies UserConfig;
+
+    const options = yield* _(
+      Effect.try({
+        try: () => addThreadConfig(baseOptions, env.multiThreads),
+        catch: () => new ConfigError(),
+      })
+    );
+
+    if (
+      globalConfig.environments.find((env) => env.name === process.env.MOON_TEST_ENV).foundation
+        .type == "zombie"
+    ) {
+      yield* _(
+        Effect.tryPromise({
+          try: () => runNetworkOnly(),
+          catch: () => new MoonwallContextError(),
+        })
+      );
+      process.env.MOON_RECYCLE = "true";
+    }
+
+    const folders = env.testFileDir.map((folder) => path.join(".", folder, "/"));
+
+    return yield* _(
+      Effect.tryPromise({
+        try: () => startVitest("test", folders, { ...options, ...additionalArgs }),
+        catch: (e: any) => new Error(e.message),
+      })
+    );
+  });
+};
 
 export async function executeTests(env: Environment, additionalArgs?: object) {
   return new Promise<Vitest>(async (resolve, reject) => {

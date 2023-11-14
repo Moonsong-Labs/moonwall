@@ -124,7 +124,7 @@ export class MoonwallContext {
 
   private handleReadOnly(env: Environment): IGlobalContextFoundation {
     if (env.foundation.type !== "read_only") {
-      throw new Error(`Foundation type must be 'dev'`);
+      throw new Error(`Foundation type must be 'read_only'`);
     }
 
     if (!env.connections) {
@@ -141,7 +141,7 @@ export class MoonwallContext {
 
   private handleChopsticks(env: Environment): IGlobalContextFoundation {
     if (env.foundation.type !== "chopsticks") {
-      throw new Error(`Foundation type must be 'dev'`);
+      throw new Error(`Foundation type must be 'chopsticks'`);
     }
 
     this.rtUpgradePath = env.foundation.rtUpgradePath;

@@ -74,9 +74,7 @@ const cliStart = Effect.try(() => {
       },
     })
     .command(`init`, "Run tests for a given Environment", async () => {
-      const effect = Effect.gen(function* (_) {
-        yield* _(Effect.tryPromise(() => generateConfig()));
-      });
+      const effect = Effect.tryPromise(() => generateConfig());
 
       await Effect.runPromise(effect);
     })
@@ -110,9 +108,7 @@ const cliStart = Effect.try(() => {
           });
       },
       async (argv) => {
-        const effect = Effect.gen(function* (_) {
-          yield* _(Effect.tryPromise(() => fetchArtifact(argv as any)));
-        });
+        const effect = Effect.tryPromise(() => fetchArtifact(argv));
         await Effect.runPromise(effect);
       }
     )
@@ -133,17 +129,15 @@ const cliStart = Effect.try(() => {
           }),
 
       async ({ envName, GrepTest }) => {
-        const effect = Effect.all([
-          setEnvVar("MOON_RUN_SCRIPTS", "true"),
-          Effect.gen(function* (_) {
-            if (envName) {
-              return yield* _(testEffect(envName as any, { testNamePattern: GrepTest }));
-            } else {
-              yield* _(Effect.logError("👉 Run 'pnpm moonwall --help' for more information"));
-              return yield* _(Effect.fail("❌ No environment specified"));
-            }
-          }),
-        ]);
+        process.env.MOON_RUN_SCRIPTS = "true";
+        const effect = Effect.gen(function* (_) {
+          if (envName) {
+            yield* _(testEffect(envName as any, { testNamePattern: GrepTest }));
+          } else {
+            console.error("👉 Run 'pnpm moonwall --help' for more information");
+            yield* _(Effect.fail("❌ No environment specified"));
+          }
+        });
 
         await Effect.runPromise(effect);
       }
@@ -161,12 +155,8 @@ const cliStart = Effect.try(() => {
             description: "Pattern to grep test ID/Description to run",
           }),
       async (argv) => {
-        const effect = Effect.all([
-          setEnvVar("MOON_RUN_SCRIPTS", "true"),
-          Effect.gen(function* (_) {
-            yield* _(Effect.tryPromise(() => runNetworkCmd(argv as any)));
-          }),
-        ]);
+        process.env.MOON_RUN_SCRIPTS = "true";
+        const effect = Effect.tryPromise(() => runNetworkCmd(argv as any));
 
         await Effect.runPromise(effect);
       }
