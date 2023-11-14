@@ -1,5 +1,11 @@
 # @moonwall/types
 
+## 4.4.1
+
+### Patch Changes
+
+- 400a5bb: Extra Fibre work
+
 ## 4.4.0
 
 ## 4.3.5

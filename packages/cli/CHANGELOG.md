@@ -1,5 +1,14 @@
 # @moonwall/cli
 
+## 4.4.1
+
+### Patch Changes
+
+- 400a5bb: Extra Fibre work
+- Updated dependencies [400a5bb]
+  - @moonwall/types@4.4.1
+  - @moonwall/util@4.4.1
+
 ## 4.4.0
 
 ### Minor Changes
