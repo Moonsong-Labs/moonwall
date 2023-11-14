@@ -439,7 +439,9 @@ const resolveTailChoice = async (env: Environment) => {
     switchNode = false;
     await new Promise(async (resolve) => {
       const onData = (chunk: any) => ui.log.write(chunk.toString());
-      const logFilePath = `${process.env.MOON_ZOMBIE_DIR}/${zombieNodes[zombieNodePointer]}.log`;
+      const logFilePath = process.env.MOON_ZOMBIE_NODES
+        ? `${process.env.MOON_ZOMBIE_DIR}/${zombieNodes[zombieNodePointer]}.log`
+        : process.env.MOON_LOG_LOCATION;
 
       // eslint-disable-next-line prefer-const
       let currentReadPosition = 0;
