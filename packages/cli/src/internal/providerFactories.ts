@@ -251,9 +251,7 @@ export class ProviderInterfaceFactory {
           `👋 Provider ${this.name} is connected to chain ` + (await api.eth.getChainId())
         ),
       disconnect: () => {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore Apparently this exists according to docs?
-        // api.provider.disconnect();  <--- this is really problematic and halts exit
+        // Not needed until we switch to websockets
       },
     };
   }
@@ -282,7 +280,6 @@ export class ProviderInterfaceFactory {
       greet: async () =>
         console.log(`👋 Provider ${this.name} is connected to chain ` + (await api.getChainId())),
       disconnect: () => {
-        // Not needed until we switch to websockets
       },
     };
   }
