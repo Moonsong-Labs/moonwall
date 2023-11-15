@@ -250,26 +250,26 @@ export async function createViemTransaction<TOptions extends DeepPartial<ViemTra
           type,
         }
       : type === "legacy"
-      ? {
-          to,
-          value,
-          gasPrice: options.gasPrice !== undefined ? options.gasPrice : gasPrice,
-          gas: options.gas !== undefined ? options.gas : estimatedGas,
-          nonce: options.nonce !== undefined ? options.nonce : txnCount,
-          data,
-        }
-      : type === "eip2930"
-      ? {
-          to,
-          value,
-          gasPrice: options.gasPrice !== undefined ? options.gasPrice : gasPrice,
-          gas: options.gas !== undefined ? options.gas : estimatedGas,
-          nonce: options.nonce !== undefined ? options.nonce : txnCount,
-          data,
-          chainId,
-          type,
-        }
-      : {};
+        ? {
+            to,
+            value,
+            gasPrice: options.gasPrice !== undefined ? options.gasPrice : gasPrice,
+            gas: options.gas !== undefined ? options.gas : estimatedGas,
+            nonce: options.nonce !== undefined ? options.nonce : txnCount,
+            data,
+          }
+        : type === "eip2930"
+          ? {
+              to,
+              value,
+              gasPrice: options.gasPrice !== undefined ? options.gasPrice : gasPrice,
+              gas: options.gas !== undefined ? options.gas : estimatedGas,
+              nonce: options.nonce !== undefined ? options.nonce : txnCount,
+              data,
+              chainId,
+              type,
+            }
+          : {};
 
   if (type !== "legacy" && accessList.length > 0) {
     txnBlob["accessList"] = accessList;
@@ -293,8 +293,8 @@ export async function checkBalance(
   return typeof block == "string"
     ? await context.viem().getBalance({ address: account, blockTag: block })
     : typeof block == "bigint"
-    ? await context.viem().getBalance({ address: account, blockNumber: block })
-    : await context.viem().getBalance({ address: account });
+      ? await context.viem().getBalance({ address: account, blockNumber: block })
+      : await context.viem().getBalance({ address: account });
 }
 
 /**

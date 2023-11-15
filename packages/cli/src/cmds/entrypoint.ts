@@ -132,7 +132,15 @@ const cliStart = Effect.try(() => {
         process.env.MOON_RUN_SCRIPTS = "true";
         const effect = Effect.gen(function* (_) {
           if (envName) {
-            yield* _(testEffect(envName as any, { testNamePattern: GrepTest }));
+            yield* _(
+              testEffect(envName as any, { testNamePattern: GrepTest }).pipe(
+                Effect.catchTag("TestsFailedError", (error) =>
+                  Effect.succeed(
+                    console.log(`❌ ${error.fails} test${error.fails !== 1 && "s"} failed`)
+                  )
+                )
+              )
+            );
           } else {
             console.error("👉 Run 'pnpm moonwall --help' for more information");
             yield* _(Effect.fail("❌ No environment specified"));

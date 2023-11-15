@@ -7,7 +7,7 @@ import { EventRecord } from "@polkadot/types/interfaces";
 import { AnyTuple, RegistryError } from "@polkadot/types/types";
 import { Debugger } from "debug";
 import { Signer } from "ethers";
-import { Web3 } from "web3";
+import type { Web3 } from "web3";
 import { FoundationType, ProviderType } from "./config";
 import { CallType } from "./foundations";
 import { ViemClient } from "./runner";
@@ -38,7 +38,7 @@ export type MoonwallEnvironment = {
 export interface MoonwallProvider {
   name: string;
   type: ProviderType;
-  connect: () => Promise<ApiPromise> | Signer | Web3<any> | Promise<ViemClient> | void;
+  connect: () => Promise<ApiPromise> | Signer | Web3 | Promise<ViemClient> | void;
   ws?: () => WsProvider;
 }
 
@@ -106,7 +106,7 @@ export interface BlockCreation {
 
 export interface BlockCreationResponse<
   ApiType extends ApiTypes,
-  Calls extends CallType<ApiType> | CallType<ApiType>[]
+  Calls extends CallType<ApiType> | CallType<ApiType>[],
 > {
   block: {
     duration: number;

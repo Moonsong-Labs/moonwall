@@ -85,9 +85,9 @@ async function checkWebSocketJSONRPC(port: number): Promise<boolean> {
     const messageHandler = (data: string) => {
       clearTimeout(timeout);
       try {
-        const { jsonrpc, id } = JSON.parse(data.toString());
-        if (jsonrpc === "2.0" && id === 1) {
-          resolve(true);
+        const { jsonrpc, id, result } = JSON.parse(data.toString());
+        if (jsonrpc === "2.0" && id >= 1 && result.length > 0) {
+          setTimeout(() => resolve(true), 50); // Buffer for timing issues
         } else {
           reject(new Error("Invalid JSON-RPC response"));
         }

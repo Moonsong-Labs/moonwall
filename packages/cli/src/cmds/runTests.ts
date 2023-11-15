@@ -7,42 +7,30 @@ import { startVitest } from "vitest/node";
 import { clearNodeLogs } from "../internal/cmdFunctions/tempLogs";
 import { commonChecks } from "../internal/launcherCommon";
 import { cacheConfig, importAsyncConfig, loadEnvVars } from "../lib/configReader";
-import { MoonwallContext, contextCreator, runNetworkOnly } from "../lib/globalContext";
-
-class EnvironmentMissingError {
-  readonly _tag = "EnvironmentMissingError";
-  constructor(readonly env: string) {}
-}
-
-class TestsFailedError {
-  readonly _tag = "TestsFailedError";
-}
-
-class CommonCheckError {
-  readonly _tag = "CommonCheckError";
-}
-
-class ConfigError {
-  readonly _tag = "ConfigError";
-  constructor(readonly customMessage?: string) {}
-}
-
-class MoonwallContextError {
-  readonly _tag = "MoonwallContextError";
-}
+import * as Err from "../errors";
+import {
+  MoonwallContext,
+  createContextEffect,
+  runNetworkOnlyEffect,
+} from "../lib/globalContextEffect";
+import {
+  MoonwallContext as legacyMoonwallContext,
+  runNetworkOnly as legacyRunNetworkOnly,
+  contextCreator,
+} from "../lib/globalContext";
 
 export const testEffect = (envName: string, additionalArgs?: object) => {
   return Effect.gen(function* (_) {
     yield* _(
       Effect.tryPromise({
         try: () => cacheConfig(),
-        catch: () => new ConfigError(),
+        catch: () => new Err.ConfigError(),
       })
     );
     const globalConfig = yield* _(
       Effect.tryPromise({
         try: () => importAsyncConfig(),
-        catch: () => new ConfigError(),
+        catch: () => new Err.ConfigError(),
       })
     );
 
@@ -50,7 +38,7 @@ export const testEffect = (envName: string, additionalArgs?: object) => {
       Effect.filterOrFail(
         Effect.sync(() => globalConfig.environments.find(({ name }) => name === envName)),
         (env) => !!env,
-        () => new EnvironmentMissingError(envName)
+        () => new Err.EnvironmentMissingError(envName)
       )
     );
 
@@ -60,7 +48,7 @@ export const testEffect = (envName: string, additionalArgs?: object) => {
     yield* _(
       Effect.tryPromise({
         try: () => commonChecks(env),
-        catch: () => new CommonCheckError(),
+        catch: () => new Err.CommonCheckError(),
       })
     );
 
@@ -79,8 +67,7 @@ export const testEffect = (envName: string, additionalArgs?: object) => {
       yield* _(Effect.sync(() => console.log("✅ All tests passed")));
       return;
     } else {
-      yield* _(Effect.sync(() => console.log("❌ Some tests failed")));
-      yield* _(Effect.fail(new TestsFailedError()));
+      yield* _(Effect.fail(new Err.TestsFailedError(failed.length)));
     }
   });
 };
@@ -126,7 +113,7 @@ export const executeTestEffect = (env: Environment, additionalArgs?: object) => 
     const globalConfig = yield* _(
       Effect.tryPromise({
         try: () => importAsyncConfig(),
-        catch: () => new ConfigError(),
+        catch: () => new Err.ConfigError(),
       })
     );
 
@@ -136,12 +123,7 @@ export const executeTestEffect = (env: Environment, additionalArgs?: object) => 
     ) {
       yield* _(Effect.config(Config.string("MOON_TEST_ENV")));
 
-      const ctx = yield* _(
-        Effect.tryPromise({
-          try: () => contextCreator(),
-          catch: () => new MoonwallContextError(),
-        })
-      );
+      const ctx = yield* _(createContextEffect());
 
       const chainData = yield* _(
         Effect.filterOrFail(
@@ -159,7 +141,7 @@ export const executeTestEffect = (env: Environment, additionalArgs?: object) => 
           ),
           (data) => data.length > 0,
           () =>
-            new ConfigError(
+            new Err.ConfigError(
               "No polkadotJs provider named 'para' found (this is required for read_only foundations)"
             )
         )
@@ -170,9 +152,9 @@ export const executeTestEffect = (env: Environment, additionalArgs?: object) => 
       process.env.MOON_RTNAME = rtName;
 
       yield* _(
-        Effect.tryPromise({
-          try: () => MoonwallContext.destroy(),
-          catch: () => new MoonwallContextError(),
+        Effect.try({
+          try: () => MoonwallContext.destroyEffect(),
+          catch: () => new Err.MoonwallContextError(),
         })
       );
     }
@@ -201,7 +183,7 @@ export const executeTestEffect = (env: Environment, additionalArgs?: object) => 
     const options = yield* _(
       Effect.try({
         try: () => addThreadConfig(baseOptions, env.multiThreads),
-        catch: () => new ConfigError(),
+        catch: () => new Err.ConfigError(),
       })
     );
 
@@ -209,12 +191,7 @@ export const executeTestEffect = (env: Environment, additionalArgs?: object) => 
       globalConfig.environments.find((env) => env.name === process.env.MOON_TEST_ENV).foundation
         .type == "zombie"
     ) {
-      yield* _(
-        Effect.tryPromise({
-          try: () => runNetworkOnly(),
-          catch: () => new MoonwallContextError(),
-        })
-      );
+      yield* _(runNetworkOnlyEffect());
       process.env.MOON_RECYCLE = "true";
     }
 
@@ -253,7 +230,7 @@ export async function executeTests(env: Environment, additionalArgs?: object) {
         const { rtVersion, rtName } = Object.values(chainData[0])[0];
         process.env.MOON_RTVERSION = rtVersion;
         process.env.MOON_RTNAME = rtName;
-        await MoonwallContext.destroy();
+        await legacyMoonwallContext.destroy();
       } catch {
         // No chain to test against
       }
@@ -287,7 +264,7 @@ export async function executeTests(env: Environment, additionalArgs?: object) {
       globalConfig.environments.find((env) => env.name === process.env.MOON_TEST_ENV)?.foundation
         .type == "zombie"
     ) {
-      await runNetworkOnly();
+      await legacyRunNetworkOnly();
       process.env.MOON_RECYCLE = "true";
     }
 

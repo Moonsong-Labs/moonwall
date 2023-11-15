@@ -1,4 +1,5 @@
 import "@moonbeam-network/api-augment";
+import { Effect } from "effect";
 import {
   ConnectedProvider,
   Environment,
@@ -14,6 +15,7 @@ import Debug from "debug";
 import fs from "fs";
 import net from "net";
 import readline from "readline";
+import * as Err from "../errors";
 import { setTimeout as timer } from "timers/promises";
 import { parseChopsticksRunCmd, parseRunCmd, parseZombieCmd } from "../internal/commandParsers";
 import {
@@ -359,7 +361,7 @@ export class MoonwallContext {
     const promises = this.environment.providers.map(
       async ({ name, type, connect }) =>
         new Promise(async (resolve) => {
-          this.providers.push(await ProviderInterfaceFactory.populate(name, type, connect));
+          this.providers.push(await ProviderInterfaceFactory.populate(name, type, connect as any));
           resolve("");
         })
     );
@@ -451,63 +453,98 @@ export class MoonwallContext {
     return MoonwallContext.instance;
   }
 
-  public static async destroy() {
-    const ctx = this.instance;
+  public static destroyEffect() {
+    return Effect.gen(function* (_) {
+      const ctx = MoonwallContext.instance;
 
-    try {
-      await ctx.disconnect();
-    } catch {
-      console.log("🛑  All connections disconnected");
-    }
+      yield* _(
+        Effect.tryPromise({
+          try: () => ctx.disconnect(),
+          catch: () => new Err.ProviderDisconnectError(),
+        })
+      );
 
-    while (ctx.nodes.length > 0) {
-      const node = ctx.nodes.pop();
-      const pid = node.pid;
-      node.kill("SIGKILL", { forceKillAfterTimeout: 2000 });
-      for (;;) {
-        if (await isPidRunning(pid)) {
-          await timer(10);
-        } else {
-          break;
+      while (ctx.nodes.length > 0) {
+        const node = ctx.nodes.pop();
+        const pid = node.pid;
+        yield* _(Effect.sync(() => node.kill("SIGKILL", { forceKillAfterTimeout: 2000 })));
+
+        for (;;) {
+          if (yield* _(isPidRunningEffect(pid))) {
+            yield* _(Effect.sleep(10));
+          } else {
+            break;
+          }
         }
       }
-    }
 
-    if (ctx.zombieNetwork) {
-      console.log("🪓  Killing zombie nodes");
-      await ctx.zombieNetwork.stop();
-      const processIds = Object.values((ctx.zombieNetwork.client as any).processMap)
-        .filter((item) => item!["pid"])
-        .map((process) => process!["pid"]);
+      if (ctx.zombieNetwork) {
+        console.log("🪓  Killing zombie nodes");
+        yield* _(
+          Effect.tryPromise({
+            try: () => ctx.zombieNetwork.stop(),
+            catch: () => Err.ZombieStopError,
+          })
+        );
 
-      try {
-        execaCommandSync(`kill ${processIds.join(" ")}`, {});
-      } catch (e) {
-        console.log(e.message);
-        console.log("continuing...");
+        const processIds = yield* _(
+          Effect.filterOrFail(
+            Effect.sync(() =>
+              Object.values((ctx.zombieNetwork.client as any).processMap)
+                .filter((item) => item!["pid"])
+                .map((process) => process!["pid"])
+            ),
+            (pids) => pids.length > 0,
+            () => new Err.ZombieStopError()
+          )
+        );
+
+        yield* _(Effect.sync(() => execaCommandSync(`kill ${processIds.join(" ")}`, {})));
+        yield* _(waitForPidsToDieEffect(processIds));
+
+        yield* _(Effect.sync(() => ctx.ipcServer?.close()));
+        yield* _(Effect.sync(() => ctx.ipcServer?.removeAllListeners()));
       }
-
-      await waitForPidsToDie(processIds);
-
-      ctx.ipcServer?.close();
-      ctx.ipcServer?.removeAllListeners();
-    }
+    });
   }
 }
 
-export const contextCreator = async () => {
-  const config = await importAsyncConfig();
-  const ctx = MoonwallContext.getContext(config);
-  await runNetworkOnly();
-  await ctx.connectEnvironment();
-  return ctx;
-};
+export const createContextEffect = () =>
+  Effect.gen(function* (_) {
+    const config = yield* _(
+      Effect.tryPromise({
+        try: () => importAsyncConfig(),
+        catch: () => new Err.ConfigError(),
+      })
+    );
+    const ctx = yield* _(Effect.sync(() => MoonwallContext.getContext(config)));
+    yield* _(runNetworkOnlyEffect());
+    yield* _(
+      Effect.tryPromise({
+        try: () => ctx.connectEnvironment(),
+        catch: () => new Err.MoonwallContextError(),
+      })
+    );
 
-export const runNetworkOnly = async () => {
-  const config = await importAsyncConfig();
-  const ctx = MoonwallContext.getContext(config);
-  await ctx.startNetwork();
-};
+    return ctx;
+  });
+
+export const runNetworkOnlyEffect = () =>
+  Effect.gen(function* (_) {
+    const config = yield* _(
+      Effect.tryPromise({
+        try: () => importAsyncConfig(),
+        catch: () => new Err.ConfigError(),
+      })
+    );
+    const ctx = yield* _(Effect.sync(() => MoonwallContext.getContext(config)));
+    yield* _(
+      Effect.tryPromise({
+        try: () => ctx.startNetwork(),
+        catch: () => new Err.MoonwallContextError(),
+      })
+    );
+  });
 
 export interface IGlobalContextFoundation {
   name: string;
@@ -522,23 +559,28 @@ export interface IGlobalContextFoundation {
   foundationType: FoundationType;
 }
 
-async function isPidRunning(pid: number): Promise<boolean> {
-  try {
-    await execaCommand(`ps -p ${pid} -o pid=`, { cleanup: true });
-    return true;
-  } catch {
+const isPidRunningEffect = (pid: number) =>
+  Effect.gen(function* (_) {
+    const result = yield* _(
+      Effect.promise(() => execaCommand(`ps -p ${pid} -o pid=`, { cleanup: true, reject: false }))
+    );
+
+    if (result.exitCode === 0) {
+      return result.stdout.trim() === pid.toString();
+    }
+
     return false;
-  }
-}
+  });
 
-async function waitForPidsToDie(pids: number[]): Promise<void> {
-  const checkPids = async (): Promise<boolean> => {
-    const checks = pids.map(async (pid) => await isPidRunning(pid));
-    const results = await Promise.all(checks);
-    return results.every((running) => !running);
-  };
+const waitForPidsToDieEffect = (pids: number[]) =>
+  Effect.gen(function* (_) {
+    const checkAliveEffect = () => {
+      return Effect.allSuccesses(pids.map((pid) => isPidRunningEffect(pid))).pipe(
+        Effect.map((res) => res.every((running) => !running))
+      );
+    };
 
-  while (!(await checkPids())) {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-  }
-}
+    while (!(yield* _(checkAliveEffect()))) {
+      yield* _(Effect.sleep(1000));
+    }
+  });

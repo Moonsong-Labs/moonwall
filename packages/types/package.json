@@ -68,8 +68,8 @@
     "@zombienet/utils": "^0.0.24",
     "bottleneck": "^2.19.5",
     "debug": "^4.3.4",
-    "ethers": "^6.8.1",
-    "viem": "^1.18.9",
+    "ethers": "6.8.1",
+    "viem": "^1.19.1",
     "web3": "4.2.2"
   },
   "publishConfig": {

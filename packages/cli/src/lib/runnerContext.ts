@@ -13,17 +13,19 @@ import type {
   ViemClient,
 } from "@moonwall/types";
 import { ApiPromise } from "@polkadot/api";
+import { Config, Effect } from "effect";
+import * as Err from "../errors";
 import Bottleneck from "bottleneck";
 import Debug from "debug";
 import { Signer } from "ethers";
 import { afterAll, beforeAll, describe, it } from "vitest";
 import { Web3 } from "web3";
 import { importAsyncConfig } from "./configReader";
-import { MoonwallContext, contextCreator } from "./globalContext";
 import { chopsticksHandler } from "./handlers/chopsticksHandler";
 import { devHandler } from "./handlers/devHandler";
 import { readOnlyHandler } from "./handlers/readOnlyHandler";
 import { zombieHandler } from "./handlers/zombieHandler";
+import { createContextEffect, MoonwallContext } from "./globalContextEffect";
 
 const RT_VERSION = Number(process.env.MOON_RTVERSION);
 const RT_NAME = process.env.MOON_RTNAME;
@@ -81,23 +83,42 @@ export function describeSuite<T extends FoundationType>({
   let ctx: MoonwallContext | null = null;
 
   beforeAll(async function () {
-    const globalConfig = await importAsyncConfig();
+    const effect = Effect.gen(function* (_) {
+      const globalConfig = yield* _(
+        Effect.tryPromise({
+          try: () => importAsyncConfig(),
+          catch: () => Err.ConfigError,
+        })
+      );
 
-    if (!process.env.MOON_TEST_ENV) {
-      throw new Error("MOON_TEST_ENV not set");
-    }
+      yield* _(Effect.config(Config.string("MOON_TEST_ENV")));
+      const env = globalConfig.environments.find(({ name }) => name === process.env.MOON_TEST_ENV)!;
 
-    ctx = await contextCreator();
-    const env = globalConfig.environments.find(({ name }) => name === process.env.MOON_TEST_ENV)!;
+      if (env.foundation.type === "read_only") {
+        const settings = loadParams(env.foundation.launchSpec);
+        limiter = new Bottleneck(settings);
+      }
 
-    if (env.foundation.type === "read_only") {
-      const settings = loadParams(env.foundation.launchSpec);
-      limiter = new Bottleneck(settings);
-    }
+      return yield* _(createContextEffect());
+    }).pipe(
+      Effect.timeoutFail({
+        duration: "10 seconds",
+        onTimeout: () => new Err.MoonwallContextCreateError(),
+      })
+    );
+
+    ctx = await Effect.runPromise(effect);
   });
 
   afterAll(async function () {
-    await MoonwallContext.destroy();
+    const effect = MoonwallContext.destroyEffect().pipe(
+      Effect.timeoutFail({
+        duration: "10 seconds",
+        onTimeout: () => new Err.MoonwallContextDestroyError(),
+      })
+    );
+
+    await Effect.runPromise(effect);
     ctx = null;
   });
 
