@@ -7,8 +7,7 @@ import Debug from "debug";
 import { Signer, Wallet, ethers } from "ethers";
 import { createWalletClient, http, publicActions } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { Web3 } from "web3";
-import { WebSocketProvider as Web3ProviderWs } from "web3";
+import { Web3, HttpProvider } from "web3";
 const debug = Debug("global:providers");
 
 export class ProviderFactory {
@@ -68,12 +67,8 @@ export class ProviderFactory {
       name: this.providerConfig.name,
       type: this.providerConfig.type,
       connect: () => {
-        const provider = new Web3ProviderWs(
-          this.url,
-          {},
-          { delay: 50, autoReconnect: false, maxAttempts: 10 }
-        );
-        return new Web3(provider);
+        const httpProvider = new HttpProvider(this.url.replace("ws", "http"));
+        return new Web3(httpProvider);
       },
     };
   }
