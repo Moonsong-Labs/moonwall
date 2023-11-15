@@ -153,6 +153,9 @@ importers:
       web3:
         specifier: 4.2.2
         version: 4.2.2(typescript@5.2.2)
+      why-is-node-running:
+        specifier: ^2.2.2
+        version: 2.2.2
       ws:
         specifier: ^8.14.2
         version: 8.14.2

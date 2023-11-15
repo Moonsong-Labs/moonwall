@@ -194,11 +194,6 @@ export class MoonwallContext {
     const socketPath = `${network.tmpDir}/node-ipc.sock`;
 
     const server = net.createServer((client) => {
-      // client.on("end", () => {
-      //   console.log("📨 IPC client disconnected");
-      // });
-
-      // Client message handling
       client.on("data", async (data) => {
         const writeToClient = (message: IPCResponseMessage) => {
           if (client.writable) {

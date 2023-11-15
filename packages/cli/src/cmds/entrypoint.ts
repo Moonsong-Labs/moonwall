@@ -1,4 +1,5 @@
 import "../internal/logging";
+import log from "why-is-node-running";
 import "@moonbeam-network/api-augment";
 import yargs from "yargs";
 import fs from "fs";
@@ -120,8 +121,7 @@ const cliStart = Effect.try(() => {
         yargs
           .positional("envName", {
             describe: "Network environment to run tests against",
-            array: true,
-            string: true,
+            type: "string",
           })
           .positional("GrepTest", {
             type: "string",
@@ -133,7 +133,7 @@ const cliStart = Effect.try(() => {
         const effect = Effect.gen(function* (_) {
           if (envName) {
             yield* _(
-              testEffect(envName as any, { testNamePattern: GrepTest }).pipe(
+              testEffect(envName, { testNamePattern: GrepTest }).pipe(
                 Effect.catchTag("TestsFailedError", (error) =>
                   Effect.succeed(
                     console.log(`❌ ${error.fails} test${error.fails !== 1 && "s"} failed`)
@@ -148,6 +148,10 @@ const cliStart = Effect.try(() => {
         });
 
         await Effect.runPromise(effect);
+
+        setTimeout(function () {
+          log(); // logs out active handles that are keeping node running
+        }, 10000);
       }
     )
     .command(
@@ -181,11 +185,11 @@ const cli = pipe(
 );
 
 Effect.runPromise(cli)
-  .then((res) => {
-    Console.log(res);
+  .then(() => {
+    console.log("🏁  Moonwall Test Run finished");
     process.exit(0);
   })
   .catch((defect) => {
-    Console.error(defect);
+    console.error(defect);
     process.exit(1);
   });
