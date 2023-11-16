@@ -64,8 +64,7 @@ export const testEffect = (envName: string, additionalArgs?: object) => {
     );
 
     if (failed.length === 0) {
-      yield* _(Effect.sync(() => console.log("✅ All tests passed")));
-      return;
+      yield* _(Effect.succeed(() => console.log("✅ All tests passed")));
     } else {
       yield* _(Effect.fail(new Err.TestsFailedError(failed.length)));
     }

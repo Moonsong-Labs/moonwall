@@ -9,7 +9,7 @@ import { runNetworkCmd } from "./runNetwork";
 import { generateConfig } from "../internal/cmdFunctions/initialisation";
 import { fetchArtifact } from "../internal/cmdFunctions/fetchArtifact";
 import dotenv from "dotenv";
-import { Effect, Console, pipe } from "effect";
+import { Effect, pipe } from "effect";
 import { main } from "./main";
 dotenv.config();
 
@@ -38,12 +38,18 @@ const parseConfigFile = Effect.sync(() =>
     .parseSync()
 );
 
-const setEnvVar = (key: string, value: string) => Effect.sync(() => (process.env[key] = value));
+const setEnvVar = (key: string, value: string) =>
+  Effect.sync(() => {
+    process.env[key] = value;
+  });
 
 const setupConfigFileEnv = pipe(
   parseConfigFile,
   Effect.flatMap((parsed) => setEnvVar("MOON_CONFIG_PATH", parsed.configFile))
 );
+
+// TODO: REMOVE THIS HACK ONCE YARGS REPLACED
+let failedTests: number | false;
 
 const cliStart = Effect.try(() => {
   const argv = yargs(hideBin(process.argv))
@@ -131,27 +137,27 @@ const cliStart = Effect.try(() => {
       async ({ envName, GrepTest }) => {
         process.env.MOON_RUN_SCRIPTS = "true";
         const effect = Effect.gen(function* (_) {
-          if (envName) {
-            yield* _(
-              testEffect(envName, { testNamePattern: GrepTest }).pipe(
-                Effect.catchTag("TestsFailedError", (error) =>
-                  Effect.succeed(
-                    console.log(`❌ ${error.fails} test${error.fails !== 1 && "s"} failed`)
-                  )
-                )
-              )
-            );
-          } else {
-            console.error("👉 Run 'pnpm moonwall --help' for more information");
-            yield* _(Effect.fail("❌ No environment specified"));
-          }
+          yield* _(
+            testEffect(envName, { testNamePattern: GrepTest }).pipe(
+              Effect.catchTag("TestsFailedError", (error) => {
+                failedTests = error.fails;
+                return Effect.succeed(
+                  console.log(`❌ ${error.fails} test file${error.fails !== 1 ? "s" : ""} failed`)
+                );
+              })
+            )
+          );
         });
 
         await Effect.runPromise(effect);
 
+        if (failedTests) {
+          process.exitCode = 1;
+        }
+        const timeout = 5;
         setTimeout(function () {
-          log(); // logs out active handles that are keeping node running
-        }, 10000);
+          log();
+        }, timeout * 1000);
       }
     )
     .command(
@@ -170,7 +176,7 @@ const cliStart = Effect.try(() => {
         process.env.MOON_RUN_SCRIPTS = "true";
         const effect = Effect.tryPromise(() => runNetworkCmd(argv as any));
 
-        await Effect.runPromise(effect);
+        await Effect.runPromiseExit(effect);
       }
     )
     .help("h")
@@ -180,16 +186,12 @@ const cliStart = Effect.try(() => {
 
 const cli = pipe(
   setupConfigFileEnv,
-  Effect.flatMap(() => cliStart),
-  Effect.catchAll((error: any) => Effect.logError(`Error: ${error.message}`))
+  Effect.flatMap(() => cliStart)
 );
 
 Effect.runPromise(cli)
   .then(() => {
-    console.log("🏁  Moonwall Test Run finished");
-    process.exit(0);
+    console.log("🏁 Moonwall Test Run finished");
+    process.exit();
   })
-  .catch((defect) => {
-    console.error(defect);
-    process.exit(1);
-  });
+  .catch(console.error);
