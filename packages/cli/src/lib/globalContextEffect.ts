@@ -505,6 +505,9 @@ export class MoonwallContext {
 
 export const createContextEffect = () =>
   Effect.gen(function* (_) {
+    // console.log("globalThis.config", globalThis.config.length);
+    // console.dir(globalThis.config, { depth: 1 })
+
     const config = yield* _(
       Effect.tryPromise({
         try: () => importAsyncConfig(),

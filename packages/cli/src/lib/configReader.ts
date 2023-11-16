@@ -69,10 +69,6 @@ export function isEthereumDevConfig(): boolean {
 }
 
 export function importJsonConfig(): MoonwallConfig {
-  if (globalThis.config) {
-    return replaceEnvVars(globalThis.config);
-  }
-
   const configPath = process.env.MOON_CONFIG_PATH!;
   const filePath = path.isAbsolute(configPath) ? configPath : path.join(process.cwd(), configPath);
 
@@ -87,10 +83,6 @@ export function importJsonConfig(): MoonwallConfig {
 }
 
 export async function importAsyncConfig() {
-  if (globalThis.config) {
-    return replaceEnvVars(globalThis.config);
-  }
-
   const configPath = process.env.MOON_CONFIG_PATH!;
   const filePath = path.isAbsolute(configPath) ? configPath : path.join(process.cwd(), configPath);
 

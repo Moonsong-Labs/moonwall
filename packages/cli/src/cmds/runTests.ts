@@ -18,18 +18,6 @@ import {
   runNetworkOnly as legacyRunNetworkOnly,
   contextCreator,
 } from "../lib/globalContext";
-import { fileURLToPath } from "url";
-
-let __dirname;
-
-if (typeof import.meta.url !== "undefined") {
-  // ESM environment
-  __dirname = path.dirname(fileURLToPath(import.meta.url));
-} else {
-  // CJS environment
-  // eslint-disable-next-line no-self-assign
-  __dirname = __dirname;
-}
 
 export const testEffect = (envName: string, additionalArgs?: object) => {
   return Effect.gen(function* (_) {
@@ -166,7 +154,6 @@ export const executeTestEffect = (env: Environment, additionalArgs?: object) => 
     const baseOptions = {
       watch: false,
       globals: true,
-      setupFiles: [path.join(__dirname, "internal/vitestSetup.js")],
       reporters: env.reporters ? env.reporters : ["default"],
       outputFile: env.reportFile,
       testTimeout: env.timeout || globalConfig.defaultTestTimeout,
