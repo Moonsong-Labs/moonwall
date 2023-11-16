@@ -32,6 +32,7 @@ import {
 } from "../internal/providerFactories";
 import {
   importAsyncConfig,
+  importJsonConfig,
   isEthereumDevConfig,
   isEthereumZombieConfig,
   isOptionSet,
@@ -437,9 +438,7 @@ export class MoonwallContext {
 
   public static getContext(config?: MoonwallConfig, force: boolean = false): MoonwallContext {
     if (!MoonwallContext.instance || force) {
-      if (!config) {
-        throw new Error("❌ Config must be provided on Global Context instantiation");
-      }
+      const config = importJsonConfig();
       MoonwallContext.instance = new MoonwallContext(config);
 
       debugSetup(`🟢  Moonwall context "${config.label}" created`);

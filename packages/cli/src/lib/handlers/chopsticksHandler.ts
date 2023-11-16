@@ -10,7 +10,7 @@ import {
   createChopsticksBlock,
   sendSetStorageRequest,
 } from "../../internal/foundations/chopsticksHelpers";
-import { MoonwallContext } from "../globalContext";
+import { MoonwallContext } from "../globalContextEffect";
 import { upgradeRuntimeChopsticks } from "../upgradeProcedures";
 
 export const chopsticksHandler: FoundationHandler<"chopsticks"> = ({

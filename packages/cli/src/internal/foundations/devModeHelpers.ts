@@ -16,7 +16,7 @@ import { setTimeout } from "timers/promises";
 import { assert } from "vitest";
 import { importAsyncConfig, isEthereumDevConfig } from "../../lib/configReader";
 import { extractError } from "../../lib/contextHelpers";
-import { MoonwallContext } from "../../lib/globalContext";
+import { MoonwallContext } from "../../lib/globalContextEffect";
 const debug = Debug("DevTest");
 
 export async function getDevProviderPath() {

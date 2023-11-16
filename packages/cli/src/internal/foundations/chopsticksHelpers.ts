@@ -5,7 +5,7 @@ import { FrameSystemEventRecord } from "@polkadot/types/lookup";
 import chalk from "chalk";
 import { setTimeout } from "timers/promises";
 import { assert } from "vitest";
-import { MoonwallContext } from "../../lib/globalContext";
+import { MoonwallContext } from "../../lib/globalContextEffect";
 
 export async function getWsFromConfig(providerName?: string): Promise<WsProvider> {
   if (providerName) {

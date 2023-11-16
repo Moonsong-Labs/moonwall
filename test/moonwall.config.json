@@ -226,7 +226,7 @@
             "name": "mb",
             "type": "parachain",
             "buildBlockMode": "manual",
-            "configPath": "./configs/moonriverChopsticks.yml"
+            "configPath": "./configs/moonbeamChopsticks.yml"
           }
         ]
       },
