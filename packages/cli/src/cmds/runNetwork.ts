@@ -9,7 +9,7 @@ import WebSocket from "ws";
 import { parse } from "yaml";
 import { clearNodeLogs, reportLogLocation } from "../internal/cmdFunctions/tempLogs";
 import { commonChecks } from "../internal/launcherCommon";
-import { cacheConfig, importAsyncConfig, loadEnvVars } from "../lib/configReader";
+import { importAsyncConfig, loadEnvVars } from "../lib/configReader";
 import { MoonwallContext, runNetworkOnly } from "../lib/globalContext";
 import { executeTests } from "./runTests";
 import { sendIpcMessage } from "../internal/foundations/zombieHelpers";
@@ -19,7 +19,6 @@ inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 let lastSelected = 0;
 
 export async function runNetworkCmd(args) {
-  await cacheConfig();
   process.env.MOON_TEST_ENV = args.envName;
   const globalConfig = await importAsyncConfig();
   const env = globalConfig.environments.find(({ name }) => name === args.envName)!;

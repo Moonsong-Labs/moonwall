@@ -302,7 +302,6 @@ export class MoonwallContext {
     this.ipcServer = server;
     process.env.MOON_IPC_SOCKET = socketPath;
 
-    process.once("exit", onProcessExit);
     process.once("SIGINT", onProcessExit);
 
     this.zombieNetwork = network;

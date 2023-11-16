@@ -9,7 +9,7 @@
     "clean": "rm -rf node_modules",
     "test-dev": "bun moonwall test 'dev_test dev_seq dev_mult'",
     "test": "bun moonwall test 'basic chopsticks'",
-    "node_test": "node --no-warnings --loader tsx --test suites/node_test/*.ts",
+    "node_test": "node --loader tsx --test suites/node_test/*.ts",
     "bun_test": "bun test suites/bun_test/*"
   },
   "devDependencies": {

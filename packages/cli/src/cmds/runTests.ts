@@ -6,7 +6,7 @@ import type { UserConfig, Vitest } from "vitest";
 import { startVitest } from "vitest/node";
 import { clearNodeLogs } from "../internal/cmdFunctions/tempLogs";
 import { commonChecks } from "../internal/launcherCommon";
-import { cacheConfig, importAsyncConfig, loadEnvVars } from "../lib/configReader";
+import { importAsyncConfig, loadEnvVars } from "../lib/configReader";
 import * as Err from "../errors";
 import {
   MoonwallContext,
@@ -18,15 +18,21 @@ import {
   runNetworkOnly as legacyRunNetworkOnly,
   contextCreator,
 } from "../lib/globalContext";
+import { fileURLToPath } from "url";
+
+let __dirname;
+
+if (typeof import.meta.url !== "undefined") {
+  // ESM environment
+  __dirname = path.dirname(fileURLToPath(import.meta.url));
+} else {
+  // CJS environment
+  // eslint-disable-next-line no-self-assign
+  __dirname = __dirname;
+}
 
 export const testEffect = (envName: string, additionalArgs?: object) => {
   return Effect.gen(function* (_) {
-    yield* _(
-      Effect.tryPromise({
-        try: () => cacheConfig(),
-        catch: () => new Err.ConfigError(),
-      })
-    );
     const globalConfig = yield* _(
       Effect.tryPromise({
         try: () => importAsyncConfig(),
@@ -72,7 +78,6 @@ export const testEffect = (envName: string, additionalArgs?: object) => {
 };
 
 export async function testCmd(envName: string, additionalArgs?: object): Promise<boolean> {
-  await cacheConfig();
   const globalConfig = await importAsyncConfig();
   const env = globalConfig.environments.find(({ name }) => name === envName)!;
   process.env.MOON_TEST_ENV = envName;
@@ -161,6 +166,7 @@ export const executeTestEffect = (env: Environment, additionalArgs?: object) => 
     const baseOptions = {
       watch: false,
       globals: true,
+      setupFiles: [path.join(__dirname, "internal/vitestSetup.js")],
       reporters: env.reporters ? env.reporters : ["default"],
       outputFile: env.reportFile,
       testTimeout: env.timeout || globalConfig.defaultTestTimeout,
