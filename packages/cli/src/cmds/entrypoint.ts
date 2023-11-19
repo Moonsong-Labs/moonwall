@@ -5,12 +5,12 @@ import yargs from "yargs";
 import fs from "fs";
 import { hideBin } from "yargs/helpers";
 import { testEffect } from "./runTests";
-import { runNetworkCmd } from "./runNetwork";
 import { generateConfig } from "../internal/cmdFunctions/initialisation";
 import { fetchArtifact } from "../internal/cmdFunctions/fetchArtifact";
 import dotenv from "dotenv";
 import { Effect, pipe } from "effect";
 import { main } from "./main";
+import { runNetworkCmdEffect } from "./runNetwork";
 dotenv.config();
 
 const defaultConfigFiles = ["./moonwall.config", "./moonwall.config.json"];
@@ -136,18 +136,14 @@ const cliStart = Effect.try(() => {
 
       async ({ envName, GrepTest }) => {
         process.env.MOON_RUN_SCRIPTS = "true";
-        const effect = Effect.gen(function* (_) {
-          yield* _(
-            testEffect(envName, { testNamePattern: GrepTest }).pipe(
-              Effect.catchTag("TestsFailedError", (error) => {
-                failedTests = error.fails;
-                return Effect.succeed(
-                  console.log(`❌ ${error.fails} test file${error.fails !== 1 ? "s" : ""} failed`)
-                );
-              })
-            )
-          );
-        });
+        const effect = testEffect(envName, { testNamePattern: GrepTest }).pipe(
+          Effect.catchTag("TestsFailedError", (error) => {
+            failedTests = error.fails;
+            return Effect.succeed(
+              console.log(`❌ ${error.fails} test file${error.fails !== 1 ? "s" : ""} failed`)
+            );
+          })
+        );
 
         await Effect.runPromise(effect);
 
@@ -174,9 +170,7 @@ const cliStart = Effect.try(() => {
           }),
       async (argv) => {
         process.env.MOON_RUN_SCRIPTS = "true";
-        const effect = Effect.tryPromise(() => runNetworkCmd(argv as any));
-
-        await Effect.runPromiseExit(effect);
+        await Effect.runPromiseExit(runNetworkCmdEffect(argv as any));
       }
     )
     .help("h")

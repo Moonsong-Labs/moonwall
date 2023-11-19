@@ -2,20 +2,21 @@ import { MoonwallConfig } from "@moonwall/types";
 import chalk from "chalk";
 import clear from "clear";
 import colors from "colors";
+import { Effect } from "effect";
+import fs from "fs";
 import inquirer from "inquirer";
 import PressToContinuePrompt from "inquirer-press-to-continue";
 import fetch from "node-fetch";
+import path from "path";
 import { SemVer, lt } from "semver";
 import pkg from "../../package.json" assert { type: "json" };
 import { fetchArtifact, getVersions } from "../internal/cmdFunctions/fetchArtifact";
 import { createFolders, generateConfig } from "../internal/cmdFunctions/initialisation";
+import { executeScript } from "../internal/launcherCommon";
 import { importAsyncConfig } from "../lib/configReader";
 import { allReposAsync } from "../lib/repoDefinitions";
-import { runNetworkCmd } from "./runNetwork";
-import { testCmd } from "./runTests";
-import fs from "fs";
-import { executeScript } from "../internal/launcherCommon";
-import path from "path";
+import { runNetworkCmdEffect } from "./runNetwork";
+import { testEffect } from "./runTests";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
@@ -103,7 +104,7 @@ async function mainMenu(config: MoonwallConfig) {
       const chosenRunEnv = await chooseRunEnv(config);
       process.env.MOON_RUN_SCRIPTS = "true";
       if (chosenRunEnv.envName !== "back") {
-        await runNetworkCmd(chosenRunEnv);
+        await Effect.runPromise(runNetworkCmdEffect(chosenRunEnv.envName));
       }
       return false;
     }
@@ -111,7 +112,7 @@ async function mainMenu(config: MoonwallConfig) {
       const chosenTestEnv = await chooseTestEnv(config);
       if (chosenTestEnv.envName !== "back") {
         process.env.MOON_RUN_SCRIPTS = "true";
-        await testCmd(chosenTestEnv.envName);
+        await Effect.runPromise(testEffect(chosenTestEnv.envName));
         await inquirer.prompt({
           name: "test complete",
           type: "press-to-continue",
