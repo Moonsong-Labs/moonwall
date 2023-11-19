@@ -24,7 +24,7 @@ import {
   checkZombieBins,
   getZombieConfig,
 } from "../internal/foundations/zombieHelpers";
-import { LaunchedNode, launchNode } from "../internal/localNode";
+import { LaunchedNode, launchNode, launchNodeEffect } from "../internal/localNode";
 import {
   ProviderFactory,
   ProviderInterfaceFactory,
@@ -40,7 +40,7 @@ import {
 const debugSetup = Debug("global:context");
 
 export class MoonwallContext {
-  private static instance: MoonwallContext | undefined;
+  private static instance: MoonwallContext;
   environment!: MoonwallEnvironment;
   providers: ConnectedProvider[];
   nodes: LaunchedNode[];
@@ -324,9 +324,12 @@ export class MoonwallContext {
       return await this.startZombieNetwork();
     }
 
-    const promises = nodes.map(async ({ cmd, args, name, launch }) => {
+    const promises = nodes.map(async ({ cmd, args, launch }) => {
       if (launch) {
-        const result = await launchNode(cmd, args, name!);
+        // const result = await launchNode(cmd, args, name!);
+        const result = await Effect.runPromise(launchNodeEffect(cmd, args))
+        console.log("result pushed")
+        console.log(result)
         this.nodes.push(result);
       } else {
         return Promise.resolve();
@@ -430,26 +433,31 @@ export class MoonwallContext {
 
   public static printStats() {
     if (MoonwallContext) {
-      console.dir(MoonwallContext.getContext(), { depth: 1 });
+      console.dir(this.getContext(), { depth: 1 });
     } else {
       console.log("Global context not created!");
     }
   }
 
   public static getContext(config?: MoonwallConfig, force: boolean = false): MoonwallContext {
-    if (!MoonwallContext.instance || force) {
+    if (!this.instance || force) {
       const config = importJsonConfig();
-      MoonwallContext.instance = new MoonwallContext(config);
+      this.instance = new MoonwallContext(config);
 
       debugSetup(`🟢  Moonwall context "${config.label}" created`);
     }
-    return MoonwallContext.instance;
+    return this.instance;
   }
 
-  public static destroyEffect() {
-    return Effect.gen(function* (_) {
-      const ctx = MoonwallContext.instance;
+  public static destroy() {
+    if (MoonwallContext.getContext()) {
+      return MoonwallContext.getContext().destroyEffect();
+    }
+  }
 
+  public destroyEffect() {
+    return Effect.gen(function* (_) {
+      const ctx = MoonwallContext.getContext();
       yield* _(
         Effect.tryPromise({
           try: () => ctx.disconnect(),
@@ -458,13 +466,14 @@ export class MoonwallContext {
       );
 
       while (ctx.nodes.length > 0) {
-        const node = ctx.nodes.pop();
+        const node = ctx.nodes[0];
         const pid = node.pid;
-        yield* _(Effect.sync(() => node.kill("SIGKILL", { forceKillAfterTimeout: 2000 })));
+        yield* _(Effect.promise(() => execaCommand(`kill ${pid}`, { shell: true })));
 
         for (;;) {
-          if (yield* _(isPidRunningEffect(pid))) {
-            yield* _(Effect.sleep(10));
+          const isRunning = yield* _(isPidRunningEffect(pid));
+          if (isRunning) {
+            yield* _(Effect.sleep(50));
           } else {
             break;
           }
@@ -476,7 +485,7 @@ export class MoonwallContext {
         yield* _(
           Effect.tryPromise({
             try: () => ctx.zombieNetwork.stop(),
-            catch: () => Err.ZombieStopError,
+            catch: () => new Err.ZombieStopError(),
           })
         );
 
@@ -498,15 +507,18 @@ export class MoonwallContext {
         yield* _(Effect.sync(() => ctx.ipcServer?.close()));
         yield* _(Effect.sync(() => ctx.ipcServer?.removeAllListeners()));
       }
+
+      yield* _(Effect.sleep(1000))
+
+      delete MoonwallContext.instance;
     });
   }
 }
 
 export const createContextEffect = () =>
   Effect.gen(function* (_) {
-    // console.log("globalThis.config", globalThis.config.length);
-    // console.dir(globalThis.config, { depth: 1 })
 
+    yield* _(Effect.sleep(10000))
     const config = yield* _(
       Effect.tryPromise({
         try: () => importAsyncConfig(),

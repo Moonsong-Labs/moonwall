@@ -201,7 +201,7 @@ export const runNetworkCmdEffect = (args) =>
           throw new Error("invalid value");
       }
     }
-    yield* _(MoonwallContext.destroyEffect());
+    yield* _(MoonwallContext.destroy());
   });
 
 const reportServicePorts = async () => {

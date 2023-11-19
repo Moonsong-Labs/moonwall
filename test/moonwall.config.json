@@ -646,7 +646,7 @@
       "name": "dev_test",
       "testFileDir": ["suites/dev_tests"],
       "envVars": ["DEBUG_COLORS=1", "TIMBO_TEST_ENV='TIMBO timbo timbo'"],
-      "reporters": ["default", "html", "json"],
+      "reporters": ["basic", "html", "json"],
       "reportFile": { "json": "tmp/testResults.json" },
       "contracts": "contracts/",
       "runScripts": ["compile-contracts.ts compile -p contracts/precompiles"],

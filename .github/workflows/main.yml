@@ -122,9 +122,6 @@ jobs:
         run: |
           pnpm install  
           pnpm run build
-      - uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: latest
       - name: Download moonbeam binary
         run: |
           cd test
