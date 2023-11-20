@@ -220,13 +220,13 @@
       "reportFile": { "json": "tmp/testResults.json" },
       "foundation": {
         "type": "chopsticks",
-        "rtUpgradePath": "./tmp/moonriver_runtime.compact.compressed.wasm",
+        "rtUpgradePath": "./tmp/moonbeam_runtime.compact.compressed.wasm",
         "launchSpec": [
           {
             "name": "mb",
             "type": "parachain",
             "buildBlockMode": "manual",
-            "configPath": "./configs/moonriverChopsticks.yml"
+            "configPath": "./configs/moonbeamChopsticks.yml"
           }
         ]
       },
