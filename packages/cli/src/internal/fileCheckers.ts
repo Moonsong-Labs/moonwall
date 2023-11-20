@@ -73,7 +73,7 @@ export async function downloadBinsIfMissing(binPath: string) {
         process.arch
       )} architecture, you will need to build it manually from source 🛠️`
     );
-    process.exit(130);
+    throw new Error("Executable binary not available");
   }
 }
 
@@ -101,8 +101,7 @@ export function checkListeningPorts(processId: number) {
       "Running Moonwall with this in the background may cause unexpected behaviour. Please manually kill the process and try running Moonwall again."
     );
     console.log(`N.B. You can kill it with: sudo kill -9 ${processId}`);
-
-    process.exit(1);
+    throw new Error(e);
   }
 }
 
@@ -155,7 +154,7 @@ export async function promptAlreadyRunning(pids: number[]) {
       break;
 
     case "abort":
-      process.exit(130);
+      throw new Error("Abort Signal Picked");
   }
 }
 

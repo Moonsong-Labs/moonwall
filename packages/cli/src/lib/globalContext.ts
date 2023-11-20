@@ -124,7 +124,7 @@ export class MoonwallContext {
 
   private handleReadOnly(env: Environment): IGlobalContextFoundation {
     if (env.foundation.type !== "read_only") {
-      throw new Error(`Foundation type must be 'dev'`);
+      throw new Error(`Foundation type must be 'read_only'`);
     }
 
     if (!env.connections) {
@@ -141,7 +141,7 @@ export class MoonwallContext {
 
   private handleChopsticks(env: Environment): IGlobalContextFoundation {
     if (env.foundation.type !== "chopsticks") {
-      throw new Error(`Foundation type must be 'dev'`);
+      throw new Error(`Foundation type must be 'chopsticks'`);
     }
 
     this.rtUpgradePath = env.foundation.rtUpgradePath;
@@ -181,10 +181,11 @@ export class MoonwallContext {
         const processIds = Object.values((this.zombieNetwork.client as any).processMap)
           .filter((item) => item!["pid"])
           .map((process) => process!["pid"]);
-        execaCommandSync(`kill ${processIds.join(" ")}`);
+        execaCommand(`kill ${processIds.join(" ")}`, {
+          reject: false,
+        });
       } catch (err) {
-        console.log(err);
-        console.log("Failed to kill zombie nodes");
+        // console.log(err.message);
       }
     };
 
@@ -307,9 +308,6 @@ export class MoonwallContext {
     process.once("exit", onProcessExit);
     process.once("SIGINT", onProcessExit);
 
-    // process.env.MOON_MONITORED_NODE = zombieConfig.parachains[0].collator
-    //   ? `${network.tmpDir}/${zombieConfig.parachains[0].collator.name}.log`
-    //   : `${network.tmpDir}/${zombieConfig.parachains[0].collators![0].name}.log`;
     this.zombieNetwork = network;
     return;
   }
@@ -444,8 +442,7 @@ export class MoonwallContext {
   public static getContext(config?: MoonwallConfig, force: boolean = false): MoonwallContext {
     if (!MoonwallContext.instance || force) {
       if (!config) {
-        console.error("❌ Config must be provided on Global Context instantiation");
-        process.exit(2);
+        throw new Error("❌ Config must be provided on Global Context instantiation");
       }
       MoonwallContext.instance = new MoonwallContext(config);
 
@@ -479,6 +476,19 @@ export class MoonwallContext {
     if (ctx.zombieNetwork) {
       console.log("🪓  Killing zombie nodes");
       await ctx.zombieNetwork.stop();
+      const processIds = Object.values((ctx.zombieNetwork.client as any).processMap)
+        .filter((item) => item!["pid"])
+        .map((process) => process!["pid"]);
+
+      try {
+        execaCommandSync(`kill ${processIds.join(" ")}`, {});
+      } catch (e) {
+        console.log(e.message);
+        console.log("continuing...");
+      }
+
+      await waitForPidsToDie(processIds);
+
       ctx.ipcServer?.close();
       ctx.ipcServer?.removeAllListeners();
     }
@@ -518,5 +528,17 @@ async function isPidRunning(pid: number): Promise<boolean> {
     return true;
   } catch {
     return false;
+  }
+}
+
+async function waitForPidsToDie(pids: number[]): Promise<void> {
+  const checkPids = async (): Promise<boolean> => {
+    const checks = pids.map(async (pid) => await isPidRunning(pid));
+    const results = await Promise.all(checks);
+    return results.every((running) => !running);
+  };
+
+  while (!(await checkPids())) {
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   }
 }

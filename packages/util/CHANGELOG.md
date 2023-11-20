@@ -1,5 +1,57 @@
 # @moonwall/util
 
+## 4.4.1
+
+### Patch Changes
+
+- 400a5bb: Extra Fibre work
+- Updated dependencies [400a5bb]
+  - @moonwall/types@4.4.1
+
+## 4.4.0
+
+### Minor Changes
+
+- f53a25f: Switched to Fibre-based Runtime
+
+### Patch Changes
+
+- @moonwall/types@4.4.0
+
+## 4.3.5
+
+### Patch Changes
+
+- bd6ef1d: Reverting to old exitlogic
+- Updated dependencies [bd6ef1d]
+  - @moonwall/types@4.3.5
+
+## 4.3.4
+
+### Patch Changes
+
+- @moonwall/types@4.3.4
+
+## 4.3.3
+
+### Patch Changes
+
+- @moonwall/types@4.3.3
+
+## 4.3.2
+
+### Patch Changes
+
+- 3978aed: Package Ver Updates
+- Updated dependencies [3978aed]
+  - @moonwall/types@4.3.2
+
+## 4.3.1
+
+### Patch Changes
+
+- @moonwall/types@4.3.1
+
 ## 4.3.0
 
 ### Patch Changes

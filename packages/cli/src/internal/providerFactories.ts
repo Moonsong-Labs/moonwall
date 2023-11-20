@@ -202,7 +202,11 @@ export interface ProviderInterface {
 }
 
 export class ProviderInterfaceFactory {
-  constructor(private name: string, private type: ProviderType, private connect: () => any) {}
+  constructor(
+    private name: string,
+    private type: ProviderType,
+    private connect: () => any
+  ) {}
 
   public async create(): Promise<ProviderInterface> {
     switch (this.type) {
@@ -267,7 +271,7 @@ export class ProviderInterfaceFactory {
           `👋  Provider ${this.name} is connected to chain ` +
             (await api.provider!.getNetwork()).chainId
         ),
-      disconnect: async () => api.provider!.destroy(),
+      disconnect: () => api.provider!.destroy(),
     };
   }
 

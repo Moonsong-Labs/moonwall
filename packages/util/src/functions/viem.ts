@@ -14,6 +14,7 @@ import {
   hexToNumber,
   http,
 } from "viem";
+import { setTimeout as timer } from "timers/promises";
 import { privateKeyToAccount } from "viem/accounts";
 import { Chain } from "viem/chains";
 import { ALITH_ADDRESS, ALITH_PRIVATE_KEY } from "../constants/accounts";
@@ -160,9 +161,20 @@ export async function deployViemContract<TOptions extends ContractDeploymentOpti
 
   await context.createBlock();
 
-  const { contractAddress, status, logs } = await context.viem().getTransactionReceipt({ hash });
-
-  return { contractAddress, status, logs, hash };
+  for (let i = 0; i < 5; i++) {
+    try {
+      const { contractAddress, status, logs } = await context
+        .viem()
+        .getTransactionReceipt({ hash });
+      return { contractAddress, status, logs, hash };
+    } catch (e) {
+      console.log(e.message);
+      console.log("Contract deployment query, retrying...");
+      await timer(100);
+      continue;
+    }
+  }
+  throw new Error("Contract deployment query failed after 5 retries");
 }
 
 export type InputAmountFormats = number | bigint | string | `0x${string}`;

@@ -26,9 +26,9 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
   const logLocation = path
     .join(
       dirPath,
-      `${path.basename(cmd)}_node_${
-        args.find((a) => a.includes("port"))?.split("=")[1]
-      }_${new Date().getTime()}.log`
+      `${path.basename(cmd)}_node_${args
+        .find((a) => a.includes("port"))
+        ?.split("=")[1]}_${new Date().getTime()}.log`
     )
     .replaceAll("node_node_undefined", "chopsticks");
   process.env.MOON_LOG_LOCATION = logLocation;
@@ -61,52 +61,9 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
   return { pid: runningNode.pid, kill: runningNode.kill };
 }
 
-const WEB_SOCKET_TIMEOUT = 5000; // e.g., 5 seconds
-
-// async function checkWebSocketJSONRPC(port: number): Promise<boolean> {
-//   return new Promise((resolve, reject) => {
-//     const ws = new WebSocket(`ws://localhost:${port}`);
-//     const timeout = setTimeout(() => {
-//       ws.close();
-//       reject(new Error("WebSocket response timeout"));
-//     }, WEB_SOCKET_TIMEOUT);
-
-//     ws.once("open", () => {
-//       ws.send(
-//         JSON.stringify({
-//           jsonrpc: "2.0",
-//           id: 1,
-//           method: "system_chain",
-//           params: [],
-//         })
-//       );
-//     });
-
-//     ws.once("message", (data) => {
-//       clearTimeout(timeout);
-//       try {
-//         const { jsonrpc, id } = JSON.parse(data.toString());
-//         if (jsonrpc === "2.0" && id === 1) {
-//           resolve(true);
-//         } else {
-//           reject(new Error("Invalid JSON-RPC response"));
-//         }
-//       } catch (e) {
-//         reject(new Error("Failed to parse WebSocket message"));
-//       } finally {
-//         ws.close();
-//       }
-//     });
-
-//     ws.once("error", (err) => {
-//       clearTimeout(timeout);
-//       ws.close();
-//       reject(new Error(`WebSocket error: ${err.message}`));
-//     });
-//   });
-// }
-
 async function checkWebSocketJSONRPC(port: number): Promise<boolean> {
+  const WEB_SOCKET_TIMEOUT = 5000; // e.g., 5 seconds
+
   return new Promise((resolve, reject) => {
     const ws = new WebSocket(`ws://localhost:${port}`);
     const timeout = setTimeout(() => {
@@ -156,7 +113,9 @@ async function checkWebSocketJSONRPC(port: number): Promise<boolean> {
   });
 }
 
-function findPortsByPid(pid: number, retryDelay: number = 10000) {
+function findPortsByPid(pid: number, timeout: number = 10000) {
+  const end = Date.now() + timeout;
+
   for (;;) {
     const command = `lsof -i -n -P | grep LISTEN | grep ${pid} || true`;
     const { stdout } = execaCommandSync(command, { shell: true, cleanup: true, timeout: 2000 });
@@ -175,7 +134,6 @@ function findPortsByPid(pid: number, retryDelay: number = 10000) {
       return ports;
     }
 
-    const end = Date.now() + retryDelay;
     if (Date.now() > end) break;
   }
 

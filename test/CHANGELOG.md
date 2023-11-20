@@ -1,5 +1,31 @@
 # @moonwall/tests
 
+## 4.4.1
+
+## 4.4.0
+
+### Minor Changes
+
+- f53a25f: Switched to Fibre-based Runtime
+
+## 4.3.5
+
+### Patch Changes
+
+- bd6ef1d: Reverting to old exitlogic
+
+## 4.3.4
+
+## 4.3.3
+
+## 4.3.2
+
+### Patch Changes
+
+- 3978aed: Package Ver Updates
+
+## 4.3.1
+
 ## 4.3.0
 
 ## 4.2.10

@@ -62,7 +62,7 @@ export async function getMoonbeamDockerBinary(binaryTag: string): Promise<string
   if (!fs.existsSync(binaryPath)) {
     if (process.platform != "linux") {
       console.error(`docker binaries are only supported on linux.`);
-      process.exit(1);
+      throw new Error("docker binaries are only supported on linux.");
     }
     const dockerImage = `purestake/moonbeam:sha-${sha8}`;
 

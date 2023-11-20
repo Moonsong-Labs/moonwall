@@ -1,5 +1,5 @@
 import "@moonbeam-network/api-augment";
-import { BlockCreation, ExtrinsicCreation, GenericContext } from "@moonwall/types";
+import { BlockCreation, DevModeContext, ExtrinsicCreation, GenericContext } from "@moonwall/types";
 import {
   alith,
   createAndFinalizeBlock,
@@ -55,24 +55,22 @@ function returnDefaultSigner() {
 
 export async function createDevBlock<
   ApiType extends ApiTypes,
-  Calls extends CallType<ApiType> | Array<CallType<ApiType>>
+  Calls extends CallType<ApiType> | Array<CallType<ApiType>>,
 >(context: GenericContext, options: BlockCreation, transactions?: Calls) {
-  let originalBlockNumber: bigint;
-
   const containsViem =
-    MoonwallContext.getContext().providers.find((prov) => prov.type == "viem") && !context.viem()
+    (context as DevModeContext).isEthereumChain &&
+    context.viem() &&
+    MoonwallContext.getContext().providers.find((prov) => prov.type == "viem")
       ? true
       : false;
+  const api = context.polkadotJs();
 
-  if (containsViem) {
-    originalBlockNumber = await context.viem().getBlockNumber();
-  }
+  const originalBlockNumber = (await api.rpc.chain.getHeader()).number.toBigInt();
 
   const signer = options.signer !== undefined ? returnSigner(options) : returnDefaultSigner();
 
   const results: ({ type: "eth"; hash: string } | { type: "sub"; hash: string })[] = [];
 
-  const api = context.polkadotJs();
   const txs =
     transactions == undefined ? [] : Array.isArray(transactions) ? transactions : [transactions];
 
@@ -126,9 +124,7 @@ export async function createDevBlock<
     };
   }
 
-  // We retrieve the events for that block
   const allRecords: EventRecord[] = await (await api.at(blockResult.hash)).query.system.events();
-  // We retrieve the block (including the extrinsics)
   const blockData = await api.rpc.chain.getBlock(blockResult.hash);
 
   const result: ExtrinsicCreation[] = results.map((result) => {
@@ -161,18 +157,18 @@ export async function createDevBlock<
     };
   });
 
-  // Avoiding race condition by ensuring ethereum block is created
-  if (containsViem && originalBlockNumber! !== undefined) {
-    const pubClient = context.viem();
+  if (results.find((res) => res.type == "eth")) {
+    // Wait until new block is actually created
     for (;;) {
-      const blockNum = await pubClient.getBlockNumber();
-      if (blockNum > originalBlockNumber) {
+      const currentBlock = (await api.rpc.chain.getHeader()).number.toBigInt();
+
+      if (currentBlock > originalBlockNumber) {
         break;
       }
-      await setTimeout(1);
+      await setTimeout(10);
     }
-  } else if (results.find((r) => r.type == "eth")) {
-    await setTimeout(10);
+    // TODO: Investigate why extra time needed
+    await setTimeout(100);
   }
 
   const actualEvents = result.flatMap((resp) => resp.events);

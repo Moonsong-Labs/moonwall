@@ -1,12 +1,89 @@
 import { Environment } from "@moonwall/types";
 import chalk from "chalk";
 import path from "path";
-import type { UserConfig } from "vitest";
+import { Effect, Config } from "effect";
+import type { UserConfig, Vitest } from "vitest";
 import { startVitest } from "vitest/node";
 import { clearNodeLogs } from "../internal/cmdFunctions/tempLogs";
 import { commonChecks } from "../internal/launcherCommon";
 import { cacheConfig, importAsyncConfig, loadEnvVars } from "../lib/configReader";
-import { contextCreator, runNetworkOnly } from "../lib/globalContext";
+import { MoonwallContext, contextCreator, runNetworkOnly } from "../lib/globalContext";
+
+class EnvironmentMissingError {
+  readonly _tag = "EnvironmentMissingError";
+  constructor(readonly env: string) {}
+}
+
+class TestsFailedError {
+  readonly _tag = "TestsFailedError";
+}
+
+class CommonCheckError {
+  readonly _tag = "CommonCheckError";
+}
+
+class ConfigError {
+  readonly _tag = "ConfigError";
+  constructor(readonly customMessage?: string) {}
+}
+
+class MoonwallContextError {
+  readonly _tag = "MoonwallContextError";
+}
+
+export const testEffect = (envName: string, additionalArgs?: object) => {
+  return Effect.gen(function* (_) {
+    yield* _(
+      Effect.tryPromise({
+        try: () => cacheConfig(),
+        catch: () => new ConfigError(),
+      })
+    );
+    const globalConfig = yield* _(
+      Effect.tryPromise({
+        try: () => importAsyncConfig(),
+        catch: () => new ConfigError(),
+      })
+    );
+
+    const env = yield* _(
+      Effect.filterOrFail(
+        Effect.sync(() => globalConfig.environments.find(({ name }) => name === envName)),
+        (env) => !!env,
+        () => new EnvironmentMissingError(envName)
+      )
+    );
+
+    yield* _(Effect.sync(() => (process.env.MOON_TEST_ENV = envName)));
+    yield* _(Effect.sync(() => loadEnvVars()));
+
+    yield* _(
+      Effect.tryPromise({
+        try: () => commonChecks(env),
+        catch: () => new CommonCheckError(),
+      })
+    );
+
+    if (
+      (env.foundation.type == "dev" && !env.foundation.launchSpec[0].retainAllLogs) ||
+      (env.foundation.type == "chopsticks" && !env.foundation.launchSpec[0].retainAllLogs)
+    ) {
+      yield* _(Effect.sync(() => clearNodeLogs()));
+    }
+    const vitest = yield* _(executeTestEffect(env, additionalArgs));
+    const failed = yield* _(
+      Effect.sync(() => vitest!.state.getFiles().filter((file) => file.result!.state === "fail"))
+    );
+
+    if (failed.length === 0) {
+      yield* _(Effect.sync(() => console.log("✅ All tests passed")));
+      return;
+    } else {
+      yield* _(Effect.sync(() => console.log("❌ Some tests failed")));
+      yield* _(Effect.fail(new TestsFailedError()));
+    }
+  });
+};
 
 export async function testCmd(envName: string, additionalArgs?: object): Promise<boolean> {
   await cacheConfig();
@@ -16,7 +93,7 @@ export async function testCmd(envName: string, additionalArgs?: object): Promise
 
   if (!env) {
     const envList = globalConfig.environments.map((env) => env.name);
-    throw new Error(
+    new Error(
       `No environment found in config for: ${chalk.bgWhiteBright.blackBright(
         envName
       )}\n Environments defined in config are: ${envList}\n`
@@ -35,82 +112,193 @@ export async function testCmd(envName: string, additionalArgs?: object): Promise
   const vitest = await executeTests(env, additionalArgs);
   const failed = vitest!.state.getFiles().filter((file) => file.result!.state === "fail");
 
-  if (failed.length > 0) {
-    process.stderr.write("Tests failed\n");
-    return false;
-  } else {
+  if (failed.length === 0) {
+    console.log("✅ All tests passed");
     return true;
+  } else {
+    console.log("❌ Some tests failed");
+    return false;
   }
 }
 
-export async function executeTests(env: Environment, additionalArgs?: object) {
-  const globalConfig = await importAsyncConfig();
-  if (env.foundation.type === "read_only") {
-    try {
-      if (!process.env.MOON_TEST_ENV) {
-        throw new Error("MOON_TEST_ENV not set");
-      }
+export const executeTestEffect = (env: Environment, additionalArgs?: object) => {
+  return Effect.gen(function* (_) {
+    const globalConfig = yield* _(
+      Effect.tryPromise({
+        try: () => importAsyncConfig(),
+        catch: () => new ConfigError(),
+      })
+    );
 
-      const ctx = await contextCreator();
-      const chainData = ctx.providers
-        .filter((provider) => provider.type == "polkadotJs" && provider.name.includes("para"))
-        .map((provider) => {
-          return {
-            [provider.name]: {
-              rtName: (provider.greet() as any).rtName,
-              rtVersion: (provider.greet() as any).rtVersion,
-            },
-          };
-        });
-      // TODO: Extend/develop this feature to respect para/relay chain specifications
-      const { rtVersion, rtName } = Object.values(chainData[0])[0];
+    if (
+      env.foundation.type === "read_only" &&
+      env.foundation.launchSpec.disableRuntimeVersionCheck !== true
+    ) {
+      yield* _(Effect.config(Config.string("MOON_TEST_ENV")));
+
+      const ctx = yield* _(
+        Effect.tryPromise({
+          try: () => contextCreator(),
+          catch: () => new MoonwallContextError(),
+        })
+      );
+
+      const chainData = yield* _(
+        Effect.filterOrFail(
+          Effect.sync(() =>
+            ctx.providers
+              .filter((provider) => provider.type == "polkadotJs" && provider.name.includes("para"))
+              .map((provider) => {
+                return {
+                  [provider.name]: {
+                    rtName: (provider.greet() as any).rtName,
+                    rtVersion: (provider.greet() as any).rtVersion,
+                  },
+                };
+              })
+          ),
+          (data) => data.length > 0,
+          () =>
+            new ConfigError(
+              "No polkadotJs provider named 'para' found (this is required for read_only foundations)"
+            )
+        )
+      );
+
+      const { rtVersion, rtName } = yield* _(Effect.sync(() => Object.values(chainData[0])[0]));
       process.env.MOON_RTVERSION = rtVersion;
       process.env.MOON_RTNAME = rtName;
-      await ctx.disconnect();
-    } catch {
-      // No chain to test against
+
+      yield* _(
+        Effect.tryPromise({
+          try: () => MoonwallContext.destroy(),
+          catch: () => new MoonwallContextError(),
+        })
+      );
     }
-  }
 
-  const baseOptions = {
-    watch: false,
-    globals: true,
-    reporters: env.reporters ? env.reporters : ["default"],
-    outputFile: env.reportFile,
-    testTimeout: env.timeout || globalConfig.defaultTestTimeout,
-    hookTimeout: env.timeout || globalConfig.defaultTestTimeout,
-    passWithNoTests: false,
-    deps: {
-      optimizer: { ssr: { enabled: false }, web: { enabled: false } },
-    },
-    include: env.include ? env.include : ["**/*{test,spec,test_,test-}*{ts,mts,cts}"],
-    onConsoleLog(log) {
-      if (filterList.includes(log.trim())) return false;
-      // if (log.trim() == "stdout | unknown test" || log.trim() == "<empty line>") return false;
-      if (log.includes("has multiple versions, ensure that there is only one installed.")) {
-        return false;
-      }
-    },
-  } satisfies UserConfig;
+    const baseOptions = {
+      watch: false,
+      globals: true,
+      reporters: env.reporters ? env.reporters : ["default"],
+      outputFile: env.reportFile,
+      testTimeout: env.timeout || globalConfig.defaultTestTimeout,
+      hookTimeout: env.timeout || globalConfig.defaultTestTimeout,
+      passWithNoTests: false,
+      deps: {
+        optimizer: { ssr: { enabled: false }, web: { enabled: false } },
+      },
+      include: env.include ? env.include : ["**/*{test,spec,test_,test-}*{ts,mts,cts}"],
+      onConsoleLog(log) {
+        if (filterList.includes(log.trim())) return false;
+        // if (log.trim() == "stdout | unknown test" || log.trim() == "<empty line>") return false;
+        if (log.includes("has multiple versions, ensure that there is only one installed.")) {
+          return false;
+        }
+      },
+    } satisfies UserConfig;
 
-  // TODO: Create options builder class
-  const options = addThreadConfig(baseOptions, env.multiThreads);
+    const options = yield* _(
+      Effect.try({
+        try: () => addThreadConfig(baseOptions, env.multiThreads),
+        catch: () => new ConfigError(),
+      })
+    );
 
-  if (
-    globalConfig.environments.find((env) => env.name === process.env.MOON_TEST_ENV)?.foundation
-      .type == "zombie"
-  ) {
-    await runNetworkOnly();
-    process.env.MOON_RECYCLE = "true";
-  }
+    if (
+      globalConfig.environments.find((env) => env.name === process.env.MOON_TEST_ENV).foundation
+        .type == "zombie"
+    ) {
+      yield* _(
+        Effect.tryPromise({
+          try: () => runNetworkOnly(),
+          catch: () => new MoonwallContextError(),
+        })
+      );
+      process.env.MOON_RECYCLE = "true";
+    }
 
-  try {
     const folders = env.testFileDir.map((folder) => path.join(".", folder, "/"));
-    return await startVitest("test", folders, { ...options, ...additionalArgs });
-  } catch (e) {
-    console.error(e);
-    process.exit(1);
-  }
+
+    return yield* _(
+      Effect.tryPromise({
+        try: () => startVitest("test", folders, { ...options, ...additionalArgs }),
+        catch: (e: any) => new Error(e.message),
+      })
+    );
+  });
+};
+
+export async function executeTests(env: Environment, additionalArgs?: object) {
+  return new Promise<Vitest>(async (resolve, reject) => {
+    const globalConfig = await importAsyncConfig();
+    if (env.foundation.type === "read_only") {
+      try {
+        if (!process.env.MOON_TEST_ENV) {
+          throw new Error("MOON_TEST_ENV not set");
+        }
+
+        const ctx = await contextCreator();
+        const chainData = ctx.providers
+          .filter((provider) => provider.type == "polkadotJs" && provider.name.includes("para"))
+          .map((provider) => {
+            return {
+              [provider.name]: {
+                rtName: (provider.greet() as any).rtName,
+                rtVersion: (provider.greet() as any).rtVersion,
+              },
+            };
+          });
+        // TODO: Extend/develop this feature to respect para/relay chain specifications
+        const { rtVersion, rtName } = Object.values(chainData[0])[0];
+        process.env.MOON_RTVERSION = rtVersion;
+        process.env.MOON_RTNAME = rtName;
+        await MoonwallContext.destroy();
+      } catch {
+        // No chain to test against
+      }
+    }
+
+    const baseOptions = {
+      watch: false,
+      globals: true,
+      reporters: env.reporters ? env.reporters : ["default"],
+      outputFile: env.reportFile,
+      testTimeout: env.timeout || globalConfig.defaultTestTimeout,
+      hookTimeout: env.timeout || globalConfig.defaultTestTimeout,
+      passWithNoTests: false,
+      deps: {
+        optimizer: { ssr: { enabled: false }, web: { enabled: false } },
+      },
+      include: env.include ? env.include : ["**/*{test,spec,test_,test-}*{ts,mts,cts}"],
+      onConsoleLog(log) {
+        if (filterList.includes(log.trim())) return false;
+        // if (log.trim() == "stdout | unknown test" || log.trim() == "<empty line>") return false;
+        if (log.includes("has multiple versions, ensure that there is only one installed.")) {
+          return false;
+        }
+      },
+    } satisfies UserConfig;
+
+    // TODO: Create options builder class
+    const options = addThreadConfig(baseOptions, env.multiThreads);
+
+    if (
+      globalConfig.environments.find((env) => env.name === process.env.MOON_TEST_ENV)?.foundation
+        .type == "zombie"
+    ) {
+      await runNetworkOnly();
+      process.env.MOON_RECYCLE = "true";
+    }
+
+    try {
+      const folders = env.testFileDir.map((folder) => path.join(".", folder, "/"));
+      resolve(await startVitest("test", folders, { ...options, ...additionalArgs }));
+    } catch (e) {
+      console.error(e);
+      reject(e);
+    }
+  });
 }
 
 const filterList = ["<empty line>", "", "stdout | unknown test"];

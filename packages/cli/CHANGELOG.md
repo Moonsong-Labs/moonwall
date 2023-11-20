@@ -1,5 +1,68 @@
 # @moonwall/cli
 
+## 4.4.1
+
+### Patch Changes
+
+- 400a5bb: Extra Fibre work
+- Updated dependencies [400a5bb]
+  - @moonwall/types@4.4.1
+  - @moonwall/util@4.4.1
+
+## 4.4.0
+
+### Minor Changes
+
+- f53a25f: Switched to Fibre-based Runtime
+
+### Patch Changes
+
+- Updated dependencies [f53a25f]
+  - @moonwall/util@4.4.0
+  - @moonwall/types@4.4.0
+
+## 4.3.5
+
+### Patch Changes
+
+- bd6ef1d: Reverting to old exitlogic
+- Updated dependencies [bd6ef1d]
+  - @moonwall/types@4.3.5
+  - @moonwall/util@4.3.5
+
+## 4.3.4
+
+### Patch Changes
+
+- 2e5b977: Encapsulation fix
+  - @moonwall/types@4.3.4
+  - @moonwall/util@4.3.4
+
+## 4.3.3
+
+### Patch Changes
+
+- accbb0d: Relaxing contract deployment timer
+  - @moonwall/types@4.3.3
+  - @moonwall/util@4.3.3
+
+## 4.3.2
+
+### Patch Changes
+
+- 3978aed: Package Ver Updates
+- Updated dependencies [3978aed]
+  - @moonwall/types@4.3.2
+  - @moonwall/util@4.3.2
+
+## 4.3.1
+
+### Patch Changes
+
+- 25a52c3: Force exit on failure
+  - @moonwall/types@4.3.1
+  - @moonwall/util@4.3.1
+
 ## 4.3.0
 
 ### Minor Changes

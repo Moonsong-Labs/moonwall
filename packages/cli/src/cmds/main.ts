@@ -37,7 +37,6 @@ export async function main() {
   }
 
   process.stdout.write(`Goodbye! 👋\n`);
-  process.exit(0);
 }
 
 async function mainMenu(config: MoonwallConfig) {

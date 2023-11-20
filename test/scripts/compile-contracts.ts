@@ -133,7 +133,7 @@ async function main(args: any) {
       } else {
         console.log(e);
       }
-      process.exit(1);
+      throw new Error("Compilation failed");
     }
   }
   // for (const ref of Object.keys(countByReference)) {

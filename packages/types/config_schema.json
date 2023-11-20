@@ -326,6 +326,10 @@
         "ReadOnlyLaunchSpec": {
             "description": "A launch specification object for the \"read_only\" foundation type.",
             "properties": {
+                "disableRuntimeVersionCheck": {
+                    "description": "Disable runtime version check.\nRT Version check is enabled by default.",
+                    "type": "boolean"
+                },
                 "name": {
                     "description": "The name of the launch spec.",
                     "type": "string"
