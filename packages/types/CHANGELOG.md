@@ -1,5 +1,11 @@
 # @moonwall/types
 
+## 4.4.2
+
+### Patch Changes
+
+- d3ba445: Restore Main Stability
+
 ## 4.4.1
 
 ### Patch Changes
