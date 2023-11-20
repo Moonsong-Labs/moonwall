@@ -1,5 +1,5 @@
 const originalWrite = process.stderr.write.bind(process.stderr);
-const blockList = ["has multiple versions, ensure that there is only one installed"];
+const blockList = ["has multiple versions, ensure that there is only one installed", "Unable to map [u8; 32] to a lookup index"];
 
 process.stderr.write = (
   chunk: string | Uint8Array,

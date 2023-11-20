@@ -24,8 +24,9 @@ import { importJsonConfig } from "./configReader";
 
 function getCompiledPath(contractName: string) {
   const config = importJsonConfig();
-  const contractsDir = config.environments.find((env) => env.name === process.env.MOON_TEST_ENV)
-    ?.contracts;
+  const contractsDir = config.environments.find(
+    (env) => env.name === process.env.MOON_TEST_ENV
+  )?.contracts;
 
   if (!contractsDir) {
     throw new Error(

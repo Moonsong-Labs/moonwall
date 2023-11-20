@@ -20,7 +20,7 @@ export const TECHNICAL_COMMITTEE_THRESHOLD = Math.ceil(
 
 export const notePreimage = async <
   Call extends SubmittableExtrinsic<ApiType>,
-  ApiType extends ApiTypes,
+  ApiType extends ApiTypes
 >(
   context: DevModeContext,
   proposal: Call,
@@ -37,7 +37,7 @@ export const notePreimage = async <
 // Creates the Council Proposal and fast track it before executing it
 export const instantFastTrack = async <
   Call extends SubmittableExtrinsic<ApiType>,
-  ApiType extends ApiTypes,
+  ApiType extends ApiTypes
 >(
   context: DevModeContext,
   proposal: string | Call,
@@ -67,7 +67,7 @@ export const instantFastTrack = async <
 // Close it (Execute if successful)
 export const execCouncilProposal = async <
   Call extends SubmittableExtrinsic<ApiType>,
-  ApiType extends ApiTypes,
+  ApiType extends ApiTypes
 >(
   context: DevModeContext,
   polkadotCall: Call,
@@ -129,7 +129,7 @@ export const execCouncilProposal = async <
 // Returns referendum index and proposal hash
 export const proposeReferendaAndDeposit = async <
   Call extends SubmittableExtrinsic<ApiType>,
-  ApiType extends ApiTypes,
+  ApiType extends ApiTypes
 >(
   context: DevModeContext,
   decisionDepositer: KeyringPair,
@@ -176,7 +176,7 @@ export const proposeReferendaAndDeposit = async <
 // Returns referendum index and proposal hash
 export const dispatchAsGeneralAdmin = async <
   Call extends SubmittableExtrinsic<ApiType>,
-  ApiType extends ApiTypes,
+  ApiType extends ApiTypes
 >(
   context: DevModeContext,
   call: string | Call
@@ -239,7 +239,7 @@ export const maximizeConvictionVotingOf = async (
 // Close it (Execute if successful)
 export const execTechnicalCommitteeProposal = async <
   Call extends SubmittableExtrinsic<ApiType>,
-  ApiType extends ApiTypes,
+  ApiType extends ApiTypes
 >(
   context: DevModeContext,
   polkadotCall: Call,
