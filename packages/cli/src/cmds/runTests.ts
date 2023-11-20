@@ -130,7 +130,7 @@ function addThreadConfig(
         isolate: true,
         minThreads: 1,
         maxThreads: 1,
-        singleThread: true,
+        singleThread: false,
         useAtomics: false,
       },
     },
@@ -142,7 +142,7 @@ function addThreadConfig(
       minThreads: 1,
       maxThreads: 3,
       singleThread: false,
-      useAtomics: false,
+      useAtomics: true,
     };
   }
 
