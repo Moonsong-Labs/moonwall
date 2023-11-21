@@ -573,7 +573,10 @@
       "name": "web3_test",
       "testFileDir": ["suites/web3_test/"],
       "foundation": {
-        "type": "read_only"
+        "type": "read_only",
+        "launchSpec": {
+          "disableRuntimeVersionCheck": true
+        }
       },
       "connections": [
         {
