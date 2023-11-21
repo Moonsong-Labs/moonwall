@@ -14,7 +14,6 @@ import type {
 } from "@moonwall/types";
 import { ApiPromise } from "@polkadot/api";
 import { Config, Effect } from "effect";
-import { setTimeout as timer } from "timers/promises";
 import * as Err from "../errors";
 import Bottleneck from "bottleneck";
 import Debug from "debug";
@@ -26,7 +25,7 @@ import { chopsticksHandler } from "./handlers/chopsticksHandler";
 import { devHandler } from "./handlers/devHandler";
 import { readOnlyHandler } from "./handlers/readOnlyHandler";
 import { zombieHandler } from "./handlers/zombieHandler";
-import { createContextEffect, MoonwallContext } from "./globalContextEffect";
+import { createContextEffect } from "./globalContextEffect";
 
 const RT_VERSION = Number(process.env.MOON_RTVERSION);
 const RT_NAME = process.env.MOON_RTNAME;

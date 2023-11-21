@@ -1,4 +1,3 @@
-import Debug from "debug";
 import { Effect } from "effect";
 import { execaCommand } from "execa";
 import fs from "fs";
@@ -6,7 +5,6 @@ import path from "path";
 import WebSocket from "ws";
 import * as Err from "../errors";
 import { checkAccess, checkExists } from "./fileCheckers";
-const debugNode = Debug("global:node");
 
 export type LaunchedNode = {
   pid: number;
