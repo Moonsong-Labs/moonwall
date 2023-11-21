@@ -14,7 +14,7 @@ import type {
 } from "@moonwall/types";
 import { ApiPromise } from "@polkadot/api";
 import { Config, Effect } from "effect";
-import { setTimeout as timer} from "timers/promises";
+import { setTimeout as timer } from "timers/promises";
 import * as Err from "../errors";
 import Bottleneck from "bottleneck";
 import Debug from "debug";
@@ -81,10 +81,10 @@ export function describeSuite<T extends FoundationType>({
     describe.skip(`🗃️  #${suiteId} ${title}`);
     return;
   }
-  let ctx: MoonwallContext | null;
+  let ctx: any;
 
   beforeAll(async function () {
-    console.log("this is before runner")
+    console.log("this is before runner");
     const effect = Effect.gen(function* (_) {
       const globalConfig = yield* _(
         Effect.tryPromise({
@@ -102,21 +102,15 @@ export function describeSuite<T extends FoundationType>({
       }
 
       return yield* _(createContextEffect());
-    })
-    // .pipe(
-    //   Effect.timeoutFail({
-    //     duration: "10 seconds",
-    //     onTimeout: () => new Err.MoonwallContextCreateError(),
-    //   })
-    // );
+    });
+
     ctx = await Effect.runPromise(effect);
-    await timer(1999)
-    console.log(ctx.nodes)
+    console.log("Nodes in this instance are:");
+    console.log(ctx.nodes);
   });
 
   afterAll(async function () {
-
-    console.log("This is after all runner")
+    console.log("This is after all runner");
     const effect = ctx.destroyEffect().pipe(
       Effect.timeoutFail({
         duration: "10 seconds",
@@ -124,9 +118,9 @@ export function describeSuite<T extends FoundationType>({
       })
     );
 
-
-    await Effect.runPromise(Effect.all([effect, Effect.sleep(1000)]));
-    console.log(ctx.nodes)
+    await Effect.runPromise(effect);
+    console.log("Nodes leftover are:");
+    console.log(ctx.nodes);
     ctx = null;
   });
 

@@ -1,11 +1,11 @@
 import Debug from "debug";
+import { Effect } from "effect";
 import { execaCommand } from "execa";
-import path from "path";
 import fs from "fs";
+import path from "path";
 import WebSocket from "ws";
-import { checkAccess, checkExists } from "./fileCheckers";
-import { Effect, pipe } from "effect";
 import * as Err from "../errors";
+import { checkAccess, checkExists } from "./fileCheckers";
 const debugNode = Debug("global:node");
 
 export type LaunchedNode = {
@@ -50,7 +50,7 @@ export const launchNodeEffect = (cmd: string, args: string[]) =>
       const ports = yield* _(findPortsByPidEffect(runningNode.pid));
       if (ports) {
         for (const port of ports) {
-          if (yield* _(checkWebSocketJSONRPCEffect(port))) {
+          if (yield* _(webSocketProbe(port))) {
             break probe;
           }
         }
@@ -60,49 +60,6 @@ export const launchNodeEffect = (cmd: string, args: string[]) =>
     return { pid: runningNode.pid, kill: runningNode.kill } satisfies LaunchedNode;
   });
 
-export async function launchNode(cmd: string, args: string[], name: string): Promise<LaunchedNode> {
-  if (cmd.includes("moonbeam")) {
-    await checkExists(cmd);
-    checkAccess(cmd);
-  }
-
-  const dirPath = path.join(process.cwd(), "tmp", "node_logs");
-  if (!fs.existsSync(dirPath)) {
-    fs.mkdirSync(dirPath, { recursive: true });
-  }
-
-  debugNode(`Launching dev node: ${name}`);
-  const logLocation = path
-    .join(
-      dirPath,
-      `${path.basename(cmd)}_node_${args
-        .find((a) => a.includes("port"))
-        ?.split("=")[1]}_${new Date().getTime()}.log`
-    )
-    .replaceAll("node_node_undefined", "chopsticks");
-  process.env.MOON_LOG_LOCATION = logLocation;
-
-  const runningNode = execaCommand(`${cmd} ${args.join(" ")}`, {
-    all: true,
-    cleanup: true,
-    detached: true,
-  }).pipeAll(logLocation);
-
-  // TODO: When we turn this into an effect, kill if timeout reached
-  probe: for (;;) {
-    const ports = await Effect.runPromise(findPortsByPidEffect(runningNode.pid));
-    if (ports) {
-      for (const port of ports) {
-        if (await Effect.runPromise(checkWebSocketJSONRPCEffect(port))) {
-          break probe;
-        }
-      }
-    }
-  }
-  console.log("this is runningNode.pid", runningNode.pid);
-  return { pid: runningNode.pid, kill: runningNode.kill };
-}
-
 const jsonRpcMessage = {
   jsonrpc: "2.0",
   id: 1,
@@ -110,31 +67,53 @@ const jsonRpcMessage = {
   params: [],
 };
 
-const checkWebSocketJSONRPCEffect = (port: number) =>
-  pipe(
-    Effect.promise(
-      () =>
-        new Promise((resolve, reject) => {
-          const ws = new WebSocket(`ws://127.0.0.1:${port}`) as WebSocket;
-          ws.on("open", () => {
-            resolve(ws);
-          });
-          ws.on("error", (err) => {
-            reject(err);
-          });
+// 1 Acquire resource
+// 2 Use resource
+// 3 Release resource
+
+interface WebSocketProbe {
+  readonly ws: WebSocket;
+  readonly close: () => Promise<void>;
+}
+
+const webSocketProbe = (port: number) => {
+  const getWebsocketProbe = (port: number): Promise<WebSocketProbe> =>
+    new Promise((resolve, reject) => {
+      const ws = new WebSocket(`ws://127.0.0.1:${port}`) as WebSocket;
+      ws.on("open", () =>
+        resolve({
+          ws,
+          close: () =>
+            new Promise((resolve) => {
+              ws.close();
+              resolve();
+            }),
         })
-    ),
-    Effect.flatMap((ws: WebSocket) =>
-      Effect.sync(() => {
-        ws.send(JSON.stringify(jsonRpcMessage));
-        return ws;
-      })
-    ),
-    Effect.flatMap((ws) =>
+      );
+
+      ws.on("error", () => reject());
+    });
+
+  const acquire = Effect.tryPromise({
+    try: () => getWebsocketProbe(port),
+    catch: () => new Err.JsonRpcCannotOpen(),
+  });
+
+  const release = (res: WebSocketProbe) => Effect.promise(() => res.close());
+
+  const use = (res: WebSocketProbe) =>
+    Effect.all([
+      Effect.promise(
+        () =>
+          new Promise<void>((resolve) => {
+            res.ws.send(JSON.stringify(jsonRpcMessage));
+            resolve();
+          })
+      ),
       Effect.promise(
         () =>
           new Promise<boolean>((resolve) => {
-            ws.on("message", (data) => {
+            res.ws.on("message", (data) => {
               const resp = JSON.parse(data.toString());
               if (resp.result) {
                 resolve(true);
@@ -143,14 +122,18 @@ const checkWebSocketJSONRPCEffect = (port: number) =>
               }
             });
           })
-      )
-    )
-  ).pipe(
-    Effect.timeoutFail({
-      onTimeout: () => new Err.JsonRpcRequestTimeout(),
-      duration: "5 seconds",
-    })
+      ),
+    ]).pipe(
+      Effect.timeoutFail({
+        onTimeout: () => new Err.JsonRpcRequestTimeout(),
+        duration: "5 seconds",
+      })
+    );
+
+  return Effect.acquireUseRelease(acquire, use, release).pipe(
+    Effect.catchTag("JsonRpcCannotOpen", () => Effect.succeed(false))
   );
+};
 
 const findPortsByPidEffect = (pid: number, timeout: number = 10000) =>
   Effect.gen(function* (_) {

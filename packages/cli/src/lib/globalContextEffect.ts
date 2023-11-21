@@ -24,7 +24,7 @@ import {
   checkZombieBins,
   getZombieConfig,
 } from "../internal/foundations/zombieHelpers";
-import { LaunchedNode, launchNode, launchNodeEffect } from "../internal/localNode";
+import { LaunchedNode, launchNodeEffect } from "../internal/localNode";
 import {
   ProviderFactory,
   ProviderInterfaceFactory,
@@ -49,7 +49,7 @@ export class MoonwallContext {
   rtUpgradePath?: string;
   ipcServer?: net.Server;
 
-  constructor(config: MoonwallConfig) {
+  private constructor(config: MoonwallConfig) {
     const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
     this.providers = [];
     this.nodes = [];
@@ -326,10 +326,9 @@ export class MoonwallContext {
 
     const promises = nodes.map(async ({ cmd, args, launch }) => {
       if (launch) {
-        // const result = await launchNode(cmd, args, name!);
-        const result = await Effect.runPromise(launchNodeEffect(cmd, args))
-        console.log("result pushed")
-        console.log(result)
+        const result = await Effect.runPromise(launchNodeEffect(cmd, args));
+        console.log("result pushed");
+        console.log(result);
         this.nodes.push(result);
       } else {
         return Promise.resolve();
@@ -439,11 +438,10 @@ export class MoonwallContext {
     }
   }
 
-  public static getContext(config?: MoonwallConfig, force: boolean = false): MoonwallContext {
-    if (!this.instance || force) {
+  public static getContext(force: boolean = false): MoonwallContext {
+    if (!MoonwallContext.instance || force) {
       const config = importJsonConfig();
-      this.instance = new MoonwallContext(config);
-
+      MoonwallContext.instance = new MoonwallContext(config);
       debugSetup(`🟢  Moonwall context "${config.label}" created`);
     }
     return this.instance;
@@ -465,13 +463,13 @@ export class MoonwallContext {
         })
       );
 
-      while (ctx.nodes.length > 0) {
+      if (ctx.nodes.length > 0) {
         const node = ctx.nodes[0];
-        const pid = node.pid;
-        yield* _(Effect.promise(() => execaCommand(`kill ${pid}`, { shell: true })));
+        // yield* _(Effect.promise(() => execaCommand(`kill ${node.pid}`, { shell: true })));
+        yield* _(Effect.try(() => node.kill()));
 
         for (;;) {
-          const isRunning = yield* _(isPidRunningEffect(pid));
+          const isRunning = yield* _(isPidRunningEffect(node.pid));
           if (isRunning) {
             yield* _(Effect.sleep(50));
           } else {
@@ -507,25 +505,13 @@ export class MoonwallContext {
         yield* _(Effect.sync(() => ctx.ipcServer?.close()));
         yield* _(Effect.sync(() => ctx.ipcServer?.removeAllListeners()));
       }
-
-      yield* _(Effect.sleep(1000))
-
-      delete MoonwallContext.instance;
     });
   }
 }
 
 export const createContextEffect = () =>
   Effect.gen(function* (_) {
-
-    yield* _(Effect.sleep(10000))
-    const config = yield* _(
-      Effect.tryPromise({
-        try: () => importAsyncConfig(),
-        catch: () => new Err.ConfigError(),
-      })
-    );
-    const ctx = yield* _(Effect.sync(() => MoonwallContext.getContext(config)));
+    const ctx = yield* _(Effect.sync(() => MoonwallContext.getContext()));
     yield* _(runNetworkOnlyEffect());
     yield* _(
       Effect.tryPromise({
@@ -539,13 +525,7 @@ export const createContextEffect = () =>
 
 export const runNetworkOnlyEffect = () =>
   Effect.gen(function* (_) {
-    const config = yield* _(
-      Effect.tryPromise({
-        try: () => importAsyncConfig(),
-        catch: () => new Err.ConfigError(),
-      })
-    );
-    const ctx = yield* _(Effect.sync(() => MoonwallContext.getContext(config)));
+    const ctx = yield* _(Effect.sync(() => MoonwallContext.getContext()));
     yield* _(
       Effect.tryPromise({
         try: () => ctx.startNetwork(),

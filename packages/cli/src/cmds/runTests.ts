@@ -98,7 +98,9 @@ export const executeTestEffect = (env: Environment, additionalArgs?: object) => 
         )
       );
 
-      const { rtVersion, rtName }: any = yield* _(Effect.sync(() => Object.values(chainData[0])[0]) );
+      const { rtVersion, rtName }: any = yield* _(
+        Effect.sync(() => Object.values(chainData[0])[0])
+      );
       process.env.MOON_RTVERSION = rtVersion;
       process.env.MOON_RTNAME = rtName;
 
