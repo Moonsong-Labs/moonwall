@@ -177,6 +177,7 @@ const cliStart = Effect.gen(function* (_) {
     case "test": {
       yield* _(
         testEffect(args["envName"], { testNamePattern: args["GrepTest"] }).pipe(
+          Effect.tap(() => Effect.sync(() => console.log("✅  All Tests Passed"))),
           Effect.catchTag("TestsFailedError", (error) => {
             failedTests = error.fails;
             return Effect.succeed(

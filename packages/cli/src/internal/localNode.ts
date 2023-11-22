@@ -54,7 +54,6 @@ export const launchNodeEffect = (cmd: string, args: string[]) =>
         }
       }
     }
-    console.log("this is runningNode.pid", runningNode.pid);
     return { pid: runningNode.pid, kill: runningNode.kill } satisfies LaunchedNode;
   });
 

@@ -83,7 +83,6 @@ export function describeSuite<T extends FoundationType>({
   let ctx: any;
 
   beforeAll(async function () {
-    console.log("this is before runner");
     const effect = Effect.gen(function* (_) {
       const globalConfig = yield* _(
         Effect.tryPromise({
@@ -104,12 +103,9 @@ export function describeSuite<T extends FoundationType>({
     });
 
     ctx = await Effect.runPromise(effect);
-    console.log("Nodes in this instance are:");
-    console.log(ctx.nodes);
   });
 
   afterAll(async function () {
-    console.log("This is after all runner");
     const effect = ctx.destroyEffect().pipe(
       Effect.timeoutFail({
         duration: "10 seconds",
@@ -118,8 +114,6 @@ export function describeSuite<T extends FoundationType>({
     );
 
     await Effect.runPromise(effect);
-    console.log("Nodes leftover are:");
-    console.log(ctx.nodes);
     ctx = null;
   });
 

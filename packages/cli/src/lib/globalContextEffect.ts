@@ -327,8 +327,6 @@ export class MoonwallContext {
     const promises = nodes.map(async ({ cmd, args, launch }) => {
       if (launch) {
         const result = await Effect.runPromise(launchNodeEffect(cmd, args));
-        console.log("result pushed");
-        console.log(result);
         this.nodes.push(result);
       } else {
         return Promise.resolve();

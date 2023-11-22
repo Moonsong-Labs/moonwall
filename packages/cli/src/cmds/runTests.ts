@@ -51,9 +51,7 @@ export const testEffect = (envName: string, additionalArgs?: object) => {
       Effect.sync(() => vitest!.state.getFiles().filter((file) => file.result!.state === "fail"))
     );
 
-    if (failed.length === 0) {
-      yield* _(Effect.succeed(() => console.log("✅ All tests passed")));
-    } else {
+    if (failed.length !== 0) {
       yield* _(new Err.TestsFailedError({ fails: failed.length }));
     }
   });
