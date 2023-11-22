@@ -135,7 +135,7 @@ const webSocketProbe = (port: number) => {
 
 const findPortsByPidEffect = (pid: number, timeout: number = 10000) =>
   Effect.gen(function* (_) {
-    const end = Date.now() + timeout;
+    const end = yield* _(Effect.sync(() => Date.now() + timeout));
 
     for (;;) {
       const command = `lsof -i -n -P | grep LISTEN | grep ${pid} || true`;

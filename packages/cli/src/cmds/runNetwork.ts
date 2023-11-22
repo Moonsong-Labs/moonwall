@@ -28,7 +28,7 @@ export const runNetworkCmdEffect = (args) =>
       Effect.filterOrFail(
         Effect.sync(() => globalConfig.environments.find(({ name }) => name === args.envName)),
         (env) => !!env,
-        () => new Err.EnvironmentMissingError(args.envName)
+        () => new Err.EnvironmentMissingError({ env: args.envName })
       )
     );
 

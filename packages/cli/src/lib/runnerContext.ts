@@ -88,7 +88,7 @@ export function describeSuite<T extends FoundationType>({
       const globalConfig = yield* _(
         Effect.tryPromise({
           try: () => importAsyncConfig(),
-          catch: () => Err.ConfigError,
+          catch: () => new Err.ConfigError("Could not load config before running test"),
         })
       );
 

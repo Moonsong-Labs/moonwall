@@ -1,7 +1,8 @@
-export class EnvironmentMissingError {
-  readonly _tag = "EnvironmentMissingError";
-  constructor(readonly env: string) {}
-}
+import { Data } from "effect";
+
+export class EnvironmentMissingError extends Data.TaggedError("EnvironmentMissingError")<{
+  env: string;
+}> {}
 
 export class ConfigError {
   readonly _tag = "ConfigError";

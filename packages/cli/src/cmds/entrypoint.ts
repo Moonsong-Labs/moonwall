@@ -1,5 +1,4 @@
 import "../internal/logging";
-import log from "why-is-node-running";
 import "@moonbeam-network/api-augment";
 import yargs from "yargs";
 import fs from "fs";
@@ -9,6 +8,7 @@ import { generateConfig } from "../internal/cmdFunctions/initialisation";
 import { fetchArtifact } from "../internal/cmdFunctions/fetchArtifact";
 import dotenv from "dotenv";
 import { Effect, pipe } from "effect";
+import * as Err from "../errors";
 import { main } from "./main";
 import { runNetworkCmdEffect } from "./runNetwork";
 dotenv.config();
@@ -25,8 +25,10 @@ const findExistingConfig = (files: string[]): string | undefined => {
 
 const defaultConfigFile = findExistingConfig(defaultConfigFiles) || "./moonwall.config.json";
 
-const parseConfigFile = Effect.sync(() =>
+const parseArgs = Effect.sync(() =>
   yargs(hideBin(process.argv))
+    .usage("Usage: $0")
+    .version("2.0.0")
     .options({
       configFile: {
         type: "string",
@@ -44,32 +46,15 @@ const setEnvVar = (key: string, value: string) =>
   });
 
 const setupConfigFileEnv = pipe(
-  parseConfigFile,
+  parseArgs,
   Effect.flatMap((parsed) => setEnvVar("MOON_CONFIG_PATH", parsed.configFile))
 );
 
-// TODO: REMOVE THIS HACK ONCE YARGS REPLACED
-let failedTests: number | false;
+const processArgs = (args: any): { command: string; args?: object } => {
+  let commandChosen: string;
+  const argsObject: object = {};
 
-const cliStart = Effect.try(() => {
-  const argv = yargs(hideBin(process.argv))
-    .usage("Usage: $0")
-    .version("2.0.0")
-    .options({
-      configFile: {
-        type: "string",
-        alias: "c",
-        description: "path to MoonwallConfig file",
-        default: defaultConfigFile,
-      },
-    })
-    .parseSync();
-
-  if (!argv._.length) {
-    return main();
-  }
-
-  return yargs(hideBin(process.argv))
+  yargs(hideBin(args))
     .usage("Usage: $0")
     .version("2.0.0")
     .options({
@@ -81,15 +66,13 @@ const cliStart = Effect.try(() => {
       },
     })
     .command(`init`, "Run tests for a given Environment", async () => {
-      const effect = Effect.tryPromise(() => generateConfig());
-
-      await Effect.runPromise(effect);
+      commandChosen = "init";
     })
     .command(
       `download <bin> [ver] [path]`,
       "Download x86 artifact from GitHub",
-      (yargs) => {
-        return yargs
+      (yargs) =>
+        yargs
           .positional("bin", {
             describe: "Name of artifact to download\n[ moonbeam | polkadot | *-runtime ]",
           })
@@ -112,17 +95,15 @@ const cliStart = Effect.try(() => {
             describe: "Rename downloaded file to this name",
             alias: "o",
             type: "string",
-          });
-      },
+          }),
       async (argv) => {
-        const effect = Effect.tryPromise(() => fetchArtifact(argv));
-        await Effect.runPromise(effect);
+        commandChosen = "download";
+        argsObject["argv"] = argv;
       }
     )
     .command(
       `test <envName> [GrepTest]`,
       "Run tests for a given Environment",
-
       (yargs) =>
         yargs
           .positional("envName", {
@@ -133,27 +114,11 @@ const cliStart = Effect.try(() => {
             type: "string",
             description: "Pattern to grep test ID/Description to run",
           }),
-
       async ({ envName, GrepTest }) => {
         process.env.MOON_RUN_SCRIPTS = "true";
-        const effect = testEffect(envName, { testNamePattern: GrepTest }).pipe(
-          Effect.catchTag("TestsFailedError", (error) => {
-            failedTests = error.fails;
-            return Effect.succeed(
-              console.log(`❌ ${error.fails} test file${error.fails !== 1 ? "s" : ""} failed`)
-            );
-          })
-        );
-
-        await Effect.runPromise(effect);
-
-        if (failedTests) {
-          process.exitCode = 1;
-        }
-        const timeout = 5;
-        setTimeout(function () {
-          log();
-        }, timeout * 1000);
+        argsObject["envName"] = envName;
+        argsObject["GrepTest"] = GrepTest;
+        commandChosen = "test";
       }
     )
     .command(
@@ -170,22 +135,84 @@ const cliStart = Effect.try(() => {
           }),
       async (argv) => {
         process.env.MOON_RUN_SCRIPTS = "true";
-        await Effect.runPromiseExit(runNetworkCmdEffect(argv as any));
+        argsObject["argv"] = argv;
+        commandChosen = "run";
       }
     )
     .help("h")
     .alias("h", "help")
     .parse();
+
+  return { command: commandChosen, args: argsObject };
+};
+
+const cliStart = Effect.gen(function* (_) {
+  let commandChosen: string;
+  let args: object = {};
+  let failedTests: number | false;
+
+  const argv = yield* _(parseArgs);
+
+  if (!argv._.length) {
+    commandChosen = "mainmenu";
+  } else {
+    const processedArgs = yield* _(Effect.sync(() => processArgs(process.argv)));
+    commandChosen = processedArgs.command;
+    args = processedArgs.args;
+  }
+
+  switch (commandChosen) {
+    case "mainmenu":
+      yield* _(Effect.promise(main));
+      break;
+
+    case "init":
+      yield* _(Effect.tryPromise(() => generateConfig()));
+      break;
+
+    case "download":
+      yield* _(Effect.tryPromise(() => fetchArtifact(args["argv"])));
+      break;
+
+    case "test": {
+      yield* _(
+        testEffect(args["envName"], { testNamePattern: args["GrepTest"] }).pipe(
+          Effect.catchTag("TestsFailedError", (error) => {
+            failedTests = error.fails;
+            return Effect.succeed(
+              console.log(`❌ ${error.fails} test file${error.fails !== 1 ? "s" : ""} failed`)
+            );
+          })
+        )
+      );
+
+      if (failedTests) {
+        process.exitCode = 1;
+      }
+
+      break;
+    }
+
+    case "run":
+      yield* _(runNetworkCmdEffect(args["argv"]));
+      break;
+
+    default:
+      yield* _(new Err.InvalidCommandError({ command: commandChosen }));
+      break;
+  }
 });
 
-const cli = pipe(
+const program = pipe(
   setupConfigFileEnv,
-  Effect.flatMap(() => cliStart)
+  Effect.flatMap(() => cliStart),
+  Effect.uninterruptible,
+  Effect.disconnect
 );
 
-Effect.runPromise(cli)
+Effect.runPromise(program)
   .then(() => {
-    console.log("🏁 Moonwall Test Run finished");
+    console.log("🏁 Moonwall Process finished");
     process.exit();
   })
   .catch(console.error);

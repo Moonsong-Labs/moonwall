@@ -26,7 +26,7 @@ export const testEffect = (envName: string, additionalArgs?: object) => {
       Effect.filterOrFail(
         Effect.sync(() => globalConfig.environments.find(({ name }) => name === envName)),
         (env) => !!env,
-        () => new Err.EnvironmentMissingError(envName)
+        () => new Err.EnvironmentMissingError({ env: envName })
       )
     );
 
@@ -54,7 +54,7 @@ export const testEffect = (envName: string, additionalArgs?: object) => {
     if (failed.length === 0) {
       yield* _(Effect.succeed(() => console.log("✅ All tests passed")));
     } else {
-      yield* _(Effect.fail(new Err.TestsFailedError(failed.length)));
+      yield* _(new Err.TestsFailedError({ fails: failed.length }));
     }
   });
 };
