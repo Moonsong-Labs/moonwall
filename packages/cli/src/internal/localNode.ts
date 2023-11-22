@@ -1,9 +1,8 @@
-import { Effect } from "effect";
+import { Chunk, Effect, Option, Stream, StreamEmit } from "effect";
 import { execaCommand } from "execa";
 import fs from "fs";
 import path from "path";
 import WebSocket from "ws";
-import * as Err from "../errors";
 import { checkAccess, checkExists } from "./fileCheckers";
 
 export type LaunchedNode = {
@@ -48,7 +47,7 @@ export const launchNodeEffect = (cmd: string, args: string[]) =>
       const ports = yield* _(findPortsByPidEffect(runningNode.pid));
       if (ports) {
         for (const port of ports) {
-          if (yield* _(webSocketProbe(port))) {
+          if (yield* _(Effect.sync(() => webSocketProbe(port)))) {
             break probe;
           }
         }
@@ -64,71 +63,30 @@ const jsonRpcMessage = {
   params: [],
 };
 
-// 1 Acquire resource
-// 2 Use resource
-// 3 Release resource
-
-interface WebSocketProbe {
-  readonly ws: WebSocket;
-  readonly close: () => Promise<void>;
-}
-
-const webSocketProbe = (port: number) => {
-  const getWebsocketProbe = (port: number): Promise<WebSocketProbe> =>
-    new Promise((resolve, reject) => {
-      const ws = new WebSocket(`ws://127.0.0.1:${port}`) as WebSocket;
-      ws.on("open", () =>
-        resolve({
-          ws,
-          close: () =>
-            new Promise((resolve) => {
-              ws.close();
-              resolve();
-            }),
-        })
-      );
-
-      ws.on("error", () => reject());
-    });
-
-  const acquire = Effect.tryPromise({
-    try: () => getWebsocketProbe(port),
-    catch: () => new Err.JsonRpcCannotOpen(),
+const webSocketProbe = (port: number) =>
+  Effect.gen(function* (_) {
+    const val = yield* _(Stream.runCollect(webSocketStream(port)));
+    const filtered = Chunk.toArray(val).filter(
+      (val) => val.result !== undefined && val.result.length > 0
+    );
+    return filtered.length > 0;
   });
 
-  const release = (res: WebSocketProbe) => Effect.promise(() => res.close());
-
-  const use = (res: WebSocketProbe) =>
-    Effect.all([
-      Effect.promise(
-        () =>
-          new Promise<void>((resolve) => {
-            res.ws.send(JSON.stringify(jsonRpcMessage));
-            resolve();
-          })
-      ),
-      Effect.promise(
-        () =>
-          new Promise<boolean>((resolve) => {
-            res.ws.on("message", (data) => {
-              const resp = JSON.parse(data.toString());
-              if (resp.result) {
-                resolve(true);
-              } else {
-                resolve(false);
-              }
-            });
-          })
-      ),
-    ]).pipe(
-      Effect.timeoutFail({
-        onTimeout: () => new Err.JsonRpcRequestTimeout(),
-        duration: "5 seconds",
-      })
-    );
-
-  return Effect.acquireUseRelease(acquire, use, release).pipe(
-    Effect.catchTag("JsonRpcCannotOpen", () => Effect.succeed(false))
+const webSocketStream = (port: number) => {
+  const ws = new WebSocket(`ws://127.0.0.1:${port}`);
+  return Stream.async((emit: StreamEmit.Emit<never, never, string, void>) => {
+    ws.addEventListener("open", () => {
+      ws.send(JSON.stringify(jsonRpcMessage));
+    });
+    ws.addEventListener("message", (e) => {
+      emit(Effect.succeed(Chunk.of(e.data.toString())));
+      emit(Effect.fail(Option.none()));
+    });
+    ws.addEventListener("error", (e) => emit(Effect.succeed(Chunk.of(e.message))));
+    ws.addEventListener("close", () => emit(Effect.fail(Option.none())));
+  }).pipe(
+    Stream.map((dataString) => JSON.parse(dataString)),
+    Stream.ensuring(Effect.sync(() => ws.close()))
   );
 };
 
@@ -159,6 +117,8 @@ const findPortsByPidEffect = (pid: number, timeout: number = 10000) =>
       }
 
       if (Date.now() > end) break;
+
+      yield* _(Effect.sleep(100));
     }
     return [];
   });
