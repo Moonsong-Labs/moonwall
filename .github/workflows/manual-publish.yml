@@ -1,4 +1,4 @@
-name: Manual NPM Publish
+name: Manual NPM Publish Dryrun
 on:
   workflow_dispatch:
     inputs:
@@ -10,10 +10,6 @@ on:
         description: "Branch to publish from"
         required: true
         default: "develop"
-      dry-run:
-        description: "Run without publishing"
-        required: false
-        default: "true"
 
 jobs:
   build:
@@ -35,4 +31,4 @@ jobs:
         with:
           token: ${{ secrets.NPM_TOKEN }}
           tag: ${{ github.event.inputs.tag }}
-          dry-run: ${{ github.event.inputs.dry-run}}
+          dry-run: "true"

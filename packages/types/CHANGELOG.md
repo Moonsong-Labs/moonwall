@@ -1,5 +1,11 @@
 # @moonwall/types
 
+## 5.0.0-beta.2
+
+### Patch Changes
+
+- Beta Release
+
 ## 4.4.1
 
 ### Patch Changes
