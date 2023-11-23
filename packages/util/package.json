@@ -78,7 +78,6 @@
     "ethers": "6.8.1",
     "inquirer": "^9.2.12",
     "inquirer-press-to-continue": "^1.2.0",
-    "node-fetch": "^3.3.2",
     "rlp": "^3.0.0",
     "semver": "^7.5.4",
     "viem": "^1.19.6",

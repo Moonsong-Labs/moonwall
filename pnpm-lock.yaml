@@ -144,9 +144,6 @@ importers:
       minimatch:
         specifier: ^9.0.3
         version: 9.0.3
-      node-fetch:
-        specifier: ^3.3.2
-        version: 3.3.2
       semver:
         specifier: ^7.5.4
         version: 7.5.4
@@ -311,9 +308,6 @@ importers:
       inquirer-press-to-continue:
         specifier: ^1.2.0
         version: 1.2.0(inquirer@9.2.12)
-      node-fetch:
-        specifier: ^3.3.2
-        version: 3.3.2
       rlp:
         specifier: ^3.0.0
         version: 3.0.0

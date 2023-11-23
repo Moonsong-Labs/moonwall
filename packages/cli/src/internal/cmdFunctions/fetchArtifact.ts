@@ -1,6 +1,5 @@
 import fs from "node:fs/promises";
 import path from "path";
-import fetch from "node-fetch";
 import semver from "semver";
 import chalk from "chalk";
 import { runTask } from "../processHelpers";
@@ -86,7 +85,7 @@ export async function getVersions(name: string, runtime: boolean = false) {
     throw new Error(`Network not found for ${name}`);
   }
   const url = `https://api.github.com/repos/${repo.ghAuthor}/${repo.ghRepo}/releases`;
-  const releases = (await (await fetch(url)).json()) as Release[];
+  const releases = (await ((await fetch(url)) as any).json()) as Release[];
   const versions = releases
     .map((release) => {
       let tag = release.tag_name;
