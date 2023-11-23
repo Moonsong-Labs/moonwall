@@ -1,141 +1,124 @@
-import Debug from "debug";
-import { execaCommand, execaCommandSync } from "execa";
-import path from "path";
+import { Chunk, Effect, Option, Stream, StreamEmit } from "effect";
+import { execaCommand } from "execa";
 import fs from "fs";
+import path from "path";
 import WebSocket from "ws";
 import { checkAccess, checkExists } from "./fileCheckers";
-const debugNode = Debug("global:node");
 
 export type LaunchedNode = {
   pid: number;
   kill(signal?: NodeJS.Signals | number, options?: object): boolean;
 };
 
-export async function launchNode(cmd: string, args: string[], name: string): Promise<LaunchedNode> {
-  if (cmd.includes("moonbeam")) {
-    await checkExists(cmd);
-    checkAccess(cmd);
-  }
+export const launchNodeEffect = (cmd: string, args: string[]) =>
+  Effect.gen(function* (_) {
+    if (cmd.includes("moonbeam")) {
+      yield* _(Effect.promise(() => checkExists(cmd)));
+      yield* _(Effect.sync(() => checkAccess(cmd)));
+    }
 
-  const dirPath = path.join(process.cwd(), "tmp", "node_logs");
-  if (!fs.existsSync(dirPath)) {
-    fs.mkdirSync(dirPath, { recursive: true });
-  }
+    const dirPath = path.join(process.cwd(), "tmp", "node_logs");
+    if (yield* _(Effect.sync(() => !fs.existsSync(dirPath)))) {
+      yield* _(Effect.sync(() => fs.mkdirSync(dirPath, { recursive: true })));
+    }
 
-  debugNode(`Launching dev node: ${name}`);
-  const logLocation = path
-    .join(
-      dirPath,
-      `${path.basename(cmd)}_node_${args
-        .find((a) => a.includes("port"))
-        ?.split("=")[1]}_${new Date().getTime()}.log`
-    )
-    .replaceAll("node_node_undefined", "chopsticks");
-  process.env.MOON_LOG_LOCATION = logLocation;
+    const logLocation = path
+      .join(
+        dirPath,
+        `${path.basename(cmd)}_node_${args
+          .find((a) => a.includes("port"))
+          ?.split("=")[1]}_${new Date().getTime()}.log`
+      )
+      .replaceAll("node_node_undefined", "chopsticks");
 
-  const runningNode = execaCommand(`${cmd} ${args.join(" ")}`, {
-    all: true,
-    cleanup: false,
-    detached: false,
-  }).pipeAll(logLocation);
+    process.env.MOON_LOG_LOCATION = logLocation;
 
-  probe: for (;;) {
-    try {
-      const ports = findPortsByPid(runningNode.pid);
+    const runningNode = yield* _(
+      Effect.sync(() =>
+        execaCommand(`${cmd} ${args.join(" ")}`, {
+          all: true,
+          cleanup: true,
+          detached: true,
+        }).pipeAll(logLocation)
+      )
+    );
+
+    probe: for (;;) {
+      const ports = yield* _(findPortsByPidEffect(runningNode.pid));
       if (ports) {
         for (const port of ports) {
-          try {
-            await checkWebSocketJSONRPC(port);
-            // console.log(`Port ${port} supports WebSocket JSON RPC!`);
+          if (yield* _(Effect.sync(() => webSocketProbe(port)))) {
             break probe;
-          } catch {
-            continue;
           }
         }
       }
-    } catch {
-      continue;
     }
-  }
-
-  return { pid: runningNode.pid, kill: runningNode.kill };
-}
-
-async function checkWebSocketJSONRPC(port: number): Promise<boolean> {
-  const WEB_SOCKET_TIMEOUT = 5000; // e.g., 5 seconds
-
-  return new Promise((resolve, reject) => {
-    const ws = new WebSocket(`ws://localhost:${port}`);
-    const timeout = setTimeout(() => {
-      ws.close();
-      reject(new Error("WebSocket response timeout"));
-    }, WEB_SOCKET_TIMEOUT);
-
-    const openHandler = () => {
-      ws.send(
-        JSON.stringify({
-          jsonrpc: "2.0",
-          id: 1,
-          method: "system_chain",
-          params: [],
-        })
-      );
-    };
-
-    const messageHandler = (data: string) => {
-      clearTimeout(timeout);
-      try {
-        const { jsonrpc, id } = JSON.parse(data.toString());
-        if (jsonrpc === "2.0" && id === 1) {
-          resolve(true);
-        } else {
-          reject(new Error("Invalid JSON-RPC response"));
-        }
-      } catch (e) {
-        reject(new Error("Failed to parse WebSocket message"));
-      } finally {
-        ws.removeListener("error", errorHandler);
-        ws.close();
-      }
-    };
-
-    const errorHandler = (err: Error) => {
-      clearTimeout(timeout);
-      ws.removeListener("open", openHandler);
-      ws.removeListener("message", messageHandler);
-      ws.close();
-      reject(new Error(`WebSocket error: ${err.message}`));
-    };
-
-    ws.once("open", openHandler);
-    ws.once("message", messageHandler);
-    ws.once("error", errorHandler);
+    return { pid: runningNode.pid, kill: runningNode.kill } satisfies LaunchedNode;
   });
-}
 
-function findPortsByPid(pid: number, timeout: number = 10000) {
-  const end = Date.now() + timeout;
+const jsonRpcMessage = {
+  jsonrpc: "2.0",
+  id: 1,
+  method: "system_chain",
+  params: [],
+};
 
-  for (;;) {
-    const command = `lsof -i -n -P | grep LISTEN | grep ${pid} || true`;
-    const { stdout } = execaCommandSync(command, { shell: true, cleanup: true, timeout: 2000 });
-    const ports: number[] = [];
-    const lines = stdout.split("\n");
+const webSocketProbe = (port: number) =>
+  Effect.gen(function* (_) {
+    const val = yield* _(Stream.runCollect(webSocketStream(port)));
+    const filtered = Chunk.toArray(val).filter(
+      (val) => val.result !== undefined && val.result.length > 0
+    );
+    return filtered.length > 0;
+  });
 
-    for (const line of lines) {
-      const regex = /(?:\*|127\.0\.0\.1):(\d+)/;
-      const match = line.match(regex);
-      if (match) {
-        ports.push(Number(match[1]));
+const webSocketStream = (port: number) => {
+  const ws = new WebSocket(`ws://127.0.0.1:${port}`);
+  return Stream.async((emit: StreamEmit.Emit<never, never, string, void>) => {
+    ws.addEventListener("open", () => {
+      ws.send(JSON.stringify(jsonRpcMessage));
+    });
+    ws.addEventListener("message", (e) => {
+      emit(Effect.succeed(Chunk.of(e.data.toString())));
+      emit(Effect.fail(Option.none()));
+    });
+    ws.addEventListener("error", (e) => emit(Effect.succeed(Chunk.of(e.message))));
+    ws.addEventListener("close", () => emit(Effect.fail(Option.none())));
+  }).pipe(
+    Stream.map((dataString) => JSON.parse(dataString)),
+    Stream.ensuring(Effect.sync(() => ws.close()))
+  );
+};
+
+const findPortsByPidEffect = (pid: number, timeout: number = 10000) =>
+  Effect.gen(function* (_) {
+    const end = yield* _(Effect.sync(() => Date.now() + timeout));
+
+    for (;;) {
+      const command = `lsof -i -n -P | grep LISTEN | grep ${pid} || true`;
+      const { stdout } = yield* _(
+        Effect.tryPromise(() =>
+          execaCommand(command, { shell: true, cleanup: true, timeout: 2000 })
+        )
+      );
+      const ports: number[] = [];
+      const lines = stdout.split("\n");
+
+      for (const line of lines) {
+        const regex = /(?:\*|127\.0\.0\.1):(\d+)/;
+        const match = line.match(regex);
+        if (match) {
+          ports.push(Number(match[1]));
+        }
       }
+
+      if (ports.length) {
+        return ports;
+      }
+
+      if (Date.now() > end) break;
+
+      yield* _(Effect.sleep(100));
     }
-
-    if (ports.length) {
-      return ports;
-    }
-
-    if (Date.now() > end) break;
-  }
-
-  return [];
-}
+    return [];
+  });

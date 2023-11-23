@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {},
+  "types": ["node", "yargs", "debug", "ws"],
   "include": ["./src/**/*.ts"],
   "exclude": ["**/dist/**"]
 }

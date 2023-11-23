@@ -5,8 +5,6 @@ import { readFileSync } from "fs";
 import JSONC from "jsonc-parser";
 import path, { extname } from "path";
 
-let cachedConfig: MoonwallConfig | undefined;
-
 async function parseConfig(filePath: string) {
   let result: any;
 
@@ -70,43 +68,21 @@ export function isEthereumDevConfig(): boolean {
   return env.foundation.type == "dev" && !env.foundation.launchSpec[0].disableDefaultEthProviders;
 }
 
-export async function cacheConfig() {
-  const configPath = process.env.MOON_CONFIG_PATH!;
-  const filePath = path.isAbsolute(configPath) ? configPath : path.join(process.cwd(), configPath);
-  try {
-    const config = parseConfigSync(filePath);
-    const replacedConfig = replaceEnvVars(config);
-    cachedConfig = replacedConfig as MoonwallConfig;
-  } catch (e) {
-    console.error(e);
-    throw new Error(`Error import config at ${filePath}`);
-  }
-}
-
 export function importJsonConfig(): MoonwallConfig {
-  if (cachedConfig) {
-    return cachedConfig;
-  }
-
   const configPath = process.env.MOON_CONFIG_PATH!;
   const filePath = path.isAbsolute(configPath) ? configPath : path.join(process.cwd(), configPath);
 
   try {
     const config = parseConfigSync(filePath);
     const replacedConfig = replaceEnvVars(config);
-    cachedConfig = replacedConfig as MoonwallConfig;
-    return cachedConfig;
+    return replacedConfig as MoonwallConfig;
   } catch (e) {
     console.error(e);
     throw new Error(`Error import config at ${filePath}`);
   }
 }
 
-export async function importAsyncConfig(): Promise<MoonwallConfig> {
-  if (cachedConfig) {
-    return cachedConfig;
-  }
-
+export async function importAsyncConfig() {
   const configPath = process.env.MOON_CONFIG_PATH!;
   const filePath = path.isAbsolute(configPath) ? configPath : path.join(process.cwd(), configPath);
 
@@ -114,8 +90,7 @@ export async function importAsyncConfig(): Promise<MoonwallConfig> {
     const config = await parseConfig(filePath);
     const replacedConfig = replaceEnvVars(config);
 
-    cachedConfig = replacedConfig as MoonwallConfig;
-    return cachedConfig;
+    return replacedConfig as MoonwallConfig;
   } catch (e) {
     console.error(e);
     throw new Error(`Error import config at ${filePath}`);

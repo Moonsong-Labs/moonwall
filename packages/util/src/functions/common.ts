@@ -1,7 +1,5 @@
 import "@moonbeam-network/api-augment";
 import { BN } from "@polkadot/util";
-import fetch from "node-fetch";
-
 // Sort dict by key
 export function sortObjectByKeys(o) {
   return Object.keys(o)
@@ -111,11 +109,11 @@ export async function directRpcRequest(
     params,
   };
 
-  const response = await fetch(endpoint, {
+  const response = (await fetch(endpoint, {
     method: "POST",
     body: JSON.stringify(data),
     headers: { "Content-Type": "application/json" },
-  });
+  })) as any;
 
   const responseData = (await response.json()) as JsonRpcResponse;
 

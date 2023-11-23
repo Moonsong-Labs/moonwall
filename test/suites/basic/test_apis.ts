@@ -1,10 +1,10 @@
-import { beforeAll, describeSuite, expect } from "@moonwall/cli";
+import { describeSuite, expect } from "@moonwall/cli";
 
 describeSuite({
   id: "B01",
   title: "Tests that are using the production APIs",
   foundationMethods: "read_only",
-  testCases: ({ context, it }) => {
+  testCases: ({ it }) => {
     it({
       id: "T01",
       title: "Passing Test",

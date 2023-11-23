@@ -226,7 +226,7 @@
             "name": "mb",
             "type": "parachain",
             "buildBlockMode": "manual",
-            "configPath": "./configs/moonriverChopsticks.yml"
+            "configPath": "./configs/moonbeamChopsticks.yml"
           }
         ]
       },
@@ -573,7 +573,10 @@
       "name": "web3_test",
       "testFileDir": ["suites/web3_test/"],
       "foundation": {
-        "type": "read_only"
+        "type": "read_only",
+        "launchSpec": {
+          "disableRuntimeVersionCheck": true
+        }
       },
       "connections": [
         {
@@ -646,7 +649,7 @@
       "name": "dev_test",
       "testFileDir": ["suites/dev_tests"],
       "envVars": ["DEBUG_COLORS=1", "TIMBO_TEST_ENV='TIMBO timbo timbo'"],
-      "reporters": ["default", "html", "json"],
+      "reporters": ["basic", "html", "json"],
       "reportFile": { "json": "tmp/testResults.json" },
       "contracts": "contracts/",
       "runScripts": ["compile-contracts.ts compile -p contracts/precompiles"],
