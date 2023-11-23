@@ -74,6 +74,7 @@
     "@polkadot/util": "^12.6.1",
     "@polkadot/util-crypto": "^12.6.1",
     "@types/ws": "^8.5.10",
+    "@vitest/ui": "1.0.0-beta.5",
     "@zombienet/orchestrator": "^0.0.62",
     "@zombienet/utils": "^0.0.24",
     "bottleneck": "^2.19.5",
@@ -98,6 +99,10 @@
     "ws": "^8.14.2",
     "yaml": "^2.3.4",
     "yargs": "^17.7.2"
+  },
+  "peerDependencies": {
+    "@vitest/ui": "1.0.0-beta.5",
+    "vitest": "1.0.0-beta.5"
   },
   "devDependencies": {
     "@types/cli-progress": "^3.11.5",

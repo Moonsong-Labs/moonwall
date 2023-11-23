@@ -93,6 +93,9 @@ importers:
       '@types/ws':
         specifier: ^8.5.10
         version: 8.5.10
+      '@vitest/ui':
+        specifier: 1.0.0-beta.5
+        version: 1.0.0-beta.5(vitest@1.0.0-beta.5)
       '@zombienet/orchestrator':
         specifier: ^0.0.62
         version: 0.0.62(@polkadot/util@12.6.1)(@types/node@20.9.4)
