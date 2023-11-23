@@ -5,6 +5,7 @@ import colors from "colors";
 import { Effect } from "effect";
 import fs from "fs";
 import inquirer from "inquirer";
+import fetch from "node-fetch";
 import PressToContinuePrompt from "inquirer-press-to-continue";
 import path from "path";
 import { SemVer, lt } from "semver";
@@ -385,7 +386,7 @@ const printIntro = async () => {
   let remoteVersion = "";
   try {
     const url = "https://api.github.com/repos/moonsong-labs/moonwall/releases";
-    const resp = (await fetch(url)) as any;
+    const resp = await fetch(url);
     const json = (await resp.json()) as GithubResponse[];
     remoteVersion = json.find((a) => a.tag_name.includes("@moonwall/cli@"))!.tag_name.split("@")[2];
   } catch (error) {

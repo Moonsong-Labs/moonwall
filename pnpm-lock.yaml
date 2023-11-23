@@ -144,6 +144,9 @@ importers:
       minimatch:
         specifier: ^9.0.3
         version: 9.0.3
+      node-fetch:
+        specifier: ^3.3.2
+        version: 3.3.2
       semver:
         specifier: ^7.5.4
         version: 7.5.4

@@ -1,5 +1,6 @@
 import { SingleBar, Presets } from "cli-progress";
 import fs from "node:fs";
+import fetch from "node-fetch";
 
 let progressBar: SingleBar;
 
@@ -29,7 +30,7 @@ export async function downloader(url: string, outputPath: string): Promise<void>
   const writeStream = fs.createWriteStream(tempPath);
   let transferredBytes = 0;
 
-  const response = (await fetch(url)) as any;
+  const response = await fetch(url);
 
   if (!response.body) {
     throw new Error("No response body");

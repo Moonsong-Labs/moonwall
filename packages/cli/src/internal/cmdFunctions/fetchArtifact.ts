@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "path";
 import semver from "semver";
+import fetch from "node-fetch";
 import chalk from "chalk";
 import { runTask } from "../processHelpers";
 import { minimatch } from "minimatch";
