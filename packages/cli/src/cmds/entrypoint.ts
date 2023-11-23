@@ -1,5 +1,6 @@
 import "../internal/logging";
 import "@moonbeam-network/api-augment";
+import { Runtime } from "@effect/platform-node";
 import yargs from "yargs";
 import fs from "fs";
 import { hideBin } from "yargs/helpers";
@@ -202,18 +203,13 @@ const cliStart = Effect.gen(function* (_) {
       yield* _(new Err.InvalidCommandError({ command: commandChosen }));
       break;
   }
+
+  console.log("🏁 Moonwall Process finished");
 });
 
 const program = pipe(
   setupConfigFileEnv,
-  Effect.flatMap(() => cliStart),
-  Effect.uninterruptible,
-  Effect.disconnect
+  Effect.flatMap(() => cliStart)
 );
 
-Effect.runPromise(program)
-  .then(() => {
-    console.log("🏁 Moonwall Process finished");
-    process.exit();
-  })
-  .catch(console.error);
+Runtime.runMain(program);
