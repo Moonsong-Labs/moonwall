@@ -46,5 +46,15 @@ describeSuite({
         }).to.throw("ERROR THROWN");
       },
     });
+
+    it({
+      id: "T05",
+      title: "This test case can read globals",
+      modifier: "skip",
+      test: function () {
+        log("Printing Global config", globalThis.config);
+        expect(globalThis.config).to.be.an("object");
+      },
+    });
   },
 });

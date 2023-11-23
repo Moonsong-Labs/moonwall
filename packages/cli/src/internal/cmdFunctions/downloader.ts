@@ -1,6 +1,6 @@
 import { SingleBar, Presets } from "cli-progress";
-import fetch from "node-fetch";
 import fs from "node:fs";
+import fetch from "node-fetch";
 
 let progressBar: SingleBar;
 

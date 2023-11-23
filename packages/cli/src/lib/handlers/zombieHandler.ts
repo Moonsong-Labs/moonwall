@@ -1,7 +1,7 @@
 import { FoundationHandler, UpgradePreferences } from "@moonwall/types";
 import { ApiPromise } from "@polkadot/api";
 import { upgradeRuntime } from "../upgradeProcedures";
-import { MoonwallContext } from "../globalContext";
+import { MoonwallContext } from "../globalContextEffect";
 import { alith } from "@moonwall/util";
 import { sendIpcMessage } from "../../internal/foundations/zombieHelpers";
 

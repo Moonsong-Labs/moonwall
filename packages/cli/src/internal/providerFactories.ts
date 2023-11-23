@@ -8,7 +8,7 @@ import { Signer, Wallet, ethers } from "ethers";
 import { createWalletClient, http, publicActions } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { Web3 } from "web3";
-import { WebSocketProvider as Web3ProviderWs } from "web3-providers-ws";
+import { WebSocketProvider as Web3ProviderWs } from "web3";
 const debug = Debug("global:providers");
 
 export class ProviderFactory {
@@ -73,8 +73,7 @@ export class ProviderFactory {
           {},
           { delay: 50, autoReconnect: false, maxAttempts: 10 }
         );
-
-        return new Web3(provider) as Web3<any>;
+        return new Web3(provider);
       },
     };
   }
@@ -240,7 +239,7 @@ export class ProviderInterfaceFactory {
           rtName: (api.consts.system.version as any).specName.toString(),
         };
       },
-      disconnect: async () => api.disconnect(),
+      disconnect: async () => await api.disconnect(),
     };
   }
 
@@ -252,16 +251,20 @@ export class ProviderInterfaceFactory {
       type: this.type,
       greet: async () =>
         console.log(
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore Apparently this exists according to docs?
           `👋 Provider ${this.name} is connected to chain ` + (await api.eth.getChainId())
         ),
-      disconnect: async () => {
-        api.currentProvider!.disconnect();
+      disconnect: () => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore Apparently this exists according to docs?
+        // api.provider.disconnect();  <--- this is really problematic and halts exit
       },
     };
   }
 
   private async createEthers(): Promise<ProviderInterface> {
-    const api = (await this.connect()) as Signer;
+    const api = (await this.connect()) as Wallet;
     return {
       name: this.name,
       api,
@@ -283,7 +286,7 @@ export class ProviderInterfaceFactory {
       type: this.type,
       greet: async () =>
         console.log(`👋 Provider ${this.name} is connected to chain ` + (await api.getChainId())),
-      disconnect: async () => {
+      disconnect: () => {
         // Not needed until we switch to websockets
       },
     };

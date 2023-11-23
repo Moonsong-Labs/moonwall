@@ -18,4 +18,4 @@ typechain-types
 cache
 artifacts
 **/tmp/*
-**/contracts/out/*
+**/out

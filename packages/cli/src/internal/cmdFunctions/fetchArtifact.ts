@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "path";
-import fetch from "node-fetch";
 import semver from "semver";
+import fetch from "node-fetch";
 import chalk from "chalk";
 import { runTask } from "../processHelpers";
 import { minimatch } from "minimatch";
@@ -37,10 +37,10 @@ export async function fetchArtifact(args) {
         }
       })
     : args.ver === "latest"
-    ? releases.find((release) => release.assets.find((asset) => asset.name === binary))
-    : releases
-        .filter((release) => release.tag_name.includes(args.ver))
-        .find((release) => release.assets.find((asset) => minimatch(asset.name, binary)));
+      ? releases.find((release) => release.assets.find((asset) => asset.name === binary))
+      : releases
+          .filter((release) => release.tag_name.includes(args.ver))
+          .find((release) => release.assets.find((asset) => minimatch(asset.name, binary)));
 
   if (release == null) {
     throw new Error(`Release not found for ${args.ver}`);
@@ -86,7 +86,7 @@ export async function getVersions(name: string, runtime: boolean = false) {
     throw new Error(`Network not found for ${name}`);
   }
   const url = `https://api.github.com/repos/${repo.ghAuthor}/${repo.ghRepo}/releases`;
-  const releases = (await (await fetch(url)).json()) as Release[];
+  const releases = (await ((await fetch(url)) as any).json()) as Release[];
   const versions = releases
     .map((release) => {
       let tag = release.tag_name;

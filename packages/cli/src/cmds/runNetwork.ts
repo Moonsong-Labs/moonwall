@@ -2,196 +2,207 @@ import { Environment } from "@moonwall/types";
 import { ApiPromise } from "@polkadot/api";
 import chalk from "chalk";
 import clear from "clear";
+import { Effect } from "effect";
 import fs, { promises as fsPromises } from "fs";
 import inquirer from "inquirer";
 import PressToContinuePrompt from "inquirer-press-to-continue";
 import WebSocket from "ws";
 import { parse } from "yaml";
+import * as Err from "../errors";
 import { clearNodeLogs, reportLogLocation } from "../internal/cmdFunctions/tempLogs";
-import { commonChecks } from "../internal/launcherCommon";
-import { cacheConfig, importAsyncConfig, loadEnvVars } from "../lib/configReader";
-import { MoonwallContext, runNetworkOnly } from "../lib/globalContext";
-import { executeTests } from "./runTests";
 import { sendIpcMessage } from "../internal/foundations/zombieHelpers";
+import { commonChecks } from "../internal/launcherCommon";
+import { importAsyncConfig, loadEnvVars } from "../lib/configReader";
+import { MoonwallContext, runNetworkOnlyEffect } from "../lib/globalContextEffect";
+import { executeTestEffect } from "./runTests";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
 let lastSelected = 0;
 
-export async function runNetworkCmd(args) {
-  await cacheConfig();
-  process.env.MOON_TEST_ENV = args.envName;
-  const globalConfig = await importAsyncConfig();
-  const env = globalConfig.environments.find(({ name }) => name === args.envName)!;
-
-  if (!env) {
-    const envList = globalConfig.environments.map((env) => env.name);
-    throw new Error(
-      `No environment found in config for: ${chalk.bgWhiteBright.blackBright(
-        args.envName
-      )}\n Environments defined in config are: ${envList}\n`
+export const runNetworkCmdEffect = (args) =>
+  Effect.gen(function* (_) {
+    process.env.MOON_TEST_ENV = args.envName;
+    const globalConfig = yield* _(Effect.promise(() => importAsyncConfig()));
+    const env = yield* _(
+      Effect.filterOrFail(
+        Effect.sync(() => globalConfig.environments.find(({ name }) => name === args.envName)),
+        (env) => !!env,
+        () => new Err.EnvironmentMissingError({ env: args.envName })
+      )
     );
-  }
 
-  loadEnvVars();
+    yield* _(Effect.sync(() => loadEnvVars()));
 
-  await commonChecks(env);
+    yield* _(Effect.promise(() => commonChecks(env)));
 
-  const testFileDirs = env.testFileDir;
-  const foundation = env.foundation.type;
-  const questions = [
-    {
-      type: "confirm",
-      name: "Quit",
-      message: "ℹ️  Are you sure you'd like to close network and quit? \n",
-      default: false,
-    },
-    {
-      name: "Choice",
-      type: "list",
-      message: "What would you like todo now",
-      choices: ["Chill", "Info", "Test", "Quit"],
-    },
-    {
-      name: "MenuChoice",
-      type: "list",
-      message:
-        `Environment : ${chalk.bgGray.cyanBright(args.envName)}\n` + "Please select a choice: ",
-      default: () => lastSelected,
-      pageSize: 10,
-      choices: [
-        {
-          name: "Tail:      Print the logs of the current running node to this console",
-          value: 1,
-          short: "tail",
-        },
-        {
-          name: `Info:      Display Information about this environment ${args.envName}`,
-          value: 2,
-          short: "info",
-        },
-        {
-          name:
-            foundation == "dev" || foundation == "chopsticks" || foundation == "zombie"
-              ? `Command:   Run command on network (${chalk.bgGrey.cyanBright(foundation)})`
-              : chalk.dim(
-                  `Not applicable for foundation type (${chalk.bgGrey.cyanBright(foundation)})`
-                ),
-          value: 3,
-          short: "cmd",
-          disabled: foundation !== "dev" && foundation !== "chopsticks" && foundation !== "zombie",
-        },
-        {
-          name:
-            testFileDirs.length > 0
-              ? "Test:      Execute tests registered for this environment   (" +
-                chalk.bgGrey.cyanBright(testFileDirs) +
-                ")"
-              : chalk.dim("Test:    NO TESTS SPECIFIED"),
-          value: 4,
-          disabled: testFileDirs.length > 0 ? false : true,
-          short: "test",
-        },
-        {
-          name:
-            testFileDirs.length > 0
-              ? "GrepTest:  Execute individual test(s) based on grepping the name / ID (" +
-                chalk.bgGrey.cyanBright(testFileDirs) +
-                ")"
-              : chalk.dim("Test:    NO TESTS SPECIFIED"),
-          value: 5,
-          disabled: testFileDirs.length > 0 ? false : true,
-          short: "grep",
-        },
-        new inquirer.Separator(),
-        {
-          name: "Quit:      Close network and quit the application",
-          value: 6,
-          short: "quit",
-        },
-      ],
-      filter(val) {
-        return val;
+    const testFileDirs = env.testFileDir;
+    const foundation = env.foundation.type;
+    const questions = [
+      {
+        type: "confirm",
+        name: "Quit",
+        message: "ℹ️  Are you sure you'd like to close network and quit? \n",
+        default: false,
       },
-    },
-    {
-      name: "NetworkStarted",
-      type: "press-to-continue",
-      anyKey: true,
-      pressToContinueMessage: "✅  Press any key to continue...\n",
-    },
-  ];
+      {
+        name: "Choice",
+        type: "list",
+        message: "What would you like todo now",
+        choices: ["Chill", "Info", "Test", "Quit"],
+      },
+      {
+        name: "MenuChoice",
+        type: "list",
+        message:
+          `Environment : ${chalk.bgGray.cyanBright(args.envName)}\n` + "Please select a choice: ",
+        default: () => lastSelected,
+        pageSize: 10,
+        choices: [
+          {
+            name: "Tail:      Print the logs of the current running node to this console",
+            value: 1,
+            short: "tail",
+          },
+          {
+            name: `Info:      Display Information about this environment ${args.envName}`,
+            value: 2,
+            short: "info",
+          },
+          {
+            name:
+              foundation == "dev" || foundation == "chopsticks" || foundation == "zombie"
+                ? `Command:   Run command on network (${chalk.bgGrey.cyanBright(foundation)})`
+                : chalk.dim(
+                    `Not applicable for foundation type (${chalk.bgGrey.cyanBright(foundation)})`
+                  ),
+            value: 3,
+            short: "cmd",
+            disabled:
+              foundation !== "dev" && foundation !== "chopsticks" && foundation !== "zombie",
+          },
+          {
+            name:
+              testFileDirs.length > 0
+                ? "Test:      Execute tests registered for this environment   (" +
+                  chalk.bgGrey.cyanBright(testFileDirs) +
+                  ")"
+                : chalk.dim("Test:    NO TESTS SPECIFIED"),
+            value: 4,
+            disabled: testFileDirs.length > 0 ? false : true,
+            short: "test",
+          },
+          {
+            name:
+              testFileDirs.length > 0
+                ? "GrepTest:  Execute individual test(s) based on grepping the name / ID (" +
+                  chalk.bgGrey.cyanBright(testFileDirs) +
+                  ")"
+                : chalk.dim("Test:    NO TESTS SPECIFIED"),
+            value: 5,
+            disabled: testFileDirs.length > 0 ? false : true,
+            short: "grep",
+          },
+          new inquirer.Separator(),
+          {
+            name: "Quit:      Close network and quit the application",
+            value: 6,
+            short: "quit",
+          },
+        ],
+        filter(val) {
+          return val;
+        },
+      },
+      {
+        name: "NetworkStarted",
+        type: "press-to-continue",
+        anyKey: true,
+        pressToContinueMessage: "✅  Press any key to continue...\n",
+      },
+    ];
 
-  if (
-    (env.foundation.type == "dev" && !env.foundation.launchSpec[0].retainAllLogs) ||
-    (env.foundation.type == "chopsticks" && !env.foundation.launchSpec[0].retainAllLogs)
-  ) {
-    clearNodeLogs();
-  }
-
-  await runNetworkOnly();
-  clear();
-  const portsList = await reportServicePorts();
-  reportLogLocation();
-  portsList.forEach(({ port }) =>
-    console.log(`  🖥️   https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0.0.1%3A${port}`)
-  );
-
-  if (!args.GrepTest) {
-    await inquirer.prompt(questions.find(({ name }) => name == "NetworkStarted"));
-  } else {
-    process.env.MOON_RECYCLE = "true";
-    process.env.MOON_GREP = await args.GrepTest;
-    await executeTests(env, { testNamePattern: await args.GrepTest });
-  }
-
-  mainloop: for (;;) {
-    const choice = await inquirer.prompt(questions.find(({ name }) => name == "MenuChoice"));
-    const env = globalConfig.environments.find(({ name }) => name === args.envName)!;
-
-    switch (choice.MenuChoice) {
-      case 1:
-        clear();
-        await resolveTailChoice(env);
-        lastSelected = 0;
-        clear();
-        break;
-
-      case 2:
-        await resolveInfoChoice(env);
-        lastSelected = 1;
-        break;
-
-      case 3:
-        env.foundation.type !== "zombie"
-          ? await resolveCommandChoice()
-          : await resolveZombieCommandChoice();
-        lastSelected = 2;
-        break;
-
-      case 4:
-        await resolveTestChoice(env);
-        lastSelected = 3;
-        break;
-
-      case 5:
-        await resolveGrepChoice(env);
-        lastSelected = 4;
-        break;
-
-      case 6: {
-        const quit = await inquirer.prompt(questions.find(({ name }) => name == "Quit"));
-        if (quit.Quit === true) {
-          break mainloop;
-        }
-        break;
-      }
-      default:
-        throw new Error("invalid value");
+    if (
+      (env.foundation.type == "dev" && !env.foundation.launchSpec[0].retainAllLogs) ||
+      (env.foundation.type == "chopsticks" && !env.foundation.launchSpec[0].retainAllLogs)
+    ) {
+      yield* _(Effect.try(() => clearNodeLogs()));
     }
-  }
-  await MoonwallContext.destroy();
-}
+
+    yield* _(runNetworkOnlyEffect());
+
+    yield* _(Effect.try(() => clear()));
+
+    const portsList = yield* _(Effect.tryPromise(() => reportServicePorts()));
+    yield* _(Effect.try(() => reportLogLocation()));
+
+    portsList.forEach(({ port }) =>
+      console.log(`  🖥️   https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0.0.1%3A${port}`)
+    );
+
+    if (!args.GrepTest) {
+      yield* _(
+        Effect.tryPromise(() =>
+          inquirer.prompt(questions.find(({ name }) => name == "NetworkStarted"))
+        )
+      );
+    } else {
+      process.env.MOON_RECYCLE = "true";
+      process.env.MOON_GREP = args.GrepTest;
+      yield* _(executeTestEffect(env, { testNamePattern: args.GrepTest }));
+    }
+
+    mainloop: for (;;) {
+      const choice: any = yield* _(
+        Effect.promise(() => inquirer.prompt(questions.find(({ name }) => name == "MenuChoice")))
+      );
+      const env = globalConfig.environments.find(({ name }) => name === args.envName);
+
+      switch (choice.MenuChoice) {
+        case 1:
+          clear();
+          yield* _(Effect.promise(() => resolveTailChoice(env)));
+          lastSelected = 0;
+          clear();
+          break;
+
+        case 2:
+          yield* _(resolveInfoChoice(env));
+          lastSelected = 1;
+          break;
+
+        case 3:
+          env.foundation.type !== "zombie"
+            ? yield* _(Effect.promise(() => resolveCommandChoice()))
+            : yield* _(Effect.promise(() => resolveZombieCommandChoice()));
+          lastSelected = 2;
+          break;
+
+        case 4:
+          yield* _(resolveTestChoice(env));
+          lastSelected = 3;
+          break;
+
+        case 5:
+          yield* _(resolveGrepChoice(env));
+          lastSelected = 4;
+          break;
+
+        case 6: {
+          const quit: any = yield* _(
+            Effect.promise(() => inquirer.prompt(questions.find(({ name }) => name == "Quit")))
+          );
+          if (quit.Quit === true) {
+            break mainloop;
+          }
+          break;
+        }
+        default:
+          throw new Error("invalid value");
+      }
+    }
+    yield* _(MoonwallContext.destroy());
+  });
 
 const reportServicePorts = async () => {
   const ctx = MoonwallContext.getContext();
@@ -315,8 +326,8 @@ const resolveCommandChoice = async () => {
       ctx.foundation == "dev"
         ? await api.rpc.engine.createBlock(true, true)
         : ctx.foundation == "chopsticks"
-        ? await sendNewBlockCmd()
-        : undefined;
+          ? await sendNewBlockCmd()
+          : undefined;
       break;
 
     case "createUnfinalizedBlock":
@@ -357,42 +368,50 @@ const resolveCommandChoice = async () => {
   return;
 };
 
-const resolveInfoChoice = async (env: Environment) => {
-  console.log(chalk.bgWhite.blackBright("Node Launch args:"));
-  console.dir(MoonwallContext.getContext().environment, { depth: null });
-  console.log(chalk.bgWhite.blackBright("Launch Spec in Config File:"));
-  console.dir(env, { depth: null });
-  const portsList = await reportServicePorts();
-  reportLogLocation();
-  portsList.forEach(({ port }) =>
-    console.log(`  🖥️   https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0.0.1%3A${port}`)
-  );
-};
-
-const resolveGrepChoice = async (env: Environment, silent: boolean = false) => {
-  const choice = await inquirer.prompt({
-    name: "grep",
-    type: "input",
-    message: `What pattern would you like to filter for (ID/Title): `,
-    default: process.env.MOON_GREP || "D01T01",
+const resolveInfoChoice = (env: Environment) =>
+  Effect.gen(function* (_) {
+    console.log(chalk.bgWhite.blackBright("Node Launch args:"));
+    console.dir(MoonwallContext.getContext().environment, { depth: null });
+    console.log(chalk.bgWhite.blackBright("Launch Spec in Config File:"));
+    console.dir(env, { depth: null });
+    const portsList = yield* _(Effect.tryPromise(() => reportServicePorts()));
+    reportLogLocation();
+    portsList.forEach(({ port }) =>
+      console.log(`  🖥️   https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0.0.1%3A${port}`)
+    );
   });
-  process.env.MOON_RECYCLE = "true";
-  process.env.MOON_GREP = await choice.grep;
-  const opts = { testNamePattern: await choice.grep, silent };
-  if (silent) {
-    opts["reporters"] = ["dot"];
-  }
-  return await executeTests(env, opts);
-};
 
-const resolveTestChoice = async (env: Environment, silent: boolean = false) => {
-  process.env.MOON_RECYCLE = "true";
-  const opts = { silent };
-  if (silent) {
-    opts["reporters"] = ["dot"];
-  }
-  return await executeTests(env, opts);
-};
+const resolveGrepChoice = (env: Environment, silent: boolean = false) =>
+  Effect.gen(function* (_) {
+    const choice: any = yield* _(
+      Effect.promise(() =>
+        inquirer.prompt({
+          name: "grep",
+          type: "input",
+          message: `What pattern would you like to filter for (ID/Title): `,
+          default: process.env.MOON_GREP || "D01T01",
+        })
+      )
+    );
+
+    process.env.MOON_RECYCLE = "true";
+    process.env.MOON_GREP = choice.grep;
+    const opts = { testNamePattern: choice.grep, silent };
+    if (silent) {
+      opts["reporters"] = ["dot"];
+    }
+    return yield* _(executeTestEffect(env, opts));
+  });
+
+const resolveTestChoice = (env: Environment, silent: boolean = false) =>
+  Effect.gen(function* (_) {
+    process.env.MOON_RECYCLE = "true";
+    const opts = { silent };
+    if (silent) {
+      opts["reporters"] = ["dot"];
+    }
+    return yield* _(executeTestEffect(env, opts));
+  });
 
 const resolveTailChoice = async (env: Environment) => {
   let tailing: boolean = true;
