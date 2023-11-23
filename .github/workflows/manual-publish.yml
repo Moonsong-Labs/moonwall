@@ -18,9 +18,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        package: ["cli", "util"]
     steps:
       - uses: actions/checkout@v3
         with:
@@ -38,5 +35,4 @@ jobs:
         with:
           token: ${{ secrets.NPM_TOKEN }}
           tag: ${{ github.event.inputs.tag }}
-          package: packages/${{ matrix.package }}
           dry-run: ${{ github.event.inputs.dry-run}}
