@@ -41,16 +41,6 @@ const parseArgs = Effect.sync(() =>
     .parseSync()
 );
 
-const setEnvVar = (key: string, value: string) =>
-  Effect.sync(() => {
-    process.env[key] = value;
-  });
-
-const setupConfigFileEnv = pipe(
-  parseArgs,
-  Effect.flatMap((parsed) => setEnvVar("MOON_CONFIG_PATH", parsed.configFile))
-);
-
 const processArgs = (args: any): { command: string; args?: object } => {
   let commandChosen: string;
   const argsObject: object = {};
@@ -153,6 +143,7 @@ const cliStart = Effect.gen(function* (_) {
   let failedTests: number | false;
 
   const argv = yield* _(parseArgs);
+  process.env.MOON_CONFIG_PATH = argv.configFile;
 
   if (!argv._.length) {
     commandChosen = "mainmenu";
@@ -208,8 +199,8 @@ const cliStart = Effect.gen(function* (_) {
 });
 
 const program = pipe(
-  setupConfigFileEnv,
-  Effect.flatMap(() => cliStart)
+  cliStart,
+  Effect.tapErrorCause(Effect.logError),
 );
 
 Runtime.runMain(program);
