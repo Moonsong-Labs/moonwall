@@ -159,16 +159,15 @@ export async function createDevBlock<
 
   if (results.find((res) => res.type == "eth")) {
     // Wait until new block is actually created
-    for (;;) {
+    // max wait 2s
+    for (let i = 0; i < 1000; i++) {
       const currentBlock = (await api.rpc.chain.getHeader()).number.toBigInt();
 
       if (currentBlock > originalBlockNumber) {
         break;
       }
-      await setTimeout(10);
+      await setTimeout(20);
     }
-    // TODO: Investigate why extra time needed
-    await setTimeout(100);
   }
 
   const actualEvents = result.flatMap((resp) => resp.events);

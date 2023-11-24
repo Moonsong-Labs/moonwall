@@ -1,5 +1,6 @@
 import "../internal/logging";
 import "@moonbeam-network/api-augment";
+import { Runtime } from "@effect/platform-node";
 import yargs from "yargs";
 import fs from "fs";
 import { hideBin } from "yargs/helpers";
@@ -38,16 +39,6 @@ const parseArgs = Effect.sync(() =>
       },
     })
     .parseSync()
-);
-
-const setEnvVar = (key: string, value: string) =>
-  Effect.sync(() => {
-    process.env[key] = value;
-  });
-
-const setupConfigFileEnv = pipe(
-  parseArgs,
-  Effect.flatMap((parsed) => setEnvVar("MOON_CONFIG_PATH", parsed.configFile))
 );
 
 const processArgs = (args: any): { command: string; args?: object } => {
@@ -152,6 +143,7 @@ const cliStart = Effect.gen(function* (_) {
   let failedTests: number | false;
 
   const argv = yield* _(parseArgs);
+  process.env.MOON_CONFIG_PATH = argv.configFile;
 
   if (!argv._.length) {
     commandChosen = "mainmenu";
@@ -202,18 +194,10 @@ const cliStart = Effect.gen(function* (_) {
       yield* _(new Err.InvalidCommandError({ command: commandChosen }));
       break;
   }
+
+  console.log("🏁 Moonwall Process finished");
 });
 
-const program = pipe(
-  setupConfigFileEnv,
-  Effect.flatMap(() => cliStart),
-  Effect.uninterruptible,
-  Effect.disconnect
-);
+const program = pipe(cliStart, Effect.tapErrorCause(Effect.logError));
 
-Effect.runPromise(program)
-  .then(() => {
-    console.log("🏁 Moonwall Process finished");
-    process.exit();
-  })
-  .catch(console.error);
+Runtime.runMain(program);

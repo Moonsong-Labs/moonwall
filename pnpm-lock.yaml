@@ -57,6 +57,15 @@ importers:
       '@acala-network/chopsticks':
         specifier: ^0.9.2
         version: 0.9.2(debug@4.3.4)
+      '@effect/platform':
+        specifier: ^0.31.1
+        version: 0.31.1(@effect/schema@0.49.4)(effect@2.0.0-next.56)
+      '@effect/platform-node':
+        specifier: ^0.32.1
+        version: 0.32.1(@effect/schema@0.49.4)(effect@2.0.0-next.56)
+      '@effect/schema':
+        specifier: ^0.49.4
+        version: 0.49.4(effect@2.0.0-next.56)(fast-check@3.14.0)
       '@moonbeam-network/api-augment':
         specifier: ^0.2600.0
         version: 0.2600.0
@@ -132,6 +141,9 @@ importers:
       execa:
         specifier: ^8.0.1
         version: 8.0.1
+      fast-check:
+        specifier: ^3.14.0
+        version: 3.14.0
       inquirer:
         specifier: ^9.2.12
         version: 9.2.12
@@ -151,8 +163,8 @@ importers:
         specifier: ^7.5.4
         version: 7.5.4
       viem:
-        specifier: ^1.19.6
-        version: 1.19.6(typescript@5.3.2)
+        specifier: ^1.19.8
+        version: 1.19.8(typescript@5.3.2)
       vitest:
         specifier: 1.0.0-beta.5
         version: 1.0.0-beta.5(@types/node@20.9.4)(@vitest/ui@1.0.0-beta.5)
@@ -230,8 +242,8 @@ importers:
         specifier: 6.8.1
         version: 6.8.1
       viem:
-        specifier: ^1.19.6
-        version: 1.19.6(typescript@5.3.2)
+        specifier: ^1.19.8
+        version: 1.19.8(typescript@5.3.2)
       web3:
         specifier: 4.2.2
         version: 4.2.2(typescript@5.3.2)
@@ -318,8 +330,8 @@ importers:
         specifier: ^7.5.4
         version: 7.5.4
       viem:
-        specifier: ^1.19.6
-        version: 1.19.6(typescript@5.3.2)
+        specifier: ^1.19.8
+        version: 1.19.8(typescript@5.3.2)
       vitest:
         specifier: 1.0.0-beta.5
         version: 1.0.0-beta.5(@types/node@20.9.4)(@vitest/ui@1.0.0-beta.5)
@@ -418,8 +430,8 @@ importers:
         specifier: ^5.3.2
         version: 5.3.2
       viem:
-        specifier: ^1.19.6
-        version: 1.19.6(typescript@5.3.2)
+        specifier: ^1.19.8
+        version: 1.19.8(typescript@5.3.2)
       vitest:
         specifier: 1.0.0-beta.5
         version: 1.0.0-beta.5(@types/node@20.9.4)(@vitest/ui@1.0.0-beta.5)
@@ -962,6 +974,42 @@ packages:
     transitivePeerDependencies:
       - '@algolia/client-search'
     dev: true
+
+  /@effect/platform-node@0.32.1(@effect/schema@0.49.4)(effect@2.0.0-next.56):
+    resolution: {integrity: sha512-i3AwIme1jS+/lE/8Hm92+7XKevbhVf05qqtTtwtUCfCe8Kk4y1pQWrxauNx6zXl+doL4nfzHhEPtyF77r75EoQ==}
+    peerDependencies:
+      effect: 2.0.0-next.56
+    dependencies:
+      '@effect/platform': 0.31.1(@effect/schema@0.49.4)(effect@2.0.0-next.56)
+      effect: 2.0.0-next.56
+      mime: 3.0.0
+      multipasta: 0.1.19
+    transitivePeerDependencies:
+      - '@effect/schema'
+    dev: false
+
+  /@effect/platform@0.31.1(@effect/schema@0.49.4)(effect@2.0.0-next.56):
+    resolution: {integrity: sha512-XJrArDmEFxPEVtrrJohEuv3TQUqBebumLM63r/N4hveObbyp8A+VK8rhPEZ4yrhiLNso8as6wG2XV/JJckaTEQ==}
+    peerDependencies:
+      '@effect/schema': ^0.49.0
+      effect: 2.0.0-next.56
+    dependencies:
+      '@effect/schema': 0.49.4(effect@2.0.0-next.56)(fast-check@3.14.0)
+      effect: 2.0.0-next.56
+      find-my-way: 7.7.0
+      multipasta: 0.1.19
+      path-browserify: 1.0.1
+    dev: false
+
+  /@effect/schema@0.49.4(effect@2.0.0-next.56)(fast-check@3.14.0):
+    resolution: {integrity: sha512-Em5qFV7kXfHpt6n89B2Zwd0ccGgfFpZbBAfQuGPdw/zY18k01Tl3ufKfBA6fFphKQiWrU6JS9btTlq1+/WRRIg==}
+    peerDependencies:
+      effect: 2.0.0-next.56
+      fast-check: ^3.13.2
+    dependencies:
+      effect: 2.0.0-next.56
+      fast-check: 3.14.0
+    dev: false
 
   /@esbuild/android-arm64@0.18.20:
     resolution: {integrity: sha512-Nz4rJcchGDtENV0eMKUNa6L12zz2zBDXuhj/Vjh18zGqB44Bi7MBMSXjgunJgjRhCmKOjnPuZp4Mb6OKqtMHLQ==}
@@ -2092,7 +2140,7 @@ packages:
     resolution: {integrity: sha512-osvveYtyzdEVbt3OfwwXFr4P2iVBL5u1Q3q4ONBfDY/UpOuXmOlbgwc1xECEboY8wIays8Yt6onaWMUdUbfl0A==}
     dependencies:
       '@noble/curves': 1.1.0
-      '@noble/hashes': 1.3.1
+      '@noble/hashes': 1.3.2
       '@scure/base': 1.1.3
 
   /@scure/bip32@1.3.2:
@@ -4359,12 +4407,22 @@ packages:
       iconv-lite: 0.4.24
       tmp: 0.0.33
 
+  /fast-check@3.14.0:
+    resolution: {integrity: sha512-9Z0zqASzDNjXBox/ileV/fd+4P+V/f3o4shM6QawvcdLFh8yjPG4h5BrHUZ8yzY6amKGDTAmRMyb/JZqe+dCgw==}
+    engines: {node: '>=8.0.0'}
+    dependencies:
+      pure-rand: 6.0.4
+    dev: false
+
   /fast-copy@3.0.1:
     resolution: {integrity: sha512-Knr7NOtK3HWRYGtHoJrjkaWepqT8thIVGAwt0p0aUs1zqkAzXZV4vo9fFNwyb5fcqK1GKYFYxldQdIDVKhUAfA==}
 
+  /fast-decode-uri-component@1.0.1:
+    resolution: {integrity: sha512-WKgKWg5eUxvRZGwW8FvfbaH7AXSh2cL+3j5fMGzUMCxWBJ3dV3a7Wz8y2f/uQ0e3B6WmodD3oS54jTQ9HVTIIg==}
+    dev: false
+
   /fast-deep-equal@3.1.3:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
-    dev: true
 
   /fast-glob@3.3.2:
     resolution: {integrity: sha512-oX2ruAFQwf/Orj8m737Y5adxDQO0LAB7/S5MnxCdTNDd4p6BsyIVsv9JQsATbTSq8KHRpLwIHbVlUNatxd+1Ow==}
@@ -4383,6 +4441,12 @@ packages:
   /fast-levenshtein@2.0.6:
     resolution: {integrity: sha512-DCXu6Ifhqcks7TZKY3Hxp3y6qphY5SJZmrWMDrKcERSOXWQdMhU9Ig/PYrzyw/ul9jOIyh0N4M0tbC5hodg8dw==}
     dev: true
+
+  /fast-querystring@1.1.2:
+    resolution: {integrity: sha512-g6KuKWmFXc0fID8WWH0jit4g0AGBoJhCkJMb1RmbsSEUNvQ+ZC8D6CUZ+GtF8nMzSPXnhiePyyqqipzNNEnHjg==}
+    dependencies:
+      fast-decode-uri-component: 1.0.1
+    dev: false
 
   /fast-redact@3.3.0:
     resolution: {integrity: sha512-6T5V1QK1u4oF+ATxs1lWUmlEk6P2T9HqJG3e2DnHOdVgZy2rFJBoEnrIedcTXlkAHU/zKC+7KETJ+KGGKwxgMQ==}
@@ -4426,6 +4490,15 @@ packages:
     engines: {node: '>=8'}
     dependencies:
       to-regex-range: 5.0.1
+
+  /find-my-way@7.7.0:
+    resolution: {integrity: sha512-+SrHpvQ52Q6W9f3wJoJBbAQULJuNEEQwBvlvYwACDhBTLOTMiQ0HYWh4+vC3OivGP2ENcTI1oKlFA2OepJNjhQ==}
+    engines: {node: '>=14'}
+    dependencies:
+      fast-deep-equal: 3.1.3
+      fast-querystring: 1.1.2
+      safe-regex2: 2.0.0
+    dev: false
 
   /find-up@4.1.0:
     resolution: {integrity: sha512-PpOwAdQ/YlXQ2vj8a3h8IipDuYRi3wceVQQGYWxNINccq40Anw7BlsEXCMbt1Zt+OLA6Fq9suIpIWD0OsnISlw==}
@@ -5595,6 +5668,12 @@ packages:
     dependencies:
       mime-db: 1.52.0
 
+  /mime@3.0.0:
+    resolution: {integrity: sha512-jSCU7/VB1loIWBZe14aEYHU/+1UMEHoaO7qxCOVJOw9GgH72VAWppxNcjU+x9a2k3GSIBXNKxXQFqRvvZ7vr3A==}
+    engines: {node: '>=10.0.0'}
+    hasBin: true
+    dev: false
+
   /mimic-fn@2.1.0:
     resolution: {integrity: sha512-OqbOk5oEQeAZ8WXWydlu9HJjz9WVdEIvamMCcXmuqUYjTknH/sqsWvhQ3vgwKFRR1HpjvNBKQ37nbJgYzGqGcg==}
     engines: {node: '>=6'}
@@ -5779,6 +5858,10 @@ packages:
 
   /multiformats@9.9.0:
     resolution: {integrity: sha512-HoMUjhH9T8DDBNT+6xzkrd9ga/XiBI4xLr58LJACwK6G3HTOPeMz4nB4KJs33L2BelrIJa7P0VuNaVF3hMYfjg==}
+    dev: false
+
+  /multipasta@0.1.19:
+    resolution: {integrity: sha512-vRQ17a7eQRImx/vS4PcJlDDuzzCT5nigItgDFNT/db9NiVEiscdkUWbUg3cHrv2x0oznNu5YNO+NBo5Z2rBL+w==}
     dev: false
 
   /mute-stream@1.0.0:
@@ -6215,6 +6298,10 @@ packages:
       entities: 4.5.0
     dev: false
 
+  /path-browserify@1.0.1:
+    resolution: {integrity: sha512-b7uo2UCUOYZcnF/3ID0lulOJi/bafxa1xPe7ZPsammBSpjSWQkjNxlt635YGS2MiR9GjvuXCtz2emr3jbsz98g==}
+    dev: false
+
   /path-equal@1.2.5:
     resolution: {integrity: sha512-i73IctDr3F2W+bsOWDyyVm/lqsXO47aY9nsFZUjTT/aljSbkxHxxCoyZ9UUrM8jK0JVod+An+rl48RCsvWM+9g==}
     dev: true
@@ -6480,6 +6567,10 @@ packages:
     resolution: {integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==}
     engines: {node: '>=6'}
 
+  /pure-rand@6.0.4:
+    resolution: {integrity: sha512-LA0Y9kxMYv47GIPJy6MI84fqTd2HmYZI83W/kM/SkKfDlajnZYfmXFTxkbY+xSBPkLJxltMa9hIkmdc29eguMA==}
+    dev: false
+
   /querystringify@2.2.0:
     resolution: {integrity: sha512-FIqgj2EUvTa7R50u0rGsyTftzjYmv/a3hO345bZNrqabNqjtgiDMgmo4mkUjd+nzU5oF3dClKqFIPUKybUyqoQ==}
     dev: false
@@ -6639,6 +6730,11 @@ packages:
       signal-exit: 3.0.7
     dev: false
 
+  /ret@0.2.2:
+    resolution: {integrity: sha512-M0b3YWQs7R3Z917WRQy1HHA7Ba7D8hvZg6UE5mLykJxQVE2ju0IXbGlaHPPlkY+WN7wFP+wUMXmBFA0aV6vYGQ==}
+    engines: {node: '>=4'}
+    dev: false
+
   /retry@0.12.0:
     resolution: {integrity: sha512-9LkiTwjUh6rT555DtE9rTX+BKByPfrMzEAtnlEtdEwr3Nkffwiihqe2bWADg+OQRjt9gl6ICdmB/ZFDCGAtSow==}
     engines: {node: '>= 4'}
@@ -6737,6 +6833,12 @@ packages:
       get-intrinsic: 1.2.2
       is-regex: 1.1.4
     dev: true
+
+  /safe-regex2@2.0.0:
+    resolution: {integrity: sha512-PaUSFsUaNNuKwkBijoAPHAK6/eM6VirvyPWlZ7BAQy4D+hCvh4B6lIG+nPdhbFfIbP+gTGBcrdsOaUs0F+ZBOQ==}
+    dependencies:
+      ret: 0.2.2
+    dev: false
 
   /safe-stable-stringify@2.4.3:
     resolution: {integrity: sha512-e2bDA2WJT0wxseVd4lsDP4+3ONX6HpMXQa1ZhFQ7SU+GjvORCmShbCMltrtIDfkYhVHrOcPtj+KhmDBdPdZD1g==}
@@ -7755,8 +7857,8 @@ packages:
       spdx-expression-parse: 3.0.1
     dev: true
 
-  /viem@1.19.6(typescript@5.3.2):
-    resolution: {integrity: sha512-WSBHBMurWIWQk2yisOD8hqSA5S56cZu6onty3hzauVjiHMildtVWujF7YT0xjoU40GpFODvJASRR2RFdzgvUUg==}
+  /viem@1.19.8(typescript@5.3.2):
+    resolution: {integrity: sha512-AgoZcLej7u4Zw/ojDsDWfonPSoz07EirrvXVndAMG78ikHf7VnRbxkFACAFg2SgNbCXmr5+ePHpgd53dMVIZ4Q==}
     peerDependencies:
       typescript: '>=5.0.4'
     peerDependenciesMeta:
