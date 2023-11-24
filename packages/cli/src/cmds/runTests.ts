@@ -1,12 +1,12 @@
 import { Environment } from "@moonwall/types";
+import { Config, Effect } from "effect";
 import path from "path";
-import { Effect, Config } from "effect";
 import type { UserConfig } from "vitest";
 import { startVitest } from "vitest/node";
+import * as Err from "../errors";
 import { clearNodeLogs } from "../internal/cmdFunctions/tempLogs";
 import { commonChecks } from "../internal/launcherCommon";
 import { importAsyncConfig, loadEnvVars } from "../lib/configReader";
-import * as Err from "../errors";
 import {
   MoonwallContext,
   createContextEffect,
@@ -149,10 +149,9 @@ export const executeTestEffect = (env: Environment, additionalArgs?: object) => 
     const folders = env.testFileDir.map((folder) => path.join(".", folder, "/"));
 
     return yield* _(
-      Effect.tryPromise({
-        try: () => startVitest("test", folders, { ...options, ...additionalArgs }),
-        catch: (e: any) => new Error(e.message),
-      })
+      Effect.interruptible(
+        Effect.promise(() => startVitest("test", folders, { ...options, ...additionalArgs }))
+      ).pipe(Effect.disconnect)
     );
   });
 };

@@ -201,11 +201,7 @@ export interface ProviderInterface {
 }
 
 export class ProviderInterfaceFactory {
-  constructor(
-    private name: string,
-    private type: ProviderType,
-    private connect: () => any
-  ) {}
+  constructor(private name: string, private type: ProviderType, private connect: () => any) {}
 
   public async create(): Promise<ProviderInterface> {
     switch (this.type) {

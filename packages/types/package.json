@@ -58,26 +58,26 @@
     "schema": "typescript-json-schema --tsNodeRegister --esModuleInterop -o config_schema.json ./src/config.ts MoonwallConfig"
   },
   "dependencies": {
-    "@polkadot/api": "^10.11.1",
-    "@polkadot/api-base": "^10.11.1",
-    "@polkadot/keyring": "^12.6.1",
-    "@polkadot/types": "^10.11.1",
-    "@polkadot/util": "^12.6.1",
-    "@polkadot/util-crypto": "^12.6.1",
-    "@types/node": "^20.9.4",
-    "@zombienet/utils": "^0.0.24",
-    "bottleneck": "^2.19.5",
-    "debug": "^4.3.4",
+    "@polkadot/api": "10.11.1",
+    "@polkadot/api-base": "10.11.1",
+    "@polkadot/keyring": "12.6.1",
+    "@polkadot/types": "10.11.1",
+    "@polkadot/util": "12.6.1",
+    "@polkadot/util-crypto": "12.6.1",
+    "@types/node": "20.9.2",
+    "@zombienet/utils": "0.0.23",
+    "bottleneck": "2.19.5",
+    "debug": "4.3.4",
     "ethers": "6.8.1",
-    "viem": "^1.19.8",
-    "web3": "4.2.2"
+    "viem": "1.19.8",
+    "web3": "4.2.1"
   },
   "publishConfig": {
     "access": "public"
   },
   "devDependencies": {
-    "tsup": "^8.0.1",
-    "typescript": "^5.3.2",
-    "typescript-json-schema": "^0.62.0"
+    "tsup": "7.2.0",
+    "typescript": "5.2.2",
+    "typescript-json-schema": "0.62.0"
   }
 }

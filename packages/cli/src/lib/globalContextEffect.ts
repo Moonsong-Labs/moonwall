@@ -114,14 +114,14 @@ export class MoonwallContext {
       providers: env.connections
         ? ProviderFactory.prepare(env.connections)
         : isEthereumDevConfig()
-          ? ProviderFactory.prepareDefaultDev()
-          : ProviderFactory.prepare([
-              {
-                name: "node",
-                type: "polkadotJs",
-                endpoints: [vitestAutoUrl],
-              },
-            ]),
+        ? ProviderFactory.prepareDefaultDev()
+        : ProviderFactory.prepare([
+            {
+              name: "node",
+              type: "polkadotJs",
+              endpoints: [vitestAutoUrl],
+            },
+          ]),
     };
   }
 
@@ -345,8 +345,8 @@ export class MoonwallContext {
       this.environment.providers = env.connections
         ? ProviderFactory.prepare(env.connections)
         : isEthereumZombieConfig()
-          ? ProviderFactory.prepareDefaultZombie()
-          : ProviderFactory.prepareNoEthDefaultZombie();
+        ? ProviderFactory.prepareDefaultZombie()
+        : ProviderFactory.prepareNoEthDefaultZombie();
     }
 
     if (this.providers.length > 0) {
@@ -503,7 +503,12 @@ export class MoonwallContext {
         yield* _(Effect.sync(() => ctx.ipcServer?.close()));
         yield* _(Effect.sync(() => ctx.ipcServer?.removeAllListeners()));
       }
-    });
+    }).pipe(
+      Effect.timeoutFail({
+        duration: 5000,
+        onTimeout: () => new Err.MoonwallContextDestroyError(),
+      })
+    );
   }
 }
 

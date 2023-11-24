@@ -1,18 +1,15 @@
+import "@moonbeam-network/api-augment";
 import { describeSuite, expect, beforeAll, MoonwallContext } from "@moonwall/cli";
 import { BALTATHAR_ADDRESS, CHARLETH_ADDRESS, ETHAN_ADDRESS, alith } from "@moonwall/util";
 import { parseEther, formatEther } from "ethers";
-import { ApiPromise } from "@polkadot/api";
-import "@moonbeam-network/api-augment";
 
 describeSuite({
   id: "X1",
   title: "Basic chopsticks test",
   foundationMethods: "chopsticks",
   testCases: ({ context, it, log }) => {
-    let api: ApiPromise;
 
     beforeAll(() => {
-      api = context.polkadotJs();
     });
 
     it({
@@ -21,12 +18,12 @@ describeSuite({
       timeout: 60000,
       // modifier:"only",
       test: async function () {
-        const chainName = api.consts.system.version.specName.toString();
-        const currentBlockHeight = (await api.rpc.chain.getHeader()).number.toNumber();
+        const chainName = context.polkadotJs().consts.system.version.specName.toString();
+        const currentBlockHeight = (await context.polkadotJs().rpc.chain.getHeader()).number.toNumber();
         log(`You are now connected to ${chainName} at height #${currentBlockHeight}`);
         expect(currentBlockHeight).toBeGreaterThan(0);
         expect(["dancebox", "moonriver", "moonbeam"].includes(chainName)).toBe(true);
-        log(JSON.stringify(await api.rpc.state.getStorage(":code")).slice(0, 20));
+        log(JSON.stringify(await context.polkadotJs().rpc.state.getStorage(":code")).slice(0, 20));
         log(`This chain is an Ethereum chain: ${context.isEthereumChain}`);
         log(`Alith Address is: ${context.keyring.alice.address}`);
       },
@@ -37,11 +34,11 @@ describeSuite({
       title: "Send a transaction ",
       timeout: 60000,
       test: async function () {
-        const currentBalance = (await api.query.system.account(ETHAN_ADDRESS)).data.free;
-        await api.tx.balances.transfer(ETHAN_ADDRESS, parseEther("10")).signAndSend(alith);
+        const currentBalance = (await context.polkadotJs().query.system.account(ETHAN_ADDRESS)).data.free;
+        await context.polkadotJs().tx.balances.transfer(ETHAN_ADDRESS, parseEther("10")).signAndSend(alith);
         await context.createBlock();
 
-        const balanceAfter = (await api.query.system.account(ETHAN_ADDRESS)).data.free;
+        const balanceAfter = (await context.polkadotJs().query.system.account(ETHAN_ADDRESS)).data.free;
         expect(currentBalance.lt(balanceAfter)).toBeTruthy();
       },
     });
@@ -51,9 +48,9 @@ describeSuite({
       title: "Skips multiple blocks ",
       timeout: 60000,
       test: async function () {
-        const currentBlock = (await api.rpc.chain.getHeader()).number.toNumber();
+        const currentBlock = (await context.polkadotJs().rpc.chain.getHeader()).number.toNumber();
         await context.createBlock({ count: 3 });
-        const laterBlock = (await api.rpc.chain.getHeader()).number.toNumber();
+        const laterBlock = (await context.polkadotJs().rpc.chain.getHeader()).number.toNumber();
         expect(laterBlock - currentBlock).toBe(3);
       },
     });
@@ -71,7 +68,7 @@ describeSuite({
         ];
 
         const balBefore = (
-          await api.query.system.account("0x3Cd0A705a2DC65e5b1E1205896BaA2be8A07c6e0")
+          await context.polkadotJs().query.system.account("0x3Cd0A705a2DC65e5b1E1205896BaA2be8A07c6e0")
         ).data.free;
 
         await context.setStorage({
@@ -81,7 +78,7 @@ describeSuite({
         });
         await context.createBlock();
         const balAfter = (
-          await api.query.system.account("0x3Cd0A705a2DC65e5b1E1205896BaA2be8A07c6e0")
+          await context.polkadotJs().query.system.account("0x3Cd0A705a2DC65e5b1E1205896BaA2be8A07c6e0")
         ).data.free;
         log(
           `Balance of 0x3Cd0A705a2DC65e5b1E1205896BaA2be8A07c6e0 before: ${formatEther(
@@ -99,11 +96,11 @@ describeSuite({
       timeout: 120000,
       modifier: "skip",
       test: async function () {
-        const rtBefore = api.consts.system.version.specVersion.toNumber();
+        const rtBefore = context.polkadotJs().consts.system.version.specVersion.toNumber();
         const ctx = MoonwallContext.getContext();
         log(ctx.rtUpgradePath);
         await context.upgradeRuntime();
-        const rtafter = api.consts.system.version.specVersion.toNumber();
+        const rtafter = context.polkadotJs().consts.system.version.specVersion.toNumber();
         expect(rtBefore).toBeLessThan(rtafter);
       },
     });
@@ -114,13 +111,13 @@ describeSuite({
       timeout: 60000,
       test: async function () {
         const expectEvents = [
-          api.events.system.ExtrinsicSuccess,
-          api.events.balances.Transfer,
-          api.events.system.NewAccount,
-          // api.events.authorFilter.EligibleUpdated
+          context.polkadotJs().events.system.ExtrinsicSuccess,
+          context.polkadotJs().events.balances.Transfer,
+          context.polkadotJs().events.system.NewAccount,
+          // context.polkadotJs().events.authorFilter.EligibleUpdated
         ];
 
-        await api.tx.balances.transfer(CHARLETH_ADDRESS, parseEther("3")).signAndSend(alith);
+        await context.polkadotJs().tx.balances.transfer(CHARLETH_ADDRESS, parseEther("3")).signAndSend(alith);
         await context.createBlock({ expectEvents, logger: log });
       },
     });
@@ -130,16 +127,16 @@ describeSuite({
       title: "Create block, allow failures and check events",
       timeout: 60000,
       test: async function () {
-        await api.tx.balances
+        await context.polkadotJs().tx.balances
           .forceTransfer(BALTATHAR_ADDRESS, CHARLETH_ADDRESS, parseEther("3"))
           .signAndSend(alith);
-        // await api.tx.balances.transfer(CHARLETH_ADDRESS, parseEther("3")).signAndSend(alith);
+        // await context.polkadotJs().tx.balances.transfer(CHARLETH_ADDRESS, parseEther("3")).signAndSend(alith);
         const { result } = await context.createBlock({ allowFailures: true });
 
-        const apiAt = await api.at(result);
+        const apiAt = await context.polkadotJs().at(result);
         const events = await apiAt.query.system.events();
         expect(
-          events.find((evt) => api.events.system.ExtrinsicFailed.is(evt.event)),
+          events.find((evt) => context.polkadotJs().events.system.ExtrinsicFailed.is(evt.event)),
           "No Event found in block"
         ).toBeTruthy();
       },

@@ -45,12 +45,12 @@ export type FoundationContextMap = {
   [K in FoundationMethod]: K extends "dev"
     ? DevModeContext
     : K extends "chopsticks"
-      ? ChopsticksContext
-      : K extends "zombie"
-        ? ZombieContext
-        : K extends "read_only"
-          ? ReadOnlyContext
-          : /* default: */ GenericContext;
+    ? ChopsticksContext
+    : K extends "zombie"
+    ? ZombieContext
+    : K extends "read_only"
+    ? ReadOnlyContext
+    : /* default: */ GenericContext;
 };
 
 export type TestContextMap = {
@@ -381,7 +381,7 @@ export interface DevModeContext extends GenericContext {
         })
       | (EthersTransactionOptions & {
           libraryType: "ethers";
-        }),
+        })
   >(
     options: TOptions
   ): Promise<`0x${string}`>;

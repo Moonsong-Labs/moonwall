@@ -6,4 +6,4 @@
 "@moonwall/tests": patch
 ---
 
-Beta Release
+Roll back zombie
