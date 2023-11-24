@@ -1,5 +1,11 @@
 # @moonwall/tests
 
+## 5.0.0-beta.5
+
+### Patch Changes
+
+- cfe5adf: Disconnects
+
 ## 5.0.0-beta.4
 
 ### Patch Changes

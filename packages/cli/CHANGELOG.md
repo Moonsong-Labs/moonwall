@@ -1,5 +1,14 @@
 # @moonwall/cli
 
+## 5.0.0-beta.5
+
+### Patch Changes
+
+- cfe5adf: Disconnects
+- Updated dependencies [cfe5adf]
+  - @moonwall/types@5.0.0-beta.5
+  - @moonwall/util@5.0.0-beta.5
+
 ## 5.0.0-beta.4
 
 ### Patch Changes
