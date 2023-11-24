@@ -44,10 +44,6 @@ function parseConfigSync(filePath: string) {
   return result;
 }
 
-export async function importConfig(configPath: string): Promise<MoonwallConfig> {
-  return await import(configPath);
-}
-
 export function isOptionSet(option: string): boolean {
   const config = importJsonConfig();
   const env = config.environments.find((env) => env.name == process.env.MOON_TEST_ENV)!;
@@ -69,6 +65,10 @@ export function isEthereumDevConfig(): boolean {
 }
 
 export function importJsonConfig(): MoonwallConfig {
+  if (globalThis.moonwall) {
+    return globalThis.moonwall;
+  }
+
   const configPath = process.env.MOON_CONFIG_PATH!;
   const filePath = path.isAbsolute(configPath) ? configPath : path.join(process.cwd(), configPath);
 
@@ -83,6 +83,9 @@ export function importJsonConfig(): MoonwallConfig {
 }
 
 export async function importAsyncConfig() {
+  if (globalThis.moonwall) {
+    return globalThis.moonwall;
+  }
   const configPath = process.env.MOON_CONFIG_PATH!;
   const filePath = path.isAbsolute(configPath) ? configPath : path.join(process.cwd(), configPath);
 

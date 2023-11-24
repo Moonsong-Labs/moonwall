@@ -25,11 +25,10 @@ import { chopsticksHandler } from "./handlers/chopsticksHandler";
 import { devHandler } from "./handlers/devHandler";
 import { readOnlyHandler } from "./handlers/readOnlyHandler";
 import { zombieHandler } from "./handlers/zombieHandler";
-import { createContextEffect } from "./globalContextEffect";
+import { MoonwallContext, createContextEffect } from "./globalContextEffect";
 
 const RT_VERSION = Number(process.env.MOON_RTVERSION);
 const RT_NAME = process.env.MOON_RTNAME;
-let limiter: Bottleneck | undefined = undefined;
 
 // About: This has been designed in the handler pattern so that eventually we can integrate it to vitest
 // https://vitest.dev/advanced/runner.html
@@ -63,7 +62,10 @@ let limiter: Bottleneck | undefined = undefined;
  *        },
  *      });
  */
-export function describeSuite<T extends FoundationType>({
+export const describeSuite = <T extends FoundationType>(params: ITestSuiteType<T>) =>
+  Effect.runSync(Effect.interruptible(describeSuiteEffect(params)).pipe(Effect.disconnect));
+
+const describeSuiteEffect = <T extends FoundationType>({
   id: suiteId,
   title,
   testCases,
@@ -71,128 +73,170 @@ export function describeSuite<T extends FoundationType>({
   minRtVersion,
   chainType,
   notChainType,
-}: ITestSuiteType<T>): void {
-  if (
-    (minRtVersion && minRtVersion > RT_VERSION) ||
-    (chainType && chainType !== RT_NAME) ||
-    (notChainType && notChainType === RT_NAME)
-  ) {
-    describe.skip(`🗃️  #${suiteId} ${title}`);
-    return;
-  }
-  let ctx: any;
+}: ITestSuiteType<T>) =>
+  Effect.gen(function* (_) {
+    if (
+      (minRtVersion && minRtVersion > RT_VERSION) ||
+      (chainType && chainType !== RT_NAME) ||
+      (notChainType && notChainType === RT_NAME)
+    ) {
+      yield* _(Effect.sync(() => describe.skip(`🗃️  #${suiteId} ${title}`)));
+      return;
+    }
 
-  beforeAll(async function () {
-    const effect = Effect.gen(function* (_) {
-      const globalConfig = yield* _(
-        Effect.tryPromise({
-          try: () => importAsyncConfig(),
-          catch: () => new Err.ConfigError("Could not load config before running test"),
-        })
-      );
+    let ctx: MoonwallContext;
+    let limiter: Bottleneck | undefined = undefined;
 
-      yield* _(Effect.config(Config.string("MOON_TEST_ENV")));
-      const env = globalConfig.environments.find(({ name }) => name === process.env.MOON_TEST_ENV);
+    yield* _(
+      Effect.sync(() =>
+        beforeAll(
+          async () =>
+            await Effect.runPromise(
+              Effect.gen(function* (_) {
+                const globalConfig = yield* _(
+                  Effect.tryPromise({
+                    try: () => importAsyncConfig(),
+                    catch: () => new Err.ConfigError("Could not load config before running test"),
+                  })
+                );
 
-      if (env.foundation.type === "read_only") {
-        const settings = loadParams(env.foundation.launchSpec);
-        limiter = new Bottleneck(settings);
-      }
+                yield* _(Effect.config(Config.string("MOON_TEST_ENV")));
+                const env = globalConfig.environments.find(
+                  ({ name }) => name === process.env.MOON_TEST_ENV
+                );
 
-      return yield* _(createContextEffect());
-    });
-
-    ctx = await Effect.runPromise(effect);
-  });
-
-  afterAll(async function () {
-    const effect = ctx.destroyEffect().pipe(
-      Effect.timeoutFail({
-        duration: "10 seconds",
-        onTimeout: () => new Err.MoonwallContextDestroyError(),
-      })
+                if (env.foundation.type === "read_only") {
+                  const settings = loadParams(env.foundation.launchSpec);
+                  limiter = new Bottleneck(settings);
+                }
+                ctx = yield* _(createContextEffect());
+                return;
+              })
+            )
+        )
+      )
     );
 
-    await Effect.runPromise(effect);
-    ctx = null;
-  });
+    yield* _(
+      Effect.sync(() =>
+        afterAll(
+          async () =>
+            await Effect.runPromise(
+              ctx.destroyEffect().pipe(
+                Effect.timeoutFail({
+                  duration: "10 seconds",
+                  onTimeout: () => new Err.MoonwallContextDestroyError(),
+                })
+              )
+            )
+        )
+      )
+    );
 
-  const testCase = (params: ITestCase) => {
-    if (params.modifier) {
-      it[params.modifier](
-        `📁  #${suiteId.concat(params.id)} ${params.title}`,
-        params.test,
-        params.timeout
-      );
-      return;
-    }
-    if (
-      (params.minRtVersion && params.minRtVersion > RT_VERSION) ||
-      (params.chainType && params.chainType !== RT_NAME) ||
-      (params.notChainType && params.notChainType === RT_NAME)
-    ) {
-      it.skip(`📁  #${suiteId.concat(params.id)} ${params.title}`, params.test, params.timeout);
-      return;
-    }
-
-    it(`📁  #${suiteId.concat(params.id)} ${params.title}`, params.test, params.timeout);
-  };
-
-  describe(`🗃️  #${suiteId} ${title}`, function () {
-    const getApi = <T extends ProviderType>(apiType?: T, apiName?: string) => {
-      const provider = ctx!.providers.find((prov) => {
-        if (apiType && apiName) {
-          return prov.type == apiType && prov.name === apiName;
-        } else if (apiType && !apiName) {
-          return prov.type == apiType;
-        } else if (!apiType && apiName) {
-          return prov.name === apiName;
-        } else {
-          return false;
-        }
-      });
-
-      if (!provider) {
-        throw new Error(
-          `API of type ${apiType} ${apiName ? "and name " + apiName : ""} could not be found`
+    const testCase = (params: ITestCase) => {
+      if (params.modifier) {
+        it[params.modifier](
+          `📁  #${suiteId.concat(params.id)} ${params.title}`,
+          params.test,
+          params.timeout
         );
+        return;
+      }
+      if (
+        (params.minRtVersion && params.minRtVersion > RT_VERSION) ||
+        (params.chainType && params.chainType !== RT_NAME) ||
+        (params.notChainType && params.notChainType === RT_NAME)
+      ) {
+        Effect.sync(() =>
+          it.skip(`📁  #${suiteId.concat(params.id)} ${params.title}`, params.test, params.timeout)
+        );
+        return;
       }
 
-      return !limiter
-        ? (provider.api as ProviderMap[T])
-        : scheduleWithBottleneck(provider.api as ProviderMap[T]);
+      it(`📁  #${suiteId.concat(params.id)} ${params.title}`, params.test, params.timeout);
     };
+    yield* _(
+      Effect.sync(() =>
+        describe(`🗃️  #${suiteId} ${title}`, async () =>
+          await Effect.runPromise(
+            Effect.gen(function* (_) {
+              const getApi = <T extends ProviderType>(apiType?: T, apiName?: string) => {
+                const provider = ctx!.providers.find((prov) => {
+                  if (apiType && apiName) {
+                    return prov.type == apiType && prov.name === apiName;
+                  } else if (apiType && !apiName) {
+                    return prov.type == apiType;
+                  } else if (!apiType && apiName) {
+                    return prov.name === apiName;
+                  } else {
+                    return false;
+                  }
+                });
 
-    const context: GenericContext = {
-      api: <T extends ProviderType>(type: T, name?: string) => getApi(type, name),
-      viem: (apiName?: string): ViemClient => getApi("viem", apiName),
-      polkadotJs: (apiName?: string): ApiPromise => getApi("polkadotJs", apiName),
-      ethers: (apiName?: string): Signer => getApi("ethers", apiName),
-      web3: (apiName?: string): Web3 => getApi("web3", apiName),
-    };
+                if (!provider) {
+                  throw new Error(
+                    `API of type ${apiType} ${
+                      apiName ? "and name " + apiName : ""
+                    } could not be found`
+                  );
+                }
 
-    const foundationHandlers: Record<FoundationType, FoundationHandler<any>> = {
-      dev: devHandler,
-      chopsticks: chopsticksHandler,
-      zombie: zombieHandler,
-      read_only: readOnlyHandler,
-      fork: readOnlyHandler,
-    };
+                return !limiter
+                  ? (provider.api as ProviderMap[T])
+                  : scheduleWithBottleneck(provider.api as ProviderMap[T]);
+              };
 
-    const handler = foundationHandlers[foundationMethods];
-    if (!handler) {
-      throw new Error(`Unsupported foundation methods: ${foundationMethods}`);
-    }
+              const scheduleWithBottleneck = <T extends ProviderApi>(api: T): T => {
+                return new Proxy(api, {
+                  get(target, propKey) {
+                    const origMethod = target[propKey];
+                    if (typeof origMethod === "function" && propKey !== "rpc" && propKey !== "tx") {
+                      return (...args: any[]) => {
+                        return limiter!.schedule(() => origMethod.apply(target, args));
+                      };
+                    }
+                    return origMethod;
+                  },
+                });
+              };
 
-    handler({
-      testCases: testCases as TestCasesFn<any>,
-      context,
-      testCase,
-      logger,
-      ctx,
-    });
+              const context: GenericContext = {
+                api: <T extends ProviderType>(type: T, name?: string) => getApi(type, name),
+                viem: (apiName?: string): ViemClient => getApi("viem", apiName),
+                polkadotJs: (apiName?: string): ApiPromise => getApi("polkadotJs", apiName),
+                ethers: (apiName?: string): Signer => getApi("ethers", apiName),
+                web3: (apiName?: string): Web3 => getApi("web3", apiName),
+              };
+
+              const foundationHandlers: Record<FoundationType, FoundationHandler<any>> = {
+                dev: devHandler,
+                chopsticks: chopsticksHandler,
+                zombie: zombieHandler,
+                read_only: readOnlyHandler,
+                fork: readOnlyHandler,
+              };
+
+              const handler = yield* _(Effect.sync(() => foundationHandlers[foundationMethods]));
+              if (!handler) {
+                Effect.fail(new Err.InvalidFoundationError({ foundation: foundationMethods }));
+              }
+
+              yield* _(
+                Effect.sync(() =>
+                  handler({
+                    testCases: testCases as TestCasesFn<any>,
+                    context,
+                    testCase,
+                    logger,
+                    ctx,
+                  })
+                )
+              );
+            })
+          ))
+      )
+    );
   });
-}
 
 const logger = () => {
   process.env.DEBUG_COLORS = "1";
@@ -217,18 +261,4 @@ const loadParams = (config?: ReadOnlyLaunchSpec) => {
   if (typeof config.rateLimiter === "object") {
     return config.rateLimiter;
   }
-};
-
-const scheduleWithBottleneck = <T extends ProviderApi>(api: T): T => {
-  return new Proxy(api, {
-    get(target, propKey) {
-      const origMethod = target[propKey];
-      if (typeof origMethod === "function" && propKey !== "rpc" && propKey !== "tx") {
-        return (...args: any[]) => {
-          return limiter!.schedule(() => origMethod.apply(target, args));
-        };
-      }
-      return origMethod;
-    },
-  });
 };

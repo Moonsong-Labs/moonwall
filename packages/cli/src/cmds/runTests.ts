@@ -12,6 +12,7 @@ import {
   createContextEffect,
   runNetworkOnlyEffect,
 } from "../lib/globalContextEffect";
+import { getCurrentDirectoryName } from "../internal/fileCheckers";
 
 export const testEffect = (envName: string, additionalArgs?: object) => {
   return Effect.gen(function* (_) {
@@ -110,11 +111,14 @@ export const executeTestEffect = (env: Environment, additionalArgs?: object) => 
       );
     }
 
+    const envPath = path.join(getCurrentDirectoryName(), "internal", "vitest", "environment.js");
+
     const baseOptions = {
       watch: false,
       globals: true,
       reporters: env.reporters ? env.reporters : ["default"],
       outputFile: env.reportFile,
+      setupFiles: envPath,
       testTimeout: env.timeout || globalConfig.defaultTestTimeout,
       hookTimeout: env.timeout || globalConfig.defaultTestTimeout,
       passWithNoTests: false,
