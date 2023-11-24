@@ -1,18 +1,18 @@
 import "../internal/logging";
 import "@moonbeam-network/api-augment";
 import { NodeContext, Runtime } from "@effect/platform-node";
-import yargs from "yargs";
-import { hideBin } from "yargs/helpers";
-import { testEffect } from "./runTests";
-import { generateConfig } from "../internal/cmdFunctions/initialisation";
-import { fetchArtifact } from "../internal/cmdFunctions/fetchArtifact";
 import dotenv from "dotenv";
 import { Effect, pipe } from "effect";
-import * as Err from "../errors";
-import { main } from "./main";
 import fs from "fs";
-import { runNetworkCmdEffect } from "./runNetwork";
 import log from "why-is-node-running";
+import yargs from "yargs";
+import { hideBin } from "yargs/helpers";
+import * as Err from "../errors";
+import { fetchArtifact } from "../internal/cmdFunctions/fetchArtifact";
+import { generateConfig } from "../internal/cmdFunctions/initialisation";
+import { main } from "./main";
+import { runNetworkCmdEffect } from "./runNetwork";
+import { testEffect } from "./runTests";
 
 dotenv.config();
 
