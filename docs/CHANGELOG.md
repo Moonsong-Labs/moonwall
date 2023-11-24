@@ -1,5 +1,11 @@
 # @moonwall/docs
 
+## 5.0.0-beta.6
+
+### Patch Changes
+
+- 5349da1: rollback vitest
+
 ## 5.0.0-beta.5
 
 ### Patch Changes
