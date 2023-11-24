@@ -9,6 +9,7 @@
     "@moonwall/tests": "5.0.0-beta.1"
   },
   "changesets": [
+    "kind-rabbits-ring",
     "small-years-deliver"
   ]
 }

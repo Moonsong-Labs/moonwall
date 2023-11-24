@@ -1,6 +1,17 @@
 # @moonwall/docs
 
-## 4.4.2
+
+## 5.0.0-beta.3
+
+### Patch Changes
+
+- af16a7d: Run Main
+
+## 5.0.0-beta.2
+
+### Patch Changes
+
+- Beta Release
 
 ## 4.4.1
 
