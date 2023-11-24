@@ -55,7 +55,7 @@ function returnDefaultSigner() {
 
 export async function createDevBlock<
   ApiType extends ApiTypes,
-  Calls extends CallType<ApiType> | Array<CallType<ApiType>>,
+  Calls extends CallType<ApiType> | Array<CallType<ApiType>>
 >(context: GenericContext, options: BlockCreation, transactions?: Calls) {
   const containsViem =
     (context as DevModeContext).isEthereumChain &&
