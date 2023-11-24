@@ -166,43 +166,65 @@ function addThreadConfig(
   config: UserConfig,
   threads: number | boolean | object = false
 ): UserConfig {
-  const configWithThreads: UserConfig = {
+  let configWithThreads: UserConfig = {
     ...config,
-    pool: "threads",
-    poolOptions: {
-      threads: {
-        isolate: true,
-        minThreads: 1,
-        maxThreads: 1,
-        singleThread: true,
-        useAtomics: false,
-      },
-    },
+    minThreads: 1,
+    maxThreads: 1,
+    singleThread: true,
+    useAtomics: false,
+    isolate: true,
+    // pool: "threads",
+    // poolOptions: {
+    //   threads: {
+    //     isolate: true,
+    //     minThreads: 1,
+    //     maxThreads: 1,
+    //     singleThread: true,
+    //     useAtomics: false,
+    //   },
+    // },
   };
 
   if (threads == true && process.env.MOON_RECYCLE !== "true") {
-    configWithThreads.poolOptions.threads = {
+    configWithThreads = {
+      ...configWithThreads,
       isolate: true,
       minThreads: 1,
-      maxThreads: 3,
+      maxThreads: 4,
       singleThread: false,
       useAtomics: false,
     };
+    // configWithThreads.poolOptions.threads = {
+    //   isolate: true,
+    //   minThreads: 1,
+    //   maxThreads: 3,
+    //   singleThread: false,
+    //   useAtomics: false,
+    // };
   }
 
   if (typeof threads === "number") {
-    configWithThreads.poolOptions.threads.maxThreads = threads;
-    configWithThreads.poolOptions.threads.singleThread = false;
+    configWithThreads = {
+      ...configWithThreads,
+      isolate: true,
+      minThreads: 1,
+      maxThreads: threads,
+      singleThread: false,
+      useAtomics: false,
+    };
+    // configWithThreads.poolOptions.threads.maxThreads = threads;
+    // configWithThreads.poolOptions.threads.singleThread = false;
   }
 
   if (typeof threads === "object") {
-    const key = Object.keys(threads)[0];
-    if (["threads", "forks", "vmThreads", "typescript"].includes(key)) {
-      configWithThreads.pool = key as "threads" | "forks" | "vmThreads" | "typescript";
-      configWithThreads.poolOptions = Object.values(threads)[0];
-    } else {
-      throw new Error(`Invalid pool type: ${key}`);
-    }
+    throw new Error("Not implemented (Rolled back vitest version)");
+    // const key = Object.keys(threads)[0];
+    // if (["threads", "forks", "vmThreads", "typescript"].includes(key)) {
+    //   configWithThreads.pool = key as "threads" | "forks" | "vmThreads" | "typescript";
+    //   configWithThreads.poolOptions = Object.values(threads)[0];
+    // } else {
+    //   throw new Error(`Invalid pool type: ${key}`);
+    // }
   }
   return configWithThreads;
 }
