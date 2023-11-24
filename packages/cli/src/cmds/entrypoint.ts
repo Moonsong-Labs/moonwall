@@ -5,12 +5,12 @@ import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import { testEffect } from "./runTests";
 import { generateConfig } from "../internal/cmdFunctions/initialisation";
-import { main } from "./main";
 import { fetchArtifact } from "../internal/cmdFunctions/fetchArtifact";
 import dotenv from "dotenv";
 import { Effect, pipe } from "effect";
 import * as Err from "../errors";
 import { main } from "./main";
+import fs from "fs";
 import { runNetworkCmdEffect } from "./runNetwork";
 import log from "why-is-node-running";
 

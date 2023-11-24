@@ -65,7 +65,7 @@
     "@polkadot/util": "12.6.1",
     "@polkadot/util-crypto": "12.6.1",
     "@types/node": "20.9.2",
-    "@zombienet/utils": "0.0.24",
+    "@zombienet/utils": "0.0.23",
     "bottleneck": "2.19.5",
     "debug": "4.3.4",
     "ethers": "6.8.0",
