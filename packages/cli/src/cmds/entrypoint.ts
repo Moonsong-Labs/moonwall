@@ -198,9 +198,6 @@ const cliStart = Effect.gen(function* (_) {
   console.log("🏁 Moonwall Process finished");
 });
 
-const program = pipe(
-  cliStart,
-  Effect.tapErrorCause(Effect.logError),
-);
+const program = pipe(cliStart, Effect.tapErrorCause(Effect.logError));
 
 Runtime.runMain(program);

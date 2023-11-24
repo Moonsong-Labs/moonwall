@@ -1,6 +1,6 @@
 import { ViemClient, beforeAll, describeSuite, expect } from "@moonwall/cli";
 import { xcAssetAbi } from "@moonwall/util";
-import { formatEther, formatUnits, getContract } from "viem";
+import { PublicClient, formatEther, formatUnits, getContract } from "viem";
 
 describeSuite({
   id: "V01",
@@ -39,7 +39,7 @@ describeSuite({
       title: "Query contract",
       test: async () => {
         const address = "0x818ec0A7Fe18Ff94269904fCED6AE3DaE6d6dC0b";
-        const contract = getContract({ address, abi: xcAssetAbi, publicClient: api as any });
+        const contract = getContract({ address, abi: xcAssetAbi, publicClient: api as any as PublicClient });
         const decimals = (await contract.read.decimals()) as number;
         const totalSupply = (await contract.read.totalSupply()) as bigint;
         const symbol = (await contract.read.symbol()) as string;

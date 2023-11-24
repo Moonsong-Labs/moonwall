@@ -1,8 +1,8 @@
-import "@moonbeam-network/api-augment";
+// import "@moonbeam-network/api-augment";
+import "@polkadot/api-augment"
 import { beforeAll, describeSuite, expect, fetchCompiledContract } from "@moonwall/cli";
 import {
   ALITH_ADDRESS,
-  ALITH_PRIVATE_KEY,
   BALTATHAR_ADDRESS,
   BALTATHAR_PRIVATE_KEY,
   CHARLETH_ADDRESS,
@@ -10,14 +10,13 @@ import {
   GLMR,
   alith,
   baltathar,
-  deployViemContract,
+  deployViemContract
 } from "@moonwall/util";
 import "@polkadot/api-augment";
 import { BN } from "@polkadot/util";
 import { Signer, parseEther } from "ethers";
 import {
   Abi,
-  createWalletClient,
   decodeErrorResult,
   decodeEventLog,
   encodeFunctionData,
@@ -25,12 +24,9 @@ import {
   formatEther,
   formatGwei,
   getContract,
-  http,
-  publicActions,
-  verifyMessage,
+  verifyMessage
 } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
-import Web3 from "web3";
 import { tokenAbi, bytecode as tokenBytecode } from "../../_test_data/token";
 
 describeSuite({
@@ -39,11 +35,9 @@ describeSuite({
   foundationMethods: "dev",
   testCases: ({ it, context, log }) => {
     let signer: Signer;
-    let w3: Web3;
 
     beforeAll(async () => {
       signer = context.ethers();
-      w3 = context.web3();
     });
 
     it({
@@ -200,8 +194,8 @@ describeSuite({
       id: "T09",
       title: "It can call with a contract",
       test: async function () {
-        const { abi, bytecode, methods } = fetchCompiledContract("MultiplyBy7");
-        const { status, contractAddress } = await deployViemContract(context, abi, bytecode);
+        const { abi, bytecode } = fetchCompiledContract("MultiplyBy7");
+        const { contractAddress } = await deployViemContract(context, abi, bytecode);
 
         const timbo = await context.viem().call({
           account: ALITH_ADDRESS,
@@ -222,7 +216,7 @@ describeSuite({
       // modifier: "only",
       test: async function () {
         // log(methods)
-        const { contractAddress, status, logs, hash } = await deployViemContract(
+        const { contractAddress } = await deployViemContract(
           context,
           tokenAbi as Abi,
           tokenBytecode,
@@ -236,9 +230,9 @@ describeSuite({
           address: contractAddress!,
           publicClient: context.viem() as any,
         });
-        // @ts-ignore
+        // @ts-ignore - this is a bug in viem
         const symbol = await contractInstance.read.symbol();
-        //@ts-ignore
+        //@ts-ignore - this is a bug in viem
         const balBefore = (await contractInstance.read.balanceOf([BALTATHAR_ADDRESS])) as bigint;
 
         await context.viem().writeContract({
@@ -267,11 +261,6 @@ describeSuite({
         const valid = await verifyMessage({ address: ALITH_ADDRESS, message: string, signature });
         log(`Signature: ${signature}`);
 
-        const tim = createWalletClient({
-          account: privateKeyToAccount(ALITH_PRIVATE_KEY),
-          transport: http("211312awd"),
-        }).extend(publicActions);
-
         context.ethers();
         expect(signature.length).to.be.greaterThan(0);
         expect(valid).to.be.true;
@@ -281,7 +270,7 @@ describeSuite({
       id: "T12",
       title: "It can calculate the gas cost of a contract interaction",
       test: async function () {
-        const { status, contractAddress } = await deployViemContract(
+        const { contractAddress } = await deployViemContract(
           context,
           tokenAbi as Abi,
           tokenBytecode
@@ -317,7 +306,7 @@ describeSuite({
       id: "T14",
       title: "It can simulate a contract interation",
       test: async function () {
-        const { status, contractAddress } = await deployViemContract(
+        const { contractAddress } = await deployViemContract(
           context,
           tokenAbi as Abi,
           tokenBytecode
@@ -354,7 +343,7 @@ describeSuite({
       id: "T16",
       title: "It can decode an event log",
       test: async function () {
-        const { status, contractAddress } = await deployViemContract(
+        const { contractAddress } = await deployViemContract(
           context,
           tokenAbi as Abi,
           tokenBytecode

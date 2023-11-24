@@ -3,16 +3,7 @@ import { ApiTypes } from "@polkadot/api/types";
 import { KeyringPair } from "@polkadot/keyring/types";
 import { Debugger } from "debug";
 import { Signer, TransactionRequest } from "ethers";
-import {
-  Abi,
-  Account,
-  Log,
-  PublicActions,
-  TransactionSerializable,
-  Transport,
-  WalletClient,
-} from "viem";
-import { Chain } from "viem/chains";
+import { Abi, Log, PublicActions, TransactionSerializable, WalletClient } from "viem";
 import { Web3 } from "web3";
 import { FoundationType } from "./config";
 import { BlockCreation, BlockCreationResponse, ChopsticksBlockCreation } from "./context";
@@ -181,7 +172,7 @@ export interface UpgradePreferences {
 /**
  * ViemClient - Combined type that contains both Wallet and Public viem client actions
  */
-export type ViemClient = WalletClient<Transport, Chain, Account> & PublicActions;
+export type ViemClient = WalletClient & PublicActions;
 
 /**
  * GenericContext - Interface that encapsulates all the common methods and properties needed for all tests.
