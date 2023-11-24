@@ -1,5 +1,13 @@
 # @moonwall/util
 
+## 5.0.0-beta.3
+
+### Patch Changes
+
+- af16a7d: Run Main
+- Updated dependencies [af16a7d]
+  - @moonwall/types@5.0.0-beta.3
+
 ## 5.0.0-beta.2
 
 ### Patch Changes
