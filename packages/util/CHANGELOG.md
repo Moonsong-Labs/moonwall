@@ -12,9 +12,9 @@
 
 ### Patch Changes
 
-- d3ba445: Restore Main Stability
-- Updated dependencies [d3ba445]
-  - @moonwall/types@4.4.2
+- Beta Release
+- Updated dependencies
+  - @moonwall/types@5.0.0-beta.2
 
 ## 4.4.1
 

@@ -10,7 +10,7 @@
 
 ### Patch Changes
 
-- d3ba445: Restore Main Stability
+- Beta Release
 
 ## 4.4.1
 
