@@ -78,8 +78,8 @@
     "@polkadot/util-crypto": "^12.6.1",
     "@types/ws": "^8.5.10",
     "@vitest/ui": "1.0.0-beta.5",
-    "@zombienet/orchestrator": "^0.0.62",
-    "@zombienet/utils": "^0.0.24",
+    "@zombienet/orchestrator": "0.0.59",
+    "@zombienet/utils": "^0.0.23",
     "bottleneck": "^2.19.5",
     "chalk": "^5.3.0",
     "clear": "^0.1.0",
@@ -100,6 +100,7 @@
     "viem": "^1.19.8",
     "vitest": "1.0.0-beta.5",
     "web3": "4.2.2",
+    "why-is-node-running": "^2.2.2",
     "ws": "^8.14.2",
     "yaml": "^2.3.4",
     "yargs": "^17.7.2"

@@ -1,6 +1,6 @@
 import "../internal/logging";
 import "@moonbeam-network/api-augment";
-import { Runtime } from "@effect/platform-node";
+import { NodeContext, Runtime } from "@effect/platform-node";
 import yargs from "yargs";
 import fs from "fs";
 import { hideBin } from "yargs/helpers";
@@ -12,6 +12,8 @@ import { Effect, pipe } from "effect";
 import * as Err from "../errors";
 import { main } from "./main";
 import { runNetworkCmdEffect } from "./runNetwork";
+import log from "why-is-node-running";
+
 dotenv.config();
 
 const defaultConfigFiles = ["./moonwall.config", "./moonwall.config.json"];
@@ -47,7 +49,7 @@ const processArgs = (args: any): { command: string; args?: object } => {
 
   yargs(hideBin(args))
     .usage("Usage: $0")
-    .version("2.0.0")
+    .version("5.0.0.beta")
     .options({
       configFile: {
         type: "string",
@@ -140,7 +142,6 @@ const processArgs = (args: any): { command: string; args?: object } => {
 const cliStart = Effect.gen(function* (_) {
   let commandChosen: string;
   let args: object = {};
-  let failedTests: number | false;
 
   const argv = yield* _(parseArgs);
   process.env.MOON_CONFIG_PATH = argv.configFile;
@@ -170,19 +171,13 @@ const cliStart = Effect.gen(function* (_) {
       yield* _(
         testEffect(args["envName"], { testNamePattern: args["GrepTest"] }).pipe(
           Effect.tap(() => Effect.sync(() => console.log("✅  All Tests Passed"))),
-          Effect.catchTag("TestsFailedError", (error) => {
-            failedTests = error.fails;
-            return Effect.succeed(
+          Effect.tapErrorTag("TestsFailedError", (error) =>
+            Effect.sync(() =>
               console.log(`❌ ${error.fails} test file${error.fails !== 1 ? "s" : ""} failed`)
-            );
-          })
+            )
+          )
         )
       );
-
-      if (failedTests) {
-        process.exitCode = 1;
-      }
-
       break;
     }
 
@@ -196,8 +191,9 @@ const cliStart = Effect.gen(function* (_) {
   }
 
   console.log("🏁 Moonwall Process finished");
+  setTimeout(log, 5000);
 });
 
 const program = pipe(cliStart, Effect.tapErrorCause(Effect.logError));
 
-Runtime.runMain(program);
+program.pipe(Effect.provide(NodeContext.layer), Runtime.runMain);

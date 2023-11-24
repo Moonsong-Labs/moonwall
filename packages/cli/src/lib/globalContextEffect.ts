@@ -503,7 +503,12 @@ export class MoonwallContext {
         yield* _(Effect.sync(() => ctx.ipcServer?.close()));
         yield* _(Effect.sync(() => ctx.ipcServer?.removeAllListeners()));
       }
-    });
+    }).pipe(
+      Effect.timeoutFail({
+        duration: 5000,
+        onTimeout: () => new Err.MoonwallContextDestroyError(),
+      })
+    );
   }
 }
 
