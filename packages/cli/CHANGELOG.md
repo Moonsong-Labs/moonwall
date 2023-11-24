@@ -17,7 +17,7 @@
 - Updated dependencies
   - @moonwall/types@5.0.0-beta.2
   - @moonwall/util@5.0.0-beta.2
-  
+
 ## 4.4.1
 
 ### Patch Changes
