@@ -17,6 +17,8 @@ describeSuite({
       title: "This is a bool test case",
       test: function () {
         expect(true).to.be.true;
+
+        // log(globalThis.moonwall)
       },
     });
 

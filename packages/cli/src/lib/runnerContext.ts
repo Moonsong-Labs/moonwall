@@ -29,7 +29,6 @@ import { createContextEffect } from "./globalContextEffect";
 
 const RT_VERSION = Number(process.env.MOON_RTVERSION);
 const RT_NAME = process.env.MOON_RTNAME;
-let limiter: Bottleneck | undefined = undefined;
 
 // About: This has been designed in the handler pattern so that eventually we can integrate it to vitest
 // https://vitest.dev/advanced/runner.html
@@ -81,6 +80,8 @@ export function describeSuite<T extends FoundationType>({
     return;
   }
   let ctx: any;
+let limiter: Bottleneck | undefined = undefined;
+
 
   beforeAll(async function () {
     const effect = Effect.gen(function* (_) {

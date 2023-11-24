@@ -6,12 +6,14 @@ import { startVitest } from "vitest/node";
 import * as Err from "../errors";
 import { clearNodeLogs } from "../internal/cmdFunctions/tempLogs";
 import { commonChecks } from "../internal/launcherCommon";
+import * as MoonwallEnv from "../internal/vitest/environment";
 import { importAsyncConfig, loadEnvVars } from "../lib/configReader";
 import {
   MoonwallContext,
   createContextEffect,
   runNetworkOnlyEffect,
 } from "../lib/globalContextEffect";
+import { getCurrentDirectoryName } from "../internal/fileCheckers";
 
 export const testEffect = (envName: string, additionalArgs?: object) => {
   return Effect.gen(function* (_) {
@@ -110,11 +112,16 @@ export const executeTestEffect = (env: Environment, additionalArgs?: object) => 
       );
     }
 
+    const envPath = path.join(getCurrentDirectoryName(), "internal", "vitest", "environment.js");
+
+    console.log(envPath);
+
     const baseOptions = {
       watch: false,
       globals: true,
       reporters: env.reporters ? env.reporters : ["default"],
       outputFile: env.reportFile,
+      setupFiles: envPath,
       testTimeout: env.timeout || globalConfig.defaultTestTimeout,
       hookTimeout: env.timeout || globalConfig.defaultTestTimeout,
       passWithNoTests: false,

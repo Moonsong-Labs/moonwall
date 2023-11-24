@@ -207,3 +207,23 @@ async function getBinaryArchitecture(filePath: string) {
     });
   });
 }
+
+function getDirname(metaUrl: string) {
+  return new URL(".", metaUrl).pathname;
+}
+
+export function getCurrentDirectoryName() {
+  let dirname;
+
+  if (typeof __dirname !== "undefined") {
+    // CommonJS environment
+    dirname = __dirname;
+  } else if (typeof import.meta !== "undefined" && import.meta.url) {
+    // ESM environment
+    dirname = getDirname(import.meta.url);
+  } else {
+    throw new Error("Cannot determine current directory name");
+  }
+
+  return dirname;
+}
