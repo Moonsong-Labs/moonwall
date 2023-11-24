@@ -1,5 +1,11 @@
 # @moonwall/docs
 
+## 5.0.0-beta.4
+
+### Patch Changes
+
+- 4975b30: Roll back zombie
+
 ## 5.0.0-beta.3
 
 ### Patch Changes
