@@ -25,9 +25,9 @@ export const launchNodeEffect = (cmd: string, args: string[]) =>
     const logLocation = path
       .join(
         dirPath,
-        `${path.basename(cmd)}_node_${args
-          .find((a) => a.includes("port"))
-          ?.split("=")[1]}_${new Date().getTime()}.log`
+        `${path.basename(cmd)}_node_${
+          args.find((a) => a.includes("port"))?.split("=")[1]
+        }_${new Date().getTime()}.log`
       )
       .replaceAll("node_node_undefined", "chopsticks");
 

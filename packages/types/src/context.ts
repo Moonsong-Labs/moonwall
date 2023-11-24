@@ -106,7 +106,7 @@ export interface BlockCreation {
 
 export interface BlockCreationResponse<
   ApiType extends ApiTypes,
-  Calls extends CallType<ApiType> | CallType<ApiType>[],
+  Calls extends CallType<ApiType> | CallType<ApiType>[]
 > {
   block: {
     duration: number;

@@ -140,8 +140,8 @@ export async function interactWithContract(
           .viem()
           .estimateGas({ account: account.address, to: contractAddress, value: 0n, data })
       : gas > 0n
-        ? gas
-        : 200_000n;
+      ? gas
+      : 200_000n;
 
   if (!call && rawTxOnly) {
     return web3Library === "viem"
