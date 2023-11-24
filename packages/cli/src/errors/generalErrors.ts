@@ -11,3 +11,7 @@ export class RunNetworkError {
 }
 
 export class InvalidCommandError extends Data.TaggedError("InvalidCommand")<{ command: string }> {}
+
+export class InvalidFoundationError extends Data.TaggedError("InvalidFoundation")<{
+  foundation: string;
+}> {}

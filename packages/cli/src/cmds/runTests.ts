@@ -6,7 +6,6 @@ import { startVitest } from "vitest/node";
 import * as Err from "../errors";
 import { clearNodeLogs } from "../internal/cmdFunctions/tempLogs";
 import { commonChecks } from "../internal/launcherCommon";
-import * as MoonwallEnv from "../internal/vitest/environment";
 import { importAsyncConfig, loadEnvVars } from "../lib/configReader";
 import {
   MoonwallContext,
@@ -113,8 +112,6 @@ export const executeTestEffect = (env: Environment, additionalArgs?: object) => 
     }
 
     const envPath = path.join(getCurrentDirectoryName(), "internal", "vitest", "environment.js");
-
-    console.log(envPath);
 
     const baseOptions = {
       watch: false,
