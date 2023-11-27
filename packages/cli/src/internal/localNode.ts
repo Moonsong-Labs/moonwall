@@ -1,4 +1,8 @@
-import { Chunk, Effect, Option, Stream, StreamEmit } from "effect";
+import { Chunk, Effect, Layer, Option, Stream, StreamEmit } from "effect";
+import * as Command from "@effect/platform-node/Command";
+import * as CommandExecutor from "@effect/platform-node/CommandExecutor";
+import * as FileSystem from "@effect/platform-node/FileSystem";
+import * as Path from "@effect/platform-node/Path";
 import { execaCommand } from "execa";
 import fs from "fs";
 import path from "path";
@@ -90,19 +94,27 @@ const webSocketStream = (port: number) => {
   );
 };
 
+const LocalEnvironment = FileSystem.layer.pipe(
+  Layer.provideMerge(CommandExecutor.layer),
+  Layer.merge(Path.layer)
+);
+
 const findPortsByPidEffect = (pid: number, timeout: number = 10000) =>
   Effect.gen(function* (_) {
-    const end = yield* _(Effect.sync(() => Date.now() + timeout));
+    const end = Date.now() + timeout;
 
     for (;;) {
       const command = `lsof -i -n -P | grep LISTEN | grep ${pid} || true`;
-      const { stdout } = yield* _(
-        Effect.tryPromise(() =>
-          execaCommand(command, { shell: true, cleanup: true, timeout: 2000 })
-        )
-      );
+      const cmdEffect = Command.make(command).pipe(Command.runInShell("/bin/bash"));
+
+      const output: Effect.Effect<
+        CommandExecutor.CommandExecutor | FileSystem.FileSystem | Path.Path,
+        unknown,
+        readonly string[]
+      > = Effect.provide(Command.lines(cmdEffect), LocalEnvironment);
+
+      const lines = yield* _(output);
       const ports: number[] = [];
-      const lines = stdout.split("\n");
 
       for (const line of lines) {
         const regex = /(?:\*|127\.0\.0\.1):(\d+)/;

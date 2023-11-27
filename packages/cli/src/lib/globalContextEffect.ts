@@ -326,8 +326,9 @@ export class MoonwallContext {
 
     const promises = nodes.map(async ({ cmd, args, launch }) => {
       if (launch) {
-        const result = await Effect.runPromise(launchNodeEffect(cmd, args));
-        this.nodes.push(result);
+        // TODO: remove anys
+        const result = await Effect.runPromise(launchNodeEffect(cmd, args) as any);
+        this.nodes.push(result as any);
       } else {
         return Promise.resolve();
       }
