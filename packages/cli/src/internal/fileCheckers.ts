@@ -1,10 +1,12 @@
 import fs from "node:fs";
 import { execSync } from "child_process";
-import { execaSync } from "execa";
 import chalk from "chalk";
 import os from "node:os";
 import inquirer from "inquirer";
 import path from "node:path";
+import { Command } from "@effect/platform-node";
+import { LocalEnvironment } from "./effectEnvironment";
+import { Effect } from "effect";
 
 export async function checkExists(path: string) {
   const binPath = path.split(" ")[0];
@@ -105,18 +107,19 @@ export function checkListeningPorts(processId: number) {
   }
 }
 
-export function checkAlreadyRunning(binaryName: string): number[] {
+export async function checkAlreadyRunning(binaryName: string) {
   try {
     console.log(`Checking if ${chalk.bgWhiteBright.blackBright(binaryName)} is already running...`);
     // pgrep only supports 15 characters
-    const { stdout } = execaSync("pgrep", [binaryName.slice(0, 14)], {
-      encoding: "utf8",
-      shell: true,
-      timeout: 2000,
-      cleanup: true,
-    });
-    const pIdStrings = stdout.split("\n").filter(Boolean);
-    return pIdStrings.map((pId) => parseInt(pId, 10));
+    const command = Command.make("pgrep", binaryName.slice(0, 14)).pipe(
+      Command.runInShell("/bin/bash")
+    );
+
+    const pIdStrings: readonly string[] = await Effect.runPromise(
+      Effect.provide(Command.lines(command), LocalEnvironment)
+    );
+
+    return pIdStrings.flatMap((pId) => parseInt(pId, 10));
   } catch (error: any) {
     if (error.exitCode === 1) {
       return [];

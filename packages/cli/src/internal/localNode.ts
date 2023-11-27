@@ -1,18 +1,16 @@
-import { Chunk, Effect, Layer, Option, Stream, StreamEmit } from "effect";
+import { Chunk, Effect, Option, Stream, StreamEmit, pipe } from "effect";
 import * as Command from "@effect/platform-node/Command";
 import * as CommandExecutor from "@effect/platform-node/CommandExecutor";
 import * as FileSystem from "@effect/platform-node/FileSystem";
+import * as Scope from "effect/Scope";
 import * as Path from "@effect/platform-node/Path";
-import { execaCommand } from "execa";
-import fs from "fs";
+import fs from "node:fs";
 import path from "path";
 import WebSocket from "ws";
 import { checkAccess, checkExists } from "./fileCheckers";
-
-export type LaunchedNode = {
-  pid: number;
-  kill(signal?: NodeJS.Signals | number, options?: object): boolean;
-};
+import { PlatformError } from "@effect/platform-node/Error";
+import { LocalEnvironment } from "./effectEnvironment";
+import { NodeContext } from "@effect/platform-node";
 
 export const launchNodeEffect = (cmd: string, args: string[]) =>
   Effect.gen(function* (_) {
@@ -37,15 +35,44 @@ export const launchNodeEffect = (cmd: string, args: string[]) =>
 
     process.env.MOON_LOG_LOCATION = logLocation;
 
-    const runningNode = yield* _(
-      Effect.sync(() =>
-        execaCommand(`${cmd} ${args.join(" ")}`, {
-          all: true,
-          cleanup: true,
-          detached: true,
-        }).pipeAll(logLocation)
-      )
-    );
+    const command = `${cmd} ${args.join(" ")}`;
+    const cmdEffect = Command.make(command).pipe(Command.runInShell("/bin/bash"));
+
+    const launchedProcess = Effect.provide(Command.start(cmdEffect), LocalEnvironment);
+
+    const runningNode = yield* _(launchedProcess);
+
+    // const fsEff = yield* _(FileSystem.FileSystem)
+
+    // const sink = fsEff.sink(logLocation, {
+    //   flag: "w+"
+    // })
+  
+    // yield* _(Stream.run(runningNode.stderr, sink))
+
+    // Stream.tapSink(sink)
+
+    // const createWriteStream = Effect.sync(() => fs.createWriteStream(logLocation));
+
+    // const releaseWriteStream = (ws: fs.WriteStream) => Effect.sync(() => ws.close());
+
+    // const resourceEffect = Effect.acquireRelease(createWriteStream, releaseWriteStream);
+
+    // const writeStream = yield* _(Effect.provide(resourceEffect, NodeContext.layer));
+
+    // runningNode.stderr.pipe(
+    //   Stream.runForEachChunk(
+    //     (chunk: any): Effect.Effect<never, never, boolean> =>
+    //       Effect.sync(() => writeStream.write(chunk))
+    //   )
+    // );
+
+    // runningNode.stdout.pipe(
+    //   Stream.runForEachChunk(
+    //     (chunk: any): Effect.Effect<never, never, boolean> =>
+    //       Effect.sync(() => writeStream.write(chunk))
+    //   )
+    // );
 
     probe: for (;;) {
       const ports = yield* _(findPortsByPidEffect(runningNode.pid));
@@ -57,7 +84,7 @@ export const launchNodeEffect = (cmd: string, args: string[]) =>
         }
       }
     }
-    return { pid: runningNode.pid, kill: runningNode.kill } satisfies LaunchedNode;
+    return runningNode;
   });
 
 const jsonRpcMessage = {
@@ -94,11 +121,6 @@ const webSocketStream = (port: number) => {
   );
 };
 
-const LocalEnvironment = FileSystem.layer.pipe(
-  Layer.provideMerge(CommandExecutor.layer),
-  Layer.merge(Path.layer)
-);
-
 const findPortsByPidEffect = (pid: number, timeout: number = 10000) =>
   Effect.gen(function* (_) {
     const end = Date.now() + timeout;
@@ -109,7 +131,7 @@ const findPortsByPidEffect = (pid: number, timeout: number = 10000) =>
 
       const output: Effect.Effect<
         CommandExecutor.CommandExecutor | FileSystem.FileSystem | Path.Path,
-        unknown,
+        PlatformError,
         readonly string[]
       > = Effect.provide(Command.lines(cmdEffect), LocalEnvironment);
 

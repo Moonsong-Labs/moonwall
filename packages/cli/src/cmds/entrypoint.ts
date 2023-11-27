@@ -4,7 +4,6 @@ import { NodeContext, Runtime } from "@effect/platform-node";
 import dotenv from "dotenv";
 import { Effect, pipe } from "effect";
 import fs from "fs";
-import log from "why-is-node-running";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import * as Err from "../errors";
@@ -194,7 +193,6 @@ const cliStart = Effect.gen(function* (_) {
   }
 
   console.log("🏁 Moonwall Process finished");
-  setTimeout(log, 5000);
 });
 
 const program = pipe(cliStart, Effect.tapErrorCause(Effect.logError));

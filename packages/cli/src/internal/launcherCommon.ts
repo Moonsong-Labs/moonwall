@@ -36,8 +36,8 @@ async function zombieBinCheck(env: Environment) {
   }
 
   const bins = parseZombieConfigForBins(env.foundation.zombieSpec.configPath);
-  const pids = bins.flatMap((bin) => checkAlreadyRunning(bin));
-  pids.length == 0 || process.env.CI || (await promptAlreadyRunning(pids));
+  const pids = await Promise.all(bins.flatMap((bin) => checkAlreadyRunning(bin)));
+  return pids.length == 0 || process.env.CI || (await promptAlreadyRunning(pids.flatMap((a) => a)));
 }
 
 async function devBinCheck(env: Environment) {
@@ -46,7 +46,7 @@ async function devBinCheck(env: Environment) {
   }
 
   const binName = path.basename(env.foundation.launchSpec[0].binPath);
-  const pids = checkAlreadyRunning(binName);
+  const pids = await checkAlreadyRunning(binName);
   pids.length == 0 || process.env.CI || (await promptAlreadyRunning(pids));
   await downloadBinsIfMissing(env.foundation.launchSpec[0].binPath);
 }
@@ -67,15 +67,18 @@ export async function executeScript(scriptCommand: string, args?: string) {
     console.log(`========== Executing script: ${chalk.bgGrey.greenBright(script)} ==========`);
 
     switch (ext) {
-      case ".js":
+      case ".js": {
         execSync("node " + scriptPath + ` ${args}`, { stdio: "inherit" });
         break;
-      case ".ts":
+      }
+      case ".ts": {
         execSync("pnpm tsx " + scriptPath + ` ${args}`, { stdio: "inherit" });
         break;
-      case ".sh":
+      }
+      case ".sh": {
         execSync(scriptPath + ` ${args}`, { stdio: "inherit" });
         break;
+      }
       default:
         console.log(`${ext} not supported, skipping ${script}`);
     }

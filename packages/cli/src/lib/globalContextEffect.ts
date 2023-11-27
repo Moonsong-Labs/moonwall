@@ -10,8 +10,8 @@ import {
 } from "@moonwall/types";
 import { ApiPromise } from "@polkadot/api";
 import zombie, { Network } from "@zombienet/orchestrator";
-import { execaCommand, execaCommandSync } from "execa";
 import Debug from "debug";
+import { Process } from "@effect/platform-node/CommandExecutor";
 import fs from "fs";
 import net from "net";
 import readline from "readline";
@@ -24,7 +24,7 @@ import {
   checkZombieBins,
   getZombieConfig,
 } from "../internal/foundations/zombieHelpers";
-import { LaunchedNode, launchNodeEffect } from "../internal/localNode";
+import { launchNodeEffect } from "../internal/localNode";
 import {
   ProviderFactory,
   ProviderInterfaceFactory,
@@ -37,13 +37,15 @@ import {
   isEthereumZombieConfig,
   isOptionSet,
 } from "./configReader";
+import { Command, NodeContext } from "@effect/platform-node";
+import { LocalEnvironment } from "../internal/effectEnvironment";
 const debugSetup = Debug("global:context");
 
 export class MoonwallContext {
   private static instance: MoonwallContext;
   environment!: MoonwallEnvironment;
   providers: ConnectedProvider[];
-  nodes: LaunchedNode[];
+  nodes: Process[];
   foundation: FoundationType;
   zombieNetwork?: Network;
   rtUpgradePath?: string;
@@ -180,16 +182,29 @@ export class MoonwallContext {
     process.env.MOON_ZOMBIE_NODES = nodeNames.join("|");
 
     const onProcessExit = () => {
-      try {
-        const processIds = Object.values((this.zombieNetwork.client as any).processMap)
-          .filter((item) => item!["pid"])
-          .map((process) => process!["pid"]);
-        execaCommand(`kill ${processIds.join(" ")}`, {
-          reject: false,
-        });
-      } catch (err) {
-        // console.log(err.message);
-      }
+      // const command = `${cmd} ${args.join(" ")}`;
+      // const cmdEffect = Command.make(command).pipe(Command.runInShell("/bin/bash"));
+
+      // const launchedProcess: Effect.Effect<
+      //   CommandExecutor.CommandExecutor | FileSystem.FileSystem | Path.Path,
+      //   PlatformError,
+      //   CommandExecutor.Process
+      // > = Effect.provide(Command.start(cmdEffect), LocalEnvironment);
+
+      // const runningNode = yield* _(launchedProcess);
+
+      const processIds = Object.values((this.zombieNetwork.client as any).processMap)
+        .filter((item) => item!["pid"])
+        .map((process) => process!["pid"]);
+
+      const command = Command.make(`kill ${processIds.join(" ")}`).pipe(
+        Command.runInShell("/bin/bash")
+      );
+
+      Effect.runFork(Effect.provide(Command.start(command), LocalEnvironment));
+      // execaCommand(`kill ${processIds.join(" ")}`, {
+      //   reject: false,
+      // });
     };
 
     const socketPath = `${network.tmpDir}/node-ipc.sock`;
@@ -264,12 +279,23 @@ export class MoonwallContext {
               // await this.disconnect();
               const pid = (network.client as any).processMap[message.nodeName].pid;
               delete (network.client as any).processMap[message.nodeName];
-              const result = await execaCommand(`kill ${pid}`, { timeout: 1000 });
+              const processIds = Object.values((this.zombieNetwork.client as any).processMap)
+                .filter((item) => item!["pid"])
+                .map((process) => process!["pid"]);
+
+              const command = Command.make(`kill ${processIds.join(" ")}`).pipe(
+                Command.runInShell("/bin/bash")
+              );
+
+              (await Effect.runPromiseExit(
+                Effect.provide(Command.string(command), LocalEnvironment)
+              )) as any;
+              // const result = await execaCommand(`kill ${pid}`, { timeout: 1000 });
               // await this.connectEnvironment(true);
               writeToClient({
                 status: "success",
-                result: result.exitCode === 0,
-                message: `${message.nodeName}, pid ${pid} killed with exitCode ${result.exitCode}`,
+                result: true, //result.exitCode === 0,
+                message: `${message.nodeName}, pid ${pid} killed`,
               });
               break;
             }
@@ -314,7 +340,6 @@ export class MoonwallContext {
       return MoonwallContext.getContext();
     }
 
-    // const activeNodes = this.nodes.filter((node) => !node.killed);
     if (this.nodes.length > 0) {
       return MoonwallContext.getContext();
     }
@@ -327,7 +352,7 @@ export class MoonwallContext {
     const promises = nodes.map(async ({ cmd, args, launch }) => {
       if (launch) {
         // TODO: remove anys
-        const result = await Effect.runPromise(launchNodeEffect(cmd, args) as any);
+        const result = await Effect.runPromise(Effect.provide(launchNodeEffect(cmd, args) as any, NodeContext.layer));
         this.nodes.push(result as any);
       } else {
         return Promise.resolve();
@@ -463,13 +488,11 @@ export class MoonwallContext {
       );
 
       if (ctx.nodes.length > 0) {
-        const node = ctx.nodes[0];
-        // yield* _(Effect.promise(() => execaCommand(`kill ${node.pid}`, { shell: true })));
-        yield* _(Effect.try(() => node.kill()));
+        const node: Process = ctx.nodes[0];
+        yield* _(node.kill());
 
         for (;;) {
-          const isRunning = yield* _(isPidRunningEffect(node.pid));
-          if (isRunning) {
+          if (yield* _(node.isRunning)) {
             yield* _(Effect.sleep(50));
           } else {
             break;
@@ -498,7 +521,11 @@ export class MoonwallContext {
           )
         );
 
-        yield* _(Effect.sync(() => execaCommandSync(`kill ${processIds.join(" ")}`, {})));
+        const command = Command.make(`kill ${processIds.join(" ")}`).pipe(
+          Command.runInShell("/bin/bash")
+        );
+
+        yield* _(Effect.provide(Command.start(command), LocalEnvironment));
         yield* _(waitForPidsToDieEffect(processIds));
 
         yield* _(Effect.sync(() => ctx.ipcServer?.close()));
@@ -553,15 +580,14 @@ export interface IGlobalContextFoundation {
 
 const isPidRunningEffect = (pid: number) =>
   Effect.gen(function* (_) {
-    const result = yield* _(
-      Effect.promise(() => execaCommand(`ps -p ${pid} -o pid=`, { cleanup: true, reject: false }))
-    );
+    const command = Command.make(`ps -p ${pid} -o pid=`).pipe(Command.runInShell("/bin/bash"));
 
-    if (result.exitCode === 0) {
-      return result.stdout.trim() === pid.toString();
-    }
-
-    return false;
+    const result = yield* _(Effect.provide(Command.string(command), LocalEnvironment));
+    // const result = yield* _(
+    //   Effect.promise(() => execaCommand(`ps -p ${pid} -o pid=`, { cleanup: true, reject: false }))
+    // );
+    console.log(result);
+    return result === pid.toString();
   });
 
 const waitForPidsToDieEffect = (pids: number[]) =>

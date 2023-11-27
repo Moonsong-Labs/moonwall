@@ -87,7 +87,6 @@
     "dotenv": "16.3.1",
     "effect": "2.0.0-next.56",
     "ethers": "6.8.1",
-    "execa": "8.0.1",
     "fast-check": "^3.14.0",
     "inquirer": "9.2.12",
     "inquirer-press-to-continue": "1.2.0",
@@ -99,7 +98,6 @@
     "vitest": "0.34.6",
     "web3": "4.2.1",
     "web3-providers-ws": "4.0.7",
-    "why-is-node-running": "^2.2.2",
     "ws": "8.14.2",
     "yaml": "2.3.3",
     "yargs": "17.7.2"
@@ -112,6 +110,7 @@
     "@types/cli-progress": "3.11.5",
     "@types/debug": "4.1.12",
     "@types/node": "20.9.2",
+    "@types/ws": "^8.5.10",
     "@types/yargs": "17.0.31",
     "prettier": "2.8.8",
     "tsup": "7.2.0",
