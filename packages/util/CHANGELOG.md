@@ -1,5 +1,13 @@
 # @moonwall/util
 
+## 5.0.0-beta.6
+
+### Patch Changes
+
+- 5349da1: rollback vitest
+- Updated dependencies [5349da1]
+  - @moonwall/types@5.0.0-beta.6
+
 ## 5.0.0-beta.5
 
 ### Patch Changes
