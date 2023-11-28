@@ -26,6 +26,7 @@ import { devHandler } from "./handlers/devHandler";
 import { readOnlyHandler } from "./handlers/readOnlyHandler";
 import { zombieHandler } from "./handlers/zombieHandler";
 import { MoonwallContext, createContextEffect } from "./globalContextEffect";
+import { NodeContext } from "@effect/platform-node";
 
 const RT_VERSION = Number(process.env.MOON_RTVERSION);
 const RT_NAME = process.env.MOON_RTNAME;
@@ -63,7 +64,7 @@ const RT_NAME = process.env.MOON_RTNAME;
  *      });
  */
 export const describeSuite = <T extends FoundationType>(params: ITestSuiteType<T>) =>
-  Effect.runSync(Effect.interruptible(describeSuiteEffect(params)).pipe(Effect.disconnect));
+  Effect.runSync(describeSuiteEffect(params));
 
 const describeSuiteEffect = <T extends FoundationType>({
   id: suiteId,
@@ -90,40 +91,46 @@ const describeSuiteEffect = <T extends FoundationType>({
     beforeAll(
       async () =>
         await Effect.runPromise(
-          Effect.gen(function* (_) {
-            const globalConfig = yield* _(
-              Effect.tryPromise({
-                try: () => importAsyncConfig(),
-                catch: () => new Err.ConfigError("Could not load config before running test"),
-              })
-            );
+          Effect.provide(
+            Effect.gen(function* (_) {
+              const globalConfig = yield* _(
+                Effect.tryPromise({
+                  try: () => importAsyncConfig(),
+                  catch: () => new Err.ConfigError("Could not load config before running test"),
+                })
+              );
 
-            yield* _(Effect.config(Config.string("MOON_TEST_ENV")));
-            const env = globalConfig.environments.find(
-              ({ name }) => name === process.env.MOON_TEST_ENV
-            );
+              yield* _(Effect.config(Config.string("MOON_TEST_ENV")));
+              const env = globalConfig.environments.find(
+                ({ name }) => name === process.env.MOON_TEST_ENV
+              );
 
-            if (env.foundation.type === "read_only") {
-              const settings = loadParams(env.foundation.launchSpec);
-              limiter = new Bottleneck(settings);
-            }
-            ctx = yield* _(createContextEffect());
-            return;
-          })
+              if (env.foundation.type === "read_only") {
+                const settings = loadParams(env.foundation.launchSpec);
+                limiter = new Bottleneck(settings);
+              }
+              ctx = yield* _(createContextEffect());
+              return;
+            }),
+            NodeContext.layer
+          )
         )
     );
 
     afterAll(
       async () =>
         await Effect.runPromise(
-          MoonwallContext.getContext()
-            .destroyEffect()
-            .pipe(
-              Effect.timeoutFail({
-                duration: "10 seconds",
-                onTimeout: () => new Err.MoonwallContextDestroyError(),
-              })
-            )
+          Effect.provide(
+            MoonwallContext.getContext()
+              .destroyEffect()
+              .pipe(
+                Effect.timeoutFail({
+                  duration: "10 seconds",
+                  onTimeout: () => new Err.MoonwallContextDestroyError(),
+                })
+              ),
+            NodeContext.layer
+          )
         )
     );
 

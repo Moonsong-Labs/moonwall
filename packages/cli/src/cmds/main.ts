@@ -17,6 +17,7 @@ import { importAsyncConfig } from "../lib/configReader";
 import { allReposAsync } from "../lib/repoDefinitions";
 import { runNetworkCmdEffect } from "./runNetwork";
 import { testEffect } from "./runTests";
+import { NodeContext } from "@effect/platform-node";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
@@ -104,7 +105,9 @@ async function mainMenu(config: MoonwallConfig) {
       const chosenRunEnv = await chooseRunEnv(config);
       process.env.MOON_RUN_SCRIPTS = "true";
       if (chosenRunEnv.envName !== "back") {
-        await Effect.runPromise(runNetworkCmdEffect(chosenRunEnv.envName));
+        await Effect.runPromise(
+          Effect.provide(runNetworkCmdEffect(chosenRunEnv.envName), NodeContext.layer)
+        );
       }
       return false;
     }
@@ -112,7 +115,9 @@ async function mainMenu(config: MoonwallConfig) {
       const chosenTestEnv = await chooseTestEnv(config);
       if (chosenTestEnv.envName !== "back") {
         process.env.MOON_RUN_SCRIPTS = "true";
-        await Effect.runPromise(testEffect(chosenTestEnv.envName));
+        await Effect.runPromise(
+          Effect.provide(testEffect(chosenTestEnv.envName), NodeContext.layer)
+        );
         await inquirer.prompt({
           name: "test complete",
           type: "press-to-continue",

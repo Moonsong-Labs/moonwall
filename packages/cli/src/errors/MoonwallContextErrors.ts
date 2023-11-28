@@ -11,3 +11,7 @@ export class MoonwallContextCreateError {
 export class MoonwallContextDestroyError extends Data.TaggedError(
   "MoonwallContextDestroyError"
 )<object> {}
+
+export class MoonwallContextNetworkError extends Data.TaggedError(
+  "MoonwallContextNetworkError"
+)<object> {}

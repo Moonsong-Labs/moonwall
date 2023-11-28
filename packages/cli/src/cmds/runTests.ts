@@ -153,9 +153,7 @@ export const executeTestEffect = (env: Environment, additionalArgs?: object) => 
     const folders = env.testFileDir.map((folder) => path.join(".", folder, "/"));
 
     return yield* _(
-      Effect.interruptible(
-        Effect.promise(() => startVitest("test", folders, { ...options, ...additionalArgs }))
-      ).pipe(Effect.disconnect)
+      Effect.promise(() => startVitest("test", folders, { ...options, ...additionalArgs }))
     );
   });
 };

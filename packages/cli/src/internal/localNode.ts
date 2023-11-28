@@ -1,16 +1,14 @@
-import { Chunk, Effect, Option, Stream, StreamEmit, pipe } from "effect";
 import * as Command from "@effect/platform-node/Command";
 import * as CommandExecutor from "@effect/platform-node/CommandExecutor";
+import { PlatformError } from "@effect/platform-node/Error";
 import * as FileSystem from "@effect/platform-node/FileSystem";
-import * as Scope from "effect/Scope";
 import * as Path from "@effect/platform-node/Path";
+import { Chunk, Effect, Option, Sink, Stream, StreamEmit } from "effect";
 import fs from "node:fs";
 import path from "path";
 import WebSocket from "ws";
-import { checkAccess, checkExists } from "./fileCheckers";
-import { PlatformError } from "@effect/platform-node/Error";
 import { LocalEnvironment } from "./effectEnvironment";
-import { NodeContext } from "@effect/platform-node";
+import { checkAccess, checkExists } from "./fileCheckers";
 
 export const launchNodeEffect = (cmd: string, args: string[]) =>
   Effect.gen(function* (_) {
@@ -35,44 +33,32 @@ export const launchNodeEffect = (cmd: string, args: string[]) =>
 
     process.env.MOON_LOG_LOCATION = logLocation;
 
-    const command = `${cmd} ${args.join(" ")}`;
-    const cmdEffect = Command.make(command).pipe(Command.runInShell("/bin/bash"));
+    const pathEff = yield* _(Path.Path);
+    const fsEff = yield* _(FileSystem.FileSystem);
 
-    const launchedProcess = Effect.provide(Command.start(cmdEffect), LocalEnvironment);
+    const sink = fsEff
+      .sink(pathEff.join(process.cwd(), "node.log"), {
+        flag: "w+",
+      })
+      .pipe(
+        Sink.refineOrDie(Option.none),
+        Sink.zipRight(Sink.collectAll<Uint8Array>()),
+        Sink.map(Chunk.last),
+        Sink.map(Option.getOrElse(() => Uint8Array.of(0)))
+      );
 
-    const runningNode = yield* _(launchedProcess);
+    const runningNode: CommandExecutor.Process = yield* _(
+      Command.make(cmd, ...args).pipe(Command.stderr(sink), Command.stdout(sink), Command.start)
+    );
 
-    // const fsEff = yield* _(FileSystem.FileSystem)
+    // const pid = runningNode.pid;
 
-    // const sink = fsEff.sink(logLocation, {
-    //   flag: "w+"
-    // })
-  
-    // yield* _(Stream.run(runningNode.stderr, sink))
+    // const processes = [] as Fiber.RuntimeFiber<unknown, unknown>[];
 
-    // Stream.tapSink(sink)
-
-    // const createWriteStream = Effect.sync(() => fs.createWriteStream(logLocation));
-
-    // const releaseWriteStream = (ws: fs.WriteStream) => Effect.sync(() => ws.close());
-
-    // const resourceEffect = Effect.acquireRelease(createWriteStream, releaseWriteStream);
-
-    // const writeStream = yield* _(Effect.provide(resourceEffect, NodeContext.layer));
-
-    // runningNode.stderr.pipe(
-    //   Stream.runForEachChunk(
-    //     (chunk: any): Effect.Effect<never, never, boolean> =>
-    //       Effect.sync(() => writeStream.write(chunk))
-    //   )
-    // );
-
-    // runningNode.stdout.pipe(
-    //   Stream.runForEachChunk(
-    //     (chunk: any): Effect.Effect<never, never, boolean> =>
-    //       Effect.sync(() => writeStream.write(chunk))
-    //   )
-    // );
+    // runningNode.pipe(Effect.provide(LocalEnvironment), Effect.runFork, processes.push);
+    // const launchedProcess = Command.start(cmdEffect);
+    // const runningNode: CommandExecutor.Process = yield* _(launchedProcess);
+    // const stream = Command.stream(cmdEffect);
 
     probe: for (;;) {
       const ports = yield* _(findPortsByPidEffect(runningNode.pid));
@@ -84,7 +70,8 @@ export const launchNodeEffect = (cmd: string, args: string[]) =>
         }
       }
     }
-    return runningNode;
+    return { runningNode, sink };
+    // return { kill: () => Fiber.interrupt(processes[0]), pid };
   });
 
 const jsonRpcMessage = {

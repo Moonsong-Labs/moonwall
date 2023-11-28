@@ -1,5 +1,6 @@
+import { Command } from "@effect/platform-node";
+import { Process } from "@effect/platform-node/CommandExecutor";
 import "@moonbeam-network/api-augment";
-import { Effect } from "effect";
 import {
   ConnectedProvider,
   Environment,
@@ -11,13 +12,14 @@ import {
 import { ApiPromise } from "@polkadot/api";
 import zombie, { Network } from "@zombienet/orchestrator";
 import Debug from "debug";
-import { Process } from "@effect/platform-node/CommandExecutor";
+import { Effect } from "effect";
 import fs from "fs";
 import net from "net";
 import readline from "readline";
-import * as Err from "../errors";
 import { setTimeout as timer } from "timers/promises";
+import * as Err from "../errors";
 import { parseChopsticksRunCmd, parseRunCmd, parseZombieCmd } from "../internal/commandParsers";
+import { LocalEnvironment } from "../internal/effectEnvironment";
 import {
   IPCRequestMessage,
   IPCResponseMessage,
@@ -37,8 +39,7 @@ import {
   isEthereumZombieConfig,
   isOptionSet,
 } from "./configReader";
-import { Command, NodeContext } from "@effect/platform-node";
-import { LocalEnvironment } from "../internal/effectEnvironment";
+
 const debugSetup = Debug("global:context");
 
 export class MoonwallContext {
@@ -50,6 +51,7 @@ export class MoonwallContext {
   zombieNetwork?: Network;
   rtUpgradePath?: string;
   ipcServer?: net.Server;
+  sink?: any;
 
   private constructor(config: MoonwallConfig) {
     const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
@@ -159,6 +161,7 @@ export class MoonwallContext {
   }
 
   private async startZombieNetwork() {
+    const ctx = MoonwallContext.getContext();
     const config = await importAsyncConfig();
     const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
 
@@ -167,7 +170,7 @@ export class MoonwallContext {
     }
 
     console.log("🧟 Spawning zombie nodes ...");
-    const nodes = this.environment.nodes;
+    const nodes = ctx.environment.nodes;
 
     const zombieConfig = getZombieConfig(nodes[0].cmd);
 
@@ -193,7 +196,7 @@ export class MoonwallContext {
 
       // const runningNode = yield* _(launchedProcess);
 
-      const processIds = Object.values((this.zombieNetwork.client as any).processMap)
+      const processIds = Object.values((ctx.zombieNetwork.client as any).processMap)
         .filter((item) => item!["pid"])
         .map((process) => process!["pid"]);
 
@@ -205,6 +208,8 @@ export class MoonwallContext {
       // execaCommand(`kill ${processIds.join(" ")}`, {
       //   reject: false,
       // });
+
+      return ctx;
     };
 
     const socketPath = `${network.tmpDir}/node-ipc.sock`;
@@ -335,32 +340,33 @@ export class MoonwallContext {
     return;
   }
 
-  public async startNetwork() {
-    if (process.env.MOON_RECYCLE == "true") {
-      return MoonwallContext.getContext();
-    }
-
-    if (this.nodes.length > 0) {
-      return MoonwallContext.getContext();
-    }
-    const nodes = MoonwallContext.getContext().environment.nodes;
-
-    if (this.environment.foundationType === "zombie") {
-      return await this.startZombieNetwork();
-    }
-
-    const promises = nodes.map(async ({ cmd, args, launch }) => {
-      if (launch) {
-        // TODO: remove anys
-        const result = await Effect.runPromise(Effect.provide(launchNodeEffect(cmd, args) as any, NodeContext.layer));
-        this.nodes.push(result as any);
-      } else {
-        return Promise.resolve();
+  public startNetwork() {
+    return Effect.gen(function* (_) {
+      const ctx = yield* _(Effect.sync(() => MoonwallContext.getContext()));
+      if (process.env.MOON_RECYCLE == "true") {
+        return ctx;
       }
-    });
-    await Promise.allSettled(promises);
 
-    return MoonwallContext.getContext();
+      if (ctx.nodes.length > 0) {
+        return ctx;
+      }
+
+      const { args, launch, cmd } = ctx.environment.nodes[0];
+
+      if (ctx.environment.foundationType === "zombie") {
+        return yield* _(Effect.promise(() => ctx.startZombieNetwork()));
+      }
+
+      if (launch) {
+        const { runningNode, sink } = yield* _(launchNodeEffect(cmd, args));
+        ctx.nodes.push(runningNode);
+        ctx.sink = sink;
+      } else {
+        return;
+      }
+
+      return ctx;
+    });
   }
 
   public async connectEnvironment(silent: boolean = false): Promise<MoonwallContext> {
@@ -490,7 +496,6 @@ export class MoonwallContext {
       if (ctx.nodes.length > 0) {
         const node: Process = ctx.nodes[0];
         yield* _(node.kill());
-
         for (;;) {
           if (yield* _(node.isRunning)) {
             yield* _(Effect.sleep(50));
@@ -498,7 +503,46 @@ export class MoonwallContext {
             break;
           }
         }
+
+        // Effect.runPromise(Stream.run(ctx.sink as any) as any)
+
+        // Effect.runPromise(
+        //  ctx.sink.pipe(Stream.run)
+        // ).then(console.log)
+        // console.log(ctx.sink)
+        // console.log(yield* _(Effect.provide(Stream.run(ctx.sink), LocalEnvironment)))
+        // console.log(yield* _())
+
+        // const fsEff = yield* _(FileSystem.FileSystem);
+        // const sink = fsEff.sink("timbo.txt", {
+        //   flag: "w+",
+        // });
+
+        // yield* _(Stream.run(node.stderr, sink));
+
+        // console.log( yield* _(Effect.provide(Stream.run(node.stderr as any, sink), LocalEnvironment)))
+        // console.log(yield* _(Stream.run(node.stderr)));
+
+        // yield* _(Stream.run(ctx.messageStream, sink));
+
+        // yield* _(Stream.run(Stream.concat(node.stderr, node.stdout), sink));
       }
+
+      // const dirPath = path.join(process.cwd(), "tmp", "node_logs");
+      // if (yield* _(Effect.sync(() => !fs.existsSync(dirPath)))) {
+      //   yield* _(Effect.sync(() => fs.mkdirSync(dirPath, { recursive: true })));
+      // }
+
+      // const logLocation = path
+      //   .join(
+      //     dirPath,
+      //     `${path.basename(cmd)}_node_${
+      //       args.find((a) => a.includes("port"))?.split("=")[1]
+      //     }_${new Date().getTime()}.log`
+      //   )
+      //   .replaceAll("node_node_undefined", "chopsticks");
+
+      // process.env.MOON_LOG_LOCATION = logLocation;
 
       if (ctx.zombieNetwork) {
         console.log("🪓  Killing zombie nodes");
@@ -532,6 +576,7 @@ export class MoonwallContext {
         yield* _(Effect.sync(() => ctx.ipcServer?.removeAllListeners()));
       }
     }).pipe(
+      Effect.provide(LocalEnvironment),
       Effect.timeoutFail({
         duration: 5000,
         onTimeout: () => new Err.MoonwallContextDestroyError(),
@@ -557,12 +602,7 @@ export const createContextEffect = () =>
 export const runNetworkOnlyEffect = () =>
   Effect.gen(function* (_) {
     const ctx = yield* _(Effect.sync(() => MoonwallContext.getContext()));
-    yield* _(
-      Effect.tryPromise({
-        try: () => ctx.startNetwork(),
-        catch: () => new Err.MoonwallContextError(),
-      })
-    );
+    yield* _(ctx.startNetwork());
   });
 
 export interface IGlobalContextFoundation {
@@ -580,15 +620,12 @@ export interface IGlobalContextFoundation {
 
 const isPidRunningEffect = (pid: number) =>
   Effect.gen(function* (_) {
-    const command = Command.make(`ps -p ${pid} -o pid=`).pipe(Command.runInShell("/bin/bash"));
-
-    const result = yield* _(Effect.provide(Command.string(command), LocalEnvironment));
-    // const result = yield* _(
-    //   Effect.promise(() => execaCommand(`ps -p ${pid} -o pid=`, { cleanup: true, reject: false }))
-    // );
-    console.log(result);
-    return result === pid.toString();
-  });
+    const command: Command.Command = Command.make(`ps -p ${pid} -o pid=`).pipe(
+      Command.runInShell("/bin/bash")
+    );
+    const result = yield* _(Command.string(command));
+    return result.toString().trim() === pid.toString().trim();
+  }).pipe(Effect.provide(LocalEnvironment));
 
 const waitForPidsToDieEffect = (pids: number[]) =>
   Effect.gen(function* (_) {
