@@ -40,15 +40,15 @@ export const launchNodeEffect = (cmd: string, args: string[]) =>
       .sink(pathEff.join(process.cwd(), "node.log"), {
         flag: "w+",
       })
-      .pipe(
-        Sink.refineOrDie(Option.none),
-        Sink.zipRight(Sink.collectAll<Uint8Array>()),
-        Sink.map(Chunk.last),
-        Sink.map(Option.getOrElse(() => Uint8Array.of(0)))
-      );
+      // .pipe(
+      //   Sink.refineOrDie(Option.none),
+      //   Sink.zipRight(Sink.collectAll<Uint8Array>()),
+      //   Sink.map(Chunk.last),
+      //   Sink.map(Option.getOrElse(() => Uint8Array.of(0)))
+      // );
 
     const runningNode: CommandExecutor.Process = yield* _(
-      Command.make(cmd, ...args).pipe(Command.stderr(sink), Command.stdout(sink), Command.start)
+      Command.make(cmd, ...args).pipe(/*Command.stdout(sink),*/ Command.start)
     );
 
     // const pid = runningNode.pid;

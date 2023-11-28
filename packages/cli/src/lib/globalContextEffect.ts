@@ -347,7 +347,7 @@ export class MoonwallContext {
         return ctx;
       }
 
-      if (ctx.nodes.length > 0) {
+      if (ctx.nodes.length > 0 || ctx.environment.nodes.length == 0) {
         return ctx;
       }
 
