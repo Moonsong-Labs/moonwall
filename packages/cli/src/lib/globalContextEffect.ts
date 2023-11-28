@@ -1,4 +1,4 @@
-import { Command } from "@effect/platform-node";
+import { Command, CommandExecutor, FileSystem, Path } from "@effect/platform-node";
 import { Process } from "@effect/platform-node/CommandExecutor";
 import "@moonbeam-network/api-augment";
 import {
@@ -12,7 +12,7 @@ import {
 import { ApiPromise } from "@polkadot/api";
 import zombie, { Network } from "@zombienet/orchestrator";
 import Debug from "debug";
-import { Effect } from "effect";
+import { Chunk, Effect, Option, Sink, Stream } from "effect";
 import fs from "fs";
 import net from "net";
 import readline from "readline";
@@ -51,7 +51,6 @@ export class MoonwallContext {
   zombieNetwork?: Network;
   rtUpgradePath?: string;
   ipcServer?: net.Server;
-  sink?: any;
 
   private constructor(config: MoonwallConfig) {
     const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
@@ -340,7 +339,7 @@ export class MoonwallContext {
     return;
   }
 
-  public startNetwork() {
+  startNetwork() {
     return Effect.gen(function* (_) {
       const ctx = yield* _(Effect.sync(() => MoonwallContext.getContext()));
       if (process.env.MOON_RECYCLE == "true") {
@@ -358,9 +357,8 @@ export class MoonwallContext {
       }
 
       if (launch) {
-        const { runningNode, sink } = yield* _(launchNodeEffect(cmd, args));
+        const { runningNode } = yield* _(launchNodeEffect(cmd, args));
         ctx.nodes.push(runningNode);
-        ctx.sink = sink;
       } else {
         return;
       }
@@ -369,7 +367,7 @@ export class MoonwallContext {
     });
   }
 
-  public async connectEnvironment(silent: boolean = false): Promise<MoonwallContext> {
+  async connectEnvironment(silent: boolean = false): Promise<MoonwallContext> {
     const config = await importAsyncConfig();
     const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
 
@@ -450,7 +448,7 @@ export class MoonwallContext {
     return MoonwallContext.getContext();
   }
 
-  public async disconnect(providerName?: string) {
+  async disconnect(providerName?: string) {
     if (providerName) {
       this.providers.find(({ name }) => name === providerName)!.disconnect();
       this.providers.filter(({ name }) => name !== providerName);
@@ -460,7 +458,7 @@ export class MoonwallContext {
     }
   }
 
-  public static printStats() {
+  static printStats() {
     if (MoonwallContext) {
       console.dir(this.getContext(), { depth: 1 });
     } else {
@@ -468,7 +466,7 @@ export class MoonwallContext {
     }
   }
 
-  public static getContext(force: boolean = false): MoonwallContext {
+  static getContext(force: boolean = false): MoonwallContext {
     if (!MoonwallContext.instance || force) {
       const config = importJsonConfig();
       MoonwallContext.instance = new MoonwallContext(config);
@@ -477,13 +475,13 @@ export class MoonwallContext {
     return this.instance;
   }
 
-  public static destroy() {
+  static destroy() {
     if (MoonwallContext.getContext()) {
       return MoonwallContext.getContext().destroyEffect();
     }
   }
 
-  public destroyEffect() {
+  destroyEffect() {
     return Effect.gen(function* (_) {
       const ctx = MoonwallContext.getContext();
       yield* _(
@@ -492,6 +490,8 @@ export class MoonwallContext {
           catch: () => new Err.ProviderDisconnectError(),
         })
       );
+        console.log("zombie")
+      console.log(ctx.zombieNetwork)
 
       if (ctx.nodes.length > 0) {
         const node: Process = ctx.nodes[0];
@@ -503,6 +503,33 @@ export class MoonwallContext {
             break;
           }
         }
+
+        const pathEff = yield* _(Path.Path);
+        const fsEff = yield* _(FileSystem.FileSystem);
+        const execEff = yield* _(CommandExecutor.CommandExecutor);
+
+        const out = pathEff.join(process.cwd(), "node.log");
+        const stream = execEff.stream(Command.make("echo", "Hello World"));
+        const sink = fsEff.sink(out, {
+          flag: "w+",
+        });
+        // const sink = fsEff.sink(out, {flag: "w+"})
+        // .pipe(
+        //   Sink.refineOrDie(Option.none),
+        //   Sink.zipRight(Sink.collectAll<Uint8Array>()),
+        //   Sink.map(Chunk.last),
+        //   Sink.map(Option.getOrElse(() => Uint8Array.of(0))),
+        // );
+
+        // console.log("dummy stream")
+        // console.log(stream)
+
+        // console.log("process stream")
+        // console.log(node.stdout)
+        // console.log(node.stderr)
+
+        yield* _(Stream.run(stream, sink));
+        // console.log(yield* _(Stream.runCollect(node.stderr)))
 
         // Effect.runPromise(Stream.run(ctx.sink as any) as any)
 
@@ -544,6 +571,8 @@ export class MoonwallContext {
 
       // process.env.MOON_LOG_LOCATION = logLocation;
 
+
+      // TODO: Fix this - can't find zombieNetwork for some reason
       if (ctx.zombieNetwork) {
         console.log("🪓  Killing zombie nodes");
         yield* _(
@@ -566,10 +595,13 @@ export class MoonwallContext {
         );
 
         const command = Command.make(`kill ${processIds.join(" ")}`).pipe(
-          Command.runInShell("/bin/bash")
+          Command.runInShell("/bin/bash"),
+          Command.start
         );
 
-        yield* _(Effect.provide(Command.start(command), LocalEnvironment));
+        console.log(`🪓  Killing zombie processes ${processIds.join(" ")}`);
+        console.log(command);
+        yield* _(command);
         yield* _(waitForPidsToDieEffect(processIds));
 
         yield* _(Effect.sync(() => ctx.ipcServer?.close()));

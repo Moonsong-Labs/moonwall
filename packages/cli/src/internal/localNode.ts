@@ -1,9 +1,10 @@
+import { NodeContext } from "@effect/platform-node";
 import * as Command from "@effect/platform-node/Command";
 import * as CommandExecutor from "@effect/platform-node/CommandExecutor";
 import { PlatformError } from "@effect/platform-node/Error";
 import * as FileSystem from "@effect/platform-node/FileSystem";
 import * as Path from "@effect/platform-node/Path";
-import { Chunk, Effect, Option, Sink, Stream, StreamEmit } from "effect";
+import { Chunk, Effect, Fiber, Option, Sink, Stream, StreamEmit } from "effect";
 import fs from "node:fs";
 import path from "path";
 import WebSocket from "ws";
@@ -37,18 +38,18 @@ export const launchNodeEffect = (cmd: string, args: string[]) =>
     const fsEff = yield* _(FileSystem.FileSystem);
 
     const sink = fsEff
-      .sink(pathEff.join(process.cwd(), "node.log"), {
+      .sink(pathEff.join(process.cwd(), "node2.log"), {
         flag: "w+",
       })
-      // .pipe(
-      //   Sink.refineOrDie(Option.none),
-      //   Sink.zipRight(Sink.collectAll<Uint8Array>()),
-      //   Sink.map(Chunk.last),
-      //   Sink.map(Option.getOrElse(() => Uint8Array.of(0)))
-      // );
+      .pipe(
+        Sink.refineOrDie(Option.none),
+        Sink.zipRight(Sink.collectAll<Uint8Array>()),
+        Sink.map(Chunk.last),
+        Sink.map(Option.getOrElse(() => Uint8Array.of(0)))
+      );
 
     const runningNode: CommandExecutor.Process = yield* _(
-      Command.make(cmd, ...args).pipe(/*Command.stdout(sink),*/ Command.start)
+      Command.make(cmd, ...args).pipe( Command.stderr(sink),Command.runInShell("/bin/bash"),Command.start)
     );
 
     // const pid = runningNode.pid;
@@ -70,7 +71,7 @@ export const launchNodeEffect = (cmd: string, args: string[]) =>
         }
       }
     }
-    return { runningNode, sink };
+    return { runningNode };
     // return { kill: () => Fiber.interrupt(processes[0]), pid };
   });
 

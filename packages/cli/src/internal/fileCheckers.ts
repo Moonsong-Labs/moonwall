@@ -121,10 +121,7 @@ export async function checkAlreadyRunning(binaryName: string) {
 
     return pIdStrings.flatMap((pId) => parseInt(pId, 10));
   } catch (error: any) {
-    if (error.exitCode === 1) {
-      return [];
-    }
-    throw error;
+   return
   }
 }
 

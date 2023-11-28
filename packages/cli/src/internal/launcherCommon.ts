@@ -36,8 +36,8 @@ async function zombieBinCheck(env: Environment) {
   }
 
   const bins = parseZombieConfigForBins(env.foundation.zombieSpec.configPath);
-  const pids = await Promise.all(bins.flatMap((bin) => checkAlreadyRunning(bin)));
-  return pids.length == 0 || process.env.CI || (await promptAlreadyRunning(pids.flatMap((a) => a)));
+  const pids = (await Promise.all(bins.flatMap((bin) => checkAlreadyRunning(bin)))).flat();
+  return pids.length == 0 || process.env.CI || (await promptAlreadyRunning(pids));
 }
 
 async function devBinCheck(env: Environment) {
