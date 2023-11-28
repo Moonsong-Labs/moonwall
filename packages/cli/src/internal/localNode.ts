@@ -33,36 +33,38 @@ export const launchNodeEffect = (cmd: string, args: string[]) =>
       .replaceAll("node_node_undefined", "chopsticks");
 
     process.env.MOON_LOG_LOCATION = logLocation;
+    const runCmd = (_cmd: string, _args: string[])=>
+      Effect.gen(function* (_) {
+        const pathEff: Path.Path = yield* _(Path.Path);
+        const fsEff: FileSystem.FileSystem = yield* _(FileSystem.FileSystem);
+        const out = pathEff.join(process.cwd(), "node.log");
+        // const sink = fsEff.sink(out, {
+        //   flag: "w+",
+        // });
+        const sink = fsEff.sink(out)
+          // {
+          //   flag: "w+",
+          // }
+          // )
+          .pipe(
+            Sink.refineOrDie(Option.none),
+            Sink.zipRight(Sink.collectAll<Uint8Array>()),
+            Sink.map(Chunk.last),
+            Sink.map(Option.getOrElse(() => Uint8Array.of(0)))
+          );
 
-    const pathEff = yield* _(Path.Path);
-    const fsEff = yield* _(FileSystem.FileSystem);
+        return yield* _(
+          Command.make(_cmd, ..._args),
+          Command.stderr(sink),
+          Command.runInShell("/bin/bash"),
+          Command.start
+        );
+      });
 
-    const sink = fsEff
-      .sink(pathEff.join(process.cwd(), "node2.log"), {
-        flag: "w+",
-      })
-      .pipe(
-        Sink.refineOrDie(Option.none),
-        Sink.zipRight(Sink.collectAll<Uint8Array>()),
-        Sink.map(Chunk.last),
-        Sink.map(Option.getOrElse(() => Uint8Array.of(0)))
-      );
-
-    const runningNode: CommandExecutor.Process = yield* _(
-      Command.make(cmd, ...args).pipe( Command.stderr(sink),Command.runInShell("/bin/bash"),Command.start)
-    );
-
-    // const pid = runningNode.pid;
-
-    // const processes = [] as Fiber.RuntimeFiber<unknown, unknown>[];
-
-    // runningNode.pipe(Effect.provide(LocalEnvironment), Effect.runFork, processes.push);
-    // const launchedProcess = Command.start(cmdEffect);
-    // const runningNode: CommandExecutor.Process = yield* _(launchedProcess);
-    // const stream = Command.stream(cmdEffect);
+    const runningProcess: CommandExecutor.Process = yield* _(runCmd(cmd, args))
 
     probe: for (;;) {
-      const ports = yield* _(findPortsByPidEffect(runningNode.pid));
+      const ports = yield* _(findPortsByPidEffect(runningProcess.pid));
       if (ports) {
         for (const port of ports) {
           if (yield* _(Effect.sync(() => webSocketProbe(port)))) {
@@ -71,7 +73,8 @@ export const launchNodeEffect = (cmd: string, args: string[]) =>
         }
       }
     }
-    return { runningNode };
+    // return { fiber: processes[0], pid: pids[0] };
+    return runningProcess
     // return { kill: () => Fiber.interrupt(processes[0]), pid };
   });
 

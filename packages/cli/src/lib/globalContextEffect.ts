@@ -12,7 +12,7 @@ import {
 import { ApiPromise } from "@polkadot/api";
 import zombie, { Network } from "@zombienet/orchestrator";
 import Debug from "debug";
-import { Chunk, Effect, Option, Sink, Stream } from "effect";
+import { Chunk, Effect, Fiber, Option, Sink, Stream } from "effect";
 import fs from "fs";
 import net from "net";
 import readline from "readline";
@@ -46,7 +46,7 @@ export class MoonwallContext {
   private static instance: MoonwallContext;
   environment!: MoonwallEnvironment;
   providers: ConnectedProvider[];
-  nodes: Process[];
+  nodes: any[];
   foundation: FoundationType;
   zombieNetwork?: Network;
   rtUpgradePath?: string;
@@ -357,7 +357,7 @@ export class MoonwallContext {
       }
 
       if (launch) {
-        const { runningNode } = yield* _(launchNodeEffect(cmd, args));
+        const runningNode  = yield* _(launchNodeEffect(cmd, args));
         ctx.nodes.push(runningNode);
       } else {
         return;
@@ -494,8 +494,9 @@ export class MoonwallContext {
       console.log(ctx.zombieNetwork)
 
       if (ctx.nodes.length > 0) {
-        const node: Process = ctx.nodes[0];
+        const node = ctx.nodes[0];
         yield* _(node.kill());
+        // yield* _(Fiber.interrupt(node.fiber))
         for (;;) {
           if (yield* _(node.isRunning)) {
             yield* _(Effect.sleep(50));
@@ -504,15 +505,15 @@ export class MoonwallContext {
           }
         }
 
-        const pathEff = yield* _(Path.Path);
-        const fsEff = yield* _(FileSystem.FileSystem);
-        const execEff = yield* _(CommandExecutor.CommandExecutor);
+        // const pathEff = yield* _(Path.Path);
+        // const fsEff = yield* _(FileSystem.FileSystem);
+        // const execEff = yield* _(CommandExecutor.CommandExecutor);
 
-        const out = pathEff.join(process.cwd(), "node.log");
-        const stream = execEff.stream(Command.make("echo", "Hello World"));
-        const sink = fsEff.sink(out, {
-          flag: "w+",
-        });
+        // const out = pathEff.join(process.cwd(), "node.log");
+        // const stream = execEff.stream(Command.make("echo", "Hello World"));
+        // const sink = fsEff.sink(out, {
+        //   flag: "w+",
+        // });
         // const sink = fsEff.sink(out, {flag: "w+"})
         // .pipe(
         //   Sink.refineOrDie(Option.none),
@@ -528,7 +529,7 @@ export class MoonwallContext {
         // console.log(node.stdout)
         // console.log(node.stderr)
 
-        yield* _(Stream.run(stream, sink));
+        // yield* _(Stream.run(stream, sink));
         // console.log(yield* _(Stream.runCollect(node.stderr)))
 
         // Effect.runPromise(Stream.run(ctx.sink as any) as any)

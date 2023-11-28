@@ -106,7 +106,7 @@ async function mainMenu(config: MoonwallConfig) {
       process.env.MOON_RUN_SCRIPTS = "true";
       if (chosenRunEnv.envName !== "back") {
         await Effect.runPromise(
-          Effect.provide(runNetworkCmdEffect(chosenRunEnv.envName), NodeContext.layer)
+          Effect.provide(runNetworkCmdEffect(chosenRunEnv.envName), NodeContext.layer) as any
         );
       }
       return false;
@@ -116,7 +116,7 @@ async function mainMenu(config: MoonwallConfig) {
       if (chosenTestEnv.envName !== "back") {
         process.env.MOON_RUN_SCRIPTS = "true";
         await Effect.runPromise(
-          Effect.provide(testEffect(chosenTestEnv.envName), NodeContext.layer)
+          Effect.provide(testEffect(chosenTestEnv.envName), NodeContext.layer) as any
         );
         await inquirer.prompt({
           name: "test complete",

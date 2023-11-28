@@ -194,4 +194,4 @@ const cliStart = Effect.gen(function* (_) {
 
 const program = pipe(cliStart, Effect.tapErrorCause(Effect.logError));
 
-program.pipe(Effect.provide(NodeContext.layer), Runtime.runMain);
+program.pipe(Runtime.runMain);
