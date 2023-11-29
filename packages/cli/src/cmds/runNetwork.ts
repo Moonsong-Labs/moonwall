@@ -32,6 +32,7 @@ export const runNetworkCmdEffect = (args) =>
       )
     );
 
+    
     yield* _(Effect.sync(() => loadEnvVars()));
 
     yield* _(Effect.promise(() => commonChecks(env)));

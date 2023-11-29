@@ -64,7 +64,7 @@ const RT_NAME = process.env.MOON_RTNAME;
  *      });
  */
 export const describeSuite = <T extends FoundationType>(params: ITestSuiteType<T>) =>
-  Effect.runSync(describeSuiteEffect(params));
+  Effect.runSync(describeSuiteEffect(params).pipe(Effect.provide(NodeContext.layer)));
 
 const describeSuiteEffect = <T extends FoundationType>({
   id: suiteId,
@@ -125,7 +125,7 @@ const describeSuiteEffect = <T extends FoundationType>({
                 onTimeout: () => new Err.MoonwallContextDestroyError(),
               }),
               Effect.provide(NodeContext.layer)
-            ) as any
+            )
         )
     );
 
