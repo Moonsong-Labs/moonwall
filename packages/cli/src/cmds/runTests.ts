@@ -5,24 +5,18 @@ import type { UserConfig } from "vitest";
 import { startVitest } from "vitest/node";
 import * as Err from "../errors";
 import { clearNodeLogs } from "../internal/cmdFunctions/tempLogs";
+import { getCurrentDirectoryName } from "../internal/fileCheckers";
 import { commonChecks } from "../internal/launcherCommon";
-import { importAsyncConfig, loadEnvVars } from "../lib/configReader";
+import { importMoonwallConfig, loadEnvVars } from "../lib/configReader";
 import {
   MoonwallContext,
   createContextEffect,
   runNetworkOnlyEffect,
 } from "../lib/globalContextEffect";
-import { getCurrentDirectoryName } from "../internal/fileCheckers";
 
 export const testEffect = (envName: string, additionalArgs?: object) => {
   return Effect.gen(function* (_) {
-    const globalConfig = yield* _(
-      Effect.tryPromise({
-        try: () => importAsyncConfig(),
-        catch: () => new Err.ConfigError(),
-      })
-    );
-
+    const globalConfig = yield* _(importMoonwallConfig());
     const env = yield* _(
       Effect.filterOrFail(
         Effect.sync(() => globalConfig.environments.find(({ name }) => name === envName)),
@@ -34,12 +28,7 @@ export const testEffect = (envName: string, additionalArgs?: object) => {
     yield* _(Effect.sync(() => (process.env.MOON_TEST_ENV = envName)));
     yield* _(Effect.sync(() => loadEnvVars()));
 
-    yield* _(
-      Effect.tryPromise({
-        try: () => commonChecks(env),
-        catch: () => new Err.CommonCheckError(),
-      })
-    );
+    yield* _(commonChecks(env));
 
     if (
       (env.foundation.type == "dev" && !env.foundation.launchSpec[0].retainAllLogs) ||
@@ -61,10 +50,7 @@ export const testEffect = (envName: string, additionalArgs?: object) => {
 export const executeTestEffect = (env: Environment, additionalArgs?: object) => {
   return Effect.gen(function* (_) {
     const globalConfig = yield* _(
-      Effect.tryPromise({
-        try: () => importAsyncConfig(),
-        catch: () => new Err.ConfigError(),
-      })
+      importMoonwallConfig()
     );
 
     if (

@@ -1,34 +1,39 @@
+import { NodeContext } from "@effect/platform-node";
 import { Environment } from "@moonwall/types";
 import chalk from "chalk";
 import { execSync } from "child_process";
+import { Effect } from "effect";
 import fs from "fs";
 import path from "path";
-import { importAsyncConfig, parseZombieConfigForBins } from "../lib/configReader";
+import * as Err from "../errors";
+import { importJsonConfig, importMoonwallConfig, parseZombieConfigForBins } from "../lib/configReader";
 import { checkAlreadyRunning, downloadBinsIfMissing, promptAlreadyRunning } from "./fileCheckers";
 
-export async function commonChecks(env: Environment) {
-  const globalConfig = await importAsyncConfig();
+export const commonChecks = (env: Environment) =>
+  Effect.gen(function* (_) {
+    yield* _(Effect.logDebug("Running common checks"));
+    const globalConfig = yield* _(importMoonwallConfig()
+    );
 
-  // TODO: This is begging for some Dependency Injection
-  if (env.foundation.type == "dev") {
-    await devBinCheck(env);
-  }
-
-  if (env.foundation.type == "zombie") {
-    await zombieBinCheck(env);
-  }
-
-  if (
-    process.env.MOON_RUN_SCRIPTS == "true" &&
-    globalConfig.scriptsDir &&
-    env.runScripts &&
-    env.runScripts.length > 0
-  ) {
-    for (const scriptCommand of env.runScripts) {
-      await executeScript(scriptCommand);
+    if (env.foundation.type == "dev") {
+      yield* _(devBinCheck(env));
     }
-  }
-}
+
+    if (env.foundation.type == "zombie") {
+      yield* _(Effect.promise(() => zombieBinCheck(env)));
+    }
+
+    if (
+      process.env.MOON_RUN_SCRIPTS == "true" &&
+      globalConfig.scriptsDir &&
+      env.runScripts &&
+      env.runScripts.length > 0
+    ) {
+      for (const scriptCommand of env.runScripts) {
+        yield* _(Effect.promise(() => executeScript(scriptCommand)));
+      }
+    }
+  });
 
 async function zombieBinCheck(env: Environment) {
   if (env.foundation.type !== "zombie") {
@@ -36,23 +41,51 @@ async function zombieBinCheck(env: Environment) {
   }
 
   const bins = parseZombieConfigForBins(env.foundation.zombieSpec.configPath);
-  const pids = (await Promise.all(bins.flatMap((bin) => checkAlreadyRunning(bin)))).flat();
-  return pids.length == 0 || process.env.CI || (await promptAlreadyRunning(pids));
+  // const pids = (await Promise.all(bins.flatMap((bin) => checkAlreadyRunning(bin)))).flat();
+
+  const pids = (await Promise.all(
+    bins.flatMap((bin) =>
+      Effect.runPromise(Effect.provide(checkAlreadyRunning(bin), NodeContext.layer))
+    )
+  )) as any;
+  return (
+    pids.length == 0 || process.env.CI || (await promptAlreadyRunning(pids.map((a) => parseInt(a))))
+  );
 }
 
-async function devBinCheck(env: Environment) {
-  if (env.foundation.type !== "dev") {
-    throw new Error("This function is only for dev environments");
-  }
+const devBinCheck = (env: Environment) =>
+  Effect.gen(function* (_) {
+    if (env.foundation.type !== "dev") {
+      return new Err.CommonCheckError();
+    }
 
-  const binName = path.basename(env.foundation.launchSpec[0].binPath);
-  const pids = await checkAlreadyRunning(binName);
-  pids.length == 0 || process.env.CI || (await promptAlreadyRunning(pids));
-  await downloadBinsIfMissing(env.foundation.launchSpec[0].binPath);
-}
+    const binName = path.basename(env.foundation.launchSpec[0].binPath);
+
+    const pids = yield* _(checkAlreadyRunning(binName))
+    pids.length == 0 ||
+      process.env.CI ||
+      (yield* _(Effect.promise(() => promptAlreadyRunning(pids.map((a) => parseInt(a))))));
+    yield* _(
+      Effect.promise(() => downloadBinsIfMissing((env.foundation as any).launchSpec[0].binPath))
+    );
+  })
+
+// async function devBinCheck(env: Environment) {
+//   if (env.foundation.type !== "dev") {
+//     throw new Error("This function is only for dev environments");
+//   }
+
+//   const binName = path.basename(env.foundation.launchSpec[0].binPath);
+//   // const pids = await checkAlreadyRunning(binName);
+//   const pids = (await Effect.runPromise(
+//     Effect.provide(checkAlreadyRunning(binName), NodeContext.layer)
+//   )) as any;
+//   pids.length == 0 || process.env.CI || (await promptAlreadyRunning(pids.map((a) => parseInt(a))));
+//   await downloadBinsIfMissing(env.foundation.launchSpec[0].binPath);
+// }
 
 export async function executeScript(scriptCommand: string, args?: string) {
-  const scriptsDir = (await importAsyncConfig()).scriptsDir;
+  const scriptsDir = (importJsonConfig()).scriptsDir;
   const files = await fs.promises.readdir(scriptsDir);
 
   try {

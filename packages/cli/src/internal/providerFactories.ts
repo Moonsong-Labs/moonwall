@@ -7,8 +7,7 @@ import Debug from "debug";
 import { Signer, Wallet, ethers } from "ethers";
 import { createWalletClient, http, publicActions } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { Web3 } from "web3";
-import { WebSocketProvider as Web3ProviderWs } from "web3";
+import { Web3, WebSocketProvider as Web3ProviderWs } from "web3";
 const debug = Debug("global:providers");
 
 export class ProviderFactory {
@@ -100,7 +99,7 @@ export class ProviderFactory {
           chain: await deriveViemChain(this.url),
           account: privateKeyToAccount(this.privateKey as `0x${string}`),
           transport: http(this.url.replace("ws", "http")),
-        }).extend(publicActions) as ViemClient,
+        }).extend(publicActions as any) as any as ViemClient,
     };
   }
 

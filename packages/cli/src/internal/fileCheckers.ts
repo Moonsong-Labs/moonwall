@@ -1,12 +1,11 @@
-import fs from "node:fs";
-import { execSync } from "child_process";
+import { Command, CommandExecutor, FileSystem } from "@effect/platform-node";
 import chalk from "chalk";
-import os from "node:os";
-import inquirer from "inquirer";
-import path from "node:path";
-import { Command } from "@effect/platform-node";
-import { LocalEnvironment } from "./effectEnvironment";
+import { execSync } from "child_process";
 import { Effect } from "effect";
+import inquirer from "inquirer";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 
 export async function checkExists(path: string) {
   const binPath = path.split(" ")[0];
@@ -92,7 +91,7 @@ export function checkListeningPorts(processId: number) {
       });
     const filtered = new Set(ports);
     return { binName, processId, ports: [...filtered].sort() };
-  } catch (e) {
+  } catch (e: any) {
     console.log(e);
 
     const binName = execSync(`ps -p ${processId} -o comm=`).toString().trim();
@@ -107,23 +106,18 @@ export function checkListeningPorts(processId: number) {
   }
 }
 
-export async function checkAlreadyRunning(binaryName: string) {
-  try {
-    console.log(`Checking if ${chalk.bgWhiteBright.blackBright(binaryName)} is already running...`);
-    // pgrep only supports 15 characters
+export const checkAlreadyRunning = (binaryName: string) =>
+  Effect.gen(function* (_) {
+    yield* _(
+      Effect.logDebug(
+        `Checking if ${chalk.bgWhiteBright.blackBright(binaryName)} is already running...`
+      )
+    );
     const command = Command.make("pgrep", binaryName.slice(0, 14)).pipe(
       Command.runInShell("/bin/bash")
     );
-
-    const pIdStrings: readonly string[] = await Effect.runPromise(
-      Effect.provide(Command.lines(command), LocalEnvironment)
-    );
-
-    return pIdStrings.flatMap((pId) => parseInt(pId, 10));
-  } catch (error: any) {
-   return
-  }
-}
+    return yield* _(Command.lines(command));
+  }).pipe(Effect.provide(CommandExecutor.layer), Effect.provide(FileSystem.layer));
 
 export async function promptAlreadyRunning(pids: number[]) {
   const choice = await inquirer.prompt({

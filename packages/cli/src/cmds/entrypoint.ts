@@ -1,6 +1,5 @@
-import "../internal/logging";
+import { FileSystem, Runtime } from "@effect/platform-node";
 import "@moonbeam-network/api-augment";
-import { NodeContext, Runtime } from "@effect/platform-node";
 import dotenv from "dotenv";
 import { Effect, pipe } from "effect";
 import fs from "fs";
@@ -9,7 +8,9 @@ import { hideBin } from "yargs/helpers";
 import * as Err from "../errors";
 import { fetchArtifact } from "../internal/cmdFunctions/fetchArtifact";
 import { generateConfig } from "../internal/cmdFunctions/initialisation";
-import { main } from "./main";
+import "../internal/logging";
+import { debuglogLevel, logLevel } from "../internal/logging";
+import { mainCmd } from "./main";
 import { runNetworkCmdEffect } from "./runNetwork";
 import { testEffect } from "./runTests";
 
@@ -42,9 +43,11 @@ const parseArgs = Effect.sync(() =>
     .parseSync()
 );
 
-const processArgs = (args: any): { command: string; args?: object } => {
-  let commandChosen: string;
-  const argsObject: object = {};
+type CommandChoices = "undefined" | "init" | "download" | "test" | "run" | "mainmenu";
+
+const processArgs = (args: any): { command: CommandChoices; args?: object } => {
+  let commandChosen: CommandChoices = "undefined";
+  const argsObject: any = {};
 
   yargs(hideBin(args))
     .usage("Usage: $0")
@@ -139,8 +142,8 @@ const processArgs = (args: any): { command: string; args?: object } => {
 };
 
 const cliStart = Effect.gen(function* (_) {
-  let commandChosen: string;
-  let args: object = {};
+  let commandChosen: CommandChoices;
+  let args: any = {};
 
   const argv = yield* _(parseArgs);
   process.env.MOON_CONFIG_PATH = argv.configFile;
@@ -155,7 +158,7 @@ const cliStart = Effect.gen(function* (_) {
 
   switch (commandChosen) {
     case "mainmenu":
-      yield* _(Effect.promise(main));
+      yield* _(mainCmd());
       break;
 
     case "init":
@@ -170,11 +173,11 @@ const cliStart = Effect.gen(function* (_) {
       yield* _(
         testEffect(args["envName"], { testNamePattern: args["GrepTest"] }).pipe(
           Effect.tap(() => Effect.sync(() => console.log("✅  All Tests Passed"))),
-          Effect.tapErrorTag("TestsFailedError", (error) =>
-            Effect.sync(() =>
-              console.log(`❌ ${error.fails} test file${error.fails !== 1 ? "s" : ""} failed`)
-            )
-          )
+          // Effect.tapErrorTag("TestsFailedError", (error) =>
+          //   Effect.sync(() =>
+          //     console.log(`❌ ${error.fails} test file${error.fails !== 1 ? "s" : ""} failed`)
+          //   )
+          // )
         )
       );
       break;
@@ -192,6 +195,12 @@ const cliStart = Effect.gen(function* (_) {
   console.log("🏁 Moonwall Process finished");
 });
 
-const program = pipe(cliStart, Effect.tapErrorCause(Effect.logError));
+const program: any = pipe(cliStart, Effect.tapErrorCause(Effect.logError));
 
-program.pipe(Runtime.runMain);
+Runtime.runMain(
+  program.pipe(
+    Effect.provide(FileSystem.layer),
+    Effect.provide(debuglogLevel),
+    Effect.provide(logLevel)
+  )
+);

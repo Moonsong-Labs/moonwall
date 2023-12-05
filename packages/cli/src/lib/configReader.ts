@@ -1,29 +1,37 @@
 import "@moonbeam-network/api-augment";
 import { MoonwallConfig } from "@moonwall/types";
-import { readFile } from "fs/promises";
+import { Effect } from "effect";
 import { readFileSync } from "fs";
+import { readFile } from "fs/promises";
 import JSONC from "jsonc-parser";
 import path, { extname } from "path";
+import * as Err from "../errors";
 
-async function parseConfig(filePath: string) {
-  let result: any;
+const parseConfig = (filePath: string) =>
+  Effect.gen(function* (_) {
+    const file = yield* _(Effect.promise(() => readFile(filePath, "utf8")));
+    switch (extname(filePath)) {
+      case ".json":
+        return yield* _(
+          Effect.try({
+            try: () => JSON.parse(file) as MoonwallConfig,
+            catch: () => new Err.ConfigError(),
+          })
+        );
 
-  const file = await readFile(filePath, "utf8");
+      case ".config":
+        return yield* _(
+          Effect.try({
+            try: () => JSONC.parse(file) as MoonwallConfig,
+            catch: () => new Err.ConfigError(),
+          })
+        );
 
-  switch (extname(filePath)) {
-    case ".json":
-      result = JSON.parse(file);
-      break;
-    case ".config":
-      result = JSONC.parse(file);
-      break;
-    default:
-      result = undefined;
-      break;
-  }
+      default:
+        return yield* _(Effect.fail(new Err.ConfigError()));
+    }
+  });
 
-  return result;
-}
 function parseConfigSync(filePath: string) {
   let result: any;
 
@@ -43,6 +51,26 @@ function parseConfigSync(filePath: string) {
 
   return result;
 }
+
+// async function parseConfig(filePath: string): Promise<MoonwallConfig> {
+//   let result: any;
+
+//   const file = await readFile(filePath, "utf8");
+
+//   switch (extname(filePath)) {
+//     case ".json":
+//       result = JSON.parse(file);
+//       break;
+//     case ".config":
+//       result = JSONC.parse(file);
+//       break;
+//     default:
+//       result = undefined;
+//       break;
+//   }
+
+//   return result;
+// }
 
 export function isOptionSet(option: string): boolean {
   const config = importJsonConfig();
@@ -74,31 +102,30 @@ export function importJsonConfig(): MoonwallConfig {
 
   try {
     const config = parseConfigSync(filePath);
-    const replacedConfig = replaceEnvVars(config);
+    const replacedConfig = replaceEnvVars2(config);
     return replacedConfig as MoonwallConfig;
   } catch (e) {
     console.error(e);
     throw new Error(`Error import config at ${filePath}`);
   }
 }
+export const importMoonwallConfig = () =>
+  Effect.gen(function* (_) {
+    if (globalThis.moonwall) {
+      return globalThis.moonwall as MoonwallConfig;
+    }
 
-export async function importAsyncConfig() {
-  if (globalThis.moonwall) {
-    return globalThis.moonwall;
-  }
-  const configPath = process.env.MOON_CONFIG_PATH!;
-  const filePath = path.isAbsolute(configPath) ? configPath : path.join(process.cwd(), configPath);
+    const configPath = process.env.MOON_CONFIG_PATH!;
+    const filePath = path.isAbsolute(configPath)
+      ? configPath
+      : path.join(process.cwd(), configPath);
 
-  try {
-    const config = await parseConfig(filePath);
-    const replacedConfig = replaceEnvVars(config);
+    const config = yield* _(parseConfig(filePath));
 
-    return replacedConfig as MoonwallConfig;
-  } catch (e) {
-    console.error(e);
-    throw new Error(`Error import config at ${filePath}`);
-  }
-}
+    const replacedConfig = yield* _(Effect.sync(() => replaceEnvVars2(config) as MoonwallConfig));
+    yield* _(Effect.sync(() => (globalThis.moonwall = replacedConfig)));
+    return replacedConfig;
+  });
 
 export function loadEnvVars(): void {
   const globalConfig = importJsonConfig();
@@ -110,7 +137,7 @@ export function loadEnvVars(): void {
     });
 }
 
-function replaceEnvVars(value: any): any {
+function replaceEnvVars2(value: any): any {
   if (typeof value === "string") {
     return value.replace(/\$\{([^}]+)\}/g, (match, group) => {
       const envVarValue = process.env[group];
@@ -128,9 +155,9 @@ function replaceEnvVars(value: any): any {
       return envVarValue || match;
     });
   } else if (Array.isArray(value)) {
-    return value.map(replaceEnvVars);
+    return value.map(replaceEnvVars2);
   } else if (typeof value === "object" && value !== null) {
-    return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, replaceEnvVars(v)]));
+    return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, replaceEnvVars2(v)]));
   } else {
     return value;
   }

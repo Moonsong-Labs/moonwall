@@ -1,3 +1,4 @@
+import { FileSystem } from "@effect/platform-node";
 import { MoonwallConfig } from "@moonwall/types";
 import chalk from "chalk";
 import clear from "clear";
@@ -5,43 +6,42 @@ import colors from "colors";
 import { Effect } from "effect";
 import fs from "fs";
 import inquirer from "inquirer";
-import fetch from "node-fetch";
 import PressToContinuePrompt from "inquirer-press-to-continue";
+import fetch from "node-fetch";
 import path from "path";
 import { SemVer, lt } from "semver";
 import pkg from "../../package.json" assert { type: "json" };
 import { fetchArtifact, getVersions } from "../internal/cmdFunctions/fetchArtifact";
 import { createFolders, generateConfig } from "../internal/cmdFunctions/initialisation";
 import { executeScript } from "../internal/launcherCommon";
-import { importAsyncConfig } from "../lib/configReader";
+import { debuglogLevel, logLevel } from "../internal/logging";
+import { importMoonwallConfig } from "../lib/configReader";
 import { allReposAsync } from "../lib/repoDefinitions";
 import { runNetworkCmdEffect } from "./runNetwork";
 import { testEffect } from "./runTests";
-import { NodeContext } from "@effect/platform-node";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
-export async function main() {
-  for (;;) {
-    let globalConfig: MoonwallConfig | undefined;
-    try {
-      globalConfig = await importAsyncConfig();
-    } catch (e) {
-      console.log(e);
-    }
-    clear();
-    await printIntro();
-    if (await mainMenu(globalConfig)) {
-      break;
-    } else {
-      continue;
-    }
-  }
+export const mainCmd = () =>
+  Effect.gen(function* (_) {
+    for (;;) {
+      const globalConfig = yield* _(importMoonwallConfig());
 
-  process.stdout.write(`Goodbye! 👋\n`);
-}
+      yield* _(Effect.sync(() => clear()));
+      yield* _(Effect.promise(() => printIntro()));
 
-async function mainMenu(config: MoonwallConfig) {
+      const cont = yield* _(Effect.promise(() => mainMenu(globalConfig)));
+
+      if (cont) {
+        break;
+      } else {
+        continue;
+      }
+    }
+    yield* _(Effect.sync(()=> process.stdout.write(`Goodbye! 👋\n`)));
+  });
+  
+async function mainMenu(config?: MoonwallConfig) {
   const configPresent = config !== undefined;
   const questionList = {
     name: "MenuChoice",
@@ -89,12 +89,12 @@ async function mainMenu(config: MoonwallConfig) {
             value: "quit",
           },
         ],
-    filter(val) {
+    filter(val: any) {
       return val;
     },
   };
 
-  const answers = await inquirer.prompt(questionList);
+  const answers = await inquirer.prompt(questionList as any);
 
   switch (answers.MenuChoice) {
     case "init":
@@ -102,21 +102,29 @@ async function mainMenu(config: MoonwallConfig) {
       await createFolders();
       return false;
     case "run": {
-      const chosenRunEnv = await chooseRunEnv(config);
+      const chosenRunEnv = await chooseRunEnv(config!);
       process.env.MOON_RUN_SCRIPTS = "true";
       if (chosenRunEnv.envName !== "back") {
         await Effect.runPromise(
-          Effect.provide(runNetworkCmdEffect(chosenRunEnv.envName), NodeContext.layer) as any
+          runNetworkCmdEffect(chosenRunEnv.envName).pipe(
+            Effect.provide(FileSystem.layer),
+            Effect.provide(debuglogLevel),
+            Effect.provide(logLevel)
+          )
         );
       }
       return false;
     }
     case "test": {
-      const chosenTestEnv = await chooseTestEnv(config);
+      const chosenTestEnv = await chooseTestEnv(config!);
       if (chosenTestEnv.envName !== "back") {
         process.env.MOON_RUN_SCRIPTS = "true";
         await Effect.runPromise(
-          Effect.provide(testEffect(chosenTestEnv.envName), NodeContext.layer) as any
+          testEffect(chosenTestEnv.envName).pipe(
+            Effect.provide(FileSystem.layer),
+            Effect.provide(debuglogLevel),
+            Effect.provide(logLevel)
+          )
         );
         await inquirer.prompt({
           name: "test complete",
@@ -137,7 +145,7 @@ async function mainMenu(config: MoonwallConfig) {
       return await resolveQuitChoice();
 
     case "exec":
-      return await resolveExecChoice(config);
+      return await resolveExecChoice(config!);
 
     default:
       throw new Error("Invalid choice");
@@ -179,7 +187,7 @@ async function resolveExecChoice(config: MoonwallConfig) {
       type: "press-to-continue",
       anyKey: true,
       pressToContinueMessage: `ℹ️  No scripts found at ${chalk.bgWhiteBright.black(
-        path.join(process.cwd(), config.scriptsDir)
+        path.join(process.cwd(), config.scriptsDir!)
       )}\n Press any key to continue...\n`,
     });
   }
@@ -236,7 +244,7 @@ async function resolveExecChoice(config: MoonwallConfig) {
 
 async function resolveDownloadChoice() {
   const binList = (await allReposAsync()).reduce((acc, curr) => {
-    acc.push(...curr.binaries.map((bin) => bin.name).flat());
+    acc.push(...curr.binaries.map((bin: any) => bin.name).flat());
     acc.push(new inquirer.Separator());
     acc.push("Back");
     acc.push(new inquirer.Separator());
@@ -371,7 +379,7 @@ const chooseRunEnv = async (config: MoonwallConfig) => {
   return result;
 };
 
-const resolveQuitChoice = async () => {
+const resolveQuitChoice = async (): Promise<boolean> => {
   const result = await inquirer.prompt({
     name: "Quit",
     type: "confirm",
@@ -393,7 +401,9 @@ const printIntro = async () => {
     const url = "https://api.github.com/repos/moonsong-labs/moonwall/releases";
     const resp = await fetch(url);
     const json = (await resp.json()) as GithubResponse[];
-    remoteVersion = json.find((a) => a.tag_name.includes("@moonwall/cli@"))!.tag_name.split("@")[2];
+    remoteVersion = json
+      .find((a) => a.tag_name.includes("@moonwall/cli@"))!
+      .tag_name.split("@")[2]!;
   } catch (error) {
     remoteVersion = "unknown";
     console.error(`Fetch Error: ${error}`);

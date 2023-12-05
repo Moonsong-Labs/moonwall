@@ -20,7 +20,7 @@ import Debug from "debug";
 import { Signer } from "ethers";
 import { afterAll, beforeAll, describe, it } from "vitest";
 import { Web3 } from "web3";
-import { importAsyncConfig } from "./configReader";
+import { importMoonwallConfig } from "./configReader";
 import { chopsticksHandler } from "./handlers/chopsticksHandler";
 import { devHandler } from "./handlers/devHandler";
 import { readOnlyHandler } from "./handlers/readOnlyHandler";
@@ -91,41 +91,40 @@ const describeSuiteEffect = <T extends FoundationType>({
     beforeAll(
       async () =>
         await Effect.runPromise(
-          Effect.gen(function* (_) {
-            const globalConfig = yield* _(
-              Effect.tryPromise({
-                try: () => importAsyncConfig(),
-                catch: () => new Err.ConfigError("Could not load config before running test"),
-              })
-            );
+          Effect.scoped(
+            Effect.gen(function* (_) {
+              const globalConfig = yield* _(importMoonwallConfig());
 
-            yield* _(Effect.config(Config.string("MOON_TEST_ENV")));
-            const env = globalConfig.environments.find(
-              ({ name }) => name === process.env.MOON_TEST_ENV
-            );
+              yield* _(Effect.config(Config.string("MOON_TEST_ENV")));
+              const env = globalConfig.environments.find(
+                ({ name }) => name === process.env.MOON_TEST_ENV
+              );
 
-            if (env.foundation.type === "read_only") {
-              const settings = loadParams(env.foundation.launchSpec);
-              limiter = new Bottleneck(settings);
-            }
-            ctx = yield* _(createContextEffect());
-            return;
-          }).pipe(Effect.provide(NodeContext.layer))
+              if (env.foundation.type === "read_only") {
+                const settings = loadParams(env.foundation.launchSpec);
+                limiter = new Bottleneck(settings);
+              }
+              ctx = yield* _(createContextEffect());
+              return;
+            }).pipe(Effect.provide(NodeContext.layer))
+          )
         )
     );
 
     afterAll(
       async () =>
         await Effect.runPromise(
-          MoonwallContext.getContext()
-            .destroyEffect()
-            .pipe(
-              Effect.timeoutFail({
-                duration: "10 seconds",
-                onTimeout: () => new Err.MoonwallContextDestroyError(),
-              }),
-              Effect.provide(NodeContext.layer)
-            )
+          Effect.scoped(
+            MoonwallContext.getContext()
+              .destroyEffect()
+              .pipe(
+                Effect.timeoutFail({
+                  duration: "10 seconds",
+                  onTimeout: () => new Err.MoonwallContextDestroyError(),
+                }),
+                Effect.provide(NodeContext.layer)
+              ) as any
+          )
         )
     );
 
