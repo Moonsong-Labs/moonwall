@@ -27,8 +27,9 @@ export const testEffect = (envName: string, additionalArgs?: object) => {
 
     yield* _(Effect.sync(() => (process.env.MOON_TEST_ENV = envName)));
     yield* _(Effect.sync(() => loadEnvVars()));
-
     yield* _(commonChecks(env));
+
+    // TODO : Create Node Pool Service
 
     if (
       (env.foundation.type == "dev" && !env.foundation.launchSpec[0].retainAllLogs) ||
@@ -49,9 +50,7 @@ export const testEffect = (envName: string, additionalArgs?: object) => {
 
 export const executeTestEffect = (env: Environment, additionalArgs?: object) => {
   return Effect.gen(function* (_) {
-    const globalConfig = yield* _(
-      importMoonwallConfig()
-    );
+    const globalConfig = yield* _(importMoonwallConfig());
 
     if (
       env.foundation.type === "read_only" &&

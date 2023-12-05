@@ -11,7 +11,7 @@ import {
 import { ApiPromise } from "@polkadot/api";
 import zombie, { Network } from "@zombienet/orchestrator";
 import Debug from "debug";
-import { Effect } from "effect";
+import { Config, Effect } from "effect";
 import fs from "fs";
 import net from "net";
 import readline from "readline";
@@ -33,6 +33,7 @@ import {
 } from "../internal/providerFactories";
 import {
   importJsonConfig,
+  importMoonwallConfig,
   isEthereumDevConfig,
   isEthereumZombieConfig,
   isOptionSet,
@@ -358,12 +359,62 @@ export class MoonwallContext {
 
       if (launch) {
         const runningNode = yield* _(launchNode(cmd, args));
-        yield* _(Effect.logDebug(`Started node ${runningNode.pid}`));
+        // yield* _(Effect.logDebug(`Started ${cmd }node on fiber #${runningNode.id().id}`));
         ctx.nodes.push(runningNode);
       } else {
         return;
       }
 
+      return ctx;
+    });
+  }
+
+  connectProviders() {
+    return Effect.gen(function* (_) {
+      const config = yield* _(importMoonwallConfig());
+      const testEnv = yield* _(Effect.config(Config.string("MOON_TEST_ENV")));
+      const env = config.environments.find(({ name }) => name == testEnv)!;
+      const ctx = MoonwallContext.getContext();
+
+      // Zombie providers are setup here because they need to be connected after the network is started
+      if (MoonwallContext.getContext().environment.foundationType == "zombie") {
+        ctx.environment.providers = env.connections
+          ? ProviderFactory.prepare(env.connections)
+          : isEthereumZombieConfig()
+          ? ProviderFactory.prepareDefaultZombie()
+          : ProviderFactory.prepareNoEthDefaultZombie();
+      }
+
+      if (ctx.providers.length > 0) {
+        yield* _(
+          Effect.logDebug(`Providers already connected, skipping "connectProviders()" call`)
+        );
+        return ctx;
+      }
+
+      yield* _(
+        Effect.forEach(
+          ctx.environment.providers,
+          ({ name, type, connect }) => {
+            return Effect.gen(function* (_) {
+              yield* _(Effect.logDebug(`Attemping to connect provider ${name} of type ${type}`));
+              ctx.providers.push(
+                yield* _(
+                  Effect.promise(() =>
+                    ProviderInterfaceFactory.populate(name, type, connect as any)
+                  )
+                )
+              );
+            });
+          },
+          { concurrency: 1 }
+        )
+      );
+
+      // TODO ADD ZOMBIE STUFF
+
+      yield* _(Effect.logDebug(`Providers connected`));
+      yield* _(Effect.sleep(5000));
       return ctx;
     });
   }
@@ -556,12 +607,7 @@ export const createContextEffect = () =>
   Effect.gen(function* (_) {
     const ctx = yield* _(Effect.sync(() => MoonwallContext.getContext()));
     yield* _(runNetworkOnlyEffect());
-    yield* _(
-      Effect.tryPromise({
-        try: () => ctx.connectEnvironment(),
-        catch: () => new Err.MoonwallContextError(),
-      })
-    );
+    yield* _(ctx.connectProviders());
 
     return ctx;
   });

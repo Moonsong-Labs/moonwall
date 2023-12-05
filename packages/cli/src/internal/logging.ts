@@ -33,9 +33,6 @@ process.stderr.write = (
   return true;
 };
 
-
-
-
 // const ANSI = {
 //   Reset: "\x1b[0m",
 //   Bold: "\x1b[1m",
@@ -103,7 +100,6 @@ export const CustomLog = Logger.make(({ logLevel, message }) => {
       break;
   }
 });
-
 
 export const debuglogLevel = Logger.minimumLogLevel(LogLevel.Debug);
 export const logLevel = Logger.replace(Logger.defaultLogger, CustomLog);

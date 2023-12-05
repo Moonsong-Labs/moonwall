@@ -6,14 +6,17 @@ import { Effect } from "effect";
 import fs from "fs";
 import path from "path";
 import * as Err from "../errors";
-import { importJsonConfig, importMoonwallConfig, parseZombieConfigForBins } from "../lib/configReader";
+import {
+  importJsonConfig,
+  importMoonwallConfig,
+  parseZombieConfigForBins,
+} from "../lib/configReader";
 import { checkAlreadyRunning, downloadBinsIfMissing, promptAlreadyRunning } from "./fileCheckers";
 
 export const commonChecks = (env: Environment) =>
   Effect.gen(function* (_) {
     yield* _(Effect.logDebug("Running common checks"));
-    const globalConfig = yield* _(importMoonwallConfig()
-    );
+    const globalConfig = yield* _(importMoonwallConfig());
 
     if (env.foundation.type == "dev") {
       yield* _(devBinCheck(env));
@@ -61,14 +64,14 @@ const devBinCheck = (env: Environment) =>
 
     const binName = path.basename(env.foundation.launchSpec[0].binPath);
 
-    const pids = yield* _(checkAlreadyRunning(binName))
+    const pids = yield* _(checkAlreadyRunning(binName));
     pids.length == 0 ||
       process.env.CI ||
       (yield* _(Effect.promise(() => promptAlreadyRunning(pids.map((a) => parseInt(a))))));
     yield* _(
       Effect.promise(() => downloadBinsIfMissing((env.foundation as any).launchSpec[0].binPath))
     );
-  })
+  });
 
 // async function devBinCheck(env: Environment) {
 //   if (env.foundation.type !== "dev") {
@@ -85,7 +88,7 @@ const devBinCheck = (env: Environment) =>
 // }
 
 export async function executeScript(scriptCommand: string, args?: string) {
-  const scriptsDir = (importJsonConfig()).scriptsDir;
+  const scriptsDir = importJsonConfig().scriptsDir;
   const files = await fs.promises.readdir(scriptsDir);
 
   try {
