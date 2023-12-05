@@ -167,7 +167,7 @@ export async function deployViemContract<TOptions extends ContractDeploymentOpti
         .viem()
         .getTransactionReceipt({ hash });
       return { contractAddress, status, logs, hash };
-    } catch (e) {
+    } catch (e: any) {
       console.log(e.message);
       console.log("Contract deployment query, retrying...");
       await timer(100);

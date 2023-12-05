@@ -38,9 +38,9 @@ export const mainCmd = () =>
         continue;
       }
     }
-    yield* _(Effect.sync(()=> process.stdout.write(`Goodbye! 👋\n`)));
+    yield* _(Effect.sync(() => process.stdout.write(`Goodbye! 👋\n`)));
   });
-  
+
 async function mainMenu(config?: MoonwallConfig) {
   const configPresent = config !== undefined;
   const questionList = {
@@ -120,10 +120,12 @@ async function mainMenu(config?: MoonwallConfig) {
       if (chosenTestEnv.envName !== "back") {
         process.env.MOON_RUN_SCRIPTS = "true";
         await Effect.runPromise(
-          testEffect(chosenTestEnv.envName).pipe(
-            Effect.provide(FileSystem.layer),
-            Effect.provide(debuglogLevel),
-            Effect.provide(logLevel)
+          Effect.scoped(
+            testEffect(chosenTestEnv.envName).pipe(
+              Effect.provide(FileSystem.layer),
+              Effect.provide(debuglogLevel),
+              Effect.provide(logLevel)
+            )
           )
         );
         await inquirer.prompt({

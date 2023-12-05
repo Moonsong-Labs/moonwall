@@ -7,6 +7,7 @@ import { PlatformError } from "@effect/platform-node/Error";
 
 export const launchNode = (cmd: string, args: string[]) =>
   Effect.gen(function* (_) {
+    yield* _(Effect.logDebug(`Starting process with command: ${cmd} ${args.join(" ")}`));
     const command = Command.make(cmd, ...args).pipe(
       Command.stdout(collectUint8Array),
       Command.stderr(collectUint8Array),
@@ -14,9 +15,10 @@ export const launchNode = (cmd: string, args: string[]) =>
     );
 
     const launchedProcess = yield* _(command);
-    const fs = yield* _(FileSystem.FileSystem);
-    // const path = yield* _(Path.Path);
 
+    yield* _(Effect.logDebug(`Started process ${cmd} with pid: ${launchedProcess.pid}`));
+
+    const fs = yield* _(FileSystem.FileSystem);
     const dirPath = path.join(process.cwd(), "tmp", "node_logs");
     if (yield* _(Effect.sync(() => !nodeFs.existsSync(dirPath)))) {
       yield* _(Effect.sync(() => nodeFs.mkdirSync(dirPath, { recursive: true })));
@@ -37,9 +39,11 @@ export const launchNode = (cmd: string, args: string[]) =>
     yield* _(
       launchedProcess.stderr.pipe(
         Stream.runForEach((bytes) => fs.writeFile("./nodeErr.log", bytes)),
-        Effect.fork
+        Effect.forkDaemon
       )
     );
+
+    yield* _(Effect.logDebug(`Logging started at ${logLocation}`));
 
     probe: for (;;) {
       const ports = yield* _(findPortsByPidEffect(launchedProcess.pid));
@@ -67,74 +71,6 @@ const collectUint8Array: Sink.Sink<never, never, Uint8Array, never, Uint8Array> 
     })
   );
 
-// export const launchNodeEffect = (cmd: string, args: string[]) =>
-//   Effect.gen(function* (_) {
-//     if (cmd.includes("moonbeam")) {
-//       yield* _(Effect.promise(() => checkExists(cmd)));
-//       yield* _(Effect.sync(() => checkAccess(cmd)));
-//     }
-
-//     const dirPath = path.join(process.cwd(), "tmp", "node_logs");
-//     if (yield* _(Effect.sync(() => !nodeFs.existsSync(dirPath)))) {
-//       yield* _(Effect.sync(() => nodeFs.mkdirSync(dirPath, { recursive: true })));
-//     }
-
-//     const logLocation = path
-//       .join(
-//         dirPath,
-//         `${path.basename(cmd)}_node_${
-//           args.find((a) => a.includes("port"))?.split("=")[1]
-//         }_${new Date().getTime()}.log`
-//       )
-//       .replaceAll("node_node_undefined", "chopsticks");
-
-//     process.env.MOON_LOG_LOCATION = logLocation;
-//     const runCmd = (_cmd: string, _args: string[]) =>
-//       Effect.gen(function* (_) {
-//         const pathEff: Path.Path = yield* _(Path.Path);
-//         const fsEff: FileSystem.FileSystem = yield* _(FileSystem.FileSystem);
-//         const out = pathEff.join(process.cwd(), "node.log");
-//         // const sink = fsEff.sink(out, {
-//         //   flag: "w+",
-//         // });
-//         const sink = fsEff
-//           .sink(out)
-//           // {
-//           //   flag: "w+",
-//           // }
-//           // )
-//           .pipe(
-//             Sink.refineOrDie(Option.none),
-//             Sink.zipRight(Sink.collectAll<Uint8Array>()),
-//             Sink.map(Chunk.last),
-//             Sink.map(Option.getOrElse(() => Uint8Array.of(0)))
-//           );
-
-//         return yield* _(
-//           Command.make(_cmd, ..._args),
-//           Command.stderr(sink),
-//           Command.runInShell("/bin/bash"),
-//           Command.start
-//         );
-//       });
-
-//     const runningProcess: CommandExecutor.Process = yield* _(runCmd(cmd, args));
-
-//     probe: for (;;) {
-//       const ports = yield* _(findPortsByPidEffect(runningProcess.pid));
-//       if (ports) {
-//         for (const port of ports) {
-//           if (yield* _(Effect.sync(() => webSocketProbe(port)))) {
-//             break probe;
-//           }
-//         }
-//       }
-//     }
-//     // return { fiber: processes[0], pid: pids[0] };
-//     return runningProcess;
-//     // return { kill: () => Fiber.interrupt(processes[0]), pid };
-//   });
-
 const jsonRpcMessage = {
   jsonrpc: "2.0",
   id: 1,
@@ -149,7 +85,7 @@ const webSocketProbe = (port: number) =>
     const filtered = Chunk.toArray(val).filter(
       (val) => val.result !== undefined && val.result.length > 0
     );
-    yield* _(Effect.logDebug(`Websocket probe result: ${Chunk.toArray(val)}`));
+    yield* _(Effect.logDebug(`Websocket probe result: ${JSON.stringify(Chunk.toArray(val))}`));
     return filtered.length > 0;
   });
 

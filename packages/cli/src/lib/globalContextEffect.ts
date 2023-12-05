@@ -340,33 +340,32 @@ export class MoonwallContext {
   }
 
   startNetwork() {
-    return Effect.scoped(
-      Effect.gen(function* (_) {
-        const ctx = yield* _(Effect.sync(() => MoonwallContext.getContext()));
-        if (process.env.MOON_RECYCLE == "true") {
-          return ctx;
-        }
-
-        if (ctx.nodes.length > 0 || ctx.environment.nodes.length == 0) {
-          return ctx;
-        }
-
-        const { args, launch, cmd } = ctx.environment.nodes[0]!;
-
-        if (ctx.environment.foundationType === "zombie") {
-          return yield* _(Effect.promise(() => ctx.startZombieNetwork()));
-        }
-
-        if (launch) {
-          const runningNode = yield* _(launchNode(cmd, args));
-          ctx.nodes.push(runningNode);
-        } else {
-          return;
-        }
-
+    return Effect.gen(function* (_) {
+      const ctx = yield* _(Effect.sync(() => MoonwallContext.getContext()));
+      if (process.env.MOON_RECYCLE == "true") {
         return ctx;
-      })
-    );
+      }
+
+      if (ctx.nodes.length > 0 || ctx.environment.nodes.length == 0) {
+        return ctx;
+      }
+
+      const { args, launch, cmd } = ctx.environment.nodes[0]!;
+
+      if (ctx.environment.foundationType === "zombie") {
+        return yield* _(Effect.promise(() => ctx.startZombieNetwork()));
+      }
+
+      if (launch) {
+        const runningNode = yield* _(launchNode(cmd, args));
+        yield* _(Effect.logDebug(`Started node ${runningNode.pid}`));
+        ctx.nodes.push(runningNode);
+      } else {
+        return;
+      }
+
+      return ctx;
+    });
   }
 
   async connectEnvironment(silent: boolean = false): Promise<MoonwallContext> {
@@ -554,26 +553,24 @@ export class MoonwallContext {
 }
 
 export const createContextEffect = () =>
-    Effect.gen(function* (_) {
-      const ctx = yield* _(Effect.sync(() => MoonwallContext.getContext()));
-      yield* _(runNetworkOnlyEffect());
-      yield* _(
-        Effect.tryPromise({
-          try: () => ctx.connectEnvironment(),
-          catch: () => new Err.MoonwallContextError(),
-        })
-      );
+  Effect.gen(function* (_) {
+    const ctx = yield* _(Effect.sync(() => MoonwallContext.getContext()));
+    yield* _(runNetworkOnlyEffect());
+    yield* _(
+      Effect.tryPromise({
+        try: () => ctx.connectEnvironment(),
+        catch: () => new Err.MoonwallContextError(),
+      })
+    );
 
-      return ctx;
-    })
-  
+    return ctx;
+  });
 
 export const runNetworkOnlyEffect = () =>
-    Effect.gen(function* (_) {
-      const ctx = yield* _(Effect.sync(() => MoonwallContext.getContext()));
-      yield* _(ctx.startNetwork());
-    })
-  
+  Effect.gen(function* (_) {
+    const ctx = yield* _(Effect.sync(() => MoonwallContext.getContext()));
+    yield* _(ctx.startNetwork());
+  });
 
 export interface IGlobalContextFoundation {
   name: string;

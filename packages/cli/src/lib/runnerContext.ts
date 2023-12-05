@@ -27,6 +27,7 @@ import { readOnlyHandler } from "./handlers/readOnlyHandler";
 import { zombieHandler } from "./handlers/zombieHandler";
 import { MoonwallContext, createContextEffect } from "./globalContextEffect";
 import { NodeContext } from "@effect/platform-node";
+import { debuglogLevel, logLevel } from "../internal/logging";
 
 const RT_VERSION = Number(process.env.MOON_RTVERSION);
 const RT_NAME = process.env.MOON_RTNAME;
@@ -106,7 +107,11 @@ const describeSuiteEffect = <T extends FoundationType>({
               }
               ctx = yield* _(createContextEffect());
               return;
-            }).pipe(Effect.provide(NodeContext.layer))
+            }).pipe(
+              Effect.provide(NodeContext.layer),
+              Effect.provide(debuglogLevel),
+              Effect.provide(logLevel)
+            )
           )
         )
     );
