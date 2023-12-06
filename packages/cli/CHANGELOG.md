@@ -1,5 +1,13 @@
 # @moonwall/cli
 
+## 4.4.4
+
+### Patch Changes
+
+- 4812837: Tracing Test Fix
+  - @moonwall/types@4.4.4
+  - @moonwall/util@4.4.4
+
 ## 4.4.3
 
 ### Patch Changes
