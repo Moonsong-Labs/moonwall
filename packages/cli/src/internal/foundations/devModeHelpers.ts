@@ -162,11 +162,10 @@ export async function createDevBlock<
     // max wait 2s
     for (let i = 0; i < 1000; i++) {
       const currentBlock = (await api.rpc.chain.getHeader()).number.toBigInt();
-
+      await setTimeout(30);
       if (currentBlock > originalBlockNumber) {
         break;
       }
-      await setTimeout(20);
     }
   }
 
