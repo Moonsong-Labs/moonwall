@@ -1,47 +1,79 @@
+import { ChildProcess, execSync, spawn } from "child_process";
 import Debug from "debug";
-import { execaCommand, execaCommandSync } from "execa";
-import path from "path";
 import fs from "fs";
+import path from "path";
 import WebSocket from "ws";
 import { checkAccess, checkExists } from "./fileCheckers";
 const debugNode = Debug("global:node");
 
-export type LaunchedNode = {
-  pid: number;
-  kill(signal?: NodeJS.Signals | number, options?: object): boolean;
-};
-
-export async function launchNode(cmd: string, args: string[], name: string): Promise<LaunchedNode> {
+export async function launchNode(cmd: string, args: string[], name: string): Promise<ChildProcess> {
   if (cmd.includes("moonbeam")) {
     await checkExists(cmd);
     checkAccess(cmd);
   }
 
   const dirPath = path.join(process.cwd(), "tmp", "node_logs");
-  if (!fs.existsSync(dirPath)) {
-    fs.mkdirSync(dirPath, { recursive: true });
-  }
 
-  debugNode(`Launching dev node: ${name}`);
+  const onProcessExit = () => {
+    runningNode && runningNode.kill();
+  };
+  const onProcessInterrupt = () => {
+    runningNode && runningNode.kill();
+  };
+
+  process.once("exit", onProcessExit);
+  process.once("SIGINT", onProcessInterrupt);
+
+  const runningNode = spawn(cmd, args);
   const logLocation = path
     .join(
       dirPath,
-      `${path.basename(cmd)}_node_${
-        args.find((a) => a.includes("port"))?.split("=")[1]
-      }_${new Date().getTime()}.log`
+      `${path.basename(cmd)}_node_${args.find((a) => a.includes("port"))?.split("=")[1]}_${
+        runningNode.pid
+      }.log`
     )
     .replaceAll("node_node_undefined", "chopsticks");
+
   process.env.MOON_LOG_LOCATION = logLocation;
 
-  const runningNode = execaCommand(`${cmd} ${args.join(" ")}`, {
-    all: true,
-    cleanup: false,
-    detached: false,
-  }).pipeAll(logLocation);
+  const fsStream = fs.createWriteStream(logLocation);
+
+  runningNode.once("exit", () => {
+    process.removeListener("exit", onProcessExit);
+    process.removeListener("SIGINT", onProcessInterrupt);
+
+    runningNode.stderr?.off("data", writeLogToFile);
+    runningNode.stdout?.off("data", writeLogToFile);
+
+    fsStream.end(); // This line ensures that the writable stream is properly closed
+    debugNode(`Exiting dev node: ${name}`);
+  });
+
+  runningNode.on("error", (err) => {
+    if ((err as any).errno == "ENOENT") {
+      console.error(
+        `\x1b[31mMissing Local binary at` + `(${cmd}).\nPlease compile the project\x1b[0m`
+      );
+    } else {
+      console.error(err);
+    }
+    process.exit(1);
+  });
+
+  const writeLogToFile = (chunk: any) => {
+    if (fsStream.writable) {
+      fsStream.write(chunk, (err) => {
+        if (err) console.error(err);
+        else fsStream.emit("drain");
+      });
+    }
+  };
+  runningNode.stderr?.on("data", writeLogToFile);
+  runningNode.stdout?.on("data", writeLogToFile);
 
   probe: for (;;) {
     try {
-      const ports = findPortsByPid(runningNode.pid);
+      const ports = await findPortsByPid(runningNode.pid);
       if (ports) {
         for (const port of ports) {
           try {
@@ -58,20 +90,14 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
     }
   }
 
-  return { pid: runningNode.pid, kill: runningNode.kill };
+  return runningNode;
 }
 
 async function checkWebSocketJSONRPC(port: number): Promise<boolean> {
-  const WEB_SOCKET_TIMEOUT = 5000; // e.g., 5 seconds
-
   return new Promise((resolve, reject) => {
     const ws = new WebSocket(`ws://localhost:${port}`);
-    const timeout = setTimeout(() => {
-      ws.close();
-      reject(new Error("WebSocket response timeout"));
-    }, WEB_SOCKET_TIMEOUT);
 
-    const openHandler = () => {
+    ws.on("open", () => {
       ws.send(
         JSON.stringify({
           jsonrpc: "2.0",
@@ -80,61 +106,56 @@ async function checkWebSocketJSONRPC(port: number): Promise<boolean> {
           params: [],
         })
       );
-    };
+    });
 
-    const messageHandler = (data: string) => {
-      clearTimeout(timeout);
+    ws.on("message", (data) => {
       try {
-        const { jsonrpc, id } = JSON.parse(data.toString());
-        if (jsonrpc === "2.0" && id === 1) {
+        const response = JSON.parse(data.toString());
+        if (response.jsonrpc === "2.0" && response.id === 1) {
           resolve(true);
         } else {
-          reject(new Error("Invalid JSON-RPC response"));
+          reject(false);
         }
       } catch (e) {
-        reject(new Error("Failed to parse WebSocket message"));
-      } finally {
-        ws.removeListener("error", errorHandler);
-        ws.close();
+        reject(false);
       }
-    };
-
-    const errorHandler = (err: Error) => {
-      clearTimeout(timeout);
-      ws.removeListener("open", openHandler);
-      ws.removeListener("message", messageHandler);
       ws.close();
-      reject(new Error(`WebSocket error: ${err.message}`));
-    };
+    });
 
-    ws.once("open", openHandler);
-    ws.once("message", messageHandler);
-    ws.once("error", errorHandler);
+    ws.on("error", () => {
+      reject(false);
+    });
   });
 }
 
-function findPortsByPid(pid: number, timeout: number = 10000) {
-  const end = Date.now() + timeout;
+async function findPortsByPid(
+  pid: number,
+  retryCount: number = 600,
+  retryDelay: number = 100
+): Promise<number[]> {
+  for (let i = 0; i < retryCount; i++) {
+    try {
+      const stdout = execSync(`lsof -i -n -P | grep LISTEN | grep ${pid}`).toString();
+      const ports: number[] = [];
+      const lines = stdout.split("\n");
+      for (const line of lines) {
+        const regex = /(?:\*|127\.0\.0\.1):(\d+)/;
+        const match = line.match(regex);
+        if (match) {
+          ports.push(Number(match[1]));
+        }
+      }
 
-  for (;;) {
-    const command = `lsof -i -n -P | grep LISTEN | grep ${pid} || true`;
-    const { stdout } = execaCommandSync(command, { shell: true, cleanup: true, timeout: 2000 });
-    const ports: number[] = [];
-    const lines = stdout.split("\n");
-
-    for (const line of lines) {
-      const regex = /(?:\*|127\.0\.0\.1):(\d+)/;
-      const match = line.match(regex);
-      if (match) {
-        ports.push(Number(match[1]));
+      if (ports.length) {
+        return ports;
+      }
+    } catch (error) {
+      if (i === retryCount - 1) {
+        throw error;
       }
     }
 
-    if (ports.length) {
-      return ports;
-    }
-
-    if (Date.now() > end) break;
+    await new Promise((resolve) => setTimeout(resolve, retryDelay));
   }
 
   return [];

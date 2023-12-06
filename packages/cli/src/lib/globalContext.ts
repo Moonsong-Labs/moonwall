@@ -9,7 +9,6 @@ import {
 } from "@moonwall/types";
 import { ApiPromise } from "@polkadot/api";
 import zombie, { Network } from "@zombienet/orchestrator";
-import { execaCommand, execaCommandSync } from "execa";
 import Debug from "debug";
 import fs from "fs";
 import net from "net";
@@ -22,7 +21,7 @@ import {
   checkZombieBins,
   getZombieConfig,
 } from "../internal/foundations/zombieHelpers";
-import { LaunchedNode, launchNode } from "../internal/localNode";
+import { launchNode } from "../internal/localNode";
 import {
   ProviderFactory,
   ProviderInterfaceFactory,
@@ -34,13 +33,15 @@ import {
   isEthereumZombieConfig,
   isOptionSet,
 } from "./configReader";
+import { ChildProcess, exec } from "node:child_process";
+import { execSync } from "child_process";
 const debugSetup = Debug("global:context");
 
 export class MoonwallContext {
   private static instance: MoonwallContext | undefined;
   environment!: MoonwallEnvironment;
   providers: ConnectedProvider[];
-  nodes: LaunchedNode[];
+  nodes: ChildProcess[];
   foundation: FoundationType;
   zombieNetwork?: Network;
   rtUpgradePath?: string;
@@ -181,8 +182,10 @@ export class MoonwallContext {
         const processIds = Object.values((this.zombieNetwork.client as any).processMap)
           .filter((item) => item!["pid"])
           .map((process) => process!["pid"]);
-        execaCommand(`kill ${processIds.join(" ")}`, {
-          reject: false,
+        exec(`kill ${processIds.join(" ")}`, (error) => {
+          if (error) {
+            console.error(`Error killing process: ${error.message}`);
+          }
         });
       } catch (err) {
         // console.log(err.message);
@@ -266,7 +269,7 @@ export class MoonwallContext {
               // await this.disconnect();
               const pid = (network.client as any).processMap[message.nodeName].pid;
               delete (network.client as any).processMap[message.nodeName];
-              const result = await execaCommand(`kill ${pid}`, { timeout: 1000 });
+              const result = exec(`kill ${pid}`, { timeout: 1000 });
               // await this.connectEnvironment(true);
               writeToClient({
                 status: "success",
@@ -359,7 +362,7 @@ export class MoonwallContext {
     const promises = this.environment.providers.map(
       async ({ name, type, connect }) =>
         new Promise(async (resolve) => {
-          this.providers.push(await ProviderInterfaceFactory.populate(name, type, connect));
+          this.providers.push(await ProviderInterfaceFactory.populate(name, type, connect as any));
           resolve("");
         })
     );
@@ -463,9 +466,10 @@ export class MoonwallContext {
     while (ctx.nodes.length > 0) {
       const node = ctx.nodes.pop();
       const pid = node.pid;
-      node.kill("SIGKILL", { forceKillAfterTimeout: 2000 });
+      node.kill();
       for (;;) {
-        if (await isPidRunning(pid)) {
+        const isRunning = await isPidRunning(pid);
+        if (isRunning) {
           await timer(10);
         } else {
           break;
@@ -481,7 +485,7 @@ export class MoonwallContext {
         .map((process) => process!["pid"]);
 
       try {
-        execaCommandSync(`kill ${processIds.join(" ")}`, {});
+        execSync(`kill ${processIds.join(" ")}`, {});
       } catch (e) {
         console.log(e.message);
         console.log("continuing...");
@@ -523,12 +527,8 @@ export interface IGlobalContextFoundation {
 }
 
 async function isPidRunning(pid: number): Promise<boolean> {
-  try {
-    await execaCommand(`ps -p ${pid} -o pid=`, { cleanup: true });
-    return true;
-  } catch {
-    return false;
-  }
+  const output = exec(`ps -p ${pid} -o pid=`);
+  return output.exitCode === 0;
 }
 
 async function waitForPidsToDie(pids: number[]): Promise<void> {
