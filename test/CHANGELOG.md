@@ -1,5 +1,11 @@
 # @moonwall/tests
 
+## 4.4.3
+
+### Patch Changes
+
+- efe7ba1: Concurrency Fix
+
 ## 4.4.2
 
 ### Patch Changes
