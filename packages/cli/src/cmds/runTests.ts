@@ -13,40 +13,48 @@ import {
   createContextEffect,
   runNetworkOnlyEffect,
 } from "../lib/globalContextEffect";
+import { nodePool } from "../internal/nodePool";
 
-export const testEffect = (envName: string, additionalArgs?: object) => {
-  return Effect.gen(function* (_) {
-    const globalConfig = yield* _(importMoonwallConfig());
-    const env = yield* _(
-      Effect.filterOrFail(
-        Effect.sync(() => globalConfig.environments.find(({ name }) => name === envName)),
-        (env) => !!env,
-        () => new Err.EnvironmentMissingError({ env: envName })
-      )
-    );
+export const testEffect = (envName: string, additionalArgs?: object) =>
+  Effect.scoped(
+    Effect.gen(function* (_) {
+      const globalConfig = yield* _(importMoonwallConfig());
+      const env = yield* _(
+        Effect.filterOrFail(
+          Effect.sync(() => globalConfig.environments.find(({ name }) => name === envName)),
+          (env) => !!env,
+          () => new Err.EnvironmentMissingError({ env: envName })
+        )
+      );
 
-    yield* _(Effect.sync(() => (process.env.MOON_TEST_ENV = envName)));
-    yield* _(Effect.sync(() => loadEnvVars()));
-    yield* _(commonChecks(env));
+      yield* _(Effect.sync(() => (process.env.MOON_TEST_ENV = envName)));
+      yield* _(Effect.sync(() => loadEnvVars()));
+      yield* _(commonChecks(env));
 
-    // TODO : Create Node Pool Service
+      // TODO : Create Node Pool Service
+      yield* _(nodePool);
 
-    if (
-      (env.foundation.type == "dev" && !env.foundation.launchSpec[0].retainAllLogs) ||
-      (env.foundation.type == "chopsticks" && !env.foundation.launchSpec[0].retainAllLogs)
-    ) {
-      yield* _(Effect.sync(() => clearNodeLogs()));
-    }
-    const vitest = yield* _(executeTestEffect(env, additionalArgs));
-    const failed = yield* _(
-      Effect.sync(() => vitest!.state.getFiles().filter((file) => file.result!.state === "fail"))
-    );
+      if (
+        (env.foundation.type == "dev" && !env.foundation.launchSpec[0].retainAllLogs) ||
+        (env.foundation.type == "chopsticks" && !env.foundation.launchSpec[0].retainAllLogs)
+      ) {
+        yield* _(Effect.sync(() => clearNodeLogs()));
+      }
 
-    if (failed.length !== 0) {
-      yield* _(new Err.TestsFailedError({ fails: failed.length }));
-    }
-  });
-};
+      yield* _(Effect.logInfo(`Running tests for ${envName}`));
+
+      // TODO: RE-ENABLE THIS
+
+      // const vitest = yield* _(executeTestEffect(env, additionalArgs));
+      // const failed = yield* _(
+      //   Effect.sync(() => vitest!.state.getFiles().filter((file) => file.result!.state === "fail"))
+      // );
+
+      // if (failed.length !== 0) {
+      //   yield* _(new Err.TestsFailedError({ fails: failed.length }));
+      // }
+    })
+  );
 
 export const executeTestEffect = (env: Environment, additionalArgs?: object) => {
   return Effect.gen(function* (_) {

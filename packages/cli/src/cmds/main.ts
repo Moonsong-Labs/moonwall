@@ -120,13 +120,11 @@ async function mainMenu(config?: MoonwallConfig) {
       if (chosenTestEnv.envName !== "back") {
         process.env.MOON_RUN_SCRIPTS = "true";
         await Effect.runPromise(
-          Effect.scoped(
             testEffect(chosenTestEnv.envName).pipe(
               Effect.provide(FileSystem.layer),
               Effect.provide(debuglogLevel),
               Effect.provide(logLevel)
             )
-          )
         );
         await inquirer.prompt({
           name: "test complete",
