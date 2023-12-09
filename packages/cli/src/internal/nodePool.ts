@@ -1,7 +1,8 @@
-import { Config, Effect } from "effect";
+import { Config, Effect, Ref, Scope } from "effect";
 import net from "net";
 import { importMoonwallConfig } from "../lib/configReader";
-import path from "path";
+import { launchNode } from "./localNode";
+import { PlatformError } from "@effect/platform/Error";
 // Define as a forked resource
 
 /// Use acquire use release
@@ -26,6 +27,18 @@ export type NodePoolResponse = {
   message: string;
 };
 
+export type ServerInfo = {
+  id: number;
+  port: number;
+  pid: number;
+};
+
+export type ServiceState = {
+  rpcServers: ProvisionedNode[];
+  socketPath: string;
+  maxServers: number;
+};
+
 export type ProvisionedNode = {
   id: number;
   nodeName: string;
@@ -33,14 +46,19 @@ export type ProvisionedNode = {
   pid: number;
 };
 
-export const setIpcSocketPath = (socketPath?: string) => {
-  const pathToSocket = socketPath ?? path.join(process.cwd(), "tmp", "nodepool-ipc.sock");
-  process.env.MOON_NODEPOOL_SOCKET = pathToSocket;
-  return pathToSocket;
-};
+// export const setIpcSocketPath = (state: Ref.Ref<ServiceState>) => Effect.gen(function* (_){
+//   const pathToSocket = yield* _(state.) ?? path.join(process.cwd(), "tmp", "nodepool-ipc.sock");
+//   process.env.MOON_NODEPOOL_SOCKET = pathToSocket;
+//   return pathToSocket;
+// })
 
-export const nodePool = (socketPath: string) =>
+// reference:
+// https://github.com/Effect-TS/experimental/blob/523005f4196b22d81f1f2c72d27599c4810a3383/src/SocketServer/Node.ts#L36
+
+export const nodePool = (sharedState: Ref.Ref<ServiceState>) =>
   Effect.gen(function* (_) {
+    const socketPath = (yield* _(Ref.get(sharedState))).socketPath;
+
     const config = yield* _(importMoonwallConfig());
     const selectedEnv = yield* _(Effect.config(Config.string("MOON_TEST_ENV")));
     const env = config.environments.find(({ name }) => name == selectedEnv)!;
@@ -53,58 +71,7 @@ export const nodePool = (socketPath: string) =>
     const server = yield* _(
       Effect.acquireRelease(
         // Acquire
-        Effect.sync(() =>
-          net.createServer((server) => {
-            server.on("data", async (data) => {
-              const writeToClient = (message: NodePoolResponse) => {
-                if (server.writable) {
-                  server.write(JSON.stringify(message));
-                } else {
-                  console.log("Client disconnected, cannot send response.");
-                }
-              };
-
-              const request = JSON.parse(data.toString()) as NodePoolRequest;
-              console.log(`Received message from client: ${JSON.stringify(request)}`);
-
-              switch (request.cmd) {
-                case "ping": {
-                  writeToClient({ status: "success", result: true, message: "pong" });
-                  break;
-                }
-
-                case "provision": {
-                  // const node = yield* _(provisionNode(env));
-                  const node = true;
-                  writeToClient({ status: "success", result: node, message: "Node provisioned" });
-                  break;
-                }
-
-                case "release": {
-                  // const node = yield* _(releaseNode(request.id));
-                  const node = true;
-                  writeToClient({ status: "success", result: node, message: "Node released" });
-                  break;
-                }
-
-                case "query": {
-                  // const node = yield* _(queryNode(request.id));
-                  const node = true;
-                  writeToClient({ status: "success", result: node, message: "Node queried" });
-                  break;
-                }
-
-                default:
-                  writeToClient({
-                    status: "failure",
-                    result: true,
-                    message: `Invalid command "${request.cmd}" received`,
-                  });
-                  break;
-              }
-            });
-          })
-        ),
+        Effect.succeed(net.createServer()),
         //Release
         (server) =>
           Effect.async<never, never, void>((resume) => {
@@ -120,9 +87,116 @@ export const nodePool = (socketPath: string) =>
     );
 
     yield* _(
-      Effect.async<never, never, void>((resume) => {
+      Effect.async<Scope.Scope, PlatformError, void>((resume) => {
+        server.on("connection", (socket) => {
+          socket.on("data", (data) => {
+            const writeToClient = (message: NodePoolResponse) => {
+              if (socket.writable) {
+                socket.write(JSON.stringify(message));
+              } else {
+                console.log("Client disconnected, cannot send response.");
+              }
+            };
+
+            const request = JSON.parse(data.toString()) as NodePoolRequest;
+
+            switch (request.cmd) {
+              case "ping": {
+                resume(
+                  Effect.succeed(
+                    writeToClient({ status: "success", result: true, message: "pong" })
+                  )
+                );
+                break;
+              }
+
+              case "provision": {
+                const provisonedNode: ProvisionedNode = {
+                  id: request.id,
+                  nodeName: "moonbeam",
+                  port: 9944,
+                  pid: 1111,
+                };
+
+                resume(Effect.logInfo(`Provisioning node ${provisonedNode}`));
+
+                // resume(
+                //   Effect.gen(function* (_) {
+                //     yield* _(
+                //       Effect.succeed(() =>
+                //         writeToClient({
+                //           status: "success",
+                //           result: provisonedNode,
+                //           message: "provisioned",
+                //         })
+                //       )
+                //     );
+                //   })
+                // );
+
+                // resume(
+                //   Effect.gen(function* (_) {
+                //     yield* _(Effect.logInfo(`Provisioning node ${request.id}`));
+                //     const process = yield* _(launchNode("./tmp/moonbeam", ["--dev"]));
+                //     const provisonedNode: ProvisionedNode = {
+                //       id: request.id,
+                //       nodeName: "moonbeam",
+                //       port: 9944,
+                //       pid: process.pid,
+                //     };
+
+                //     yield* _(
+                //       Effect.sync(() =>
+                //         writeToClient({
+                //           status: "success",
+                //           result: provisonedNode,
+                //           message: "Node provisioned",
+                //         })
+                //       )
+                //     );
+
+                //     yield* _(
+                //       Ref.update(sharedState, (state) => ({
+                //         ...state,
+                //         rpcServers: [...state.rpcServers, provisonedNode],
+                //       }))
+                //     );
+                //   })
+                // );
+                break;
+              }
+
+              case "release": {
+                // const node = yield* _(releaseNode(request.id));
+                const node = true;
+                writeToClient({ status: "success", result: node, message: "Node released" });
+                break;
+              }
+
+              case "query": {
+                // const node = yield* _(queryNode(request.id));
+                const node = true;
+                writeToClient({ status: "success", result: node, message: "Node queried" });
+                break;
+              }
+
+              default:
+                writeToClient({
+                  status: "failure",
+                  result: true,
+                  message: `Invalid command "${request.cmd}" received`,
+                });
+                break;
+            }
+          });
+
+          socket.on("error", (err) => {
+            resume(Effect.die(err));
+          });
+        });
+
         server.listen(socketPath, () => resume(Effect.unit));
-      })
+      }).pipe(Effect.fork)
     );
 
     yield* _(Effect.logDebug(`Node pool listening on ${socketPath}`));
@@ -147,7 +221,12 @@ export const nodePoolClientSend = (message: NodePoolRequest, socketPath: string)
     yield* _(Effect.sync(() => client.write(JSON.stringify(message))));
     yield* _(Effect.logInfo(`Sent message to node pool: ${JSON.stringify(message)}`));
     return yield* _(
-      Effect.async<never, NodePoolResponse | string, NodePoolResponse>((resume) => {
+      Effect.async<never, NodePoolResponse | string | Error, NodePoolResponse>((resume) => {
+        
+        client.on("error", (err) => {
+          resume(Effect.fail(err));
+        });
+
         client.on("data", (data) => {
           const resp = JSON.parse(data.toString()) as NodePoolResponse;
 

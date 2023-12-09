@@ -1,5 +1,5 @@
 import { Environment } from "@moonwall/types";
-import { Config, Effect, pipe } from "effect";
+import { Config, Effect, Ref, pipe } from "effect";
 import path from "path";
 import type { UserConfig } from "vitest";
 import { startVitest } from "vitest/node";
@@ -13,7 +13,7 @@ import {
   createContextEffect,
   runNetworkOnlyEffect,
 } from "../lib/globalContextEffect";
-import { nodePool, nodePoolClientSend, setIpcSocketPath } from "../internal/nodePool";
+import { ServiceState, nodePool, nodePoolClientSend } from "../internal/nodePool";
 
 export const testEffect = (envName: string, additionalArgs?: object) =>
   Effect.scoped(
@@ -27,15 +27,39 @@ export const testEffect = (envName: string, additionalArgs?: object) =>
         )
       );
 
+      const serviceState = yield* _(
+        Ref.make<ServiceState>({
+          rpcServers: [],
+          maxServers: 10,
+          socketPath: path.join(process.cwd(), "tmp", "nodepool-ipc.sock"),
+        })
+      );
+
       yield* _(Effect.sync(() => (process.env.MOON_TEST_ENV = envName)));
       yield* _(Effect.sync(() => loadEnvVars()));
       yield* _(commonChecks(env));
+      yield* _(nodePool(serviceState));
 
-      const socketPath = yield* _(Effect.sync(() => setIpcSocketPath()));
-      yield* _(nodePool(socketPath));
+      const state = yield* _(Ref.get(serviceState));
 
-      const response = yield* _(nodePoolClientSend({ cmd: "ping", id: 1, text: "ping" }, socketPath));
-      console.log(`response: ${JSON.stringify(response)}`)
+      // NodeService Testing
+      const response = yield* _(
+        nodePoolClientSend({ cmd: "ping", id: 1, text: "ping" }, state.socketPath)
+      );
+      console.log(`response: ${JSON.stringify(response)}`);
+
+      const response2 = yield* _(
+        nodePoolClientSend(
+          {
+            cmd: "provision",
+            id: 1,
+            text: "can i have a node",
+          },
+          state.socketPath
+        )
+      );
+
+      console.log(`response2: ${JSON.stringify(response2)}`);
 
       if (
         (env.foundation.type == "dev" && !env.foundation.launchSpec[0].retainAllLogs) ||
