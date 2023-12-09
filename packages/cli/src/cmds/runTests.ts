@@ -1,5 +1,5 @@
 import { Environment } from "@moonwall/types";
-import { Config, Effect } from "effect";
+import { Config, Effect, pipe } from "effect";
 import path from "path";
 import type { UserConfig } from "vitest";
 import { startVitest } from "vitest/node";
@@ -13,7 +13,7 @@ import {
   createContextEffect,
   runNetworkOnlyEffect,
 } from "../lib/globalContextEffect";
-import { nodePool } from "../internal/nodePool";
+import { nodePool, nodePoolClientSend, setIpcSocketPath } from "../internal/nodePool";
 
 export const testEffect = (envName: string, additionalArgs?: object) =>
   Effect.scoped(
@@ -31,8 +31,11 @@ export const testEffect = (envName: string, additionalArgs?: object) =>
       yield* _(Effect.sync(() => loadEnvVars()));
       yield* _(commonChecks(env));
 
-      // TODO : Create Node Pool Service
-      yield* _(nodePool);
+      const socketPath = yield* _(Effect.sync(() => setIpcSocketPath()));
+      yield* _(nodePool(socketPath));
+
+      const response = yield* _(nodePoolClientSend({ cmd: "ping", id: 1, text: "ping" }, socketPath));
+      console.log(`response: ${JSON.stringify(response)}`)
 
       if (
         (env.foundation.type == "dev" && !env.foundation.launchSpec[0].retainAllLogs) ||

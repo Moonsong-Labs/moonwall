@@ -1,4 +1,4 @@
-import { Config, Effect, Layer } from "effect";
+import { Config, Effect } from "effect";
 import net from "net";
 import { importMoonwallConfig } from "../lib/configReader";
 import path from "path";
@@ -14,17 +14,10 @@ import path from "path";
 
 // Use message queues: https://effect.website/docs/concurrency/queue
 
-// IPC Server!
-
-// Needs endpoints:
-// request
-// release
-// query
-
 export type NodePoolRequest = {
   text?: string;
   id: number; // Should be the Fiber ID or UUID
-  cmd: "provision" | "release" | "query";
+  cmd: "provision" | "release" | "query" | "ping";
 };
 
 export type NodePoolResponse = {
@@ -40,60 +33,191 @@ export type ProvisionedNode = {
   pid: number;
 };
 
-export const nodePool = Effect.gen(function* (_) {
-  const config = yield* _(importMoonwallConfig());
-  const selectedEnv = yield* _(Effect.config(Config.string("MOON_TEST_ENV")));
-  const env = config.environments.find(({ name }) => name == selectedEnv)!;
+export const setIpcSocketPath = (socketPath?: string) => {
+  const pathToSocket = socketPath ?? path.join(process.cwd(), "tmp", "nodepool-ipc.sock");
+  process.env.MOON_NODEPOOL_SOCKET = pathToSocket;
+  return pathToSocket;
+};
 
-  const nodesToStart =
-    typeof env.multiThreads === "number" ? env.multiThreads : env.multiThreads === true ? 4 : 1;
+export const nodePool = (socketPath: string) =>
+  Effect.gen(function* (_) {
+    const config = yield* _(importMoonwallConfig());
+    const selectedEnv = yield* _(Effect.config(Config.string("MOON_TEST_ENV")));
+    const env = config.environments.find(({ name }) => name == selectedEnv)!;
 
-  yield* _(Effect.logInfo(`Starting node pool with ${nodesToStart} nodes`));
+    const nodesToStart =
+      typeof env.multiThreads === "number" ? env.multiThreads : env.multiThreads === true ? 4 : 1;
 
-  const server = yield* _(
-    Effect.acquireRelease(
-      // Acquire
-      Effect.sync(() =>
-        net.createServer((client) => {
-          client.on("data", async (data) => {
-            const writeToClient = (message: any) => {
-              if (client.writable) {
-                client.write(JSON.stringify(message));
-              } else {
-                console.log("Client disconnected, cannot send response.");
+    yield* _(Effect.logInfo(`Starting node pool with ${nodesToStart} nodes`));
+
+    const server = yield* _(
+      Effect.acquireRelease(
+        // Acquire
+        Effect.sync(() =>
+          net.createServer((server) => {
+            server.on("data", async (data) => {
+              const writeToClient = (message: NodePoolResponse) => {
+                if (server.writable) {
+                  server.write(JSON.stringify(message));
+                } else {
+                  console.log("Client disconnected, cannot send response.");
+                }
+              };
+
+              const request = JSON.parse(data.toString()) as NodePoolRequest;
+              console.log(`Received message from client: ${JSON.stringify(request)}`);
+
+              switch (request.cmd) {
+                case "ping": {
+                  writeToClient({ status: "success", result: true, message: "pong" });
+                  break;
+                }
+
+                case "provision": {
+                  // const node = yield* _(provisionNode(env));
+                  const node = true;
+                  writeToClient({ status: "success", result: node, message: "Node provisioned" });
+                  break;
+                }
+
+                case "release": {
+                  // const node = yield* _(releaseNode(request.id));
+                  const node = true;
+                  writeToClient({ status: "success", result: node, message: "Node released" });
+                  break;
+                }
+
+                case "query": {
+                  // const node = yield* _(queryNode(request.id));
+                  const node = true;
+                  writeToClient({ status: "success", result: node, message: "Node queried" });
+                  break;
+                }
+
+                default:
+                  writeToClient({
+                    status: "failure",
+                    result: true,
+                    message: `Invalid command "${request.cmd}" received`,
+                  });
+                  break;
               }
-            };
+            });
+          })
+        ),
+        //Release
+        (server) =>
+          Effect.async<never, never, void>((resume) => {
+            server.close((err) => {
+              if (err) {
+                resume(Effect.die(err));
+              } else {
+                resume(Effect.logInfo("Server closed"));
+              }
+            });
+          })
+      )
+    );
 
-            const dataString = data.toString();
-            console.log(dataString);
-            Effect.logInfo("Data received");
-            writeToClient({ status: "success", result: true, message: "Data received" });
-          });
-        })
-      ),
-      (server) =>
-        Effect.async<never,never,void>((resume) => {
-          server.close((err) => {
-            if (err) {
-              resume(Effect.die(err));
-            } else {
-              resume(Effect.logInfo("Server closed"));
+    yield* _(
+      Effect.async<never, never, void>((resume) => {
+        server.listen(socketPath, () => resume(Effect.unit));
+      })
+    );
+
+    yield* _(Effect.logDebug(`Node pool listening on ${socketPath}`));
+  });
+
+export const nodePoolClientSend = (message: NodePoolRequest, socketPath: string) =>
+  Effect.gen(function* (_) {
+    const client = yield* _(
+      Effect.acquireRelease(
+        // Acquire
+        Effect.sync(() => net.createConnection({ path: socketPath })),
+        // Release
+        (client) =>
+          Effect.async<never, never, void>((resume) => {
+            client.end(() => {
+              resume(Effect.logInfo("Client closed"));
+            });
+          })
+      )
+    );
+
+    yield* _(Effect.sync(() => client.write(JSON.stringify(message))));
+    yield* _(Effect.logInfo(`Sent message to node pool: ${JSON.stringify(message)}`));
+    return yield* _(
+      Effect.async<never, NodePoolResponse | string, NodePoolResponse>((resume) => {
+        client.on("data", (data) => {
+          const resp = JSON.parse(data.toString()) as NodePoolResponse;
+
+          switch (resp.status) {
+            case "success": {
+              resume(Effect.succeed(resp));
+              break;
             }
-          });
-        })
-    )
-  );
-  const socketPath = path.join(process.cwd(), "tmp", "nodepool-ipc.sock");
-  process.env.MOON_NODEPOOL_SOCKET = socketPath;
 
-  yield* _(
-    Effect.async<never, never, void>((resume) => {
-      server.listen(socketPath, () => resume(Effect.unit));
-    })
-  );
+            case "failure": {
+              resume(Effect.fail(resp));
+              break;
+            }
 
-  yield* _(Effect.logDebug(`Node pool listening on ${socketPath}`));
-});
+            default: {
+              resume(Effect.fail(`Invalid response status: ${resp.status}`));
+              break;
+            }
+          }
+        });
+      })
+    );
+  });
+
+// export async function sendIpcMessage(message: IPCRequestMessage): Promise<IPCResponseMessage> {
+//   return new Promise(async (resolve, reject) => {
+//     let response: IPCResponseMessage;
+//     const ipcPath = process.env.MOON_IPC_SOCKET;
+//     const client = net.createConnection({ path: ipcPath });
+
+//     // Listener to return control flow after server responds
+//     client.on("data", async (data) => {
+//       response = JSON.parse(data.toString());
+//       if (response.status === "success") {
+//         client.end();
+
+//         for (let i = 0; ; i++) {
+//           if (client.closed) {
+//             break;
+//           }
+
+//           if (i > 100) {
+//             reject(new Error(`Closing IPC connection failed`));
+//           }
+//           await timer(200);
+//         }
+//         resolve(response);
+//       }
+
+//       if (response.status === "failure") {
+//         reject(new Error(JSON.stringify(response)));
+//       }
+//     });
+
+//     for (let i = 0; ; i++) {
+//       if (!client.connecting) {
+//         break;
+//       }
+
+//       if (i > 100) {
+//         reject(new Error(`Connection to ${ipcPath} failed`));
+//       }
+//       await timer(200);
+//     }
+
+//     await new Promise((resolve) => {
+//       client.write(JSON.stringify(message), () => resolve("Sent!"));
+//     });
+//   });
+// }
 
 // export const serve2r = net.createServer((client) => {
 //   client.on("data", async (data) => {
