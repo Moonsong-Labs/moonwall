@@ -3,6 +3,9 @@ import net from "net";
 import { importMoonwallConfig } from "../lib/configReader";
 import { launchNode } from "./localNode";
 import { PlatformError } from "@effect/platform/Error";
+import { debuglogLevel, logLevel } from "./logging";
+import { Signal } from "@effect/platform-node/CommandExecutor";
+import { RuntimeFiber } from "effect/Fiber";
 // Define as a forked resource
 
 /// Use acquire use release
@@ -43,7 +46,7 @@ export type ProvisionedNode = {
   id: number;
   nodeName: string;
   port: number;
-  pid: number;
+  fibre: RuntimeFiber<PlatformError, void>
 };
 
 // export const setIpcSocketPath = (state: Ref.Ref<ServiceState>) => Effect.gen(function* (_){
@@ -89,7 +92,7 @@ export const nodePool = (sharedState: Ref.Ref<ServiceState>) =>
     yield* _(
       Effect.async<Scope.Scope, PlatformError, void>((resume) => {
         server.on("connection", (socket) => {
-          socket.on("data", (data) => {
+          socket.on("data", async (data) => {
             const writeToClient = (message: NodePoolResponse) => {
               if (socket.writable) {
                 socket.write(JSON.stringify(message));
@@ -102,24 +105,72 @@ export const nodePool = (sharedState: Ref.Ref<ServiceState>) =>
 
             switch (request.cmd) {
               case "ping": {
-                resume(
-                  Effect.succeed(
-                    writeToClient({ status: "success", result: true, message: "pong" })
-                  )
+                Effect.runFork(
+                  Effect.gen(function* (_) {
+                    yield* _(Effect.logInfo("Test Test"));
+                    yield* _(
+                      Ref.update(sharedState, (state) => ({
+                        ...state,
+                        maxServers: state.maxServers + 1,
+                        rpcServers: [...state.rpcServers],
+                      }))
+                    );
+                    yield* _(
+                      Effect.sync(() =>
+                        writeToClient({ status: "success", result: true, message: "pong" })
+                      )
+                    );
+                  }).pipe(Effect.provide(debuglogLevel), Effect.provide(logLevel))
                 );
+
                 break;
               }
 
               case "provision": {
-                const provisonedNode: ProvisionedNode = {
-                  id: request.id,
-                  nodeName: "moonbeam",
-                  port: 9944,
-                  pid: 1111,
-                };
+                Effect.runFork(
+                  // TODO find a way to add below to global scope
+                  Effect.scoped(
+                    Effect.gen(function* (_) {
+                      for (;;) {
+                        const state = yield* _(Ref.get(sharedState));
+                        if (state.rpcServers.length < state.maxServers) {
+                          break;
+                        }
+                        yield* _(Effect.sleep(1000));
+                      }
 
-                resume(Effect.logInfo(`Provisioning node ${provisonedNode}`));
+                      const runningProc = yield* _(launchNode("./tmp/moonbeam", ["--dev"]));
 
+                      const provisonedNode: ProvisionedNode = {
+                        id: request.id,
+                        nodeName: "moonbeam",
+                        port: 9944,
+                        fibre: runningProc
+                      };
+
+                      yield* _(Effect.logInfo(`Provisioning node ${provisonedNode}`));
+
+                      yield* _(
+                        Ref.update(sharedState, (state) => ({
+                          ...state,
+                          maxServers: state.maxServers + 1,
+                          rpcServers: [...state.rpcServers, provisonedNode],
+                        }))
+                      );
+
+                      yield* _(
+                        Effect.sync(() =>
+                          writeToClient({
+                            status: "success",
+                            result: provisonedNode,
+                            message: "test",
+                          })
+                        )
+                      );
+                    }).pipe(Effect.forkDaemon, Effect.provide(debuglogLevel), Effect.provide(logLevel))
+                  )
+                )
+                // .await
                 // resume(
                 //   Effect.gen(function* (_) {
                 //     yield* _(
@@ -154,15 +205,6 @@ export const nodePool = (sharedState: Ref.Ref<ServiceState>) =>
                 //         })
                 //       )
                 //     );
-
-                //     yield* _(
-                //       Ref.update(sharedState, (state) => ({
-                //         ...state,
-                //         rpcServers: [...state.rpcServers, provisonedNode],
-                //       }))
-                //     );
-                //   })
-                // );
                 break;
               }
 
@@ -193,10 +235,12 @@ export const nodePool = (sharedState: Ref.Ref<ServiceState>) =>
           socket.on("error", (err) => {
             resume(Effect.die(err));
           });
+
+          socket.on("end", () => resume(Effect.unit));
         });
 
         server.listen(socketPath, () => resume(Effect.unit));
-      }).pipe(Effect.fork)
+      })
     );
 
     yield* _(Effect.logDebug(`Node pool listening on ${socketPath}`));
@@ -222,7 +266,6 @@ export const nodePoolClientSend = (message: NodePoolRequest, socketPath: string)
     yield* _(Effect.logInfo(`Sent message to node pool: ${JSON.stringify(message)}`));
     return yield* _(
       Effect.async<never, NodePoolResponse | string | Error, NodePoolResponse>((resume) => {
-        
         client.on("error", (err) => {
           resume(Effect.fail(err));
         });

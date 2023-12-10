@@ -43,11 +43,14 @@ export const testEffect = (envName: string, additionalArgs?: object) =>
       const state = yield* _(Ref.get(serviceState));
 
       // NodeService Testing
+      console.log("state before")
+      console.log(yield* _(Ref.get(serviceState)))
+      
       const response = yield* _(
         nodePoolClientSend({ cmd: "ping", id: 1, text: "ping" }, state.socketPath)
       );
       console.log(`response: ${JSON.stringify(response)}`);
-
+      console.log(yield* _(Ref.get(serviceState)))
       const response2 = yield* _(
         nodePoolClientSend(
           {
@@ -59,8 +62,11 @@ export const testEffect = (envName: string, additionalArgs?: object) =>
         )
       );
 
-      console.log(`response2: ${JSON.stringify(response2)}`);
 
+      console.log(`response2: ${JSON.stringify(response2)}`);
+      yield* _(Effect.sleep(5000));
+      console.log("state after")
+      console.log(yield* _(Ref.get(serviceState)))
       if (
         (env.foundation.type == "dev" && !env.foundation.launchSpec[0].retainAllLogs) ||
         (env.foundation.type == "chopsticks" && !env.foundation.launchSpec[0].retainAllLogs)

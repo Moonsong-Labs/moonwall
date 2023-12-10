@@ -11,12 +11,16 @@ export const launchNode = (cmd: string, args: string[]) =>
     const command = Command.make(cmd, ...args).pipe(
       Command.stdout(collectUint8Array),
       Command.stderr(collectUint8Array),
-      Command.start
+      Command.start,
+      Effect.map((proc) => {
+        proc.stderr.pipe(Stream.runForEach((bytes) => fs.writeFile("./nodeErr.log", bytes)));
+      }),
+      Effect.forkDaemon
     );
 
     const launchedProcess = yield* _(command);
 
-    yield* _(Effect.logDebug(`Started process ${cmd} with pid: ${launchedProcess.pid}`));
+    yield* _(Effect.logDebug(`Started process ${cmd} with fibre id: ${launchedProcess.id()}`));
 
     const fs = yield* _(FileSystem.FileSystem);
     const dirPath = path.join(process.cwd(), "tmp", "node_logs");
@@ -24,39 +28,43 @@ export const launchNode = (cmd: string, args: string[]) =>
       yield* _(Effect.sync(() => nodeFs.mkdirSync(dirPath, { recursive: true })));
     }
 
-    const logLocation = path
-      .join(
-        dirPath,
-        `${path.basename(cmd)}_node_${
-          args.find((a) => a.includes("port"))?.split("=")[1]
-        }_${new Date().getTime()}.log`
+    const logLocation = yield* _(
+      Effect.succeed(
+        path
+          .join(
+            dirPath,
+            `${path.basename(cmd)}_node_${
+              args.find((a) => a.includes("port"))?.split("=")[1]
+            }_${new Date().getTime()}.log`
+          )
+          .replaceAll("node_node_undefined", "chopsticks")
       )
-      .replaceAll("node_node_undefined", "chopsticks");
+    );
 
     process.env.MOON_LOG_LOCATION = logLocation;
 
     // ** Start logging stderr to file asynchronously
-    yield* _(
-      launchedProcess.stderr.pipe(
-        Stream.runForEach((bytes) => fs.writeFile("./nodeErr.log", bytes)),
-        Effect.forkDaemon
-      )
-    );
+    // yield* _(
+    //   launchedProcess.stderr.pipe(
+    //     Stream.runForEach((bytes) => fs.writeFile("./nodeErr.log", bytes)),
+    //     Effect.forkDaemon
+    //   )
+    // );
 
     yield* _(Effect.logDebug(`Logging started at ${logLocation}`));
 
-    probe: for (;;) {
-      const ports = yield* _(findPortsByPidEffect(launchedProcess.pid));
-      yield* _(Effect.logDebug(`Scanning ports ${ports} for process ${launchedProcess.pid}`));
-      if (ports) {
-        for (const port of ports) {
-          if (yield* _(webSocketProbe(port))) {
-            yield* _(Effect.logDebug(`Found open websocket on port ${port}`));
-            break probe;
-          }
-        }
-      }
-    }
+    // probe: for (;;) {
+    //   const ports = yield* _(findPortsByPidEffect(launchedProcess.pid));
+    //   yield* _(Effect.logDebug(`Scanning ports ${ports} for process ${launchedProcess.pid}`));
+    //   if (ports) {
+    //     for (const port of ports) {
+    //       if (yield* _(webSocketProbe(port))) {
+    //         yield* _(Effect.logDebug(`Found open websocket on port ${port}`));
+    //         break probe;
+    //       }
+    //     }
+    //   }
+    // }
 
     return launchedProcess;
   }).pipe(Effect.provide(NodeContext.layer));
