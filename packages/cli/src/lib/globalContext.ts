@@ -52,10 +52,14 @@ export class MoonwallContext {
     this.providers = [];
     this.nodes = [];
     this.foundation = env.foundation.type;
+  }
 
+  public async setupFoundation() {
+    const config = await importAsyncConfig();
+    const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
     const foundationHandlers: Record<
       FoundationType,
-      (env: Environment, config?: MoonwallConfig) => IGlobalContextFoundation
+      (env: Environment, config?: MoonwallConfig) => Promise<IGlobalContextFoundation>
     > = {
       read_only: this.handleReadOnly,
       chopsticks: this.handleChopsticks,
@@ -65,15 +69,19 @@ export class MoonwallContext {
     };
 
     const foundationHandler = foundationHandlers[env.foundation.type];
-    this.environment = { providers: [], nodes: [], ...foundationHandler.call(this, env, config) };
+    this.environment = {
+      providers: [],
+      nodes: [],
+      ...(await foundationHandler.call(this, env, config)),
+    };
   }
 
-  private handleZombie(env: Environment): IGlobalContextFoundation {
+  private async handleZombie(env: Environment) {
     if (env.foundation.type !== "zombie") {
       throw new Error(`Foundation type must be 'zombie'`);
     }
 
-    const { cmd: zombieConfig } = parseZombieCmd(env.foundation.zombieSpec);
+    const { cmd: zombieConfig } = await parseZombieCmd(env.foundation.zombieSpec);
     this.rtUpgradePath = env.foundation.rtUpgradePath;
     return {
       name: env.name,
@@ -86,15 +94,15 @@ export class MoonwallContext {
           launch: true,
         },
       ],
-    };
+    } satisfies IGlobalContextFoundation;
   }
 
-  private handleDev(env: Environment, config: MoonwallConfig): IGlobalContextFoundation {
+  private async handleDev(env: Environment, config: MoonwallConfig) {
     if (env.foundation.type !== "dev") {
       throw new Error(`Foundation type must be 'dev'`);
     }
 
-    const { cmd, args, launch } = parseRunCmd(
+    const { cmd, args, launch } = await parseRunCmd(
       env.foundation.launchSpec![0],
       config.additionalRepos
     );
@@ -117,13 +125,13 @@ export class MoonwallContext {
             {
               name: "node",
               type: "polkadotJs",
-              endpoints: [vitestAutoUrl],
+              endpoints: [vitestAutoUrl()],
             },
           ]),
-    };
+    } satisfies IGlobalContextFoundation;
   }
 
-  private handleReadOnly(env: Environment): IGlobalContextFoundation {
+  private async handleReadOnly(env: Environment) {
     if (env.foundation.type !== "read_only") {
       throw new Error(`Foundation type must be 'read_only'`);
     }
@@ -137,10 +145,10 @@ export class MoonwallContext {
       name: env.name,
       foundationType: "read_only",
       providers: ProviderFactory.prepare(env.connections),
-    };
+    } satisfies IGlobalContextFoundation;
   }
 
-  private handleChopsticks(env: Environment): IGlobalContextFoundation {
+  private async handleChopsticks(env: Environment) {
     if (env.foundation.type !== "chopsticks") {
       throw new Error(`Foundation type must be 'chopsticks'`);
     }
@@ -151,7 +159,7 @@ export class MoonwallContext {
       foundationType: "chopsticks",
       nodes: [parseChopsticksRunCmd(env.foundation.launchSpec!)],
       providers: [...ProviderFactory.prepare(env.connections!)],
-    };
+    } satisfies IGlobalContextFoundation;
   }
 
   private async startZombieNetwork() {
@@ -316,15 +324,16 @@ export class MoonwallContext {
   }
 
   public async startNetwork() {
+    const ctx = await MoonwallContext.getContext();
     if (process.env.MOON_RECYCLE == "true") {
-      return MoonwallContext.getContext();
+      return ctx;
     }
 
     // const activeNodes = this.nodes.filter((node) => !node.killed);
     if (this.nodes.length > 0) {
-      return MoonwallContext.getContext();
+      return ctx;
     }
-    const nodes = MoonwallContext.getContext().environment.nodes;
+    const nodes = ctx.environment.nodes;
 
     if (this.environment.foundationType === "zombie") {
       return await this.startZombieNetwork();
@@ -340,7 +349,7 @@ export class MoonwallContext {
     });
     await Promise.allSettled(promises);
 
-    return MoonwallContext.getContext();
+    return ctx;
   }
 
   public async connectEnvironment(silent: boolean = false): Promise<MoonwallContext> {
@@ -434,21 +443,16 @@ export class MoonwallContext {
     }
   }
 
-  public static printStats() {
-    if (MoonwallContext) {
-      console.dir(MoonwallContext.getContext(), { depth: 1 });
-    } else {
-      console.log("Global context not created!");
-    }
-  }
-
-  public static getContext(config?: MoonwallConfig, force: boolean = false): MoonwallContext {
+  public static async getContext(
+    config?: MoonwallConfig,
+    force: boolean = false
+  ): Promise<MoonwallContext> {
     if (!MoonwallContext.instance || force) {
       if (!config) {
         throw new Error("❌ Config must be provided on Global Context instantiation");
       }
       MoonwallContext.instance = new MoonwallContext(config);
-
+      await MoonwallContext.instance.setupFoundation();
       debugSetup(`🟢  Moonwall context "${config.label}" created`);
     }
     return MoonwallContext.instance;
@@ -501,7 +505,7 @@ export class MoonwallContext {
 
 export const contextCreator = async () => {
   const config = await importAsyncConfig();
-  const ctx = MoonwallContext.getContext(config);
+  const ctx = await MoonwallContext.getContext(config);
   await runNetworkOnly();
   await ctx.connectEnvironment();
   return ctx;
@@ -509,7 +513,7 @@ export const contextCreator = async () => {
 
 export const runNetworkOnly = async () => {
   const config = await importAsyncConfig();
-  const ctx = MoonwallContext.getContext(config);
+  const ctx = await MoonwallContext.getContext(config);
   await ctx.startNetwork();
 };
 

@@ -19,7 +19,7 @@ export const zombieHandler: FoundationHandler<"zombie"> = ({
         chain: string = "parachain",
         mode: "height" | "quantity" = "quantity"
       ) => {
-        const ctx = MoonwallContext.getContext();
+        const ctx = await MoonwallContext.getContext();
         const provider = ctx.providers.find((prov) => prov.name === chain);
 
         if (!provider) {
@@ -41,7 +41,7 @@ export const zombieHandler: FoundationHandler<"zombie"> = ({
       },
 
       upgradeRuntime: async (options: UpgradePreferences = {}) => {
-        const ctx = MoonwallContext.getContext();
+        const ctx = await MoonwallContext.getContext();
         const provider = ctx.providers.find((prov) => prov.name === "parachain");
 
         if (!provider) {

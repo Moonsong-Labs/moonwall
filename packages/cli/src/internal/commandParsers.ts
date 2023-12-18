@@ -2,6 +2,7 @@ import { ChopsticksLaunchSpec, DevLaunchSpec, RepoSpec, ZombieLaunchSpec } from 
 import chalk from "chalk";
 import path from "path";
 import { standardRepos } from "../lib/repoDefinitions";
+import { getFreePort } from "./providerFactories";
 
 export function parseZombieCmd(launchSpec: ZombieLaunchSpec) {
   if (launchSpec) {
@@ -34,7 +35,7 @@ function fetchDefaultArgs(binName: string, additionalRepos: RepoSpec[] = []): st
   return defaultArgs;
 }
 
-export function parseRunCmd(launchSpec: DevLaunchSpec, additionalRepos?: RepoSpec[]) {
+export async function parseRunCmd(launchSpec: DevLaunchSpec, additionalRepos?: RepoSpec[]) {
   const launch = !launchSpec.running ? true : launchSpec.running;
   const cmd = launchSpec.binPath;
   const args = launchSpec.options
@@ -53,10 +54,13 @@ export function parseRunCmd(launchSpec: DevLaunchSpec, additionalRepos?: RepoSpe
       args.push(`--rpc-port=${ports.rpcPort}`);
     }
   } else {
+    const freePort = (await getFreePort()).toString();
+    process.env.MOONWALL_RPC_PORT = freePort;
+
     if (launchSpec.newRpcBehaviour) {
-      args.push(`--rpc-port=${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`);
+      args.push(`--rpc-port=${freePort}`);
     } else {
-      args.push(`--ws-port=${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`);
+      args.push(`--ws-port=${freePort}`);
     }
   }
   return { cmd, args, launch };

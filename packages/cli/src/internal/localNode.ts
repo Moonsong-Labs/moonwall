@@ -1,10 +1,10 @@
 import { ChildProcess, execSync, spawn } from "child_process";
-import Debug from "debug";
 import fs from "fs";
 import path from "path";
 import WebSocket from "ws";
 import { checkAccess, checkExists } from "./fileCheckers";
-const debugNode = Debug("global:node");
+import Debug from "debug";
+const debug = Debug("global:localNode");
 
 export async function launchNode(cmd: string, args: string[], name: string): Promise<ChildProcess> {
   if (cmd.includes("moonbeam")) {
@@ -12,17 +12,22 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
     checkAccess(cmd);
   }
 
+  const port = args.find((a) => a.includes("port"))?.split("=")[1];
+  debug(`\x1b[36mStarting ${name} node on port ${port}...\x1b[0m`);
+
   const dirPath = path.join(process.cwd(), "tmp", "node_logs");
 
   const onProcessExit = () => {
-    runningNode && runningNode.kill();
-  };
-  const onProcessInterrupt = () => {
-    runningNode && runningNode.kill();
-  };
+    if (runningNode) {
+      runningNode.kill();
+      runningNode.stderr?.off("data", writeLogToFile);
+      runningNode.stdout?.off("data", writeLogToFile);
+    }
 
-  process.once("exit", onProcessExit);
-  process.once("SIGINT", onProcessInterrupt);
+    if (fsStream) {
+      fsStream.end();
+    }
+  };
 
   const runningNode = spawn(cmd, args);
   const logLocation = path
@@ -37,17 +42,6 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
   process.env.MOON_LOG_LOCATION = logLocation;
 
   const fsStream = fs.createWriteStream(logLocation);
-
-  runningNode.once("exit", () => {
-    process.removeListener("exit", onProcessExit);
-    process.removeListener("SIGINT", onProcessInterrupt);
-
-    runningNode.stderr?.off("data", writeLogToFile);
-    runningNode.stdout?.off("data", writeLogToFile);
-
-    fsStream.end(); // This line ensures that the writable stream is properly closed
-    debugNode(`Exiting dev node: ${name}`);
-  });
 
   runningNode.on("error", (err) => {
     if ((err as any).errno == "ENOENT") {
@@ -68,8 +62,12 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
       });
     }
   };
+
   runningNode.stderr?.on("data", writeLogToFile);
   runningNode.stdout?.on("data", writeLogToFile);
+
+  process.once("exit", onProcessExit);
+  process.once("SIGINT", onProcessExit);
 
   probe: for (;;) {
     try {

@@ -72,7 +72,8 @@ export const chopsticksHandler: FoundationHandler<"chopsticks"> = ({
     }) => await sendSetStorageRequest(params),
 
     upgradeRuntime: async () => {
-      await upgradeRuntimeChopsticks(ctx, (() => MoonwallContext.getContext().rtUpgradePath!)());
+      const path = (await MoonwallContext.getContext()).rtUpgradePath!;
+      await upgradeRuntimeChopsticks(ctx, path);
     },
   } satisfies ChopsticksContext;
 

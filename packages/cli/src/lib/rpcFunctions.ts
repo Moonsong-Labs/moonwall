@@ -1,3 +1,4 @@
+import { vitestAutoUrl } from "../internal/providerFactories";
 import { importAsyncConfig } from "./configReader";
 import fetch from "node-fetch";
 
@@ -6,7 +7,7 @@ export async function customDevRpcRequest(method: string, params: any[] = []): P
   const env = globalConfig.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
   const endpoint = env.connections
     ? env.connections[0].endpoints[0].replace("ws://", "http://")
-    : `http://127.0.0.1:${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`;
+    : vitestAutoUrl();
   const data = {
     jsonrpc: "2.0",
     id: 1,

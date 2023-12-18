@@ -97,7 +97,7 @@ describeSuite({
       modifier: "skip",
       test: async function () {
         const rtBefore = context.polkadotJs().consts.system.version.specVersion.toNumber();
-        const ctx = MoonwallContext.getContext();
+        const ctx = await MoonwallContext.getContext();
         log(ctx.rtUpgradePath);
         await context.upgradeRuntime();
         const rtafter = context.polkadotJs().consts.system.version.specVersion.toNumber();

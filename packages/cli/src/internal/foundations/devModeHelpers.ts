@@ -17,6 +17,7 @@ import { assert } from "vitest";
 import { importAsyncConfig, isEthereumDevConfig } from "../../lib/configReader";
 import { extractError } from "../../lib/contextHelpers";
 import { MoonwallContext } from "../../lib/globalContext";
+import { vitestAutoUrl } from "../providerFactories";
 const debug = Debug("DevTest");
 
 export async function getDevProviderPath() {
@@ -24,7 +25,7 @@ export async function getDevProviderPath() {
   const env = globalConfig.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
   return env.connections
     ? env.connections[0].endpoints[0].replace("ws://", "http://")
-    : `http://127.0.0.1:${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`;
+    : vitestAutoUrl();
 }
 
 export type CreatedBlockResult = {
@@ -60,7 +61,7 @@ export async function createDevBlock<
   const containsViem =
     (context as DevModeContext).isEthereumChain &&
     context.viem() &&
-    MoonwallContext.getContext().providers.find((prov) => prov.type == "viem")
+    (await MoonwallContext.getContext()).providers.find((prov) => prov.type == "viem")
       ? true
       : false;
   const api = context.polkadotJs();
