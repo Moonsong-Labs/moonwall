@@ -70,15 +70,11 @@ export async function launchNode(cmd: string, args: string[], name: string) {
   runningNode.stderr?.on("data", logHandler);
   runningNode.stdout?.on("data", logHandler);
 
-  runningNode.on("exit", () => {
+  runningNode.once("exit", () => {
     fsStream.end();
     runningNode.stderr?.removeListener("data", logHandler);
     runningNode.stdout?.removeListener("data", logHandler);
   });
-
-  // process.once("exit", onProcessExit);
-  // process.once("SIGINT", onProcessExit);
-  // process.once("SIGTERM", onProcessExit);
 
   probe: for (let i = 0; ; i++) {
     try {
