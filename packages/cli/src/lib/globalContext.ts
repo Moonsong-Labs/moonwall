@@ -45,7 +45,6 @@ export class MoonwallContext {
   zombieNetwork?: Network;
   rtUpgradePath?: string;
   ipcServer?: net.Server;
-  fsStream?: fs.WriteStream;
 
   constructor(config: MoonwallConfig) {
     const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
@@ -121,14 +120,14 @@ export class MoonwallContext {
       providers: env.connections
         ? ProviderFactory.prepare(env.connections)
         : isEthereumDevConfig()
-        ? ProviderFactory.prepareDefaultDev()
-        : ProviderFactory.prepare([
-            {
-              name: "node",
-              type: "polkadotJs",
-              endpoints: [vitestAutoUrl()],
-            },
-          ]),
+          ? ProviderFactory.prepareDefaultDev()
+          : ProviderFactory.prepare([
+              {
+                name: "node",
+                type: "polkadotJs",
+                endpoints: [vitestAutoUrl()],
+              },
+            ]),
     } satisfies IGlobalContextFoundation;
   }
 
@@ -342,9 +341,8 @@ export class MoonwallContext {
 
     const promises = nodes.map(async ({ cmd, args, name, launch }) => {
       if (launch) {
-        const { fsStream, runningNode } = await launchNode(cmd, args, name!);
+        const { runningNode } = await launchNode(cmd, args, name!);
         this.nodes.push(runningNode);
-        this.fsStream = fsStream;
       } else {
         return Promise.resolve();
       }
@@ -362,8 +360,8 @@ export class MoonwallContext {
       this.environment.providers = env.connections
         ? ProviderFactory.prepare(env.connections)
         : isEthereumZombieConfig()
-        ? ProviderFactory.prepareDefaultZombie()
-        : ProviderFactory.prepareNoEthDefaultZombie();
+          ? ProviderFactory.prepareDefaultZombie()
+          : ProviderFactory.prepareNoEthDefaultZombie();
     }
 
     if (this.providers.length > 0) {
@@ -482,8 +480,6 @@ export class MoonwallContext {
         }
       }
     }
-
-    ctx.fsStream?.close();
 
     if (ctx.zombieNetwork) {
       console.log("🪓  Killing zombie nodes");

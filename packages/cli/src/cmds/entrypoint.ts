@@ -92,6 +92,8 @@ yargs(hideBin(process.argv))
       if (args.envName) {
         process.env.MOON_RUN_SCRIPTS = "true";
         if (await testCmd(args.envName.toString(), { testNamePattern: args.GrepTest })) {
+          console.log((process as any)._getActiveHandles());
+          console.log((process as any)._getActiveRequests());
           process.exit(0);
         } else {
           process.exit(1);

@@ -21,17 +21,17 @@ export async function launchNode(cmd: string, args: string[], name: string) {
 
   const dirPath = path.join(process.cwd(), "tmp", "node_logs");
 
-  const onProcessExit = () => {
-    // if (runningNode) {
-    // runningNode.kill();
-    // runningNode.stderr?.off("data", writeLogToFile);
-    // runningNode.stdout?.off("data", writeLogToFile);
-    // }
+  // const onProcessExit = () => {
+  //   // if (runningNode) {
+  //   // runningNode.kill();
+  //   // runningNode.stderr?.off("data", writeLogToFile);
+  //   // runningNode.stdout?.off("data", writeLogToFile);
+  //   // }
 
-    if (fsStream) {
-      fsStream.end();
-    }
-  };
+  //   if (fsStream) {
+  //     fsStream.end();
+  //   }
+  // };
 
   const runningNode = spawn(cmd, args);
   const logLocation = path
@@ -58,7 +58,7 @@ export async function launchNode(cmd: string, args: string[], name: string) {
     process.exit(1);
   });
 
-  const writeLogToFile = (chunk: any) => {
+  const logHandler = (chunk: any) => {
     if (fsStream.writable) {
       fsStream.write(chunk, (err) => {
         if (err) console.error(err);
@@ -67,12 +67,18 @@ export async function launchNode(cmd: string, args: string[], name: string) {
     }
   };
 
-  runningNode.stderr?.on("data", writeLogToFile);
-  runningNode.stdout?.on("data", writeLogToFile);
+  runningNode.stderr?.on("data", logHandler);
+  runningNode.stdout?.on("data", logHandler);
 
-  process.once("exit", onProcessExit);
-  process.once("SIGINT", onProcessExit);
-  process.once("SIGTERM", onProcessExit);
+  runningNode.on("exit", () => {
+    fsStream.end();
+    runningNode.stderr?.removeListener("data", logHandler);
+    runningNode.stdout?.removeListener("data", logHandler);
+  });
+
+  // process.once("exit", onProcessExit);
+  // process.once("SIGINT", onProcessExit);
+  // process.once("SIGTERM", onProcessExit);
 
   probe: for (let i = 0; ; i++) {
     try {
