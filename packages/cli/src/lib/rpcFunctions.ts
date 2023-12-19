@@ -7,7 +7,7 @@ export async function customDevRpcRequest(method: string, params: any[] = []): P
   const env = globalConfig.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
   const endpoint = env.connections
     ? env.connections[0].endpoints[0].replace("ws://", "http://")
-    : vitestAutoUrl();
+    : vitestAutoUrl().replace("ws://", "http://").replace("wss://", "https://");
   const data = {
     jsonrpc: "2.0",
     id: 1,

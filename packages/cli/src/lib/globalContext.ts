@@ -33,8 +33,7 @@ import {
   isEthereumZombieConfig,
   isOptionSet,
 } from "./configReader";
-import { ChildProcess, exec } from "node:child_process";
-import { execSync } from "child_process";
+import { ChildProcess, exec, execSync } from "node:child_process";
 const debugSetup = Debug("global:context");
 
 export class MoonwallContext {
@@ -46,6 +45,7 @@ export class MoonwallContext {
   zombieNetwork?: Network;
   rtUpgradePath?: string;
   ipcServer?: net.Server;
+  fsStream?: fs.WriteStream;
 
   constructor(config: MoonwallConfig) {
     const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
@@ -106,6 +106,7 @@ export class MoonwallContext {
       env.foundation.launchSpec![0],
       config.additionalRepos
     );
+
     return {
       name: env.name,
       foundationType: "dev",
@@ -341,8 +342,9 @@ export class MoonwallContext {
 
     const promises = nodes.map(async ({ cmd, args, name, launch }) => {
       if (launch) {
-        const result = await launchNode(cmd, args, name!);
-        this.nodes.push(result);
+        const { fsStream, runningNode } = await launchNode(cmd, args, name!);
+        this.nodes.push(runningNode);
+        this.fsStream = fsStream;
       } else {
         return Promise.resolve();
       }
@@ -480,6 +482,8 @@ export class MoonwallContext {
         }
       }
     }
+
+    ctx.fsStream?.close();
 
     if (ctx.zombieNetwork) {
       console.log("🪓  Killing zombie nodes");
