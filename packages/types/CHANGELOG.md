@@ -1,5 +1,11 @@
 # @moonwall/types
 
+## 4.4.5
+
+### Patch Changes
+
+- 14d65d8: Another Concurrency Fix
+
 ## 4.4.4
 
 ## 4.4.3

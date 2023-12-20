@@ -1,5 +1,14 @@
 # @moonwall/cli
 
+## 4.4.5
+
+### Patch Changes
+
+- 14d65d8: Another Concurrency Fix
+- Updated dependencies [14d65d8]
+  - @moonwall/types@4.4.5
+  - @moonwall/util@4.4.5
+
 ## 4.4.4
 
 ### Patch Changes
