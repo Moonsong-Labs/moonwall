@@ -33,8 +33,7 @@ import {
   isEthereumZombieConfig,
   isOptionSet,
 } from "./configReader";
-import { ChildProcess, exec } from "node:child_process";
-import { execSync } from "child_process";
+import { ChildProcess, exec, execSync } from "node:child_process";
 const debugSetup = Debug("global:context");
 
 export class MoonwallContext {
@@ -106,6 +105,7 @@ export class MoonwallContext {
       env.foundation.launchSpec![0],
       config.additionalRepos
     );
+
     return {
       name: env.name,
       foundationType: "dev",
@@ -120,14 +120,14 @@ export class MoonwallContext {
       providers: env.connections
         ? ProviderFactory.prepare(env.connections)
         : isEthereumDevConfig()
-        ? ProviderFactory.prepareDefaultDev()
-        : ProviderFactory.prepare([
-            {
-              name: "node",
-              type: "polkadotJs",
-              endpoints: [vitestAutoUrl()],
-            },
-          ]),
+          ? ProviderFactory.prepareDefaultDev()
+          : ProviderFactory.prepare([
+              {
+                name: "node",
+                type: "polkadotJs",
+                endpoints: [vitestAutoUrl()],
+              },
+            ]),
     } satisfies IGlobalContextFoundation;
   }
 
@@ -341,8 +341,8 @@ export class MoonwallContext {
 
     const promises = nodes.map(async ({ cmd, args, name, launch }) => {
       if (launch) {
-        const result = await launchNode(cmd, args, name!);
-        this.nodes.push(result);
+        const { runningNode } = await launchNode(cmd, args, name!);
+        this.nodes.push(runningNode);
       } else {
         return Promise.resolve();
       }
@@ -360,8 +360,8 @@ export class MoonwallContext {
       this.environment.providers = env.connections
         ? ProviderFactory.prepare(env.connections)
         : isEthereumZombieConfig()
-        ? ProviderFactory.prepareDefaultZombie()
-        : ProviderFactory.prepareNoEthDefaultZombie();
+          ? ProviderFactory.prepareDefaultZombie()
+          : ProviderFactory.prepareNoEthDefaultZombie();
     }
 
     if (this.providers.length > 0) {

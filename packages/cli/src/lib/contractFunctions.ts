@@ -24,9 +24,8 @@ import { importJsonConfig } from "./configReader";
 
 function getCompiledPath(contractName: string) {
   const config = importJsonConfig();
-  const contractsDir = config.environments.find(
-    (env) => env.name === process.env.MOON_TEST_ENV
-  )?.contracts;
+  const contractsDir = config.environments.find((env) => env.name === process.env.MOON_TEST_ENV)
+    ?.contracts;
 
   if (!contractsDir) {
     throw new Error(
@@ -140,8 +139,8 @@ export async function interactWithContract(
           .viem()
           .estimateGas({ account: account.address, to: contractAddress, value: 0n, data })
       : gas > 0n
-      ? gas
-      : 200_000n;
+        ? gas
+        : 200_000n;
 
   if (!call && rawTxOnly) {
     return web3Library === "viem"

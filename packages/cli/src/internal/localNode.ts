@@ -1,12 +1,16 @@
-import { ChildProcess, execSync, spawn } from "child_process";
+import { exec, spawn } from "child_process";
 import fs from "fs";
 import path from "path";
 import WebSocket from "ws";
 import { checkAccess, checkExists } from "./fileCheckers";
 import Debug from "debug";
+import { setTimeout as timer } from "timers/promises";
+import util from "util";
+
+const execAsync = util.promisify(exec);
 const debug = Debug("global:localNode");
 
-export async function launchNode(cmd: string, args: string[], name: string): Promise<ChildProcess> {
+export async function launchNode(cmd: string, args: string[], name: string) {
   if (cmd.includes("moonbeam")) {
     await checkExists(cmd);
     checkAccess(cmd);
@@ -17,17 +21,17 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
 
   const dirPath = path.join(process.cwd(), "tmp", "node_logs");
 
-  const onProcessExit = () => {
-    if (runningNode) {
-      runningNode.kill();
-      runningNode.stderr?.off("data", writeLogToFile);
-      runningNode.stdout?.off("data", writeLogToFile);
-    }
+  // const onProcessExit = () => {
+  //   // if (runningNode) {
+  //   // runningNode.kill();
+  //   // runningNode.stderr?.off("data", writeLogToFile);
+  //   // runningNode.stdout?.off("data", writeLogToFile);
+  //   // }
 
-    if (fsStream) {
-      fsStream.end();
-    }
-  };
+  //   if (fsStream) {
+  //     fsStream.end();
+  //   }
+  // };
 
   const runningNode = spawn(cmd, args);
   const logLocation = path
@@ -54,7 +58,7 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
     process.exit(1);
   });
 
-  const writeLogToFile = (chunk: any) => {
+  const logHandler = (chunk: any) => {
     if (fsStream.writable) {
       fsStream.write(chunk, (err) => {
         if (err) console.error(err);
@@ -63,13 +67,16 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
     }
   };
 
-  runningNode.stderr?.on("data", writeLogToFile);
-  runningNode.stdout?.on("data", writeLogToFile);
+  runningNode.stderr?.on("data", logHandler);
+  runningNode.stdout?.on("data", logHandler);
 
-  process.once("exit", onProcessExit);
-  process.once("SIGINT", onProcessExit);
+  runningNode.once("exit", () => {
+    fsStream.end();
+    runningNode.stderr?.removeListener("data", logHandler);
+    runningNode.stdout?.removeListener("data", logHandler);
+  });
 
-  probe: for (;;) {
+  probe: for (let i = 0; ; i++) {
     try {
       const ports = await findPortsByPid(runningNode.pid);
       if (ports) {
@@ -84,46 +91,56 @@ export async function launchNode(cmd: string, args: string[], name: string): Pro
         }
       }
     } catch {
+      if (i === 300) {
+        throw new Error(`Could not find ports for node after 30 seconds`);
+      }
+      await timer(100);
       continue;
     }
   }
 
-  return runningNode;
+  return { runningNode, fsStream };
 }
 
 async function checkWebSocketJSONRPC(port: number): Promise<boolean> {
-  return new Promise((resolve, reject) => {
+  try {
     const ws = new WebSocket(`ws://localhost:${port}`);
 
-    ws.on("open", () => {
-      ws.send(
-        JSON.stringify({
-          jsonrpc: "2.0",
-          id: 1,
-          method: "system_chain",
-          params: [],
-        })
-      );
-    });
+    const result: boolean = await new Promise((resolve) => {
+      ws.on("open", () => {
+        ws.send(
+          JSON.stringify({
+            jsonrpc: "2.0",
+            id: 1,
+            method: "system_chain",
+            params: [],
+          })
+        );
+      });
 
-    ws.on("message", (data) => {
-      try {
-        const response = JSON.parse(data.toString());
-        if (response.jsonrpc === "2.0" && response.id === 1) {
-          resolve(true);
-        } else {
-          reject(false);
+      ws.on("message", (data) => {
+        try {
+          const response = JSON.parse(data.toString());
+          if (response.jsonrpc === "2.0" && response.id === 1) {
+            resolve(true);
+          } else {
+            resolve(false);
+          }
+        } catch (e) {
+          resolve(false);
         }
-      } catch (e) {
-        reject(false);
-      }
-      ws.close();
+      });
+
+      ws.on("error", () => {
+        resolve(false);
+      });
     });
 
-    ws.on("error", () => {
-      reject(false);
-    });
-  });
+    ws && ws.close();
+    return result;
+  } catch {
+    return false;
+  }
 }
 
 async function findPortsByPid(
@@ -133,7 +150,7 @@ async function findPortsByPid(
 ): Promise<number[]> {
   for (let i = 0; i < retryCount; i++) {
     try {
-      const stdout = execSync(`lsof -i -n -P | grep LISTEN | grep ${pid}`).toString();
+      const { stdout } = await execAsync(`lsof -i -n -P | grep LISTEN | grep ${pid}`);
       const ports: number[] = [];
       const lines = stdout.split("\n");
       for (const line of lines) {

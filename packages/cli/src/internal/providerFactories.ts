@@ -8,7 +8,6 @@ import { Signer, Wallet, ethers } from "ethers";
 import { createWalletClient, http, publicActions } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { Web3 } from "web3";
-import getPort, { portNumbers } from "get-port";
 import { WebSocketProvider as Web3ProviderWs } from "web3-providers-ws";
 const debug = Debug("global:providers");
 
@@ -203,7 +202,11 @@ export interface ProviderInterface {
 }
 
 export class ProviderInterfaceFactory {
-  constructor(private name: string, private type: ProviderType, private connect: () => any) {}
+  constructor(
+    private name: string,
+    private type: ProviderType,
+    private connect: () => any
+  ) {}
 
   public async create(): Promise<ProviderInterface> {
     switch (this.type) {
@@ -296,12 +299,3 @@ export class ProviderInterfaceFactory {
 }
 
 export const vitestAutoUrl = () => `ws://127.0.0.1:${process.env.MOONWALL_RPC_PORT}`;
-
-export const getFreePort = async () => {
-  const portRange = portNumbers(
-    49152 + parseInt(process.env.VITEST_POOL_ID),
-    65435 + parseInt(process.env.VITEST_POOL_ID)
-  );
-
-  return getPort({ port: portRange });
-};

@@ -315,8 +315,8 @@ const resolveCommandChoice = async () => {
       ctx.foundation == "dev"
         ? await api.rpc.engine.createBlock(true, true)
         : ctx.foundation == "chopsticks"
-        ? await sendNewBlockCmd()
-        : undefined;
+          ? await sendNewBlockCmd()
+          : undefined;
       break;
 
     case "createUnfinalizedBlock":
