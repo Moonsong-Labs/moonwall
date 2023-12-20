@@ -85,7 +85,7 @@ export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
     ];
 
     const mode = launchSpecs[0].buildBlockMode ? launchSpecs[0].buildBlockMode : "manual";
-    const num = mode == "batch" ? 0 : mode == "instant" ? 1 : 2;
+    const num = mode == "batch" ? "Batch" : mode == "instant" ? "Instant" : "Manual";
     chopsticksArgs.push(`--build-block-mode=${num}`);
 
     if (launchSpecs[0].wsPort) {
