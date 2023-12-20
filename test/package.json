@@ -37,9 +37,5 @@
     "vitest": "1.1.0",
     "web3": "4.2.1",
     "yargs": "17.7.2"
-  },
-  "dependencies": {
-    "@zombienet/orchestrator": "^0.0.68",
-    "@zombienet/utils": "^0.0.24"
   }
 }
