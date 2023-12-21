@@ -8,6 +8,7 @@ import { generateConfig } from "../internal/cmdFunctions/initialisation";
 import { main } from "./main";
 import { runNetworkCmd } from "./runNetwork";
 import { testCmd } from "./runTests";
+import { importConfig } from "..";
 dotenv.config();
 
 // Hack to expose config-path to all commands and fallback
@@ -126,4 +127,9 @@ yargs(hideBin(process.argv))
   })
   .help("h")
   .alias("h", "help")
-  .parseAsync();
+  .parseAsync()
+  .then(async () => {
+    if (process.env.MOON_EXIT) {
+      process.exit();
+    }
+  });
