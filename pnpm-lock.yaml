@@ -156,9 +156,15 @@ importers:
       web3-providers-ws:
         specifier: 4.0.7
         version: 4.0.7
+      why-is-node-running:
+        specifier: ^2.2.2
+        version: 2.2.2
       ws:
         specifier: 8.15.1
         version: 8.15.1
+      wtfnode:
+        specifier: ^0.9.1
+        version: 0.9.1
       yaml:
         specifier: 2.3.4
         version: 2.3.4
@@ -8878,6 +8884,11 @@ packages:
         optional: true
       utf-8-validate:
         optional: true
+
+  /wtfnode@0.9.1:
+    resolution: {integrity: sha512-Ip6C2KeQPl/F3aP1EfOnPoQk14Udd9lffpoqWDNH3Xt78svxPbv53ngtmtfI0q2Te3oTq79XKTnRNXVIn/GsPA==}
+    hasBin: true
+    dev: false
 
   /xml-name-validator@5.0.0:
     resolution: {integrity: sha512-EvGK8EJ3DhaHfbRlETOWAS5pO9MZITeauHKJyb8wyajUfQUenkIg2MvLDTZ4T/TgIcm3HU0TFBgWWboAZ30UHg==}

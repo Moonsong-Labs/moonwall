@@ -124,6 +124,7 @@ function addThreadConfig(
 ): UserConfig {
   const configWithThreads: UserConfig = {
     ...config,
+    fileParallelism: false,
     pool: "threads",
     poolOptions: {
       threads: {
@@ -131,22 +132,24 @@ function addThreadConfig(
         minThreads: 1,
         maxThreads: 1,
         singleThread: false,
-        useAtomics: false,
+        useAtomics: true,
       },
     },
   };
 
   if (threads == true && process.env.MOON_RECYCLE !== "true") {
+    configWithThreads.fileParallelism = true;
     configWithThreads.poolOptions.threads = {
       isolate: true,
       minThreads: 1,
       maxThreads: 3,
       singleThread: false,
-      useAtomics: false,
+      useAtomics: true,
     };
   }
 
   if (typeof threads === "number") {
+    configWithThreads.fileParallelism = true;
     configWithThreads.poolOptions.threads.maxThreads = threads;
     configWithThreads.poolOptions.threads.singleThread = false;
   }

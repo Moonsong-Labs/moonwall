@@ -36,7 +36,7 @@ describeSuite({
       title: "this is a test case3",
       test: async function () {
         console.log(`The latest block is ${(await api.provider!.getBlock("latest"))!.number}`);
-        log(MoonwallContext.getContext()!.providers);
+        log((await MoonwallContext.getContext())!.providers);
         expect(2).toBeGreaterThan(0);
       },
     });

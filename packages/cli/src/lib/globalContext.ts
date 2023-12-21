@@ -470,7 +470,7 @@ export class MoonwallContext {
     while (ctx.nodes.length > 0) {
       const node = ctx.nodes.pop();
       const pid = node.pid;
-      node.kill();
+      node.kill("SIGINT");
       for (;;) {
         const isRunning = await isPidRunning(pid);
         if (isRunning) {
