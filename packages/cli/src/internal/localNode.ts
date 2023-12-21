@@ -21,18 +21,6 @@ export async function launchNode(cmd: string, args: string[], name: string) {
 
   const dirPath = path.join(process.cwd(), "tmp", "node_logs");
 
-  // const onProcessExit = () => {
-  //   // if (runningNode) {
-  //   // runningNode.kill();
-  //   // runningNode.stderr?.off("data", writeLogToFile);
-  //   // runningNode.stdout?.off("data", writeLogToFile);
-  //   // }
-
-  //   if (fsStream) {
-  //     fsStream.end();
-  //   }
-  // };
-
   const runningNode = spawn(cmd, args);
   const logLocation = path
     .join(
@@ -52,10 +40,8 @@ export async function launchNode(cmd: string, args: string[], name: string) {
       console.error(
         `\x1b[31mMissing Local binary at` + `(${cmd}).\nPlease compile the project\x1b[0m`
       );
-    } else {
-      console.error(err);
     }
-    process.exit(1);
+    throw new Error(err.message);
   });
 
   const logHandler = (chunk: any) => {
@@ -97,6 +83,7 @@ export async function launchNode(cmd: string, args: string[], name: string) {
       await timer(100);
       continue;
     }
+    await timer(100);
   }
 
   return { runningNode, fsStream };
