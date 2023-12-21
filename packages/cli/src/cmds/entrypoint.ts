@@ -8,7 +8,6 @@ import { generateConfig } from "../internal/cmdFunctions/initialisation";
 import { main } from "./main";
 import { runNetworkCmd } from "./runNetwork";
 import { testCmd } from "./runTests";
-import { importConfig } from "..";
 dotenv.config();
 
 // Hack to expose config-path to all commands and fallback
