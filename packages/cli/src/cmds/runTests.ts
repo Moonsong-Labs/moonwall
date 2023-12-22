@@ -33,7 +33,7 @@ export async function testCmd(envName: string, additionalArgs?: object): Promise
     clearNodeLogs();
   }
 
-  if (env.foundation.type == "zombie") {
+  if (env.foundation.type !== "dev") {
     process.env.MOON_EXIT = "true";
   }
 
