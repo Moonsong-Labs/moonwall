@@ -33,7 +33,7 @@ export async function testCmd(envName: string, additionalArgs?: object): Promise
     clearNodeLogs();
   }
 
-  if (env.foundation.type !== "dev") {
+  if (env.foundation.type === "zombie") {
     process.env.MOON_EXIT = "true";
   }
 
@@ -73,9 +73,10 @@ export async function executeTests(env: Environment, additionalArgs?: object) {
         const { rtVersion, rtName } = Object.values(chainData[0])[0];
         process.env.MOON_RTVERSION = rtVersion;
         process.env.MOON_RTNAME = rtName;
+      } catch (e) {
+        console.error(e);
+      } finally {
         await MoonwallContext.destroy();
-      } catch {
-        // No chain to test against
       }
     }
 
