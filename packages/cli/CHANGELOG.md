@@ -1,5 +1,13 @@
 # @moonwall/cli
 
+## 4.5.1
+
+### Patch Changes
+
+- 810d1de: Mini exit fix
+  - @moonwall/types@4.5.1
+  - @moonwall/util@4.5.1
+
 ## 4.5.0
 
 ### Minor Changes
