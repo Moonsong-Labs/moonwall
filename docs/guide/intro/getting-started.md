@@ -83,7 +83,7 @@ This isn't too important as you will always be able to create new environment sp
 - `fork` : 🚧 Not yet implemented! Will be part of a new way of forking the network with a real client
 
 ::: tip
-This is the very brief rundown of foundations. For their specific information please visit the relevant sections in [Config](../../config/environment).
+This is the very brief rundown of foundations. For their specific information please visit the relevant sections in [Config](/guide/intro/foundations).
 :::
 
 ## Generated Config
@@ -116,7 +116,7 @@ If using a code-editor like Visual Studio Code, intellisense is available for va
 
 ## Downloading a Binary
 
-For this example lets download a copy of the Moonbeam node via the CLI menus.
+For this example let's download a copy of the Moonbeam node via the CLI menus.
 
 Launch the app:
 
@@ -188,7 +188,7 @@ Open your code editor and edit the `moonwall.config.json` so that it now has the
 
 ## Running the Network
 
-Now that we have a very basic environment config, lets start the network!
+Now that we have a very basic environment config, let's start the network!
 
 Open the Moonwall application except this time select: `2) Network Launcher & Toolbox:` and choose the environment you created (this is "default_env" above).
 

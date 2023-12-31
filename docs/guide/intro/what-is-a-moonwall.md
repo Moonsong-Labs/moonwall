@@ -39,7 +39,7 @@ The assumptions made about state are fundamentally incompatible with blockchain 
 ### Combined Config
 
 The goal is to dramatically help with environment configuration, to reduce friction in reproducing an error or tracking down a defect. Given that blockchains are so 
-idiosyncratic and complex - configuring these networks are a great source of pain. Moonwall attempts to allievate this as much as possible by providing a single venue to
+idiosyncratic and complex - configuring these networks are a great source of pain. Moonwall attempts to allieviate this as much as possible by providing a single venue to
 look how environments are configured - without having to search the code for esoteric flags, options or environment variables.
 
 ### User-chosen Clients

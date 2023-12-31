@@ -15,10 +15,12 @@ PolkadotJs is a suite of tools, including a JavaScript library, for interacting 
 
 ### Ethers
 
-Ethers is a popular and comprehensive JavaScript library used for interacting with the Ethereum-compatible blockchains. It is designed to provide a simple, minimal, and complete interface to EVM-compatible chains. For more information about Ethers, be sure to check out the [Ethers docs] 
+[Ethers.js](https://github.com/ethers-io/ethers.js){target=_blank} is a popular and comprehensive JavaScript library used for interacting with the Ethereum-compatible blockchains. It is designed to provide a simple, minimal, and complete interface to EVM-compatible chains. For more information about Ethers, be sure to check out the [Ethers docs](https://docs.ethers.org/v6/){target=_blank}
 
 ### Web3
 
+[Web3.js](https://github.com/web3/web3.js){target=_blank} is a popular Ethereum javascript library & competitor to Ethers.js. It takes a slightly different approach to providing all of the necessary functionaity for interacting with Ethereum-compatible blockchains. For more information about Web3.js, be sure to checkout the [Web3js docs](https://web3js.readthedocs.io/en/v1.10.0/){target=_blank}.
+
 ### Viem
 
-![underconstruction](/under-construction.png)
+[Viem](https://github.com/wevm/viem){target=_blank} is a lightweight and modular typescript library for interacting with Ethereum-compatible blockchains. For more information about Viem, be sure to checkout the [Viem docs](https://viem.sh/){target=_blank}. 
