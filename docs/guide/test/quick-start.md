@@ -96,3 +96,14 @@ Putting it all together, our config file for testing on a local Moonbeam node us
    ]
 }%
 ```
+
+## Running your Tests
+
+After you've assembled your config file and written your test suite now it's time to run it! To do so, take the following steps:
+
+- Run `pnpm moonwall`
+- Select the option of **3) Test Suite Execution 
+- Select the environment that you configured
+- Review the results
+
+![run tests](/run-tests.png)
