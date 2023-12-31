@@ -123,22 +123,22 @@ export class ProviderFactory {
       {
         name: "dev",
         type: "polkadotJs",
-        endpoints: [vitestAutoUrl],
+        endpoints: [vitestAutoUrl()],
       },
       {
         name: "w3",
         type: "web3",
-        endpoints: [vitestAutoUrl],
+        endpoints: [vitestAutoUrl()],
       },
       {
         name: "eth",
         type: "ethers",
-        endpoints: [vitestAutoUrl],
+        endpoints: [vitestAutoUrl()],
       },
       {
         name: "public",
         type: "viem",
-        endpoints: [vitestAutoUrl],
+        endpoints: [vitestAutoUrl()],
       },
     ]);
   }
@@ -202,7 +202,11 @@ export interface ProviderInterface {
 }
 
 export class ProviderInterfaceFactory {
-  constructor(private name: string, private type: ProviderType, private connect: () => any) {}
+  constructor(
+    private name: string,
+    private type: ProviderType,
+    private connect: () => any
+  ) {}
 
   public async create(): Promise<ProviderInterface> {
     switch (this.type) {
@@ -294,6 +298,4 @@ export class ProviderInterfaceFactory {
   }
 }
 
-export const vitestAutoUrl = `ws://127.0.0.1:${
-  10000 + Number(process.env.VITEST_POOL_ID || 1) * 100
-}`;
+export const vitestAutoUrl = () => `ws://127.0.0.1:${process.env.MOONWALL_RPC_PORT}`;

@@ -9,7 +9,6 @@ import {
 } from "@moonwall/types";
 import { ApiPromise } from "@polkadot/api";
 import zombie, { Network } from "@zombienet/orchestrator";
-import { execaCommand, execaCommandSync } from "execa";
 import Debug from "debug";
 import fs from "fs";
 import net from "net";
@@ -22,7 +21,7 @@ import {
   checkZombieBins,
   getZombieConfig,
 } from "../internal/foundations/zombieHelpers";
-import { LaunchedNode, launchNode } from "../internal/localNode";
+import { launchNode } from "../internal/localNode";
 import {
   ProviderFactory,
   ProviderInterfaceFactory,
@@ -34,13 +33,14 @@ import {
   isEthereumZombieConfig,
   isOptionSet,
 } from "./configReader";
+import { ChildProcess, exec, execSync } from "node:child_process";
 const debugSetup = Debug("global:context");
 
 export class MoonwallContext {
   private static instance: MoonwallContext | undefined;
   environment!: MoonwallEnvironment;
   providers: ConnectedProvider[];
-  nodes: LaunchedNode[];
+  nodes: ChildProcess[];
   foundation: FoundationType;
   zombieNetwork?: Network;
   rtUpgradePath?: string;
@@ -51,10 +51,14 @@ export class MoonwallContext {
     this.providers = [];
     this.nodes = [];
     this.foundation = env.foundation.type;
+  }
 
+  public async setupFoundation() {
+    const config = await importAsyncConfig();
+    const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
     const foundationHandlers: Record<
       FoundationType,
-      (env: Environment, config?: MoonwallConfig) => IGlobalContextFoundation
+      (env: Environment, config?: MoonwallConfig) => Promise<IGlobalContextFoundation>
     > = {
       read_only: this.handleReadOnly,
       chopsticks: this.handleChopsticks,
@@ -64,15 +68,19 @@ export class MoonwallContext {
     };
 
     const foundationHandler = foundationHandlers[env.foundation.type];
-    this.environment = { providers: [], nodes: [], ...foundationHandler.call(this, env, config) };
+    this.environment = {
+      providers: [],
+      nodes: [],
+      ...(await foundationHandler.call(this, env, config)),
+    };
   }
 
-  private handleZombie(env: Environment): IGlobalContextFoundation {
+  private async handleZombie(env: Environment) {
     if (env.foundation.type !== "zombie") {
       throw new Error(`Foundation type must be 'zombie'`);
     }
 
-    const { cmd: zombieConfig } = parseZombieCmd(env.foundation.zombieSpec);
+    const { cmd: zombieConfig } = await parseZombieCmd(env.foundation.zombieSpec);
     this.rtUpgradePath = env.foundation.rtUpgradePath;
     return {
       name: env.name,
@@ -85,18 +93,19 @@ export class MoonwallContext {
           launch: true,
         },
       ],
-    };
+    } satisfies IGlobalContextFoundation;
   }
 
-  private handleDev(env: Environment, config: MoonwallConfig): IGlobalContextFoundation {
+  private async handleDev(env: Environment, config: MoonwallConfig) {
     if (env.foundation.type !== "dev") {
       throw new Error(`Foundation type must be 'dev'`);
     }
 
-    const { cmd, args, launch } = parseRunCmd(
+    const { cmd, args, launch } = await parseRunCmd(
       env.foundation.launchSpec![0],
       config.additionalRepos
     );
+
     return {
       name: env.name,
       foundationType: "dev",
@@ -111,18 +120,18 @@ export class MoonwallContext {
       providers: env.connections
         ? ProviderFactory.prepare(env.connections)
         : isEthereumDevConfig()
-        ? ProviderFactory.prepareDefaultDev()
-        : ProviderFactory.prepare([
-            {
-              name: "node",
-              type: "polkadotJs",
-              endpoints: [vitestAutoUrl],
-            },
-          ]),
-    };
+          ? ProviderFactory.prepareDefaultDev()
+          : ProviderFactory.prepare([
+              {
+                name: "node",
+                type: "polkadotJs",
+                endpoints: [vitestAutoUrl()],
+              },
+            ]),
+    } satisfies IGlobalContextFoundation;
   }
 
-  private handleReadOnly(env: Environment): IGlobalContextFoundation {
+  private async handleReadOnly(env: Environment) {
     if (env.foundation.type !== "read_only") {
       throw new Error(`Foundation type must be 'read_only'`);
     }
@@ -136,10 +145,10 @@ export class MoonwallContext {
       name: env.name,
       foundationType: "read_only",
       providers: ProviderFactory.prepare(env.connections),
-    };
+    } satisfies IGlobalContextFoundation;
   }
 
-  private handleChopsticks(env: Environment): IGlobalContextFoundation {
+  private async handleChopsticks(env: Environment) {
     if (env.foundation.type !== "chopsticks") {
       throw new Error(`Foundation type must be 'chopsticks'`);
     }
@@ -150,7 +159,7 @@ export class MoonwallContext {
       foundationType: "chopsticks",
       nodes: [parseChopsticksRunCmd(env.foundation.launchSpec!)],
       providers: [...ProviderFactory.prepare(env.connections!)],
-    };
+    } satisfies IGlobalContextFoundation;
   }
 
   private async startZombieNetwork() {
@@ -181,8 +190,10 @@ export class MoonwallContext {
         const processIds = Object.values((this.zombieNetwork.client as any).processMap)
           .filter((item) => item!["pid"])
           .map((process) => process!["pid"]);
-        execaCommand(`kill ${processIds.join(" ")}`, {
-          reject: false,
+        exec(`kill ${processIds.join(" ")}`, (error) => {
+          if (error) {
+            console.error(`Error killing process: ${error.message}`);
+          }
         });
       } catch (err) {
         // console.log(err.message);
@@ -266,7 +277,7 @@ export class MoonwallContext {
               // await this.disconnect();
               const pid = (network.client as any).processMap[message.nodeName].pid;
               delete (network.client as any).processMap[message.nodeName];
-              const result = await execaCommand(`kill ${pid}`, { timeout: 1000 });
+              const result = exec(`kill ${pid}`, { timeout: 1000 });
               // await this.connectEnvironment(true);
               writeToClient({
                 status: "success",
@@ -313,15 +324,16 @@ export class MoonwallContext {
   }
 
   public async startNetwork() {
+    const ctx = await MoonwallContext.getContext();
     if (process.env.MOON_RECYCLE == "true") {
-      return MoonwallContext.getContext();
+      return ctx;
     }
 
     // const activeNodes = this.nodes.filter((node) => !node.killed);
     if (this.nodes.length > 0) {
-      return MoonwallContext.getContext();
+      return ctx;
     }
-    const nodes = MoonwallContext.getContext().environment.nodes;
+    const nodes = ctx.environment.nodes;
 
     if (this.environment.foundationType === "zombie") {
       return await this.startZombieNetwork();
@@ -329,15 +341,15 @@ export class MoonwallContext {
 
     const promises = nodes.map(async ({ cmd, args, name, launch }) => {
       if (launch) {
-        const result = await launchNode(cmd, args, name!);
-        this.nodes.push(result);
+        const { runningNode } = await launchNode(cmd, args, name!);
+        this.nodes.push(runningNode);
       } else {
         return Promise.resolve();
       }
     });
     await Promise.allSettled(promises);
 
-    return MoonwallContext.getContext();
+    return ctx;
   }
 
   public async connectEnvironment(silent: boolean = false): Promise<MoonwallContext> {
@@ -348,8 +360,8 @@ export class MoonwallContext {
       this.environment.providers = env.connections
         ? ProviderFactory.prepare(env.connections)
         : isEthereumZombieConfig()
-        ? ProviderFactory.prepareDefaultZombie()
-        : ProviderFactory.prepareNoEthDefaultZombie();
+          ? ProviderFactory.prepareDefaultZombie()
+          : ProviderFactory.prepareNoEthDefaultZombie();
     }
 
     if (this.providers.length > 0) {
@@ -359,7 +371,7 @@ export class MoonwallContext {
     const promises = this.environment.providers.map(
       async ({ name, type, connect }) =>
         new Promise(async (resolve) => {
-          this.providers.push(await ProviderInterfaceFactory.populate(name, type, connect));
+          this.providers.push(await ProviderInterfaceFactory.populate(name, type, connect as any));
           resolve("");
         })
     );
@@ -431,21 +443,16 @@ export class MoonwallContext {
     }
   }
 
-  public static printStats() {
-    if (MoonwallContext) {
-      console.dir(MoonwallContext.getContext(), { depth: 1 });
-    } else {
-      console.log("Global context not created!");
-    }
-  }
-
-  public static getContext(config?: MoonwallConfig, force: boolean = false): MoonwallContext {
+  public static async getContext(
+    config?: MoonwallConfig,
+    force: boolean = false
+  ): Promise<MoonwallContext> {
     if (!MoonwallContext.instance || force) {
       if (!config) {
         throw new Error("❌ Config must be provided on Global Context instantiation");
       }
       MoonwallContext.instance = new MoonwallContext(config);
-
+      await MoonwallContext.instance.setupFoundation();
       debugSetup(`🟢  Moonwall context "${config.label}" created`);
     }
     return MoonwallContext.instance;
@@ -463,9 +470,10 @@ export class MoonwallContext {
     while (ctx.nodes.length > 0) {
       const node = ctx.nodes.pop();
       const pid = node.pid;
-      node.kill("SIGKILL", { forceKillAfterTimeout: 2000 });
+      node.kill("SIGINT");
       for (;;) {
-        if (await isPidRunning(pid)) {
+        const isRunning = await isPidRunning(pid);
+        if (isRunning) {
           await timer(10);
         } else {
           break;
@@ -481,7 +489,7 @@ export class MoonwallContext {
         .map((process) => process!["pid"]);
 
       try {
-        execaCommandSync(`kill ${processIds.join(" ")}`, {});
+        execSync(`kill ${processIds.join(" ")}`, {});
       } catch (e) {
         console.log(e.message);
         console.log("continuing...");
@@ -497,7 +505,7 @@ export class MoonwallContext {
 
 export const contextCreator = async () => {
   const config = await importAsyncConfig();
-  const ctx = MoonwallContext.getContext(config);
+  const ctx = await MoonwallContext.getContext(config);
   await runNetworkOnly();
   await ctx.connectEnvironment();
   return ctx;
@@ -505,7 +513,7 @@ export const contextCreator = async () => {
 
 export const runNetworkOnly = async () => {
   const config = await importAsyncConfig();
-  const ctx = MoonwallContext.getContext(config);
+  const ctx = await MoonwallContext.getContext(config);
   await ctx.startNetwork();
 };
 
@@ -523,12 +531,8 @@ export interface IGlobalContextFoundation {
 }
 
 async function isPidRunning(pid: number): Promise<boolean> {
-  try {
-    await execaCommand(`ps -p ${pid} -o pid=`, { cleanup: true });
-    return true;
-  } catch {
-    return false;
-  }
+  const output = exec(`ps -p ${pid} -o pid=`);
+  return output.exitCode === 0;
 }
 
 async function waitForPidsToDie(pids: number[]): Promise<void> {

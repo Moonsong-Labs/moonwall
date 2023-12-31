@@ -1,5 +1,50 @@
 # @moonwall/cli
 
+## 4.5.1
+
+### Patch Changes
+
+- 810d1de: Mini exit fix
+  - @moonwall/types@4.5.1
+  - @moonwall/util@4.5.1
+
+## 4.5.0
+
+### Minor Changes
+
+- 5a8c1a4: Concurrency Changes
+
+### Patch Changes
+
+- @moonwall/types@4.5.0
+- @moonwall/util@4.5.0
+
+## 4.4.5
+
+### Patch Changes
+
+- 14d65d8: Another Concurrency Fix
+- Updated dependencies [14d65d8]
+  - @moonwall/types@4.4.5
+  - @moonwall/util@4.4.5
+
+## 4.4.4
+
+### Patch Changes
+
+- 4812837: Tracing Test Fix
+  - @moonwall/types@4.4.4
+  - @moonwall/util@4.4.4
+
+## 4.4.3
+
+### Patch Changes
+
+- efe7ba1: Concurrency Fix
+- Updated dependencies [efe7ba1]
+  - @moonwall/types@4.4.3
+  - @moonwall/util@4.4.3
+
 ## 4.4.2
 
 ### Patch Changes

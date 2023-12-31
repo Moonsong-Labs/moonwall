@@ -1,5 +1,39 @@
 # @moonwall/util
 
+## 4.5.1
+
+### Patch Changes
+
+- @moonwall/types@4.5.1
+
+## 4.5.0
+
+### Patch Changes
+
+- @moonwall/types@4.5.0
+
+## 4.4.5
+
+### Patch Changes
+
+- 14d65d8: Another Concurrency Fix
+- Updated dependencies [14d65d8]
+  - @moonwall/types@4.4.5
+
+## 4.4.4
+
+### Patch Changes
+
+- @moonwall/types@4.4.4
+
+## 4.4.3
+
+### Patch Changes
+
+- efe7ba1: Concurrency Fix
+- Updated dependencies [efe7ba1]
+  - @moonwall/types@4.4.3
+
 ## 4.4.2
 
 ### Patch Changes

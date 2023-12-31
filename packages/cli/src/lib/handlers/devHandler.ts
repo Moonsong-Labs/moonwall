@@ -79,7 +79,7 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
 
     createBlock: async <
       ApiType extends ApiTypes,
-      Calls extends CallType<ApiType> | CallType<ApiType>[]
+      Calls extends CallType<ApiType> | CallType<ApiType>[],
     >(
       transactions?: Calls,
       options?: BlockCreation
@@ -101,7 +101,7 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
               })
             | (EthersTransactionOptions & {
                 libraryType: "ethers";
-              })
+              }),
         >(
           options: TOptions
         ) => {

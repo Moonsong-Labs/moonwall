@@ -1,13 +1,13 @@
 import "../internal/logging";
 import "@moonbeam-network/api-augment";
+import dotenv from "dotenv";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
-import { testCmd } from "./runTests";
-import { runNetworkCmd } from "./runNetwork";
+import { fetchArtifact } from "../internal/cmdFunctions/fetchArtifact";
 import { generateConfig } from "../internal/cmdFunctions/initialisation";
 import { main } from "./main";
-import { fetchArtifact } from "../internal/cmdFunctions/fetchArtifact";
-import dotenv from "dotenv";
+import { runNetworkCmd } from "./runNetwork";
+import { testCmd } from "./runTests";
 dotenv.config();
 
 // Hack to expose config-path to all commands and fallback
@@ -91,13 +91,13 @@ yargs(hideBin(process.argv))
     async (args) => {
       if (args.envName) {
         process.env.MOON_RUN_SCRIPTS = "true";
-        (await testCmd(args.envName.toString(), { testNamePattern: args.GrepTest }))
-          ? process.exit(0)
-          : process.exit(1);
+        if (!(await testCmd(args.envName.toString(), { testNamePattern: args.GrepTest }))) {
+          process.exitCode = 1;
+        }
       } else {
         console.log("❌ No environment specified");
         console.log(`👉 Run 'pnpm moonwall --help' for more information`);
-        process.exit(1);
+        process.exitCode = 1;
       }
     }
   )
@@ -117,7 +117,6 @@ yargs(hideBin(process.argv))
     async (argv) => {
       process.env.MOON_RUN_SCRIPTS = "true";
       await runNetworkCmd(argv as any);
-      process.exit(0);
     }
   )
   .demandCommand(1)
@@ -127,4 +126,9 @@ yargs(hideBin(process.argv))
   })
   .help("h")
   .alias("h", "help")
-  .parse();
+  .parseAsync()
+  .then(async () => {
+    if (process.env.MOON_EXIT) {
+      process.exit();
+    }
+  });

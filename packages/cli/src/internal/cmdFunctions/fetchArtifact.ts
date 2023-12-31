@@ -37,10 +37,10 @@ export async function fetchArtifact(args) {
         }
       })
     : args.ver === "latest"
-    ? releases.find((release) => release.assets.find((asset) => asset.name === binary))
-    : releases
-        .filter((release) => release.tag_name.includes(args.ver))
-        .find((release) => release.assets.find((asset) => minimatch(asset.name, binary)));
+      ? releases.find((release) => release.assets.find((asset) => asset.name === binary))
+      : releases
+          .filter((release) => release.tag_name.includes(args.ver))
+          .find((release) => release.assets.find((asset) => minimatch(asset.name, binary)));
 
   if (release == null) {
     throw new Error(`Release not found for ${args.ver}`);

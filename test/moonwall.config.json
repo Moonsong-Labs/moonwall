@@ -226,6 +226,7 @@
             "name": "mb",
             "type": "parachain",
             "buildBlockMode": "manual",
+            "allowUnresolvedImports": true,
             "configPath": "./configs/moonbeamChopsticks.yml"
           }
         ]

@@ -1,6 +1,5 @@
 import fs from "node:fs";
 import { execSync } from "child_process";
-import { execaSync } from "execa";
 import chalk from "chalk";
 import os from "node:os";
 import inquirer from "inquirer";
@@ -109,16 +108,14 @@ export function checkAlreadyRunning(binaryName: string): number[] {
   try {
     console.log(`Checking if ${chalk.bgWhiteBright.blackBright(binaryName)} is already running...`);
     // pgrep only supports 15 characters
-    const { stdout } = execaSync("pgrep", [binaryName.slice(0, 14)], {
+    const stdout = execSync(`pgrep ${[binaryName.slice(0, 14)]}`, {
       encoding: "utf8",
-      shell: true,
       timeout: 2000,
-      cleanup: true,
     });
     const pIdStrings = stdout.split("\n").filter(Boolean);
     return pIdStrings.map((pId) => parseInt(pId, 10));
   } catch (error: any) {
-    if (error.exitCode === 1) {
+    if (error.status === 1) {
       return [];
     }
     throw error;

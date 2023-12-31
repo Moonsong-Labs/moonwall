@@ -194,7 +194,7 @@ export async function runNetworkCmd(args) {
 }
 
 const reportServicePorts = async () => {
-  const ctx = MoonwallContext.getContext();
+  const ctx = await MoonwallContext.getContext();
   const portsList: { port: string; name: string }[] = [];
   const globalConfig = await importAsyncConfig();
   const config = globalConfig.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
@@ -284,7 +284,7 @@ const resolveCommandChoice = async () => {
     default: "createBlock",
   });
 
-  const ctx = await MoonwallContext.getContext().connectEnvironment();
+  const ctx = await (await MoonwallContext.getContext()).connectEnvironment();
   const api = ctx.providers.find((a) => a.type == "polkadotJs")!.api as ApiPromise;
   const globalConfig = await importAsyncConfig();
   const config = globalConfig.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
@@ -315,8 +315,8 @@ const resolveCommandChoice = async () => {
       ctx.foundation == "dev"
         ? await api.rpc.engine.createBlock(true, true)
         : ctx.foundation == "chopsticks"
-        ? await sendNewBlockCmd()
-        : undefined;
+          ? await sendNewBlockCmd()
+          : undefined;
       break;
 
     case "createUnfinalizedBlock":
@@ -359,7 +359,7 @@ const resolveCommandChoice = async () => {
 
 const resolveInfoChoice = async (env: Environment) => {
   console.log(chalk.bgWhite.blackBright("Node Launch args:"));
-  console.dir(MoonwallContext.getContext().environment, { depth: null });
+  console.dir((await MoonwallContext.getContext()).environment, { depth: null });
   console.log(chalk.bgWhite.blackBright("Launch Spec in Config File:"));
   console.dir(env, { depth: null });
   const portsList = await reportServicePorts();

@@ -16,7 +16,7 @@ export const readOnlyHandler: FoundationHandler<"read_only"> = ({
         chainName?: string,
         mode: "height" | "quantity" = "quantity"
       ) => {
-        const ctx = MoonwallContext.getContext();
+        const ctx = await MoonwallContext.getContext();
         const provider = chainName
           ? ctx.providers.find((prov) => prov.name === chainName && prov.type === "polkadotJs")
           : ctx.providers.find((prov) => prov.type === "polkadotJs");

@@ -9,7 +9,7 @@ import { MoonwallContext } from "../../lib/globalContext";
 
 export async function getWsFromConfig(providerName?: string): Promise<WsProvider> {
   if (providerName) {
-    const provider = MoonwallContext.getContext().environment.providers.find(
+    const provider = (await MoonwallContext.getContext()).environment.providers.find(
       ({ name }) => name == providerName
     );
 
@@ -23,7 +23,7 @@ export async function getWsFromConfig(providerName?: string): Promise<WsProvider
 
     return provider.ws();
   } else {
-    const provider = MoonwallContext.getContext().environment.providers.find(
+    const provider = (await MoonwallContext.getContext()).environment.providers.find(
       ({ type }) => type == "polkadotJs"
     );
 

@@ -17,6 +17,7 @@ import { assert } from "vitest";
 import { importAsyncConfig, isEthereumDevConfig } from "../../lib/configReader";
 import { extractError } from "../../lib/contextHelpers";
 import { MoonwallContext } from "../../lib/globalContext";
+import { vitestAutoUrl } from "../providerFactories";
 const debug = Debug("DevTest");
 
 export async function getDevProviderPath() {
@@ -24,7 +25,7 @@ export async function getDevProviderPath() {
   const env = globalConfig.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
   return env.connections
     ? env.connections[0].endpoints[0].replace("ws://", "http://")
-    : `http://127.0.0.1:${10000 + Number(process.env.VITEST_POOL_ID || 1) * 100}`;
+    : vitestAutoUrl();
 }
 
 export type CreatedBlockResult = {
@@ -55,12 +56,12 @@ function returnDefaultSigner() {
 
 export async function createDevBlock<
   ApiType extends ApiTypes,
-  Calls extends CallType<ApiType> | Array<CallType<ApiType>>
+  Calls extends CallType<ApiType> | Array<CallType<ApiType>>,
 >(context: GenericContext, options: BlockCreation, transactions?: Calls) {
   const containsViem =
     (context as DevModeContext).isEthereumChain &&
     context.viem() &&
-    MoonwallContext.getContext().providers.find((prov) => prov.type == "viem")
+    (await MoonwallContext.getContext()).providers.find((prov) => prov.type == "viem")
       ? true
       : false;
   const api = context.polkadotJs();
@@ -159,16 +160,14 @@ export async function createDevBlock<
 
   if (results.find((res) => res.type == "eth")) {
     // Wait until new block is actually created
-    for (;;) {
+    // max wait 2s
+    for (let i = 0; i < 1000; i++) {
       const currentBlock = (await api.rpc.chain.getHeader()).number.toBigInt();
-
+      await setTimeout(30);
       if (currentBlock > originalBlockNumber) {
         break;
       }
-      await setTimeout(10);
     }
-    // TODO: Investigate why extra time needed
-    await setTimeout(100);
   }
 
   const actualEvents = result.flatMap((resp) => resp.events);
