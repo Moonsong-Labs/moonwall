@@ -1,9 +1,10 @@
-# Coming Soon
+# FAQ
 
-::: info
-This page is Under Construction 🏗️, whilst Moonwall has been built - the docs have not.
+### How do I upgrade Moonwall?
 
-Please Stay tuned for more details of this feature!
-:::
+You can upgrade Moonwall with the following command:
 
-![underconstruction](/under-construction.png)
+```bash
+pnpm update
+```
+
