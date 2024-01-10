@@ -5,7 +5,8 @@ import { ApiOptions } from "@polkadot/api/types";
 import { Wallet, ethers } from "ethers";
 import { createWalletClient, http, publicActions } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { Web3, WebSocketProvider } from "web3";
+import { Web3 } from "web3";
+import { WebSocketProvider } from "web3-providers-ws";
 import Debug from "debug";
 const debug = Debug("global:providers");
 
@@ -72,7 +73,7 @@ export class ProviderFactory {
           { delay: 50, autoReconnect: false, maxAttempts: 10 }
         );
 
-        return new Web3(provider)
+        return new Web3(provider);
       },
     };
   }
@@ -253,7 +254,7 @@ export class ProviderInterfaceFactory {
           `👋 Provider ${this.name} is connected to chain ` + (await api.eth.getChainId())
         ),
       disconnect: async () => {
-        api.currentProvider!.disconnect();
+        api.eth.net.currentProvider!.disconnect();
       },
     };
   }
