@@ -39,7 +39,11 @@ describeSuite({
       title: "Query contract",
       test: async () => {
         const address = "0x818ec0A7Fe18Ff94269904fCED6AE3DaE6d6dC0b";
-        const contract = getContract({ address, abi: xcAssetAbi, publicClient: api as any });
+        const contract = getContract({
+          address,
+          abi: xcAssetAbi,
+          client: { public: api, wallet: api },
+        });
         const decimals = (await contract.read.decimals()) as number;
         const totalSupply = (await contract.read.totalSupply()) as bigint;
         const symbol = (await contract.read.symbol()) as string;

@@ -1,4 +1,5 @@
-import "@moonbeam-network/api-augment";
+// import "@moonbeam-network/api-augment";
+import "@polkadot/api-augment";
 import { beforeAll, describeSuite, expect, fetchCompiledContract } from "@moonwall/cli";
 import {
   ALITH_ADDRESS,
@@ -12,7 +13,6 @@ import {
   baltathar,
   deployViemContract,
 } from "@moonwall/util";
-import "@polkadot/api-augment";
 import { BN } from "@polkadot/util";
 import { Signer, parseEther } from "ethers";
 import {
@@ -80,6 +80,7 @@ describeSuite({
           .polkadotJs()
           .tx.balances.transfer(BALTATHAR_ADDRESS, parseEther("2"))
           .signAndSend(alith);
+
         await context.createBlock();
 
         const balanceAfter = (await context.polkadotJs().query.system.account(BALTATHAR_ADDRESS))
@@ -234,7 +235,10 @@ describeSuite({
         const contractInstance = getContract({
           abi: tokenAbi as Abi,
           address: contractAddress!,
-          publicClient: context.viem() as any,
+          client: {
+            wallet: context.viem() as any,
+            public: context.viem() as any,
+          },
         });
         // @ts-ignore
         const symbol = await contractInstance.read.symbol();

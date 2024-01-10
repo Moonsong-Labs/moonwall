@@ -2,7 +2,6 @@ import "@moonbeam-network/api-augment";
 import { beforeAll, describeSuite, expect } from "@moonwall/cli";
 import { ALITH_ADDRESS, GLMR, baltathar } from "@moonwall/util";
 import { ApiPromise } from "@polkadot/api";
-import "@polkadot/api-augment";
 
 describeSuite({
   id: "Z1",
