@@ -1,16 +1,16 @@
 import "@polkadot/api-base/types/events";
-import { ApiPromise, WsProvider } from "@polkadot/api";
+import type { ApiPromise, WsProvider } from "@polkadot/api";
 import type { ApiTypes, AugmentedEvent, SubmittableExtrinsic } from "@polkadot/api-base/types";
-import { KeyringPair } from "@polkadot/keyring/types";
-import { GenericExtrinsic } from "@polkadot/types";
-import { EventRecord } from "@polkadot/types/interfaces";
-import { AnyTuple, RegistryError } from "@polkadot/types/types";
-import { Debugger } from "debug";
-import { Signer } from "ethers";
-import { Web3 } from "web3";
-import { FoundationType, ProviderType } from "./config";
-import { CallType } from "./foundations";
-import { ViemClient } from "./runner";
+import type { KeyringPair } from "@polkadot/keyring/types";
+import type { GenericExtrinsic } from "@polkadot/types";
+import type { EventRecord } from "@polkadot/types/interfaces";
+import type { AnyTuple, RegistryError } from "@polkadot/types/types";
+import type { Debugger } from "debug";
+import type { Wallet } from "ethers";
+import type { Web3 } from "web3";
+import type { FoundationType, ProviderType } from "./config";
+import type { CallType } from "./foundations";
+import type { ViemClient } from "./runner";
 
 /**
  * @name MoonwallEnvironment
@@ -38,7 +38,7 @@ export type MoonwallEnvironment = {
 export interface MoonwallProvider {
   name: string;
   type: ProviderType;
-  connect: () => Promise<ApiPromise> | Signer | Web3<any> | Promise<ViemClient> | void;
+  connect: () => Promise<ApiPromise> | Wallet | Web3<any> | Promise<ViemClient> | void;
   ws?: () => WsProvider;
 }
 
@@ -63,7 +63,7 @@ export type ProviderApi = { [P in keyof ProviderMap]: ProviderMap[P] }[keyof Pro
 
 export type ProviderMap = {
   polkadotJs: ApiPromise;
-  ethers: Signer;
+  ethers: Wallet;
   web3: Web3;
   moon: ApiPromise;
   viem: ViemClient;

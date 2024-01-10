@@ -153,9 +153,6 @@ importers:
       web3:
         specifier: 4.3.0
         version: 4.3.0(typescript@5.3.3)
-      web3-providers-ws:
-        specifier: 4.0.7
-        version: 4.0.7
       ws:
         specifier: 8.16.0
         version: 8.16.0

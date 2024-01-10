@@ -1,14 +1,14 @@
 import "@moonbeam-network/api-augment";
 import { describeSuite } from "@moonwall/cli";
 import { checkBlockFinalized } from "@moonwall/util";
-import { Signer } from "ethers";
+import { Wallet } from "ethers";
 
 describeSuite({
   id: "S01",
   title: "ReadOnly test suite",
   foundationMethods: "read_only",
   testCases: ({ it, context, log }) => {
-    let api: Signer;
+    let api: Wallet;
 
     const whale = "0xF977814e90dA44bFA03b6295A0616a897441aceC";
 

@@ -15,7 +15,7 @@ import type {
 import { ApiPromise } from "@polkadot/api";
 import Bottleneck from "bottleneck";
 import Debug from "debug";
-import { Signer } from "ethers";
+import { Wallet } from "ethers";
 import { afterAll, beforeAll, describe, it } from "vitest";
 import { Web3 } from "web3";
 import { importAsyncConfig } from "./configReader";
@@ -151,7 +151,7 @@ export function describeSuite<T extends FoundationType>({
       api: <T extends ProviderType>(type: T, name?: string) => getApi(type, name),
       viem: (apiName?: string): ViemClient => getApi("viem", apiName),
       polkadotJs: (apiName?: string): ApiPromise => getApi("polkadotJs", apiName),
-      ethers: (apiName?: string): Signer => getApi("ethers", apiName),
+      ethers: (apiName?: string): Wallet => getApi("ethers", apiName),
       web3: (apiName?: string): Web3 => getApi("web3", apiName),
     };
 

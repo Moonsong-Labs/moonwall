@@ -1,5 +1,4 @@
-// import "@moonbeam-network/api-augment";
-import "@polkadot/api-augment";
+import "@polkadot/api-augment"
 import { beforeAll, describeSuite, expect, fetchCompiledContract } from "@moonwall/cli";
 import {
   ALITH_ADDRESS,
@@ -14,7 +13,7 @@ import {
   deployViemContract,
 } from "@moonwall/util";
 import { BN } from "@polkadot/util";
-import { Signer, parseEther } from "ethers";
+import { Wallet, parseEther } from "ethers";
 import {
   Abi,
   createWalletClient,
@@ -38,7 +37,7 @@ describeSuite({
   title: "Dev test suite",
   foundationMethods: "dev",
   testCases: ({ it, context, log }) => {
-    let signer: Signer;
+    let signer: Wallet;
     let w3: Web3;
 
     beforeAll(async () => {

@@ -1,7 +1,7 @@
 import "@moonbeam-network/api-augment";
 import { describeSuite, expect, beforeAll} from "@moonwall/cli";
 import { CHARLETH_ADDRESS, BALTATHAR_ADDRESS, alith } from "@moonwall/util";
-import { parseEther, Signer } from "ethers";
+import { parseEther, Wallet } from "ethers";
 import { BN } from "@polkadot/util";
 import { ApiPromise } from "@polkadot/api";
 import Web3 from "web3";
@@ -10,7 +10,7 @@ describeSuite({
   title: "Dev test suite2",
   foundationMethods: "dev",
   testCases: ({ it, context }) => {
-    let signer: Signer;
+    let signer: Wallet;
     let w3: Web3;
     let polkadotJs: ApiPromise;
 

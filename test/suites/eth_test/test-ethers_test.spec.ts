@@ -1,13 +1,13 @@
 import { describeSuite, expect, beforeAll, MoonwallContext } from "@moonwall/cli";
 import { xcAssetAbi } from "@moonwall/util";
-import { Signer, ethers } from "ethers";
+import { Wallet, ethers } from "ethers";
 
 describeSuite({
   id: "S01",
   title: "Ethers test suite",
   foundationMethods: "read_only",
   testCases: ({ it, context, log }) => {
-    let api: Signer;
+    let api: Wallet;
 
     beforeAll(() => {
       log("Should be before all test cases");

@@ -1,14 +1,12 @@
-import "@moonbeam-network/api-augment";
 import { MoonwallProvider, ProviderConfig, ProviderType, ViemClient } from "@moonwall/types";
 import { ALITH_PRIVATE_KEY, deriveViemChain } from "@moonwall/util";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { ApiOptions } from "@polkadot/api/types";
-import Debug from "debug";
-import { Signer, Wallet, ethers } from "ethers";
+import { Wallet, ethers } from "ethers";
 import { createWalletClient, http, publicActions } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { Web3 } from "web3";
-import { WebSocketProvider as Web3ProviderWs } from "web3-providers-ws";
+import { Web3, WebSocketProvider } from "web3";
+import Debug from "debug";
 const debug = Debug("global:providers");
 
 export class ProviderFactory {
@@ -68,13 +66,13 @@ export class ProviderFactory {
       name: this.providerConfig.name,
       type: this.providerConfig.type,
       connect: () => {
-        const provider = new Web3ProviderWs(
+        const provider = new WebSocketProvider(
           this.url,
           {},
           { delay: 50, autoReconnect: false, maxAttempts: 10 }
         );
 
-        return new Web3(provider) as Web3<any>;
+        return new Web3(provider)
       },
     };
   }
@@ -101,7 +99,7 @@ export class ProviderFactory {
           chain: await deriveViemChain(this.url),
           account: privateKeyToAccount(this.privateKey as `0x${string}`),
           transport: http(this.url.replace("ws", "http")),
-        }).extend(publicActions) as any,
+        }).extend(publicActions),
     };
   }
 
@@ -261,7 +259,7 @@ export class ProviderInterfaceFactory {
   }
 
   private async createEthers(): Promise<ProviderInterface> {
-    const api = (await this.connect()) as Signer;
+    const api = (await this.connect()) as Wallet;
     return {
       name: this.name,
       api,
@@ -292,7 +290,7 @@ export class ProviderInterfaceFactory {
   public static async populate(
     name: string,
     type: ProviderType,
-    connect: () => Promise<ApiPromise> | Signer | Web3 | Promise<ViemClient> | void
+    connect: () => Promise<ApiPromise> | Wallet | Web3 | Promise<ViemClient> | void
   ): Promise<ProviderInterface> {
     return await new ProviderInterfaceFactory(name, type, connect).create();
   }
