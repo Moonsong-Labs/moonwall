@@ -58,8 +58,8 @@ importers:
         specifier: 0.9.5
         version: 0.9.5(debug@4.3.4)
       '@moonbeam-network/api-augment':
-        specifier: 0.2600.0
-        version: 0.2600.0
+        specifier: 0.2700.0
+        version: 0.2700.0
       '@moonwall/types':
         specifier: workspace:*
         version: link:../types
@@ -246,8 +246,8 @@ importers:
   packages/util:
     dependencies:
       '@moonbeam-network/api-augment':
-        specifier: 0.2600.0
-        version: 0.2600.0
+        specifier: 0.2700.0
+        version: 0.2700.0
       '@moonwall/types':
         specifier: workspace:*
         version: link:../types
@@ -361,8 +361,8 @@ importers:
         specifier: 0.9.5
         version: 0.9.5(debug@4.3.4)
       '@moonbeam-network/api-augment':
-        specifier: 0.2600.0
-        version: 0.2600.0
+        specifier: 0.2700.0
+        version: 0.2700.0
       '@moonwall/cli':
         specifier: workspace:*
         version: link:../packages/cli
@@ -1694,8 +1694,8 @@ packages:
       read-yaml-file: 1.1.0
     dev: true
 
-  /@moonbeam-network/api-augment@0.2600.0:
-    resolution: {integrity: sha512-Hnn7mw8Im+X8GgbX11EjydbPM5MTQSG6yHs7JE2mPYCgSf6PkqUqOil5F4nACI4hMn6rM6GTTdRXscu0ztiNvQ==}
+  /@moonbeam-network/api-augment@0.2700.0:
+    resolution: {integrity: sha512-rZtZ69p0E90fsjJLKYB6Jft65IFYkHPOUvG57/1mXf7xaN9EynLzUsfH4hKYqQzSKJS0uwm9j8CXjZlQHgF+cQ==}
     engines: {node: '>=14.0.0'}
 
   /@noble/curves@1.1.0:

@@ -63,7 +63,7 @@
   },
   "dependencies": {
     "@acala-network/chopsticks": "0.9.5",
-    "@moonbeam-network/api-augment": "0.2600.0",
+    "@moonbeam-network/api-augment": "0.2700.0",
     "@moonwall/types": "workspace:*",
     "@moonwall/util": "workspace:*",
     "@polkadot/api": "10.11.2",

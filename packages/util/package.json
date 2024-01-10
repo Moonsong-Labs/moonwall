@@ -57,7 +57,7 @@
     "prepublish": "pnpm run build && pnpm run generate-types"
   },
   "dependencies": {
-    "@moonbeam-network/api-augment": "0.2600.0",
+    "@moonbeam-network/api-augment": "0.2700.0",
     "@moonwall/types": "workspace:*",
     "@polkadot/api": "10.11.2",
     "@polkadot/api-augment": "10.11.2",
