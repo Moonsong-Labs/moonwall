@@ -1,5 +1,4 @@
 import "@moonbeam-network/api-augment";
-import "@polkadot/api-augment";
 import { u128 } from "@polkadot/types-codec";
 import { AccountId20, DispatchError, DispatchInfo, EventRecord } from "@polkadot/types/interfaces";
 

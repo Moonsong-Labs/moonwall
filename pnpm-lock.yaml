@@ -69,9 +69,6 @@ importers:
       '@polkadot/api':
         specifier: 10.11.2
         version: 10.11.2
-      '@polkadot/api-augment':
-        specifier: 10.11.2
-        version: 10.11.2
       '@polkadot/api-derive':
         specifier: 10.11.2
         version: 10.11.2
@@ -252,9 +249,6 @@ importers:
         specifier: workspace:*
         version: link:../types
       '@polkadot/api':
-        specifier: 10.11.2
-        version: 10.11.2
-      '@polkadot/api-augment':
         specifier: 10.11.2
         version: 10.11.2
       '@polkadot/api-derive':

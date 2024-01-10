@@ -1,4 +1,4 @@
-import "@polkadot/api-augment"
+import "@moonbeam-network/api-augment"
 import { beforeAll, describeSuite, expect, fetchCompiledContract } from "@moonwall/cli";
 import {
   ALITH_ADDRESS,

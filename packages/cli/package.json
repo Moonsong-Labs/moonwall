@@ -67,7 +67,6 @@
     "@moonwall/types": "workspace:*",
     "@moonwall/util": "workspace:*",
     "@polkadot/api": "10.11.2",
-    "@polkadot/api-augment": "10.11.2",
     "@polkadot/api-derive": "10.11.2",
     "@polkadot/keyring": "12.6.2",
     "@polkadot/types": "10.11.2",
