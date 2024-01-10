@@ -7,8 +7,8 @@
   "description": "Testing framework for the Moon family of projects",
   "scripts": {
     "clean": "rm -rf node_modules",
-    "test-dev": "bun moonwall test 'dev_test dev_seq dev_mult'",
-    "test": "bun moonwall test 'basic chopsticks'",
+    "test-dev": "pnpm moonwall test 'dev_test dev_seq dev_mult'",
+    "test": "pnpm moonwall test 'basic chopsticks'",
     "node_test": "node --no-warnings --loader tsx --test suites/node_test/*.ts",
     "bun_test": "bun test suites/bun_test/*"
   },

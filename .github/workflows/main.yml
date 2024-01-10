@@ -71,7 +71,7 @@ jobs:
       - name: Run standard dev test
         run: |
           cd test
-          bun moonwall test basic
+          pnpm moonwall test basic
   test_tanssi:
     runs-on: ubuntu-latest
     needs: ["build"]
@@ -97,11 +97,11 @@ jobs:
       - name: Download tanssi binary
         run: |
           cd test
-          bun moonwall download tanssi-node latest ./tmp
+          pnpm moonwall download tanssi-node latest ./tmp
       - name: Run standard dev test
         run: |
           cd test
-          bun moonwall test dev_tanssi
+          pnpm moonwall test dev_tanssi
 
   test_dev:
     runs-on: ubuntu-latest
@@ -128,19 +128,19 @@ jobs:
       - name: Download moonbeam binary
         run: |
           cd test
-          bun moonwall download moonbeam latest ./tmp
+          pnpm moonwall download moonbeam latest ./tmp
       - name: Run standard dev test
         run: |
           cd test
-          bun moonwall test dev_test
+          pnpm moonwall test dev_test
       - name: Run parallel dev test
         run: |
           cd test
-          bun moonwall test dev_multi
+          pnpm moonwall test dev_multi
       - name: Run sequential dev test
         run: |
           cd test
-          bun moonwall test dev_seq
+          pnpm moonwall test dev_seq
 
   test_chopsticks:
     runs-on: ubuntu-latest
@@ -164,7 +164,7 @@ jobs:
       - name: Run standard chopsticks run
         run: |
           cd test
-          bun moonwall test chopsticks
+          pnpm moonwall test chopsticks
 
       # disabled until we have an available instance of moonscope running
       # - name: Use Send Report Action
@@ -198,14 +198,14 @@ jobs:
       - name: Run standard ethers run
         run: |
           cd test
-          bun moonwall test eth_test
+          pnpm moonwall test eth_test
       - name: Run standard viem run
         run: |
           cd test
-          bun moonwall test viem_test
+          pnpm moonwall test viem_test
       #  disabled until web3.js fix their stuff
       # - name: Run standard web3 run
-      #   run: bun moonwall test web3_test
+      #   run: pnpm moonwall test web3_test
 
   test_zombie:
     runs-on: ubuntu-latest
@@ -229,16 +229,16 @@ jobs:
       - name: Download binaries
         run: |
           cd test
-          bun moonwall download moonbeam latest ./tmp
+          pnpm moonwall download moonbeam latest ./tmp
           
           # Change these to latest once MB is compatible with 1.2.0
-          bun moonwall download polkadot 1.1.0 ./tmp
-          bun moonwall download polkadot-execute-worker 1.1.0 ./tmp
-          bun moonwall download polkadot-prepare-worker 1.1.0 ./tmp
+          pnpm moonwall download polkadot 1.1.0 ./tmp
+          pnpm moonwall download polkadot-execute-worker 1.1.0 ./tmp
+          pnpm moonwall download polkadot-prepare-worker 1.1.0 ./tmp
       - name: Run standard zombie test
         run: |
           cd test
-          bun moonwall test zombie_test
+          pnpm moonwall test zombie_test
 
   test_multi_zombie:
     runs-on: ubuntu-latest
@@ -262,13 +262,13 @@ jobs:
       - name: Download binaries
         run: |
           cd test
-          bun moonwall download moonbeam latest ./tmp
+          pnpm moonwall download moonbeam latest ./tmp
 
           # Change these to latest once MB is compatible with 1.2.0
-          bun moonwall download polkadot 1.1.0 ./tmp
-          bun moonwall download polkadot-execute-worker 1.1.0 ./tmp
-          bun moonwall download polkadot-prepare-worker 1.1.0 ./tmp
+          pnpm moonwall download polkadot 1.1.0 ./tmp
+          pnpm moonwall download polkadot-execute-worker 1.1.0 ./tmp
+          pnpm moonwall download polkadot-prepare-worker 1.1.0 ./tmp
       - name: Run multi zombie test
         run: |
           cd test
-          bun moonwall test zombie_multi_para
+          pnpm moonwall test zombie_multi_para
