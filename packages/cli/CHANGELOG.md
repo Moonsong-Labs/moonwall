@@ -1,5 +1,17 @@
 # @moonwall/cli
 
+## 4.6.0
+
+### Minor Changes
+
+- 1f37750: Jan Package Update
+
+### Patch Changes
+
+- Updated dependencies [1f37750]
+  - @moonwall/types@4.6.0
+  - @moonwall/util@4.6.0
+
 ## 4.5.1
 
 ### Patch Changes
