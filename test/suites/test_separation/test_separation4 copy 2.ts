@@ -23,7 +23,7 @@ describeSuite({
         const balanceBefore = (await api.query.system.account(DUMMY_ACCOUNT)).data.free;
         expect(balanceBefore.toString()).toEqual("0");
 
-        await api.tx.balances.transfer(DUMMY_ACCOUNT, parseEther("1")).signAndSend(alith);
+        await api.tx.balances.transferAllowDeath(DUMMY_ACCOUNT, parseEther("1")).signAndSend(alith);
         await context.createBlock();
         const balanceAfter = (await api.query.system.account(DUMMY_ACCOUNT)).data.free;
         expect(balanceAfter.sub(balanceBefore).toString()).toEqual(parseEther("1").toString());
@@ -37,7 +37,7 @@ describeSuite({
         const balanceBefore = (await api.query.system.account(DUMMY_ACCOUNT)).data.free;
         expect(balanceBefore.toString()).toEqual(parseEther("1").toString());
 
-        await api.tx.balances.transfer(DUMMY_ACCOUNT, parseEther("1")).signAndSend(alith);
+        await api.tx.balances.transferAllowDeath(DUMMY_ACCOUNT, parseEther("1")).signAndSend(alith);
         await context.createBlock();
         const balanceAfter = (await api.query.system.account(DUMMY_ACCOUNT)).data.free;
         expect(balanceAfter.sub(balanceBefore).toString()).toEqual(parseEther("1").toString());

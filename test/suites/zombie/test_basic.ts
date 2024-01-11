@@ -2,7 +2,6 @@ import "@moonbeam-network/api-augment";
 import { beforeAll, describeSuite, expect } from "@moonwall/cli";
 import { ALITH_ADDRESS, GLMR, baltathar } from "@moonwall/util";
 import { ApiPromise } from "@polkadot/api";
-import "@polkadot/api-augment";
 
 describeSuite({
   id: "Z1",
@@ -61,7 +60,7 @@ describeSuite({
 
         await new Promise((resolve) => {
           paraApi.tx.balances
-            .transfer(ALITH_ADDRESS, 2n * GLMR)
+            .transferAllowDeath(ALITH_ADDRESS, 2n * GLMR)
             .signAndSend(baltathar, ({ status, events }) => {
               if (status.isInBlock) {
                 log("Transaction is in block");

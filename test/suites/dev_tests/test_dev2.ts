@@ -1,14 +1,16 @@
 import "@moonbeam-network/api-augment";
-import { describeSuite, expect, beforeAll, ApiPromise, Signer, Web3 } from "@moonwall/cli";
+import { describeSuite, expect, beforeAll} from "@moonwall/cli";
 import { CHARLETH_ADDRESS, BALTATHAR_ADDRESS, alith } from "@moonwall/util";
-import { parseEther } from "ethers";
+import { parseEther, Wallet } from "ethers";
 import { BN } from "@polkadot/util";
+import { ApiPromise } from "@polkadot/api";
+import Web3 from "web3";
 describeSuite({
   id: "D02",
   title: "Dev test suite2",
   foundationMethods: "dev",
   testCases: ({ it, context }) => {
-    let signer: Signer;
+    let signer: Wallet;
     let w3: Web3;
     let polkadotJs: ApiPromise;
 
@@ -37,7 +39,7 @@ describeSuite({
         const balanceBefore = (await polkadotJs.query.system.account(BALTATHAR_ADDRESS)).data.free;
 
         await polkadotJs.tx.balances
-          .transfer(BALTATHAR_ADDRESS, parseEther("2"))
+          .transferAllowDeath(BALTATHAR_ADDRESS, parseEther("2"))
           .signAndSend(alith);
 
         await context.createBlock();
@@ -92,7 +94,7 @@ describeSuite({
         ];
 
         await context.createBlock(
-          polkadotJs.tx.balances.transfer(CHARLETH_ADDRESS, parseEther("3")),
+          polkadotJs.tx.balances.transferAllowDeath(CHARLETH_ADDRESS, parseEther("3")),
           { expectEvents }
         );
       },

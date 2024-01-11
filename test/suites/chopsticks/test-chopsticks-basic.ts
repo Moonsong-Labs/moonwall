@@ -35,7 +35,7 @@ describeSuite({
       timeout: 60000,
       test: async function () {
         const currentBalance = (await context.polkadotJs().query.system.account(ETHAN_ADDRESS)).data.free;
-        await context.polkadotJs().tx.balances.transfer(ETHAN_ADDRESS, parseEther("10")).signAndSend(alith);
+        await context.polkadotJs().tx.balances.transferAllowDeath(ETHAN_ADDRESS, parseEther("10")).signAndSend(alith);
         await context.createBlock();
 
         const balanceAfter = (await context.polkadotJs().query.system.account(ETHAN_ADDRESS)).data.free;
@@ -117,7 +117,7 @@ describeSuite({
           // context.polkadotJs().events.authorFilter.EligibleUpdated
         ];
 
-        await context.polkadotJs().tx.balances.transfer(CHARLETH_ADDRESS, parseEther("3")).signAndSend(alith);
+        await context.polkadotJs().tx.balances.transferAllowDeath(CHARLETH_ADDRESS, parseEther("3")).signAndSend(alith);
         await context.createBlock({ expectEvents, logger: log });
       },
     });
@@ -130,7 +130,7 @@ describeSuite({
         await context.polkadotJs().tx.balances
           .forceTransfer(BALTATHAR_ADDRESS, CHARLETH_ADDRESS, parseEther("3"))
           .signAndSend(alith);
-        // await context.polkadotJs().tx.balances.transfer(CHARLETH_ADDRESS, parseEther("3")).signAndSend(alith);
+        // await context.polkadotJs().tx.balances.transferAllowDeath(CHARLETH_ADDRESS, parseEther("3")).signAndSend(alith);
         const { result } = await context.createBlock({ allowFailures: true });
 
         const apiAt = await context.polkadotJs().at(result);

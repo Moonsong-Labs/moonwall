@@ -46,7 +46,6 @@ export async function getDevChain(url: string) {
   return {
     id: 1281,
     name: "Moonbeam Dev",
-    network: "moonbeam",
     nativeCurrency: {
       decimals: 18,
       name: "Glimmer",
@@ -82,7 +81,6 @@ export async function deriveViemChain(endpoint: string) {
   return {
     id,
     name,
-    network: name,
     nativeCurrency: {
       decimals: tokenDecimals,
       name: tokenSymbol,

@@ -2,7 +2,7 @@ import { ApiPromise } from "@polkadot/api";
 import { ApiTypes } from "@polkadot/api/types";
 import { KeyringPair } from "@polkadot/keyring/types";
 import { Debugger } from "debug";
-import { Signer, TransactionRequest } from "ethers";
+import { Wallet, TransactionRequest } from "ethers";
 import {
   Abi,
   Account,
@@ -188,12 +188,12 @@ export type ViemClient = WalletClient<Transport, Chain, Account> & PublicActions
  */
 export interface GenericContext {
   api(type: "polkadotJs", name?: string): ApiPromise;
-  api(type: "ethers", name?: string): Signer;
+  api(type: "ethers", name?: string): Wallet;
   api(type: "web3", name?: string): Web3;
   api(type: "viem", name?: string): ViemClient;
   viem(name?: string): ViemClient;
   polkadotJs(apiName?: string): ApiPromise;
-  ethers(name?: string): Signer;
+  ethers(name?: string): Wallet;
   web3(name?: string): Web3;
 }
 

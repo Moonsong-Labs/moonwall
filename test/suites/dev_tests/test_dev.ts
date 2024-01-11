@@ -1,4 +1,4 @@
-import "@moonbeam-network/api-augment";
+import "@moonbeam-network/api-augment"
 import { beforeAll, describeSuite, expect, fetchCompiledContract } from "@moonwall/cli";
 import {
   ALITH_ADDRESS,
@@ -12,9 +12,8 @@ import {
   baltathar,
   deployViemContract,
 } from "@moonwall/util";
-import "@polkadot/api-augment";
 import { BN } from "@polkadot/util";
-import { Signer, parseEther } from "ethers";
+import { Wallet, parseEther } from "ethers";
 import {
   Abi,
   createWalletClient,
@@ -38,7 +37,7 @@ describeSuite({
   title: "Dev test suite",
   foundationMethods: "dev",
   testCases: ({ it, context, log }) => {
-    let signer: Signer;
+    let signer: Wallet;
     let w3: Web3;
 
     beforeAll(async () => {
@@ -78,8 +77,9 @@ describeSuite({
 
         await context
           .polkadotJs()
-          .tx.balances.transfer(BALTATHAR_ADDRESS, parseEther("2"))
+          .tx.balances.transferAllowDeath(BALTATHAR_ADDRESS, parseEther("2"))
           .signAndSend(alith);
+
         await context.createBlock();
 
         const balanceAfter = (await context.polkadotJs().query.system.account(BALTATHAR_ADDRESS))
@@ -135,7 +135,7 @@ describeSuite({
         ];
 
         await context.createBlock(
-          context.polkadotJs().tx.balances.transfer(CHARLETH_ADDRESS, parseEther("3")),
+          context.polkadotJs().tx.balances.transferAllowDeath(CHARLETH_ADDRESS, parseEther("3")),
           { expectEvents, logger: log }
         );
       },
@@ -234,7 +234,10 @@ describeSuite({
         const contractInstance = getContract({
           abi: tokenAbi as Abi,
           address: contractAddress!,
-          publicClient: context.viem() as any,
+          client: {
+            wallet: context.viem() as any,
+            public: context.viem() as any,
+          },
         });
         // @ts-ignore
         const symbol = await contractInstance.read.symbol();
@@ -387,7 +390,7 @@ describeSuite({
       id: "T17",
       title: "It can use different signers when creating a block",
       test: async function () {
-        const txn = context.polkadotJs().tx.balances.transfer(DOROTHY_ADDRESS, GLMR);
+        const txn = context.polkadotJs().tx.balances.transferAllowDeath(DOROTHY_ADDRESS, GLMR);
         const balBefore = (
           await context.polkadotJs().query.system.account(BALTATHAR_ADDRESS)
         ).data.free.toBigInt();
