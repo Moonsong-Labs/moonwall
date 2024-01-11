@@ -39,7 +39,7 @@ describeSuite({
         const balanceBefore = (await polkadotJs.query.system.account(BALTATHAR_ADDRESS)).data.free;
 
         await polkadotJs.tx.balances
-          .transfer(BALTATHAR_ADDRESS, parseEther("2"))
+          .transferAllowDeath(BALTATHAR_ADDRESS, parseEther("2"))
           .signAndSend(alith);
 
         await context.createBlock();

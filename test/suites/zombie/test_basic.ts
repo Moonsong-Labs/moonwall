@@ -60,7 +60,7 @@ describeSuite({
 
         await new Promise((resolve) => {
           paraApi.tx.balances
-            .transfer(ALITH_ADDRESS, 2n * GLMR)
+            .transferAllowDeath(ALITH_ADDRESS, 2n * GLMR)
             .signAndSend(baltathar, ({ status, events }) => {
               if (status.isInBlock) {
                 log("Transaction is in block");
