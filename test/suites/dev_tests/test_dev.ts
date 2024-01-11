@@ -77,7 +77,7 @@ describeSuite({
 
         await context
           .polkadotJs()
-          .tx.balances.transfer(BALTATHAR_ADDRESS, parseEther("2"))
+          .tx.balances.transferAllowDeath(BALTATHAR_ADDRESS, parseEther("2"))
           .signAndSend(alith);
 
         await context.createBlock();
@@ -135,7 +135,7 @@ describeSuite({
         ];
 
         await context.createBlock(
-          context.polkadotJs().tx.balances.transfer(CHARLETH_ADDRESS, parseEther("3")),
+          context.polkadotJs().tx.balances.transferAllowDeath(CHARLETH_ADDRESS, parseEther("3")),
           { expectEvents, logger: log }
         );
       },
@@ -390,7 +390,7 @@ describeSuite({
       id: "T17",
       title: "It can use different signers when creating a block",
       test: async function () {
-        const txn = context.polkadotJs().tx.balances.transfer(DOROTHY_ADDRESS, GLMR);
+        const txn = context.polkadotJs().tx.balances.transferAllowDeath(DOROTHY_ADDRESS, GLMR);
         const balBefore = (
           await context.polkadotJs().query.system.account(BALTATHAR_ADDRESS)
         ).data.free.toBigInt();

@@ -26,7 +26,7 @@ describeSuite({
 
         await context
           .polkadotJs()
-          .tx.balances.transfer(DUMMY_ACCOUNT, parseEther("1"))
+          .tx.balances.transferAllowDeath(DUMMY_ACCOUNT, parseEther("1"))
           .signAndSend(alith);
         await context.createBlock();
         const balanceAfter = (await context.polkadotJs().query.system.account(DUMMY_ACCOUNT)).data
@@ -44,7 +44,7 @@ describeSuite({
         expect(balanceBefore.toString()).toEqual(parseEther("1").toString());
         await context
           .polkadotJs()
-          .tx.balances.transfer(DUMMY_ACCOUNT, parseEther("1"))
+          .tx.balances.transferAllowDeath(DUMMY_ACCOUNT, parseEther("1"))
           .signAndSend(alith);
         await context.createBlock();
         const balanceAfter = (await context.polkadotJs().query.system.account(DUMMY_ACCOUNT)).data
