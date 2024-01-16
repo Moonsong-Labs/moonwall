@@ -74,7 +74,7 @@ export async function createChopsticksBlock(
   options: ChopsticksBlockCreation = { allowFailures: false }
 ) {
   const result = await sendNewBlockRequest(options);
-  const apiAt = await context.polkadotJs().at(result);
+  const apiAt = await context.polkadotJs(options.providerName).at(result);
   const actualEvents = await apiAt.query.system.events();
 
   if (options && options.expectEvents) {

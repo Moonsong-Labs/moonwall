@@ -75,7 +75,7 @@ export function describeSuite<T extends FoundationType>({
     (chainType && chainType !== RT_NAME) ||
     (notChainType && notChainType === RT_NAME)
   ) {
-    describe.skip(`🗃️  #${suiteId} ${title}`);
+    describe.skip(`🗃️  ${suiteId} ${title}`);
     return;
   }
   let ctx: MoonwallContext | null = null;
@@ -104,7 +104,7 @@ export function describeSuite<T extends FoundationType>({
   const testCase = (params: ITestCase) => {
     if (params.modifier) {
       it[params.modifier](
-        `📁  #${suiteId.concat(params.id)} ${params.title}`,
+        `📁  ${suiteId.concat(params.id)} ${params.title}`,
         params.test,
         params.timeout
       );
@@ -115,14 +115,14 @@ export function describeSuite<T extends FoundationType>({
       (params.chainType && params.chainType !== RT_NAME) ||
       (params.notChainType && params.notChainType === RT_NAME)
     ) {
-      it.skip(`📁  #${suiteId.concat(params.id)} ${params.title}`, params.test, params.timeout);
+      it.skip(`📁  ${suiteId.concat(params.id)} ${params.title}`, params.test, params.timeout);
       return;
     }
 
-    it(`📁  #${suiteId.concat(params.id)} ${params.title}`, params.test, params.timeout);
+    it(`📁  ${suiteId.concat(params.id)} ${params.title}`, params.test, params.timeout);
   };
 
-  describe(`🗃️  #${suiteId} ${title}`, function () {
+  describe(`🗃️  ${suiteId} ${title}`, function () {
     const getApi = <T extends ProviderType>(apiType?: T, apiName?: string) => {
       const provider = ctx!.providers.find((prov) => {
         if (apiType && apiName) {

@@ -315,7 +315,7 @@ export interface ChopsticksContext extends GenericContext {
    *
    * @returns {Promise<void>} A Promise that resolves once the runtime has been upgraded.
    */
-  upgradeRuntime: () => Promise<void>;
+  upgradeRuntime: (providerName?: string) => Promise<void>;
 
   /**
    * Getter that returns true if System.Account is AccountId20 (Ethereum Account length is 20 bytes).

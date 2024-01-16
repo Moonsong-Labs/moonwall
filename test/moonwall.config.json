@@ -28,7 +28,7 @@
       "binaries": [
         {
           "name": "hydradx"
-        }
+                }
       ]
     },
     {
@@ -280,7 +280,7 @@
         "launchSpec": [
           {
             "name": "mb",
-            "type": "parachain",
+"type": "parachain",
             "buildBlockMode": "batch",
             "allowUnresolvedImports": true,
             "configPath": "./configs/moonbeamChopsticks.yml"
@@ -913,32 +913,30 @@
       "connections": []
     },
     {
-      "name": "chopsticks_xcm2",
+      "name": "multi_chopsticks",
       "testFileDir": [
-        "tests/rt-upgrade-chopsticks"
+        "suites/multi_chopsticks"
       ],
       "foundation": {
         "type": "chopsticks",
+        "rtUpgradePath": "./tmp/hydradx_RT_201.wasm",
         "launchSpec": [
           {
-            "name": "PolkadotDB",
+            "name": "polkadot",
             "type": "relaychain",
             "allowUnresolvedImports": true,
-            "buildBlockMode": "manual",
             "configPath": "./configs/polkadot.yml"
           },
           {
-            "name": "HydraDXDB",
+            "name": "hydra",
             "type": "parachain",
             "allowUnresolvedImports": true,
-            "buildBlockMode": "manual",
             "configPath": "./configs/hydradx.yml"
           },
           {
-            "name": "ZeitgeistDB",
+            "name": "zeitgeist",
             "type": "parachain",
             "allowUnresolvedImports": true,
-            "buildBlockMode": "manual",
             "configPath": "./configs/zeitgeist.yml"
           }
         ]
@@ -949,21 +947,21 @@
       ],
       "connections": [
         {
-          "name": "PolkadotRelay",
+          "name": "polkadot",
           "type": "polkadotJs",
           "endpoints": [
             "ws://127.0.0.1:8002"
           ]
         },
         {
-          "name": "HydraDXPara",
+          "name": "hydradx",
           "type": "polkadotJs",
           "endpoints": [
             "ws://127.0.0.1:8000"
           ]
         },
         {
-          "name": "ZeitgeistPara",
+          "name": "zeitgeist",
           "type": "polkadotJs",
           "endpoints": [
             "ws://127.0.0.1:8001"

@@ -1,6 +1,6 @@
 import "@moonbeam-network/api-augment";
 import { ChopsticksContext, UpgradePreferences } from "@moonwall/types";
-import { ApiPromise } from "@polkadot/api";
+import type { ApiPromise } from "@polkadot/api";
 import type { WeightV2 } from "@polkadot/types/interfaces";
 import { blake2AsHex } from "@polkadot/util-crypto";
 import chalk from "chalk";
@@ -9,7 +9,11 @@ import fs, { existsSync, readFileSync } from "fs";
 import { getRuntimeWasm } from "./binariesHelpers";
 import { cancelReferendaWithCouncil, executeProposalWithCouncil } from "./governanceProcedures";
 
-export async function upgradeRuntimeChopsticks(context: ChopsticksContext, path: string) {
+export async function upgradeRuntimeChopsticks(
+  context: ChopsticksContext,
+  path: string,
+  providerName?: string
+) {
   if (!existsSync(path)) {
     throw new Error("Runtime wasm not found at path: " + path);
   }
@@ -17,18 +21,19 @@ export async function upgradeRuntimeChopsticks(context: ChopsticksContext, path:
   const rtHex = `0x${rtWasm.toString("hex")}`;
   const rtHash = blake2AsHex(rtHex);
   await context.setStorage({
+    providerName,
     module: "parachainSystem",
     method: "authorizedUpgrade",
     methodParams: rtHash,
   });
-  await context.createBlock();
+  await context.createBlock({ providerName });
 
-  const api = context.polkadotJs();
+  const api = context.polkadotJs(providerName);
   const signer = context.keyring.alice;
 
   await api.tx.parachainSystem.enactAuthorizedUpgrade(rtHex).signAndSend(signer);
 
-  await context.createBlock({ count: 3 });
+  await context.createBlock({ providerName, count: 3 });
 }
 
 export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePreferences) {
