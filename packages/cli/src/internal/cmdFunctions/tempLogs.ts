@@ -18,6 +18,11 @@ export function clearNodeLogs(silent: boolean = true) {
 
 export function reportLogLocation(silent: boolean = false) {
   const dirPath = path.join(process.cwd(), "tmp", "node_logs");
+  
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
+
   const result = fs.readdirSync(dirPath);
   let consoleMessage = "";
   let filePath = "";
