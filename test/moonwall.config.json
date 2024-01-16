@@ -28,7 +28,7 @@
       "binaries": [
         {
           "name": "hydradx"
-                }
+        }
       ]
     },
     {
@@ -280,8 +280,8 @@
         "launchSpec": [
           {
             "name": "mb",
-"type": "parachain",
-            "buildBlockMode": "batch",
+            "type": "parachain",
+            "buildBlockMode": "manual",
             "allowUnresolvedImports": true,
             "configPath": "./configs/moonbeamChopsticks.yml"
           }
