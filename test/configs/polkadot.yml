@@ -2,9 +2,9 @@ endpoint:
   - wss://rpc.polkadot.io
   - wss://polkadot-rpc.dwellir.com
 mock-signature-host: true
-block: ${env.POLKADOT_BLOCK_NUMBER}
+block: 18867218
 port: 8002
-db: ./db.sqlite
+db: ./tmp/db.sqlite
 # wasm-override: polkadot_runtime.compact.compressed.wasm
 
 import-storage:

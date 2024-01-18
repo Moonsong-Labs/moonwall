@@ -163,6 +163,9 @@ importers:
         specifier: 17.7.2
         version: 17.7.2
     devDependencies:
+      '@types/clear':
+        specifier: ^0.1.4
+        version: 0.1.4
       '@types/cli-progress':
         specifier: 3.11.5
         version: 3.11.5
@@ -172,6 +175,9 @@ importers:
       '@types/node':
         specifier: 20.10.8
         version: 20.10.8
+      '@types/ws':
+        specifier: ^8.5.10
+        version: 8.5.10
       '@types/yargs':
         specifier: 17.0.32
         version: 17.0.32
@@ -2479,6 +2485,10 @@ packages:
     resolution: {integrity: sha512-V46N0zwKRF5Q00AZ6hWtN0T8gGmDUaUzLWQvHFo5yThtVwK/VCenFY3wXVbOvNfajEpsTfQM4IN9k/d6gUVX3A==}
     dependencies:
       '@types/node': 20.10.8
+
+  /@types/clear@0.1.4:
+    resolution: {integrity: sha512-4nJjoilJPTbYF7Q4y5+F7JFDK8QdcwOItzwVv3RDEMWALT9Mx9UzfxCiUfpbFK05REhieXTCvhbNkiDW/Wfejw==}
+    dev: true
 
   /@types/cli-progress@3.11.5:
     resolution: {integrity: sha512-D4PbNRbviKyppS5ivBGyFO29POlySLmA2HyUFE4p5QGazAMM3CwkKWcvTl8gvElSuxRh6FPKL8XmidX873ou4g==}
@@ -5790,6 +5800,7 @@ packages:
     dependencies:
       chalk: 3.0.0
       diff-match-patch: 1.0.5
+    bundledDependencies: []
 
   /jsonfile@4.0.0:
     resolution: {integrity: sha512-m6F1R3z8jjlf2imQHS2Qez5sjKWQzbuuhuJ/FKYFRZvPE3PuHcSMVZzfsLhGVOkfd20obL5SWEBew5ShlquNxg==}

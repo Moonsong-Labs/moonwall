@@ -38,6 +38,7 @@ const debugSetup = Debug("global:context");
 
 export class MoonwallContext {
   private static instance: MoonwallContext | undefined;
+  configured: boolean = false;
   environment!: MoonwallEnvironment;
   providers: ConnectedProvider[];
   nodes: ChildProcess[];
@@ -73,6 +74,7 @@ export class MoonwallContext {
       nodes: [],
       ...(await foundationHandler.call(this, env, config)),
     };
+    this.configured = true;
   }
 
   private async handleZombie(env: Environment) {
@@ -451,7 +453,7 @@ export class MoonwallContext {
     config?: MoonwallConfig,
     force: boolean = false
   ): Promise<MoonwallContext> {
-    if (!MoonwallContext.instance || force) {
+    if (!MoonwallContext.instance?.configured || force) {
       if (!config) {
         throw new Error("❌ Config must be provided on Global Context instantiation");
       }

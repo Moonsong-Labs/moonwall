@@ -105,7 +105,7 @@ async function mainMenu(config?: MoonwallConfig) {
       if (chosenRunEnv.envName !== "back") {
         await runNetworkCmd(chosenRunEnv);
       }
-      return false;
+      return true;
     }
     case "test": {
       const chosenTestEnv = await chooseTestEnv(config!);
@@ -121,7 +121,7 @@ async function mainMenu(config?: MoonwallConfig) {
           )} has been completed. Press any key to continue...\n`,
         });
       }
-      return false;
+      return true;
     }
     case "download":
       await resolveDownloadChoice();
