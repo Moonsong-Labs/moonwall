@@ -66,6 +66,11 @@ export async function sendIpcMessage(message: IPCRequestMessage): Promise<IPCRes
   return new Promise(async (resolve, reject) => {
     let response: IPCResponseMessage;
     const ipcPath = process.env.MOON_IPC_SOCKET;
+
+    if (!ipcPath) {
+      throw new Error("No IPC path found. This is a bug, please report it.");
+    }
+
     const client = net.createConnection({ path: ipcPath });
 
     // Listener to return control flow after server responds

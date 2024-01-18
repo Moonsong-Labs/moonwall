@@ -39,7 +39,7 @@ export async function main() {
   process.stdout.write(`Goodbye! 👋\n`);
 }
 
-async function mainMenu(config: MoonwallConfig) {
+async function mainMenu(config?: MoonwallConfig) {
   const configPresent = config !== undefined;
   const questionList = {
     name: "MenuChoice",
@@ -100,7 +100,7 @@ async function mainMenu(config: MoonwallConfig) {
       await createFolders();
       return false;
     case "run": {
-      const chosenRunEnv = await chooseRunEnv(config);
+      const chosenRunEnv = await chooseRunEnv(config!);
       process.env.MOON_RUN_SCRIPTS = "true";
       if (chosenRunEnv.envName !== "back") {
         await runNetworkCmd(chosenRunEnv);
@@ -108,7 +108,7 @@ async function mainMenu(config: MoonwallConfig) {
       return false;
     }
     case "test": {
-      const chosenTestEnv = await chooseTestEnv(config);
+      const chosenTestEnv = await chooseTestEnv(config!);
       if (chosenTestEnv.envName !== "back") {
         process.env.MOON_RUN_SCRIPTS = "true";
         await testCmd(chosenTestEnv.envName);
@@ -131,7 +131,7 @@ async function mainMenu(config: MoonwallConfig) {
       return await resolveQuitChoice();
 
     case "exec":
-      return await resolveExecChoice(config);
+      return await resolveExecChoice(config!);
 
     default:
       throw new Error("Invalid choice");
@@ -173,7 +173,7 @@ async function resolveExecChoice(config: MoonwallConfig) {
       type: "press-to-continue",
       anyKey: true,
       pressToContinueMessage: `ℹ️  No scripts found at ${chalk.bgWhiteBright.black(
-        path.join(process.cwd(), config.scriptsDir)
+        path.join(process.cwd(), config.scriptsDir || "")
       )}\n Press any key to continue...\n`,
     });
   }

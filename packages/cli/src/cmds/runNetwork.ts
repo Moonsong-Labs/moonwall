@@ -260,7 +260,7 @@ const resolveZombieCommandChoice = async () => {
         nodeName: whichNode.nodeName,
         text: `Running ${choice.cmd} on ${whichNode.nodeName}`,
       });
-    } catch (e) {
+    } catch (e: any) {
       console.error("Error: ");
       console.error(e.message);
     }
@@ -400,7 +400,7 @@ const resolveTailChoice = async (env: Environment) => {
   let bottomBarContents = "";
   let switchNode: boolean;
   let zombieContent: string;
-  let zombieNodes: string[] | undefined;
+  let zombieNodes: string[];
 
   const resumePauseProse = [
     `, ${chalk.bgWhite.black("[p]")} Pause tail`,
@@ -420,9 +420,7 @@ const resolveTailChoice = async (env: Environment) => {
   for (;;) {
     clear();
     if (process.env.MOON_ZOMBIE_NODES) {
-      zombieNodes = process.env.MOON_ZOMBIE_NODES
-        ? process.env.MOON_ZOMBIE_NODES.split("|")
-        : undefined;
+      zombieNodes = process.env.MOON_ZOMBIE_NODES.split("|")!;
 
       zombieContent = `, ${chalk.bgWhite.black("[,]")} Next Log, ${chalk.bgWhite.black(
         "[.]"
@@ -441,6 +439,10 @@ const resolveTailChoice = async (env: Environment) => {
       const logFilePath = process.env.MOON_ZOMBIE_NODES
         ? `${process.env.MOON_ZOMBIE_DIR}/${zombieNodes[zombieNodePointer]}.log`
         : process.env.MOON_LOG_LOCATION;
+
+      if (!logFilePath) {
+        throw new Error("No log file path resolved, this should not happen. Please raise defect");
+      }
 
       // eslint-disable-next-line prefer-const
       let currentReadPosition = 0;

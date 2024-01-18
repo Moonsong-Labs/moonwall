@@ -125,25 +125,30 @@ export async function createDevBlock<
     };
   }
 
-  const allRecords: EventRecord[] = await (await api.at(blockResult.hash)).query.system.events();
+  const allRecords: EventRecord[] = (await (
+    await api.at(blockResult.hash)
+  ).query.system.events()) as any;
   const blockData = await api.rpc.chain.getBlock(blockResult.hash);
 
   const result: ExtrinsicCreation[] = results.map((result) => {
     const extrinsicIndex =
       result.type == "eth"
-        ? allRecords
-            .find(
-              ({ phase, event: { section, method, data } }) =>
-                phase.isApplyExtrinsic &&
-                section == "ethereum" &&
-                method == "Executed" &&
-                data[2].toString() == result.hash
-            )
-            ?.phase?.asApplyExtrinsic?.toNumber()
+        ? parseInt(
+            allRecords
+              .find(
+                ({ phase, event: { section, method, data } }) =>
+                  phase.isApplyExtrinsic &&
+                  section == "ethereum" &&
+                  method == "Executed" &&
+                  data[2].toString() == result.hash
+              )!
+              .phase!.asApplyExtrinsic!.toString()
+          )
         : blockData.block.extrinsics.findIndex((ext) => ext.hash.toHex() == result.hash);
     // We retrieve the events associated with the extrinsic
     const events = allRecords.filter(
-      ({ phase }) => phase.isApplyExtrinsic && phase.asApplyExtrinsic.toNumber() === extrinsicIndex
+      ({ phase }) =>
+        phase.isApplyExtrinsic && parseInt(phase.asApplyExtrinsic.toString()) === extrinsicIndex
     );
     const failure = extractError(events);
     return {

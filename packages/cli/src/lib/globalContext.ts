@@ -58,7 +58,7 @@ export class MoonwallContext {
     const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
     const foundationHandlers: Record<
       FoundationType,
-      (env: Environment, config?: MoonwallConfig) => Promise<IGlobalContextFoundation>
+      (env: Environment, config: MoonwallConfig) => Promise<IGlobalContextFoundation>
     > = {
       read_only: this.handleReadOnly,
       chopsticks: this.handleChopsticks,
@@ -187,7 +187,7 @@ export class MoonwallContext {
 
     const onProcessExit = () => {
       try {
-        const processIds = Object.values((this.zombieNetwork.client as any).processMap)
+        const processIds = Object.values((this.zombieNetwork!.client as any).processMap)
           .filter((item) => item!["pid"])
           .map((process) => process!["pid"]);
         exec(`kill ${processIds.join(" ")}`, (error) => {
@@ -221,6 +221,10 @@ export class MoonwallContext {
           const message: IPCRequestMessage = JSON.parse(data.toString());
 
           const zombieClient = network.client;
+
+          if (!message.nodeName) {
+            throw new Error("nodeName not provided in message");
+          }
 
           switch (message.cmd) {
             case "networkmap": {
@@ -301,7 +305,7 @@ export class MoonwallContext {
             default:
               throw new Error(`Invalid command received: ${message.cmd}`);
           }
-        } catch (e) {
+        } catch (e: any) {
           console.log("📨 Error processing message from client:", data.toString());
           console.error(e.message);
           writeToClient({ status: "failure", result: false, message: e.message });
@@ -461,6 +465,10 @@ export class MoonwallContext {
   public static async destroy() {
     const ctx = this.instance;
 
+    if (!ctx) {
+      throw new Error("❌  No context to destroy");
+    }
+
     try {
       await ctx.disconnect();
     } catch {
@@ -469,7 +477,17 @@ export class MoonwallContext {
 
     while (ctx.nodes.length > 0) {
       const node = ctx.nodes.pop();
+
+      if (!node) {
+        throw new Error("❌  No nodes to destroy");
+      }
+
       const pid = node.pid;
+
+      if (!pid) {
+        throw new Error("❌  No pid to destroy");
+      }
+
       node.kill("SIGINT");
       for (;;) {
         const isRunning = await isPidRunning(pid);
@@ -490,7 +508,7 @@ export class MoonwallContext {
 
       try {
         execSync(`kill ${processIds.join(" ")}`, {});
-      } catch (e) {
+      } catch (e: any) {
         console.log(e.message);
         console.log("continuing...");
       }
