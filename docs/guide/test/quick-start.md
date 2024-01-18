@@ -21,6 +21,7 @@ You'll need to give a name to your environment and you'll need to specify a dire
 ```
 
 ### Foundation
+
 For this quick start, we've chosen the dev foundation, which utilizes a local development node. We also specify our port information. 
 
 ```json
