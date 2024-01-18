@@ -353,6 +353,11 @@ export interface DevModeContext extends GenericContext {
   isEthereumChain: boolean;
 
   /**
+   * Getter that returns true if chain has ParachainStaking pallet.
+   */
+  isParachainStaking: boolean;
+
+  /**
    * Getter that returns an object with the default accounts already generated.
    */
   keyring: { alice: KeyringPair; bob: KeyringPair; charlie: KeyringPair; dave: KeyringPair };
@@ -445,6 +450,22 @@ export interface DevModeContext extends GenericContext {
     bytecode: `0x${string}`;
     methods: any;
   }>;
+
+  /**
+   * Jump a specified number of blocks.
+   *
+   * @param {number} blocksToJump The number of blocks to jump forward.
+   * @returns {Promise<void>} A Promise that resolves after the operation is fully complete.
+   */
+  jumpBlocks?: (blocksToJump: number) => Promise<void>;
+
+  /**
+   * Jump a specified number of ParachainStaking Rounds.
+   *
+   * @param {number} blocksToJump The number of ParachainStaking rounds to jump forward.
+   * @returns {Promise<void>} A Promise that resolves after the operation is fully complete.
+   */
+  jumpRounds?: (roundsToJump: number) => Promise<void>;
 }
 
 export type ViemTransactionOptions = TransactionSerializable & {

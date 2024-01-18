@@ -18,6 +18,8 @@ import {
   alith,
   createEthersTransaction,
   createViemTransaction,
+  jumpBlocksDev,
+  jumpRoundsDev,
 } from "@moonwall/util";
 import { ApiTypes } from "@polkadot/api/types";
 import { createDevBlock } from "../../internal/foundations/devModeHelpers";
@@ -46,6 +48,15 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
     return metadata.lookup.getTypeDef(systemAccountStorageType.asMap.key).type;
   };
 
+  const containsPallet = (palletName: string): boolean => {
+    const metadata = ctx.polkadotJs().runtimeMetadata.asLatest;
+    const systemPalletIndex = metadata.pallets.findIndex(
+      (pallet) => pallet.name.toString() === palletName
+    );
+
+    return systemPalletIndex !== -1;
+  };
+
   const newKeyring = () => {
     const isEth = accountTypeLookup() == "AccountId20";
     const keyring = new Keyring({
@@ -71,6 +82,10 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
     },
     get pjsApi() {
       return context.polkadotJs();
+    },
+
+    get isParachainStaking() {
+      return containsPallet("ParachainStaking");
     },
 
     get keyring() {
@@ -149,6 +164,17 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
       : async (contractName: string, options?: ContractDeploymentOptions) => {
           return await deployCreateCompiledContract(ctx, contractName, options);
         },
+
+    jumpBlocks: async (blocks: number) => {
+      await jumpBlocksDev(ctx, blocks);
+    },
+
+    jumpRounds: async (rounds: number) => {
+      if (!ctx.isParachainStaking) {
+        throw new Error("ParachainStaking pallet is not enabled");
+      }
+      await jumpRoundsDev(ctx, rounds);
+    },
   } satisfies DevModeContext;
 
   testCases({
