@@ -24,4 +24,4 @@ Artifact Downloader currently supports downloading artifacts for the following n
 - Polkadot
 - Tanssi
 
-Would you like to see other networks added here? Let us know at info@moonsonglabs.com or file an issue in the Github repo. 
+Would you like to see other networks added here? Let us know at info@moonsonglabs.com or file an issue in the [GitHub repo](https://github.com/Moonsong-Labs/moonwall). 
