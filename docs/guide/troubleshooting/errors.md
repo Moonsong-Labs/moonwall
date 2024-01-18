@@ -1,6 +1,6 @@
 # Common Errors
 
-Getting an error running your test suite! Never fear - certainly someone before you has received the same one and can help you. Here are some common errors that might come up in your testing and solutions for how you can fix them. 
+Getting an error running your test suite? Never fear - certainly someone before you has received the same one and can help you. Here are some common errors that might come up in your testing and solutions for how you can fix them. 
 
 ### Incorrect handling of nonces
 
