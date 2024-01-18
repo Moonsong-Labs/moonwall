@@ -28,7 +28,7 @@ Moonwall offers five different foundations as follows:
 ### Chopsticks:
 - Uses [Chopsticks](https://github.com/AcalaNetwork/chopsticks){target=_blank} to start a lazily-forked network. Lazily-forking a network refers to quickly cloning the state of the chosen network. The new fork is on its own and will not import new blocks from the original network. 
 - Imports a Chopsticks config file, such as the following [example Chopsticks config](https://github.com/AcalaNetwork/chopsticks/tree/master/configs){target=_blank} 
-- You can launch a single blockain or multiple blockchains
+- You can launch a single blockchain or multiple blockchains
 - Performs state transitions locally and updates local state
 - No client RPCs, no MetaMask support. This foundation strictly models change of state 
 
