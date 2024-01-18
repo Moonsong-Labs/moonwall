@@ -4,7 +4,7 @@ This guide assumes that you've already installed Moonwall and you have a basic t
 
 ## Getting your Config File Sorted
 
-Your `moonwall.config.json` file that lives at the root directory of your project is the key to setting up a sublime testing experience. Go ahead and open it up and let's get started setting it up. In this quick start, we'll set up our Moonwall config file for testing on a local moonbeam node using the dev foundation.
+Your `moonwall.config.json` file that lives in the root directory of your project is the key to setting up a sublime testing experience. Go ahead and open it up and let's get started setting it up. In this quick start, we'll set up our Moonwall config file for testing on a local moonbeam node using the [dev foundation](/guide/intro/foundations.html#dev){target=blank}.
 
 ### Environment
 
