@@ -5,7 +5,7 @@ Let's write a super simple test case that we'll run in the
 
 ## Moonwall Utils
 
-Moonwall utils is a utils package with helpful constants and various functions for Moonwall. In our test file we want to refer to some pre-funded development accounts like ALITH and BALTATHAR which can be easily import from ```@moonwall/util```
+Moonwall utils is a utils package with helpful constants and various functions for Moonwall. In the test file you can refer to some pre-funded development accounts like ALITH and BALTATHAR which can be easily imported from ```@moonwall/util```
 
 We use describeSuite to define our test suite, similar to how you would use Mocha in Javascript. 
 
