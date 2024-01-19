@@ -1,24 +1,39 @@
 import type { ApiPromise } from "@polkadot/api";
 import inquirer from "inquirer";
 import { MoonwallContext } from "../../lib/globalContext";
+import { jumpRoundsDev } from "@moonwall/util";
 
 export async function resolveDevInteractiveCmdChoice() {
+  const ctx = await (await MoonwallContext.getContext()).connectEnvironment();
+  const api = ctx.providers.find((a) => a.type == "polkadotJs")!.api as ApiPromise;
+  const choices = [
+    { name: "🆗  Create Block", value: "createblock" },
+    { name: "🆕  Create Unfinalized Block", value: "createUnfinalizedBlock" },
+    { name: "➡️   Create N Blocks", value: "createNBlocks" },
+  ];
+
+  const containsPallet = (polkadotJsApi: ApiPromise, palletName: string): boolean => {
+    const metadata = polkadotJsApi.runtimeMetadata.asLatest;
+    const systemPalletIndex = metadata.pallets.findIndex(
+      (pallet) => pallet.name.toString() === palletName
+    );
+
+    return systemPalletIndex !== -1;
+  };
+
+  if (containsPallet(api, "ParachainStaking")) {
+    choices.push({ name: "🔼  Jump N Rounds", value: "jumpRounds" });
+  }
+
+  choices.push(...[new inquirer.Separator(), { name: "🔙  Go Back", value: "back" }]);
+
   const choice = await inquirer.prompt({
     name: "cmd",
     type: "list",
-    choices: [
-      { name: "🆗  Create Block", value: "createblock" },
-      { name: "🆕  Create Unfinalized Block", value: "createUnfinalizedBlock" },
-      { name: "➡️   Create N Blocks", value: "createNBlocks" },
-      new inquirer.Separator(),
-      { name: "🔙  Go Back", value: "back" },
-    ],
+    choices,
     message: `What command would you like to run? `,
     default: "createBlock",
   });
-
-  const ctx = await (await MoonwallContext.getContext()).connectEnvironment();
-  const api = ctx.providers.find((a) => a.type == "polkadotJs")!.api as ApiPromise;
 
   switch (choice.cmd) {
     case "createblock":
@@ -45,6 +60,17 @@ export async function resolveDevInteractiveCmdChoice() {
       };
       await executeSequentially(result.n);
 
+      break;
+    }
+
+    case "jumpRounds": {
+      const result = await new inquirer.prompt({
+        name: "n",
+        type: "number",
+        message: `How many rounds? `,
+      });
+
+      await jumpRoundsDev(api, result.n);
       break;
     }
 

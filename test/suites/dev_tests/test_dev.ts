@@ -10,9 +10,7 @@ import {
   GLMR,
   alith,
   baltathar,
-  jumpBlocksDev,
-  deployViemContract,
-  jumpRoundsDev,
+  deployViemContract
 } from "@moonwall/util";
 import { BN } from "@polkadot/util";
 import { Wallet, parseEther } from "ethers";

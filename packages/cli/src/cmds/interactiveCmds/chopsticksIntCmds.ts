@@ -58,15 +58,22 @@ export async function resolveChopsticksInteractiveCmdChoice() {
     });
   };
 
+  const choices = [
+    { name: "🆗  Create Block", value: "createblock" },
+    { name: "➡️  Create N Blocks", value: "createNBlocks" },
+  ];
+
+  // if (ctx){
+
+  //   jump
+  // }
+
+  choices.push(...[new inquirer.Separator(), { name: "🔙  Go Back", value: "back" }]);
+
   const choice = await inquirer.prompt({
     name: "cmd",
     type: "list",
-    choices: [
-      { name: "🆗  Create Block", value: "createblock" },
-      { name: "➡️   Create N Blocks", value: "createNBlocks" },
-      new inquirer.Separator(),
-      { name: "🔙  Go Back", value: "back" },
-    ],
+    choices,
     message: `What command would you like to run? `,
     default: "createBlock",
   });

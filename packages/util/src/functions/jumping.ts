@@ -1,30 +1,28 @@
 import "@moonbeam-network/api-augment";
-import { DevModeContext } from "@moonwall/types";
+import type { ApiPromise } from "@polkadot/api";
 
-export async function jumpBlocksDev(context: DevModeContext, blockCount: number) {
+export async function jumpBlocksDev(polkadotJsApi: ApiPromise, blockCount: number) {
   while (blockCount > 0) {
-    (await context.createBlock()).block.hash.toString();
+    await polkadotJsApi.rpc.engine.createBlock(true, true);
     blockCount--;
   }
 }
 
 export async function jumpRoundsDev(
-  context: DevModeContext,
+  polkadotJsApi: ApiPromise,
   count: number
 ): Promise<string | null> {
-  const round = (await context.polkadotJs().query.parachainStaking.round()).current
+  const round = (await polkadotJsApi.query.parachainStaking.round()).current
     .addn(count.valueOf())
     .toNumber();
 
-  return jumpToRoundDev(context, round);
+  return jumpToRoundDev(polkadotJsApi, round);
 }
 
-async function jumpToRoundDev(context: DevModeContext, round: number): Promise<string | null> {
+async function jumpToRoundDev(polkadotJsApi: ApiPromise, round: number): Promise<string | null> {
   let lastBlockHash = "";
   for (;;) {
-    const currentRound = (
-      await context.polkadotJs().query.parachainStaking.round()
-    ).current.toNumber();
+    const currentRound = (await polkadotJsApi.query.parachainStaking.round()).current.toNumber();
 
     if (currentRound === round) {
       return lastBlockHash;
@@ -32,6 +30,6 @@ async function jumpToRoundDev(context: DevModeContext, round: number): Promise<s
       return null;
     }
 
-    lastBlockHash = (await context.createBlock()).block.hash.toString();
+    lastBlockHash = (await polkadotJsApi.rpc.engine.createBlock(true, true)).blockHash.toString();
   }
 }

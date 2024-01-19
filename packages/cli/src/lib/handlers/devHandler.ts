@@ -21,6 +21,7 @@ import {
   jumpBlocksDev,
   jumpRoundsDev,
 } from "@moonwall/util";
+import { Keyring } from "@polkadot/api";
 import { ApiTypes } from "@polkadot/api/types";
 import { createDevBlock } from "../../internal/foundations/devModeHelpers";
 import { importJsonConfig, isEthereumDevConfig } from "../configReader";
@@ -29,7 +30,6 @@ import {
   interactWithContract,
   interactWithPrecompileContract,
 } from "../contractFunctions";
-import { Keyring } from "@polkadot/api";
 
 export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testCase, logger }) => {
   const config = importJsonConfig();
@@ -48,15 +48,6 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
     return metadata.lookup.getTypeDef(systemAccountStorageType.asMap.key).type;
   };
 
-  const containsPallet = (palletName: string): boolean => {
-    const metadata = ctx.polkadotJs().runtimeMetadata.asLatest;
-    const systemPalletIndex = metadata.pallets.findIndex(
-      (pallet) => pallet.name.toString() === palletName
-    );
-
-    return systemPalletIndex !== -1;
-  };
-
   const newKeyring = () => {
     const isEth = accountTypeLookup() == "AccountId20";
     const keyring = new Keyring({
@@ -70,6 +61,15 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
       }),
       dave: keyring.addFromUri(isEth ? DOROTHY_PRIVATE_KEY : "//Dave", { name: "Dave default" }),
     };
+  };
+
+  const containsPallet = (palletName: string): boolean => {
+    const metadata = context.polkadotJs().runtimeMetadata.asLatest;
+    const systemPalletIndex = metadata.pallets.findIndex(
+      (pallet) => pallet.name.toString() === palletName
+    );
+
+    return systemPalletIndex !== -1;
   };
 
   const ctx = {
@@ -166,14 +166,14 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
         },
 
     jumpBlocks: async (blocks: number) => {
-      await jumpBlocksDev(ctx, blocks);
+      await jumpBlocksDev(context.polkadotJs(), blocks);
     },
 
     jumpRounds: async (rounds: number) => {
       if (!ctx.isParachainStaking) {
         throw new Error("ParachainStaking pallet is not enabled");
       }
-      await jumpRoundsDev(ctx, rounds);
+      await jumpRoundsDev(context.polkadotJs(), rounds);
     },
   } satisfies DevModeContext;
 
