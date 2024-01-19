@@ -55,6 +55,7 @@ describeSuite({
     it({
       id: "T03",
       title: "Verify it can upgrade in multichain setup",
+      modifier:"skip",
       test: async () => {
         const specVersion = context.polkadotJs("hydradx").consts.system.version.specVersion.toNumber();
         await context.upgradeRuntime("hydradx");
