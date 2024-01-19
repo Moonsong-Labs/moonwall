@@ -591,7 +591,6 @@ describeSuite({
     it({
       id: "T25",
       title: "it can jump ParachainStaking rounds",
-      modifier: "only",
       test: async function () {
         log(`This chain has parachainStaking: ${context.isParachainStaking}`);
         const round = (
