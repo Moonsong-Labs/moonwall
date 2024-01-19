@@ -4,10 +4,13 @@ import {
   BALTATHAR_PRIVATE_KEY,
   CHARLETH_PRIVATE_KEY,
   DOROTHY_PRIVATE_KEY,
+  jumpRoundsChopsticks,
 } from "@moonwall/util";
 import { Keyring } from "@polkadot/api";
+import type { ApiPromise } from "@polkadot/api";
 import {
   createChopsticksBlock,
+  getWsFromConfig,
   sendSetStorageRequest,
 } from "../../internal/foundations/chopsticksHelpers";
 import { MoonwallContext } from "../globalContext";
@@ -75,6 +78,20 @@ export const chopsticksHandler: FoundationHandler<"chopsticks"> = ({
       const path = (await MoonwallContext.getContext()).rtUpgradePath!;
       await upgradeRuntimeChopsticks(ctx, path, providerName);
     },
+
+    jumpRounds: async (options: { rounds: number; providerName?: string }) => {
+      const api = context.polkadotJs(options.providerName);
+      if (!containsPallet(api, "ParachainStaking")) {
+        throw new Error("ParachainStaking pallet is not enabled");
+      }
+
+      const ws = options.providerName
+        ? await getWsFromConfig(options.providerName)
+        : await getWsFromConfig();
+      // @ts-ignore - internal endpoints are not exposed
+      const port = parseInt(ws.__internal__endpoints[0].split(":")[2].split("/")[0]);
+      await jumpRoundsChopsticks(api, port, options.rounds);
+    },
   } satisfies ChopsticksContext;
 
   testCases({
@@ -82,4 +99,13 @@ export const chopsticksHandler: FoundationHandler<"chopsticks"> = ({
     it: testCase,
     log: logger(),
   });
+};
+
+const containsPallet = (polkadotJsApi: ApiPromise, palletName: string): boolean => {
+  const metadata = polkadotJsApi.runtimeMetadata.asLatest;
+  const systemPalletIndex = metadata.pallets.findIndex(
+    (pallet) => pallet.name.toString() === palletName
+  );
+
+  return systemPalletIndex !== -1;
 };

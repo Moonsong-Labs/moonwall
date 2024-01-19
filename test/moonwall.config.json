@@ -298,6 +298,36 @@
       ]
     },
     {
+      "name": "chopsticks_round",
+      "testFileDir": [
+        "suites/chopsticks-round/"
+      ],
+      "reporters": [
+        "default"
+      ],
+      "foundation": {
+        "type": "chopsticks",
+        "launchSpec": [
+          {
+            "name": "MB",
+            "type": "parachain",
+            "buildBlockMode": "manual",
+            "allowUnresolvedImports": true,
+            "configPath": "./configs/moonbeamChopsticksRound.yml"
+          }
+        ]
+      },
+      "connections": [
+        {
+          "name": "MB",
+          "type": "polkadotJs",
+          "endpoints": [
+            "ws://127.0.0.1:10000"
+          ]
+        }
+      ]
+    },
+    {
       "name": "chopsticks_state",
       "testFileDir": [
         "suites/chopsticks/"

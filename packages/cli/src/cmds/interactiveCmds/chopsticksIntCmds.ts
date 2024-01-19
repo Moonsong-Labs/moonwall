@@ -1,6 +1,5 @@
 import { promises as fsPromises } from "fs";
 import inquirer from "inquirer";
-import WebSocket from "ws";
 import { parse } from "yaml";
 import { importJsonConfig } from "../../lib/configReader";
 import { MoonwallContext } from "../../lib/globalContext";
@@ -55,18 +54,6 @@ export async function resolveChopsticksInteractiveCmdChoice() {
       })
   );
   const port = parseInt(ports[0]);
-
-  // TODO: Support multiple chains on chopsticks
-  // const sendNewBlockCmd = async (port: number, count: number = 1) => {
-  //   const websocketUrl = `ws://127.0.0.1:${port}`;
-  //   const socket = new WebSocket(websocketUrl);
-  //   socket.on("open", () => {
-  //     socket.send(
-  //       JSON.stringify({ jsonrpc: "2.0", id: 1, method: "dev_newBlock", params: [{ count }] })
-  //     );
-  //     socket.close();
-  //   });
-  // };
 
   const choices = [
     { name: "🆗  Create Block", value: "createblock" },
