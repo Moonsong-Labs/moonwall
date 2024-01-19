@@ -24,4 +24,20 @@ Artifact Downloader currently supports downloading artifacts for the following n
 - Polkadot
 - Tanssi
 
-Would you like to see other networks added here? Let us know at info@moonsonglabs.com or file an issue in the [GitHub repo](https://github.com/Moonsong-Labs/moonwall). 
+Would you like to see other networks added here? You can add [your network configuration to `repoDefinitions`](https://github.com/Moonsong-Labs/moonwall/tree/main/packages/cli/src/lib/repoDefinitions){target=_blank}. `YOUR-NETWORK.ts` needs to specify the network's Github repo name, repo owner, and supported binaries. Here's an example of of the repo definition file for Tanssi: 
+
+```typescript
+import { RepoSpec } from "@moonwall/types";
+
+const repo: RepoSpec = {
+  name: "tanssi",
+  binaries: [
+    { name: "tanssi-node", defaultArgs: ["--dev", "--sealing=manual", "--no-hardware-benchmarks"] },
+    { name: "container-chain-template-simple-node" },
+    { name: "container-chain-template-frontier-node" },
+  ],
+  ghAuthor: "moondance-labs",
+  ghRepo: "tanssi",
+};
+export default repo;
+```
