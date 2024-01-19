@@ -345,6 +345,9 @@ importers:
       '@types/node':
         specifier: 20.10.8
         version: 20.10.8
+      '@types/ws':
+        specifier: ^8.5.10
+        version: 8.5.10
       '@types/yargs':
         specifier: 17.0.32
         version: 17.0.32

@@ -279,7 +279,7 @@
         "rtUpgradePath": "./tmp/moonbeam_runtime.compact.compressed.wasm",
         "launchSpec": [
           {
-            "name": "mb",
+            "name": "MB",
             "type": "parachain",
             "buildBlockMode": "manual",
             "allowUnresolvedImports": true,

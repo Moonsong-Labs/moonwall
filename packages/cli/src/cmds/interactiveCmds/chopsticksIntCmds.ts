@@ -3,6 +3,9 @@ import inquirer from "inquirer";
 import WebSocket from "ws";
 import { parse } from "yaml";
 import { importJsonConfig } from "../../lib/configReader";
+import { MoonwallContext } from "../../lib/globalContext";
+import type { ApiPromise } from "@polkadot/api";
+import { jumpBlocksChopsticks, jumpRoundsChopsticks, jumpToRoundChopsticks } from "@moonwall/util";
 
 export async function resolveChopsticksInteractiveCmdChoice() {
   const globalConfig = importJsonConfig();
@@ -32,6 +35,17 @@ export async function resolveChopsticksInteractiveCmdChoice() {
 
   const nodeSelected = isMultiChain ? await promptNode() : config.foundation.launchSpec[0].name;
 
+  const ctx = await (await MoonwallContext.getContext()).connectEnvironment();
+  const provider = ctx.providers.find((a) => a.type == "polkadotJs" && a.name == nodeSelected);
+
+  if (!provider) {
+    throw new Error(
+      `Provider ${nodeSelected} not found. Verify moonwall config has matching pair of launchSpec and Connection names.`
+    );
+  }
+
+  const api = provider.api as ApiPromise;
+
   const ports = await Promise.all(
     config.foundation.launchSpec
       .filter(({ name }) => name == nodeSelected)
@@ -43,30 +57,39 @@ export async function resolveChopsticksInteractiveCmdChoice() {
   const port = parseInt(ports[0]);
 
   // TODO: Support multiple chains on chopsticks
-  const sendNewBlockCmd = async (port: number, count: number = 1) => {
-    if (config.foundation.type !== "chopsticks") {
-      throw new Error("Only chopsticks is supported, this is a bug please raise an issue.");
-    }
-
-    const websocketUrl = `ws://127.0.0.1:${port}`;
-    const socket = new WebSocket(websocketUrl);
-    socket.on("open", () => {
-      socket.send(
-        JSON.stringify({ jsonrpc: "2.0", id: 1, method: "dev_newBlock", params: [{ count }] })
-      );
-      socket.close();
-    });
-  };
+  // const sendNewBlockCmd = async (port: number, count: number = 1) => {
+  //   const websocketUrl = `ws://127.0.0.1:${port}`;
+  //   const socket = new WebSocket(websocketUrl);
+  //   socket.on("open", () => {
+  //     socket.send(
+  //       JSON.stringify({ jsonrpc: "2.0", id: 1, method: "dev_newBlock", params: [{ count }] })
+  //     );
+  //     socket.close();
+  //   });
+  // };
 
   const choices = [
     { name: "🆗  Create Block", value: "createblock" },
     { name: "➡️  Create N Blocks", value: "createNBlocks" },
   ];
 
-  // if (ctx){
+  const containsPallet = (polkadotJsApi: ApiPromise, palletName: string): boolean => {
+    const metadata = polkadotJsApi.runtimeMetadata.asLatest;
+    const systemPalletIndex = metadata.pallets.findIndex(
+      (pallet) => pallet.name.toString() === palletName
+    );
 
-  //   jump
-  // }
+    return systemPalletIndex !== -1;
+  };
+
+  if (containsPallet(api, "ParachainStaking")) {
+    choices.push(
+      ...[
+        { name: "🔼  Jump To Round", value: "jumpToRound" },
+        { name: "⏫  Jump N Rounds", value: "jumpRounds" },
+      ]
+    );
+  }
 
   choices.push(...[new inquirer.Separator(), { name: "🔙  Go Back", value: "back" }]);
 
@@ -80,7 +103,7 @@ export async function resolveChopsticksInteractiveCmdChoice() {
 
   switch (choice.cmd) {
     case "createblock":
-      await sendNewBlockCmd(port);
+      await jumpBlocksChopsticks(port, 1);
       break;
 
     case "createNBlocks": {
@@ -90,8 +113,30 @@ export async function resolveChopsticksInteractiveCmdChoice() {
         message: `How many blocks? `,
       });
 
-      await sendNewBlockCmd(port, result.n);
+      await jumpBlocksChopsticks(port, result.n);
 
+      break;
+    }
+
+    case "jumpToRound": {
+      const result = await new inquirer.prompt({
+        name: "round",
+        type: "number",
+        message: `Which round to jump to (in future)? `,
+      });
+      console.log("💤 This may take a while....");
+      await jumpToRoundChopsticks(api, port, result.round);
+      break;
+    }
+
+    case "jumpRounds": {
+      const result = await new inquirer.prompt({
+        name: "n",
+        type: "number",
+        message: `How many rounds? `,
+      });
+      console.log("💤 This may take a while....");
+      await jumpRoundsChopsticks(api, port, result.n);
       break;
     }
 

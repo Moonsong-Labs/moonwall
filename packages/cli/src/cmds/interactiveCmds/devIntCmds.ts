@@ -1,7 +1,7 @@
 import type { ApiPromise } from "@polkadot/api";
 import inquirer from "inquirer";
 import { MoonwallContext } from "../../lib/globalContext";
-import { jumpRoundsDev } from "@moonwall/util";
+import { jumpRoundsDev, jumpToRoundDev } from "@moonwall/util";
 
 export async function resolveDevInteractiveCmdChoice() {
   const ctx = await (await MoonwallContext.getContext()).connectEnvironment();
@@ -22,7 +22,12 @@ export async function resolveDevInteractiveCmdChoice() {
   };
 
   if (containsPallet(api, "ParachainStaking")) {
-    choices.push({ name: "🔼  Jump N Rounds", value: "jumpRounds" });
+    choices.push(
+      ...[
+        { name: "🔼  Jump To Round", value: "jumpToRound" },
+        { name: "⏫  Jump N Rounds", value: "jumpRounds" },
+      ]
+    );
   }
 
   choices.push(...[new inquirer.Separator(), { name: "🔙  Go Back", value: "back" }]);
@@ -60,6 +65,17 @@ export async function resolveDevInteractiveCmdChoice() {
       };
       await executeSequentially(result.n);
 
+      break;
+    }
+
+    case "jumpToRound": {
+      const result = await new inquirer.prompt({
+        name: "round",
+        type: "number",
+        message: `Which round to jump to (in future)? `,
+      });
+
+      await jumpToRoundDev(api, result.round);
       break;
     }
 
