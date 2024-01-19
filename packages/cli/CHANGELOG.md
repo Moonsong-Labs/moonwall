@@ -1,5 +1,20 @@
 # @moonwall/cli
 
+## 4.7.0
+
+### Minor Changes
+
+- 978f731: Chopsticks Features
+  - [#343](https://github.com/Moonsong-Labs/moonwall/issues/343) Fixed
+  - [#342](https://github.com/Moonsong-Labs/moonwall/issues/342) Implemented
+  - [#140](https://github.com/Moonsong-Labs/moonwall/issues/140) Implemented
+
+### Patch Changes
+
+- Updated dependencies [978f731]
+  - @moonwall/types@4.7.0
+  - @moonwall/util@4.7.0
+
 ## 4.6.0
 
 ### Minor Changes
