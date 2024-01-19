@@ -89,9 +89,7 @@ export function checkListeningPorts(processId: number) {
       });
     const filtered = new Set(ports);
     return { binName, processId, ports: [...filtered].sort() };
-  } catch (e) {
-    console.log(e);
-
+  } catch (e: any) {
     const binName = execSync(`ps -p ${processId} -o comm=`).toString().trim();
     console.log(
       `Process ${processId} is running which for binary ${binName}, however it is unresponsive.`

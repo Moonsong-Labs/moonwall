@@ -251,7 +251,7 @@ export class ProviderInterfaceFactory {
       type: this.type,
       greet: async () =>
         console.log(
-          `👋 Provider ${this.name} is connected to chain ` + (await api.eth.getChainId())
+          `👋 Provider ${this.name} is connected to chain ` + (await (api.eth as any).getChainId())
         ),
       disconnect: async () => {
         api.eth.net.currentProvider!.disconnect();

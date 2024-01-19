@@ -79,6 +79,7 @@
     "access": "public"
   },
   "devDependencies": {
+    "@types/debug": "4.1.12",
     "tsup": "8.0.1",
     "typescript": "5.3.3",
     "typescript-json-schema": "0.62.0"

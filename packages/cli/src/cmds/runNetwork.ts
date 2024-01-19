@@ -1,18 +1,20 @@
 import { Environment } from "@moonwall/types";
-import { ApiPromise } from "@polkadot/api";
 import chalk from "chalk";
 import clear from "clear";
 import fs, { promises as fsPromises } from "fs";
 import inquirer from "inquirer";
 import PressToContinuePrompt from "inquirer-press-to-continue";
-import WebSocket from "ws";
 import { parse } from "yaml";
 import { clearNodeLogs, reportLogLocation } from "../internal/cmdFunctions/tempLogs";
 import { commonChecks } from "../internal/launcherCommon";
 import { cacheConfig, importAsyncConfig, loadEnvVars } from "../lib/configReader";
 import { MoonwallContext, runNetworkOnly } from "../lib/globalContext";
+import {
+  resolveChopsticksInteractiveCmdChoice,
+  resolveDevInteractiveCmdChoice,
+  resolveZombieInteractiveCmdChoice,
+} from "./interactiveCmds";
 import { executeTests } from "./runTests";
-import { sendIpcMessage } from "../internal/foundations/zombieHelpers";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
@@ -163,9 +165,7 @@ export async function runNetworkCmd(args) {
         break;
 
       case 3:
-        env.foundation.type !== "zombie"
-          ? await resolveCommandChoice()
-          : await resolveZombieCommandChoice();
+        await resolveCommandChoice();
         lastSelected = 2;
         break;
 
@@ -190,6 +190,7 @@ export async function runNetworkCmd(args) {
         throw new Error("invalid value");
     }
   }
+
   await MoonwallContext.destroy();
 }
 
@@ -198,32 +199,41 @@ const reportServicePorts = async () => {
   const portsList: { port: string; name: string }[] = [];
   const globalConfig = await importAsyncConfig();
   const config = globalConfig.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
-  if (config.foundation.type == "dev") {
-    const port =
-      ctx.environment.nodes[0].args
-        .find((a) => a.includes("ws-port") || a.includes("rpc-port"))!
-        .split("=")[1] || "9944";
-    portsList.push({ port, name: "dev" });
-  } else if (config.foundation.type == "chopsticks") {
-    portsList.push(
-      ...(await Promise.all(
-        config.foundation.launchSpec.map(async ({ configPath, name }) => {
-          const yaml = parse((await fsPromises.readFile(configPath)).toString());
-          return { name, port: yaml.port || "8000" };
-        })
-      ))
-    );
-  } else if (config.foundation.type == "zombie") {
-    ctx.zombieNetwork!.relay.forEach(({ wsUri, name }) => {
-      portsList.push({ name, port: wsUri.split("ws://127.0.0.1:")[1] });
-    });
 
-    Object.keys(ctx.zombieNetwork!.paras).forEach((paraId) => {
-      ctx.zombieNetwork!.paras[paraId].nodes.forEach(({ wsUri, name }) => {
+  switch (config.foundation.type) {
+    case "dev": {
+      const args = ctx.environment.nodes[0].args;
+      const explicitPortArg = args.find((a) => a.includes("ws-port") || a.includes("rpc-port"));
+      const port = explicitPortArg ? explicitPortArg.split("=")[1] : "9944";
+      portsList.push({ port, name: "dev" });
+      break;
+    }
+
+    case "chopsticks": {
+      portsList.push(
+        ...(await Promise.all(
+          config.foundation.launchSpec.map(async ({ configPath, name }) => {
+            const yaml = parse((await fsPromises.readFile(configPath)).toString());
+            return { name, port: yaml.port || "8000" };
+          })
+        ))
+      );
+      break;
+    }
+
+    case "zombie": {
+      ctx.zombieNetwork!.relay.forEach(({ wsUri, name }) => {
         portsList.push({ name, port: wsUri.split("ws://127.0.0.1:")[1] });
       });
-    });
+
+      Object.keys(ctx.zombieNetwork!.paras).forEach((paraId) => {
+        ctx.zombieNetwork!.paras[paraId].nodes.forEach(({ wsUri, name }) => {
+          portsList.push({ name, port: wsUri.split("ws://127.0.0.1:")[1] });
+        });
+      });
+    }
   }
+
   portsList.forEach(({ name, port }) =>
     console.log(`  🌐  Node ${name} has started, listening on ports - Websocket: ${port}`)
   );
@@ -231,130 +241,22 @@ const reportServicePorts = async () => {
   return portsList;
 };
 
-const resolveZombieCommandChoice = async () => {
-  const choice = await inquirer.prompt({
-    name: "cmd",
-    type: "list",
-    choices: [
-      { name: "♻️  Restart Node", value: "restart" },
-      { name: "🗡️  Kill Node", value: "kill" },
-      new inquirer.Separator(),
-      { name: "🔙  Go Back", value: "back" },
-    ],
-    message: "What command would you like to run? ",
-    default: "back",
-  });
-
-  if (choice.cmd == "back") {
-    return;
-  } else {
-    const whichNode = await inquirer.prompt({
-      name: "nodeName",
-      type: "input",
-      message: `Which node would you like to ${choice.cmd}? `,
-    });
-
-    try {
-      await sendIpcMessage({
-        cmd: choice.cmd,
-        nodeName: whichNode.nodeName,
-        text: `Running ${choice.cmd} on ${whichNode.nodeName}`,
-      });
-    } catch (e) {
-      console.error("Error: ");
-      console.error(e.message);
-    }
-  }
-
-  return;
-};
-
 const resolveCommandChoice = async () => {
-  const choice = await inquirer.prompt({
-    name: "cmd",
-    type: "list",
-    choices: [
-      { name: "🆗  Create Block", value: "createblock" },
-      { name: "🆕  Create Unfinalized Block", value: "createUnfinalizedBlock" },
-      { name: "#️⃣   Create N Blocks", value: "createNBlocks" },
-      new inquirer.Separator(),
-      { name: "🔙  Go Back", value: "back" },
-    ],
-    message: `What command would you like to run? `,
-    default: "createBlock",
-  });
-
   const ctx = await (await MoonwallContext.getContext()).connectEnvironment();
-  const api = ctx.providers.find((a) => a.type == "polkadotJs")!.api as ApiPromise;
-  const globalConfig = await importAsyncConfig();
-  const config = globalConfig.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
 
-  // TODO: Support multiple chains on chopsticks
-  const sendNewBlockCmd = async (count: number = 1) => {
-    const port =
-      config.foundation.type == "chopsticks"
-        ? await Promise.all(
-            config.foundation.launchSpec.map(async ({ configPath }) => {
-              const yaml = parse((await fsPromises.readFile(configPath)).toString());
-              return yaml.port || "8000";
-            })
-          )
-        : undefined;
-    const websocketUrl = `ws://127.0.0.1:${port}`;
-    const socket = new WebSocket(websocketUrl);
-    socket.on("open", () => {
-      socket.send(
-        JSON.stringify({ jsonrpc: "2.0", id: 1, method: "dev_newBlock", params: [{ count }] })
-      );
-      socket.close();
-    });
-  };
-
-  switch (choice.cmd) {
-    case "createblock":
-      ctx.foundation == "dev"
-        ? await api.rpc.engine.createBlock(true, true)
-        : ctx.foundation == "chopsticks"
-          ? await sendNewBlockCmd()
-          : undefined;
+  switch (ctx.foundation) {
+    case "dev":
+      await resolveDevInteractiveCmdChoice();
       break;
 
-    case "createUnfinalizedBlock":
-      ctx.foundation == "chopsticks"
-        ? console.log("Not supported")
-        : await api.rpc.engine.createBlock(true, false);
+    case "chopsticks":
+      await resolveChopsticksInteractiveCmdChoice();
       break;
 
-    case "createNBlocks": {
-      const result = await new inquirer.prompt({
-        name: "n",
-        type: "number",
-        message: `How many blocks? `,
-      });
-
-      if (ctx.foundation == "dev") {
-        const executeSequentially = async (remaining: number) => {
-          if (remaining === 0) {
-            return;
-          }
-          await api.rpc.engine.createBlock(true, true);
-          await executeSequentially(remaining - 1);
-        };
-        await executeSequentially(result.n);
-      }
-
-      if (ctx.foundation == "chopsticks") {
-        await sendNewBlockCmd(result.n);
-      }
-
-      break;
-    }
-
-    case "back":
+    case "zombie":
+      await resolveZombieInteractiveCmdChoice();
       break;
   }
-
-  return;
 };
 
 const resolveInfoChoice = async (env: Environment) => {
@@ -400,7 +302,7 @@ const resolveTailChoice = async (env: Environment) => {
   let bottomBarContents = "";
   let switchNode: boolean;
   let zombieContent: string;
-  let zombieNodes: string[] | undefined;
+  let zombieNodes: string[];
 
   const resumePauseProse = [
     `, ${chalk.bgWhite.black("[p]")} Pause tail`,
@@ -420,9 +322,7 @@ const resolveTailChoice = async (env: Environment) => {
   for (;;) {
     clear();
     if (process.env.MOON_ZOMBIE_NODES) {
-      zombieNodes = process.env.MOON_ZOMBIE_NODES
-        ? process.env.MOON_ZOMBIE_NODES.split("|")
-        : undefined;
+      zombieNodes = process.env.MOON_ZOMBIE_NODES.split("|")!;
 
       zombieContent = `, ${chalk.bgWhite.black("[,]")} Next Log, ${chalk.bgWhite.black(
         "[.]"
@@ -441,6 +341,10 @@ const resolveTailChoice = async (env: Environment) => {
       const logFilePath = process.env.MOON_ZOMBIE_NODES
         ? `${process.env.MOON_ZOMBIE_DIR}/${zombieNodes[zombieNodePointer]}.log`
         : process.env.MOON_LOG_LOCATION;
+
+      if (!logFilePath) {
+        throw new Error("No log file path resolved, this should not happen. Please raise defect");
+      }
 
       // eslint-disable-next-line prefer-const
       let currentReadPosition = 0;

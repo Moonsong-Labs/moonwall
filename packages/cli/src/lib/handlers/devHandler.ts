@@ -18,7 +18,10 @@ import {
   alith,
   createEthersTransaction,
   createViemTransaction,
+  jumpBlocksDev,
+  jumpRoundsDev,
 } from "@moonwall/util";
+import { Keyring } from "@polkadot/api";
 import { ApiTypes } from "@polkadot/api/types";
 import { createDevBlock } from "../../internal/foundations/devModeHelpers";
 import { importJsonConfig, isEthereumDevConfig } from "../configReader";
@@ -27,7 +30,6 @@ import {
   interactWithContract,
   interactWithPrecompileContract,
 } from "../contractFunctions";
-import { Keyring } from "@polkadot/api";
 
 export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testCase, logger }) => {
   const config = importJsonConfig();
@@ -61,6 +63,15 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
     };
   };
 
+  const containsPallet = (palletName: string): boolean => {
+    const metadata = context.polkadotJs().runtimeMetadata.asLatest;
+    const systemPalletIndex = metadata.pallets.findIndex(
+      (pallet) => pallet.name.toString() === palletName
+    );
+
+    return systemPalletIndex !== -1;
+  };
+
   const ctx = {
     ...context,
     get isEthereumChain() {
@@ -71,6 +82,10 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
     },
     get pjsApi() {
       return context.polkadotJs();
+    },
+
+    get isParachainStaking() {
+      return containsPallet("ParachainStaking");
     },
 
     get keyring() {
@@ -149,6 +164,17 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
       : async (contractName: string, options?: ContractDeploymentOptions) => {
           return await deployCreateCompiledContract(ctx, contractName, options);
         },
+
+    jumpBlocks: async (blocks: number) => {
+      await jumpBlocksDev(context.polkadotJs(), blocks);
+    },
+
+    jumpRounds: async (rounds: number) => {
+      if (!ctx.isParachainStaking) {
+        throw new Error("ParachainStaking pallet is not enabled");
+      }
+      await jumpRoundsDev(context.polkadotJs(), rounds);
+    },
   } satisfies DevModeContext;
 
   testCases({

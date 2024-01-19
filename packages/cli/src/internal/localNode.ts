@@ -63,6 +63,10 @@ export async function launchNode(cmd: string, args: string[], name: string) {
   });
 
   probe: for (let i = 0; ; i++) {
+    if (!runningNode.pid) {
+      throw new Error("Running node has no PID registered, this is a bug. Please report it.");
+    }
+
     try {
       const ports = await findPortsByPid(runningNode.pid);
       if (ports) {

@@ -315,7 +315,7 @@ export interface ChopsticksContext extends GenericContext {
    *
    * @returns {Promise<void>} A Promise that resolves once the runtime has been upgraded.
    */
-  upgradeRuntime: () => Promise<void>;
+  upgradeRuntime: (providerName?: string) => Promise<void>;
 
   /**
    * Getter that returns true if System.Account is AccountId20 (Ethereum Account length is 20 bytes).
@@ -336,6 +336,14 @@ export interface ChopsticksContext extends GenericContext {
    * Default getter for a connected PolkadotJs ApiPromise instance
    */
   pjsApi: ApiPromise;
+
+  /**
+   * Jump a specified number of ParachainStaking Rounds.
+   *
+   * @param {number} blocksToJump The number of ParachainStaking rounds to jump forward.
+   * @returns {Promise<void>} A Promise that resolves after the operation is fully complete.
+   */
+  jumpRounds?: (options: { rounds: number; providerName?: string }) => Promise<void>;
 }
 
 /**
@@ -351,6 +359,11 @@ export interface DevModeContext extends GenericContext {
    * Getter that returns true if System.Account is AccountId20 (Ethereum Account length is 20 bytes).
    */
   isEthereumChain: boolean;
+
+  /**
+   * Getter that returns true if chain has ParachainStaking pallet.
+   */
+  isParachainStaking: boolean;
 
   /**
    * Getter that returns an object with the default accounts already generated.
@@ -445,6 +458,22 @@ export interface DevModeContext extends GenericContext {
     bytecode: `0x${string}`;
     methods: any;
   }>;
+
+  /**
+   * Jump a specified number of blocks.
+   *
+   * @param {number} blocksToJump The number of blocks to jump forward.
+   * @returns {Promise<void>} A Promise that resolves after the operation is fully complete.
+   */
+  jumpBlocks?: (blocksToJump: number) => Promise<void>;
+
+  /**
+   * Jump a specified number of ParachainStaking Rounds.
+   *
+   * @param {number} blocksToJump The number of ParachainStaking rounds to jump forward.
+   * @returns {Promise<void>} A Promise that resolves after the operation is fully complete.
+   */
+  jumpRounds?: (roundsToJump: number) => Promise<void>;
 }
 
 export type ViemTransactionOptions = TransactionSerializable & {

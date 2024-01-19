@@ -1,4 +1,4 @@
-import "@moonbeam-network/api-augment"
+import "@moonbeam-network/api-augment";
 import { beforeAll, describeSuite, expect, fetchCompiledContract } from "@moonwall/cli";
 import {
   ALITH_ADDRESS,
@@ -10,7 +10,7 @@ import {
   GLMR,
   alith,
   baltathar,
-  deployViemContract,
+  deployViemContract
 } from "@moonwall/util";
 import { BN } from "@polkadot/util";
 import { Wallet, parseEther } from "ethers";
@@ -565,6 +565,50 @@ describeSuite({
         log(`Balance after: ${formatEther(balAfter)}`);
 
         expect(balAfter - balBefore).toBe(parseEther("1.0"));
+      },
+    });
+
+    it({
+      id: "T24",
+      title: "it can jump 10 blocks",
+      test: async function () {
+        const block = (
+          await context.polkadotJs().rpc.chain.getBlock()
+        ).block.header.number.toNumber();
+
+        await context.jumpBlocks!(10);
+
+        const block2 = (
+          await context.polkadotJs().rpc.chain.getBlock()
+        ).block.header.number.toNumber();
+        log(`Previous block #${block}, new block #${block2}`);
+        expect(block2).toBe(block + 10);
+      },
+    });
+
+    it({
+      id: "T25",
+      title: "it can jump ParachainStaking rounds",
+      test: async function () {
+        log(`This chain has parachainStaking: ${context.isParachainStaking}`);
+        const round = (
+          (await context.polkadotJs().query.parachainStaking.round()) as any
+        ).current.toNumber();
+
+        const block = (
+          await context.polkadotJs().rpc.chain.getBlock()
+        ).block.header.number.toNumber();
+
+        await context.jumpRounds!(1);
+        const round2 = (
+          (await context.polkadotJs().query.parachainStaking.round()) as any
+        ).current.toNumber();
+        const block2 = (
+          await context.polkadotJs().rpc.chain.getBlock()
+        ).block.header.number.toNumber();
+        log(`Previous block #${block}, new block #${block2}`);
+        log(`Previous round #${round}, new round #${round2}`);
+        expect(round2).toBe(round + 1);
       },
     });
   },

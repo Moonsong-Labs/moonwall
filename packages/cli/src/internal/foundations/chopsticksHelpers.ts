@@ -1,3 +1,4 @@
+import "@moonbeam-network/api-augment";
 import { ChopsticksBlockCreation, GenericContext } from "@moonwall/types";
 import { WsProvider } from "@polkadot/api";
 import { ApiTypes, AugmentedEvent } from "@polkadot/api/types";
@@ -52,7 +53,7 @@ export async function sendNewBlockAndCheck(
   const api = context.polkadotJs();
   const apiAt = await api.at(newBlock);
 
-  const actualEvents = await apiAt.query.system.events();
+  const actualEvents: any = await apiAt.query.system.events();
   const match = expectedEvents.every((eEvt) => {
     return actualEvents
       .map((aEvt) => {
@@ -74,8 +75,8 @@ export async function createChopsticksBlock(
   options: ChopsticksBlockCreation = { allowFailures: false }
 ) {
   const result = await sendNewBlockRequest(options);
-  const apiAt = await context.polkadotJs().at(result);
-  const actualEvents = await apiAt.query.system.events();
+  const apiAt = await context.polkadotJs(options.providerName).at(result);
+  const actualEvents: any = await apiAt.query.system.events();
 
   if (options && options.expectEvents) {
     const match = options.expectEvents.every((eEvt) => {

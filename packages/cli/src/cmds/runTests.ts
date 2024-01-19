@@ -114,7 +114,7 @@ export async function executeTests(env: Environment, additionalArgs?: object) {
 
     try {
       const folders = env.testFileDir.map((folder) => path.join(".", folder, "/"));
-      resolve(await startVitest("test", folders, { ...options, ...additionalArgs }));
+      resolve((await startVitest("test", folders, { ...options, ...additionalArgs })) as Vitest);
     } catch (e) {
       console.error(e);
       reject(e);
@@ -145,7 +145,7 @@ function addThreadConfig(
 
   if (threads == true && process.env.MOON_RECYCLE !== "true") {
     configWithThreads.fileParallelism = true;
-    configWithThreads.poolOptions.threads = {
+    configWithThreads.poolOptions!.threads = {
       isolate: true,
       minThreads: 1,
       maxThreads: 3,
@@ -156,8 +156,8 @@ function addThreadConfig(
 
   if (typeof threads === "number" && process.env.MOON_RECYCLE !== "true") {
     configWithThreads.fileParallelism = true;
-    configWithThreads.poolOptions.threads.maxThreads = threads;
-    configWithThreads.poolOptions.threads.singleThread = false;
+    configWithThreads.poolOptions!.threads!.maxThreads = threads;
+    configWithThreads.poolOptions!.threads!.singleThread = false;
   }
 
   if (typeof threads === "object" && process.env.MOON_RECYCLE !== "true") {

@@ -53,6 +53,11 @@ async function devBinCheck(env: Environment) {
 
 export async function executeScript(scriptCommand: string, args?: string) {
   const scriptsDir = (await importAsyncConfig()).scriptsDir;
+
+  if (!scriptsDir) {
+    throw new Error("No scriptsDir found in config");
+  }
+
   const files = await fs.promises.readdir(scriptsDir);
 
   try {
