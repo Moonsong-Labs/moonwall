@@ -91,8 +91,8 @@ importers:
         specifier: 1.2.1
         version: 1.2.1(vitest@1.2.1)
       '@zombienet/orchestrator':
-        specifier: 0.0.73
-        version: 0.0.73(@polkadot/util@12.6.2)(@types/node@20.11.5)
+        specifier: 0.0.68
+        version: 0.0.68(@polkadot/util@12.6.2)(@types/node@20.11.5)
       '@zombienet/utils':
         specifier: 0.0.24
         version: 0.0.24(@types/node@20.11.5)(typescript@5.3.3)
@@ -3162,8 +3162,8 @@ packages:
       - vue
     dev: true
 
-  /@zombienet/orchestrator@0.0.73(@polkadot/util@12.6.2)(@types/node@20.11.5):
-    resolution: {integrity: sha512-aQKMES2VpZ3d7L1IjS5mEAmUboWq8YVsG16ZkfP0wfF4ZsdD0ljATs0UefLZ8aqEbZcxD3YIMITEUYZodrtz0w==}
+  /@zombienet/orchestrator@0.0.68(@polkadot/util@12.6.2)(@types/node@20.11.5):
+    resolution: {integrity: sha512-n/Gj1VWGz6W4Phzw5r/rb56uMT3H3B06xRzP+PZJtG2dGMqWAUZP2DcNhLWZ8w3/NEsWrrNTfSejaQvuaUApGg==}
     engines: {node: '>=18'}
     dependencies:
       '@polkadot/api': 10.11.2
