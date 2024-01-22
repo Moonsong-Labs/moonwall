@@ -141,8 +141,8 @@ export async function createDevBlock<
                   section == "ethereum" &&
                   method == "Executed" &&
                   data[2].toString() == result.hash
-              )!
-              .phase!.asApplyExtrinsic!.toString()
+              )
+              ?.phase?.asApplyExtrinsic?.toString() || "-1"
           )
         : blockData.block.extrinsics.findIndex((ext) => ext.hash.toHex() == result.hash);
     // We retrieve the events associated with the extrinsic
