@@ -1,5 +1,13 @@
 # @moonwall/cli
 
+## 4.7.4
+
+### Patch Changes
+
+- be92d6c: Fix upgrades
+  - @moonwall/types@4.7.4
+  - @moonwall/util@4.7.4
+
 ## 4.7.3
 
 ### Patch Changes
