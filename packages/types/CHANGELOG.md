@@ -1,5 +1,11 @@
 # @moonwall/types
 
+## 4.7.1
+
+### Patch Changes
+
+- 6e530df: pkg updates
+
 ## 4.7.0
 
 ### Minor Changes
