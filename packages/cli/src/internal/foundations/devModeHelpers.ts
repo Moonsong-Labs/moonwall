@@ -7,7 +7,7 @@ import {
   generateKeyringPair,
 } from "@moonwall/util";
 import { Keyring } from "@polkadot/api";
-import { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types";
+import type { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types";
 import { RegistryError } from "@polkadot/types-codec/types/registry";
 import { EventRecord } from "@polkadot/types/interfaces";
 import chalk from "chalk";
@@ -130,26 +130,33 @@ export async function createDevBlock<
   ).query.system.events()) as any;
   const blockData = await api.rpc.chain.getBlock(blockResult.hash);
 
+  const getExtIndex = (records: EventRecord[], result: { type: "sub" | "eth"; hash: string }) => {
+    if (result.type == "eth") {
+      const res = records
+        .find(
+          ({ phase, event: { section, method, data } }) =>
+            phase.isApplyExtrinsic &&
+            section == "ethereum" &&
+            method == "Executed" &&
+            data[2].toString() == result.hash
+        )
+        ?.phase?.asApplyExtrinsic?.toString();
+
+      return res === undefined ? undefined : Number(res);
+    } else {
+      return blockData.block.extrinsics.findIndex((ext) => ext.hash.toHex() == result.hash);
+    }
+  };
+
   const result: ExtrinsicCreation[] = results.map((result) => {
-    const extrinsicIndex =
-      result.type == "eth"
-        ? parseInt(
-            allRecords
-              .find(
-                ({ phase, event: { section, method, data } }) =>
-                  phase.isApplyExtrinsic &&
-                  section == "ethereum" &&
-                  method == "Executed" &&
-                  data[2].toString() == result.hash
-              )
-              ?.phase?.asApplyExtrinsic?.toString() || "-1"
-          )
-        : blockData.block.extrinsics.findIndex((ext) => ext.hash.toHex() == result.hash);
+    const extrinsicIndex = getExtIndex(allRecords, result);
+
     // We retrieve the events associated with the extrinsic
     const events = allRecords.filter(
       ({ phase }) =>
-        phase.isApplyExtrinsic && parseInt(phase.asApplyExtrinsic.toString()) === extrinsicIndex
+        phase.isApplyExtrinsic && Number(phase.asApplyExtrinsic.toString()) === extrinsicIndex
     );
+
     const failure = extractError(events);
     return {
       extrinsic: extrinsicIndex! >= 0 ? blockData.block.extrinsics[extrinsicIndex!] : null,
