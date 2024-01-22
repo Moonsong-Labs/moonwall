@@ -1,5 +1,13 @@
 # @moonwall/util
 
+## 4.7.1
+
+### Patch Changes
+
+- 6e530df: pkg updates
+- Updated dependencies [6e530df]
+  - @moonwall/types@4.7.1
+
 ## 4.7.0
 
 ### Patch Changes
