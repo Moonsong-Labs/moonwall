@@ -1,5 +1,13 @@
 # @moonwall/cli
 
+## 4.7.3
+
+### Patch Changes
+
+- 4055c3e: CreateBlock fix v2
+  - @moonwall/types@4.7.3
+  - @moonwall/util@4.7.3
+
 ## 4.7.2
 
 ### Patch Changes
