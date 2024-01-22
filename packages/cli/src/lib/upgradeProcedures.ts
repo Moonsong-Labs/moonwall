@@ -8,7 +8,6 @@ import { sha256 } from "ethers";
 import fs, { existsSync, readFileSync } from "fs";
 import { getRuntimeWasm } from "./binariesHelpers";
 import { cancelReferendaWithCouncil, executeProposalWithCouncil } from "./governanceProcedures";
-import { u32 } from "@polkadot/types-codec";
 
 export async function upgradeRuntimeChopsticks(
   context: ChopsticksContext,
