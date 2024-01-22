@@ -1,5 +1,11 @@
 # @moonwall/util
 
+## 4.7.4
+
+### Patch Changes
+
+- @moonwall/types@4.7.4
+
 ## 4.7.3
 
 ### Patch Changes
