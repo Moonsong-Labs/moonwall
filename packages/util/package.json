@@ -89,7 +89,7 @@
   },
   "peerDependencies": {
     "@polkadot/api": "10.11.2",
-    "vitest": "1.1.3"
+    "vitest": "1.2.1"
   },
   "devDependencies": {
     "@types/debug": "4.1.12",
