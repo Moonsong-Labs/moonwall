@@ -7,7 +7,6 @@ import { PalletDemocracyReferendumInfo } from "@polkadot/types/lookup";
 import { blake2AsHex } from "@polkadot/util-crypto";
 import { alith, baltathar, charleth, dorothy } from "@moonwall/util";
 import { DevModeContext } from "@moonwall/types";
-import { u32 } from "@polkadot/types-codec";
 
 export const COUNCIL_MEMBERS: KeyringPair[] = [baltathar, charleth, dorothy];
 export const COUNCIL_THRESHOLD = Math.ceil((COUNCIL_MEMBERS.length * 2) / 3);
@@ -100,9 +99,7 @@ export const execCouncilProposal = async <
   const proposalIndex =
     index >= 0
       ? index
-      : parseInt(
-          ((await context.polkadotJs().query.councilCollective.proposalCount()) as u32).toString()
-        ) - 1;
+      : (await context.polkadotJs().query.councilCollective.proposalCount()).toNumber() - 1;
   await Promise.all(
     voters.map((voter) =>
       context
@@ -297,17 +294,15 @@ export const execTechnicalCommitteeProposal = async <
 };
 
 export const executeProposalWithCouncil = async (api: ApiPromise, encodedHash: string) => {
-  let nonce = parseInt((await api.rpc.system.accountNextIndex(alith.address)).toString());
-  const referendumNextIndex = parseInt(
-    ((await api.query.democracy.referendumCount()) as u32).toString()
-  );
+  let nonce = (await api.rpc.system.accountNextIndex(alith.address)).toNumber();
+  const referendumNextIndex = (await api.query.democracy.referendumCount()).toNumber();
 
   // process.stdout.write(
   //   `Sending council motion (${encodedHash} ` +
   //     `[threashold: 1, expected referendum: ${referendumNextIndex}])...`
   // );
   const callData =
-    parseInt(((api.consts.system.version as any).specVersion as u32).toString()) >= 2000
+    api.consts.system.version.specVersion.toNumber() >= 2000
       ? { Legacy: encodedHash }
       : encodedHash;
 
@@ -337,14 +332,13 @@ export const executeProposalWithCouncil = async (api: ApiPromise, encodedHash: s
   process.stdout.write(`Waiting for referendum [${referendumNextIndex}] to be executed...`);
   let referenda: PalletDemocracyReferendumInfo | undefined;
   while (!referenda) {
-    referenda = (
-      (await api.query.democracy.referendumInfoOf.entries()).find(
+    referenda = (await api.query.democracy.referendumInfoOf.entries())
+      .find(
         (ref: any) =>
           ref[1].unwrap().isFinished &&
-          parseInt(api.registry.createType("u32", ref[0].toU8a().slice(-4)).toString()) ==
-            referendumNextIndex
-      )?.[1] as any
-    ).unwrap();
+          api.registry.createType("u32", ref[0].toU8a().slice(-4)).toNumber() == referendumNextIndex
+      )?.[1]
+      .unwrap();
     await new Promise((resolve) => setTimeout(resolve, 1000));
   }
   process.stdout.write(`${referenda.asFinished.approved ? `✅` : `❌`} \n`);
