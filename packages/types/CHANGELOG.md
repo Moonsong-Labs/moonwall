@@ -1,5 +1,14 @@
 # @moonwall/types
 
+## 4.7.0
+
+### Minor Changes
+
+- 978f731: Chopsticks Features
+  - [#343](https://github.com/Moonsong-Labs/moonwall/issues/343) Fixed
+  - [#342](https://github.com/Moonsong-Labs/moonwall/issues/342) Implemented
+  - [#140](https://github.com/Moonsong-Labs/moonwall/issues/140) Implemented
+
 ## 4.6.0
 
 ### Minor Changes
