@@ -75,7 +75,7 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
         log("Using governance...");
         // TODO: remove support for old style after all chains upgraded to 2400+
         const proposal =
-          parseInt(((api.consts.system.version as any).specVersion as u32).toString()) >= 2400
+          api.consts.system.version.specVersion.toNumber() >= 2400
             ? (api.tx.parachainSystem as any).authorizeUpgrade(blake2AsHex(code), false)
             : (api.tx.parachainSystem as any).authorizeUpgrade(blake2AsHex(code));
         const encodedProposal = proposal.method.toHex();
@@ -123,7 +123,7 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
                   ref[1].unwrap().asOngoing.proposal.asLookup.hash.toHex() == encodedHash
               )
               .map((ref) =>
-                parseInt(api.registry.createType("u32", ref[0].toU8a().slice(-4)).toString())
+                api.registry.createType("u32", ref[0].toU8a().slice(-4)).toNumber()
               )?.[0]
           : referendum
               .filter(
@@ -132,7 +132,7 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
                   (ref[1].unwrap().asOngoing as any).proposalHash.toHex() == encodedHash
               )
               .map((ref) =>
-                parseInt(api.registry.createType("u32", ref[0].toU8a().slice(-4)).toString())
+                api.registry.createType("u32", ref[0].toU8a().slice(-4)).toNumber()
               )?.[0];
 
         if (referendaIndex !== null && referendaIndex !== undefined) {
