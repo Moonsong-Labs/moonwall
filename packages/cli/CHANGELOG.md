@@ -1,5 +1,13 @@
 # @moonwall/cli
 
+## 4.7.5
+
+### Patch Changes
+
+- cc4230b: roll back gov updates
+  - @moonwall/types@4.7.5
+  - @moonwall/util@4.7.5
+
 ## 4.7.4
 
 ### Patch Changes
