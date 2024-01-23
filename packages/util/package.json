@@ -25,34 +25,30 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "require": "./dist/index.cjs",
       "import": "./dist/index.js"
     }
   },
-  "main": "dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "engines": {
-    "node": ">=14.16.0",
+    "node": ">=20",
     "pnpm": ">=7"
   },
   "files": [
     "dist",
     "bin",
     "*.d.ts",
-    "*.d.cts",
-    "*.mjs",
-    "*.cjs"
+    "*.mjs"
   ],
   "scripts": {
     "clean": "rm -rf dist && rm -rf node_modules",
-    "build": "pnpm exec rm -rf dist && tsup src --format cjs,esm  && pnpm generate-types",
-    "generate-types": "tsup src --format cjs,esm --dts ",
+    "build": "pnpm exec rm -rf dist && tsup src --format esm  && pnpm generate-types",
+    "generate-types": "tsup src --format esm --dts ",
     "lint": "eslint ./src/**/*.ts",
     "lint:fix": "eslint './src/**/*.ts' --fix",
     "fmt": "pnpm prettier --check --ignore-path ../../.prettierignore '**/*.(yml|js|ts|json)'",
     "fmt:fix": "pnpm prettier --write --ignore-path ../../.prettierignore '**/*.(yml|js|ts|json)'",
-    "watch": "tsup src --format cjs,esm --dts --watch",
+    "watch": "tsup src --format esm --dts --watch",
     "typecheck": "pnpm exec tsc --noEmit",
     "prepublish": "pnpm run build && pnpm run generate-types"
   },

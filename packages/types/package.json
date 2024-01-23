@@ -25,30 +25,26 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "require": "./dist/index.cjs",
       "import": "./dist/index.js"
     }
   },
-  "main": "dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "engines": {
-    "node": ">=14.16.0",
+    "node": ">=20",
     "pnpm": ">=7"
   },
   "files": [
     "dist",
     "bin",
     "*.d.ts",
-    "*.d.cts",
-    "*.mjs",
-    "*.cjs"
+    "*.mjs"
   ],
   "scripts": {
     "clean": "rm -rf dist && rm -rf node_modules",
-    "build": "rm -rf dist && tsup src --format cjs,esm  && pnpm generate-types",
-    "generate-types": "tsup src --format cjs,esm --dts  && pnpm schema && pnpm typecheck",
-    "watch": "tsup src --format cjs,esm --dts --watch",
+    "build": "rm -rf dist && tsup src --format esm && pnpm generate-types",
+    "generate-types": "tsup src --format esm --dts && pnpm schema && pnpm typecheck",
+    "watch": "tsup src --format esm --dts --watch",
     "typecheck": "tsc --noEmit",
     "lint": "eslint ./src/**/*.ts",
     "lint:fix": "eslint './src/**/*.ts' --fix",
