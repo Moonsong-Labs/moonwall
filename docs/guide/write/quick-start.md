@@ -3,15 +3,25 @@
 Let's write a super simple test case that we'll run in the 
 [Quick Start Running Tests](/guide/test/quick-start) Section. 
 
-## Moonwall Utils
+### Moonwall Utils
 
 Moonwall utils is a utils package with helpful constants and various functions for Moonwall. In the test file you can refer to some pre-funded development accounts like ALITH and BALTATHAR which can be easily imported from ```@moonwall/util```
 
-We use describeSuite to define our test suite, similar to how you would use Mocha in Javascript. 
+We use `describeSuite` to define our test suite, similar to how you would use Mocha in Javascript. We also need to explicity import `expect` from moonwall, as we'll use this to check the validity of our test cases.
 
 ```typescript
-import {describeSuite} from "@moonwall/cli"
-import {BALTATHAR_ADDRESS, GLMR} from "@moonwall/util"
+import {describeSuite, expect } from "@moonwall/cli"
+import {alith, GLMR} from "@moonwall/util"
+```
+
+### Additional Imports
+
+There are a few additional imports that are a good idea to have. You'll likely want to query the Polkadot API for blockchain state. We also use ether `utils` for `parseEther`.  
+
+```typescript
+import { utils } from "ethers";
+import { ApiPromise } from "@polkadot/api";
+import "@polkadot/api-augment";
 ```
 
 
@@ -32,12 +42,19 @@ describeSuite({
 
 ### Write Test Cases
 
-We are going to write a basic test case that transfers some funds to Baltathar (which is prefunded account that exists on Moonbeam local dev nodes). Be sure to give the test case an id and a name that makes sense. Then we'll produce a block. 
+Let's write a basic test case that transfers some funds to an empty dummy account. We assert that the initial balance of the dummy account is 0, then we transfer some funds to it. We'll create a block and then ensure that our final balances are consistent with what we expect.
 
 ```typescript
 it ({id: "T1", title: "Demo test case", test: async()=> {
-			await context.ethers().sendTransaction({to:BALTATHAR_ADDRESS, value: 10n * GLMR });
-			await context.createBlock();
+
+            const balanceBefore = (await api.query.system.account(DUMMY_ACCOUNT)).data.free;
+            expect(balanceBefore.toString()).toEqual("0");
+
+            await context.ethers().sendTransaction({to:DUMMY_ACCOUNT, value: utils.parseEther("1").toString() });
+            await context.createBlock();
+
+            const balanceAfter = (await api.query.system.account(DUMMY_ACCOUNT)).data.free;
+            expect(balanceAfter.sub(balanceBefore).toString()).toEqual(utils.parseEther("1").toString());
 		} })
 ``` 
 
