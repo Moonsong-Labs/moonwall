@@ -20,7 +20,7 @@ You'll need to give a name to your environment and you'll need to specify a dire
          ],
 ```
 
-For more information about each of the above parameters, please see environment configuration. 
+For more information about each of the above parameters, please see [environment configuration](/config/environment). 
 
 ### Foundation
 
@@ -38,6 +38,8 @@ For this quick start, we've chosen the dev foundation, which utilizes a local de
             }]
          },
 ```
+
+For more information about each of the above parameters, please see [foundation configuration](/config/foundation). 
 
 ### Connections and Providers
 
