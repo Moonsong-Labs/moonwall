@@ -12,25 +12,10 @@ Moonwall offers five different foundations as follows:
 
 - The Dev foundation is for running tests on a local development node.
 - Assumes manual seal (a block will be produced only when you specifically direct the node to produce one).
+- Moonwall will check to see if you already have a dev node running before trying to start its own. 
 
 ::: tip
 Dev is great for repeated lightweight testing, e.g. debugging
-:::
-
-### Read only: 
-
-- This option does not start any networks but relies on networks that are already stood up.
-- You *can* submit transactions to live networks but it is not recommended as automated tests will quickly drain wallets (even testnet wallets).
-- Also used for smoke tests.
-
-### Zombie
-
-- Uses [ParityTech's ZombieNet framework](https://github.com/paritytech/zombienet){target=_blank} to run a multi-node network
-- Import a zombienet config file, such as this [ZombieNet example config file](https://paritytech.github.io/zombienet/cli/spawn.html){target=_blank}
-- Can launch multiple blockchains, for example, a relaychain with several parachains or multiple ContainerChains with Tanssi.
-
-::: tip
-Zombie is the ideal foundation for testing cross chain interactions including XCM.
 :::
 
 ### Chopsticks:
@@ -45,8 +30,29 @@ Zombie is the ideal foundation for testing cross chain interactions including XC
 Chopsticks is ideal for testing runtime upgrades and substrate extrinsics. It's not suited for EVM calls.
 :::
 
+### Read only: 
+
+- This option does not start any networks but relies on networks that are already running. This applies to all networks, including local dev nodes, live testnets, and more.
+- You *can* submit transactions to live networks but it is not recommended as automated tests will quickly drain wallets (even testnet wallets).
+- Also used for smoke tests.
+
+::: tip
+Use Read Only if Moonwall doesn't need to start any networks - you've already got it covered.
+:::
+
+### Zombie
+
+- Uses [ParityTech's ZombieNet framework](https://github.com/paritytech/zombienet){target=_blank} to run a multi-node network
+- Import a zombienet config file, such as this [ZombieNet example config file](https://paritytech.github.io/zombienet/cli/spawn.html){target=_blank}
+- Can launch multiple blockchains, for example, a relaychain with several parachains or multiple ContainerChains with Tanssi.
+
+::: tip
+Zombie is the ideal foundation for testing cross chain interactions including XCM.
+:::
+
+
 ### Fork:
 
-- Coming soon! Will be part of a new way of forking the network with a real client
+- 🚧 Not yet implemented! Will be part of a new way of forking the network with a real client
 
 ![Foundation image](/foundation.png)
