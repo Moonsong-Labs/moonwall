@@ -1,6 +1,6 @@
 # Environment Configuration
 
-You'll likely be setting up your environment configuration alongside your Moonwall Config file. Let's dive into each of the parameters you can use when setting up your environment.
+You'll need to set up your environment configuration while getting your Moonwall Config file sorted. Let's dive into each of the parameters you can use when setting up your environment.
 
 ## Parameters
 
@@ -16,9 +16,9 @@ You'll likely be setting up your environment configuration alongside your Moonwa
 - **connections?** * ProviderConfig[]*: An optional array of ProviderConfig objects.
 - **multiThreads?** *boolean*, *number*, or *object*: An optional boolean to indicate if multi-threading is enabled. Optionally, you can specify your own threadPool spec using a PoolOptions config object. See [poolOptions](https://vitest.dev/config/#pooloptions){target=blank} for more info. 
 - **contracts?** *string*: Path to directory containing smart contracts for testing against.
-- **runScripts?** *string[]*: An optional array of scripts to run before testing.
-
-
+- **defaultSigner?** *{Substrate keyring type, privateKey}* Allows you to specify the kind of signer and the private key with which to sign and send transactions during the createBlock() function. The default signer can be of type *ethereum*, *sr25519*, or *ed25519* For more info about each, see [Polkadot Keyring docs](https://polkadot.js.org/docs/keyring/start/sign-verify/){target=blank}
+- **defaultAllowFailures?** *boolean*: Toggle whether createBlock() will throw when extrinsic errors inside.
+- **defaultFinalization?** *boolean*:Toggle whether createBlock() will finalize blocks by default or not.
 
 ### Dev
 

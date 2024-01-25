@@ -41,6 +41,7 @@ export function sidebarGuide(): DefaultTheme.SidebarItem[] {
       base: "/config/",
       items: [
         { text: "Environment", link: "environment" },
+        { text: "Foundation", link: "foundation" },
         { text: "moonwall-config", link: "moonwall-config" },
       ],
     },
