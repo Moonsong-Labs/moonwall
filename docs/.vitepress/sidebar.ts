@@ -14,7 +14,15 @@ export function sidebarGuide(): DefaultTheme.SidebarItem[] {
         { text: "Networks Supported", link: "networks" },
       ],
     },
-
+    {
+      text: "Writing Tests",
+      collapsed: false,
+      base: "/guide/write/",
+      items: [
+        { text: "Quick Start", link: "quick-start" },
+        { text: "Context Functions", link: "context-functions" },
+      ],
+    },
     {
       text: "Running Tests",
       collapsed: false,
@@ -24,15 +32,6 @@ export function sidebarGuide(): DefaultTheme.SidebarItem[] {
         { text: "Test Reports", link: "reporting" },
         { text: "Debugging Tests", link: "debug" },
         { text: "For CI", link: "ci" },
-      ],
-    },
-    {
-      text: "Writing Tests",
-      collapsed: false,
-      base: "/guide/write/",
-      items: [
-        { text: "Quick Start", link: "quick-start" },
-        { text: "Context Functions", link: "context-functions" },
       ],
     },
     {

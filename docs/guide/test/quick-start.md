@@ -43,7 +43,7 @@ For more information about each of the above parameters, please see [foundation 
 
 ### Connections and Providers
 
-We've defined here our endpoint information and set up two connections, one that uses the polkadotJs provider and another that uses the Ethers provider.
+We've defined here our endpoint information and set up two connections, one that uses the polkadotJs provider and another that uses the Ethers provider. Of course, if you don't have a need for the Ethers connection, you don't need to include it. 
 
 ```json
 {
