@@ -46,19 +46,37 @@ it ({id: "T1", title: "Demo test case", test: async()=> {
 Once all is said and done your simple test file should look like the below. Remember, this is a simple demo test case and it is not refined or comprehensive. 
 
 ```typescript
-import {describeSuite} from "@moonwall/cli"
-import {BALTATHAR_ADDRESS, GLMR} from "@moonwall/util"
+import {describeSuite, expect } from "@moonwall/cli";
+import {alith, GLMR} from "@moonwall/util";
+import { utils } from "ethers";
+import { ApiPromise } from "@polkadot/api";
+import "@polkadot/api-augment";
 
 describeSuite({
 	id: "D1",
 	title: "Demo suite",
 	foundationMethods: "dev",
 	testCases: ({it, context, log})=> {
+        let api: ApiPromise;
+        const DUMMY_ACCOUNT = "0x11d88f59425cbc1867883fcf93614bf70e87E854";
+
+        beforeAll(() => {
+          api = context.polkadotJs();
+        });
+
 
 		it ({id: "T1", title: "Demo test case", test: async()=> {
-			await context.ethers().sendTransaction({to:BALTATHAR_ADDRESS, value: 10n * GLMR });
-			await context.createBlock();
+
+            const balanceBefore = (await api.query.system.account(DUMMY_ACCOUNT)).data.free;
+            expect(balanceBefore.toString()).toEqual("0");
+            log("balance before: " + balanceBefore);
+            await context.ethers().sendTransaction({to:DUMMY_ACCOUNT, value: utils.parseEther("1").toString() });
+            await context.createBlock();
+            const balanceAfter = (await api.query.system.account(DUMMY_ACCOUNT)).data.free;
+            log("balance after: " + balanceAfter);
+            expect(balanceAfter.sub(balanceBefore).toString()).toEqual(utils.parseEther("1").toString());
 		} })
+
 	}
 })
 ```
