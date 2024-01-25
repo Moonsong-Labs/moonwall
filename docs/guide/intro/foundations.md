@@ -1,16 +1,16 @@
 # All About Foundations
 
-## What are foundations?
+## What are Foundations?
 
-Foundations are bundlings of configurations and presets that will (hopefully) make your life easier by allowing you to quickly execute tests under different assumptions. For more information about each foundation, continue reading below. 
+Foundations are bundlings of configurations and presets that will (hopefully) make your life easier by allowing you to quickly execute tests under different assumptions. For more information about each Foundation, continue reading below. 
 
 ## Foundations Offered
 
-Moonwall offers five different foundations as follows:
+Moonwall offers five different Foundations as follows:
 
 ### Dev
 
-- The Dev foundation is for running tests on a local development node.
+- The Dev Foundation is for running tests on a local development node.
 - Assumes manual seal (a block will be produced only when you specifically direct the node to produce one).
 - Moonwall will check to see if you already have a dev node running before trying to start its own. 
 
@@ -42,12 +42,12 @@ Use Read Only if Moonwall doesn't need to start any networks - you've already go
 
 ### Zombie
 
-- Uses [ParityTech's ZombieNet framework](https://github.com/paritytech/zombienet){target=_blank} to run a multi-node network
+- Uses [ParityTech's ZombieNet framework](https://github.com/paritytech/zombienet){target=_blank} to start a fresh multi-node network on your local machine
 - Import a zombienet config file, such as this [ZombieNet example config file](https://paritytech.github.io/zombienet/cli/spawn.html){target=_blank}
 - Can launch multiple blockchains, for example, a relaychain with several parachains or multiple ContainerChains with Tanssi.
 
 ::: tip
-Zombie is the ideal foundation for testing cross chain interactions including XCM.
+Zombie is the ideal Foundation for testing cross chain interactions including XCM.
 :::
 
 
