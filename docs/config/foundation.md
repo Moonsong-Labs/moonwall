@@ -2,7 +2,11 @@
 
 Here are the parameters that you can configure in your Moonwall Config file when setting up your Foundations.
 
-##
+## Generic Foundation Spec
+
+- **name** *string*: The name of the launch spec.
+- **running** *boolean*: Optional. This is currently UNUSED.
+- **options** *string[]*: Optional. An array of options for the launch spec.
 
 ## Dev
 
