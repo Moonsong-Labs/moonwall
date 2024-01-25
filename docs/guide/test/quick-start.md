@@ -108,3 +108,18 @@ After you've assembled your config file and written your test suite now it's tim
 - Review the results
 
 ![run tests](/run-tests.png)
+
+### Network already running?
+
+If the network that you're running your tests against is already up and running locally, Moonwall will detect this, and you'll get a message such as:
+
+```bash
+The following processes are already running:
+moonbeam - pid: 96050, listenPorts: [30333, 9615, 9944]
+```
+
+Moonwall will ask you how you'd like to continue, and you have three options as follows:
+
+1. 🪓  **Kill processes and continue** - Stop your existing network, spin up a new one as defined in your Moonwall Config, and proceed to run the tests.
+2. ➡️   **Continue (and let processes live)** - Keep your existing network running, and proceed to run the tests.
+3. 🛑  **Abort (and let processes live)** - Keep your existing network running, and do not run tests. 
