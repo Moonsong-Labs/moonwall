@@ -4,6 +4,11 @@
 
 Providers in the context of Moonwall assume the same identity as providers in the greater blockchain development space. A provider is a tool that allows you or your application to connect to a blockchain network and simplifies the low-level details of the process. A provider handles submitting transactions, reading state, and more. 
 
+
+## Working with Providers
+
+In Moonwall, you can interact with your preferred provider as your normally would. Don't forget to import your provider into your test file and import any relevant helpers, such as `utils` from `ethers` or `ApiPromise` from `@polkadot/api`.
+
 ## Providers supported
 
 At time of writing, Moonwall supports the following providers:

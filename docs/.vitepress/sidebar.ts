@@ -36,6 +36,15 @@ export function sidebarGuide(): DefaultTheme.SidebarItem[] {
       ],
     },
     {
+      text: "Config",
+      collapsed: true,
+      base: "/config/",
+      items: [
+        { text: "Environment", link: "environment" },
+        { text: "moonwall-config", link: "moonwall-config" },
+      ],
+    },
+    {
       text: "Commands",
       collapsed: false,
       base: "/guide/cmd/",
