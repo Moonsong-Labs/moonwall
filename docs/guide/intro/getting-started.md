@@ -9,8 +9,9 @@ These steps are not required for projects that already have Moonwall integrated.
 Skip to [Testing - Quick Start](../test/quick-start) for advice on running tests in Moonwall.
 :::
 
-- [Node.js](https://nodejs.org/) version 18 or higher.
+- [Node.js](https://nodejs.org/){target=_blank} version 18 or higher.
 - MacOS or Linux Operating system (WSL counts!)
+- [pNPM](https://pnpm.io/){target=_blank}, a fast and efficient package manager
 
 Moonwall should be installed as dependency to the project under test.
 
@@ -33,6 +34,12 @@ npm add -D @moonwall/cli
 ```
 
 :::
+
+You can install Moonwall globally with the following command: 
+
+```sh
+pnpm -g i @moonwall/cli
+```
 
 ## Initializing Moonwall
 

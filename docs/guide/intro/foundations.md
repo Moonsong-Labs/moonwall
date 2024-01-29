@@ -20,10 +20,10 @@ Dev is great for repeated lightweight testing, e.g. debugging
 
 ### Chopsticks:
 
-- Uses [Chopsticks](https://github.com/AcalaNetwork/chopsticks){target=_blank} to start a lazily-forked network. Lazily-forking a network refers to loading the runtime of the live chain but only retrieving state when needed. The major advantage is that spares you from downloading the entire blockchain (hundreds of GBs)
-- Imports a Chopsticks config file, such as the following [example Chopsticks config](https://github.com/AcalaNetwork/chopsticks/tree/master/configs){target=_blank} 
-- You can launch a single blockchain or multiple blockchains
-- Performs state transitions locally and updates local state
+- Uses [Chopsticks](https://github.com/AcalaNetwork/chopsticks){target=_blank} to start a lazily-forked network. Lazily-forking a network refers to loading the runtime of the live chain but only retrieving state when needed. The major advantage is that spares you from downloading the entire blockchain (hundreds of GBs).
+- Imports a Chopsticks config file, such as the following [example Chopsticks config](https://github.com/AcalaNetwork/chopsticks/tree/master/configs){target=_blank}. 
+- You can launch a single blockchain or multiple blockchains.
+- Performs state transitions locally and updates local state.
 - No client RPCs, no MetaMask support. 
 
 ::: tip
@@ -42,8 +42,8 @@ Use Read Only if Moonwall doesn't need to start any networks - you've already go
 
 ### Zombie
 
-- Uses [ParityTech's ZombieNet framework](https://github.com/paritytech/zombienet){target=_blank} to start a fresh multi-node network on your local machine
-- Import a zombienet config file, such as this [ZombieNet example config file](https://paritytech.github.io/zombienet/cli/spawn.html){target=_blank}
+- Uses [ParityTech's ZombieNet framework](https://github.com/paritytech/zombienet){target=_blank} to start a fresh multi-node network on your local machine.
+- Import a zombienet config file, such as this [ZombieNet example config file](https://paritytech.github.io/zombienet/cli/spawn.html){target=_blank}.
 - Can launch multiple blockchains, for example, a relaychain with several parachains or multiple ContainerChains with Tanssi.
 
 ::: tip
@@ -53,6 +53,4 @@ Zombie is the ideal Foundation for testing cross chain interactions including XC
 
 ### Fork:
 
-- 🚧 Not yet implemented! Will be part of a new way of forking the network with a real client
-
-![Foundation image](/foundation.png)
+- 🚧 Not yet implemented! Will be part of a new way of forking the network with a real client.
