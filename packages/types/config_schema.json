@@ -1,660 +1,684 @@
 {
-	"$schema": "http://json-schema.org/draft-07/schema#",
-	"definitions": {
-		"Bottleneck.IORedisConnection": {
-			"type": "object"
-		},
-		"Bottleneck.RedisConnection": {
-			"type": "object"
-		},
-		"Bottleneck.Strategy": {
-			"type": "object"
-		},
-		"ChopsticksLaunchSpec": {
-			"description": "A launch specification object for the \"chopsticks\" foundation type.",
-			"properties": {
-				"allowUnresolvedImports": {
-					"description": "An optional flag to NOT throw when the host fails to export a function expected by the runtime.",
-					"type": "boolean"
-				},
-				"buildBlockMode": {
-					"description": "An optional block building mode, can be \"batch\", \"manual\" or \"instant\".\nThis is only supported for single mode chopsticks.",
-					"enum": ["batch", "instant", "manual"],
-					"type": "string"
-				},
-				"configPath": {
-					"description": "The path to the config file.",
-					"type": "string"
-				},
-				"name": {
-					"description": "The name of the launch spec.",
-					"type": "string"
-				},
-				"options": {
-					"description": "An optional array of options for the launch spec.",
-					"items": {
-						"type": "string"
-					},
-					"type": "array"
-				},
-				"retainAllLogs": {
-					"description": "An optional flag to retain node logs from previous runs.",
-					"type": "boolean"
-				},
-				"running": {
-					"description": "UNUSED",
-					"type": "boolean"
-				},
-				"type": {
-					"description": "An optional type of either \"relaychain\" or \"parachain\".",
-					"enum": ["parachain", "relaychain"],
-					"type": "string"
-				},
-				"wasmOverride": {
-					"description": "An optional WebAssembly override.",
-					"type": "string"
-				},
-				"wsPort": {
-					"description": "An optional WebSocket port.\nQuirk of Chopsticks is that port option is only for single mode not xcm.",
-					"type": "number"
-				}
-			},
-			"type": "object"
-		},
-		"DevLaunchSpec": {
-			"description": "A launch specification object for the \"dev\" foundation type.",
-			"properties": {
-				"binPath": {
-					"description": "The path to the binary file.",
-					"type": "string"
-				},
-				"disableDefaultEthProviders": {
-					"description": "Determines if the default Ethereum provider connections should be disabled.\nWhen set to true, the framework will not automatically connect the Ethereum providers.\nDefault behavior (when unset or set to false) is to connect with Ethers, Viem & Web3 frameworks.\n\nNote: This also acts as a feature gate for context methods like createTxn and readPrecompile.",
-					"type": "boolean"
-				},
-				"name": {
-					"description": "The name of the launch spec.",
-					"type": "string"
-				},
-				"newRpcBehaviour": {
-					"description": "Launch node using rpc-port parameter instead of ws-port.",
-					"type": "boolean"
-				},
-				"options": {
-					"description": "An optional array of options for the launch spec.",
-					"items": {
-						"type": "string"
-					},
-					"type": "array"
-				},
-				"ports": {
-					"description": "An optional object with p2pPort, wsPort, and rpcPort.",
-					"properties": {
-						"p2pPort": {
-							"description": "The port for peer-to-peer (P2P) communication.",
-							"type": "number"
-						},
-						"rpcPort": {
-							"description": "The port for remote procedure call (RPC).",
-							"type": "number"
-						},
-						"wsPort": {
-							"description": "The port for WebSocket communication (soon deprecated)",
-							"type": "number"
-						}
-					},
-					"type": "object"
-				},
-				"retainAllLogs": {
-					"description": "An optional flag to retain node logs from previous runs.",
-					"type": "boolean"
-				},
-				"running": {
-					"description": "UNUSED",
-					"type": "boolean"
-				}
-			},
-			"type": "object"
-		},
-		"IFoundation": {
-			"anyOf": [
-				{
-					"properties": {
-						"launchSpec": {
-							"items": {
-								"$ref": "#/definitions/DevLaunchSpec"
-							},
-							"type": "array"
-						},
-						"type": {
-							"const": "dev",
-							"type": "string"
-						}
-					},
-					"type": "object"
-				},
-				{
-					"properties": {
-						"launchSpec": {
-							"items": {
-								"$ref": "#/definitions/ChopsticksLaunchSpec"
-							},
-							"type": "array"
-						},
-						"rtUpgradePath": {
-							"type": "string"
-						},
-						"type": {
-							"const": "chopsticks",
-							"type": "string"
-						}
-					},
-					"type": "object"
-				},
-				{
-					"properties": {
-						"rtUpgradePath": {
-							"type": "string"
-						},
-						"type": {
-							"const": "zombie",
-							"type": "string"
-						},
-						"zombieSpec": {
-							"$ref": "#/definitions/ZombieLaunchSpec"
-						}
-					},
-					"type": "object"
-				},
-				{
-					"properties": {
-						"launchSpec": {
-							"$ref": "#/definitions/ReadOnlyLaunchSpec"
-						},
-						"type": {
-							"const": "read_only",
-							"type": "string"
-						}
-					},
-					"type": "object"
-				},
-				{
-					"properties": {
-						"type": {
-							"const": "fork",
-							"type": "string"
-						}
-					},
-					"type": "object"
-				}
-			],
-			"description": "The foundation configuration for the environment. It can be of several types including \"dev\", \"chopsticks\", \"zombie\", \"read_only\", or \"fork\"."
-		},
-		"IRpcBundle": {
-			"additionalProperties": {
-				"$ref": "#/definitions/IRpcModule"
-			},
-			"description": "Interface for defining RPC bundles.\nIt is a dictionary where each key is a module name and the value is an IRpcModule.",
-			"type": "object"
-		},
-		"IRpcMethod": {
-			"description": "Interface for defining RPC methods.",
-			"properties": {
-				"description": {
-					"type": "string"
-				},
-				"params": {
-					"items": {
-						"$ref": "#/definitions/IRpcParam"
-					},
-					"type": "array"
-				},
-				"type": {
-					"type": "string"
-				}
-			},
-			"type": "object"
-		},
-		"IRpcModule": {
-			"additionalProperties": {
-				"$ref": "#/definitions/IRpcMethod"
-			},
-			"description": "Interface for defining RPC modules.\nIt is a dictionary where each key is a method name and the value is an IRpcMethod.",
-			"type": "object"
-		},
-		"IRpcParam": {
-			"description": "Interface for defining RPC parameters.",
-			"properties": {
-				"isOptional": {
-					"type": "boolean"
-				},
-				"name": {
-					"type": "string"
-				},
-				"type": {
-					"type": "string"
-				}
-			},
-			"type": "object"
-		},
-		"LogType": {
-			"enum": ["silent", "table", "text"],
-			"type": "string"
-		},
-		"OrcOptionsInterface": {
-			"properties": {
-				"dir": {
-					"type": "string"
-				},
-				"force": {
-					"type": "boolean"
-				},
-				"inCI": {
-					"type": "boolean"
-				},
-				"logType": {
-					"$ref": "#/definitions/LogType"
-				},
-				"monitor": {
-					"type": "boolean"
-				},
-				"setGlobalNetwork": {
-					"type": "object"
-				},
-				"spawnConcurrency": {
-					"type": "number"
-				}
-			},
-			"type": "object"
-		},
-		"ProviderConfig": {
-			"description": "The configuration object for a provider.",
-			"properties": {
-				"additionalTypes": {
-					"additionalProperties": {
-						"additionalProperties": {
-							"type": "string"
-						},
-						"type": "object"
-					},
-					"description": "An optional collection of additional types.",
-					"type": "object"
-				},
-				"endpoints": {
-					"description": "An array of endpoint URLs.",
-					"items": {
-						"type": "string"
-					},
-					"type": "array"
-				},
-				"name": {
-					"description": "The name of the provider.",
-					"type": "string"
-				},
-				"rpc": {
-					"$ref": "#/definitions/IRpcBundle",
-					"description": "An optional RPC bundle."
-				},
-				"type": {
-					"$ref": "#/definitions/ProviderType",
-					"description": "The type of the provider."
-				}
-			},
-			"type": "object"
-		},
-		"ProviderType": {
-			"description": "The type of provider. Can be \"polkadotJs\", \"ethers\", \"web3\", \"viem\"",
-			"enum": ["ethers", "polkadotJs", "viem", "web3"],
-			"type": "string"
-		},
-		"ReadOnlyLaunchSpec": {
-			"description": "A launch specification object for the \"read_only\" foundation type.",
-			"properties": {
-				"disableRuntimeVersionCheck": {
-					"description": "Disable runtime version check.\nRT Version check is enabled by default.",
-					"type": "boolean"
-				},
-				"name": {
-					"description": "The name of the launch spec.",
-					"type": "string"
-				},
-				"options": {
-					"description": "An optional array of options for the launch spec.",
-					"items": {
-						"type": "string"
-					},
-					"type": "array"
-				},
-				"rateLimiter": {
-					"anyOf": [
-						{
-							"additionalProperties": {},
-							"properties": {
-								"Promise": {
-									"description": "Override the Promise library used by Bottleneck."
-								},
-								"Redis": {
-									"description": "Optional Redis/IORedis library from `require('ioredis')` or equivalent. If not, Bottleneck will attempt to require Redis/IORedis at runtime."
-								},
-								"clearDatastore": {
-									"description": "When set to `true`, on initial startup, the limiter will wipe any existing Bottleneck state data on the Redis db.",
-									"type": "boolean"
-								},
-								"clientOptions": {
-									"description": "This object is passed directly to the redis client library you've selected."
-								},
-								"clusterNodes": {
-									"description": "**ioredis only.** When `clusterNodes` is not null, the client will be instantiated by calling `new Redis.Cluster(clusterNodes, clientOptions)`."
-								},
-								"connection": {
-									"anyOf": [
-										{
-											"$ref": "#/definitions/Bottleneck.RedisConnection"
-										},
-										{
-											"$ref": "#/definitions/Bottleneck.IORedisConnection"
-										}
-									],
-									"description": "Bottleneck connection object created from `new Bottleneck.RedisConnection` or `new Bottleneck.IORedisConnection`."
-								},
-								"datastore": {
-									"description": "Where the limiter stores its internal state. The default (`local`) keeps the state in the limiter itself. Set it to `redis` to enable Clustering.",
-									"type": "string"
-								},
-								"highWater": {
-									"description": "How long can the queue get? When the queue length exceeds that value, the selected `strategy` is executed to shed the load.",
-									"type": "number"
-								},
-								"id": {
-									"description": "Optional identifier",
-									"type": "string"
-								},
-								"maxConcurrent": {
-									"description": "How many jobs can be running at the same time.",
-									"type": "number"
-								},
-								"minTime": {
-									"description": "How long to wait after launching a job before launching another one.",
-									"type": "number"
-								},
-								"penalty": {
-									"description": "The `penalty` value used by the `Bottleneck.strategy.BLOCK` strategy.",
-									"type": "number"
-								},
-								"rejectOnDrop": {
-									"description": "Set to true to leave your failed jobs hanging instead of failing them.",
-									"type": "boolean"
-								},
-								"reservoir": {
-									"description": "How many jobs can be executed before the limiter stops executing jobs. If `reservoir` reaches `0`, no jobs will be executed until it is no longer `0`.",
-									"type": "number"
-								},
-								"reservoirIncreaseAmount": {
-									"description": "The increment applied to `reservoir` when `reservoirIncreaseInterval` is in use.",
-									"type": "number"
-								},
-								"reservoirIncreaseInterval": {
-									"description": "Every `reservoirIncreaseInterval` milliseconds, the `reservoir` value will be automatically incremented by `reservoirIncreaseAmount`.",
-									"type": "number"
-								},
-								"reservoirIncreaseMaximum": {
-									"description": "The maximum value that `reservoir` can reach when `reservoirIncreaseInterval` is in use.",
-									"type": "number"
-								},
-								"reservoirRefreshAmount": {
-									"description": "The value to reset `reservoir` to when `reservoirRefreshInterval` is in use.",
-									"type": "number"
-								},
-								"reservoirRefreshInterval": {
-									"description": "Every `reservoirRefreshInterval` milliseconds, the `reservoir` value will be automatically reset to `reservoirRefreshAmount`.",
-									"type": "number"
-								},
-								"strategy": {
-									"$ref": "#/definitions/Bottleneck.Strategy",
-									"description": "Which strategy to use if the queue gets longer than the high water mark."
-								},
-								"timeout": {
-									"description": "The Redis TTL in milliseconds for the keys created by the limiter. When `timeout` is set, the limiter's state will be automatically removed from Redis after timeout milliseconds of inactivity. Note: timeout is 300000 (5 minutes) by default when using a Group.",
-									"type": "number"
-								},
-								"trackDoneStatus": {
-									"description": "Set to true to keep track of done jobs with counts() and jobStatus(). Uses more memory.",
-									"type": "boolean"
-								}
-							},
-							"type": "object"
-						},
-						{
-							"type": "boolean"
-						}
-					],
-					"description": "Rate limiter options, on by default.\nCan be set to false to disable."
-				},
-				"running": {
-					"description": "UNUSED",
-					"type": "boolean"
-				}
-			},
-			"type": "object"
-		},
-		"ZombieLaunchSpec": {
-			"description": "A launch specification object for the \"zombie\" foundation type.",
-			"properties": {
-				"additionalZombieConfig": {
-					"$ref": "#/definitions/OrcOptionsInterface",
-					"description": "Additional configuration for the zombie network"
-				},
-				"configPath": {
-					"description": "The path to the config file.",
-					"type": "string"
-				},
-				"disableDefaultEthProviders": {
-					"description": "Determines if the default Ethereum provider connections should be disabled.\nWhen set to true, the framework will not automatically connect the Ethereum providers.\nDefault behavior (when unset or set to false) is to connect with Ethers, Viem & Web3 frameworks.",
-					"type": "boolean"
-				},
-				"disableLogEavesdropping": {
-					"description": "Specifies whether the framework should eavesdrop and log WARN, ERROR from the node logs.\nIf set to true, the eavesdropping on node logs is disabled.\nDefault behavior (when unset or set to false) is to listen to the logs.",
-					"type": "boolean"
-				},
-				"name": {
-					"description": "The name of the launch spec.",
-					"type": "string"
-				},
-				"options": {
-					"description": "An optional array of options for the launch spec.",
-					"items": {
-						"type": "string"
-					},
-					"type": "array"
-				},
-				"running": {
-					"description": "UNUSED",
-					"type": "boolean"
-				},
-				"skipBlockCheck": {
-					"description": "An optional array of blocks to skip checking.",
-					"items": {
-						"type": "string"
-					},
-					"type": "array"
-				}
-			},
-			"type": "object"
-		}
-	},
-	"description": "The main configuration object for Moonwall.",
-	"properties": {
-		"additionalRepos": {
-			"description": "Use this to specify additional repos to download binaries from.\nPolkadot, Tanssi and Moonbeam are available by default.",
-			"items": {
-				"description": "`RepoSpec` type represents the configuration required to download binaries\nfrom a project's GitHub repository.",
-				"properties": {
-					"binaries": {
-						"items": {
-							"description": "`Bin` type defines the binary configurations within a `RepoSpec`.",
-							"properties": {
-								"defaultArgs": {
-									"items": {
-										"type": "string"
-									},
-									"type": "array"
-								},
-								"name": {
-									"type": "string"
-								}
-							},
-							"type": "object"
-						},
-						"type": "array"
-					},
-					"ghAuthor": {
-						"type": "string"
-					},
-					"ghRepo": {
-						"type": "string"
-					},
-					"name": {
-						"type": "string"
-					}
-				},
-				"type": "object"
-			},
-			"type": "array"
-		},
-		"defaultTestTimeout": {
-			"description": "The default timeout for tests.",
-			"type": "number"
-		},
-		"environments": {
-			"description": "An array of Environment objects for testing.",
-			"items": {
-				"description": "The environment configuration for testing.",
-				"properties": {
-					"connections": {
-						"description": "An optional array of ProviderConfig objects.",
-						"items": {
-							"$ref": "#/definitions/ProviderConfig"
-						},
-						"type": "array"
-					},
-					"contracts": {
-						"description": "Path to directory containing smart contracts for testing against.",
-						"type": "string"
-					},
-					"defaultAllowFailures": {
-						"description": "Toggle whether createBlock() will throw when extrinsic errors inside.",
-						"type": "boolean"
-					},
-					"defaultFinalization": {
-						"description": "Toggle whether createBlock() will finalize blocks by default or not.",
-						"type": "boolean"
-					},
-					"defaultSigner": {
-						"description": "The privateKey with which to sign and send transactions in createBlock() function.",
-						"properties": {
-							"privateKey": {
-								"description": "Hex encoded private key to generate KeyringPair (\"0x..\")",
-								"type": "string"
-							},
-							"type": {
-								"description": "Substrate Keyring type",
-								"enum": ["ed25519", "ethereum", "sr25519"],
-								"type": "string"
-							}
-						},
-						"type": "object"
-					},
-					"description": {
-						"description": "Description of the environment to display in menus.",
-						"type": "string"
-					},
-					"envVars": {
-						"description": "An optional array of environment variable names.",
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"foundation": {
-						"$ref": "#/definitions/IFoundation",
-						"description": "The foundation configuration for the environment."
-					},
-					"include": {
-						"description": "An optional array of included files or directories.",
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"multiThreads": {
-						"anyOf": [
-							{
-								"additionalProperties": true,
-								"properties": {},
-								"type": "object"
-							},
-							{
-								"type": ["number", "boolean"]
-							}
-						],
-						"description": "An optional boolean to indicate if multi-threading is enabled.\nOptionally, you can specify your own threadPool spec using a PoolOptions config object.\nVisit https://vitest.dev/config/#pooloptions for more info"
-					},
-					"name": {
-						"description": "The name of the environment.",
-						"type": "string"
-					},
-					"reportFile": {
-						"anyOf": [
-							{
-								"additionalProperties": {
-									"type": "string"
-								},
-								"type": "object"
-							},
-							{
-								"type": "string"
-							}
-						],
-						"description": "Write test results to a file when the using JSON or HTML reporter.\nBy providing an object instead of a string you can define individual outputs when using multiple reporters."
-					},
-					"reporters": {
-						"description": "An optional array of reporter names.",
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"runScripts": {
-						"description": "An optional array of scripts to run before testing.",
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"testFileDir": {
-						"description": "An array of directories with test files.",
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"timeout": {
-						"description": "The default timeout for tests and hooks",
-						"type": "number"
-					}
-				},
-				"type": "object"
-			},
-			"type": "array"
-		},
-		"label": {
-			"description": "A label for the config.",
-			"type": "string"
-		},
-		"scriptsDir": {
-			"description": "Optional path to a directory containing scripts.",
-			"type": "string"
-		}
-	},
-	"type": "object"
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "Bottleneck.IORedisConnection": {
+            "type": "object"
+        },
+        "Bottleneck.RedisConnection": {
+            "type": "object"
+        },
+        "Bottleneck.Strategy": {
+            "type": "object"
+        },
+        "ChopsticksLaunchSpec": {
+            "description": "A launch specification object for the \"chopsticks\" foundation type.",
+            "properties": {
+                "allowUnresolvedImports": {
+                    "description": "An optional flag to NOT throw when the host fails to export a function expected by the runtime.",
+                    "type": "boolean"
+                },
+                "buildBlockMode": {
+                    "description": "An optional block building mode, can be \"batch\", \"manual\" or \"instant\".\nThis is only supported for single mode chopsticks.",
+                    "enum": [
+                        "batch",
+                        "instant",
+                        "manual"
+                    ],
+                    "type": "string"
+                },
+                "configPath": {
+                    "description": "The path to the config file.",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "The name of the launch spec.",
+                    "type": "string"
+                },
+                "options": {
+                    "description": "An optional array of options for the launch spec.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "retainAllLogs": {
+                    "description": "An optional flag to retain node logs from previous runs.",
+                    "type": "boolean"
+                },
+                "running": {
+                    "description": "UNUSED",
+                    "type": "boolean"
+                },
+                "type": {
+                    "description": "An optional type of either \"relaychain\" or \"parachain\".",
+                    "enum": [
+                        "parachain",
+                        "relaychain"
+                    ],
+                    "type": "string"
+                },
+                "wasmOverride": {
+                    "description": "An optional WebAssembly override.",
+                    "type": "string"
+                },
+                "wsPort": {
+                    "description": "An optional WebSocket port.\nQuirk of Chopsticks is that port option is only for single mode not xcm.",
+                    "type": "number"
+                }
+            },
+            "type": "object"
+        },
+        "DevLaunchSpec": {
+            "description": "A launch specification object for the \"dev\" foundation type.",
+            "properties": {
+                "binPath": {
+                    "description": "The path to the binary file.",
+                    "type": "string"
+                },
+                "disableDefaultEthProviders": {
+                    "description": "Determines if the default Ethereum provider connections should be disabled.\nWhen set to true, the framework will not automatically connect the Ethereum providers.\nDefault behavior (when unset or set to false) is to connect with Ethers, Viem & Web3 frameworks.\n\nNote: This also acts as a feature gate for context methods like createTxn and readPrecompile.",
+                    "type": "boolean"
+                },
+                "name": {
+                    "description": "The name of the launch spec.",
+                    "type": "string"
+                },
+                "newRpcBehaviour": {
+                    "description": "Launch node using rpc-port parameter instead of ws-port.",
+                    "type": "boolean"
+                },
+                "options": {
+                    "description": "An optional array of options for the launch spec.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "ports": {
+                    "description": "An optional object with p2pPort, wsPort, and rpcPort.",
+                    "properties": {
+                        "p2pPort": {
+                            "description": "The port for peer-to-peer (P2P) communication.",
+                            "type": "number"
+                        },
+                        "rpcPort": {
+                            "description": "The port for remote procedure call (RPC).",
+                            "type": "number"
+                        },
+                        "wsPort": {
+                            "description": "The port for WebSocket communication (soon deprecated)",
+                            "type": "number"
+                        }
+                    },
+                    "type": "object"
+                },
+                "retainAllLogs": {
+                    "description": "An optional flag to retain node logs from previous runs.",
+                    "type": "boolean"
+                },
+                "running": {
+                    "description": "UNUSED",
+                    "type": "boolean"
+                }
+            },
+            "type": "object"
+        },
+        "IFoundation": {
+            "anyOf": [
+                {
+                    "properties": {
+                        "launchSpec": {
+                            "items": {
+                                "$ref": "#/definitions/DevLaunchSpec"
+                            },
+                            "type": "array"
+                        },
+                        "type": {
+                            "const": "dev",
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                {
+                    "properties": {
+                        "launchSpec": {
+                            "items": {
+                                "$ref": "#/definitions/ChopsticksLaunchSpec"
+                            },
+                            "type": "array"
+                        },
+                        "rtUpgradePath": {
+                            "type": "string"
+                        },
+                        "type": {
+                            "const": "chopsticks",
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                {
+                    "properties": {
+                        "rtUpgradePath": {
+                            "type": "string"
+                        },
+                        "type": {
+                            "const": "zombie",
+                            "type": "string"
+                        },
+                        "zombieSpec": {
+                            "$ref": "#/definitions/ZombieLaunchSpec"
+                        }
+                    },
+                    "type": "object"
+                },
+                {
+                    "properties": {
+                        "launchSpec": {
+                            "$ref": "#/definitions/ReadOnlyLaunchSpec"
+                        },
+                        "type": {
+                            "const": "read_only",
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                {
+                    "properties": {
+                        "type": {
+                            "const": "fork",
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                }
+            ],
+            "description": "The foundation configuration for the environment. It can be of several types including \"dev\", \"chopsticks\", \"zombie\", \"read_only\", or \"fork\"."
+        },
+        "IRpcBundle": {
+            "additionalProperties": {
+                "$ref": "#/definitions/IRpcModule"
+            },
+            "description": "Interface for defining RPC bundles.\nIt is a dictionary where each key is a module name and the value is an IRpcModule.",
+            "type": "object"
+        },
+        "IRpcMethod": {
+            "description": "Interface for defining RPC methods.",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "params": {
+                    "items": {
+                        "$ref": "#/definitions/IRpcParam"
+                    },
+                    "type": "array"
+                },
+                "type": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "IRpcModule": {
+            "additionalProperties": {
+                "$ref": "#/definitions/IRpcMethod"
+            },
+            "description": "Interface for defining RPC modules.\nIt is a dictionary where each key is a method name and the value is an IRpcMethod.",
+            "type": "object"
+        },
+        "IRpcParam": {
+            "description": "Interface for defining RPC parameters.",
+            "properties": {
+                "isOptional": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "LogType": {
+            "enum": [
+                "silent",
+                "table",
+                "text"
+            ],
+            "type": "string"
+        },
+        "OrcOptionsInterface": {
+            "properties": {
+                "dir": {
+                    "type": "string"
+                },
+                "force": {
+                    "type": "boolean"
+                },
+                "inCI": {
+                    "type": "boolean"
+                },
+                "logType": {
+                    "$ref": "#/definitions/LogType"
+                },
+                "monitor": {
+                    "type": "boolean"
+                },
+                "setGlobalNetwork": {
+                    "type": "object"
+                },
+                "spawnConcurrency": {
+                    "type": "number"
+                }
+            },
+            "type": "object"
+        },
+        "ProviderConfig": {
+            "description": "The configuration object for a provider.",
+            "properties": {
+                "additionalTypes": {
+                    "additionalProperties": {
+                        "additionalProperties": {
+                            "type": "string"
+                        },
+                        "type": "object"
+                    },
+                    "description": "An optional collection of additional types.",
+                    "type": "object"
+                },
+                "endpoints": {
+                    "description": "An array of endpoint URLs.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "name": {
+                    "description": "The name of the provider.",
+                    "type": "string"
+                },
+                "rpc": {
+                    "$ref": "#/definitions/IRpcBundle",
+                    "description": "An optional RPC bundle."
+                },
+                "type": {
+                    "$ref": "#/definitions/ProviderType",
+                    "description": "The type of the provider."
+                }
+            },
+            "type": "object"
+        },
+        "ProviderType": {
+            "description": "The type of provider. Can be \"polkadotJs\", \"ethers\", \"web3\", \"viem\"",
+            "enum": [
+                "ethers",
+                "polkadotJs",
+                "viem",
+                "web3"
+            ],
+            "type": "string"
+        },
+        "ReadOnlyLaunchSpec": {
+            "description": "A launch specification object for the \"read_only\" foundation type.",
+            "properties": {
+                "disableRuntimeVersionCheck": {
+                    "description": "Disable runtime version check.\nRT Version check is enabled by default.",
+                    "type": "boolean"
+                },
+                "name": {
+                    "description": "The name of the launch spec.",
+                    "type": "string"
+                },
+                "options": {
+                    "description": "An optional array of options for the launch spec.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "rateLimiter": {
+                    "anyOf": [
+                        {
+                            "additionalProperties": {},
+                            "properties": {
+                                "Promise": {
+                                    "description": "Override the Promise library used by Bottleneck."
+                                },
+                                "Redis": {
+                                    "description": "Optional Redis/IORedis library from `require('ioredis')` or equivalent. If not, Bottleneck will attempt to require Redis/IORedis at runtime."
+                                },
+                                "clearDatastore": {
+                                    "description": "When set to `true`, on initial startup, the limiter will wipe any existing Bottleneck state data on the Redis db.",
+                                    "type": "boolean"
+                                },
+                                "clientOptions": {
+                                    "description": "This object is passed directly to the redis client library you've selected."
+                                },
+                                "clusterNodes": {
+                                    "description": "**ioredis only.** When `clusterNodes` is not null, the client will be instantiated by calling `new Redis.Cluster(clusterNodes, clientOptions)`."
+                                },
+                                "connection": {
+                                    "anyOf": [
+                                        {
+                                            "$ref": "#/definitions/Bottleneck.RedisConnection"
+                                        },
+                                        {
+                                            "$ref": "#/definitions/Bottleneck.IORedisConnection"
+                                        }
+                                    ],
+                                    "description": "Bottleneck connection object created from `new Bottleneck.RedisConnection` or `new Bottleneck.IORedisConnection`."
+                                },
+                                "datastore": {
+                                    "description": "Where the limiter stores its internal state. The default (`local`) keeps the state in the limiter itself. Set it to `redis` to enable Clustering.",
+                                    "type": "string"
+                                },
+                                "highWater": {
+                                    "description": "How long can the queue get? When the queue length exceeds that value, the selected `strategy` is executed to shed the load.",
+                                    "type": "number"
+                                },
+                                "id": {
+                                    "description": "Optional identifier",
+                                    "type": "string"
+                                },
+                                "maxConcurrent": {
+                                    "description": "How many jobs can be running at the same time.",
+                                    "type": "number"
+                                },
+                                "minTime": {
+                                    "description": "How long to wait after launching a job before launching another one.",
+                                    "type": "number"
+                                },
+                                "penalty": {
+                                    "description": "The `penalty` value used by the `Bottleneck.strategy.BLOCK` strategy.",
+                                    "type": "number"
+                                },
+                                "rejectOnDrop": {
+                                    "description": "Set to true to leave your failed jobs hanging instead of failing them.",
+                                    "type": "boolean"
+                                },
+                                "reservoir": {
+                                    "description": "How many jobs can be executed before the limiter stops executing jobs. If `reservoir` reaches `0`, no jobs will be executed until it is no longer `0`.",
+                                    "type": "number"
+                                },
+                                "reservoirIncreaseAmount": {
+                                    "description": "The increment applied to `reservoir` when `reservoirIncreaseInterval` is in use.",
+                                    "type": "number"
+                                },
+                                "reservoirIncreaseInterval": {
+                                    "description": "Every `reservoirIncreaseInterval` milliseconds, the `reservoir` value will be automatically incremented by `reservoirIncreaseAmount`.",
+                                    "type": "number"
+                                },
+                                "reservoirIncreaseMaximum": {
+                                    "description": "The maximum value that `reservoir` can reach when `reservoirIncreaseInterval` is in use.",
+                                    "type": "number"
+                                },
+                                "reservoirRefreshAmount": {
+                                    "description": "The value to reset `reservoir` to when `reservoirRefreshInterval` is in use.",
+                                    "type": "number"
+                                },
+                                "reservoirRefreshInterval": {
+                                    "description": "Every `reservoirRefreshInterval` milliseconds, the `reservoir` value will be automatically reset to `reservoirRefreshAmount`.",
+                                    "type": "number"
+                                },
+                                "strategy": {
+                                    "$ref": "#/definitions/Bottleneck.Strategy",
+                                    "description": "Which strategy to use if the queue gets longer than the high water mark."
+                                },
+                                "timeout": {
+                                    "description": "The Redis TTL in milliseconds for the keys created by the limiter. When `timeout` is set, the limiter's state will be automatically removed from Redis after timeout milliseconds of inactivity. Note: timeout is 300000 (5 minutes) by default when using a Group.",
+                                    "type": "number"
+                                },
+                                "trackDoneStatus": {
+                                    "description": "Set to true to keep track of done jobs with counts() and jobStatus(). Uses more memory.",
+                                    "type": "boolean"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ],
+                    "description": "Rate limiter options, on by default.\nCan be set to false to disable."
+                },
+                "running": {
+                    "description": "UNUSED",
+                    "type": "boolean"
+                }
+            },
+            "type": "object"
+        },
+        "ZombieLaunchSpec": {
+            "description": "A launch specification object for the \"zombie\" foundation type.",
+            "properties": {
+                "additionalZombieConfig": {
+                    "$ref": "#/definitions/OrcOptionsInterface",
+                    "description": "Additional configuration for the zombie network"
+                },
+                "configPath": {
+                    "description": "The path to the config file.",
+                    "type": "string"
+                },
+                "disableDefaultEthProviders": {
+                    "description": "Determines if the default Ethereum provider connections should be disabled.\nWhen set to true, the framework will not automatically connect the Ethereum providers.\nDefault behavior (when unset or set to false) is to connect with Ethers, Viem & Web3 frameworks.",
+                    "type": "boolean"
+                },
+                "disableLogEavesdropping": {
+                    "description": "Specifies whether the framework should eavesdrop and log WARN, ERROR from the node logs.\nIf set to true, the eavesdropping on node logs is disabled.\nDefault behavior (when unset or set to false) is to listen to the logs.",
+                    "type": "boolean"
+                },
+                "name": {
+                    "description": "The name of the launch spec.",
+                    "type": "string"
+                },
+                "options": {
+                    "description": "An optional array of options for the launch spec.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "running": {
+                    "description": "UNUSED",
+                    "type": "boolean"
+                },
+                "skipBlockCheck": {
+                    "description": "An optional array of blocks to skip checking.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                }
+            },
+            "type": "object"
+        }
+    },
+    "description": "The main configuration object for Moonwall.",
+    "properties": {
+        "additionalRepos": {
+            "description": "Use this to specify additional repos to download binaries from.\nPolkadot, Tanssi and Moonbeam are available by default.",
+            "items": {
+                "description": "`RepoSpec` type represents the configuration required to download binaries\nfrom a project's GitHub repository.",
+                "properties": {
+                    "binaries": {
+                        "items": {
+                            "description": "`Bin` type defines the binary configurations within a `RepoSpec`.",
+                            "properties": {
+                                "defaultArgs": {
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "type": "array"
+                                },
+                                "name": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "type": "array"
+                    },
+                    "ghAuthor": {
+                        "type": "string"
+                    },
+                    "ghRepo": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "type": "array"
+        },
+        "defaultTestTimeout": {
+            "description": "The default timeout for tests.",
+            "type": "number"
+        },
+        "environments": {
+            "description": "An array of Environment objects for testing.",
+            "items": {
+                "description": "The environment configuration for testing.",
+                "properties": {
+                    "connections": {
+                        "description": "An optional array of ProviderConfig objects.",
+                        "items": {
+                            "$ref": "#/definitions/ProviderConfig"
+                        },
+                        "type": "array"
+                    },
+                    "contracts": {
+                        "description": "Path to directory containing smart contracts for testing against.",
+                        "type": "string"
+                    },
+                    "defaultAllowFailures": {
+                        "description": "Toggle whether createBlock() will throw when extrinsic errors inside.",
+                        "type": "boolean"
+                    },
+                    "defaultFinalization": {
+                        "description": "Toggle whether createBlock() will finalize blocks by default or not.",
+                        "type": "boolean"
+                    },
+                    "defaultSigner": {
+                        "description": "The privateKey with which to sign and send transactions in createBlock() function.",
+                        "properties": {
+                            "privateKey": {
+                                "description": "Hex encoded private key to generate KeyringPair (\"0x..\")",
+                                "type": "string"
+                            },
+                            "type": {
+                                "description": "Substrate Keyring type",
+                                "enum": [
+                                    "ed25519",
+                                    "ethereum",
+                                    "sr25519"
+                                ],
+                                "type": "string"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "description": {
+                        "description": "Description of the environment to display in menus.",
+                        "type": "string"
+                    },
+                    "envVars": {
+                        "description": "An optional array of environment variable names.",
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "foundation": {
+                        "$ref": "#/definitions/IFoundation",
+                        "description": "The foundation configuration for the environment."
+                    },
+                    "include": {
+                        "description": "An optional array of included files or directories.",
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "multiThreads": {
+                        "anyOf": [
+                            {
+                                "additionalProperties": true,
+                                "properties": {},
+                                "type": "object"
+                            },
+                            {
+                                "type": [
+                                    "number",
+                                    "boolean"
+                                ]
+                            }
+                        ],
+                        "description": "An optional boolean to indicate if multi-threading is enabled.\nOptionally, you can specify your own threadPool spec using a PoolOptions config object.\nVisit https://vitest.dev/config/#pooloptions for more info"
+                    },
+                    "name": {
+                        "description": "The name of the environment.",
+                        "type": "string"
+                    },
+                    "reportFile": {
+                        "anyOf": [
+                            {
+                                "additionalProperties": {
+                                    "type": "string"
+                                },
+                                "type": "object"
+                            },
+                            {
+                                "type": "string"
+                            }
+                        ],
+                        "description": "Write test results to a file when the using JSON or HTML reporter.\nBy providing an object instead of a string you can define individual outputs when using multiple reporters."
+                    },
+                    "reporters": {
+                        "description": "An optional array of reporter names.",
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "runScripts": {
+                        "description": "An optional array of scripts to run before testing.",
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "testFileDir": {
+                        "description": "An array of directories with test files.",
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "timeout": {
+                        "description": "The default timeout for tests and hooks",
+                        "type": "number"
+                    }
+                },
+                "type": "object"
+            },
+            "type": "array"
+        },
+        "label": {
+            "description": "A label for the config.",
+            "type": "string"
+        },
+        "scriptsDir": {
+            "description": "Optional path to a directory containing scripts.",
+            "type": "string"
+        }
+    },
+    "type": "object"
 }
+

@@ -366,6 +366,9 @@ importers:
       '@acala-network/chopsticks':
         specifier: 0.9.7
         version: 0.9.7(debug@4.3.4)
+      '@biomejs/biome':
+        specifier: 1.5.3
+        version: 1.5.3
       '@moonbeam-network/api-augment':
         specifier: 0.2700.0
         version: 0.2700.0
