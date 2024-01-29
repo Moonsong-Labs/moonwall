@@ -12,10 +12,10 @@ import { TransactionType } from "./eth";
  * @property {`0x${string}`} deployedBytecode - The bytecode of the deployed contract.
  */
 export type MoonwallContract<TAbi extends Abi> = {
-  abi: TAbi;
-  bytecode: `0x${string}`;
-  methods: Record<string, string>[];
-  deployedBytecode: `0x${string}`;
+	abi: TAbi;
+	bytecode: `0x${string}`;
+	methods: Record<string, string>[];
+	deployedBytecode: `0x${string}`;
 };
 
 /**
@@ -27,9 +27,9 @@ export type MoonwallContract<TAbi extends Abi> = {
  * @property {string} sourceCode - The source code of the contract.
  */
 export type CompiledContract<TAbi extends Abi> = {
-  byteCode: `0x${string}`;
-  contract: ContractObject<TAbi>;
-  sourceCode: string;
+	byteCode: `0x${string}`;
+	contract: ContractObject<TAbi>;
+	sourceCode: string;
 };
 
 /**
@@ -45,13 +45,13 @@ export type CompiledContract<TAbi extends Abi> = {
  * @property {any} userdoc - User documentation for the contract.
  */
 export type ContractObject<TAbi extends Abi> = {
-  abi: TAbi;
-  devdoc: any;
-  evm: any;
-  ewasm: any;
-  metadata: any;
-  storageLayout: any;
-  userdoc: any;
+	abi: TAbi;
+	devdoc: any;
+	evm: any;
+	ewasm: any;
+	metadata: any;
+	storageLayout: any;
+	userdoc: any;
 };
 
 /**
@@ -63,9 +63,9 @@ export type ContractObject<TAbi extends Abi> = {
  * @property {TransactionType} txnType - (optional) The type of the transaction.
  */
 export type ContractDeploymentOptions = DeepPartial<
-  Omit<DeployContractParameters, "abi" | "bytecode" | "privateKey">
+	Omit<DeployContractParameters, "abi" | "bytecode" | "privateKey">
 > & {
-  privateKey?: `0x${string}`;
-  args?: any[];
-  txnType?: TransactionType;
+	privateKey?: `0x${string}`;
+	args?: any[];
+	txnType?: TransactionType;
 };

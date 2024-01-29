@@ -1,6 +1,10 @@
 import "@polkadot/api-base/types/events";
 import type { ApiPromise, WsProvider } from "@polkadot/api";
-import type { ApiTypes, AugmentedEvent, SubmittableExtrinsic } from "@polkadot/api-base/types";
+import type {
+	ApiTypes,
+	AugmentedEvent,
+	SubmittableExtrinsic,
+} from "@polkadot/api-base/types";
 import type { KeyringPair } from "@polkadot/keyring/types";
 import type { GenericExtrinsic } from "@polkadot/types";
 import type { EventRecord } from "@polkadot/types/interfaces";
@@ -21,10 +25,10 @@ import type { ViemClient } from "./runner";
  * @property nodes - An array of Node objects.
  */
 export type MoonwallEnvironment = {
-  name: string;
-  providers: MoonwallProvider[];
-  foundationType: FoundationType;
-  nodes: Node[];
+	name: string;
+	providers: MoonwallProvider[];
+	foundationType: FoundationType;
+	nodes: Node[];
 };
 
 /**
@@ -36,10 +40,15 @@ export type MoonwallEnvironment = {
  * @property ws - An optional function returning a WebSocket provider.
  */
 export interface MoonwallProvider {
-  name: string;
-  type: ProviderType;
-  connect: () => Promise<ApiPromise> | Wallet | Web3<any> | Promise<ViemClient> | void;
-  ws?: () => WsProvider;
+	name: string;
+	type: ProviderType;
+	connect: () =>
+		| Promise<ApiPromise>
+		| Wallet
+		| Web3<any>
+		| Promise<ViemClient>
+		| void;
+	ws?: () => WsProvider;
 }
 
 /**
@@ -52,21 +61,23 @@ export interface MoonwallProvider {
  * @property greet - A function that returns a greeting message or an object containing runtime information.
  */
 export interface ConnectedProvider {
-  name: string;
-  type: ProviderType;
-  api: ProviderApi;
-  disconnect: () => Promise<void>;
-  greet: () => Promise<void> | void | { rtName: string; rtVersion: number };
+	name: string;
+	type: ProviderType;
+	api: ProviderApi;
+	disconnect: () => Promise<void>;
+	greet: () => Promise<void> | void | { rtName: string; rtVersion: number };
 }
 
-export type ProviderApi = { [P in keyof ProviderMap]: ProviderMap[P] }[keyof ProviderMap];
+export type ProviderApi = {
+	[P in keyof ProviderMap]: ProviderMap[P];
+}[keyof ProviderMap];
 
 export type ProviderMap = {
-  polkadotJs: ApiPromise;
-  ethers: Wallet;
-  web3: Web3;
-  moon: ApiPromise;
-  viem: ViemClient;
+	polkadotJs: ApiPromise;
+	ethers: Wallet;
+	web3: Web3;
+	moon: ApiPromise;
+	viem: ViemClient;
 };
 
 /**
@@ -79,49 +90,51 @@ export type ProviderMap = {
  * @property launch - UNUSED
  */
 export type Node = {
-  name?: string;
-  cmd: string;
-  args: string[];
-  rtUpgradePath?: string;
-  launch?: boolean;
+	name?: string;
+	cmd: string;
+	args: string[];
+	rtUpgradePath?: string;
+	launch?: boolean;
 };
 
 export interface ChopsticksBlockCreation {
-  providerName?: string;
-  count?: number;
-  to?: number;
-  expectEvents?: AugmentedEvent<ApiTypes>[];
-  allowFailures?: boolean;
-  logger?: Debugger;
+	providerName?: string;
+	count?: number;
+	to?: number;
+	expectEvents?: AugmentedEvent<ApiTypes>[];
+	allowFailures?: boolean;
+	logger?: Debugger;
 }
 
 export interface BlockCreation {
-  parentHash?: string;
-  finalize?: boolean;
-  allowFailures?: boolean;
-  expectEvents?: AugmentedEvent<ApiTypes>[];
-  logger?: Debugger;
-  signer?: { type: "ethereum" | "sr25519" | "ed25519"; privateKey: string } | KeyringPair;
+	parentHash?: string;
+	finalize?: boolean;
+	allowFailures?: boolean;
+	expectEvents?: AugmentedEvent<ApiTypes>[];
+	logger?: Debugger;
+	signer?:
+		| { type: "ethereum" | "sr25519" | "ed25519"; privateKey: string }
+		| KeyringPair;
 }
 
 export interface BlockCreationResponse<
-  ApiType extends ApiTypes,
-  Calls extends CallType<ApiType> | CallType<ApiType>[],
+	ApiType extends ApiTypes,
+	Calls extends CallType<ApiType> | CallType<ApiType>[],
 > {
-  block: {
-    duration: number;
-    hash: string;
-    proofSize?: number;
-  };
-  result?: Calls extends (string | SubmittableExtrinsic<ApiType>)[]
-    ? ExtrinsicCreation[]
-    : ExtrinsicCreation;
+	block: {
+		duration: number;
+		hash: string;
+		proofSize?: number;
+	};
+	result?: Calls extends (string | SubmittableExtrinsic<ApiType>)[]
+		? ExtrinsicCreation[]
+		: ExtrinsicCreation;
 }
 
 export interface ExtrinsicCreation {
-  extrinsic: GenericExtrinsic<AnyTuple> | null;
-  events: EventRecord[];
-  error: RegistryError | undefined;
-  successful: boolean;
-  hash: string;
+	extrinsic: GenericExtrinsic<AnyTuple> | null;
+	events: EventRecord[];
+	error: RegistryError | undefined;
+	successful: boolean;
+	hash: string;
 }
