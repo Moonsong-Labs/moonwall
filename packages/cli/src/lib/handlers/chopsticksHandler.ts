@@ -40,12 +40,18 @@ export const chopsticksHandler: FoundationHandler<"chopsticks"> = ({
       type: isEth ? "ethereum" : "sr25519",
     });
     return {
-      alice: keyring.addFromUri(isEth ? ALITH_PRIVATE_KEY : "//Alice", { name: "Alice default" }),
-      bob: keyring.addFromUri(isEth ? BALTATHAR_PRIVATE_KEY : "//Bob", { name: "Bob default" }),
+      alice: keyring.addFromUri(isEth ? ALITH_PRIVATE_KEY : "//Alice", {
+        name: "Alice default",
+      }),
+      bob: keyring.addFromUri(isEth ? BALTATHAR_PRIVATE_KEY : "//Bob", {
+        name: "Bob default",
+      }),
       charlie: keyring.addFromUri(isEth ? CHARLETH_PRIVATE_KEY : "//Charlie", {
         name: "Charlie default",
       }),
-      dave: keyring.addFromUri(isEth ? DOROTHY_PRIVATE_KEY : "//Dave", { name: "Dave default" }),
+      dave: keyring.addFromUri(isEth ? DOROTHY_PRIVATE_KEY : "//Dave", {
+        name: "Dave default",
+      }),
     };
   };
 

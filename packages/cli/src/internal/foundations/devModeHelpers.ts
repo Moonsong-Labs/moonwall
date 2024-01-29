@@ -51,7 +51,9 @@ function returnSigner(options: BlockCreation) {
 function returnDefaultSigner() {
   return isEthereumDevConfig()
     ? alith
-    : new Keyring({ type: "sr25519" }).addFromUri("//Alice", { name: "Alice default" });
+    : new Keyring({ type: "sr25519" }).addFromUri("//Alice", {
+        name: "Alice default",
+      });
 }
 
 export async function createDevBlock<

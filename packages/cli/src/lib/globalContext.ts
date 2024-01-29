@@ -310,7 +310,11 @@ export class MoonwallContext {
         } catch (e: any) {
           console.log("📨 Error processing message from client:", data.toString());
           console.error(e.message);
-          writeToClient({ status: "failure", result: false, message: e.message });
+          writeToClient({
+            status: "failure",
+            result: false,
+            message: e.message,
+          });
         }
       });
     });

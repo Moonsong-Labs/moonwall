@@ -111,7 +111,8 @@ export async function deriveViemChain(endpoint: string) {
  * @property status - The status of the contract deployment transaction.
  * @property logs - Any logs produced during the contract deployment transaction.
  */
-export async function deployViemContract<TOptions extends ContractDeploymentOptions>( // TODO: Make this generic
+export async function deployViemContract<TOptions extends ContractDeploymentOptions>(
+  // TODO: Make this generic
   context: DevModeContext,
   abi: Abi,
   bytecode: `0x${string}`,
@@ -125,7 +126,12 @@ export async function deployViemContract<TOptions extends ContractDeploymentOpti
   const url = context.viem().transport.url;
 
   const { privateKey = ALITH_PRIVATE_KEY, ...rest } = options || ({} as any);
-  const blob = { ...rest, abi, bytecode, account: privateKeyToAccount(privateKey) };
+  const blob = {
+    ...rest,
+    abi,
+    bytecode,
+    account: privateKeyToAccount(privateKey),
+  };
 
   const account = privateKeyToAccount(ALITH_PRIVATE_KEY);
   const client = createWalletClient({
@@ -201,7 +207,11 @@ export async function createRawTransfer<TOptions extends TransferOptions>(
   options?: TOptions
 ): Promise<`0x${string}`> {
   const transferAmount = typeof value === "bigint" ? value : BigInt(value);
-  return await createViemTransaction(context, { ...options, to, value: transferAmount });
+  return await createViemTransaction(context, {
+    ...options,
+    to,
+    value: transferAmount,
+  });
 }
 
 /**

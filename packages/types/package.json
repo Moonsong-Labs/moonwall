@@ -52,8 +52,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint ./src/**/*.ts",
     "lint:fix": "eslint './src/**/*.ts' --fix",
-    "fmt": "biome format src",
-    "fmt:fix": "biome format src --write",
+    "fmt": "biome format .",
+    "fmt:fix": "biome format . --write",
     "prepublish": "pnpm run build && pnpm run generate-types",
     "schema": "typescript-json-schema --tsNodeRegister --esModuleInterop -o config_schema.json ./src/config.ts MoonwallConfig"
   },

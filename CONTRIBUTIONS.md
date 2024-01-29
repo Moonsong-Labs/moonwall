@@ -5,7 +5,7 @@
 
 1. Do all the changes you want on a user-branch
 2. Run as many tests until you're happy
-3. Run `prettier`
+3. Run `fmt:fix`
 4. Commit changes and push to GitHub
 5. Raise PR with additional details if required
 

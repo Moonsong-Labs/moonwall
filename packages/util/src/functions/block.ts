@@ -234,7 +234,13 @@ export function mapExtrinsics(
 
         return event;
       });
-    return { dispatchError, dispatchInfo, events, extrinsic, fee: fees ? fees[index] : undefined };
+    return {
+      dispatchError,
+      dispatchInfo,
+      events,
+      extrinsic,
+      fee: fees ? fees[index] : undefined,
+    };
   });
 }
 

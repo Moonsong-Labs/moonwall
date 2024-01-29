@@ -91,7 +91,11 @@ yargs(hideBin(process.argv))
     async (args) => {
       if (args.envName) {
         process.env.MOON_RUN_SCRIPTS = "true";
-        if (!(await testCmd(args.envName.toString(), { testNamePattern: args.GrepTest }))) {
+        if (
+          !(await testCmd(args.envName.toString(), {
+            testNamePattern: args.GrepTest,
+          }))
+        ) {
           process.exitCode = 1;
         }
       } else {

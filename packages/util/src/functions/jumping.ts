@@ -87,7 +87,12 @@ const sendNewBlockCmd = async (port: number, count: number = 1) => {
   const result: string = await new Promise((resolve) => {
     socket.on("open", () => {
       socket.send(
-        JSON.stringify({ jsonrpc: "2.0", id: 1, method: "dev_newBlock", params: [{ count }] })
+        JSON.stringify({
+          jsonrpc: "2.0",
+          id: 1,
+          method: "dev_newBlock",
+          params: [{ count }],
+        })
       );
     });
 

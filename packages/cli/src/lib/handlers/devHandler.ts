@@ -54,12 +54,18 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
       type: isEth ? "ethereum" : "sr25519",
     });
     return {
-      alice: keyring.addFromUri(isEth ? ALITH_PRIVATE_KEY : "//Alice", { name: "Alice default" }),
-      bob: keyring.addFromUri(isEth ? BALTATHAR_PRIVATE_KEY : "//Bob", { name: "Bob default" }),
+      alice: keyring.addFromUri(isEth ? ALITH_PRIVATE_KEY : "//Alice", {
+        name: "Alice default",
+      }),
+      bob: keyring.addFromUri(isEth ? BALTATHAR_PRIVATE_KEY : "//Bob", {
+        name: "Bob default",
+      }),
       charlie: keyring.addFromUri(isEth ? CHARLETH_PRIVATE_KEY : "//Charlie", {
         name: "Charlie default",
       }),
-      dave: keyring.addFromUri(isEth ? DOROTHY_PRIVATE_KEY : "//Dave", { name: "Dave default" }),
+      dave: keyring.addFromUri(isEth ? DOROTHY_PRIVATE_KEY : "//Dave", {
+        name: "Dave default",
+      }),
     };
   };
 
@@ -138,7 +144,10 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
     writePrecompile: !ethCompatible
       ? undefined
       : async (options: PrecompileCallOptions) => {
-          const response = await interactWithPrecompileContract(ctx, { call: false, ...options });
+          const response = await interactWithPrecompileContract(ctx, {
+            call: false,
+            ...options,
+          });
           return response as `0x${string}`;
         },
 
@@ -155,7 +164,10 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
     writeContract: !ethCompatible
       ? undefined
       : async (options: ContractCallOptions) => {
-          const response = await interactWithContract(ctx, { call: false, ...options });
+          const response = await interactWithContract(ctx, {
+            call: false,
+            ...options,
+          });
           return response as `0x${string}`;
         },
 

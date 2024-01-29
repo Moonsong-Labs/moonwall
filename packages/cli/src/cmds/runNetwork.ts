@@ -261,7 +261,9 @@ const resolveCommandChoice = async () => {
 
 const resolveInfoChoice = async (env: Environment) => {
   console.log(chalk.bgWhite.blackBright("Node Launch args:"));
-  console.dir((await MoonwallContext.getContext()).environment, { depth: null });
+  console.dir((await MoonwallContext.getContext()).environment, {
+    depth: null,
+  });
   console.log(chalk.bgWhite.blackBright("Launch Spec in Config File:"));
   console.dir(env, { depth: null });
   const portsList = await reportServicePorts();

@@ -8,9 +8,8 @@
   "scripts": {
     "build": "pnpm -r --filter='./packages/**' run build",
     "generate-types": "pnpm -r --filter='./packages/**' run generate-types",
-    "prettier": "pnpm exec prettier --write --ignore-path .gitignore '**/*.(yml|js|ts|json)'",
-    "fmt": "pnpm -r --filter='./packages/**' run fmt",
-    "fmt:fix": "pnpm -r --filter='./packages/**' run fmt:fix",
+    "fmt": "biome format ./biome.json; pnpm -r --filter='./packages/**' run fmt",
+    "fmt:fix": "biome format ./biome.json --write; pnpm -r --filter='./packages/**' run fmt:fix",
     "lint": "pnpm -r --filter='./packages/**' run lint",
     "lint:fix": "pnpm -r --filter='./packages/**' run lint:fix",
     "changeset": "changeset",
@@ -24,15 +23,14 @@
     "typecheck": "pnpm -r --filter='./packages/**' run typecheck"
   },
   "devDependencies": {
+    "@biomejs/biome": "1.5.3",
     "@changesets/cli": "2.27.1",
     "@pnpm/eslint-config": "1.1.0",
     "@typescript-eslint/eslint-plugin": "6.19.0",
     "@typescript-eslint/parser": "6.19.0",
     "eslint": "8.56.0",
-    "eslint-config-prettier": "9.1.0",
     "eslint-config-xo": "0.43.1",
     "eslint-config-xo-typescript": "1.0.1",
-    "prettier": "3.2.4",
     "typescript": "5.3.3"
   }
 }

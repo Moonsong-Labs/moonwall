@@ -136,9 +136,12 @@ export async function interactWithContract(
   const account = privateKeyToAccount(privateKey);
   const gasParam =
     gas === "estimate"
-      ? await context
-          .viem()
-          .estimateGas({ account: account.address, to: contractAddress, value: 0n, data })
+      ? await context.viem().estimateGas({
+          account: account.address,
+          to: contractAddress,
+          value: 0n,
+          data,
+        })
       : gas > 0n
         ? gas
         : 200_000n;
@@ -163,9 +166,13 @@ export async function interactWithContract(
 
   if (call) {
     if (web3Library === "viem") {
-      const result = await context
-        .viem()
-        .call({ account: account.address, to: contractAddress, value: 0n, data, gas: gasParam });
+      const result = await context.viem().call({
+        account: account.address,
+        to: contractAddress,
+        value: 0n,
+        data,
+        gas: gasParam,
+      });
       return decodeFunctionResult({ abi, functionName, data: result.data! });
     } else {
       const result = await context.ethers().call({

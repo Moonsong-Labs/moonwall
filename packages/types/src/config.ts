@@ -5,128 +5,128 @@ import type { LogType } from "@zombienet/utils";
  * The main configuration object for Moonwall.
  */
 export type MoonwallConfig = {
-	/**
-	 * A label for the config.
-	 */
-	label: string;
+  /**
+   * A label for the config.
+   */
+  label: string;
 
-	/**
-	 * The default timeout for tests.
-	 */
-	defaultTestTimeout: number;
+  /**
+   * The default timeout for tests.
+   */
+  defaultTestTimeout: number;
 
-	/**
-	 * Optional path to a directory containing scripts.
-	 */
-	scriptsDir?: string;
+  /**
+   * Optional path to a directory containing scripts.
+   */
+  scriptsDir?: string;
 
-	/**
-	 * An array of Environment objects for testing.
-	 */
-	environments: Environment[];
+  /**
+   * An array of Environment objects for testing.
+   */
+  environments: Environment[];
 
-	/**
-	 * Use this to specify additional repos to download binaries from.
-	 * Polkadot, Tanssi and Moonbeam are available by default.
-	 **/
-	additionalRepos?: RepoSpec[];
+  /**
+   * Use this to specify additional repos to download binaries from.
+   * Polkadot, Tanssi and Moonbeam are available by default.
+   **/
+  additionalRepos?: RepoSpec[];
 };
 
 /**
  * The environment configuration for testing.
  */
 export type Environment = {
-	/**
-	 * An optional array of reporter names.
-	 */
-	reporters?: string[];
+  /**
+   * An optional array of reporter names.
+   */
+  reporters?: string[];
 
-	/**
-	 * Write test results to a file when the using JSON or HTML reporter.
-	 * By providing an object instead of a string you can define individual outputs when using multiple reporters.
-	 */
-	reportFile?: string | { [reporterName: string]: string };
+  /**
+   * Write test results to a file when the using JSON or HTML reporter.
+   * By providing an object instead of a string you can define individual outputs when using multiple reporters.
+   */
+  reportFile?: string | { [reporterName: string]: string };
 
-	/**
-	 * The name of the environment.
-	 */
-	name: string;
+  /**
+   * The name of the environment.
+   */
+  name: string;
 
-	/**
-	 * Description of the environment to display in menus.
-	 */
-	description?: string;
+  /**
+   * Description of the environment to display in menus.
+   */
+  description?: string;
 
-	/**
-	 * The default timeout for tests and hooks
-	 */
-	timeout?: number;
+  /**
+   * The default timeout for tests and hooks
+   */
+  timeout?: number;
 
-	/**
-	 * An array of directories with test files.
-	 */
-	testFileDir: string[];
+  /**
+   * An array of directories with test files.
+   */
+  testFileDir: string[];
 
-	/**
-	 * An optional array of environment variable names.
-	 */
-	envVars?: string[];
+  /**
+   * An optional array of environment variable names.
+   */
+  envVars?: string[];
 
-	/**
-	 * The foundation configuration for the environment.
-	 */
-	foundation: IFoundation;
+  /**
+   * The foundation configuration for the environment.
+   */
+  foundation: IFoundation;
 
-	/**
-	 * An optional array of included files or directories.
-	 */
-	include?: string[];
+  /**
+   * An optional array of included files or directories.
+   */
+  include?: string[];
 
-	/**
-	 * An optional array of ProviderConfig objects.
-	 */
-	connections?: ProviderConfig[];
+  /**
+   * An optional array of ProviderConfig objects.
+   */
+  connections?: ProviderConfig[];
 
-	/**
-	 * An optional boolean to indicate if multi-threading is enabled.
-	 * Optionally, you can specify your own threadPool spec using a PoolOptions config object.
-	 * Visit https://vitest.dev/config/#pooloptions for more info
-	 */
-	multiThreads?: boolean | number | object;
+  /**
+   * An optional boolean to indicate if multi-threading is enabled.
+   * Optionally, you can specify your own threadPool spec using a PoolOptions config object.
+   * Visit https://vitest.dev/config/#pooloptions for more info
+   */
+  multiThreads?: boolean | number | object;
 
-	/**
-	 * Path to directory containing smart contracts for testing against.
-	 */
-	contracts?: string;
+  /**
+   * Path to directory containing smart contracts for testing against.
+   */
+  contracts?: string;
 
-	/**
-	 * An optional array of scripts to run before testing.
-	 */
-	runScripts?: string[];
+  /**
+   * An optional array of scripts to run before testing.
+   */
+  runScripts?: string[];
 
-	/**
-	 * The privateKey with which to sign and send transactions in createBlock() function.
-	 */
-	defaultSigner?: {
-		/**
-		 *  Substrate Keyring type
-		 */
-		type: "ethereum" | "sr25519" | "ed25519";
-		/**
-		 * Hex encoded private key to generate KeyringPair ("0x..")
-		 */
-		privateKey: string;
-	};
+  /**
+   * The privateKey with which to sign and send transactions in createBlock() function.
+   */
+  defaultSigner?: {
+    /**
+     *  Substrate Keyring type
+     */
+    type: "ethereum" | "sr25519" | "ed25519";
+    /**
+     * Hex encoded private key to generate KeyringPair ("0x..")
+     */
+    privateKey: string;
+  };
 
-	/**
-	 * Toggle whether createBlock() will throw when extrinsic errors inside.
-	 */
-	defaultAllowFailures?: boolean;
+  /**
+   * Toggle whether createBlock() will throw when extrinsic errors inside.
+   */
+  defaultAllowFailures?: boolean;
 
-	/**
-	 * Toggle whether createBlock() will finalize blocks by default or not.
-	 */
-	defaultFinalization?: boolean;
+  /**
+   * Toggle whether createBlock() will finalize blocks by default or not.
+   */
+  defaultFinalization?: boolean;
 };
 
 /**
@@ -134,28 +134,28 @@ export type Environment = {
  * @description The foundation configuration for the environment. It can be of several types including "dev", "chopsticks", "zombie", "read_only", or "fork".
  */
 export type IFoundation =
-	| {
-			type: "dev";
-			launchSpec: DevLaunchSpec[];
-	  }
-	| {
-			type: "chopsticks";
-			rtUpgradePath?: string;
-			launchSpec: ChopsticksLaunchSpec[];
-	  }
-	| {
-			type: "zombie";
-			rtUpgradePath?: string;
-			zombieSpec: ZombieLaunchSpec;
-	  }
-	| {
-			type: "read_only";
-			launchSpec: ReadOnlyLaunchSpec;
-	  }
-	| {
-			type: "fork";
-			// launchSpec: ForkLaunchSpec;
-	  };
+  | {
+      type: "dev";
+      launchSpec: DevLaunchSpec[];
+    }
+  | {
+      type: "chopsticks";
+      rtUpgradePath?: string;
+      launchSpec: ChopsticksLaunchSpec[];
+    }
+  | {
+      type: "zombie";
+      rtUpgradePath?: string;
+      zombieSpec: ZombieLaunchSpec;
+    }
+  | {
+      type: "read_only";
+      launchSpec: ReadOnlyLaunchSpec;
+    }
+  | {
+      type: "fork";
+      // launchSpec: ForkLaunchSpec;
+    };
 
 /**
  * @name EthTransactionType
@@ -175,20 +175,20 @@ export type FoundationType = IFoundation["type"];
  * A generic launch specification object.
  */
 export interface GenericLaunchSpec {
-	/**
-	 * The name of the launch spec.
-	 */
-	name: string;
+  /**
+   * The name of the launch spec.
+   */
+  name: string;
 
-	/**
-	 * UNUSED
-	 */
-	running?: boolean;
+  /**
+   * UNUSED
+   */
+  running?: boolean;
 
-	/**
-	 * An optional array of options for the launch spec.
-	 */
-	options?: string[];
+  /**
+   * An optional array of options for the launch spec.
+   */
+  options?: string[];
 }
 
 /**
@@ -196,17 +196,17 @@ export interface GenericLaunchSpec {
  * @extends GenericLaunchSpec
  */
 export interface ReadOnlyLaunchSpec extends GenericLaunchSpec {
-	/**
-	 * Rate limiter options, on by default.
-	 * Can be set to false to disable.
-	 */
-	rateLimiter?: boolean | Bottleneck.ConstructorOptions;
+  /**
+   * Rate limiter options, on by default.
+   * Can be set to false to disable.
+   */
+  rateLimiter?: boolean | Bottleneck.ConstructorOptions;
 
-	/**
-	 * Disable runtime version check.
-	 * RT Version check is enabled by default.
-	 */
-	disableRuntimeVersionCheck?: boolean;
+  /**
+   * Disable runtime version check.
+   * RT Version check is enabled by default.
+   */
+  disableRuntimeVersionCheck?: boolean;
 }
 
 /**
@@ -220,34 +220,34 @@ export interface ForkLaunchSpec extends GenericLaunchSpec {}
  * @extends GenericLaunchSpec
  */
 export interface ZombieLaunchSpec extends GenericLaunchSpec {
-	/**
-	 * Additional configuration for the zombie network
-	 */
-	additionalZombieConfig?: OrcOptionsInterface;
+  /**
+   * Additional configuration for the zombie network
+   */
+  additionalZombieConfig?: OrcOptionsInterface;
 
-	/**
-	 * Determines if the default Ethereum provider connections should be disabled.
-	 * When set to true, the framework will not automatically connect the Ethereum providers.
-	 * Default behavior (when unset or set to false) is to connect with Ethers, Viem & Web3 frameworks.
-	 */
-	disableDefaultEthProviders?: boolean;
+  /**
+   * Determines if the default Ethereum provider connections should be disabled.
+   * When set to true, the framework will not automatically connect the Ethereum providers.
+   * Default behavior (when unset or set to false) is to connect with Ethers, Viem & Web3 frameworks.
+   */
+  disableDefaultEthProviders?: boolean;
 
-	/**
-	 * Specifies whether the framework should eavesdrop and log WARN, ERROR from the node logs.
-	 * If set to true, the eavesdropping on node logs is disabled.
-	 * Default behavior (when unset or set to false) is to listen to the logs.
-	 */
-	disableLogEavesdropping?: boolean;
+  /**
+   * Specifies whether the framework should eavesdrop and log WARN, ERROR from the node logs.
+   * If set to true, the eavesdropping on node logs is disabled.
+   * Default behavior (when unset or set to false) is to listen to the logs.
+   */
+  disableLogEavesdropping?: boolean;
 
-	/**
-	 * The path to the config file.
-	 */
-	configPath: string;
+  /**
+   * The path to the config file.
+   */
+  configPath: string;
 
-	/**
-	 * An optional array of blocks to skip checking.
-	 */
-	skipBlockCheck?: string[];
+  /**
+   * An optional array of blocks to skip checking.
+   */
+  skipBlockCheck?: string[];
 }
 
 // TODO: Separate single chopsticks network and multi chopsticks into separate interfaces
@@ -256,42 +256,42 @@ export interface ZombieLaunchSpec extends GenericLaunchSpec {
  * @extends GenericLaunchSpec
  */
 export interface ChopsticksLaunchSpec extends GenericLaunchSpec {
-	/**
-	 * The path to the config file.
-	 */
-	configPath: string;
+  /**
+   * The path to the config file.
+   */
+  configPath: string;
 
-	/**
-	 * An optional WebSocket port.
-	 * Quirk of Chopsticks is that port option is only for single mode not xcm.
-	 */
-	wsPort?: number;
+  /**
+   * An optional WebSocket port.
+   * Quirk of Chopsticks is that port option is only for single mode not xcm.
+   */
+  wsPort?: number;
 
-	/**
-	 * An optional type of either "relaychain" or "parachain".
-	 */
-	type?: "relaychain" | "parachain";
+  /**
+   * An optional type of either "relaychain" or "parachain".
+   */
+  type?: "relaychain" | "parachain";
 
-	/**
-	 * An optional WebAssembly override.
-	 */
-	wasmOverride?: string;
+  /**
+   * An optional WebAssembly override.
+   */
+  wasmOverride?: string;
 
-	/**
-	 * An optional flag to NOT throw when the host fails to export a function expected by the runtime.
-	 */
-	allowUnresolvedImports?: boolean;
+  /**
+   * An optional flag to NOT throw when the host fails to export a function expected by the runtime.
+   */
+  allowUnresolvedImports?: boolean;
 
-	/**
-	 * An optional block building mode, can be "batch", "manual" or "instant".
-	 * This is only supported for single mode chopsticks.
-	 */
-	buildBlockMode?: "batch" | "manual" | "instant";
+  /**
+   * An optional block building mode, can be "batch", "manual" or "instant".
+   * This is only supported for single mode chopsticks.
+   */
+  buildBlockMode?: "batch" | "manual" | "instant";
 
-	/**
-	 * An optional flag to retain node logs from previous runs.
-	 */
-	retainAllLogs?: boolean;
+  /**
+   * An optional flag to retain node logs from previous runs.
+   */
+  retainAllLogs?: boolean;
 }
 
 /**
@@ -299,79 +299,79 @@ export interface ChopsticksLaunchSpec extends GenericLaunchSpec {
  * @extends GenericLaunchSpec
  */
 export interface DevLaunchSpec extends GenericLaunchSpec {
-	/**
-	 * The path to the binary file.
-	 */
-	binPath: string;
+  /**
+   * The path to the binary file.
+   */
+  binPath: string;
 
-	/**
-	 * Determines if the default Ethereum provider connections should be disabled.
-	 * When set to true, the framework will not automatically connect the Ethereum providers.
-	 * Default behavior (when unset or set to false) is to connect with Ethers, Viem & Web3 frameworks.
-	 *
-	 * Note: This also acts as a feature gate for context methods like createTxn and readPrecompile.
-	 */
-	disableDefaultEthProviders?: boolean;
+  /**
+   * Determines if the default Ethereum provider connections should be disabled.
+   * When set to true, the framework will not automatically connect the Ethereum providers.
+   * Default behavior (when unset or set to false) is to connect with Ethers, Viem & Web3 frameworks.
+   *
+   * Note: This also acts as a feature gate for context methods like createTxn and readPrecompile.
+   */
+  disableDefaultEthProviders?: boolean;
 
-	/**
-	 * Launch node using rpc-port parameter instead of ws-port.
-	 */
-	newRpcBehaviour?: boolean;
+  /**
+   * Launch node using rpc-port parameter instead of ws-port.
+   */
+  newRpcBehaviour?: boolean;
 
-	/**
-	 * An optional object with p2pPort, wsPort, and rpcPort.
-	 */
-	ports?: {
-		/**
-		 * The port for peer-to-peer (P2P) communication.
-		 */
-		p2pPort: number;
+  /**
+   * An optional object with p2pPort, wsPort, and rpcPort.
+   */
+  ports?: {
+    /**
+     * The port for peer-to-peer (P2P) communication.
+     */
+    p2pPort: number;
 
-		/**
-		 * The port for remote procedure call (RPC).
-		 */
-		rpcPort: number;
+    /**
+     * The port for remote procedure call (RPC).
+     */
+    rpcPort: number;
 
-		/**
-		 * The port for WebSocket communication (soon deprecated)
-		 */
-		wsPort: number;
-	};
+    /**
+     * The port for WebSocket communication (soon deprecated)
+     */
+    wsPort: number;
+  };
 
-	/**
-	 * An optional flag to retain node logs from previous runs.
-	 */
-	retainAllLogs?: boolean;
+  /**
+   * An optional flag to retain node logs from previous runs.
+   */
+  retainAllLogs?: boolean;
 }
 
 /**
  * The configuration object for a provider.
  */
 export interface ProviderConfig {
-	/**
-	 * The name of the provider.
-	 */
-	name: string;
+  /**
+   * The name of the provider.
+   */
+  name: string;
 
-	/**
-	 * The type of the provider.
-	 */
-	type: ProviderType;
+  /**
+   * The type of the provider.
+   */
+  type: ProviderType;
 
-	/**
-	 * An array of endpoint URLs.
-	 */
-	endpoints: string[];
+  /**
+   * An array of endpoint URLs.
+   */
+  endpoints: string[];
 
-	/**
-	 * An optional RPC bundle.
-	 */
-	rpc?: IRpcBundle;
+  /**
+   * An optional RPC bundle.
+   */
+  rpc?: IRpcBundle;
 
-	/**
-	 * An optional collection of additional types.
-	 */
-	additionalTypes?: TypesBundle;
+  /**
+   * An optional collection of additional types.
+   */
+  additionalTypes?: TypesBundle;
 }
 
 /**
@@ -394,9 +394,9 @@ export type ZombieNodeType = "relaychain" | "parachain";
  * @property isOptional - A flag indicating whether the RPC parameter is optional.
  */
 export interface IRpcParam {
-	name: string;
-	type: string;
-	isOptional?: boolean;
+  name: string;
+  type: string;
+  isOptional?: boolean;
 }
 
 /**
@@ -407,9 +407,9 @@ export interface IRpcParam {
  * @property type - The return type of the RPC method.
  */
 export interface IRpcMethod {
-	description: string;
-	params: IRpcParam[];
-	type: string;
+  description: string;
+  params: IRpcParam[];
+  type: string;
 }
 
 /**
@@ -418,7 +418,7 @@ export interface IRpcMethod {
  * It is a dictionary where each key is a method name and the value is an IRpcMethod.
  */
 export interface IRpcModule {
-	[methodName: string]: IRpcMethod;
+  [methodName: string]: IRpcMethod;
 }
 
 /**
@@ -427,7 +427,7 @@ export interface IRpcModule {
  * It is a dictionary where each key is a module name and the value is an IRpcModule.
  */
 export interface IRpcBundle {
-	[moduleName: string]: IRpcModule;
+  [moduleName: string]: IRpcModule;
 }
 
 /**
@@ -444,23 +444,23 @@ export interface IRpcBundle {
  * ```
  */
 export type TypesBundle = {
-	[key: string]: GenericData;
+  [key: string]: GenericData;
 };
 
 export type GenericData = {
-	[key: string]: string;
+  [key: string]: string;
 };
 
 // CopyPasta from https://github.com/paritytech/zombienet/blob/f929641e13e7591b7336c4a256756aa04eb2a14c/javascript/packages/orchestrator/src/orchestrator.ts#L61
 // Until it's exposed in the orchestrator types
 export interface OrcOptionsInterface {
-	monitor?: boolean;
-	spawnConcurrency?: number;
-	inCI?: boolean;
-	dir?: string;
-	force?: boolean;
-	logType?: LogType;
-	setGlobalNetwork?: (network: object) => void;
+  monitor?: boolean;
+  spawnConcurrency?: number;
+  inCI?: boolean;
+  dir?: string;
+  force?: boolean;
+  logType?: LogType;
+  setGlobalNetwork?: (network: object) => void;
 }
 
 /**
@@ -487,10 +487,10 @@ export interface OrcOptionsInterface {
  * }
  */
 export type RepoSpec = {
-	name: string;
-	ghAuthor: string;
-	ghRepo: string;
-	binaries: Bin[];
+  name: string;
+  ghAuthor: string;
+  ghRepo: string;
+  binaries: Bin[];
 };
 
 /**
@@ -511,6 +511,6 @@ export type RepoSpec = {
  * }
  */
 export type Bin = {
-	name: string;
-	defaultArgs?: string[];
+  name: string;
+  defaultArgs?: string[];
 };
