@@ -11,5 +11,6 @@ The command takes no parameters but you'll be asked for the following to complet
 - Network Foundation: *dev*
 - Would you like to generate this config? (no to restart from beginning) (Y/n) *Y*
 
+For more details about configuring your `Moonwall.config` see the [Quick Start Guide](/guide/test/quick-start).
 
 ![Moonwall init terminal screenshot](/init.png)

@@ -1,6 +1,6 @@
 # Running Tests Quick Start
 
-This guide assumes that you've already installed Moonwall and you have a basic test case that you want to run. The test case can be a simple transaction that transfers some dust from one test account to another. You can put together a simple test suite here in the [Quick Start Writing Tests guide](/guide/write/quick-start)
+This guide assumes that you've already [installed Moonwall](/guide/intro/getting-started) and you have a basic test case that you want to run. The test case can be a simple transaction that transfers some dust from one test account to another. You can put together a simple test suite here in the [Quick Start Writing Tests guide](/guide/write/quick-start)
 
 ## Getting your Config File Sorted
 

@@ -43,7 +43,7 @@ pnpm -g i @moonwall/cli
 
 ## Initializing Moonwall
 
-The first thing to do is to create a Moonwall config file. This can be initiated with the command:
+The first thing to do is to create a Moonwall config file. This can be initiated with the command below or you can [use the CLI to take the same steps](/guide/cmd/cli).
 
 ::: code-group
 
@@ -72,7 +72,7 @@ which should give you an output like:
 ? Provide a label for the config file (moonwall_config) 
 ```
 
-From here you can follow the questions in the wizard to build a stock moonwall config to start you off.
+From here you can follow the questions in the wizard to build a stock moonwall config to start you off. For information, please see the [init command](/guide/cmd/init). 
 
 ::: info
 The items in brackets are the default options, which you can accept with `ENTER`
