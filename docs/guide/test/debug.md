@@ -19,7 +19,7 @@ While tailing the logs, you can manage your tests with the following key command
 
 ### Analyzing the Logs
 
-The default location of your log files is /tmp/node_logs. The full location can be found at the top of the console output when tailing the logs in the prior step. 
+The default location of your log files is `/tmp/node_logs`. The full location can be found at the top of the console output when tailing the logs in the prior step. 
 
 ::: tip
 The logs automatically get overwritten with each time the network is spooled up, so be sure to make copies of any log files that you wish to keep.
