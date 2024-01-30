@@ -87,9 +87,10 @@ export function generateKeyringPair(
   privateKey?: string
 ) {
   const key = privateKey || `0xDEADBEEF${(accountSeed++).toString(16).padStart(56, "0")}`;
-  if (type == "sr25519") {
+  if (type === "sr25519") {
     return keyringSr25519.addFromUri(key);
-  } else if (type == "ed25519") {
+  }
+  if (type === "ed25519") {
     return keyringEd25519.addFromUri(key);
   }
   return keyringEth.addFromUri(key);

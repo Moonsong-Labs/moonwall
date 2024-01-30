@@ -55,7 +55,7 @@
     "fmt": "biome format .",
     "fmt:fix": "biome format . --write",
     "prepublish": "pnpm run build && pnpm run generate-types",
-    "schema": "typescript-json-schema --tsNodeRegister --esModuleInterop -o config_schema.json ./src/config.ts MoonwallConfig"
+    "schema": "typescript-json-schema --tsNodeRegister --esModuleInterop -o config_schema.json ./src/config.ts MoonwallConfig && pnpm biome format config_schema.json --write"
   },
   "dependencies": {
     "@polkadot/api": "10.11.2",

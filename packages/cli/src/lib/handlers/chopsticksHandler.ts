@@ -35,7 +35,7 @@ export const chopsticksHandler: FoundationHandler<"chopsticks"> = ({
   };
 
   const newKeyring = () => {
-    const isEth = accountTypeLookup() == "AccountId20";
+    const isEth = accountTypeLookup() === "AccountId20";
     const keyring = new Keyring({
       type: isEth ? "ethereum" : "sr25519",
     });

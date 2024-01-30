@@ -44,14 +44,14 @@ export const instantFastTrack = async <
   { votingPeriod, delayPeriod } = { votingPeriod: 2, delayPeriod: 0 }
 ): Promise<string> => {
   const proposalHash =
-    typeof proposal == "string" ? proposal : await notePreimage(context, proposal);
+    typeof proposal === "string" ? proposal : await notePreimage(context, proposal);
 
   await execCouncilProposal(
     context,
     context.polkadotJs().tx.democracy.externalProposeMajority({
       Lookup: {
         hash: proposalHash,
-        len: typeof proposal == "string" ? proposal : proposal.method.encodedLength,
+        len: typeof proposal === "string" ? proposal : proposal.method.encodedLength,
       },
     })
   );
@@ -92,7 +92,7 @@ export const execCouncilProposal = async <
   expect(proposalResult!.successful, `Council proposal refused: ${proposalResult?.error?.name}`).to
     .be.true;
   const proposalHash = proposalResult!.events
-    .find(({ event: { method } }) => method.toString() == "Proposed")!
+    .find(({ event: { method } }) => method.toString() === "Proposed")!
     .event.data[2].toHex() as string;
 
   // Dorothy vote for this proposal and close it
@@ -138,7 +138,7 @@ export const proposeReferendaAndDeposit = async <
 ): Promise<[number, string]> => {
   // Fetch proposal hash
   const proposalHash =
-    typeof proposal == "string" ? proposal : await notePreimage(context, proposal);
+    typeof proposal === "string" ? proposal : await notePreimage(context, proposal);
 
   // Post referenda
   const { result: proposalResult } = await context.createBlock(
@@ -149,7 +149,7 @@ export const proposeReferendaAndDeposit = async <
         {
           Lookup: {
             hash: proposalHash,
-            len: typeof proposal == "string" ? proposal : proposal.method.encodedLength,
+            len: typeof proposal === "string" ? proposal : proposal.method.encodedLength,
           },
         },
         { At: 0 }
@@ -161,7 +161,7 @@ export const proposeReferendaAndDeposit = async <
     .be.true;
 
   const refIndex = proposalResult!.events
-    .find(({ event: { method } }) => method.toString() == "Submitted")!
+    .find(({ event: { method } }) => method.toString() === "Submitted")!
     .event.data[0].toString();
 
   // Place decision deposit
@@ -262,7 +262,7 @@ export const execTechnicalCommitteeProposal = async <
   expect(proposalResult!.successful, `Council proposal refused: ${proposalResult?.error?.name}`).to
     .be.true;
   const proposalHash = proposalResult!.events
-    .find(({ event: { method } }) => method.toString() == "Proposed")!
+    .find(({ event: { method } }) => method.toString() === "Proposed")!
     .event.data[2].toHex() as string;
 
   // Get proposal count
@@ -336,7 +336,8 @@ export const executeProposalWithCouncil = async (api: ApiPromise, encodedHash: s
       .find(
         (ref: any) =>
           ref[1].unwrap().isFinished &&
-          api.registry.createType("u32", ref[0].toU8a().slice(-4)).toNumber() == referendumNextIndex
+          api.registry.createType("u32", ref[0].toU8a().slice(-4)).toNumber() ===
+            referendumNextIndex
       )?.[1]
       .unwrap();
     await new Promise((resolve) => setTimeout(resolve, 1000));

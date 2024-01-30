@@ -27,8 +27,8 @@ export async function testCmd(envName: string, additionalArgs?: object): Promise
   await commonChecks(env);
 
   if (
-    (env.foundation.type == "dev" && !env.foundation.launchSpec[0].retainAllLogs) ||
-    (env.foundation.type == "chopsticks" && !env.foundation.launchSpec[0].retainAllLogs)
+    (env.foundation.type === "dev" && !env.foundation.launchSpec[0].retainAllLogs) ||
+    (env.foundation.type === "chopsticks" && !env.foundation.launchSpec[0].retainAllLogs)
   ) {
     clearNodeLogs();
   }
@@ -60,7 +60,7 @@ export async function executeTests(env: Environment, additionalArgs?: object) {
 
         const ctx = await contextCreator();
         const chainData = ctx.providers
-          .filter((provider) => provider.type == "polkadotJs" && provider.name.includes("para"))
+          .filter((provider) => provider.type === "polkadotJs" && provider.name.includes("para"))
           .map((provider) => {
             return {
               [provider.name]: {
@@ -98,7 +98,7 @@ export async function executeTests(env: Environment, additionalArgs?: object) {
       include: env.include ? env.include : ["**/*{test,spec,test_,test-}*{ts,mts,cts}"],
       onConsoleLog(log) {
         if (filterList.includes(log.trim())) return false;
-        // if (log.trim() == "stdout | unknown test" || log.trim() == "<empty line>") return false;
+        // if (log.trim() === "stdout | unknown test" || log.trim() === "<empty line>") return false;
         if (log.includes("has multiple versions, ensure that there is only one installed.")) {
           return false;
         }
@@ -110,7 +110,7 @@ export async function executeTests(env: Environment, additionalArgs?: object) {
 
     if (
       globalConfig.environments.find((env) => env.name === process.env.MOON_TEST_ENV)?.foundation
-        .type == "zombie"
+        .type === "zombie"
     ) {
       await runNetworkOnly();
       process.env.MOON_RECYCLE = "true";
@@ -152,7 +152,7 @@ function addThreadConfig(
     },
   };
 
-  if (threads == true && process.env.MOON_RECYCLE !== "true") {
+  if (threads === true && process.env.MOON_RECYCLE !== "true") {
     configWithThreads.fileParallelism = true;
     configWithThreads.poolOptions!.threads = {
       isolate: true,

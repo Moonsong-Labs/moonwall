@@ -207,7 +207,7 @@ const main = async () => {
     }
     const callData = api.createType("Call", call.asInline.toHex());
     return (
-      callData.method == "nudgeReferendum" && (callData.args[0] as any).toNumber() == proposalIndex
+      callData.method === "nudgeReferendum" && (callData.args[0] as any).toNumber() === proposalIndex
     );
   });
 
@@ -224,7 +224,7 @@ const main = async () => {
       (await api.rpc.chain.getHeader()).number.toNumber() + 2
     )}`
   );
-  await moveScheduledCallTo(api, 1, (call) => call.isLookup && call.asLookup.toHex() == callHash);
+  await moveScheduledCallTo(api, 1, (call) => call.isLookup && call.asLookup.toHex() === callHash);
 
   console.log(
     `${chalk.yellow("Fast forward")} ${chalk.green(1)} to #${chalk.green(

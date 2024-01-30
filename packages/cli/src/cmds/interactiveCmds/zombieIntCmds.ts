@@ -15,7 +15,7 @@ export async function resolveZombieInteractiveCmdChoice() {
     default: "back",
   });
 
-  if (choice.cmd == "back") {
+  if (choice.cmd === "back") {
     return;
   } else {
     const whichNode = await inquirer.prompt({

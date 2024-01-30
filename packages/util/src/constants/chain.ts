@@ -1,5 +1,5 @@
 import "@moonbeam-network/api-augment";
-export const SPECS_PATH = `./moonbeam-test-specs`;
+export const SPECS_PATH = "./moonbeam-test-specs";
 
 export const DEBUG_MODE = process.env.DEBUG_MODE || false;
 export const DISPLAY_LOG = process.env.MOONBEAM_LOG || false;
@@ -7,12 +7,12 @@ export const MOONBEAM_LOG = process.env.MOONBEAM_LOG || "info";
 
 export const BASE_PATH = process.env.BASE_PATH;
 export const CUSTOM_SPEC_PATH = process.env.CUSTOM_SPEC_PATH;
-export const BINARY_PATH = process.env.BINARY_PATH || `../target/release/moonbeam`;
-export const RELAY_BINARY_PATH = process.env.RELAY_BINARY_PATH || `../target/release/polkadot`;
+export const BINARY_PATH = process.env.BINARY_PATH || "../target/release/moonbeam";
+export const RELAY_BINARY_PATH = process.env.RELAY_BINARY_PATH || "../target/release/polkadot";
 export const RELAY_LOG = process.env.RELAY_LOG;
 
 // Is undefined by default as the path is dependent of the runtime.
-export const OVERRIDE_RUNTIME_PATH = process.env["OVERRIDE_RUNTIME_PATH"] || undefined;
+export const OVERRIDE_RUNTIME_PATH = process.env.OVERRIDE_RUNTIME_PATH || undefined;
 export const SPAWNING_TIME = 20000;
 export const ETHAPI_CMD = process.env.ETHAPI_CMD || "";
 export const WASM_RUNTIME_OVERRIDES = process.env.WASM_RUNTIME_OVERRIDES || "";

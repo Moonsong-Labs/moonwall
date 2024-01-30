@@ -6,7 +6,9 @@ import WebSocket from "ws";
 // DEV
 //**************************
 
-export async function jumpBlocksDev(polkadotJsApi: ApiPromise, blockCount: number) {
+export async function jumpBlocksDev(polkadotJsApi: ApiPromise, blocks: number) {
+  let blockCount = blocks;
+
   while (blockCount > 0) {
     await polkadotJsApi.rpc.engine.createBlock(true, true);
     blockCount--;
@@ -33,7 +35,8 @@ export async function jumpToRoundDev(polkadotJsApi: ApiPromise, round: number) {
 
     if (currentRound === round) {
       return lastBlockHash;
-    } else if (currentRound > round) {
+    }
+    if (currentRound > round) {
       return null;
     }
 
@@ -80,7 +83,7 @@ export async function jumpBlocksChopsticks(port: number, blockCount: number) {
   return await sendNewBlockCmd(port, blockCount);
 }
 
-const sendNewBlockCmd = async (port: number, count: number = 1) => {
+const sendNewBlockCmd = async (port: number, count = 1) => {
   const websocketUrl = `ws://127.0.0.1:${port}`;
   const socket = new WebSocket(websocketUrl);
 

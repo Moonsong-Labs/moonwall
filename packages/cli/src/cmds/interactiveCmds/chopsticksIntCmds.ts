@@ -8,7 +8,7 @@ import { jumpBlocksChopsticks, jumpRoundsChopsticks, jumpToRoundChopsticks } fro
 
 export async function resolveChopsticksInteractiveCmdChoice() {
   const globalConfig = importJsonConfig();
-  const config = globalConfig.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
+  const config = globalConfig.environments.find(({ name }) => name === process.env.MOON_TEST_ENV)!;
 
   if (config.foundation.type !== "chopsticks") {
     throw new Error("Only chopsticks is supported, this is a bug please raise an issue.");
@@ -35,7 +35,7 @@ export async function resolveChopsticksInteractiveCmdChoice() {
   const nodeSelected = isMultiChain ? await promptNode() : config.foundation.launchSpec[0].name;
 
   const ctx = await (await MoonwallContext.getContext()).connectEnvironment();
-  const provider = ctx.providers.find((a) => a.type == "polkadotJs" && a.name == nodeSelected);
+  const provider = ctx.providers.find((a) => a.type === "polkadotJs" && a.name === nodeSelected);
 
   if (!provider) {
     throw new Error(
@@ -47,7 +47,7 @@ export async function resolveChopsticksInteractiveCmdChoice() {
 
   const ports = await Promise.all(
     config.foundation.launchSpec
-      .filter(({ name }) => name == nodeSelected)
+      .filter(({ name }) => name === nodeSelected)
       .map(async ({ configPath }) => {
         const yaml = parse((await fsPromises.readFile(configPath)).toString());
         return (yaml.port as string) || "8000";

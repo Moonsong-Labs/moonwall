@@ -74,7 +74,7 @@ export async function runNetworkCmd(args) {
         },
         {
           name:
-            foundation == "dev" || foundation == "chopsticks" || foundation == "zombie"
+            foundation === "dev" || foundation === "chopsticks" || foundation === "zombie"
               ? `Command:   Run command on network (${chalk.bgGrey.cyanBright(foundation)})`
               : chalk.dim(
                   `Not applicable for foundation type (${chalk.bgGrey.cyanBright(foundation)})`
@@ -125,8 +125,8 @@ export async function runNetworkCmd(args) {
   ];
 
   if (
-    (env.foundation.type == "dev" && !env.foundation.launchSpec[0].retainAllLogs) ||
-    (env.foundation.type == "chopsticks" && !env.foundation.launchSpec[0].retainAllLogs)
+    (env.foundation.type === "dev" && !env.foundation.launchSpec[0].retainAllLogs) ||
+    (env.foundation.type === "chopsticks" && !env.foundation.launchSpec[0].retainAllLogs)
   ) {
     clearNodeLogs();
   }
@@ -140,7 +140,7 @@ export async function runNetworkCmd(args) {
   );
 
   if (!args.GrepTest) {
-    await inquirer.prompt(questions.find(({ name }) => name == "NetworkStarted"));
+    await inquirer.prompt(questions.find(({ name }) => name === "NetworkStarted"));
   } else {
     process.env.MOON_RECYCLE = "true";
     process.env.MOON_GREP = await args.GrepTest;
@@ -148,7 +148,7 @@ export async function runNetworkCmd(args) {
   }
 
   mainloop: for (;;) {
-    const choice = await inquirer.prompt(questions.find(({ name }) => name == "MenuChoice"));
+    const choice = await inquirer.prompt(questions.find(({ name }) => name === "MenuChoice"));
     const env = globalConfig.environments.find(({ name }) => name === args.envName)!;
 
     switch (choice.MenuChoice) {
@@ -180,7 +180,7 @@ export async function runNetworkCmd(args) {
         break;
 
       case 6: {
-        const quit = await inquirer.prompt(questions.find(({ name }) => name == "Quit"));
+        const quit = await inquirer.prompt(questions.find(({ name }) => name === "Quit"));
         if (quit.Quit === true) {
           break mainloop;
         }
@@ -198,7 +198,7 @@ const reportServicePorts = async () => {
   const ctx = await MoonwallContext.getContext();
   const portsList: { port: string; name: string }[] = [];
   const globalConfig = await importAsyncConfig();
-  const config = globalConfig.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
+  const config = globalConfig.environments.find(({ name }) => name === process.env.MOON_TEST_ENV)!;
 
   switch (config.foundation.type) {
     case "dev": {

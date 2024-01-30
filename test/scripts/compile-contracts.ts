@@ -157,7 +157,7 @@ const getImports = (fileRef: string) => (dependency: string) => {
       return { contents: sourceByReference[localRef] };
     }
     base = path.dirname(base);
-    if (base == ".") {
+    if (base === ".") {
       continue;
     }
   }

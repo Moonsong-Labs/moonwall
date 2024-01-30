@@ -22,7 +22,7 @@ const debug = Debug("DevTest");
 
 export async function getDevProviderPath() {
   const globalConfig = await importAsyncConfig();
-  const env = globalConfig.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
+  const env = globalConfig.environments.find(({ name }) => name === process.env.MOON_TEST_ENV)!;
   return env.connections
     ? env.connections[0].endpoints[0].replace("ws://", "http://")
     : vitestAutoUrl();
@@ -63,7 +63,7 @@ export async function createDevBlock<
   const containsViem =
     (context as DevModeContext).isEthereumChain &&
     context.viem() &&
-    (await MoonwallContext.getContext()).providers.find((prov) => prov.type == "viem")
+    (await MoonwallContext.getContext()).providers.find((prov) => prov.type === "viem")
       ? true
       : false;
   const api = context.polkadotJs();
@@ -75,10 +75,10 @@ export async function createDevBlock<
   const results: ({ type: "eth"; hash: string } | { type: "sub"; hash: string })[] = [];
 
   const txs =
-    transactions == undefined ? [] : Array.isArray(transactions) ? transactions : [transactions];
+    transactions === undefined ? [] : Array.isArray(transactions) ? transactions : [transactions];
 
   for await (const call of txs) {
-    if (typeof call == "string") {
+    if (typeof call === "string") {
       // Ethereum
       results.push({
         type: "eth",
@@ -121,7 +121,7 @@ export async function createDevBlock<
   const blockResult = await createAndFinalizeBlock(api, parentHash, finalize);
 
   // No need to extract events if no transactions
-  if (results.length == 0) {
+  if (results.length === 0) {
     return {
       block: blockResult,
     };
@@ -133,20 +133,20 @@ export async function createDevBlock<
   const blockData = await api.rpc.chain.getBlock(blockResult.hash);
 
   const getExtIndex = (records: EventRecord[], result: { type: "sub" | "eth"; hash: string }) => {
-    if (result.type == "eth") {
+    if (result.type === "eth") {
       const res = records
         .find(
           ({ phase, event: { section, method, data } }) =>
             phase.isApplyExtrinsic &&
-            section == "ethereum" &&
-            method == "Executed" &&
-            data[2].toString() == result.hash
+            section === "ethereum" &&
+            method === "Executed" &&
+            data[2].toString() === result.hash
         )
         ?.phase?.asApplyExtrinsic?.toString();
 
       return res === undefined ? undefined : Number(res);
     } else {
-      return blockData.block.extrinsics.findIndex((ext) => ext.hash.toHex() == result.hash);
+      return blockData.block.extrinsics.findIndex((ext) => ext.hash.toHex() === result.hash);
     }
   };
 
@@ -172,7 +172,7 @@ export async function createDevBlock<
     };
   });
 
-  if (results.find((res) => res.type == "eth")) {
+  if (results.find((res) => res.type === "eth")) {
     // Wait until new block is actually created
     // max wait 2s
     for (let i = 0; i < 1000; i++) {

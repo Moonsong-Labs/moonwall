@@ -1,18 +1,18 @@
 import "@moonbeam-network/api-augment";
-import { Web3, JsonRpcResponse } from "web3";
+import { Web3 } from "web3";
 import { alith } from "../constants/accounts";
 import { MIN_GAS_PRICE } from "../constants/chain";
 
 export async function customWeb3Request(web3: Web3, method: string, params: any[]) {
-  return new Promise<JsonRpcResponse>((resolve, reject) => {
-    (web3.eth.currentProvider as any).send(
+  return new Promise((resolve, reject) => {
+    ((web3.eth as any).currentProvider as any).send(
       {
         jsonrpc: "2.0",
         id: 1,
         method,
         params,
       },
-      (error: Error | null, result?: JsonRpcResponse) => {
+      (error: Error | null, result?: any) => {
         if (error) {
           reject(
             `Failed to send custom request (${method} (${params
@@ -23,7 +23,7 @@ export async function customWeb3Request(web3: Web3, method: string, params: any[
               .join(",")})): ${error.message || error.toString()}`
           );
         }
-        resolve(result!);
+        resolve(result);
       }
     );
   });
@@ -44,10 +44,10 @@ export interface Web3EthCallOptions {
 export async function web3EthCall(web3: Web3, options: Web3EthCallOptions) {
   return await customWeb3Request(web3, "eth_call", [
     {
-      from: options.from == undefined ? options.from : alith.address,
+      from: options.from === undefined ? options.from : alith.address,
       value: options.value,
-      gas: options.gas == undefined ? options.gas : 256000,
-      gasPrice: options.gas == undefined ? options.gas : `0x${MIN_GAS_PRICE}`,
+      gas: options.gas === undefined ? options.gas : 256000,
+      gasPrice: options.gas === undefined ? options.gas : `0x${MIN_GAS_PRICE}`,
       to: options.to,
       data: options.data,
     },
@@ -85,5 +85,5 @@ export async function web3EthCall(web3: Web3, options: Web3EthCallOptions) {
 // }
 
 export type EnhancedWeb3 = Web3 & {
-  customRequest: (method: string, params: any[]) => Promise<JsonRpcResponse>;
+  customRequest: (method: string, params: any[]) => Promise<any>;
 };

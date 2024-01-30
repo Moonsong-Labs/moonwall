@@ -36,7 +36,7 @@ contract ERC20Instance is IERC20 {
         (bool result, bytes memory data) = erc20address.staticcall(
             abi.encodeWithSignature("totalSupply()")
         );
-        require(result == true);
+        require(result === true);
         return abi.decode(data, (uint256));
     }
 

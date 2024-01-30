@@ -88,7 +88,7 @@ export async function getRuntimeWasm(
     fs.mkdirSync(RUNTIME_DIRECTORY, { recursive: true });
   }
 
-  if (runtimeTag == "local") {
+  if (runtimeTag === "local") {
     const builtRuntimePath = localPath
       ? localPath
       : path.join(

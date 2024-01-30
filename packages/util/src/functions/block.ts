@@ -20,7 +20,7 @@ const debug = Debug("test:blocks");
 export async function createAndFinalizeBlock(
   api: ApiPromise,
   parentHash?: string,
-  finalize: boolean = false
+  finalize = false
 ): Promise<{
   duration: number;
   hash: string;
@@ -83,7 +83,7 @@ export const getBlockExtrinsic = async (
     apiAt.query.system.events(),
   ]);
   const extIndex = block.extrinsics.findIndex(
-    (ext) => ext.method.section == section && ext.method.method == method
+    (ext) => ext.method.section === section && ext.method.method === method
   );
   const extrinsic = extIndex > -1 ? block.extrinsics[extIndex] : null;
   const events = (records as any)
@@ -99,7 +99,7 @@ export const getBlockExtrinsic = async (
 
 export const getBlockTime = (signedBlock: any) =>
   signedBlock.block.extrinsics
-    .find((item) => item.method.section == "timestamp")
+    .find((item) => item.method.section === "timestamp")
     .method.args[0].toNumber();
 
 export const checkBlockFinalized = async (api: ApiPromise, number: number) => {
@@ -139,7 +139,11 @@ export const fetchHistoricBlockNum = async (
   );
 };
 
-export const getBlockArray = async (api: ApiPromise, timePeriod: number, limiter?: Bottleneck) => {
+export const getBlockArray = async (
+  api: ApiPromise,
+  timePeriod: number,
+  bottleneck?: Bottleneck
+) => {
   /**  
   @brief Returns an sequential array of block numbers from a given period of time in the past
   @param api Connected ApiPromise to perform queries on
@@ -147,7 +151,9 @@ export const getBlockArray = async (api: ApiPromise, timePeriod: number, limiter
   @param limiter Bottleneck rate limiter to throttle requests
   */
 
-  if (limiter == null) {
+  let limiter = bottleneck;
+
+  if (!limiter) {
     limiter = new Bottleneck({ maxConcurrent: 10, minTime: 100 });
   }
   const finalizedHead = await limiter.schedule(() => api.rpc.chain.getFinalizedHead());
@@ -202,7 +208,8 @@ export function extractPreimageDeposit(
       accountId: deposit.unwrap()[0].toHex(),
       amount: deposit.unwrap()[1],
     };
-  } else if ("isNone" in deposit && deposit.isNone) {
+  }
+  if ("isNone" in deposit && deposit.isNone) {
     return undefined;
   }
   return {

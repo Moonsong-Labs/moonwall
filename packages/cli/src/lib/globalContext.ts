@@ -48,7 +48,7 @@ export class MoonwallContext {
   ipcServer?: net.Server;
 
   constructor(config: MoonwallConfig) {
-    const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
+    const env = config.environments.find(({ name }) => name === process.env.MOON_TEST_ENV)!;
     this.providers = [];
     this.nodes = [];
     this.foundation = env.foundation.type;
@@ -56,7 +56,7 @@ export class MoonwallContext {
 
   public async setupFoundation() {
     const config = await importAsyncConfig();
-    const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
+    const env = config.environments.find(({ name }) => name === process.env.MOON_TEST_ENV)!;
     const foundationHandlers: Record<
       FoundationType,
       (env: Environment, config: MoonwallConfig) => Promise<IGlobalContextFoundation>
@@ -166,7 +166,7 @@ export class MoonwallContext {
 
   private async startZombieNetwork() {
     const config = await importAsyncConfig();
-    const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
+    const env = config.environments.find(({ name }) => name === process.env.MOON_TEST_ENV)!;
 
     if (env.foundation.type !== "zombie") {
       throw new Error(`Foundation type must be 'zombie', something has gone very wrong.`);
@@ -335,7 +335,7 @@ export class MoonwallContext {
 
   public async startNetwork() {
     const ctx = await MoonwallContext.getContext();
-    if (process.env.MOON_RECYCLE == "true") {
+    if (process.env.MOON_RECYCLE === "true") {
       return ctx;
     }
 
@@ -364,9 +364,9 @@ export class MoonwallContext {
 
   public async connectEnvironment(silent: boolean = false): Promise<MoonwallContext> {
     const config = await importAsyncConfig();
-    const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
+    const env = config.environments.find(({ name }) => name === process.env.MOON_TEST_ENV)!;
 
-    if (this.environment.foundationType == "zombie") {
+    if (this.environment.foundationType === "zombie") {
       this.environment.providers = env.connections
         ? ProviderFactory.prepare(env.connections)
         : isEthereumZombieConfig()
@@ -387,7 +387,7 @@ export class MoonwallContext {
     );
     await Promise.all(promises);
 
-    if (this.foundation == "zombie") {
+    if (this.foundation === "zombie") {
       let readStreams: any[];
       if (!isOptionSet("disableLogEavesdropping")) {
         !silent && console.log(`🦻 Eavesdropping on node logs at ${process.env.MOON_ZOMBIE_DIR}`);
@@ -411,10 +411,10 @@ export class MoonwallContext {
       }
 
       const promises = this.providers
-        .filter(({ type }) => type == "polkadotJs")
+        .filter(({ type }) => type === "polkadotJs")
         .filter(
           ({ name }) =>
-            env.foundation.type == "zombie" &&
+            env.foundation.type === "zombie" &&
             (!env.foundation.zombieSpec.skipBlockCheck ||
               !env.foundation.zombieSpec.skipBlockCheck.includes(name))
         )
@@ -424,7 +424,7 @@ export class MoonwallContext {
             while (
               (
                 await (provider.api as ApiPromise).rpc.chain.getBlock()
-              ).block.header.number.toNumber() == 0
+              ).block.header.number.toNumber() === 0
             ) {
               await timer(500);
             }

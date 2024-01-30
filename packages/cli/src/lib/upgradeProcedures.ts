@@ -60,7 +60,7 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
 
       log("Checking if upgrade is needed...");
       const existingCode = await api.rpc.state.getStorage(":code");
-      if (existingCode!.toString() == code) {
+      if (existingCode!.toString() === code) {
         reject(
           `Runtime upgrade with same code: ${existingCode!.toString().slice(0, 20)} vs ${code
             .toString()
@@ -119,7 +119,7 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
                 (ref: any) =>
                   ref[1].unwrap().isOngoing &&
                   ref[1].unwrap().asOngoing.proposal.isLookup &&
-                  ref[1].unwrap().asOngoing.proposal.asLookup.hash.toHex() == encodedHash
+                  ref[1].unwrap().asOngoing.proposal.asLookup.hash.toHex() === encodedHash
               )
               .map((ref) =>
                 api.registry.createType("u32", ref[0].toU8a().slice(-4)).toNumber()
@@ -128,7 +128,7 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
               .filter(
                 (ref: any) =>
                   ref[1].unwrap().isOngoing &&
-                  (ref[1].unwrap().asOngoing as any).proposalHash.toHex() == encodedHash
+                  (ref[1].unwrap().asOngoing as any).proposalHash.toHex() === encodedHash
               )
               .map((ref) =>
                 api.registry.createType("u32", ref[0].toU8a().slice(-4)).toNumber()
@@ -193,7 +193,7 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
             const blockToWait = (await api.rpc.chain.getHeader()).number.toNumber() + 1;
             await new Promise(async (resolve) => {
               const subBlocks = await api.rpc.chain.subscribeNewHeads(async (header) => {
-                if (header.number.toNumber() == blockToWait) {
+                if (header.number.toNumber() === blockToWait) {
                   subBlocks();
                   resolve(blockToWait);
                 }

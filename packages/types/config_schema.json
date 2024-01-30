@@ -618,7 +618,7 @@
 						"description": "Write test results to a file when the using JSON or HTML reporter.\nBy providing an object instead of a string you can define individual outputs when using multiple reporters."
 					},
 					"reporters": {
-						"description": "An optional array of reporter names.",
+						"description": "An optional array of reporter types e.g. html, basic, verbose, json etc",
 						"items": {
 							"type": "string"
 						},

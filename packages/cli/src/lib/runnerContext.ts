@@ -126,9 +126,9 @@ export function describeSuite<T extends FoundationType>({
     const getApi = <T extends ProviderType>(apiType?: T, apiName?: string) => {
       const provider = ctx!.providers.find((prov) => {
         if (apiType && apiName) {
-          return prov.type == apiType && prov.name === apiName;
+          return prov.type === apiType && prov.name === apiName;
         } else if (apiType && !apiName) {
-          return prov.type == apiType;
+          return prov.type === apiType;
         } else if (!apiType && apiName) {
           return prov.name === apiName;
         } else {

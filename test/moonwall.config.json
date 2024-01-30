@@ -8,7 +8,6 @@
       "name": "astar",
       "ghAuthor": "AstarNetwork",
       "ghRepo": "Astar",
-
       "binaries": [
         {
           "name": "astar-collator*ubuntu-x86*",
@@ -262,6 +261,9 @@
     },
     {
       "name": "chopsticks",
+      "envVars": [
+        "DEBUG_COLORS=1"
+      ],
       "testFileDir": [
         "suites/chopsticks/"
       ],

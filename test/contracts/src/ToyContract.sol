@@ -13,7 +13,7 @@ contract ToyContract {
   function setter(uint256 _val) public returns (bool) {
     value = _val;
 
-    if (_val % 2 == 0) {
+    if (_val % 2 === 0) {
       return true;
     } else {
       return false;

@@ -33,7 +33,7 @@ import {
 
 export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testCase, logger }) => {
   const config = importJsonConfig();
-  const env = config.environments.find((env) => env.name == process.env.MOON_TEST_ENV)!;
+  const env = config.environments.find((env) => env.name === process.env.MOON_TEST_ENV)!;
   const ethCompatible = isEthereumDevConfig();
 
   const accountTypeLookup = () => {
@@ -49,7 +49,7 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
   };
 
   const newKeyring = () => {
-    const isEth = accountTypeLookup() == "AccountId20";
+    const isEth = accountTypeLookup() === "AccountId20";
     const keyring = new Keyring({
       type: isEth ? "ethereum" : "sr25519",
     });

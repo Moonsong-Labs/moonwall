@@ -36,7 +36,7 @@ export async function launchNode(cmd: string, args: string[], name: string) {
   const fsStream = fs.createWriteStream(logLocation);
 
   runningNode.on("error", (err) => {
-    if ((err as any).errno == "ENOENT") {
+    if ((err as any).errno === "ENOENT") {
       console.error(
         `\x1b[31mMissing Local binary at` + `(${cmd}).\nPlease compile the project\x1b[0m`
       );

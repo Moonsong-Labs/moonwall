@@ -42,7 +42,7 @@ export async function fetchArtifact(args) {
           .filter((release) => release.tag_name.includes(args.ver))
           .find((release) => release.assets.find((asset) => minimatch(asset.name, binary)));
 
-  if (release == null) {
+  if (!release) {
     throw new Error(`Release not found for ${args.ver}`);
   }
 

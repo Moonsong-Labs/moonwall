@@ -5,7 +5,7 @@ import { jumpRoundsDev, jumpToRoundDev } from "@moonwall/util";
 
 export async function resolveDevInteractiveCmdChoice() {
   const ctx = await (await MoonwallContext.getContext()).connectEnvironment();
-  const api = ctx.providers.find((a) => a.type == "polkadotJs")!.api as ApiPromise;
+  const api = ctx.providers.find((a) => a.type === "polkadotJs")!.api as ApiPromise;
   const choices = [
     { name: "🆗  Create Block", value: "createblock" },
     { name: "🆕  Create Unfinalized Block", value: "createUnfinalizedBlock" },

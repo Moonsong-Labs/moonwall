@@ -175,7 +175,6 @@ export async function deployViemContract<TOptions extends ContractDeploymentOpti
       console.log(e.message);
       console.log("Contract deployment query, retrying...");
       await timer(100);
-      continue;
     }
   }
   throw new Error("Contract deployment query failed after 5 retries");
@@ -230,22 +229,22 @@ export async function createViemTransaction<TOptions extends DeepPartial<ViemTra
   const type = !!options && !!options.txnType ? options.txnType : "eip1559";
   const privateKey = !!options && !!options.privateKey ? options.privateKey : ALITH_PRIVATE_KEY;
   const account = privateKeyToAccount(privateKey);
-  const value = options && options.value ? options.value : 0n;
-  const to = options && options.to ? options.to : "0x0000000000000000000000000000000000000000";
+  const value = options?.value ? options.value : 0n;
+  const to = options?.to ? options.to : "0x0000000000000000000000000000000000000000";
   const chainId = await context.viem().getChainId();
   const txnCount = await context.viem().getTransactionCount({ address: account.address });
   const gasPrice = await context.viem().getGasPrice();
-  const data = options && options.data ? options.data : "0x";
+  const data = options?.data ? options.data : "0x";
 
   const estimatedGas =
     options.skipEstimation || options.gas !== undefined
       ? 1_500_000n
       : await context.viem().estimateGas({ account: account.address, to, value, data });
-  const accessList = options && options.accessList ? options.accessList : [];
+  const accessList = options?.accessList ? options.accessList : [];
 
-  const txnBlob: TransactionSerializable | object =
+  const txnBlob =
     type === "eip1559"
-      ? {
+      ? ({
           to,
           value,
           maxFeePerGas: options.maxFeePerGas !== undefined ? options.maxFeePerGas : gasPrice,
@@ -256,18 +255,18 @@ export async function createViemTransaction<TOptions extends DeepPartial<ViemTra
           data,
           chainId,
           type,
-        }
+        } satisfies TransactionSerializable)
       : type === "legacy"
-        ? {
+        ? ({
             to,
             value,
             gasPrice: options.gasPrice !== undefined ? options.gasPrice : gasPrice,
             gas: options.gas !== undefined ? options.gas : estimatedGas,
             nonce: options.nonce !== undefined ? options.nonce : txnCount,
             data,
-          }
+          } satisfies TransactionSerializable)
         : type === "eip2930"
-          ? {
+          ? ({
               to,
               value,
               gasPrice: options.gasPrice !== undefined ? options.gasPrice : gasPrice,
@@ -276,11 +275,14 @@ export async function createViemTransaction<TOptions extends DeepPartial<ViemTra
               data,
               chainId,
               type,
-            }
+            } satisfies TransactionSerializable)
           : {};
 
-  if (type !== "legacy" && accessList.length > 0) {
-    txnBlob["accessList"] = accessList;
+  if (
+    (type === "eip1559" && accessList.length > 0) ||
+    (type === "eip2930" && accessList.length > 0)
+  ) {
+    (txnBlob as any).accessList = accessList;
   }
   return await account.signTransaction(txnBlob);
 }
@@ -298,9 +300,9 @@ export async function checkBalance(
   account: `0x${string}` = ALITH_ADDRESS,
   block: BlockTag | bigint = "latest"
 ): Promise<bigint> {
-  return typeof block == "string"
+  return typeof block === "string"
     ? await context.viem().getBalance({ address: account, blockTag: block })
-    : typeof block == "bigint"
+    : typeof block === "bigint"
       ? await context.viem().getBalance({ address: account, blockNumber: block })
       : await context.viem().getBalance({ address: account });
 }

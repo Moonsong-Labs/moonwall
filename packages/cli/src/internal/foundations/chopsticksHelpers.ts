@@ -11,10 +11,10 @@ import { MoonwallContext } from "../../lib/globalContext";
 export async function getWsFromConfig(providerName?: string): Promise<WsProvider> {
   if (providerName) {
     const provider = (await MoonwallContext.getContext()).environment.providers.find(
-      ({ name }) => name == providerName
+      ({ name }) => name === providerName
     );
 
-    if (typeof provider == "undefined") {
+    if (typeof provider === "undefined") {
       throw new Error(`Cannot find provider ${chalk.bgWhiteBright.blackBright(providerName)}`);
     }
 
@@ -25,10 +25,10 @@ export async function getWsFromConfig(providerName?: string): Promise<WsProvider
     return provider.ws();
   } else {
     const provider = (await MoonwallContext.getContext()).environment.providers.find(
-      ({ type }) => type == "polkadotJs"
+      ({ type }) => type === "polkadotJs"
     );
 
-    if (typeof provider == "undefined") {
+    if (typeof provider === "undefined") {
       throw new Error(
         `Cannot find providers of type ${chalk.bgWhiteBright.blackBright("polkadotJs")}`
       );

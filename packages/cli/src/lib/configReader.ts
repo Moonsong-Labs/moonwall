@@ -52,7 +52,7 @@ export async function importConfig(configPath: string): Promise<MoonwallConfig> 
 
 export function isOptionSet(option: string): boolean {
   const config = importJsonConfig();
-  const env = config.environments.find((env) => env.name == process.env.MOON_TEST_ENV)!;
+  const env = config.environments.find((env) => env.name === process.env.MOON_TEST_ENV)!;
   const optionValue = traverseConfig(env, option);
 
   return optionValue !== undefined;
@@ -60,14 +60,14 @@ export function isOptionSet(option: string): boolean {
 
 export function isEthereumZombieConfig(): boolean {
   const config = importJsonConfig();
-  const env = config.environments.find((env) => env.name == process.env.MOON_TEST_ENV)!;
-  return env.foundation.type == "zombie" && !env.foundation.zombieSpec.disableDefaultEthProviders;
+  const env = config.environments.find((env) => env.name === process.env.MOON_TEST_ENV)!;
+  return env.foundation.type === "zombie" && !env.foundation.zombieSpec.disableDefaultEthProviders;
 }
 
 export function isEthereumDevConfig(): boolean {
   const config = importJsonConfig();
-  const env = config.environments.find((env) => env.name == process.env.MOON_TEST_ENV)!;
-  return env.foundation.type == "dev" && !env.foundation.launchSpec[0].disableDefaultEthProviders;
+  const env = config.environments.find((env) => env.name === process.env.MOON_TEST_ENV)!;
+  return env.foundation.type === "dev" && !env.foundation.launchSpec[0].disableDefaultEthProviders;
 }
 
 export async function cacheConfig() {
@@ -159,7 +159,7 @@ function replaceEnvVars(value: any): any {
 }
 
 function traverseConfig(configObj: any, option: string): any {
-  if (typeof configObj !== "object" || configObj === null) return undefined;
+  if (typeof configObj !== "object" || !configObj) return undefined;
 
   if (Object.prototype.hasOwnProperty.call(configObj, option)) {
     return configObj[option];
