@@ -109,7 +109,10 @@ export class ProviderFactory {
     return {
       name: this.providerConfig.name,
       type: this.providerConfig.type,
-      connect: () => console.log(`🚧  provider ${this.providerConfig.name} not yet implemented`),
+      connect: () => {
+        console.log(`🚧  provider ${this.providerConfig.name} not yet implemented`);
+        return null;
+      },
     };
   }
 

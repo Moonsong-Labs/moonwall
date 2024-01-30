@@ -70,6 +70,10 @@ export async function executeTests(env: Environment, additionalArgs?: object) {
             };
           });
         // TODO: Extend/develop this feature to respect para/relay chain specifications
+        if (chainData.length < 1) {
+          throw "Could not read runtime name or version \nTo fix: ensure moonwall config has a polkadotJs provider with a name containing 'para'";
+        }
+
         const { rtVersion, rtName } = Object.values(chainData[0])[0];
         process.env.MOON_RTVERSION = rtVersion;
         process.env.MOON_RTNAME = rtName;

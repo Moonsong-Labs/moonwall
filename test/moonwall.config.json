@@ -118,7 +118,7 @@
           "name": "viem",
           "type": "viem",
           "endpoints": [
-            "wss://wss.api.moonbeam.network"
+            "wss://rpc.api.moonbeam.network"
           ]
         }
       ]
@@ -747,14 +747,14 @@
           "name": "w3",
           "type": "web3",
           "endpoints": [
-            "wss://wss.api.moonbeam.network"
+            "wss://rpc.api.moonbeam.network"
           ]
         },
         {
           "name": "MB",
           "type": "polkadotJs",
           "endpoints": [
-            "wss://wss.api.moonbeam.network"
+            "wss://rpc.api.moonbeam.network"
           ]
         }
       ]
@@ -782,14 +782,14 @@
           "name": "para",
           "type": "polkadotJs",
           "endpoints": [
-            "wss://wss.api.moonbeam.network"
+            "wss://rpc.api.moonbeam.network"
           ]
         },
         {
           "name": "eth",
           "type": "ethers",
           "endpoints": [
-            "wss://wss.api.moonbeam.network"
+            "wss://rpc.api.moonbeam.network"
           ]
         }
       ]
@@ -817,14 +817,14 @@
           "name": "eth",
           "type": "ethers",
           "endpoints": [
-            "wss://wss.api.moonbeam.network"
+            "wss://rpc.api.moonbeam.network"
           ]
         },
         {
           "name": "para",
           "type": "polkadotJs",
           "endpoints": [
-            "wss://wss.api.moonbeam.network"
+            "wss://rpc.api.moonbeam.network"
           ]
         }
       ]
