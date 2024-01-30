@@ -8,6 +8,7 @@
       "name": "astar",
       "ghAuthor": "AstarNetwork",
       "ghRepo": "Astar",
+
       "binaries": [
         {
           "name": "astar-collator*ubuntu-x86*",
@@ -782,14 +783,14 @@
           "name": "para",
           "type": "polkadotJs",
           "endpoints": [
-            "wss://rpc.api.moonbeam.network"
+            "wss://moonbeam-rpc.dwellir.com"
           ]
         },
         {
           "name": "eth",
           "type": "ethers",
           "endpoints": [
-            "wss://rpc.api.moonbeam.network"
+            "wss://moonbeam-rpc.dwellir.com"
           ]
         }
       ]
