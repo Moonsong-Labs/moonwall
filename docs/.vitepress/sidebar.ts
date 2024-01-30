@@ -75,14 +75,6 @@ export function sidebarGuide(): DefaultTheme.SidebarItem[] {
         { text: "FAQ", link: "faq" },
       ],
     },
-    {
-      text: "Guide Examples",
-      collapsed: false,
-      base: "/guide/",
-      items: [
-        { text: "Markdown Examples", link: "markdown-examples" },
-      ],
-    },
   ];
 }
 
