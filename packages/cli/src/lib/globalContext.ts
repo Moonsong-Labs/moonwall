@@ -388,11 +388,17 @@ export class MoonwallContext {
     await Promise.all(promises);
 
     if (this.foundation === "zombie") {
-      let readStreams: any[];
+      let readStreams: any[] = [];
       if (!isOptionSet("disableLogEavesdropping")) {
         !silent && console.log(`🦻 Eavesdropping on node logs at ${process.env.MOON_ZOMBIE_DIR}`);
-        const zombieNodeLogs = process.env
-          .MOON_ZOMBIE_NODES!.split("|")
+
+        const envVar = process.env.MOON_ZOMBIE_NODES;
+
+        if (!envVar) {
+          throw new Error("MOON_ZOMBIE_NODES not set, this is an error please raise.");
+        }
+        const zombieNodeLogs = envVar
+          .split("|")
           .map((nodeName) => `${process.env.MOON_ZOMBIE_DIR}/${nodeName}.log`);
 
         readStreams = zombieNodeLogs.map((logPath) => {
@@ -436,7 +442,10 @@ export class MoonwallContext {
       await Promise.all(promises);
 
       if (!isOptionSet("disableLogEavesdropping")) {
-        readStreams!.forEach((readStream) => readStream.close());
+        for (const readStream of readStreams) {
+          readStream.close();
+        }
+        // readStreams.forEach((readStream) => readStream.close());
       }
     }
 

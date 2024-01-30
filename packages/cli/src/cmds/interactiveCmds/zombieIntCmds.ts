@@ -17,23 +17,22 @@ export async function resolveZombieInteractiveCmdChoice() {
 
   if (choice.cmd === "back") {
     return;
-  } else {
-    const whichNode = await inquirer.prompt({
-      name: "nodeName",
-      type: "input",
-      message: `Which node would you like to ${choice.cmd}? `,
-    });
+  }
+  const whichNode = await inquirer.prompt({
+    name: "nodeName",
+    type: "input",
+    message: `Which node would you like to ${choice.cmd}? `,
+  });
 
-    try {
-      await sendIpcMessage({
-        cmd: choice.cmd,
-        nodeName: whichNode.nodeName,
-        text: `Running ${choice.cmd} on ${whichNode.nodeName}`,
-      });
-    } catch (e: any) {
-      console.error("Error: ");
-      console.error(e.message);
-    }
+  try {
+    await sendIpcMessage({
+      cmd: choice.cmd,
+      nodeName: whichNode.nodeName,
+      text: `Running ${choice.cmd} on ${whichNode.nodeName}`,
+    });
+  } catch (e: any) {
+    console.error("Error: ");
+    console.error(e.message);
   }
 
   return;

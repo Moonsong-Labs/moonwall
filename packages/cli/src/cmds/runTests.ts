@@ -11,12 +11,12 @@ import { MoonwallContext, contextCreator, runNetworkOnly } from "../lib/globalCo
 export async function testCmd(envName: string, additionalArgs?: object): Promise<boolean> {
   await cacheConfig();
   const globalConfig = await importAsyncConfig();
-  const env = globalConfig.environments.find(({ name }) => name === envName)!;
+  const env = globalConfig.environments.find(({ name }) => name === envName);
   process.env.MOON_TEST_ENV = envName;
 
   if (!env) {
     const envList = globalConfig.environments.map((env) => env.name);
-    new Error(
+    throw new Error(
       `No environment found in config for: ${chalk.bgWhiteBright.blackBright(
         envName
       )}\n Environments defined in config are: ${envList}\n`
@@ -38,15 +38,16 @@ export async function testCmd(envName: string, additionalArgs?: object): Promise
   }
 
   const vitest = await executeTests(env, additionalArgs);
-  const failed = vitest!.state.getFiles().filter((file) => file.result!.state === "fail");
+  const failed = vitest.state
+    .getFiles()
+    .filter((file) => file.result && file.result.state === "fail");
 
   if (failed.length === 0) {
     console.log("✅ All tests passed");
     return true;
-  } else {
-    console.log("❌ Some tests failed");
-    return false;
   }
+  console.log("❌ Some tests failed");
+  return false;
 }
 
 export async function executeTests(env: Environment, additionalArgs?: object) {
@@ -153,8 +154,11 @@ function addThreadConfig(
   };
 
   if (threads === true && process.env.MOON_RECYCLE !== "true") {
+    if (!configWithThreads.poolOptions) {
+      throw new Error("poolOptions not defined in config, this is an error please raise.");
+    }
     configWithThreads.fileParallelism = true;
-    configWithThreads.poolOptions!.threads = {
+    configWithThreads.poolOptions.threads = {
       isolate: true,
       minThreads: 1,
       maxThreads: 3,
@@ -164,9 +168,17 @@ function addThreadConfig(
   }
 
   if (typeof threads === "number" && process.env.MOON_RECYCLE !== "true") {
+    if (!configWithThreads.poolOptions) {
+      throw new Error("poolOptions not defined in config, this is an error please raise.");
+    }
+
+    if (!configWithThreads.poolOptions.threads) {
+      throw new Error("poolOptions.threads not defined in config, this is an error please raise.");
+    }
+
     configWithThreads.fileParallelism = true;
-    configWithThreads.poolOptions!.threads!.maxThreads = threads;
-    configWithThreads.poolOptions!.threads!.singleThread = false;
+    configWithThreads.poolOptions.threads.maxThreads = threads;
+    configWithThreads.poolOptions.threads.singleThread = false;
   }
 
   if (typeof threads === "object" && process.env.MOON_RECYCLE !== "true") {

@@ -22,11 +22,11 @@ const onProgress = (bytes) => {
 
 const onComplete = () => {
   progressBar.stop();
-  process.stdout.write(`  💾 Saving binary artefact...`);
+  process.stdout.write("  💾 Saving binary artefact...");
 };
 
 export async function downloader(url: string, outputPath: string): Promise<void> {
-  const tempPath = outputPath + ".tmp";
+  const tempPath = `${outputPath}.tmp`;
   const writeStream = fs.createWriteStream(tempPath);
   let transferredBytes = 0;
 

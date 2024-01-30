@@ -206,12 +206,19 @@ export async function createDevBlock<
   }
 
   if (!options.allowFailures) {
-    actualEvents.forEach((event) => {
-      assert(
-        !api.events.system.ExtrinsicFailed.is(event.event),
-        "ExtrinsicFailed event detected, enable 'allowFailures' if this is expected."
-      );
-    });
+    for (const event of actualEvents) {
+      if (api.events.system.ExtrinsicFailed.is(event.event)) {
+        throw new Error(
+          "ExtrinsicFailed event detected, enable 'allowFailures' if this is expected."
+        );
+      }
+    }
+    // actualEvents.forEach((event) => {
+    //   assert(
+    //     !api.events.system.ExtrinsicFailed.is(event.event),
+    //     "ExtrinsicFailed event detected, enable 'allowFailures' if this is expected."
+    //   );
+    // });
   }
 
   return {

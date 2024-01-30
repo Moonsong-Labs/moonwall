@@ -142,9 +142,12 @@ export async function promptAlreadyRunning(pids: number[]) {
 
   switch (choice.AlreadyRunning) {
     case "kill":
-      pids.forEach((pid) => {
+      for (const pid of pids) {
         execSync(`kill ${pid}`);
-      });
+      }
+      // pids.forEach((pid) => {
+      //   execSync(`kill ${pid}`);
+      // });
       break;
 
     case "continue":

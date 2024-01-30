@@ -29,7 +29,11 @@ export const chopsticksHandler: FoundationHandler<"chopsticks"> = ({
     );
     const systemAccountStorageType = metadata.pallets[systemPalletIndex].storage
       .unwrap()
-      .items.find((storage) => storage.name.toString() === "Account")!.type;
+      .items.find((storage) => storage.name.toString() === "Account")?.type;
+
+    if (!systemAccountStorageType) {
+      throw new Error("System.Account storage not found");
+    }
 
     return metadata.lookup.getTypeDef(systemAccountStorageType.asMap.key).type;
   };
@@ -73,7 +77,7 @@ export const chopsticksHandler: FoundationHandler<"chopsticks"> = ({
 
     createBlock: async (options: ChopsticksBlockCreation = {}) =>
       await createChopsticksBlock(context, options),
-    setStorage: async (params?: {
+    setStorage: async (params: {
       providerName?: string;
       module: string;
       method: string;
@@ -81,7 +85,11 @@ export const chopsticksHandler: FoundationHandler<"chopsticks"> = ({
     }) => await sendSetStorageRequest(params),
 
     upgradeRuntime: async (providerName?: string) => {
-      const path = (await MoonwallContext.getContext()).rtUpgradePath!;
+      const path = (await MoonwallContext.getContext()).rtUpgradePath;
+
+      if (!path) {
+        throw new Error("No runtime upgrade path defined in config");
+      }
       await upgradeRuntimeChopsticks(ctx, path, providerName);
     },
 

@@ -31,7 +31,10 @@ export function reportLogLocation(silent = false) {
       ? process.env.MOON_ZOMBIE_DIR
       : process.env.MOON_LOG_LOCATION
         ? process.env.MOON_LOG_LOCATION
-        : path.join(dirPath, result.find((file) => path.extname(file) === ".log")!);
+        : path.join(
+            dirPath,
+            result.find((file) => path.extname(file) === ".log") || "no_logs_found"
+          );
     consoleMessage = `  🪵   Log location: ${filePath}`;
   } catch (e) {
     console.error(e);

@@ -110,7 +110,7 @@ export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
   const chopsticksCmd = "node";
   const chopsticksArgs = ["node_modules/@acala-network/chopsticks/chopsticks.cjs", "xcm"];
 
-  launchSpecs.forEach((spec) => {
+  for (const spec of launchSpecs) {
     const type = spec.type ? spec.type : "parachain";
     switch (type) {
       case "parachain":
@@ -119,7 +119,17 @@ export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
       case "relaychain":
         chopsticksArgs.push(`--relaychain=${spec.configPath}`);
     }
-  });
+  }
+  // launchSpecs.forEach((spec) => {
+  //   const type = spec.type ? spec.type : "parachain";
+  //   switch (type) {
+  //     case "parachain":
+  //       chopsticksArgs.push(`--parachain=${spec.configPath}`);
+  //       break;
+  //     case "relaychain":
+  //       chopsticksArgs.push(`--relaychain=${spec.configPath}`);
+  //   }
+  // });
 
   return {
     cmd: chopsticksCmd,

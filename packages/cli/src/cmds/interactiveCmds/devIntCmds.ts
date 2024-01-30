@@ -5,7 +5,13 @@ import { jumpRoundsDev, jumpToRoundDev } from "@moonwall/util";
 
 export async function resolveDevInteractiveCmdChoice() {
   const ctx = await (await MoonwallContext.getContext()).connectEnvironment();
-  const api = ctx.providers.find((a) => a.type === "polkadotJs")!.api as ApiPromise;
+
+  const prov = ctx.providers.find((a) => a.type === "polkadotJs");
+
+  if (!prov) {
+    throw new Error("Provider not found. This is a bug, please raise an issue.");
+  }
+  const api = prov.api as ApiPromise;
   const choices = [
     { name: "🆗  Create Block", value: "createblock" },
     { name: "🆕  Create Unfinalized Block", value: "createUnfinalizedBlock" },
@@ -36,7 +42,7 @@ export async function resolveDevInteractiveCmdChoice() {
     name: "cmd",
     type: "list",
     choices,
-    message: `What command would you like to run? `,
+    message: "What command would you like to run? ",
     default: "createBlock",
   });
 
@@ -53,7 +59,7 @@ export async function resolveDevInteractiveCmdChoice() {
       const result = await new inquirer.prompt({
         name: "n",
         type: "number",
-        message: `How many blocks? `,
+        message: "How many blocks? ",
       });
 
       const executeSequentially = async (remaining: number) => {
@@ -72,7 +78,7 @@ export async function resolveDevInteractiveCmdChoice() {
       const result = await new inquirer.prompt({
         name: "round",
         type: "number",
-        message: `Which round to jump to (in future)? `,
+        message: "Which round to jump to (in future)? ",
       });
 
       await jumpToRoundDev(api, result.round);
@@ -83,7 +89,7 @@ export async function resolveDevInteractiveCmdChoice() {
       const result = await new inquirer.prompt({
         name: "n",
         type: "number",
-        message: `How many rounds? `,
+        message: "How many rounds? ",
       });
 
       await jumpRoundsDev(api, result.n);
