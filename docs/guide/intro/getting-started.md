@@ -158,7 +158,6 @@ The main menu will pop up with the following options:
 ```sh
 ? Main Menu - Please select one of the following: (Use arrow keys)
   1) Execute Script:                     Run scripts placed in your config defined script directory
-
 ❯ 2) Network Launcher & Toolbox:         Launch network, access tools: tail logs, interactive tests
  etc
   3) Test Suite Execution:               Run automated tests, start network if needed
