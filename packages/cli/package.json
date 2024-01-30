@@ -52,8 +52,8 @@
   "scripts": {
     "clean": "rm -rf dist && rm -rf node_modules",
     "build": "pnpm exec rm -rf dist && tsup src --format cjs,esm  && pnpm generate-types",
-    "lint": "eslint ./src/**/*.ts",
-    "lint:fix": "eslint './src/**/*.ts' --fix",
+    "lint": "pnpm biome lint ./src",
+    "lint:fix": "pnpm biome lint ./src --apply",
     "fmt": "biome format .",
     "fmt:fix": "biome format . --write",
     "generate-types": "tsup src --format cjs,esm --dts ",

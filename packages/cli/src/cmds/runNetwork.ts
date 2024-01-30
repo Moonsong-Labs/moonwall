@@ -273,7 +273,7 @@ const resolveInfoChoice = async (env: Environment) => {
   );
 };
 
-const resolveGrepChoice = async (env: Environment, silent: boolean = false) => {
+const resolveGrepChoice = async (env: Environment, silent = false) => {
   const choice = await inquirer.prompt({
     name: "grep",
     type: "input",
@@ -289,7 +289,7 @@ const resolveGrepChoice = async (env: Environment, silent: boolean = false) => {
   return await executeTests(env, opts);
 };
 
-const resolveTestChoice = async (env: Environment, silent: boolean = false) => {
+const resolveTestChoice = async (env: Environment, silent = false) => {
   process.env.MOON_RECYCLE = "true";
   const opts = { silent };
   if (silent) {
@@ -299,8 +299,8 @@ const resolveTestChoice = async (env: Environment, silent: boolean = false) => {
 };
 
 const resolveTailChoice = async (env: Environment) => {
-  let tailing: boolean = true;
-  let zombieNodePointer: number = 0;
+  let tailing = true;
+  let zombieNodePointer = 0;
   let bottomBarContents = "";
   let switchNode: boolean;
   let zombieContent: string;
@@ -349,7 +349,7 @@ const resolveTailChoice = async (env: Environment) => {
       }
 
       // eslint-disable-next-line prefer-const
-      let currentReadPosition = 0;
+      const currentReadPosition = 0;
 
       const printLogs = (newReadPosition: number, currentReadPosition: number) => {
         const stream = fs.createReadStream(logFilePath, {

@@ -71,7 +71,7 @@ export const execCouncilProposal = async <
 >(
   context: DevModeContext,
   polkadotCall: Call,
-  index: number = -1,
+  index = -1,
   voters: KeyringPair[] = COUNCIL_MEMBERS,
   threshold: number = COUNCIL_THRESHOLD
 ) => {

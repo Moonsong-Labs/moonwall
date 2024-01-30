@@ -38,7 +38,7 @@ const debugSetup = Debug("global:context");
 
 export class MoonwallContext {
   private static instance: MoonwallContext | undefined;
-  configured: boolean = false;
+  configured = false;
   environment!: MoonwallEnvironment;
   providers: ConnectedProvider[];
   nodes: ChildProcess[];
@@ -362,7 +362,7 @@ export class MoonwallContext {
     return ctx;
   }
 
-  public async connectEnvironment(silent: boolean = false): Promise<MoonwallContext> {
+  public async connectEnvironment(silent = false): Promise<MoonwallContext> {
     const config = await importAsyncConfig();
     const env = config.environments.find(({ name }) => name === process.env.MOON_TEST_ENV)!;
 
@@ -453,10 +453,7 @@ export class MoonwallContext {
     }
   }
 
-  public static async getContext(
-    config?: MoonwallConfig,
-    force: boolean = false
-  ): Promise<MoonwallContext> {
+  public static async getContext(config?: MoonwallConfig, force = false): Promise<MoonwallContext> {
     if (!MoonwallContext.instance?.configured || force) {
       if (!config) {
         throw new Error("❌ Config must be provided on Global Context instantiation");

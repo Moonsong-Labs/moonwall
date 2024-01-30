@@ -35,12 +35,11 @@ export async function generateConfig() {
       await fs.writeFile("moonwall.config", textBlob + JSONBlob, "utf-8");
       process.env.MOON_CONFIG_PATH = "./moonwall.config";
       break;
-    } else {
-      console.log("ℹ️  Config file already exists at this location. Quitting.");
-      return;
     }
+    console.log("ℹ️  Config file already exists at this location. Quitting.");
+    return;
   }
-  console.log(`Goodbye! 👋`);
+  console.log("Goodbye! 👋");
 }
 
 const generateQuestions = [

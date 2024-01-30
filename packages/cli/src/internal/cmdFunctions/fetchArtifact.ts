@@ -78,7 +78,7 @@ export async function fetchArtifact(args) {
   }
 }
 
-export async function getVersions(name: string, runtime: boolean = false) {
+export async function getVersions(name: string, runtime = false) {
   const repo = (await allReposAsync()).find((network) =>
     network.binaries.find((bin) => bin.name === name)
   );

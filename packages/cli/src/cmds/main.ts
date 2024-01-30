@@ -230,7 +230,7 @@ async function resolveExecChoice(config: MoonwallConfig) {
 
 async function resolveDownloadChoice() {
   const binList = (await allReposAsync()).reduce((acc, curr) => {
-    acc.push(...curr.binaries.map((bin) => bin.name).flat());
+    acc.push(...curr.binaries.flatMap((bin) => bin.name));
     acc.push(new inquirer.Separator());
     acc.push("Back");
     acc.push(new inquirer.Separator());

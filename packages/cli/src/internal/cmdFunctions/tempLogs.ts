@@ -1,7 +1,7 @@
 import path from "path";
 import fs from "fs";
 
-export function clearNodeLogs(silent: boolean = true) {
+export function clearNodeLogs(silent = true) {
   const dirPath = path.join(process.cwd(), "tmp", "node_logs");
   if (!fs.existsSync(dirPath)) {
     fs.mkdirSync(dirPath, { recursive: true });
@@ -16,7 +16,7 @@ export function clearNodeLogs(silent: boolean = true) {
   }
 }
 
-export function reportLogLocation(silent: boolean = false) {
+export function reportLogLocation(silent = false) {
   const dirPath = path.join(process.cwd(), "tmp", "node_logs");
 
   if (!fs.existsSync(dirPath)) {

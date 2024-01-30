@@ -168,10 +168,10 @@ export function checkAccess(path: string) {
 async function getBinaryArchitecture(filePath: string) {
   return new Promise((resolve, reject) => {
     const architectureMap = {
-      0x0: "unknown",
-      0x03: "x86",
-      0x3e: "x64",
-      0xb7: "arm64",
+      0: "unknown",
+      3: "x86",
+      62: "x64",
+      183: "arm64",
     };
 
     fs.open(filePath, "r", (err, fd) => {

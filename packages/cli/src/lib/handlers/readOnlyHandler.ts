@@ -12,7 +12,7 @@ export const readOnlyHandler: FoundationHandler<"read_only"> = ({
     context: {
       ...context,
       waitBlock: async (
-        blocksToWaitFor: number = 1,
+        blocksToWaitFor = 1,
         chainName?: string,
         mode: "height" | "quantity" = "quantity"
       ) => {

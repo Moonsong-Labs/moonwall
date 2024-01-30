@@ -134,11 +134,7 @@ async function checkWebSocketJSONRPC(port: number): Promise<boolean> {
   }
 }
 
-async function findPortsByPid(
-  pid: number,
-  retryCount: number = 600,
-  retryDelay: number = 100
-): Promise<number[]> {
+async function findPortsByPid(pid: number, retryCount = 600, retryDelay = 100): Promise<number[]> {
   for (let i = 0; i < retryCount; i++) {
     try {
       const { stdout } = await execAsync(`lsof -i -n -P | grep LISTEN | grep ${pid}`);

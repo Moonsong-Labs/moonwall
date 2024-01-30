@@ -15,8 +15,8 @@ export const zombieHandler: FoundationHandler<"zombie"> = ({
     context: {
       ...context,
       waitBlock: async (
-        blocksToWaitFor: number = 1,
-        chain: string = "parachain",
+        blocksToWaitFor = 1,
+        chain = "parachain",
         mode: "height" | "quantity" = "quantity"
       ) => {
         const ctx = await MoonwallContext.getContext();

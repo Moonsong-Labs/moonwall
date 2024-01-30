@@ -80,7 +80,7 @@ export function describeSuite<T extends FoundationType>({
   }
   let ctx: MoonwallContext | null = null;
 
-  beforeAll(async function () {
+  beforeAll(async () => {
     const globalConfig = await importAsyncConfig();
 
     if (!process.env.MOON_TEST_ENV) {
@@ -96,7 +96,7 @@ export function describeSuite<T extends FoundationType>({
     }
   });
 
-  afterAll(async function () {
+  afterAll(async () => {
     await MoonwallContext.destroy();
     ctx = null;
   });
@@ -122,7 +122,7 @@ export function describeSuite<T extends FoundationType>({
     it(`📁  ${suiteId.concat(params.id)} ${params.title}`, params.test, params.timeout);
   };
 
-  describe(`🗃️  ${suiteId} ${title}`, function () {
+  describe(`🗃️  ${suiteId} ${title}`, () => {
     const getApi = <T extends ProviderType>(apiType?: T, apiName?: string) => {
       const provider = ctx!.providers.find((prov) => {
         if (apiType && apiName) {
