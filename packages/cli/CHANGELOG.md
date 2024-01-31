@@ -1,5 +1,14 @@
 # @moonwall/cli
 
+## 4.7.6
+
+### Patch Changes
+
+- 0fc4e5e: Linter and Pkg Updates
+- Updated dependencies [0fc4e5e]
+  - @moonwall/types@4.7.6
+  - @moonwall/util@4.7.6
+
 ## 4.7.5
 
 ### Patch Changes

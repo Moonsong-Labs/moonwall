@@ -1,5 +1,11 @@
 # @moonwall/types
 
+## 4.7.6
+
+### Patch Changes
+
+- 0fc4e5e: Linter and Pkg Updates
+
 ## 4.7.5
 
 ## 4.7.4
