@@ -146,13 +146,14 @@ export async function createDevBlock<
         )
         ?.phase?.asApplyExtrinsic?.toString();
 
-      return !res ? undefined : Number(res);
+      return typeof res === "undefined" ? undefined : Number(res);
     }
     return blockData.block.extrinsics.findIndex((ext) => ext.hash.toHex() === result.hash);
   };
 
   const result: ExtrinsicCreation[] = results.map((result) => {
-    const extrinsicIndex = getExtIndex(allRecords, result) || -1;
+    const extrinsicIndex = getExtIndex(allRecords, result);
+    const extrinsicFound = typeof extrinsicIndex !== "undefined";
 
     // We retrieve the events associated with the extrinsic
     const events = allRecords.filter(
@@ -161,15 +162,14 @@ export async function createDevBlock<
     );
 
     const failure = extractError(events);
-
     return {
-      extrinsic: extrinsicIndex >= 0 ? blockData.block.extrinsics[extrinsicIndex] : null,
+      extrinsic: extrinsicFound ? blockData.block.extrinsics[extrinsicIndex] : null,
       events,
       error:
         failure &&
         ((failure.isModule && api.registry.findMetaError(failure.asModule)) ||
           ({ name: failure.toString() } as RegistryError)),
-      successful: extrinsicIndex > 0 && typeof failure !== "undefined",
+      successful: extrinsicFound && !failure,
       hash: result.hash,
     };
   });
