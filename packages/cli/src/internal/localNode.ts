@@ -37,9 +37,7 @@ export async function launchNode(cmd: string, args: string[], name: string) {
 
   runningNode.on("error", (err) => {
     if ((err as any).errno === "ENOENT") {
-      console.error(
-        `\x1b[31mMissing Local binary at` + `(${cmd}).\nPlease compile the project\x1b[0m`
-      );
+      console.error(`\x1b[31mMissing Local binary at(${cmd}).\nPlease compile the project\x1b[0m`);
     }
     throw new Error(err.message);
   });
@@ -75,14 +73,12 @@ export async function launchNode(cmd: string, args: string[], name: string) {
             await checkWebSocketJSONRPC(port);
             // console.log(`Port ${port} supports WebSocket JSON RPC!`);
             break probe;
-          } catch {
-            continue;
-          }
+          } catch {}
         }
       }
     } catch {
       if (i === 300) {
-        throw new Error(`Could not find ports for node after 30 seconds`);
+        throw new Error("Could not find ports for node after 30 seconds");
       }
       await timer(100);
       continue;
@@ -127,7 +123,7 @@ async function checkWebSocketJSONRPC(port: number): Promise<boolean> {
       });
     });
 
-    ws && ws.close();
+    ws?.close();
     return result;
   } catch {
     return false;

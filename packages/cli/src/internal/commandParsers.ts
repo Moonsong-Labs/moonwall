@@ -7,13 +7,12 @@ import getPort from "get-port";
 export function parseZombieCmd(launchSpec: ZombieLaunchSpec) {
   if (launchSpec) {
     return { cmd: launchSpec.configPath };
-  } else {
-    throw new Error(
-      `No ZombieSpec found in config. \n Are you sure your ${chalk.bgWhiteBright.blackBright(
-        "moonwall.config.json"
-      )} file has the correct "configPath" in zombieSpec?`
-    );
   }
+  throw new Error(
+    `No ZombieSpec found in config. \n Are you sure your ${chalk.bgWhiteBright.blackBright(
+      "moonwall.config.json"
+    )} file has the correct "configPath" in zombieSpec?`
+  );
 }
 
 function fetchDefaultArgs(binName: string, additionalRepos: RepoSpec[] = []): string[] {

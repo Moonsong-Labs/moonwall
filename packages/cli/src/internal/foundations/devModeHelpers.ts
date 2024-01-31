@@ -14,15 +14,18 @@ import chalk from "chalk";
 import Debug from "debug";
 import { setTimeout } from "timers/promises";
 import { assert } from "vitest";
-import { importAsyncConfig, isEthereumDevConfig } from "../../lib/configReader";
+import {
+  getEnvironmentFromConfig,
+  importAsyncConfig,
+  isEthereumDevConfig,
+} from "../../lib/configReader";
 import { extractError } from "../../lib/contextHelpers";
 import { MoonwallContext } from "../../lib/globalContext";
 import { vitestAutoUrl } from "../providerFactories";
 const debug = Debug("DevTest");
 
 export async function getDevProviderPath() {
-  const globalConfig = await importAsyncConfig();
-  const env = globalConfig.environments.find(({ name }) => name === process.env.MOON_TEST_ENV)!;
+  const env = getEnvironmentFromConfig();
   return env.connections
     ? env.connections[0].endpoints[0].replace("ws://", "http://")
     : vitestAutoUrl();
@@ -43,8 +46,8 @@ export type CallType<TApi extends ApiTypes> =
   | Promise<string>;
 
 function returnSigner(options: BlockCreation) {
-  return "privateKey" in options.signer! && "type" in options.signer
-    ? generateKeyringPair(options.signer!.type, options.signer!.privateKey)
+  return options.signer && "privateKey" in options.signer && "type" in options.signer
+    ? generateKeyringPair(options.signer.type, options.signer.privateKey)
     : options.signer;
 }
 
@@ -145,13 +148,16 @@ export async function createDevBlock<
         ?.phase?.asApplyExtrinsic?.toString();
 
       return res === undefined ? undefined : Number(res);
-    } else {
-      return blockData.block.extrinsics.findIndex((ext) => ext.hash.toHex() === result.hash);
     }
+    return blockData.block.extrinsics.findIndex((ext) => ext.hash.toHex() === result.hash);
   };
 
   const result: ExtrinsicCreation[] = results.map((result) => {
     const extrinsicIndex = getExtIndex(allRecords, result);
+
+    if (!extrinsicIndex) {
+      throw new Error(`Extrinsic ${result.hash} not found in block`);
+    }
 
     // We retrieve the events associated with the extrinsic
     const events = allRecords.filter(
@@ -161,7 +167,7 @@ export async function createDevBlock<
 
     const failure = extractError(events);
     return {
-      extrinsic: extrinsicIndex! >= 0 ? blockData.block.extrinsics[extrinsicIndex!] : null,
+      extrinsic: extrinsicIndex >= 0 ? blockData.block.extrinsics[extrinsicIndex] : null,
       events,
       error:
         failure &&

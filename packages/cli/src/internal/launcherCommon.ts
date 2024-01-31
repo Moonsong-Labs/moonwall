@@ -73,13 +73,13 @@ export async function executeScript(scriptCommand: string, args?: string) {
 
     switch (ext) {
       case ".js":
-        execSync("node " + scriptPath + ` ${args}`, { stdio: "inherit" });
+        execSync(`node ${scriptPath} ${args}`, { stdio: "inherit" });
         break;
       case ".ts":
-        execSync("pnpm tsx " + scriptPath + ` ${args}`, { stdio: "inherit" });
+        execSync(`pnpm tsx ${scriptPath} ${args}`, { stdio: "inherit" });
         break;
       case ".sh":
-        execSync(scriptPath + ` ${args}`, { stdio: "inherit" });
+        execSync(`${scriptPath} ${args}`, { stdio: "inherit" });
         break;
       default:
         console.log(`${ext} not supported, skipping ${script}`);

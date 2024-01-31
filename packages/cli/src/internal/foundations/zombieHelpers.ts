@@ -98,7 +98,7 @@ export async function sendIpcMessage(message: IPCRequestMessage): Promise<IPCRes
           }
 
           if (i > 100) {
-            reject(new Error(`Closing IPC connection failed`));
+            reject(new Error("Closing IPC connection failed"));
           }
           await timer(200);
         }
