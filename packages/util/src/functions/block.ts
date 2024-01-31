@@ -157,7 +157,9 @@ export const getBlockArray = async (
     limiter = new Bottleneck({ maxConcurrent: 10, minTime: 100 });
   }
   const finalizedHead = await limiter.schedule(() => api.rpc.chain.getFinalizedHead());
-  const signedBlock = await limiter.schedule(() => api.rpc.chain.getBlock(finalizedHead));
+  const signedBlock: SignedBlock = await limiter.schedule(() =>
+    api.rpc.chain.getBlock(finalizedHead)
+  );
 
   const lastBlockNumber = signedBlock.block.header.number.toNumber();
   const lastBlockTime = getBlockTime(signedBlock);

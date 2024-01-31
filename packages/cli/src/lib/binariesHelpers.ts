@@ -60,8 +60,8 @@ export async function getMoonbeamDockerBinary(binaryTag: string): Promise<string
   const sha8 = await getTagSha8(binaryTag);
   const binaryPath = path.join(BINARY_DIRECTORY, `moonbeam-${sha8}`);
   if (!fs.existsSync(binaryPath)) {
-    if (process.platform != "linux") {
-      console.error(`docker binaries are only supported on linux.`);
+    if (process.platform !== "linux") {
+      console.error("docker binaries are only supported on linux.");
       throw new Error("docker binaries are only supported on linux.");
     }
     const dockerImage = `purestake/moonbeam:sha-${sha8}`;
@@ -101,10 +101,9 @@ export async function getRuntimeWasm(
   } else if (!fs.existsSync(runtimePath)) {
     console.log(`     Missing ${runtimePath} locally, downloading it...`);
     child_process.execSync(
-      `mkdir -p ${path.dirname(runtimePath)} && ` +
-        `wget -q https://github.com/PureStake/moonbeam/releases/` +
-        `download/${runtimeTag}/${runtimeName}-${runtimeTag}.wasm ` +
-        `-O ${runtimePath}.bin`
+      `mkdir -p ${path.dirname(
+        runtimePath
+      )} && wget -q https://github.com/PureStake/moonbeam/releases/download/${runtimeTag}/${runtimeName}-${runtimeTag}.wasm -O ${runtimePath}.bin`
     );
     const code = fs.readFileSync(`${runtimePath}.bin`);
     fs.writeFileSync(runtimePath, `0x${code.toString("hex")}`);

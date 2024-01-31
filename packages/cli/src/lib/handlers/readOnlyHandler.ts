@@ -34,7 +34,8 @@ export const readOnlyHandler: FoundationHandler<"read_only"> = ({
           const newBlockNumber = (await api.rpc.chain.getBlock()).block.header.number.toNumber();
           if (mode === "quantity" && newBlockNumber >= currentBlockNumber + blocksToWaitFor) {
             break;
-          } else if (mode === "height" && newBlockNumber >= blocksToWaitFor) {
+          }
+          if (mode === "height" && newBlockNumber >= blocksToWaitFor) {
             break;
           }
         }

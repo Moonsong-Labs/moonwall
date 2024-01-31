@@ -208,7 +208,7 @@ export async function createRawTransfer<TOptions extends TransferOptions>(
   const transferAmount = typeof value === "bigint" ? value : BigInt(value);
   return await createViemTransaction(context, {
     ...options,
-    to,
+    to: to as any,
     value: transferAmount,
   });
 }

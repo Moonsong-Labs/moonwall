@@ -24,7 +24,7 @@ import {
 import { Keyring } from "@polkadot/api";
 import { ApiTypes } from "@polkadot/api/types";
 import { createDevBlock } from "../../internal/foundations/devModeHelpers";
-import { importJsonConfig, isEthereumDevConfig } from "../configReader";
+import { getEnvironmentFromConfig, importJsonConfig, isEthereumDevConfig } from "../configReader";
 import {
   deployCreateCompiledContract,
   interactWithContract,
@@ -32,8 +32,7 @@ import {
 } from "../contractFunctions";
 
 export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testCase, logger }) => {
-  const config = importJsonConfig();
-  const env = config.environments.find((env) => env.name === process.env.MOON_TEST_ENV)!;
+  const env = getEnvironmentFromConfig();
   const ethCompatible = isEthereumDevConfig();
 
   const accountTypeLookup = () => {
@@ -41,9 +40,14 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
     const systemPalletIndex = metadata.pallets.findIndex(
       (pallet) => pallet.name.toString() === "System"
     );
-    const systemAccountStorageType = metadata.pallets[systemPalletIndex].storage
+    const systemAccountStorage = metadata.pallets[systemPalletIndex].storage
       .unwrap()
-      .items.find((storage) => storage.name.toString() === "Account")!.type;
+      .items.find((storage) => storage.name.toString() === "Account");
+
+    if (!systemAccountStorage) {
+      throw new Error("Account storage not found");
+    }
+    const systemAccountStorageType = systemAccountStorage.type;
 
     return metadata.lookup.getTypeDef(systemAccountStorageType.asMap.key).type;
   };

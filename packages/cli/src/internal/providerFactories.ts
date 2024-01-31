@@ -207,7 +207,7 @@ export class ProviderInterfaceFactory {
   constructor(
     private name: string,
     private type: ProviderType,
-    private connect: () => any
+    private connect: () => Promise<ApiPromise> | Wallet | Web3 | Promise<ViemClient> | null
   ) {}
 
   public async create(): Promise<ProviderInterface> {
@@ -307,7 +307,7 @@ export class ProviderInterfaceFactory {
   public static async populate(
     name: string,
     type: ProviderType,
-    connect: () => Promise<ApiPromise> | Wallet | Web3 | Promise<ViemClient> | void
+    connect: () => Promise<ApiPromise> | Wallet | Web3 | Promise<ViemClient> | null
   ): Promise<ProviderInterface> {
     return await new ProviderInterfaceFactory(name, type, connect).create();
   }
