@@ -37,7 +37,7 @@ export type MoonwallConfig = {
  */
 export type Environment = {
   /**
-   * An optional array of reporter names.
+   * An optional array of reporter types e.g. html, basic, verbose, json etc
    */
   reporters?: string[];
 

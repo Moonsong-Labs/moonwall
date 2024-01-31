@@ -44,14 +44,14 @@ export const instantFastTrack = async <
   { votingPeriod, delayPeriod } = { votingPeriod: 2, delayPeriod: 0 }
 ): Promise<string> => {
   const proposalHash =
-    typeof proposal == "string" ? proposal : await notePreimage(context, proposal);
+    typeof proposal === "string" ? proposal : await notePreimage(context, proposal);
 
   await execCouncilProposal(
     context,
     context.polkadotJs().tx.democracy.externalProposeMajority({
       Lookup: {
         hash: proposalHash,
-        len: typeof proposal == "string" ? proposal : proposal.method.encodedLength,
+        len: typeof proposal === "string" ? proposal : proposal.method.encodedLength,
       },
     })
   );
@@ -71,7 +71,7 @@ export const execCouncilProposal = async <
 >(
   context: DevModeContext,
   polkadotCall: Call,
-  index: number = -1,
+  index = -1,
   voters: KeyringPair[] = COUNCIL_MEMBERS,
   threshold: number = COUNCIL_THRESHOLD
 ) => {
@@ -84,22 +84,35 @@ export const execCouncilProposal = async <
       .signAsync(charleth)
   );
 
+  if (!proposalResult) {
+    throw "Proposal result is undefined";
+  }
+
   if (threshold <= 1) {
     // Proposal are automatically executed on threshold <= 1
     return proposalResult;
   }
 
-  expect(proposalResult!.successful, `Council proposal refused: ${proposalResult?.error?.name}`).to
-    .be.true;
-  const proposalHash = proposalResult!.events
-    .find(({ event: { method } }) => method.toString() == "Proposed")!
-    .event.data[2].toHex() as string;
+  if (!proposalResult.successful) {
+    throw `Council proposal refused: ${proposalResult?.error?.name}`;
+  }
+
+  const proposed = proposalResult.events.find(
+    ({ event: { method } }) => method.toString() === "Proposed"
+  );
+
+  if (!proposed) {
+    throw "Proposed event not found";
+  }
+
+  const proposalHash = proposed.event.data[2].toHex() as string;
 
   // Dorothy vote for this proposal and close it
   const proposalIndex =
     index >= 0
       ? index
-      : (await context.polkadotJs().query.councilCollective.proposalCount()).toNumber() - 1;
+      : ((await context.polkadotJs().query.councilCollective.proposalCount()) as any).toNumber() -
+        1;
   await Promise.all(
     voters.map((voter) =>
       context
@@ -138,7 +151,7 @@ export const proposeReferendaAndDeposit = async <
 ): Promise<[number, string]> => {
   // Fetch proposal hash
   const proposalHash =
-    typeof proposal == "string" ? proposal : await notePreimage(context, proposal);
+    typeof proposal === "string" ? proposal : await notePreimage(context, proposal);
 
   // Post referenda
   const { result: proposalResult } = await context.createBlock(
@@ -149,7 +162,7 @@ export const proposeReferendaAndDeposit = async <
         {
           Lookup: {
             hash: proposalHash,
-            len: typeof proposal == "string" ? proposal : proposal.method.encodedLength,
+            len: typeof proposal === "string" ? proposal : proposal.method.encodedLength,
           },
         },
         { At: 0 }
@@ -157,12 +170,21 @@ export const proposeReferendaAndDeposit = async <
       .signAsync(alith)
   );
 
-  expect(proposalResult!.successful, `Unable to post referenda: ${proposalResult?.error?.name}`).to
-    .be.true;
+  if (!proposalResult) {
+    throw "Proposal result is undefined";
+  }
 
-  const refIndex = proposalResult!.events
-    .find(({ event: { method } }) => method.toString() == "Submitted")!
-    .event.data[0].toString();
+  if (!proposalResult.successful) {
+    throw `Unable to post referenda: ${proposalResult?.error?.name}`;
+  }
+
+  const refIndex = proposalResult.events
+    .find(({ event: { method } }) => method.toString() === "Submitted")
+    ?.event.data[0].toString();
+
+  if (!refIndex) {
+    throw "Referendum index not found";
+  }
 
   // Place decision deposit
   await context.createBlock(
@@ -254,17 +276,24 @@ export const execTechnicalCommitteeProposal = async <
     context.polkadotJs().tx.techCommitteeCollective.propose(threshold, polkadotCall, lengthBound)
   );
 
+  if (!proposalResult) {
+    throw "Proposal result is undefined";
+  }
+
   if (threshold <= 1) {
     // Proposal are automatically executed on threshold <= 1
     return proposalResult;
   }
 
-  expect(proposalResult!.successful, `Council proposal refused: ${proposalResult?.error?.name}`).to
+  expect(proposalResult.successful, `Council proposal refused: ${proposalResult?.error?.name}`).to
     .be.true;
-  const proposalHash = proposalResult!.events
-    .find(({ event: { method } }) => method.toString() == "Proposed")!
-    .event.data[2].toHex() as string;
+  const proposalHash = proposalResult.events
+    .find(({ event: { method } }) => method.toString() === "Proposed")
+    ?.event.data[2].toHex();
 
+  if (!proposalHash) {
+    throw "Proposed event not found";
+  }
   // Get proposal count
   const proposalCount = await context.polkadotJs().query.techCommitteeCollective.proposalCount();
 
@@ -295,14 +324,14 @@ export const execTechnicalCommitteeProposal = async <
 
 export const executeProposalWithCouncil = async (api: ApiPromise, encodedHash: string) => {
   let nonce = (await api.rpc.system.accountNextIndex(alith.address)).toNumber();
-  const referendumNextIndex = (await api.query.democracy.referendumCount()).toNumber();
+  const referendumNextIndex = ((await api.query.democracy.referendumCount()) as any).toNumber();
 
   // process.stdout.write(
   //   `Sending council motion (${encodedHash} ` +
   //     `[threashold: 1, expected referendum: ${referendumNextIndex}])...`
   // );
   const callData =
-    api.consts.system.version.specVersion.toNumber() >= 2000
+    (api.consts.system.version as any).specVersion.toNumber() >= 2000
       ? { Legacy: encodedHash }
       : encodedHash;
 
@@ -327,21 +356,25 @@ export const executeProposalWithCouncil = async (api: ApiPromise, encodedHash: s
       })
       .signAndSend(alith, { nonce: nonce++ }),
   ]);
-  process.stdout.write(`✅\n`);
+  process.stdout.write("✅\n");
 
   process.stdout.write(`Waiting for referendum [${referendumNextIndex}] to be executed...`);
   let referenda: PalletDemocracyReferendumInfo | undefined;
   while (!referenda) {
-    referenda = (await api.query.democracy.referendumInfoOf.entries())
-      .find(
-        (ref: any) =>
-          ref[1].unwrap().isFinished &&
-          api.registry.createType("u32", ref[0].toU8a().slice(-4)).toNumber() == referendumNextIndex
-      )?.[1]
-      .unwrap();
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      referenda = (
+        (await api.query.democracy.referendumInfoOf.entries()).find(
+          (ref: any) =>
+            ref[1].unwrap().isFinished &&
+            (api.registry.createType("u32", ref[0].toU8a().slice(-4)) as any).toNumber() ===
+              referendumNextIndex
+        )?.[1] as any
+      ).unwrap();
+    } catch {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
   }
-  process.stdout.write(`${referenda.asFinished.approved ? `✅` : `❌`} \n`);
+  process.stdout.write(`${referenda.asFinished.approved ? "✅" : "❌"} \n`);
   if (!referenda.asFinished.approved) {
     throw new Error("Finished Referendum was not approved");
   }

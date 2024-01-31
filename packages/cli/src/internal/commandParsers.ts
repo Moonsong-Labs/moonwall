@@ -7,13 +7,12 @@ import getPort from "get-port";
 export function parseZombieCmd(launchSpec: ZombieLaunchSpec) {
   if (launchSpec) {
     return { cmd: launchSpec.configPath };
-  } else {
-    throw new Error(
-      `No ZombieSpec found in config. \n Are you sure your ${chalk.bgWhiteBright.blackBright(
-        "moonwall.config.json"
-      )} file has the correct "configPath" in zombieSpec?`
-    );
   }
+  throw new Error(
+    `No ZombieSpec found in config. \n Are you sure your ${chalk.bgWhiteBright.blackBright(
+      "moonwall.config.json"
+    )} file has the correct "configPath" in zombieSpec?`
+  );
 }
 
 function fetchDefaultArgs(binName: string, additionalRepos: RepoSpec[] = []): string[] {
@@ -85,7 +84,7 @@ export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
     ];
 
     const mode = launchSpecs[0].buildBlockMode ? launchSpecs[0].buildBlockMode : "manual";
-    const num = mode == "batch" ? "Batch" : mode == "instant" ? "Instant" : "Manual";
+    const num = mode === "batch" ? "Batch" : mode === "instant" ? "Instant" : "Manual";
     chopsticksArgs.push(`--build-block-mode=${num}`);
 
     if (launchSpecs[0].wsPort) {
@@ -110,7 +109,7 @@ export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
   const chopsticksCmd = "node";
   const chopsticksArgs = ["node_modules/@acala-network/chopsticks/chopsticks.cjs", "xcm"];
 
-  launchSpecs.forEach((spec) => {
+  for (const spec of launchSpecs) {
     const type = spec.type ? spec.type : "parachain";
     switch (type) {
       case "parachain":
@@ -119,7 +118,17 @@ export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
       case "relaychain":
         chopsticksArgs.push(`--relaychain=${spec.configPath}`);
     }
-  });
+  }
+  // launchSpecs.forEach((spec) => {
+  //   const type = spec.type ? spec.type : "parachain";
+  //   switch (type) {
+  //     case "parachain":
+  //       chopsticksArgs.push(`--parachain=${spec.configPath}`);
+  //       break;
+  //     case "relaychain":
+  //       chopsticksArgs.push(`--relaychain=${spec.configPath}`);
+  //   }
+  // });
 
   return {
     cmd: chopsticksCmd,

@@ -1,14 +1,13 @@
 import { promises as fsPromises } from "fs";
 import inquirer from "inquirer";
 import { parse } from "yaml";
-import { importJsonConfig } from "../../lib/configReader";
+import { getEnvironmentFromConfig } from "../../lib/configReader";
 import { MoonwallContext } from "../../lib/globalContext";
 import type { ApiPromise } from "@polkadot/api";
 import { jumpBlocksChopsticks, jumpRoundsChopsticks, jumpToRoundChopsticks } from "@moonwall/util";
 
 export async function resolveChopsticksInteractiveCmdChoice() {
-  const globalConfig = importJsonConfig();
-  const config = globalConfig.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
+  const config = getEnvironmentFromConfig();
 
   if (config.foundation.type !== "chopsticks") {
     throw new Error("Only chopsticks is supported, this is a bug please raise an issue.");
@@ -26,7 +25,7 @@ export async function resolveChopsticksInteractiveCmdChoice() {
       name: "name",
       type: "list",
       choices: nodes,
-      message: `Which network would you like to interact with? `,
+      message: "Which network would you like to interact with? ",
     });
 
     return result.name;
@@ -35,7 +34,7 @@ export async function resolveChopsticksInteractiveCmdChoice() {
   const nodeSelected = isMultiChain ? await promptNode() : config.foundation.launchSpec[0].name;
 
   const ctx = await (await MoonwallContext.getContext()).connectEnvironment();
-  const provider = ctx.providers.find((a) => a.type == "polkadotJs" && a.name == nodeSelected);
+  const provider = ctx.providers.find((a) => a.type === "polkadotJs" && a.name === nodeSelected);
 
   if (!provider) {
     throw new Error(
@@ -47,7 +46,7 @@ export async function resolveChopsticksInteractiveCmdChoice() {
 
   const ports = await Promise.all(
     config.foundation.launchSpec
-      .filter(({ name }) => name == nodeSelected)
+      .filter(({ name }) => name === nodeSelected)
       .map(async ({ configPath }) => {
         const yaml = parse((await fsPromises.readFile(configPath)).toString());
         return (yaml.port as string) || "8000";
@@ -84,7 +83,7 @@ export async function resolveChopsticksInteractiveCmdChoice() {
     name: "cmd",
     type: "list",
     choices,
-    message: `What command would you like to run? `,
+    message: "What command would you like to run? ",
     default: "createBlock",
   });
 
@@ -97,7 +96,7 @@ export async function resolveChopsticksInteractiveCmdChoice() {
       const result = await new inquirer.prompt({
         name: "n",
         type: "number",
-        message: `How many blocks? `,
+        message: "How many blocks? ",
       });
 
       await jumpBlocksChopsticks(port, result.n);
@@ -109,7 +108,7 @@ export async function resolveChopsticksInteractiveCmdChoice() {
       const result = await new inquirer.prompt({
         name: "round",
         type: "number",
-        message: `Which round to jump to (in future)? `,
+        message: "Which round to jump to (in future)? ",
       });
       console.log("💤 This may take a while....");
       await jumpToRoundChopsticks(api, port, result.round);
@@ -120,7 +119,7 @@ export async function resolveChopsticksInteractiveCmdChoice() {
       const result = await new inquirer.prompt({
         name: "n",
         type: "number",
-        message: `How many rounds? `,
+        message: "How many rounds? ",
       });
       console.log("💤 This may take a while....");
       await jumpRoundsChopsticks(api, port, result.n);

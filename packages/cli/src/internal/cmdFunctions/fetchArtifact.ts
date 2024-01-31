@@ -32,9 +32,8 @@ export async function fetchArtifact(args) {
     ? releases.find((release) => {
         if (args.ver === "latest") {
           return release.assets.find((asset) => asset.name.includes(binary));
-        } else {
-          return release.assets.find((asset) => asset.name === `${binary}-${args.ver}.wasm`);
         }
+        return release.assets.find((asset) => asset.name === `${binary}-${args.ver}.wasm`);
       })
     : args.ver === "latest"
       ? releases.find((release) => release.assets.find((asset) => asset.name === binary))
@@ -42,7 +41,7 @@ export async function fetchArtifact(args) {
           .filter((release) => release.tag_name.includes(args.ver))
           .find((release) => release.assets.find((asset) => minimatch(asset.name, binary)));
 
-  if (release == null) {
+  if (!release) {
     throw new Error(`Release not found for ${args.ver}`);
   }
 
@@ -50,8 +49,12 @@ export async function fetchArtifact(args) {
     ? release.assets.find((asset) => asset.name.includes(binary) && asset.name.includes("wasm"))
     : release.assets.find((asset) => minimatch(asset.name, binary));
 
+  if (!asset) {
+    throw new Error(`Asset not found for ${binary}`);
+  }
+
   if (!binary.includes("-runtime")) {
-    const url = asset!.browser_download_url;
+    const url = asset.browser_download_url;
     const filename = path.basename(url);
     const binPath = path.join("./", enteredPath, filename);
 
@@ -64,21 +67,19 @@ export async function fetchArtifact(args) {
       const version = (await runTask(`./${cleaned} --version`)).trim();
       process.stdout.write(` ${chalk.green(version.trim())} ✓\n`);
       return;
-    } else {
-      const version = (await runTask(`./${binPath} --version`)).trim();
-      process.stdout.write(` ${chalk.green(version.trim())} ✓\n`);
-      return;
     }
-  } else {
-    const binaryPath = path.join("./", args.path, `${args.bin}-${args.ver}.wasm`);
-    await downloader(asset!.browser_download_url, binaryPath);
-    await fs.chmod(binaryPath, "755");
-    process.stdout.write(` ${chalk.green("done")} ✓\n`);
+    const version = (await runTask(`./${binPath} --version`)).trim();
+    process.stdout.write(` ${chalk.green(version.trim())} ✓\n`);
     return;
   }
+  const binaryPath = path.join("./", args.path, `${args.bin}-${args.ver}.wasm`);
+  await downloader(asset.browser_download_url, binaryPath);
+  await fs.chmod(binaryPath, "755");
+  process.stdout.write(` ${chalk.green("done")} ✓\n`);
+  return;
 }
 
-export async function getVersions(name: string, runtime: boolean = false) {
+export async function getVersions(name: string, runtime = false) {
   const repo = (await allReposAsync()).find((network) =>
     network.binaries.find((bin) => bin.name === name)
   );

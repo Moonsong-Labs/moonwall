@@ -1,10 +1,9 @@
 import { vitestAutoUrl } from "../internal/providerFactories";
-import { importAsyncConfig } from "./configReader";
+import { getEnvironmentFromConfig } from "./configReader";
 import fetch from "node-fetch";
 
 export async function customDevRpcRequest(method: string, params: any[] = []): Promise<any> {
-  const globalConfig = await importAsyncConfig();
-  const env = globalConfig.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
+  const env = getEnvironmentFromConfig();
   const endpoint = env.connections
     ? env.connections[0].endpoints[0].replace("ws://", "http://")
     : vitestAutoUrl().replace("ws://", "http://").replace("wss://", "https://");

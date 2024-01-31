@@ -16,7 +16,7 @@ export class ProviderFactory {
 
   constructor(private providerConfig: ProviderConfig) {
     this.url = providerConfig.endpoints.includes("ENV_VAR")
-      ? process.env.WSS_URL!
+      ? process.env.WSS_URL || "error_missing_WSS_URL_env_var"
       : providerConfig.endpoints[0];
     this.privateKey = process.env.MOON_PRIV_KEY || ALITH_PRIVATE_KEY;
   }
@@ -109,7 +109,10 @@ export class ProviderFactory {
     return {
       name: this.providerConfig.name,
       type: this.providerConfig.type,
-      connect: () => console.log(`🚧  provider ${this.providerConfig.name} not yet implemented`),
+      connect: () => {
+        console.log(`🚧  provider ${this.providerConfig.name} not yet implemented`);
+        return null;
+      },
     };
   }
 
@@ -118,7 +121,7 @@ export class ProviderFactory {
   }
 
   public static prepareDefaultDev(): MoonwallProvider[] {
-    return this.prepare([
+    return ProviderFactory.prepare([
       {
         name: "dev",
         type: "polkadotJs",
@@ -145,7 +148,7 @@ export class ProviderFactory {
   public static prepareDefaultZombie(): MoonwallProvider[] {
     const MOON_PARA_WSS = process.env.MOON_PARA_WSS || "error";
     const MOON_RELAY_WSS = process.env.MOON_RELAY_WSS || "error";
-    return this.prepare([
+    return ProviderFactory.prepare([
       {
         name: "w3",
         type: "web3",
@@ -177,7 +180,7 @@ export class ProviderFactory {
   public static prepareNoEthDefaultZombie(): MoonwallProvider[] {
     const MOON_PARA_WSS = process.env.MOON_PARA_WSS || "error";
     const MOON_RELAY_WSS = process.env.MOON_RELAY_WSS || "error";
-    return this.prepare([
+    return ProviderFactory.prepare([
       {
         name: "parachain",
         type: "polkadotJs",
@@ -204,7 +207,7 @@ export class ProviderInterfaceFactory {
   constructor(
     private name: string,
     private type: ProviderType,
-    private connect: () => any
+    private connect: () => Promise<ApiPromise> | Wallet | Web3 | Promise<ViemClient> | null
   ) {}
 
   public async create(): Promise<ProviderInterface> {
@@ -251,10 +254,13 @@ export class ProviderInterfaceFactory {
       type: this.type,
       greet: async () =>
         console.log(
-          `👋 Provider ${this.name} is connected to chain ` + (await (api.eth as any).getChainId())
+          `👋 Provider ${this.name} is connected to chain ${await (api.eth as any).getChainId()}`
         ),
       disconnect: async () => {
-        api.eth.net.currentProvider!.disconnect();
+        if (!api.eth.net.currentProvider) {
+          throw new Error("No connected web3 provider to disconnect from");
+        }
+        api.eth.net.currentProvider.disconnect();
       },
     };
   }
@@ -265,12 +271,22 @@ export class ProviderInterfaceFactory {
       name: this.name,
       api,
       type: this.type,
-      greet: async () =>
+      greet: async () => {
+        if (!api.provider) {
+          throw new Error("No connected ethers provider to greet with");
+        }
         debug(
-          `👋  Provider ${this.name} is connected to chain ` +
-            (await api.provider!.getNetwork()).chainId
-        ),
-      disconnect: () => api.provider!.destroy(),
+          `👋  Provider ${this.name} is connected to chain ${
+            (await api.provider.getNetwork()).chainId
+          }`
+        );
+      },
+      disconnect: () => {
+        if (!api.provider) {
+          throw new Error("No connected ethers provider to disconnect from");
+        }
+        api.provider.destroy();
+      },
     };
   }
 
@@ -281,7 +297,7 @@ export class ProviderInterfaceFactory {
       api,
       type: this.type,
       greet: async () =>
-        console.log(`👋 Provider ${this.name} is connected to chain ` + (await api.getChainId())),
+        console.log(`👋 Provider ${this.name} is connected to chain ${await api.getChainId()}`),
       disconnect: async () => {
         // Not needed until we switch to websockets
       },
@@ -291,7 +307,7 @@ export class ProviderInterfaceFactory {
   public static async populate(
     name: string,
     type: ProviderType,
-    connect: () => Promise<ApiPromise> | Wallet | Web3 | Promise<ViemClient> | void
+    connect: () => Promise<ApiPromise> | Wallet | Web3 | Promise<ViemClient> | null
   ): Promise<ProviderInterface> {
     return await new ProviderInterfaceFactory(name, type, connect).create();
   }

@@ -11,12 +11,12 @@ import { MoonwallContext, contextCreator, runNetworkOnly } from "../lib/globalCo
 export async function testCmd(envName: string, additionalArgs?: object): Promise<boolean> {
   await cacheConfig();
   const globalConfig = await importAsyncConfig();
-  const env = globalConfig.environments.find(({ name }) => name === envName)!;
+  const env = globalConfig.environments.find(({ name }) => name === envName);
   process.env.MOON_TEST_ENV = envName;
 
   if (!env) {
     const envList = globalConfig.environments.map((env) => env.name);
-    new Error(
+    throw new Error(
       `No environment found in config for: ${chalk.bgWhiteBright.blackBright(
         envName
       )}\n Environments defined in config are: ${envList}\n`
@@ -27,8 +27,8 @@ export async function testCmd(envName: string, additionalArgs?: object): Promise
   await commonChecks(env);
 
   if (
-    (env.foundation.type == "dev" && !env.foundation.launchSpec[0].retainAllLogs) ||
-    (env.foundation.type == "chopsticks" && !env.foundation.launchSpec[0].retainAllLogs)
+    (env.foundation.type === "dev" && !env.foundation.launchSpec[0].retainAllLogs) ||
+    (env.foundation.type === "chopsticks" && !env.foundation.launchSpec[0].retainAllLogs)
   ) {
     clearNodeLogs();
   }
@@ -38,15 +38,16 @@ export async function testCmd(envName: string, additionalArgs?: object): Promise
   }
 
   const vitest = await executeTests(env, additionalArgs);
-  const failed = vitest!.state.getFiles().filter((file) => file.result!.state === "fail");
+  const failed = vitest.state
+    .getFiles()
+    .filter((file) => file.result && file.result.state === "fail");
 
   if (failed.length === 0) {
     console.log("✅ All tests passed");
     return true;
-  } else {
-    console.log("❌ Some tests failed");
-    return false;
   }
+  console.log("❌ Some tests failed");
+  return false;
 }
 
 export async function executeTests(env: Environment, additionalArgs?: object) {
@@ -60,7 +61,7 @@ export async function executeTests(env: Environment, additionalArgs?: object) {
 
         const ctx = await contextCreator();
         const chainData = ctx.providers
-          .filter((provider) => provider.type == "polkadotJs" && provider.name.includes("para"))
+          .filter((provider) => provider.type === "polkadotJs" && provider.name.includes("para"))
           .map((provider) => {
             return {
               [provider.name]: {
@@ -70,6 +71,10 @@ export async function executeTests(env: Environment, additionalArgs?: object) {
             };
           });
         // TODO: Extend/develop this feature to respect para/relay chain specifications
+        if (chainData.length < 1) {
+          throw "Could not read runtime name or version \nTo fix: ensure moonwall config has a polkadotJs provider with a name containing 'para'";
+        }
+
         const { rtVersion, rtName } = Object.values(chainData[0])[0];
         process.env.MOON_RTVERSION = rtVersion;
         process.env.MOON_RTNAME = rtName;
@@ -94,7 +99,7 @@ export async function executeTests(env: Environment, additionalArgs?: object) {
       include: env.include ? env.include : ["**/*{test,spec,test_,test-}*{ts,mts,cts}"],
       onConsoleLog(log) {
         if (filterList.includes(log.trim())) return false;
-        // if (log.trim() == "stdout | unknown test" || log.trim() == "<empty line>") return false;
+        // if (log.trim() === "stdout | unknown test" || log.trim() === "<empty line>") return false;
         if (log.includes("has multiple versions, ensure that there is only one installed.")) {
           return false;
         }
@@ -106,7 +111,7 @@ export async function executeTests(env: Environment, additionalArgs?: object) {
 
     if (
       globalConfig.environments.find((env) => env.name === process.env.MOON_TEST_ENV)?.foundation
-        .type == "zombie"
+        .type === "zombie"
     ) {
       await runNetworkOnly();
       process.env.MOON_RECYCLE = "true";
@@ -114,7 +119,12 @@ export async function executeTests(env: Environment, additionalArgs?: object) {
 
     try {
       const folders = env.testFileDir.map((folder) => path.join(".", folder, "/"));
-      resolve((await startVitest("test", folders, { ...options, ...additionalArgs })) as Vitest);
+      resolve(
+        (await startVitest("test", folders, {
+          ...options,
+          ...additionalArgs,
+        })) as Vitest
+      );
     } catch (e) {
       console.error(e);
       reject(e);
@@ -143,9 +153,12 @@ function addThreadConfig(
     },
   };
 
-  if (threads == true && process.env.MOON_RECYCLE !== "true") {
+  if (threads === true && process.env.MOON_RECYCLE !== "true") {
+    if (!configWithThreads.poolOptions) {
+      throw new Error("poolOptions not defined in config, this is an error please raise.");
+    }
     configWithThreads.fileParallelism = true;
-    configWithThreads.poolOptions!.threads = {
+    configWithThreads.poolOptions.threads = {
       isolate: true,
       minThreads: 1,
       maxThreads: 3,
@@ -155,9 +168,17 @@ function addThreadConfig(
   }
 
   if (typeof threads === "number" && process.env.MOON_RECYCLE !== "true") {
+    if (!configWithThreads.poolOptions) {
+      throw new Error("poolOptions not defined in config, this is an error please raise.");
+    }
+
+    if (!configWithThreads.poolOptions.threads) {
+      throw new Error("poolOptions.threads not defined in config, this is an error please raise.");
+    }
+
     configWithThreads.fileParallelism = true;
-    configWithThreads.poolOptions!.threads!.maxThreads = threads;
-    configWithThreads.poolOptions!.threads!.singleThread = false;
+    configWithThreads.poolOptions.threads.maxThreads = threads;
+    configWithThreads.poolOptions.threads.singleThread = false;
   }
 
   if (typeof threads === "object" && process.env.MOON_RECYCLE !== "true") {

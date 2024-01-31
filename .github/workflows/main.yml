@@ -200,7 +200,7 @@ jobs:
       - uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
-      - name: Run standard ${{matrix.suite}}}
+      - name: Run standard ${{matrix.suite}}
         run: |
           cd test
           bun moonwall test ${{matrix.suite}}

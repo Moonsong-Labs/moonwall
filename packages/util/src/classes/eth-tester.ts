@@ -1,4 +1,4 @@
-import { Web3, JsonRpcResponse } from "web3";
+import { Web3 } from "web3";
 import { AccessListish, ContractFactory } from "ethers";
 import { Debugger } from "debug";
 
@@ -123,30 +123,31 @@ export class EthTester {
 
     // Checks transaction shouldn't have both Legacy and EIP1559 fields
     if (options.gasPrice && options.maxFeePerGas) {
-      throw new Error(`txn has both gasPrice and maxFeePerGas!`);
+      throw new Error("txn has both gasPrice and maxFeePerGas!");
     }
     if (options.gasPrice && options.maxPriorityFeePerGas) {
-      throw new Error(`txn has both gasPrice and maxPriorityFeePerGas!`);
+      throw new Error("txn has both gasPrice and maxPriorityFeePerGas!");
     }
 
     // Converts BigInt to hex string. This is needed because Web3 doesn't support BigInt
     if (typeof options.gasPrice === "bigint") {
-      options.gasPrice = "0x" + options.gasPrice.toString(16);
+      options.gasPrice = `0x${options.gasPrice.toString(16)}`;
     }
     if (typeof options.maxFeePerGas === "bigint") {
-      options.maxFeePerGas = "0x" + options.maxFeePerGas.toString(16);
+      options.maxFeePerGas = `0x${options.maxFeePerGas.toString(16)}`;
     }
     if (typeof options.maxPriorityFeePerGas === "bigint") {
-      options.maxPriorityFeePerGas = "0x" + options.maxPriorityFeePerGas.toString(16);
+      options.maxPriorityFeePerGas = `0x${options.maxPriorityFeePerGas.toString(16)}`;
     }
 
-    let maxFeePerGas;
-    let maxPriorityFeePerGas;
+    let maxFeePerGas: any;
+    let maxPriorityFeePerGas: any;
+
     if (options.gasPrice) {
       maxFeePerGas = options.gasPrice;
       maxPriorityFeePerGas = options.gasPrice;
     } else {
-      maxFeePerGas = options.maxFeePerGas || BigInt(await this.web3.eth.getGasPrice());
+      maxFeePerGas = options.maxFeePerGas || BigInt(await (this.web3 as any).eth.getGasPrice());
       maxPriorityFeePerGas = options.maxPriorityFeePerGas || 0;
     }
 
@@ -154,7 +155,7 @@ export class EthTester {
     const gasPrice =
       options.gasPrice !== undefined
         ? options.gasPrice
-        : "0x" + BigInt(await this.web3.eth.getGasPrice()).toString(16);
+        : `0x${BigInt(await (this.web3 as any).eth.getGasPrice()).toString(16)}`;
     const value = options.value !== undefined ? options.value : "0x00";
     const from = options.from || this.defaultAccount.address;
     const privateKey =
@@ -162,7 +163,7 @@ export class EthTester {
 
     // Always execute estimateGas. Allows to retrieve potential errors
     let error: any;
-    const estimatedGas = await this.web3.eth
+    const estimatedGas = await (this.web3 as any).eth
       .estimateGas({
         from: from,
         to: options.to,
@@ -180,7 +181,7 @@ export class EthTester {
     const nonce =
       options.nonce != null
         ? options.nonce
-        : await this.web3.eth.getTransactionCount(from, "pending");
+        : await (this.web3 as any).eth.getTransactionCount(from, "pending");
 
     let data: any;
     let rawTransaction: string;
@@ -188,21 +189,21 @@ export class EthTester {
       data = {
         from,
         to: options.to,
-        value: value && value.toString(),
+        value: value?.toString(),
         gasPrice,
         gas,
         nonce: nonce,
         data: options.data,
       };
-      const tx = await this.web3.eth.accounts.signTransaction(data, privateKey);
+      const tx = await (this.web3 as any).eth.accounts.signTransaction(data, privateKey);
       rawTransaction = tx.rawTransaction;
     } else {
-      const chainId = await this.web3.eth.getChainId();
+      const chainId = await (this.web3 as any).eth.getChainId();
       if (isEip2930) {
         data = {
           from,
           to: options.to,
-          value: value && value.toString(),
+          value: value?.toString(),
           gasPrice,
           gasLimit: gas,
           nonce: nonce,
@@ -215,7 +216,7 @@ export class EthTester {
         data = {
           from,
           to: options.to,
-          value: value && value.toString(),
+          value: value?.toString(),
           maxFeePerGas,
           maxPriorityFeePerGas,
           gasLimit: gas,
@@ -226,33 +227,32 @@ export class EthTester {
           type: 2,
         };
       }
-      const tx = await this.web3.eth.accounts.signTransaction(data, privateKey);
+      const tx = await (this.web3 as any).eth.accounts.signTransaction(data, privateKey);
       rawTransaction = tx.rawTransaction;
     }
 
     this.logger(
-      `Tx [${/:([0-9]+)$/.exec((this.web3.currentProvider as any).host)?.[1]}] ` +
-        `from: ${data.from.substr(0, 5) + "..." + data.from.substr(data.from.length - 3)}, ` +
-        (data.to
-          ? `to: ${data.to.substr(0, 5) + "..." + data.to.substr(data.to.length - 3)}, `
-          : "") +
-        (data.value ? `value: ${data.value.toString()}, ` : "") +
-        (data.gasPrice ? `gasPrice: ${data.gasPrice.toString()}, ` : "") +
-        (data.maxFeePerGas ? `maxFeePerGas: ${data.maxFeePerGas.toString()}, ` : "") +
-        (data.maxPriorityFeePerGas
+      `Tx [${
+        /:([0-9]+)$/.exec(((this.web3 as any).currentProvider as any).host)?.[1]
+      }] from: ${`${data.from.substr(0, 5)}...${data.from.substr(data.from.length - 3)}`}, ${
+        data.to ? `to: ${`${data.to.substr(0, 5)}...${data.to.substr(data.to.length - 3)}`}, ` : ""
+      }${data.value ? `value: ${data.value.toString()}, ` : ""}${
+        data.gasPrice ? `gasPrice: ${data.gasPrice.toString()}, ` : ""
+      }${data.maxFeePerGas ? `maxFeePerGas: ${data.maxFeePerGas.toString()}, ` : ""}${
+        data.maxPriorityFeePerGas
           ? `maxPriorityFeePerGas: ${data.maxPriorityFeePerGas.toString()}, `
-          : "") +
-        (data.accessList ? `accessList: ${data.accessList.toString()}, ` : "") +
-        (data.gas ? `gas: ${data.gas.toString()}, ` : "") +
-        (data.nonce ? `nonce: ${data.nonce.toString()}, ` : "") +
-        (!data.data
+          : ""
+      }${data.accessList ? `accessList: ${data.accessList.toString()}, ` : ""}${
+        data.gas ? `gas: ${data.gas.toString()}, ` : ""
+      }${data.nonce ? `nonce: ${data.nonce.toString()}, ` : ""}${
+        !data.data
           ? ""
           : `data: ${
               data.data.length < 50
                 ? data.data
-                : data.data.substr(0, 5) + "..." + data.data.substr(data.data.length - 3)
-            }, `) +
-        (error ? `ERROR: ${error.toString()}, ` : "")
+                : `${data.data.substr(0, 5)}...${data.data.substr(data.data.length - 3)}`
+            }, `
+      }${error ? `ERROR: ${error.toString()}, ` : ""}`
     );
     return rawTransaction;
   };
@@ -301,16 +301,14 @@ export class EthTester {
    * @param rawTransaction Signed transaction
    * @returns Transaction JSON RPC response
    */
-  sendSignedTransaction = async (
-    rawTransaction: string | PromiseLike<string>
-  ): Promise<JsonRpcResponse> => {
-    return new Promise<JsonRpcResponse>(async (resolve, reject) => {
+  sendSignedTransaction = async (rawTransaction: string | PromiseLike<string>): Promise<any> => {
+    return new Promise(async (resolve, reject) => {
       try {
-        if (typeof this.web3.currentProvider == "string") {
+        if (typeof (this.web3 as any).currentProvider === "string") {
           reject("Web3 provider is not a valid provider");
           return;
         }
-        (this.web3.currentProvider as any).send(
+        ((this.web3 as any).currentProvider as any).send(
           {
             jsonrpc: "2.0",
             id: 1,
@@ -321,7 +319,7 @@ export class EthTester {
             if (error) {
               reject(`Failed to send signed transaction: ${error.message || error.toString()}`);
             }
-            resolve(result as JsonRpcResponse);
+            resolve(result);
           }
         );
       } catch (e) {

@@ -15,7 +15,7 @@ export async function upgradeRuntimeChopsticks(
   providerName?: string
 ) {
   if (!existsSync(path)) {
-    throw new Error("Runtime wasm not found at path: " + path);
+    throw new Error(`Runtime wasm not found at path: ${path}`);
   }
   const rtWasm = readFileSync(path);
   const rtHex = `0x${rtWasm.toString("hex")}`;
@@ -42,39 +42,56 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
     useGovernance: false,
     ...preferences,
   };
+
   return new Promise<number>(async (resolve, reject) => {
     const log = (text: string) => {
       if (options.logger) {
         return options.logger(text);
-      } else {
-        return;
       }
+      return;
     };
+
+    if (!options.runtimeName) {
+      throw new Error("'runtimeName' is required to upgrade runtime");
+    }
+
+    if (!options.runtimeTag) {
+      throw new Error("'runtimeTag' is required to upgrade runtime");
+    }
+
+    if (!options.from) {
+      throw new Error("'from' is required to upgrade runtime");
+    }
 
     try {
       const code = fs
         .readFileSync(
-          await getRuntimeWasm(options.runtimeName!, options.runtimeTag!, options.localPath)
+          await getRuntimeWasm(options.runtimeName, options.runtimeTag, options.localPath)
         )
         .toString();
 
       log("Checking if upgrade is needed...");
       const existingCode = await api.rpc.state.getStorage(":code");
-      if (existingCode!.toString() == code) {
+
+      if (!existingCode) {
+        throw "No existing runtime code found";
+      }
+
+      if (existingCode.toString() === code) {
         reject(
-          `Runtime upgrade with same code: ${existingCode!.toString().slice(0, 20)} vs ${code
+          `Runtime upgrade with same code: ${existingCode.toString().slice(0, 20)} vs ${code
             .toString()
             .slice(0, 20)}`
         );
       }
 
-      let nonce = (await api.rpc.system.accountNextIndex(options.from!.address)).toNumber();
+      let nonce = (await api.rpc.system.accountNextIndex(options.from.address)).toNumber();
 
       if (options.useGovernance) {
         log("Using governance...");
         // TODO: remove support for old style after all chains upgraded to 2400+
         const proposal =
-          api.consts.system.version.specVersion.toNumber() >= 2400
+          (api.consts.system.version as any).specVersion.toNumber() >= 2400
             ? (api.tx.parachainSystem as any).authorizeUpgrade(blake2AsHex(code), false)
             : (api.tx.parachainSystem as any).authorizeUpgrade(blake2AsHex(code));
         const encodedProposal = proposal.method.toHex();
@@ -100,14 +117,14 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
           if (api.query.preimage) {
             await api.tx.preimage
               .notePreimage(encodedProposal)
-              .signAndSend(options.from!, { nonce: nonce++ });
+              .signAndSend(options.from, { nonce: nonce++ });
           } else {
             // TODO: remove support for democracy after 2000
             await api.tx.democracy
               .notePreimage(encodedProposal)
-              .signAndSend(options.from!, { nonce: nonce++ });
+              .signAndSend(options.from, { nonce: nonce++ });
           }
-          log(`Complete ✅`);
+          log("Complete ✅");
         }
 
         // Check if already in referendum
@@ -119,34 +136,34 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
                 (ref: any) =>
                   ref[1].unwrap().isOngoing &&
                   ref[1].unwrap().asOngoing.proposal.isLookup &&
-                  ref[1].unwrap().asOngoing.proposal.asLookup.hash.toHex() == encodedHash
+                  ref[1].unwrap().asOngoing.proposal.asLookup.hash.toHex() === encodedHash
               )
               .map((ref) =>
-                api.registry.createType("u32", ref[0].toU8a().slice(-4)).toNumber()
+                (api.registry.createType("u32", ref[0].toU8a().slice(-4)) as any).toNumber()
               )?.[0]
           : referendum
               .filter(
                 (ref: any) =>
                   ref[1].unwrap().isOngoing &&
-                  (ref[1].unwrap().asOngoing as any).proposalHash.toHex() == encodedHash
+                  (ref[1].unwrap().asOngoing as any).proposalHash.toHex() === encodedHash
               )
               .map((ref) =>
-                api.registry.createType("u32", ref[0].toU8a().slice(-4)).toNumber()
+                (api.registry.createType("u32", ref[0].toU8a().slice(-4)) as any).toNumber()
               )?.[0];
 
         if (referendaIndex !== null && referendaIndex !== undefined) {
-          log(`Vote for upgrade already in referendum, cancelling it.`);
+          log("Vote for upgrade already in referendum, cancelling it.");
           await cancelReferendaWithCouncil(api, referendaIndex);
         }
         await executeProposalWithCouncil(api, encodedHash);
 
         // Needs to retrieve nonce after those governance calls
-        nonce = (await api.rpc.system.accountNextIndex(options.from!.address)).toNumber();
-        log(`Enacting authorized upgrade...`);
+        nonce = (await api.rpc.system.accountNextIndex(options.from.address)).toNumber();
+        log("Enacting authorized upgrade...");
         await api.tx.parachainSystem
           .enactAuthorizedUpgrade(code)
-          .signAndSend(options.from!, { nonce: nonce++ });
-        log(`Complete ✅`);
+          .signAndSend(options.from, { nonce: nonce++ });
+        log("Complete ✅");
       } else {
         log(
           `Sending sudo.setCode (${sha256(Buffer.from(code))} [~${Math.floor(
@@ -164,11 +181,11 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
                   refTime: 1,
                 }
           )
-          .signAndSend(options.from!, { nonce: nonce++ });
-        log(`✅`);
+          .signAndSend(options.from, { nonce: nonce++ });
+        log("✅");
       }
 
-      log(`Waiting to apply new runtime (${chalk.red(`~4min`)})...`);
+      log(`Waiting to apply new runtime (${chalk.red("~4min")})...`);
       let isInitialVersion = true;
 
       const unsub = await api.rpc.state.subscribeStorage([":code"], async (newCode: any) => {
@@ -177,14 +194,14 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
           log(
             `Complete ✅ [New Code: ${newCode.toString().slice(0, 5)}...${newCode
               .toString()
-              .slice(-4)} , Old Code:${existingCode!.toString().slice(0, 5)}...${existingCode!
+              .slice(-4)} , Old Code:${existingCode.toString().slice(0, 5)}...${existingCode
               .toString()
               .slice(-4)}] [#${blockNumber}]`
           );
           unsub();
-          if (newCode!.toString() != code) {
+          if (newCode.toString() !== code) {
             reject(
-              `Unexpected new code: ${newCode!.toString().slice(0, 20)} vs ${code
+              `Unexpected new code: ${newCode.toString().slice(0, 20)} vs ${code
                 .toString()
                 .slice(0, 20)}`
             );
@@ -193,7 +210,7 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
             const blockToWait = (await api.rpc.chain.getHeader()).number.toNumber() + 1;
             await new Promise(async (resolve) => {
               const subBlocks = await api.rpc.chain.subscribeNewHeads(async (header) => {
-                if (header.number.toNumber() == blockToWait) {
+                if (header.number.toNumber() === blockToWait) {
                   subBlocks();
                   resolve(blockToWait);
                 }
@@ -205,7 +222,8 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
         isInitialVersion = false;
       });
     } catch (e) {
-      console.error(`Failed to setCode`);
+      console.error(e);
+      console.error("Failed to setCode");
       reject(e);
     }
   });

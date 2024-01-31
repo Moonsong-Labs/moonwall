@@ -95,7 +95,7 @@ async function main(args: any) {
   }
 
   console.log(`📁 Found ${Object.keys(sourceToCompile).length} contracts to compile`);
-  const contractsToCompile = [];
+  const contractsToCompile: any[] = [];
   const tempFileExists = await fs
     .access(tempFile)
     .then(() => true)
@@ -105,6 +105,10 @@ async function main(args: any) {
     contractMd5 = JSON.parse((await fs.readFile(tempFile)).toString());
     for (const contract of Object.keys(sourceToCompile)) {
       const path = filePaths.find((path) => path.includes(contract));
+
+      if (!path) {
+        throw new Error(`Contract ${contract} not found in ${filePaths}`);
+      }
       const contractHash = computeHash((await fs.readFile(path)).toString());
       if (contractHash != contractMd5[contract]) {
         console.log(`  - Change in ${chalk.yellow(contract)}, compiling ⚙️`);
@@ -127,9 +131,13 @@ async function main(args: any) {
     } catch (e) {
       console.log(`Failed to compile: ${ref}`);
       if (e.errors) {
-        e.errors.forEach((error) => {
+        for (const error of e.errors) {
           console.log(error.formattedMessage);
-        });
+        }
+
+        // e.errors.forEach((error) => {
+        //   console.log(error.formattedMessage);
+        // });
       } else {
         console.log(e);
       }
@@ -157,7 +165,7 @@ const getImports = (fileRef: string) => (dependency: string) => {
       return { contents: sourceByReference[localRef] };
     }
     base = path.dirname(base);
-    if (base == ".") {
+    if (base === ".") {
       continue;
     }
   }
@@ -196,15 +204,18 @@ function compileSolidity(
   if (!result.contracts) {
     throw result;
   }
-  return Object.keys(result.contracts[filename]).reduce((p, contractName) => {
-    p[contractName] = {
-      byteCode: ("0x" +
-        result.contracts[filename][contractName].evm.bytecode.object) as `0x${string}`,
-      contract: result.contracts[filename][contractName],
-      sourceCode: contractContent,
-    };
-    return p;
-  }, {} as { [name: string]: CompiledContract<Abi> });
+  return Object.keys(result.contracts[filename]).reduce(
+    (p, contractName) => {
+      p[contractName] = {
+        byteCode: ("0x" +
+          result.contracts[filename][contractName].evm.bytecode.object) as `0x${string}`,
+        contract: result.contracts[filename][contractName],
+        sourceCode: contractContent,
+      };
+      return p;
+    },
+    {} as { [name: string]: CompiledContract<Abi> }
+  );
 }
 
 // Shouldn't be run concurrently with the same 'name'

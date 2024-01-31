@@ -24,7 +24,7 @@ import {
 import { Keyring } from "@polkadot/api";
 import { ApiTypes } from "@polkadot/api/types";
 import { createDevBlock } from "../../internal/foundations/devModeHelpers";
-import { importJsonConfig, isEthereumDevConfig } from "../configReader";
+import { getEnvironmentFromConfig, importJsonConfig, isEthereumDevConfig } from "../configReader";
 import {
   deployCreateCompiledContract,
   interactWithContract,
@@ -32,8 +32,7 @@ import {
 } from "../contractFunctions";
 
 export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testCase, logger }) => {
-  const config = importJsonConfig();
-  const env = config.environments.find((env) => env.name == process.env.MOON_TEST_ENV)!;
+  const env = getEnvironmentFromConfig();
   const ethCompatible = isEthereumDevConfig();
 
   const accountTypeLookup = () => {
@@ -41,25 +40,36 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
     const systemPalletIndex = metadata.pallets.findIndex(
       (pallet) => pallet.name.toString() === "System"
     );
-    const systemAccountStorageType = metadata.pallets[systemPalletIndex].storage
+    const systemAccountStorage = metadata.pallets[systemPalletIndex].storage
       .unwrap()
-      .items.find((storage) => storage.name.toString() === "Account")!.type;
+      .items.find((storage) => storage.name.toString() === "Account");
+
+    if (!systemAccountStorage) {
+      throw new Error("Account storage not found");
+    }
+    const systemAccountStorageType = systemAccountStorage.type;
 
     return metadata.lookup.getTypeDef(systemAccountStorageType.asMap.key).type;
   };
 
   const newKeyring = () => {
-    const isEth = accountTypeLookup() == "AccountId20";
+    const isEth = accountTypeLookup() === "AccountId20";
     const keyring = new Keyring({
       type: isEth ? "ethereum" : "sr25519",
     });
     return {
-      alice: keyring.addFromUri(isEth ? ALITH_PRIVATE_KEY : "//Alice", { name: "Alice default" }),
-      bob: keyring.addFromUri(isEth ? BALTATHAR_PRIVATE_KEY : "//Bob", { name: "Bob default" }),
+      alice: keyring.addFromUri(isEth ? ALITH_PRIVATE_KEY : "//Alice", {
+        name: "Alice default",
+      }),
+      bob: keyring.addFromUri(isEth ? BALTATHAR_PRIVATE_KEY : "//Bob", {
+        name: "Bob default",
+      }),
       charlie: keyring.addFromUri(isEth ? CHARLETH_PRIVATE_KEY : "//Charlie", {
         name: "Charlie default",
       }),
-      dave: keyring.addFromUri(isEth ? DOROTHY_PRIVATE_KEY : "//Dave", { name: "Dave default" }),
+      dave: keyring.addFromUri(isEth ? DOROTHY_PRIVATE_KEY : "//Dave", {
+        name: "Dave default",
+      }),
     };
   };
 
@@ -138,7 +148,10 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
     writePrecompile: !ethCompatible
       ? undefined
       : async (options: PrecompileCallOptions) => {
-          const response = await interactWithPrecompileContract(ctx, { call: false, ...options });
+          const response = await interactWithPrecompileContract(ctx, {
+            call: false,
+            ...options,
+          });
           return response as `0x${string}`;
         },
 
@@ -155,7 +168,10 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
     writeContract: !ethCompatible
       ? undefined
       : async (options: ContractCallOptions) => {
-          const response = await interactWithContract(ctx, { call: false, ...options });
+          const response = await interactWithContract(ctx, {
+            call: false,
+            ...options,
+          });
           return response as `0x${string}`;
         },
 

@@ -37,11 +37,11 @@ yargs(hideBin(process.argv))
   .middleware((argv) => {
     process.env.MOON_CONFIG_PATH = argv.configFile;
   })
-  .command(`init`, "Run tests for a given Environment", async () => {
+  .command("init", "Run tests for a given Environment", async () => {
     await generateConfig();
   })
   .command(
-    `download <bin> [ver] [path]`,
+    "download <bin> [ver] [path]",
     "Download x86 artifact from GitHub",
     (yargs) => {
       return yargs
@@ -74,7 +74,7 @@ yargs(hideBin(process.argv))
     }
   )
   .command(
-    `test <envName> [GrepTest]`,
+    "test <envName> [GrepTest]",
     "Run tests for a given Environment",
     (yargs) => {
       return yargs
@@ -91,7 +91,11 @@ yargs(hideBin(process.argv))
     async (args) => {
       if (args.envName) {
         process.env.MOON_RUN_SCRIPTS = "true";
-        if (!(await testCmd(args.envName.toString(), { testNamePattern: args.GrepTest }))) {
+        if (
+          !(await testCmd(args.envName.toString(), {
+            testNamePattern: args.GrepTest,
+          }))
+        ) {
           process.exitCode = 1;
         }
       } else {
@@ -102,7 +106,7 @@ yargs(hideBin(process.argv))
     }
   )
   .command(
-    `run <envName> [GrepTest]`,
+    "run <envName> [GrepTest]",
     "Start new network found in global config",
     (yargs) => {
       return yargs

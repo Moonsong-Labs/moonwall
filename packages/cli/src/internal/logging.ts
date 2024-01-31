@@ -17,9 +17,8 @@ process.stderr.write = (
   if (shouldWrite) {
     if (typeof encodingOrCallback === "function") {
       return originalWrite(chunk, encodingOrCallback);
-    } else {
-      return originalWrite(chunk, encodingOrCallback as BufferEncoding, callback);
     }
+    return originalWrite(chunk, encodingOrCallback as BufferEncoding, callback);
   }
 
   if (callback) {

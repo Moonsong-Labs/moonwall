@@ -38,7 +38,7 @@ export type MoonwallEnvironment = {
 export interface MoonwallProvider {
   name: string;
   type: ProviderType;
-  connect: () => Promise<ApiPromise> | Wallet | Web3<any> | Promise<ViemClient> | void;
+  connect: () => Promise<ApiPromise> | Wallet | Web3<any> | Promise<ViemClient> | null;
   ws?: () => WsProvider;
 }
 
@@ -59,7 +59,9 @@ export interface ConnectedProvider {
   greet: () => Promise<void> | void | { rtName: string; rtVersion: number };
 }
 
-export type ProviderApi = { [P in keyof ProviderMap]: ProviderMap[P] }[keyof ProviderMap];
+export type ProviderApi = {
+  [P in keyof ProviderMap]: ProviderMap[P];
+}[keyof ProviderMap];
 
 export type ProviderMap = {
   polkadotJs: ApiPromise;

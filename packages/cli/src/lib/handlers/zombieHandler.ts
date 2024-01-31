@@ -15,8 +15,8 @@ export const zombieHandler: FoundationHandler<"zombie"> = ({
     context: {
       ...context,
       waitBlock: async (
-        blocksToWaitFor: number = 1,
-        chain: string = "parachain",
+        blocksToWaitFor = 1,
+        chain = "parachain",
         mode: "height" | "quantity" = "quantity"
       ) => {
         const ctx = await MoonwallContext.getContext();
@@ -34,7 +34,8 @@ export const zombieHandler: FoundationHandler<"zombie"> = ({
           const newBlockNumber = (await api.rpc.chain.getBlock()).block.header.number.toNumber();
           if (mode === "quantity" && newBlockNumber >= currentBlockNumber + blocksToWaitFor) {
             break;
-          } else if (mode === "height" && newBlockNumber >= blocksToWaitFor) {
+          }
+          if (mode === "height" && newBlockNumber >= blocksToWaitFor) {
             break;
           }
         }
@@ -42,6 +43,10 @@ export const zombieHandler: FoundationHandler<"zombie"> = ({
 
       upgradeRuntime: async (options: UpgradePreferences = {}) => {
         const ctx = await MoonwallContext.getContext();
+
+        if (!ctx.rtUpgradePath) {
+          throw new Error("Runtime upgrade path not defined in moonwall config");
+        }
         const provider = ctx.providers.find((prov) => prov.name === "parachain");
 
         if (!provider) {
@@ -52,7 +57,7 @@ export const zombieHandler: FoundationHandler<"zombie"> = ({
         const params: UpgradePreferences = {
           runtimeName: options.runtimeName || "moonbase",
           runtimeTag: options.runtimeTag || "local",
-          localPath: options.localPath || ctx.rtUpgradePath!,
+          localPath: options.localPath || ctx.rtUpgradePath,
           useGovernance: options.useGovernance || false,
           waitMigration: options.waitMigration || true,
           from: options.from || alith,
