@@ -358,7 +358,6 @@ export class MoonwallContext {
       return ctx;
     }
 
-    // const activeNodes = this.nodes.filter((node) => !node.killed);
     if (this.nodes.length > 0) {
       return ctx;
     }

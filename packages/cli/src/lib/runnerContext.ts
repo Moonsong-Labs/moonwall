@@ -18,7 +18,7 @@ import Debug from "debug";
 import { Wallet } from "ethers";
 import { afterAll, beforeAll, describe, it } from "vitest";
 import { Web3 } from "web3";
-import { importAsyncConfig } from "./configReader";
+import { getEnvironmentFromConfig, importAsyncConfig } from "./configReader";
 import { MoonwallContext, contextCreator } from "./globalContext";
 import { chopsticksHandler } from "./handlers/chopsticksHandler";
 import { devHandler } from "./handlers/devHandler";
@@ -81,14 +81,8 @@ export function describeSuite<T extends FoundationType>({
   let ctx: MoonwallContext | null = null;
 
   beforeAll(async () => {
-    const globalConfig = await importAsyncConfig();
-
-    if (!process.env.MOON_TEST_ENV) {
-      throw new Error("MOON_TEST_ENV not set");
-    }
-
+    const env = getEnvironmentFromConfig();
     ctx = await contextCreator();
-    const env = globalConfig.environments.find(({ name }) => name === process.env.MOON_TEST_ENV)!;
 
     if (env.foundation.type === "read_only") {
       const settings = loadParams(env.foundation.launchSpec);
@@ -124,21 +118,25 @@ export function describeSuite<T extends FoundationType>({
 
   describe(`🗃️  ${suiteId} ${title}`, () => {
     const getApi = <T extends ProviderType>(apiType?: T, apiName?: string) => {
-      const provider = ctx!.providers.find((prov) => {
+      if (!ctx) {
+        throw new Error("Context not initialized");
+      }
+      const provider = ctx.providers.find((prov) => {
         if (apiType && apiName) {
           return prov.type === apiType && prov.name === apiName;
-        } else if (apiType && !apiName) {
-          return prov.type === apiType;
-        } else if (!apiType && apiName) {
-          return prov.name === apiName;
-        } else {
-          return false;
         }
+        if (apiType && !apiName) {
+          return prov.type === apiType;
+        }
+        if (!apiType && apiName) {
+          return prov.name === apiName;
+        }
+        return false;
       });
 
       if (!provider) {
         throw new Error(
-          `API of type ${apiType} ${apiName ? "and name " + apiName : ""} could not be found`
+          `API of type ${apiType} ${apiName ? `and name ${apiName}` : ""} could not be found`
         );
       }
 
@@ -209,7 +207,11 @@ const scheduleWithBottleneck = <T extends ProviderApi>(api: T): T => {
       const origMethod = target[propKey];
       if (typeof origMethod === "function" && propKey !== "rpc" && propKey !== "tx") {
         return (...args: any[]) => {
-          return limiter!.schedule(() => origMethod.apply(target, args));
+          if (!limiter) {
+            throw new Error("Limiter not initialized");
+          }
+
+          return limiter.schedule(() => origMethod.apply(target, args));
         };
       }
       return origMethod;
