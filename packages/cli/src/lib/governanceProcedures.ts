@@ -361,15 +361,18 @@ export const executeProposalWithCouncil = async (api: ApiPromise, encodedHash: s
   process.stdout.write(`Waiting for referendum [${referendumNextIndex}] to be executed...`);
   let referenda: PalletDemocracyReferendumInfo | undefined;
   while (!referenda) {
-    referenda = (
-      (await api.query.democracy.referendumInfoOf.entries()).find(
-        (ref: any) =>
-          ref[1].unwrap().isFinished &&
-          (api.registry.createType("u32", ref[0].toU8a().slice(-4)) as any).toNumber() ===
-            referendumNextIndex
-      )?.[1] as any
-    ).unwrap();
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      referenda = (
+        (await api.query.democracy.referendumInfoOf.entries()).find(
+          (ref: any) =>
+            ref[1].unwrap().isFinished &&
+            (api.registry.createType("u32", ref[0].toU8a().slice(-4)) as any).toNumber() ===
+              referendumNextIndex
+        )?.[1] as any
+      ).unwrap();
+    } catch {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
   }
   process.stdout.write(`${referenda.asFinished.approved ? "✅" : "❌"} \n`);
   if (!referenda.asFinished.approved) {

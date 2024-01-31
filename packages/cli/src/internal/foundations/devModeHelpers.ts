@@ -73,12 +73,11 @@ export async function createDevBlock<
 
   const originalBlockNumber = (await api.rpc.chain.getHeader()).number.toBigInt();
 
-  const signer = options.signer !== undefined ? returnSigner(options) : returnDefaultSigner();
+  const signer = options.signer ? returnSigner(options) : returnDefaultSigner();
 
   const results: ({ type: "eth"; hash: string } | { type: "sub"; hash: string })[] = [];
 
-  const txs =
-    transactions === undefined ? [] : Array.isArray(transactions) ? transactions : [transactions];
+  const txs = !transactions ? [] : Array.isArray(transactions) ? transactions : [transactions];
 
   for await (const call of txs) {
     if (typeof call === "string") {
@@ -147,17 +146,13 @@ export async function createDevBlock<
         )
         ?.phase?.asApplyExtrinsic?.toString();
 
-      return res === undefined ? undefined : Number(res);
+      return !res ? undefined : Number(res);
     }
     return blockData.block.extrinsics.findIndex((ext) => ext.hash.toHex() === result.hash);
   };
 
   const result: ExtrinsicCreation[] = results.map((result) => {
-    const extrinsicIndex = getExtIndex(allRecords, result);
-
-    if (!extrinsicIndex) {
-      throw new Error(`Extrinsic ${result.hash} not found in block`);
-    }
+    const extrinsicIndex = getExtIndex(allRecords, result) || -1;
 
     // We retrieve the events associated with the extrinsic
     const events = allRecords.filter(
@@ -166,6 +161,7 @@ export async function createDevBlock<
     );
 
     const failure = extractError(events);
+
     return {
       extrinsic: extrinsicIndex >= 0 ? blockData.block.extrinsics[extrinsicIndex] : null,
       events,
@@ -173,7 +169,7 @@ export async function createDevBlock<
         failure &&
         ((failure.isModule && api.registry.findMetaError(failure.asModule)) ||
           ({ name: failure.toString() } as RegistryError)),
-      successful: extrinsicIndex !== undefined && !failure,
+      successful: extrinsicIndex > 0 && typeof failure !== "undefined",
       hash: result.hash,
     };
   });
@@ -219,12 +215,6 @@ export async function createDevBlock<
         );
       }
     }
-    // actualEvents.forEach((event) => {
-    //   assert(
-    //     !api.events.system.ExtrinsicFailed.is(event.event),
-    //     "ExtrinsicFailed event detected, enable 'allowFailures' if this is expected."
-    //   );
-    // });
   }
 
   return {

@@ -222,6 +222,7 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
         isInitialVersion = false;
       });
     } catch (e) {
+      console.error(e);
       console.error("Failed to setCode");
       reject(e);
     }
