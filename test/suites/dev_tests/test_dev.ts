@@ -48,7 +48,7 @@ describeSuite({
     it({
       id: "T01",
       title: "Checking that launched node can create blocks",
-      test: async function () {
+      test: async () => {
         const block = (
           await context.polkadotJs().rpc.chain.getBlock()
         ).block.header.number.toNumber();
@@ -71,7 +71,7 @@ describeSuite({
       id: "T02",
       title: "Checking that substrate txns possible",
       timeout: 20000,
-      test: async function () {
+      test: async () => {
         const balanceBefore = (await context.polkadotJs().query.system.account(BALTATHAR_ADDRESS))
           .data.free;
 
@@ -91,7 +91,7 @@ describeSuite({
     it({
       id: "T03",
       title: "Checking that sudo can be used",
-      test: async function () {
+      test: async () => {
         await context.createBlock();
         const tx = context.polkadotJs().tx.rootTesting.fillBlock(60 * 10 ** 7);
         await context.polkadotJs().tx.sudo.sudo(tx).signAndSend(alith);
@@ -105,7 +105,7 @@ describeSuite({
     it({
       id: "T04",
       title: "Can send Ethers txns",
-      test: async function () {
+      test: async () => {
         const balanceBefore = (await context.polkadotJs().query.system.account(BALTATHAR_ADDRESS))
           .data.free;
 
@@ -127,7 +127,7 @@ describeSuite({
       title: "Testing out Create block and listen for event",
       // modifier: "only",
       timeout: 30000,
-      test: async function () {
+      test: async () => {
         const expectEvents = [
           context.polkadotJs().events.system.ExtrinsicSuccess,
           context.polkadotJs().events.balances.Transfer,
@@ -145,7 +145,7 @@ describeSuite({
       id: "T06",
       title: "Testing out Create block and analyse failures",
       timeout: 30000,
-      test: async function () {
+      test: async () => {
         const { result } = await context.createBlock(
           context
             .polkadotJs()
@@ -165,7 +165,7 @@ describeSuite({
     it({
       id: "T07",
       title: "Can send viem txns",
-      test: async function () {
+      test: async () => {
         const balanceBefore = await context.viem().getBalance({ address: BALTATHAR_ADDRESS });
 
         await context.viem().sendTransaction({
@@ -185,7 +185,7 @@ describeSuite({
     it({
       id: "T08",
       title: "It can deploy a contract",
-      test: async function () {
+      test: async () => {
         const { abi, bytecode, methods } = fetchCompiledContract("MultiplyBy7");
         log(methods);
 
@@ -199,7 +199,7 @@ describeSuite({
     it({
       id: "T09",
       title: "It can call with a contract",
-      test: async function () {
+      test: async () => {
         const { abi, bytecode, methods } = fetchCompiledContract("MultiplyBy7");
         const { status, contractAddress } = await deployViemContract(context, abi, bytecode);
 
@@ -220,7 +220,7 @@ describeSuite({
       id: "T10",
       title: "It can write-interact with a contract",
       // modifier: "only",
-      test: async function () {
+      test: async () => {
         // log(methods)
         const { contractAddress, status, logs, hash } = await deployViemContract(
           context,
@@ -264,7 +264,7 @@ describeSuite({
     it({
       id: "T11",
       title: "It can sign a message",
-      test: async function () {
+      test: async () => {
         const string = "Boom Boom Lemon";
         const signature = await context.viem().signMessage({ message: string });
         const valid = await verifyMessage({ address: ALITH_ADDRESS, message: string, signature });
@@ -283,7 +283,7 @@ describeSuite({
     it({
       id: "T12",
       title: "It can calculate the gas cost of a contract interaction",
-      test: async function () {
+      test: async () => {
         const { status, contractAddress } = await deployViemContract(
           context,
           tokenAbi as Abi,
@@ -306,7 +306,7 @@ describeSuite({
     it({
       id: "T13",
       title: "It can calculate the gas cost of a simple balance transfer",
-      test: async function () {
+      test: async () => {
         const gas = await context
           .viem()
           .estimateGas({ account: ALITH_ADDRESS, to: BALTATHAR_ADDRESS, value: parseEther("1.0") });
@@ -319,7 +319,7 @@ describeSuite({
     it({
       id: "T14",
       title: "It can simulate a contract interation",
-      test: async function () {
+      test: async () => {
         const { status, contractAddress } = await deployViemContract(
           context,
           tokenAbi as Abi,
@@ -341,7 +341,7 @@ describeSuite({
     it({
       id: "T15",
       title: "It can decode an error result",
-      test: async function () {
+      test: async () => {
         const errorData =
           ("0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000" +
             "00000000000000002645524332303a207472616e7366657220616d6f756e7420657863656" +
@@ -356,7 +356,7 @@ describeSuite({
     it({
       id: "T16",
       title: "It can decode an event log",
-      test: async function () {
+      test: async () => {
         const { status, contractAddress } = await deployViemContract(
           context,
           tokenAbi as Abi,
@@ -389,7 +389,7 @@ describeSuite({
     it({
       id: "T17",
       title: "It can use different signers when creating a block",
-      test: async function () {
+      test: async () => {
         const txn = context.polkadotJs().tx.balances.transferAllowDeath(DOROTHY_ADDRESS, GLMR);
         const balBefore = (
           await context.polkadotJs().query.system.account(BALTATHAR_ADDRESS)
@@ -409,7 +409,7 @@ describeSuite({
     it({
       id: "T18",
       title: "It can use different apis",
-      test: async function () {
+      test: async () => {
         log(await context.ethers().provider?.getBalance(BALTATHAR_ADDRESS));
         expect(await context.api("ethers").provider?.getBalance(BALTATHAR_ADDRESS)).toBeGreaterThan(
           0n
@@ -420,7 +420,7 @@ describeSuite({
     it({
       id: "T19",
       title: "It has working runner functions added to context",
-      test: async function () {
+      test: async () => {
         const address1 = privateKeyToAccount(generatePrivateKey()).address;
         const address2 = privateKeyToAccount(generatePrivateKey()).address;
 
@@ -453,7 +453,7 @@ describeSuite({
     it({
       id: "T20",
       title: "It can read a precompiled contracts",
-      test: async function () {
+      test: async () => {
         const round = await context.readPrecompile!({
           precompileName: "ParachainStaking",
           functionName: "round",
@@ -467,7 +467,7 @@ describeSuite({
     it({
       id: "T21",
       title: "It can write to a precompiled contract",
-      test: async function () {
+      test: async () => {
         const allowanceBefore = (await context.readPrecompile!({
           precompileName: "NativeErc20",
           functionName: "allowance",
@@ -516,7 +516,7 @@ describeSuite({
     it({
       id: "T22",
       title: "it can read a newly deployed contract",
-      test: async function () {
+      test: async () => {
         const { contractAddress } = await context.deployContract!("ToyContract");
         log(`Deployed contract at ${contractAddress}`);
 
@@ -548,7 +548,7 @@ describeSuite({
     it({
       id: "T23",
       title: "it can interact with a contract with balance",
-      test: async function () {
+      test: async () => {
         const { contractAddress } = await context.deployContract!("ToyContract");
         const balBefore = await context.viem().getBalance({ address: contractAddress });
 
@@ -571,7 +571,7 @@ describeSuite({
     it({
       id: "T24",
       title: "it can jump 10 blocks",
-      test: async function () {
+      test: async () => {
         const block = (
           await context.polkadotJs().rpc.chain.getBlock()
         ).block.header.number.toNumber();
@@ -589,7 +589,7 @@ describeSuite({
     it({
       id: "T25",
       title: "it can jump ParachainStaking rounds",
-      test: async function () {
+      test: async () => {
         log(`This chain has parachainStaking: ${context.isParachainStaking}`);
         const round = (
           (await context.polkadotJs().query.parachainStaking.round()) as any
@@ -611,5 +611,8 @@ describeSuite({
         expect(round2).toBe(round + 1);
       },
     });
+
+
+    
   },
 });

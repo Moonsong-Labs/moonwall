@@ -8,7 +8,7 @@ describeSuite({
     it({
       id: "T01",
       title: "Passing Test",
-      test: function () {
+      test: () => {
         expect(true).to.be.true;
       },
     });
@@ -17,7 +17,7 @@ describeSuite({
       id: "T02",
       title: "Skipped test",
       modifier: "skip",
-      test: function () {
+      test: () => {
         expect(false).to.be.true;
       },
     });

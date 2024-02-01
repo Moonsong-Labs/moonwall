@@ -22,8 +22,8 @@ describeSuite({
 
     it({
       id: "C100",
-      title: `should have a recently finalized block`,
-      test: async function () {
+      title: "should have a recently finalized block",
+      test: async () => {
         const head = await api.rpc.chain.getFinalizedHead();
         const block = await api.rpc.chain.getBlock(head);
         const diff = Date.now() - getBlockTime(block);
@@ -35,7 +35,7 @@ describeSuite({
 
     it({
       id: "C200",
-      title: `should have a recent eth block`,
+      title: "should have a recent eth block",
       test: async function () {
         const specVersion = api.consts.system.version.specVersion.toNumber();
         const clientVersion = (await api.rpc.system.version()).toString().split("-")[0];
@@ -56,8 +56,7 @@ describeSuite({
     it({
       id: "C300",
       title:
-        `should have only finalized blocks in the past` +
-        ` ${(timePeriod / (1000 * 60 * 60)).toFixed(2)} hours #C300`,
+        `should have only finalized blocks in the past ${(timePeriod / (1000 * 60 * 60)).toFixed(2)} hours #C300`,
       test: async function () {
         this.timeout(timeout);
         const signedBlock = await api.rpc.chain.getBlock(await api.rpc.chain.getFinalizedHead());

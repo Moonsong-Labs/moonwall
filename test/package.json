@@ -9,6 +9,8 @@
     "clean": "rm -rf node_modules",
     "test-dev": "pnpm moonwall test 'dev_test dev_seq dev_mult'",
     "test": "pnpm moonwall test 'basic chopsticks'",
+    "lint": "pnpm biome lint ./suites",
+    "lint:fix": "pnpm biome lint ./suites --apply",
     "fmt": "biome format .",
     "fmt:fix": "biome format . --write",
     "node_test": "node --no-warnings --loader tsx --test suites/node_test/*.ts",

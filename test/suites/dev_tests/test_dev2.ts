@@ -23,7 +23,7 @@ describeSuite({
     it({
       id: "T01",
       title: "Checking that launched node can create blocks",
-      test: async function () {
+      test: async () => {
         const block = (await polkadotJs.rpc.chain.getBlock()).block.header.number.toNumber();
         await context.createBlock();
         const block2 = (await polkadotJs.rpc.chain.getBlock()).block.header.number.toNumber();
@@ -35,7 +35,7 @@ describeSuite({
       id: "T02",
       title: "Checking that substrate txns possible",
       timeout: 20000,
-      test: async function () {
+      test: async () => {
         const balanceBefore = (await polkadotJs.query.system.account(BALTATHAR_ADDRESS)).data.free;
 
         await polkadotJs.tx.balances
@@ -52,7 +52,7 @@ describeSuite({
     it({
       id: "T03",
       title: "Checking that sudo can be used",
-      test: async function () {
+      test: async () => {
         await context.createBlock();
         const tx = polkadotJs.tx.rootTesting.fillBlock(60 * 10 ** 7);
         await polkadotJs.tx.sudo.sudo(tx).signAndSend(alith);
@@ -68,7 +68,7 @@ describeSuite({
     it({
       id: "T04",
       title: "Can send Ethers txns",
-      test: async function () {
+      test: async () => {
         const balanceBefore = (await polkadotJs.query.system.account(BALTATHAR_ADDRESS)).data.free;
         await signer.sendTransaction({
           to: BALTATHAR_ADDRESS,
@@ -86,7 +86,7 @@ describeSuite({
       title: "Testing out Create block and listen for event",
       // modifier: "only",
       timeout: 30000,
-      test: async function () {
+      test: async () => {
         const expectEvents = [
           polkadotJs.events.system.ExtrinsicSuccess,
           polkadotJs.events.balances.Transfer,

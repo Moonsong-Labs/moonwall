@@ -9,7 +9,7 @@ describeSuite({
     it({
       id: "T01",
       title: "Query the chain",
-      test: async function () {
+      test: async () => {
         const currentRound = (
           await context.polkadotJs().query.parachainStaking.round()
         ).current.toNumber();

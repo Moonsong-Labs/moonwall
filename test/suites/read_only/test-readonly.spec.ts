@@ -15,7 +15,7 @@ describeSuite({
     it({
       id: "T1",
       title: "this is a block Number case",
-      test: async function (vitestContext) {
+      test: async (vitestContext) => {
         log(vitestContext);
         log(await context.ethers()!.provider!.getBlockNumber());
 
@@ -28,7 +28,7 @@ describeSuite({
     it({
       id: "T2",
       title: "this is a balance test",
-      test: async function (vitestContext) {
+      test: async (vitestContext) => {
         log(await context.ethers()!.provider!.getBalance(whale));
         log((await context.polkadotJs().query.system.account(whale)).data.free.toBigInt());
       },
@@ -37,7 +37,7 @@ describeSuite({
     it({
       id: "T3",
       title: "this is a block finalize test",
-      test: async function (vitestContext) {
+      test: async (vitestContext) => {
         log(
           await checkBlockFinalized(
             context.polkadotJs(),

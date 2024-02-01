@@ -17,7 +17,7 @@ describeSuite({
       id: "T1",
       title: "Calling chain data",
       timeout: 60000,
-      test: async function () {
+      test: async () => {
         log(`The latest block is ${(await web3.eth.getBlock("latest")).number}`);
         const bal = await web3.eth.getBalance("0x506172656E740000000000000000000000000000");
         log(web3.utils.fromWei(bal, "ether"));
@@ -28,7 +28,7 @@ describeSuite({
     it({
       id: "T2",
       title: "Calling contract methods",
-      test: async function () {
+      test: async () => {
         const address = "0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080";
         const contract = new web3.eth.Contract(xcAssetAbi, address);
         const totalSupply = Number(await contract.methods.totalSupply().call());
@@ -48,7 +48,7 @@ describeSuite({
       id: "T3",
       title: "Can wait for new block",
       timeout: 40000,
-      test: async function () {
+      test: async () => {
         const api = context.polkadotJs();
 
         const blockNum = (await api.rpc.chain.getBlock()).block.header.number.toNumber();
