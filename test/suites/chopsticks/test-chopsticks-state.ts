@@ -1,4 +1,3 @@
-import " ";
 import { describeSuite, expect, beforeAll } from "@moonwall/cli";
 import { alith } from "@moonwall/util";
 import { parseEther } from "ethers";
