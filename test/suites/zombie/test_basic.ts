@@ -99,6 +99,5 @@ describeSuite({
         await context.waitBlock(2, "parachain", "quantity");
       },
     });
-
   },
 });

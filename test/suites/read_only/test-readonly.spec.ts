@@ -41,7 +41,7 @@ describeSuite({
         log(
           await checkBlockFinalized(
             context.polkadotJs(),
-            await context.ethers().provider!.getBlockNumber() -5
+            (await context.ethers().provider!.getBlockNumber()) - 5
           )
         );
       },

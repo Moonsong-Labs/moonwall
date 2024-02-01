@@ -1,4 +1,4 @@
-import "@polkadot/api-augment";
+import " ";
 import { beforeAll, describeSuite, expect } from "@moonwall/cli";
 
 describeSuite({

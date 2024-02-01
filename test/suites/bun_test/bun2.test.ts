@@ -1,4 +1,4 @@
-import { beforeAll,expect, describe, test } from "bun:test";
+import { beforeAll, expect, describe, test } from "bun:test";
 import { setTimeout as timer } from "timers/promises";
 
 describe("B02" + "This is a timbo test suite", () => {
@@ -16,7 +16,7 @@ describe("B02" + "This is a timbo test suite", () => {
   });
 
   test("T03" + "This is a string test case", async () => {
-    await timer(1000)
+    await timer(1000);
     expect("Home is where the heart is").toContain("heart");
   });
 

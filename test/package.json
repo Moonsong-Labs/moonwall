@@ -25,7 +25,6 @@
     "@moonwall/util": "workspace:*",
     "@openzeppelin/contracts": "4.9.3",
     "@polkadot/api": "10.11.2",
-    "@polkadot/api-augment": "10.11.2",
     "@polkadot/util": "12.6.2",
     "@types/node": "20.11.5",
     "@vitest/ui": "1.2.2",

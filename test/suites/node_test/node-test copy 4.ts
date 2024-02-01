@@ -17,7 +17,7 @@ describe("B02" + "This is a timbo test suite", () => {
   });
 
   it("T03" + "This is a string test case", async () => {
-    await timer(100)
+    await timer(100);
     expect("Home is where the heart is").to.contains("heart");
   });
 

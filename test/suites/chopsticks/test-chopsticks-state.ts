@@ -1,4 +1,4 @@
-import "@polkadot/api-augment";
+import " ";
 import { describeSuite, expect, beforeAll } from "@moonwall/cli";
 import { alith } from "@moonwall/util";
 import { parseEther } from "ethers";
@@ -31,7 +31,9 @@ describeSuite({
       title: "Send a transaction ",
       test: async () => {
         const currentBalance = (await api.query.system.account(RANDOM_ADDRESS)).data.free;
-        await api.tx.balances.transferAllowDeath(RANDOM_ADDRESS, parseEther("10")).signAndSend(alith);
+        await api.tx.balances
+          .transferAllowDeath(RANDOM_ADDRESS, parseEther("10"))
+          .signAndSend(alith);
         await context.createBlock();
 
         const balanceAfter = (await api.query.system.account(RANDOM_ADDRESS)).data.free;

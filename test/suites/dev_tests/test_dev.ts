@@ -10,7 +10,7 @@ import {
   GLMR,
   alith,
   baltathar,
-  deployViemContract
+  deployViemContract,
 } from "@moonwall/util";
 import { BN } from "@polkadot/util";
 import { Wallet, parseEther } from "ethers";
@@ -29,7 +29,6 @@ import {
   verifyMessage,
 } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
-import Web3 from "web3";
 import { tokenAbi, bytecode as tokenBytecode } from "../../_test_data/token";
 
 describeSuite({
@@ -38,7 +37,6 @@ describeSuite({
   foundationMethods: "dev",
   testCases: ({ it, context, log }) => {
     let signer: Wallet;
-    let w3: Web3;
 
     beforeAll(async () => {
       signer = context.ethers();
@@ -192,7 +190,7 @@ describeSuite({
         const { status, contractAddress } = await deployViemContract(context, abi, bytecode);
 
         expect(status).to.be.toStrictEqual("success");
-        expect(contractAddress!.length).to.be.greaterThan(0);
+        expect(contractAddress.length).to.be.greaterThan(0);
       },
     });
 
@@ -205,7 +203,7 @@ describeSuite({
 
         const timbo = await context.viem().call({
           account: ALITH_ADDRESS,
-          to: contractAddress!,
+          to: contractAddress,
           value: 0n,
           data: encodeFunctionData({ abi, functionName: "multiply", args: [7n] }),
         });
@@ -233,7 +231,7 @@ describeSuite({
 
         const contractInstance = getContract({
           abi: tokenAbi as Abi,
-          address: contractAddress!,
+          address: contractAddress,
           client: {
             wallet: context.viem() as any,
             public: context.viem() as any,
@@ -246,7 +244,7 @@ describeSuite({
 
         await context.viem().writeContract({
           abi: tokenAbi as Abi,
-          address: contractAddress!,
+          address: contractAddress,
           value: 0n,
           functionName: "transfer",
           args: [BALTATHAR_ADDRESS, parseEther("2.0")],
@@ -293,7 +291,7 @@ describeSuite({
 
         const gas = await context.viem().estimateContractGas({
           abi: tokenAbi,
-          address: contractAddress!,
+          address: contractAddress,
           functionName: "transfer",
           args: [BALTATHAR_ADDRESS, parseEther("2.0")],
           account: ALITH_ADDRESS,
@@ -329,7 +327,7 @@ describeSuite({
         const { result } = await context.viem().simulateContract({
           account: ALITH_ADDRESS,
           abi: tokenAbi,
-          address: contractAddress!,
+          address: contractAddress,
           functionName: "transfer",
           args: [BALTATHAR_ADDRESS, parseEther("2.0")],
         });
@@ -349,7 +347,7 @@ describeSuite({
 
         const value = decodeErrorResult({ abi: tokenAbi, data: errorData });
 
-        expect(value.args![0]).to.contains("ERC20: transfer amount exceeds balance");
+        expect(value.args[0]).to.contains("ERC20: transfer amount exceeds balance");
       },
     });
 
@@ -366,7 +364,7 @@ describeSuite({
 
         const txHash = await context.viem().writeContract({
           abi: tokenAbi,
-          address: contractAddress!,
+          address: contractAddress,
           functionName: "transfer",
           args: [BALTATHAR_ADDRESS, parseEther("2.0")],
         });
@@ -424,7 +422,7 @@ describeSuite({
         const address1 = privateKeyToAccount(generatePrivateKey()).address;
         const address2 = privateKeyToAccount(generatePrivateKey()).address;
 
-        const rawTxn1 = await context.createTxn!({
+        const rawTxn1 = await context.createTxn?.({
           to: address1,
           value: parseEther("1.0"),
           libraryType: "ethers",
@@ -436,7 +434,7 @@ describeSuite({
 
         const balance1 = await context.viem().getBalance({ address: address1 });
         expect(balance1).toBe(GLMR);
-        const rawTxn2 = await context.createTxn!({
+        const rawTxn2 = await context.createTxn?.({
           to: address2,
           value: parseEther("1.0"),
           libraryType: "viem",
@@ -454,7 +452,7 @@ describeSuite({
       id: "T20",
       title: "It can read a precompiled contracts",
       test: async () => {
-        const round = await context.readPrecompile!({
+        const round = await context.readPrecompile?.({
           precompileName: "ParachainStaking",
           functionName: "round",
         });
@@ -468,7 +466,7 @@ describeSuite({
       id: "T21",
       title: "It can write to a precompiled contract",
       test: async () => {
-        const allowanceBefore = (await context.readPrecompile!({
+        const allowanceBefore = (await context.readPrecompile?.({
           precompileName: "NativeErc20",
           functionName: "allowance",
           args: [ALITH_ADDRESS, BALTATHAR_ADDRESS],
@@ -476,7 +474,7 @@ describeSuite({
 
         log(`Allowance of baltathar is:  ${allowanceBefore}`);
 
-        const tx = await context.writePrecompile!({
+        const tx = await context.writePrecompile?.({
           precompileName: "NativeErc20",
           functionName: "approve",
           args: [BALTATHAR_ADDRESS, GLMR],
@@ -485,7 +483,7 @@ describeSuite({
 
         await context.createBlock();
 
-        const allowanceAfter = (await context.readPrecompile!({
+        const allowanceAfter = (await context.readPrecompile?.({
           precompileName: "NativeErc20",
           functionName: "allowance",
           args: [ALITH_ADDRESS, BALTATHAR_ADDRESS],
@@ -493,7 +491,7 @@ describeSuite({
         log(`Allowance of baltathar is:  ${allowanceAfter}`);
         expect(allowanceAfter - allowanceBefore).toBe(GLMR);
 
-        const rawTx = await context.writePrecompile!({
+        const rawTx = await context.writePrecompile?.({
           precompileName: "NativeErc20",
           functionName: "approve",
           rawTxOnly: true,
@@ -503,7 +501,7 @@ describeSuite({
 
         await context.createBlock(rawTx);
 
-        const allowanceFinal = (await context.readPrecompile!({
+        const allowanceFinal = (await context.readPrecompile?.({
           precompileName: "NativeErc20",
           functionName: "allowance",
           args: [ALITH_ADDRESS, BALTATHAR_ADDRESS],
@@ -517,17 +515,17 @@ describeSuite({
       id: "T22",
       title: "it can read a newly deployed contract",
       test: async () => {
-        const { contractAddress } = await context.deployContract!("ToyContract");
+        const { contractAddress } = await context.deployContract?.("ToyContract");
         log(`Deployed contract at ${contractAddress}`);
 
-        const value = await context.readContract!({
+        const value = await context.readContract?.({
           contractName: "ToyContract",
           contractAddress,
           functionName: "value",
         });
         log(`Value is ${value}`);
         expect(value).toBe(5n);
-        await context.writeContract!({
+        await context.writeContract?.({
           contractName: "ToyContract",
           contractAddress,
           functionName: "setter",
@@ -535,7 +533,7 @@ describeSuite({
         });
         await context.createBlock();
 
-        const value2 = await context.readContract!({
+        const value2 = await context.readContract?.({
           contractName: "ToyContract",
           contractAddress,
           functionName: "value",
@@ -552,7 +550,7 @@ describeSuite({
         const { contractAddress } = await context.deployContract!("ToyContract");
         const balBefore = await context.viem().getBalance({ address: contractAddress });
 
-        await context.writeContract!({
+        await context.writeContract?.({
           contractName: "ToyContract",
           contractAddress,
           functionName: "acceptBalance",
@@ -576,7 +574,7 @@ describeSuite({
           await context.polkadotJs().rpc.chain.getBlock()
         ).block.header.number.toNumber();
 
-        await context.jumpBlocks!(10);
+        await context.jumpBlocks?.(10);
 
         const block2 = (
           await context.polkadotJs().rpc.chain.getBlock()
@@ -599,7 +597,7 @@ describeSuite({
           await context.polkadotJs().rpc.chain.getBlock()
         ).block.header.number.toNumber();
 
-        await context.jumpRounds!(1);
+        await context.jumpRounds?.(1);
         const round2 = (
           (await context.polkadotJs().query.parachainStaking.round()) as any
         ).current.toNumber();
@@ -612,7 +610,34 @@ describeSuite({
       },
     });
 
+    it({
+      id: "T26",
+      title: "it can fast-forward an openGov proposal",
+      modifier: "only",
+      test: async () => {
+        log("Test test");
 
-    
+        const value = (await context.pjsApi.query.parachainSystem.authorizedUpgrade()).isNone;
+
+        log(value);
+
+        // Construct a ext
+        // Note preimage oif it
+
+        // Construct dispatchWhiteListed call
+        // Note preimage of it
+
+        // Submit openGov proposal
+        // Place decision deposit
+
+        // Submit OpenTechCommittee proposal to whitelist call
+        // Vote on it and close
+
+        // Vote with a lot of support on first proposal
+        // Fast-forward to next round
+
+        // Check that ext has been executed
+      },
+    });
   },
 });

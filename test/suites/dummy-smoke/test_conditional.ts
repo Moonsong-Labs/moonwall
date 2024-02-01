@@ -1,6 +1,6 @@
 import { describeSuite, expect, beforeAll } from "@moonwall/cli";
 import { ApiPromise } from "@polkadot/api";
-import "@polkadot/api-augment";
+import " ";
 
 describeSuite({
   id: "R01",

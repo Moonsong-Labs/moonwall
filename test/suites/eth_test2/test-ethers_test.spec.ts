@@ -69,7 +69,5 @@ describeSuite({
         expect(totalSupply > 0).to.be.true;
       },
     });
-
-    
   },
 });

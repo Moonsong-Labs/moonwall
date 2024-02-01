@@ -369,7 +369,7 @@ importers:
       '@polkadot/api':
         specifier: 10.11.2
         version: 10.11.2
-      '@polkadot/api-augment':
+      ' ':
         specifier: 10.11.2
         version: 10.11.2
       '@polkadot/util':
@@ -551,7 +551,7 @@ packages:
       '@acala-network/chopsticks-core': 0.9.7
       '@acala-network/chopsticks-db': 0.9.7
       '@pnpm/npm-conf': 2.2.2
-      '@polkadot/api-augment': 10.11.2
+      ' ': 10.11.2
       '@polkadot/types': 10.11.2
       '@polkadot/util': 12.6.2
       '@polkadot/util-crypto': 12.6.2(@polkadot/util@12.6.2)
@@ -595,7 +595,7 @@ packages:
       '@acala-network/chopsticks-core': 0.9.8
       '@acala-network/chopsticks-db': 0.9.8
       '@pnpm/npm-conf': 2.2.2
-      '@polkadot/api-augment': 10.11.2
+      ' ': 10.11.2
       '@polkadot/types': 10.11.2
       '@polkadot/util': 12.6.2
       '@polkadot/util-crypto': 12.6.2(@polkadot/util@12.6.2)
@@ -1932,7 +1932,7 @@ packages:
   /@polka/url@1.0.0-next.24:
     resolution: {integrity: sha512-2LuNTFBIO0m7kKIQvvPHN6UE63VjpmL9rnEEaOOaiSPbZK+zUOYIzBAWcED+3XYzhYsd/0mD57VdxAEqqV52CQ==}
 
-  /@polkadot/api-augment@10.11.2:
+  / @10.11.2:
     resolution: {integrity: sha512-PTpnqpezc75qBqUtgrc0GYB8h9UHjfbHSRZamAbecIVAJ2/zc6CqtnldeaBlIu1IKTgBzi3FFtTyYu+ZGbNT2Q==}
     engines: {node: '>=18'}
     dependencies:
@@ -1967,7 +1967,7 @@ packages:
     engines: {node: '>=18'}
     dependencies:
       '@polkadot/api': 10.11.2
-      '@polkadot/api-augment': 10.11.2
+      ' ': 10.11.2
       '@polkadot/api-base': 10.11.2
       '@polkadot/rpc-core': 10.11.2
       '@polkadot/types': 10.11.2
@@ -1985,7 +1985,7 @@ packages:
     resolution: {integrity: sha512-AorCZxCWCoTtdbl4DPUZh+ACe/pbLIS1BkdQY0AFJuZllm0x/yWzjgampcPd5jQAA/O3iKShRBkZqj6Mk9yG/A==}
     engines: {node: '>=18'}
     dependencies:
-      '@polkadot/api-augment': 10.11.2
+      ' ': 10.11.2
       '@polkadot/api-base': 10.11.2
       '@polkadot/api-derive': 10.11.2
       '@polkadot/keyring': 12.6.2(@polkadot/util-crypto@12.6.2)(@polkadot/util@12.6.2)

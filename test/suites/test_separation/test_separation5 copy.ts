@@ -2,7 +2,7 @@ import { describeSuite, expect, beforeAll } from "@moonwall/cli";
 import { alith } from "@moonwall/util";
 import { parseEther } from "ethers";
 import { ApiPromise } from "@polkadot/api";
-import "@polkadot/api-augment";
+import " ";
 
 describeSuite({
   id: "D51",
