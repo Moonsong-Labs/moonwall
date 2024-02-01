@@ -1,5 +1,13 @@
 import "@moonbeam-network/api-augment";
-import { beforeAll, describeSuite, expect, fetchCompiledContract } from "@moonwall/cli";
+import {
+  beforeAll,
+  describeSuite,
+  expect,
+  extractInfo,
+  fetchCompiledContract,
+  filterAndApply,
+  notePreimage,
+} from "@moonwall/cli";
 import {
   ALITH_ADDRESS,
   ALITH_PRIVATE_KEY,
@@ -11,6 +19,7 @@ import {
   alith,
   baltathar,
   deployViemContract,
+  faith,
 } from "@moonwall/util";
 import { BN } from "@polkadot/util";
 import { Wallet, parseEther } from "ethers";
@@ -614,21 +623,65 @@ describeSuite({
       title: "it can fast-forward an openGov proposal",
       modifier: "only",
       test: async () => {
-        log("Test test");
-
         const value = (await context.pjsApi.query.parachainSystem.authorizedUpgrade()).isNone;
-
-        log(value);
+        expect(value, "parachainSystem.authorizedUpgrade should be empty to begin with").toBe(true);
 
         // Construct a ext
-        // Note preimage oif it
+        const extrinsicCall = context.pjsApi.tx.parachainSystem.authorizeUpgrade(
+          "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+          false
+        );
+
+        // Note preimage if it
+        const originalPreImage = await notePreimage(context, extrinsicCall);
+        const originalPreImageLen = extrinsicCall.encodedLength;
+        log(`Extrinsic preimage noted: ${originalPreImage}`);
 
         // Construct dispatchWhiteListed call
+        const dispatchWLCall = context.pjsApi.tx.whitelist.dispatchWhitelistedCall(
+          originalPreImage,
+          originalPreImageLen,
+          {
+            refTime: 2_000_000_000,
+            proofSize: 100_000,
+          }
+        );
+
         // Note preimage of it
+        const wLPreimage = await notePreimage(context, dispatchWLCall);
+        const wLPreimageLen = dispatchWLCall.encodedLength;
+        log(`DispatchWhitelistedCall preimage noted: ${wLPreimage}`);
 
         // Submit openGov proposal
-        // Place decision deposit
+        const proposal = await context.pjsApi.tx.referenda
+          .submit(
+            {
+              Origins: { whitelistedcaller: "WhitelistedCaller" },
+            },
+            { Lookup: { hash: wLPreimage, len: wLPreimageLen } },
+            { After: { After: 100 } }
+          )
+          .signAsync(faith);
+        const { result } = await context.createBlock(proposal);
 
+        if (!result?.events) {
+          throw new Error("No events in block");
+        }
+        let proposalId: number | undefined;
+
+        filterAndApply(result.events, "referenda", ["Submitted"], (found) => {
+          proposalId = (found.event as any).data.index.toNumber();
+        });
+
+        if (typeof proposalId === "undefined") {
+          throw new Error("No proposal id found");
+        }
+
+        log(`Refendum submitted with proposal id: ${proposalId}`);
+
+        // Place decision deposit
+        await context.createBlock(context.pjsApi.tx.referenda.placeDecisionDeposit(proposalId));
+        
         // Submit OpenTechCommittee proposal to whitelist call
         // Vote on it and close
 
