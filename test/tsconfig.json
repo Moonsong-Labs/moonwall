@@ -1,8 +1,8 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "types": ["bun-types", "node"]
+    "types": [ "node"]
   },
-  "exclude": ["**/dist/**", "./packages/*/*.d.ts", "./packages/*/*.d.cts", "node_modules"],
-  "include": ["suites"]
+  // "exclude": ["**/dist/**", "./packages/*/*.d.ts", "./packages/*/*.d.cts", "node_modules"],
+  "exclude": ["node_modules", "suites"]
 }

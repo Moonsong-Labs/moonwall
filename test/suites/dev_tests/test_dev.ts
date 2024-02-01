@@ -40,7 +40,6 @@ describeSuite({
 
     beforeAll(async () => {
       signer = context.ethers();
-      w3 = context.web3();
     });
 
     it({

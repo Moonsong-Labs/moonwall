@@ -369,9 +369,6 @@ importers:
       '@polkadot/api':
         specifier: 10.11.2
         version: 10.11.2
-      ' ':
-        specifier: 10.11.2
-        version: 10.11.2
       '@polkadot/util':
         specifier: 12.6.2
         version: 12.6.2
@@ -381,9 +378,6 @@ importers:
       '@vitest/ui':
         specifier: 1.2.2
         version: 1.2.2(vitest@1.2.2)
-      bun-types:
-        specifier: 1.0.25
-        version: 1.0.25
       chai:
         specifier: 5.0.0
         version: 5.0.0
@@ -419,6 +413,22 @@ importers:
         version: 17.7.2
 
 packages:
+
+  / @10.11.2:
+    resolution: {integrity: sha512-PTpnqpezc75qBqUtgrc0GYB8h9UHjfbHSRZamAbecIVAJ2/zc6CqtnldeaBlIu1IKTgBzi3FFtTyYu+ZGbNT2Q==}
+    engines: {node: '>=18'}
+    dependencies:
+      '@polkadot/api-base': 10.11.2
+      '@polkadot/rpc-augment': 10.11.2
+      '@polkadot/types': 10.11.2
+      '@polkadot/types-augment': 10.11.2
+      '@polkadot/types-codec': 10.11.2
+      '@polkadot/util': 12.6.2
+      tslib: 2.6.2
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - utf-8-validate
 
   /@acala-network/chopsticks-core@0.9.7:
     resolution: {integrity: sha512-pUJ7rk9YvRELPZtU9N4mk6DjFD7Z70r1ukiUM1pB7m7wDVM1Erd5mKdI62J9BiakmrJ37lZgHyWtdOSl27YRKg==}
@@ -548,10 +558,11 @@ packages:
     resolution: {integrity: sha512-sthat3RSi6Kg3r5uLesEC1u2nxUdDWrlVKamWHNbihQ/Vrm/wFXTPuuHO59j0STj9hM3CtZHEWa/gOemuj1S8A==}
     hasBin: true
     dependencies:
+      ' ': 10.11.2
       '@acala-network/chopsticks-core': 0.9.7
       '@acala-network/chopsticks-db': 0.9.7
       '@pnpm/npm-conf': 2.2.2
-      ' ': 10.11.2
+      '@polkadot/api-augment': 10.11.2
       '@polkadot/types': 10.11.2
       '@polkadot/util': 12.6.2
       '@polkadot/util-crypto': 12.6.2(@polkadot/util@12.6.2)
@@ -592,10 +603,11 @@ packages:
     resolution: {integrity: sha512-ZasjzOQBFmIVXqt6KQFq4/AXx+hGM7JFK+R1tg4PmTMM9O8tAGZdEiHbdDRRB3LxxDNtwoJLQle/f+VkQcrcgQ==}
     hasBin: true
     dependencies:
+      ' ': 10.11.2
       '@acala-network/chopsticks-core': 0.9.8
       '@acala-network/chopsticks-db': 0.9.8
       '@pnpm/npm-conf': 2.2.2
-      ' ': 10.11.2
+      '@polkadot/api-augment': 10.11.2
       '@polkadot/types': 10.11.2
       '@polkadot/util': 12.6.2
       '@polkadot/util-crypto': 12.6.2(@polkadot/util@12.6.2)
@@ -1932,7 +1944,7 @@ packages:
   /@polka/url@1.0.0-next.24:
     resolution: {integrity: sha512-2LuNTFBIO0m7kKIQvvPHN6UE63VjpmL9rnEEaOOaiSPbZK+zUOYIzBAWcED+3XYzhYsd/0mD57VdxAEqqV52CQ==}
 
-  / @10.11.2:
+  /@polkadot/api-augment@10.11.2:
     resolution: {integrity: sha512-PTpnqpezc75qBqUtgrc0GYB8h9UHjfbHSRZamAbecIVAJ2/zc6CqtnldeaBlIu1IKTgBzi3FFtTyYu+ZGbNT2Q==}
     engines: {node: '>=18'}
     dependencies:
@@ -1966,8 +1978,9 @@ packages:
     resolution: {integrity: sha512-m3BQbPionkd1iSlknddxnL2hDtolPIsT+aRyrtn4zgMRPoLjHFmTmovvg8RaUyYofJtZeYrnjMw0mdxiSXx7eA==}
     engines: {node: '>=18'}
     dependencies:
-      '@polkadot/api': 10.11.2
       ' ': 10.11.2
+      '@polkadot/api': 10.11.2
+      '@polkadot/api-augment': 10.11.2
       '@polkadot/api-base': 10.11.2
       '@polkadot/rpc-core': 10.11.2
       '@polkadot/types': 10.11.2
@@ -1986,6 +1999,7 @@ packages:
     engines: {node: '>=18'}
     dependencies:
       ' ': 10.11.2
+      '@polkadot/api-augment': 10.11.2
       '@polkadot/api-base': 10.11.2
       '@polkadot/api-derive': 10.11.2
       '@polkadot/keyring': 12.6.2(@polkadot/util-crypto@12.6.2)(@polkadot/util@12.6.2)
@@ -3457,14 +3471,6 @@ packages:
     dependencies:
       base64-js: 1.5.1
       ieee754: 1.2.1
-
-  /bun-types@1.0.25:
-    resolution: {integrity: sha512-9lxeUR/OJsvlZH4GOWteiAdx7ikrSxCUX7Rr0JJux+DrR3LejouVLxIZnTeQ3UPAZovvSgKivWeHPJ2wlo7/Kg==}
-    dependencies:
-      '@types/node': 20.11.5
-      '@types/ws': 8.5.10
-      undici-types: 5.28.2
-    dev: true
 
   /bundle-require@4.0.2(esbuild@0.19.8):
     resolution: {integrity: sha512-jwzPOChofl67PSTW2SGubV9HBQAhhR2i6nskiOThauo9dzwDUgOWQScFVaJkjEfYX+UXiD+LEx8EblQMc2wIag==}
@@ -7734,10 +7740,6 @@ packages:
 
   /undici-types@5.26.5:
     resolution: {integrity: sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==}
-
-  /undici-types@5.28.2:
-    resolution: {integrity: sha512-W71OLwDqzIO0d3k07qg1xc7d4cX8SsSwuCO4bQ4V7ITwduXXie/lcImofabP5VV+NvuvSe8ovKvHVJcizVc1JA==}
-    dev: true
 
   /unique-filename@1.1.1:
     resolution: {integrity: sha512-Vmp0jIp2ln35UTXuryvjzkjGdRyf9b2lTXuSYUiPmzRcl3FDtYqAwOnTJkAngD9SWhnoJzDbTKwaOrZ+STtxNQ==}
