@@ -1,7 +1,7 @@
 ## Description
 ![moonwall](./moonwall.png)
 
-Test framework for testing on Moonbeam, Moonriver and more
+Moonwall is a comprehensive blockchain test framework for Substrate-based networks
 
 ## Installation
 
@@ -28,10 +28,10 @@ import { ALITH_ADDRESS } from "@moonwall/util";
 
 ## Functions
 
-- Init: Generates a new config file.
-- Run: Runs a network.
-- Test: Executes tests, and runs a network if neccesary.
-- Download: Gets node binaries for polkadot, moonbeam from GH.
+1. Execute Script: Run scripts placed in your config defined script directory.
+2. Network Launcher & Toolbox: Launch network, access tools: tail logs, interactive tests etc.
+3. Test Suite Execution: Run automated tests, start network if needed.
+4. Artifact Downloader: Fetch artifacts (x86) from GitHub repos.
 
 > :information_source: Use `--help` for more information about arguments for each command
 
