@@ -12,7 +12,6 @@
     "noEmit": true,
     "allowImportingTsExtensions": true,
     "moduleDetection": "force",
-    "incremental": true,
     "importHelpers": true,
     "skipDefaultLibCheck": true,
     "preserveConstEnums": true,

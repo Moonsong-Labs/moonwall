@@ -151,7 +151,7 @@ describeSuite({
         );
 
         expect(
-          result!.events.find((evt) =>
+          result?.events.find((evt) =>
             context.polkadotJs().events.system.ExtrinsicFailed.is(evt.event)
           ),
           "No Event found in block"
