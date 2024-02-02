@@ -630,7 +630,6 @@ describeSuite({
     it({
       id: "T26",
       title: "it can fast execute an openGov proposal",
-      modifier: "only",
       test: async () => {
         const value = (await context.pjsApi.query.parachainSystem.authorizedUpgrade()).isNone;
         expect(value, "parachainSystem.authorizedUpgrade should be empty to begin with").toBe(true);
