@@ -5,7 +5,16 @@ import { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types";
 import { KeyringPair } from "@polkadot/keyring/types";
 import { PalletDemocracyReferendumInfo } from "@polkadot/types/lookup";
 import { blake2AsHex } from "@polkadot/util-crypto";
-import { alith, baltathar, charleth, dorothy, ethan, faith, filterAndApply } from "@moonwall/util";
+import {
+  GLMR,
+  alith,
+  baltathar,
+  charleth,
+  dorothy,
+  ethan,
+  faith,
+  filterAndApply,
+} from "@moonwall/util";
 import { DevModeContext } from "@moonwall/types";
 import { fastFowardToNextEvent } from "../internal/foundations/devModeHelpers";
 
@@ -469,9 +478,120 @@ export const execTechnicalCommitteeProposal = async <
   return closeResult;
 };
 
+export const executeOpenTechCommitteeProposal = async (api: ApiPromise, encodedHash: string) => {
+  let nonce = (await api.rpc.system.accountNextIndex(alith.address)).toNumber();
+  // const referendumNextIndex = (await api.query.referenda.referendumCount()).toNumber();
+  const voteAmount = 1_000_000n * GLMR;
+
+  const queryPreimage = await api.query.preimage.requestStatusFor(encodedHash);
+  if (queryPreimage.isNone) {
+    throw new Error("Preimage not found");
+  }
+
+  process.stdout.write(`Sending proposal + vote for ${encodedHash}...`);
+
+  // Noting new preimage to dispatchWhiteList
+  const proposalLen = queryPreimage.unwrap().asUnrequested.len;
+  const dispatchCallHex = api.tx.whitelist
+    .dispatchWhitelistedCall(encodedHash, proposalLen, {
+      refTime: 2_000_000_000,
+      proofSize: 100_000,
+    })
+    .method.toHex();
+  const dispatchCallPreimageHash = blake2AsHex(dispatchCallHex);
+
+  await api.tx.preimage.notePreimage(dispatchCallHex).signAndSend(charleth);
+
+  const queryDispatchPreimage = await api.query.preimage.requestStatusFor(dispatchCallPreimageHash);
+
+  if (queryDispatchPreimage.isNone) {
+    throw new Error("Dispatch preimage not found");
+  }
+
+  const dispatchCallPreimageLen = queryDispatchPreimage.unwrap().asUnrequested.len;
+
+  // Raising new proposal to OpenGov under whitelisted track
+  await api.tx.referenda
+    .submit(
+      {
+        Origins: { whitelistedcaller: "WhitelistedCaller" },
+      },
+      { Lookup: { hash: dispatchCallPreimageHash, len: dispatchCallPreimageLen } },
+      { After: { After: 0 } }
+    )
+    .signAsync(charleth);
+
+  // Opening Proposal to whiteList
+  await api.tx.openTechCommitteeCollective
+    .propose(2, api.tx.whitelist.whitelistCall(encodedHash), 100)
+    .signAndSend(alith);
+  const openTechProposal = (await api.query.openTechCommitteeCollective.proposals()).at(-1)
+
+  if (!openTechProposal || openTechProposal?.isEmpty){
+    throw new Error("OpenTechProposal not found")
+  }
+
+  // Voting on openTech proposal
+  await Promise.all([
+    api.tx.openTechCommitteeCollective.vote(openTechProposal,)
+  ])
+
+  // Closing openTech proposal
+
+  // Voting on referendum with lots of money
+
+  // Waiting one million years for the referendum to be enacted
+
+  await Promise.all([
+    api.tx.openTechCommitteeCollective
+      .propose(2, encodedHash, 100)
+      .signAndSend(alith, { nonce: nonce++ }),
+    api.tx.openTechCommitteeCollective
+      .vote(
+        referendumNextIndex,
+
+        true
+      )
+      .signAndSend(alith, { nonce: nonce++ }),
+    api.tx.openTechCommitteeCollective
+      .vote(referendumNextIndex, true)
+      .signAndSend(alith, { nonce: nonce++ }),
+    api.tx.openTechCommitteeCollective
+      .close(referendumNextIndex, {
+        Standard: {
+          balance: voteAmount,
+          vote: { aye: true, conviction: 1 },
+        },
+      })
+      .signAndSend(alith, { nonce: nonce++ }),
+  ]);
+  process.stdout.write("✅\n");
+
+  process.stdout.write(`Waiting for referendum [${referendumNextIndex}] to be executed...`);
+  let referenda: PalletDemocracyReferendumInfo | undefined;
+  while (!referenda) {
+    try {
+      referenda = (
+        (await api.query.democracy.referendumInfoOf.entries()).find(
+          (ref: any) =>
+            ref[1].unwrap().isFinished &&
+            (api.registry.createType("u32", ref[0].toU8a().slice(-4)) as any).toNumber() ===
+              referendumNextIndex
+        )?.[1] as any
+      ).unwrap();
+    } catch {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+  }
+  process.stdout.write(`${referenda.asFinished.approved ? "✅" : "❌"} \n`);
+  if (!referenda.asFinished.approved) {
+    throw new Error("Finished Referendum was not approved");
+  }
+};
+
 export const executeProposalWithCouncil = async (api: ApiPromise, encodedHash: string) => {
   let nonce = (await api.rpc.system.accountNextIndex(alith.address)).toNumber();
-  const referendumNextIndex = ((await api.query.democracy.referendumCount()) as any).toNumber();
+  const referendumNextIndex = (await api.query.democracy.referendumCount()).toNumber();
 
   // process.stdout.write(
   //   `Sending council motion (${encodedHash} ` +

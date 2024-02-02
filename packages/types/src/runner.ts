@@ -164,7 +164,7 @@ export type GenericTestContext = ITestContext<GenericContext>;
  * @property runtimeTag - The tag of the runtime.
  * @property from - The KeyringPair to be used for the upgrade.
  * @property waitMigration - A flag to indicate whether to wait for migration.
- * @property useGovernance - A flag to indicate whether to use governance for the upgrade.
+ * @property upgradeMethod - Specifies which upgrade method to use: "Governance", "WhiteListedCaller", "Sudo" (default).
  * @property localPath - The local path for the runtime.
  * @property logger - The debugger instance for logging.
  */
@@ -173,7 +173,7 @@ export interface UpgradePreferences {
   runtimeTag?: "local" | string;
   from?: KeyringPair;
   waitMigration?: boolean;
-  useGovernance?: boolean;
+  upgradeMethod?: "Governance" | "WhiteListedCaller" | "Sudo";
   localPath?: string;
   logger?: Debugger;
 }
