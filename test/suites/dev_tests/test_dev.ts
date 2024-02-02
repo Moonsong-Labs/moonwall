@@ -3,9 +3,9 @@ import {
   beforeAll,
   describeSuite,
   expect,
-  extractInfo,
   fetchCompiledContract,
   filterAndApply,
+  maximizeConvictionVotingOf,
   notePreimage,
 } from "@moonwall/cli";
 import {
@@ -19,6 +19,7 @@ import {
   alith,
   baltathar,
   deployViemContract,
+  ethan,
   faith,
 } from "@moonwall/util";
 import { BN } from "@polkadot/util";
@@ -355,7 +356,7 @@ describeSuite({
 
         const value = decodeErrorResult({ abi: tokenAbi, data: errorData });
 
-        expect(value.args[0]).to.contains("ERC20: transfer amount exceeds balance");
+        expect(value.args?.[0]).to.contains("ERC20: transfer amount exceeds balance");
       },
     });
 
@@ -438,7 +439,7 @@ describeSuite({
 
         await context.createBlock(rawTxn1);
         log(`Raw generated txn1 is ${rawTxn1}`);
-        expect(rawTxn1.length).toBeGreaterThan(2);
+        expect(rawTxn1?.length).toBeGreaterThan(2);
 
         const balance1 = await context.viem().getBalance({ address: address1 });
         expect(balance1).toBe(GLMR);
@@ -449,7 +450,7 @@ describeSuite({
         });
         await context.createBlock(rawTxn2);
         log(`Raw generated txn2 is ${rawTxn2}`);
-        expect(rawTxn2.length).toBeGreaterThan(2);
+        expect(rawTxn2?.length).toBeGreaterThan(2);
 
         const balance2 = await context.viem().getBalance({ address: address2 });
         expect(balance2).toBe(GLMR);
@@ -523,7 +524,13 @@ describeSuite({
       id: "T22",
       title: "it can read a newly deployed contract",
       test: async () => {
-        const { contractAddress } = await context.deployContract?.("ToyContract");
+        const result = await context.deployContract?.("ToyContract");
+        if (!result) {
+          throw new Error("No result");
+        }
+
+        const contractAddress = result.contractAddress;
+
         log(`Deployed contract at ${contractAddress}`);
 
         const value = await context.readContract?.({
@@ -620,7 +627,7 @@ describeSuite({
 
     it({
       id: "T26",
-      title: "it can fast-forward an openGov proposal",
+      title: "it can fast execute an openGov proposal",
       modifier: "only",
       test: async () => {
         const value = (await context.pjsApi.query.parachainSystem.authorizedUpgrade()).isNone;
@@ -634,8 +641,12 @@ describeSuite({
 
         // Note preimage if it
         const originalPreImage = await notePreimage(context, extrinsicCall);
-        const originalPreImageLen = extrinsicCall.encodedLength;
-        log(`Extrinsic preimage noted: ${originalPreImage}`);
+        const originalPreImageLen = extrinsicCall.encodedLength - 2;
+        log(
+          `Extrinsic preimage noted: ${originalPreImage.slice(0, 6)}...${originalPreImage.slice(
+            -4
+          )}, len: ${originalPreImageLen}`
+        );
 
         // Construct dispatchWhiteListed call
         const dispatchWLCall = context.pjsApi.tx.whitelist.dispatchWhitelistedCall(
@@ -649,8 +660,13 @@ describeSuite({
 
         // Note preimage of it
         const wLPreimage = await notePreimage(context, dispatchWLCall);
-        const wLPreimageLen = dispatchWLCall.encodedLength;
-        log(`DispatchWhitelistedCall preimage noted: ${wLPreimage}`);
+        const wLPreimageLen = dispatchWLCall.encodedLength - 2;
+        log(
+          `DispatchWhitelistedCall preimage noted: ${wLPreimage.slice(
+            0,
+            6
+          )}...${originalPreImage.slice(-4)}, len: ${wLPreimageLen}`
+        );
 
         // Submit openGov proposal
         const proposal = await context.pjsApi.tx.referenda
@@ -659,7 +675,7 @@ describeSuite({
               Origins: { whitelistedcaller: "WhitelistedCaller" },
             },
             { Lookup: { hash: wLPreimage, len: wLPreimageLen } },
-            { After: { After: 100 } }
+            { After: { After: 0 } }
           )
           .signAsync(faith);
         const { result } = await context.createBlock(proposal);
@@ -667,8 +683,8 @@ describeSuite({
         if (!result?.events) {
           throw new Error("No events in block");
         }
-        let proposalId: number | undefined;
 
+        let proposalId: number | undefined;
         filterAndApply(result.events, "referenda", ["Submitted"], (found) => {
           proposalId = (found.event as any).data.index.toNumber();
         });
@@ -681,14 +697,117 @@ describeSuite({
 
         // Place decision deposit
         await context.createBlock(context.pjsApi.tx.referenda.placeDecisionDeposit(proposalId));
-        
+
         // Submit OpenTechCommittee proposal to whitelist call
+        const whitelistCall = context.pjsApi.tx.whitelist
+          .whitelistCall(originalPreImage)
+          .method.toHex();
+        const openTechCommitteeProposal = context.pjsApi.tx.openTechCommitteeCollective.propose(
+          2,
+          whitelistCall,
+          100
+        );
+        const { result: result2 } = await context.createBlock(openTechCommitteeProposal, {
+          signer: alith,
+        });
+        if (!result2?.events) {
+          throw new Error("No events in block");
+        }
+
+        let openTechProposal: `0x${string}` | undefined;
+        let openTechProposalIndex: number | undefined;
+        filterAndApply(result2.events, "openTechCommitteeCollective", ["Proposed"], (found) => {
+          openTechProposalIndex = (found.event as any).data.proposalIndex.toNumber();
+          openTechProposal = (found.event as any).data.proposalHash.toHex();
+        });
+
+        if (
+          typeof openTechProposal === "undefined" ||
+          typeof openTechProposalIndex === "undefined"
+        ) {
+          throw new Error("Error submitting OpenTechCommittee proposal");
+        }
+
+        log(
+          `OpenTechCommittee proposal submitted with proposal id: ${openTechProposalIndex} and hash: ${openTechProposal.slice(
+            0,
+            6
+          )}...${openTechProposal.slice(-4)}`
+        );
+
         // Vote on it and close
+        const alithNonce = (
+          await context.pjsApi.query.system.account(alith.address)
+        ).nonce.toNumber();
+        const alithVote = context.pjsApi.tx.openTechCommitteeCollective
+          .vote(openTechProposal, openTechProposalIndex, true)
+          .signAsync(alith, { nonce: alithNonce });
+        const baltatharVote = context.pjsApi.tx.openTechCommitteeCollective
+          .vote(openTechProposal, openTechProposalIndex, true)
+          .signAsync(baltathar, { nonce: -1 });
+        const closeProposal = context.pjsApi.tx.openTechCommitteeCollective
+          .close(
+            openTechProposal,
+            openTechProposalIndex,
+            {
+              refTime: 2_000_000_000,
+              proofSize: 100_000,
+            },
+            100
+          )
+          .signAsync(alith, { nonce: alithNonce + 1 });
+
+        await context.createBlock([alithVote, baltatharVote, closeProposal]);
+
+        const isWhitelisted = (
+          await context.pjsApi.query.whitelist.whitelistedCall(originalPreImage)
+        ).isSome;
+
+        if (!isWhitelisted) {
+          throw new Error("Whitelisted procedure failed");
+        }
 
         // Vote with a lot of support on first proposal
+        await maximizeConvictionVotingOf(context, [ethan], proposalId);
+        await context.createBlock();
+
         // Fast-forward to next round
 
+        const fastFowardToNextEvent = async () => {
+          const [entry] = await context.pjsApi.query.scheduler.agenda.entries();
+          const [key, _] = entry;
+          if (key.isEmpty) {
+            throw new Error("No items in scheduler.agenda");
+          }
+          const desiredHeight = Number(key.toHuman());
+          const currentHeight = (await context.pjsApi.rpc.chain.getHeader()).number.toNumber();
+
+          log(
+            `Current height: ${currentHeight}, desired height: ${desiredHeight}, jumping ${
+              desiredHeight - currentHeight + 1
+            } blocks`
+          );
+          await context.jumpBlocks?.(desiredHeight - currentHeight + 1);
+        };
+        // Fastforward until preparation done
+        await fastFowardToNextEvent();
+
+        // Fastforward until proposal confirmed
+        await fastFowardToNextEvent();
+
+        // Fastforward until proposal enacted
+        await fastFowardToNextEvent();
+
         // Check that ext has been executed
+        const postStatus = (await context.pjsApi.query.parachainSystem.authorizedUpgrade()).isNone;
+        expect(postStatus).toBe(false);
+
+        expect(
+          (await context.pjsApi.query.parachainSystem.authorizedUpgrade())
+            .unwrap()
+            .codeHash.toHex()
+            .toLowerCase()
+        ).toBe("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
       },
     });
   },
