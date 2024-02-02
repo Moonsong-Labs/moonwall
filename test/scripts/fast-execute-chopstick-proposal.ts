@@ -33,7 +33,7 @@ async function moveScheduledCallTo(
   verifier: (call: FrameSupportPreimagesBounded) => boolean
 ) {
   const blockNumber = (await api.rpc.chain.getHeader()).number.toNumber();
-  // Fast forward the nudge referendum to the next block to get the refendum to be scheduled
+  // Fast forward the nudge referendum to the next block to get the referendum to be scheduled
   const agenda = await api.query.scheduler.agenda.entries();
   let found = false;
   for (const agendaEntry of agenda) {
@@ -178,12 +178,12 @@ const main = async () => {
   let fastProposal;
   try {
     fastProposal = api.registry.createType(
-      `Option<PalletReferendaReferendumInfo>`,
+      "Option<PalletReferendaReferendumInfo>",
       fastProposalData
     );
   } catch {
     fastProposal = api.registry.createType(
-      `Option<PalletReferendaReferendumInfoConvictionVotingTally>`,
+      "Option<PalletReferendaReferendumInfoConvictionVotingTally>",
       fastProposalData
     );
   }
@@ -195,7 +195,7 @@ const main = async () => {
   );
   const result = await api.rpc("dev_setStorage", [[referendumKey, fastProposal.toHex()]]);
 
-  // Fast forward the nudge referendum to the next block to get the refendum to be scheduled
+  // Fast forward the nudge referendum to the next block to get the Referendum to be scheduled
   console.log(
     `${chalk.yellow("Rescheduling")} ${chalk.red("scheduler.nudgeReferendum")} to #${chalk.green(
       (await api.rpc.chain.getHeader()).number.toNumber() + 2

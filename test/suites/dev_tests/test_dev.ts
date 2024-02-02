@@ -6,6 +6,8 @@ import {
   fetchCompiledContract,
   filterAndApply,
   maximizeConvictionVotingOf,
+  execOpenTechCommitteeProposal,
+  whiteListedTrack,
   notePreimage,
 } from "@moonwall/cli";
 import {
@@ -633,172 +635,13 @@ describeSuite({
         const value = (await context.pjsApi.query.parachainSystem.authorizedUpgrade()).isNone;
         expect(value, "parachainSystem.authorizedUpgrade should be empty to begin with").toBe(true);
 
-        // Construct a ext
         const extrinsicCall = context.pjsApi.tx.parachainSystem.authorizeUpgrade(
-          "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+          "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
           false
         );
 
-        // Note preimage if it
-        const originalPreImage = await notePreimage(context, extrinsicCall);
-        const originalPreImageLen = extrinsicCall.encodedLength - 2;
-        log(
-          `Extrinsic preimage noted: ${originalPreImage.slice(0, 6)}...${originalPreImage.slice(
-            -4
-          )}, len: ${originalPreImageLen}`
-        );
+        await whiteListedTrack(context, extrinsicCall);
 
-        // Construct dispatchWhiteListed call
-        const dispatchWLCall = context.pjsApi.tx.whitelist.dispatchWhitelistedCall(
-          originalPreImage,
-          originalPreImageLen,
-          {
-            refTime: 2_000_000_000,
-            proofSize: 100_000,
-          }
-        );
-
-        // Note preimage of it
-        const wLPreimage = await notePreimage(context, dispatchWLCall);
-        const wLPreimageLen = dispatchWLCall.encodedLength - 2;
-        log(
-          `DispatchWhitelistedCall preimage noted: ${wLPreimage.slice(
-            0,
-            6
-          )}...${originalPreImage.slice(-4)}, len: ${wLPreimageLen}`
-        );
-
-        // Submit openGov proposal
-        const proposal = await context.pjsApi.tx.referenda
-          .submit(
-            {
-              Origins: { whitelistedcaller: "WhitelistedCaller" },
-            },
-            { Lookup: { hash: wLPreimage, len: wLPreimageLen } },
-            { After: { After: 0 } }
-          )
-          .signAsync(faith);
-        const { result } = await context.createBlock(proposal);
-
-        if (!result?.events) {
-          throw new Error("No events in block");
-        }
-
-        let proposalId: number | undefined;
-        filterAndApply(result.events, "referenda", ["Submitted"], (found) => {
-          proposalId = (found.event as any).data.index.toNumber();
-        });
-
-        if (typeof proposalId === "undefined") {
-          throw new Error("No proposal id found");
-        }
-
-        log(`Refendum submitted with proposal id: ${proposalId}`);
-
-        // Place decision deposit
-        await context.createBlock(context.pjsApi.tx.referenda.placeDecisionDeposit(proposalId));
-
-        // Submit OpenTechCommittee proposal to whitelist call
-        const whitelistCall = context.pjsApi.tx.whitelist
-          .whitelistCall(originalPreImage)
-          .method.toHex();
-        const openTechCommitteeProposal = context.pjsApi.tx.openTechCommitteeCollective.propose(
-          2,
-          whitelistCall,
-          100
-        );
-        const { result: result2 } = await context.createBlock(openTechCommitteeProposal, {
-          signer: alith,
-        });
-        if (!result2?.events) {
-          throw new Error("No events in block");
-        }
-
-        let openTechProposal: `0x${string}` | undefined;
-        let openTechProposalIndex: number | undefined;
-        filterAndApply(result2.events, "openTechCommitteeCollective", ["Proposed"], (found) => {
-          openTechProposalIndex = (found.event as any).data.proposalIndex.toNumber();
-          openTechProposal = (found.event as any).data.proposalHash.toHex();
-        });
-
-        if (
-          typeof openTechProposal === "undefined" ||
-          typeof openTechProposalIndex === "undefined"
-        ) {
-          throw new Error("Error submitting OpenTechCommittee proposal");
-        }
-
-        log(
-          `OpenTechCommittee proposal submitted with proposal id: ${openTechProposalIndex} and hash: ${openTechProposal.slice(
-            0,
-            6
-          )}...${openTechProposal.slice(-4)}`
-        );
-
-        // Vote on it and close
-        const alithNonce = (
-          await context.pjsApi.query.system.account(alith.address)
-        ).nonce.toNumber();
-        const alithVote = context.pjsApi.tx.openTechCommitteeCollective
-          .vote(openTechProposal, openTechProposalIndex, true)
-          .signAsync(alith, { nonce: alithNonce });
-        const baltatharVote = context.pjsApi.tx.openTechCommitteeCollective
-          .vote(openTechProposal, openTechProposalIndex, true)
-          .signAsync(baltathar, { nonce: -1 });
-        const closeProposal = context.pjsApi.tx.openTechCommitteeCollective
-          .close(
-            openTechProposal,
-            openTechProposalIndex,
-            {
-              refTime: 2_000_000_000,
-              proofSize: 100_000,
-            },
-            100
-          )
-          .signAsync(alith, { nonce: alithNonce + 1 });
-
-        await context.createBlock([alithVote, baltatharVote, closeProposal]);
-
-        const isWhitelisted = (
-          await context.pjsApi.query.whitelist.whitelistedCall(originalPreImage)
-        ).isSome;
-
-        if (!isWhitelisted) {
-          throw new Error("Whitelisted procedure failed");
-        }
-
-        // Vote with a lot of support on first proposal
-        await maximizeConvictionVotingOf(context, [ethan], proposalId);
-        await context.createBlock();
-
-        // Fast-forward to next round
-
-        const fastFowardToNextEvent = async () => {
-          const [entry] = await context.pjsApi.query.scheduler.agenda.entries();
-          const [key, _] = entry;
-          if (key.isEmpty) {
-            throw new Error("No items in scheduler.agenda");
-          }
-          const desiredHeight = Number(key.toHuman());
-          const currentHeight = (await context.pjsApi.rpc.chain.getHeader()).number.toNumber();
-
-          log(
-            `Current height: ${currentHeight}, desired height: ${desiredHeight}, jumping ${
-              desiredHeight - currentHeight + 1
-            } blocks`
-          );
-          await context.jumpBlocks?.(desiredHeight - currentHeight + 1);
-        };
-        // Fastforward until preparation done
-        await fastFowardToNextEvent();
-
-        // Fastforward until proposal confirmed
-        await fastFowardToNextEvent();
-
-        // Fastforward until proposal enacted
-        await fastFowardToNextEvent();
-
-        // Check that ext has been executed
         const postStatus = (await context.pjsApi.query.parachainSystem.authorizedUpgrade()).isNone;
         expect(postStatus).toBe(false);
 
@@ -806,7 +649,6 @@ describeSuite({
           (await context.pjsApi.query.parachainSystem.authorizedUpgrade())
             .unwrap()
             .codeHash.toHex()
-            .toLowerCase()
         ).toBe("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
       },
     });

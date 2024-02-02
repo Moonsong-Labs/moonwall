@@ -5,8 +5,9 @@ import { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types";
 import { KeyringPair } from "@polkadot/keyring/types";
 import { PalletDemocracyReferendumInfo } from "@polkadot/types/lookup";
 import { blake2AsHex } from "@polkadot/util-crypto";
-import { alith, baltathar, charleth, dorothy } from "@moonwall/util";
+import { alith, baltathar, charleth, dorothy, ethan, faith, filterAndApply } from "@moonwall/util";
 import { DevModeContext } from "@moonwall/types";
+import { fastFowardToNextEvent } from "../internal/foundations/devModeHelpers";
 
 export const COUNCIL_MEMBERS: KeyringPair[] = [baltathar, charleth, dorothy];
 export const COUNCIL_THRESHOLD = Math.ceil((COUNCIL_MEMBERS.length * 2) / 3);
@@ -14,10 +15,13 @@ export const TECHNICAL_COMMITTEE_MEMBERS: KeyringPair[] = [alith, baltathar];
 export const TECHNICAL_COMMITTEE_THRESHOLD = Math.ceil(
   (TECHNICAL_COMMITTEE_MEMBERS.length * 2) / 3
 );
+export const OPEN_TECHNICAL_COMMITTEE_MEMBERS: KeyringPair[] = [alith, baltathar];
+export const OPEN_TECHNICAL_COMMITTEE_THRESHOLD = Math.ceil(
+  (TECHNICAL_COMMITTEE_MEMBERS.length * 2) / 3
+);
 
 // TODO: Refactor to support both instant sealing and parachain environment
 // (using a waitOrCreateNextBlock common function)
-
 export const notePreimage = async <
   Call extends SubmittableExtrinsic<ApiType>,
   ApiType extends ApiTypes,
@@ -60,6 +64,149 @@ export const instantFastTrack = async <
     context.polkadotJs().tx.democracy.fastTrack(proposalHash, votingPeriod, delayPeriod)
   );
   return proposalHash;
+};
+
+// Uses WhitelistedOrigin track to quickly execute a call
+export const whiteListedTrack = async <
+  Call extends SubmittableExtrinsic<ApiType>,
+  ApiType extends ApiTypes,
+>(
+  context: DevModeContext,
+  proposal: string | Call
+) => {
+  const proposalHash =
+    typeof proposal === "string" ? proposal : await notePreimage(context, proposal);
+
+  // Construct dispatchWhiteListed call
+  const proposalLen = (await context.pjsApi.query.preimage.requestStatusFor(proposalHash)).unwrap()
+    .asUnrequested.len;
+  const dispatchWLCall = context.pjsApi.tx.whitelist.dispatchWhitelistedCall(
+    proposalHash,
+    proposalLen,
+    {
+      refTime: 2_000_000_000,
+      proofSize: 100_000,
+    }
+  );
+
+  // Note preimage of it
+  const wLPreimage = await notePreimage(context, dispatchWLCall);
+  const wLPreimageLen = dispatchWLCall.encodedLength - 2;
+  console.log(
+    `📝 DispatchWhitelistedCall preimage noted: ${wLPreimage.slice(0, 6)}...${wLPreimage.slice(
+      -4
+    )}, len: ${wLPreimageLen}`
+  );
+
+  // Submit openGov proposal
+  const openGovProposal = await context.pjsApi.tx.referenda
+    .submit(
+      {
+        Origins: { whitelistedcaller: "WhitelistedCaller" },
+      },
+      { Lookup: { hash: wLPreimage, len: wLPreimageLen } },
+      { After: { After: 0 } }
+    )
+    .signAsync(faith);
+  const { result } = await context.createBlock(openGovProposal);
+
+  if (!result?.events) {
+    throw new Error("No events in block");
+  }
+
+  let proposalId: number | undefined;
+  filterAndApply(result.events, "referenda", ["Submitted"], (found) => {
+    proposalId = (found.event as any).data.index.toNumber();
+  });
+
+  if (typeof proposalId === "undefined") {
+    throw new Error("No proposal id found");
+  }
+
+  console.log(`🏛️ Referendum submitted with proposal id: ${proposalId}`);
+  await context.createBlock(context.pjsApi.tx.referenda.placeDecisionDeposit(proposalId));
+  await execOpenTechCommitteeProposal(context, proposalHash);
+  await maximizeConvictionVotingOf(context, [ethan], proposalId);
+  await context.createBlock();
+
+  await fastFowardToNextEvent(context); // ⏩️ until preparation done
+  await fastFowardToNextEvent(context); // ⏩️ until proposal confirmed
+  await fastFowardToNextEvent(context); // ⏩️ until proposal enacted
+};
+
+// Creates a OpenTechCommitteeProposal and attempts to execute it
+export const execOpenTechCommitteeProposal = async (
+  context: DevModeContext,
+  polkadotCallHash: string,
+  voters: KeyringPair[] = OPEN_TECHNICAL_COMMITTEE_MEMBERS,
+  threshold: number = OPEN_TECHNICAL_COMMITTEE_THRESHOLD
+) => {
+  const whitelistCall = context.pjsApi.tx.whitelist.whitelistCall(polkadotCallHash).method.toHex();
+  const openTechCommitteeProposal = context.pjsApi.tx.openTechCommitteeCollective.propose(
+    threshold,
+    whitelistCall,
+    100
+  );
+  const { result: result2 } = await context.createBlock(openTechCommitteeProposal, {
+    signer: voters[0],
+  });
+  if (!result2?.events) {
+    throw new Error("No events in block");
+  }
+
+  let openTechProposal: `0x${string}` | undefined;
+  let openTechProposalIndex: number | undefined;
+
+  filterAndApply(result2.events, "openTechCommitteeCollective", ["Proposed"], (found) => {
+    openTechProposalIndex = (found.event as any).data.proposalIndex.toNumber();
+    openTechProposal = (found.event as any).data.proposalHash.toHex();
+  });
+
+  if (typeof openTechProposal === "undefined" || typeof openTechProposalIndex === "undefined") {
+    throw new Error("Error submitting OpenTechCommittee proposal");
+  }
+
+  console.log(
+    `🏛️ OpenTechCommittee proposal submitted with proposal id: ${openTechProposalIndex} and hash: ${openTechProposal.slice(
+      0,
+      6
+    )}...${openTechProposal.slice(-4)}`
+  );
+
+  // Vote on it
+  for (const voter of voters) {
+    const nonce = (await context.pjsApi.query.system.account(voter.address)).nonce.toNumber();
+    const vote = context.pjsApi.tx.openTechCommitteeCollective
+      .vote(openTechProposal, openTechProposalIndex, true)
+      .signAsync(voter, { nonce });
+
+    await context.createBlock(vote);
+  }
+
+  // Close proposal
+  const result = await context.createBlock(
+    [
+      context.pjsApi.tx.openTechCommitteeCollective.close(
+        openTechProposal,
+        openTechProposalIndex,
+        {
+          refTime: 2_000_000_000,
+          proofSize: 100_000,
+        },
+        100
+      ),
+    ],
+    { signer: voters[0] }
+  );
+
+  const isWhitelisted = (await context.pjsApi.query.whitelist.whitelistedCall(polkadotCallHash))
+    .isSome;
+
+  if (!isWhitelisted) {
+    throw new Error("Whitelisted procedure failed");
+  }
+
+  return result;
 };
 
 // Creates the Council Proposal
