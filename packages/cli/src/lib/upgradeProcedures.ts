@@ -7,8 +7,13 @@ import chalk from "chalk";
 import { sha256 } from "ethers";
 import fs, { existsSync, readFileSync } from "fs";
 import { getRuntimeWasm } from "./binariesHelpers";
-import { cancelReferendaWithCouncil, execOpenTechCommitteeProposal, executeOpenTechCommitteeProposal, executeProposalWithCouncil } from "./governanceProcedures";
-import { createAndFinalizeBlock} from "@moonwall/util"
+import {
+  cancelReferendaWithCouncil,
+  execOpenTechCommitteeProposal,
+  executeOpenTechCommitteeProposal,
+  executeProposalWithCouncil,
+} from "./governanceProcedures";
+import { createAndFinalizeBlock } from "@moonwall/util";
 
 export async function upgradeRuntimeChopsticks(
   context: ChopsticksContext,
@@ -217,17 +222,17 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
 
           const referendum = await api.query.referenda.referendumInfoFor.entries();
           const referendaIndex = referendum
-          .filter(
-            (ref: any) =>
-              ref[1].unwrap().isOngoing &&
-              ref[1].unwrap().asOngoing.proposal.isLookup &&
-              ref[1].unwrap().asOngoing.proposal.asLookup.hash.toHex() === encodedHash
-          )
-          .map((ref) =>
-            (api.registry.createType("u32", ref[0].toU8a().slice(-4)) as any).toNumber()
-          )?.[0]
+            .filter(
+              (ref: any) =>
+                ref[1].unwrap().isOngoing &&
+                ref[1].unwrap().asOngoing.proposal.isLookup &&
+                ref[1].unwrap().asOngoing.proposal.asLookup.hash.toHex() === encodedHash
+            )
+            .map((ref) =>
+              (api.registry.createType("u32", ref[0].toU8a().slice(-4)) as any).toNumber()
+            )?.[0];
 
-          // TODO: Cancel ref if already exists e.g. 
+          // TODO: Cancel ref if already exists e.g.
           //
           // if (typeof referendaIndex !== "undefined" && referendaIndex !== null) {
           //   log("Vote for upgrade already in referendum, cancelling it.");
@@ -235,7 +240,6 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
           // }
 
           await executeOpenTechCommitteeProposal(api, encodedHash);
-
 
           break;
         }

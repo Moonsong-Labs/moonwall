@@ -482,7 +482,6 @@ export const execTechnicalCommitteeProposal = async <
 };
 
 export const executeOpenTechCommitteeProposal = async (api: ApiPromise, encodedHash: string) => {
-  let nonce = (await api.rpc.system.accountNextIndex(alith.address)).toNumber();
   // const referendumNextIndex = (await api.query.referenda.referendumCount()).toNumber();
   const voteAmount = 1_000_000n * GLMR;
 
