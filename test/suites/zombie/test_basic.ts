@@ -7,7 +7,7 @@ describeSuite({
   id: "Z1",
   title: "Zombie Test Suite",
   foundationMethods: "zombie",
-  testCases: function ({ it, context, log }) {
+  testCases: ({ it, context, log }) => {
     let paraApi: ApiPromise;
     let relayApi: ApiPromise;
 
@@ -19,7 +19,7 @@ describeSuite({
     it({
       id: "T01",
       title: "Check relaychain api correctly connected",
-      test: async function () {
+      test: async () => {
         const rt = relayApi.consts.system.version.specVersion.toNumber();
         expect(rt).to.be.greaterThan(0);
 
@@ -31,7 +31,7 @@ describeSuite({
     it({
       id: "T02",
       title: "Check parachain api correctly connected",
-      test: async function () {
+      test: async () => {
         const network = paraApi.consts.system.version.specName.toString();
         expect(network).to.contain("moonbase");
 
@@ -44,7 +44,7 @@ describeSuite({
       id: "T03",
       title: "Check parachain api correctly connected (2)",
       timeout: 120000,
-      test: async function () {
+      test: async () => {
         await context.waitBlock(5, "parachain", "height");
       },
     });
@@ -53,7 +53,7 @@ describeSuite({
       id: "T04",
       title: "Can connect to parachain and execute a transaction",
       timeout: 60000,
-      test: async function () {
+      test: async () => {
         const balBefore = (await paraApi.query.system.account(ALITH_ADDRESS)).data.free;
 
         log("Please wait, this will take at least 30s for transaction to complete");
@@ -82,7 +82,7 @@ describeSuite({
       title: "Perform a runtime upgrade",
       timeout: 600000,
       modifier: "skip",
-      test: async function () {
+      test: async () => {
         await context.upgradeRuntime({ logger: log });
         log((await paraApi.rpc.chain.getBlock()).block.header.number.toNumber());
         await context.waitBlock(5, "parachain");
@@ -94,11 +94,10 @@ describeSuite({
       id: "T06",
       title: "Restart a node from test script",
       timeout: 600000,
-      test: async function () {
+      test: async () => {
         await context.restartNode("alith");
         await context.waitBlock(2, "parachain", "quantity");
       },
     });
-
   },
 });

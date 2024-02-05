@@ -1,7 +1,15 @@
 {
-    "$schema": "https://biomejs.dev/schemas/1.5.3/schema.json",
-    "extends": ["../../biome.json"],
-"files":{
-  "ignore": [ "node_modules/", "contracts", "tmp" , "html"]
+	"$schema": "https://biomejs.dev/schemas/1.5.3/schema.json",
+	"extends": ["../biome.json"],
+	"files": {
+		"ignore": ["node_modules/", "contracts", "tmp", "html"]
+	},
+	"linter": {
+		"rules": {
+			"recommended": true,
+			"style": {
+				"noNonNullAssertion": "off"
+			}
+		}
+	}
 }
-  }

@@ -58,7 +58,7 @@ export const zombieHandler: FoundationHandler<"zombie"> = ({
           runtimeName: options.runtimeName || "moonbase",
           runtimeTag: options.runtimeTag || "local",
           localPath: options.localPath || ctx.rtUpgradePath,
-          useGovernance: options.useGovernance || false,
+          upgradeMethod: options.upgradeMethod || "Sudo",
           waitMigration: options.waitMigration || true,
           from: options.from || alith,
         };

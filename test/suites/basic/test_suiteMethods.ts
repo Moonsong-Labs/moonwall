@@ -5,7 +5,7 @@ describeSuite({
   id: "B06",
   title: "New Test Suite",
   foundationMethods: "read_only",
-  testCases: function ({ it }) {
+  testCases: ({ it }) => {
     it({
       id: "T01",
       title: "Sample test",
@@ -18,7 +18,7 @@ describeSuite({
       id: "T02",
       title: "Skipped test",
       modifier: "skip",
-      test: function () {
+      test: () => {
         expect(true).to.be.true;
       },
     });
@@ -26,7 +26,7 @@ describeSuite({
     it({
       id: "T03",
       title: "Long test",
-      test: async function () {
+      test: async () => {
         await setTimeout(5000);
         expect(true).to.be.true;
       },

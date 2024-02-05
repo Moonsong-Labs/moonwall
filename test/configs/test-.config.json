@@ -1,95 +1,95 @@
 {
-  "$schema": "../packages/types/config_schema.json",
-  "label": "Global Test Config 🐯",
-  "defaultTestTimeout": 60000,
-  "scriptsDir": "scripts/",
-  "environments": [
-    {
-      "name": "dev_test",
-      "testFileDir": ["/tests/dev_tests"],
-      "envVars": ["DEBUG_COLORS=1", "TIMBO_TEST_ENV='TIMBO timbo timbo'"],
-      "reporters": ["default"],
-      "contracts": "contracts/",
-      "runScripts": ["compile-contracts.ts compile -p contracts/precompiles"],
-      "defaultSigner": {
-        "type": "ethereum",
-        "privateKey": "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
-      },
-      "defaultAllowFailures": false,
-      "foundation": {
-        "type": "dev",
-        "launchSpec": [
-          {
-            "name": "moonbeam",
-            "running": false,
-            "binPath": "tmp/moonbeam",
-            "retainAllLogs": false,
-            "ports": { "p2pPort": 30333, "wsPort": 9944, "rpcPort": 9933 },
-            "options": [
-              "--dev",
-              "--no-hardware-benchmarks",
-              "--no-telemetry",
-              "--reserved-only",
-              "--rpc-cors=all",
-              "--no-grandpa",
-              "--sealing=manual",
-              "--force-authoring",
-              "--no-prometheus"
-            ]
-          }
-        ]
-      },
-      "connections": [
-        {
-          "name": "eth",
-          "type": "ethers",
-          "endpoints": ["ws://127.0.0.1:9944"]
-        },
-        {
-          "name": "w3",
-          "type": "web3",
-          "endpoints": ["ws://127.0.0.1:9944"]
-        },
-        {
-          "name": "viem",
-          "type": "viem",
-          "endpoints": ["ws://127.0.0.1:9944"]
-        },
-        {
-          "name": "pjs",
-          "type": "polkadotJs",
-          "endpoints": ["ws://127.0.0.1:9944"],
-          "rpc": {
-            "polkadotJs": {
-              "isTxFinalized": {
-                "description": "Just a test method",
-                "params": [
-                  {
-                    "name": "txHash",
-                    "type": "Hash"
-                  }
-                ],
-                "type": "bool"
-              }
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "dev_network_only",
-      "testFileDir": [],
-      "foundation": {
-        "type": "dev",
-        "launchSpec": [
-          {
-            "name": "moonbeam",
-            "running": true,
-            "binPath": "./tmp/moonbeam"
-          }
-        ]
-      },
-      "connections": []
-    }
-  ]
+	"$schema": "../packages/types/config_schema.json",
+	"label": "Global Test Config 🐯",
+	"defaultTestTimeout": 60000,
+	"scriptsDir": "scripts/",
+	"environments": [
+		{
+			"name": "dev_test",
+			"testFileDir": ["/tests/dev_tests"],
+			"envVars": ["DEBUG_COLORS=1", "TIMBO_TEST_ENV='TIMBO timbo timbo'"],
+			"reporters": ["default"],
+			"contracts": "contracts/",
+			"runScripts": ["compile-contracts.ts compile -p contracts/precompiles"],
+			"defaultSigner": {
+				"type": "ethereum",
+				"privateKey": "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
+			},
+			"defaultAllowFailures": false,
+			"foundation": {
+				"type": "dev",
+				"launchSpec": [
+					{
+						"name": "moonbeam",
+						"running": false,
+						"binPath": "tmp/moonbeam",
+						"retainAllLogs": false,
+						"ports": { "p2pPort": 30333, "wsPort": 9944, "rpcPort": 9933 },
+						"options": [
+							"--dev",
+							"--no-hardware-benchmarks",
+							"--no-telemetry",
+							"--reserved-only",
+							"--rpc-cors=all",
+							"--no-grandpa",
+							"--sealing=manual",
+							"--force-authoring",
+							"--no-prometheus"
+						]
+					}
+				]
+			},
+			"connections": [
+				{
+					"name": "eth",
+					"type": "ethers",
+					"endpoints": ["ws://127.0.0.1:9944"]
+				},
+				{
+					"name": "w3",
+					"type": "web3",
+					"endpoints": ["ws://127.0.0.1:9944"]
+				},
+				{
+					"name": "viem",
+					"type": "viem",
+					"endpoints": ["ws://127.0.0.1:9944"]
+				},
+				{
+					"name": "pjs",
+					"type": "polkadotJs",
+					"endpoints": ["ws://127.0.0.1:9944"],
+					"rpc": {
+						"polkadotJs": {
+							"isTxFinalized": {
+								"description": "Just a test method",
+								"params": [
+									{
+										"name": "txHash",
+										"type": "Hash"
+									}
+								],
+								"type": "bool"
+							}
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "dev_network_only",
+			"testFileDir": [],
+			"foundation": {
+				"type": "dev",
+				"launchSpec": [
+					{
+						"name": "moonbeam",
+						"running": true,
+						"binPath": "./tmp/moonbeam"
+					}
+				]
+			},
+			"connections": []
+		}
+	]
 }

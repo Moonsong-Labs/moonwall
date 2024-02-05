@@ -1,6 +1,5 @@
 import { describeSuite, expect, beforeAll } from "@moonwall/cli";
 import { ApiPromise } from "@polkadot/api";
-import "@polkadot/api-augment";
 
 describeSuite({
   id: "R01",
@@ -16,7 +15,7 @@ describeSuite({
     it({
       id: "C01",
       title: "This should run regardless of chain",
-      test: async function () {
+      test: async () => {
         expect(api.consts.system.version.specVersion.toNumber()).to.be.greaterThan(0);
       },
     });
@@ -25,7 +24,7 @@ describeSuite({
       id: "C02",
       title: "This test should only run on moonriver",
       chainType: "moonriver",
-      test: async function () {
+      test: async () => {
         expect(api.consts.system.version.specName.toString()).to.be.equal("moonriver");
       },
     });
@@ -34,7 +33,7 @@ describeSuite({
       id: "C03",
       title: "This test should only run on moonriver",
       notChainType: "moonbeam",
-      test: async function () {
+      test: async () => {
         expect(api.consts.system.version.specName.toString()).to.be.equal("moonriver");
       },
     });
@@ -43,7 +42,7 @@ describeSuite({
       id: "C04",
       title: "This test should always skip due to version num",
       minRtVersion: 2200,
-      test: async function () {
+      test: async () => {
         expect(api.consts.system.version.specVersion.toNumber()).to.be.greaterThanOrEqual(2200);
       },
     });

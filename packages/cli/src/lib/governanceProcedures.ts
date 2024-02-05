@@ -3,10 +3,25 @@ import { expect } from "vitest";
 import type { ApiPromise } from "@polkadot/api";
 import { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types";
 import { KeyringPair } from "@polkadot/keyring/types";
-import { PalletDemocracyReferendumInfo } from "@polkadot/types/lookup";
+import {
+  PalletDemocracyReferendumInfo,
+  PalletReferendaReferendumInfo,
+} from "@polkadot/types/lookup";
 import { blake2AsHex } from "@polkadot/util-crypto";
-import { alith, baltathar, charleth, dorothy } from "@moonwall/util";
+import {
+  GLMR,
+  alith,
+  baltathar,
+  charleth,
+  dorothy,
+  ethan,
+  faith,
+  filterAndApply,
+  signAndSend,
+} from "@moonwall/util";
 import { DevModeContext } from "@moonwall/types";
+import { fastFowardToNextEvent } from "../internal/foundations/devModeHelpers";
+import { ISubmittableResult } from "@polkadot/types/types";
 
 export const COUNCIL_MEMBERS: KeyringPair[] = [baltathar, charleth, dorothy];
 export const COUNCIL_THRESHOLD = Math.ceil((COUNCIL_MEMBERS.length * 2) / 3);
@@ -14,10 +29,13 @@ export const TECHNICAL_COMMITTEE_MEMBERS: KeyringPair[] = [alith, baltathar];
 export const TECHNICAL_COMMITTEE_THRESHOLD = Math.ceil(
   (TECHNICAL_COMMITTEE_MEMBERS.length * 2) / 3
 );
+export const OPEN_TECHNICAL_COMMITTEE_MEMBERS: KeyringPair[] = [alith, baltathar];
+export const OPEN_TECHNICAL_COMMITTEE_THRESHOLD = Math.ceil(
+  (TECHNICAL_COMMITTEE_MEMBERS.length * 2) / 3
+);
 
 // TODO: Refactor to support both instant sealing and parachain environment
 // (using a waitOrCreateNextBlock common function)
-
 export const notePreimage = async <
   Call extends SubmittableExtrinsic<ApiType>,
   ApiType extends ApiTypes,
@@ -60,6 +78,149 @@ export const instantFastTrack = async <
     context.polkadotJs().tx.democracy.fastTrack(proposalHash, votingPeriod, delayPeriod)
   );
   return proposalHash;
+};
+
+// Uses WhitelistedOrigin track to quickly execute a call
+export const whiteListedTrack = async <
+  Call extends SubmittableExtrinsic<ApiType>,
+  ApiType extends ApiTypes,
+>(
+  context: DevModeContext,
+  proposal: string | Call
+) => {
+  const proposalHash =
+    typeof proposal === "string" ? proposal : await notePreimage(context, proposal);
+
+  // Construct dispatchWhiteListed call
+  const proposalLen = (await context.pjsApi.query.preimage.requestStatusFor(proposalHash)).unwrap()
+    .asUnrequested.len;
+  const dispatchWLCall = context.pjsApi.tx.whitelist.dispatchWhitelistedCall(
+    proposalHash,
+    proposalLen,
+    {
+      refTime: 2_000_000_000,
+      proofSize: 100_000,
+    }
+  );
+
+  // Note preimage of it
+  const wLPreimage = await notePreimage(context, dispatchWLCall);
+  const wLPreimageLen = dispatchWLCall.encodedLength - 2;
+  console.log(
+    `📝 DispatchWhitelistedCall preimage noted: ${wLPreimage.slice(0, 6)}...${wLPreimage.slice(
+      -4
+    )}, len: ${wLPreimageLen}`
+  );
+
+  // Submit openGov proposal
+  const openGovProposal = await context.pjsApi.tx.referenda
+    .submit(
+      {
+        Origins: { whitelistedcaller: "WhitelistedCaller" },
+      },
+      { Lookup: { hash: wLPreimage, len: wLPreimageLen } },
+      { After: { After: 0 } }
+    )
+    .signAsync(faith);
+  const { result } = await context.createBlock(openGovProposal);
+
+  if (!result?.events) {
+    throw new Error("No events in block");
+  }
+
+  let proposalId: number | undefined;
+  filterAndApply(result.events, "referenda", ["Submitted"], (found) => {
+    proposalId = (found.event as any).data.index.toNumber();
+  });
+
+  if (typeof proposalId === "undefined") {
+    throw new Error("No proposal id found");
+  }
+
+  console.log(`🏛️ Referendum submitted with proposal id: ${proposalId}`);
+  await context.createBlock(context.pjsApi.tx.referenda.placeDecisionDeposit(proposalId));
+  await execOpenTechCommitteeProposal(context, proposalHash);
+  await maximizeConvictionVotingOf(context, [ethan], proposalId);
+  await context.createBlock();
+
+  await fastFowardToNextEvent(context); // ⏩️ until preparation done
+  await fastFowardToNextEvent(context); // ⏩️ until proposal confirmed
+  await fastFowardToNextEvent(context); // ⏩️ until proposal enacted
+};
+
+// Creates a OpenTechCommitteeProposal and attempts to execute it
+export const execOpenTechCommitteeProposal = async (
+  context: DevModeContext,
+  polkadotCallHash: string,
+  voters: KeyringPair[] = OPEN_TECHNICAL_COMMITTEE_MEMBERS,
+  threshold: number = OPEN_TECHNICAL_COMMITTEE_THRESHOLD
+) => {
+  const whitelistCall = context.pjsApi.tx.whitelist.whitelistCall(polkadotCallHash).method.toHex();
+  const openTechCommitteeProposal = context.pjsApi.tx.openTechCommitteeCollective.propose(
+    threshold,
+    whitelistCall,
+    100
+  );
+  const { result: result2 } = await context.createBlock(openTechCommitteeProposal, {
+    signer: voters[0],
+  });
+  if (!result2?.events) {
+    throw new Error("No events in block");
+  }
+
+  let openTechProposal: `0x${string}` | undefined;
+  let openTechProposalIndex: number | undefined;
+
+  filterAndApply(result2.events, "openTechCommitteeCollective", ["Proposed"], (found) => {
+    openTechProposalIndex = (found.event as any).data.proposalIndex.toNumber();
+    openTechProposal = (found.event as any).data.proposalHash.toHex();
+  });
+
+  if (typeof openTechProposal === "undefined" || typeof openTechProposalIndex === "undefined") {
+    throw new Error("Error submitting OpenTechCommittee proposal");
+  }
+
+  console.log(
+    `🏛️ OpenTechCommittee proposal submitted with proposal id: ${openTechProposalIndex} and hash: ${openTechProposal.slice(
+      0,
+      6
+    )}...${openTechProposal.slice(-4)}`
+  );
+
+  // Vote on it
+  for (const voter of voters) {
+    const nonce = (await context.pjsApi.query.system.account(voter.address)).nonce.toNumber();
+    const vote = context.pjsApi.tx.openTechCommitteeCollective
+      .vote(openTechProposal, openTechProposalIndex, true)
+      .signAsync(voter, { nonce });
+
+    await context.createBlock(vote);
+  }
+
+  // Close proposal
+  const result = await context.createBlock(
+    [
+      context.pjsApi.tx.openTechCommitteeCollective.close(
+        openTechProposal,
+        openTechProposalIndex,
+        {
+          refTime: 2_000_000_000,
+          proofSize: 100_000,
+        },
+        100
+      ),
+    ],
+    { signer: voters[0] }
+  );
+
+  const isWhitelisted = (await context.pjsApi.query.whitelist.whitelistedCall(polkadotCallHash))
+    .isSome;
+
+  if (!isWhitelisted) {
+    throw new Error("Whitelisted procedure failed");
+  }
+
+  return result;
 };
 
 // Creates the Council Proposal
@@ -231,8 +392,7 @@ export const maximizeConvictionVotingOf = async (
       .tx.convictionVoting.vote(refIndex, {
         Standard: {
           vote: { aye: true, conviction: "Locked6x" },
-          balance: ((await context.polkadotJs().query.system.account(alith.address)) as any).data
-            .free,
+          balance: (await context.polkadotJs().query.system.account(alith.address)).data.free,
         },
       })
       .paymentInfo(alith)
@@ -247,7 +407,7 @@ export const maximizeConvictionVotingOf = async (
           Standard: {
             vote: { aye: true, conviction: "Locked6x" },
             balance: await (
-              (await context.polkadotJs().query.system.account(voter.address)) as any
+              await context.polkadotJs().query.system.account(voter.address)
             ).data.free.sub(fee),
           },
         })
@@ -322,14 +482,160 @@ export const execTechnicalCommitteeProposal = async <
   return closeResult;
 };
 
+export const executeOpenTechCommitteeProposal = async (api: ApiPromise, encodedHash: string) => {
+  console.log("Executing OpenTechCommittee proposal");
+  const queryPreimage = await api.query.preimage.requestStatusFor(encodedHash);
+  if (queryPreimage.isNone) {
+    throw new Error("Preimage not found");
+  }
+
+  process.stdout.write(`Sending proposal + vote for ${encodedHash}...`);
+
+  // Noting new preimage to dispatchWhiteList
+  const proposalLen = queryPreimage.unwrap().asUnrequested.len;
+  const dispatchCallHex = api.tx.whitelist
+    .dispatchWhitelistedCall(encodedHash, proposalLen, {
+      refTime: 2_000_000_000,
+      proofSize: 100_000,
+    })
+    .method.toHex();
+  const dispatchCallPreimageHash = blake2AsHex(dispatchCallHex);
+
+  await signAndSend(api.tx.preimage.notePreimage(dispatchCallHex), charleth);
+
+  const queryDispatchPreimage = await api.query.preimage.requestStatusFor(dispatchCallPreimageHash);
+
+  if (queryDispatchPreimage.isNone) {
+    throw new Error("Dispatch preimage not found");
+  }
+
+  const dispatchCallPreimageLen = queryDispatchPreimage.unwrap().asUnrequested.len;
+
+  // Raising new proposal to OpenGov under whitelisted track
+  await signAndSend(
+    api.tx.referenda.submit(
+      {
+        Origins: { whitelistedcaller: "WhitelistedCaller" },
+      },
+      { Lookup: { hash: dispatchCallPreimageHash, len: dispatchCallPreimageLen } },
+      { After: { After: 0 } }
+    ),
+    charleth
+  );
+  // await api.tx.referenda
+  //   .submit(
+  //     {
+  //       Origins: { whitelistedcaller: "WhitelistedCaller" },
+  //     },
+  //     { Lookup: { hash: dispatchCallPreimageHash, len: dispatchCallPreimageLen } },
+  //     { After: { After: 0 } }
+  //   )
+  //   .signAsync(charleth);
+
+  const proposalId = (await api.query.referenda.referendumCount()).toNumber() - 1;
+
+  if (proposalId < 0) {
+    throw new Error("Proposal id not found");
+  }
+
+  await api.tx.referenda.placeDecisionDeposit(proposalId).signAndSend(alith);
+
+  // Opening Proposal to whiteList
+  process.stdout.write(`Sending proposal to openTechCommittee to whitelist ${encodedHash}...`);
+  await signAndSend(
+    api.tx.openTechCommitteeCollective.propose(2, api.tx.whitelist.whitelistCall(encodedHash), 100)
+  );
+
+  const openTechProposal = (await api.query.openTechCommitteeCollective.proposals()).at(-1);
+
+  if (!openTechProposal || openTechProposal?.isEmpty) {
+    throw new Error("OpenTechProposal not found");
+  }
+
+  const index = (await api.query.openTechCommitteeCollective.proposalCount()).toNumber() - 1;
+
+  if (index < 0) {
+    throw new Error("OpenTechProposal index not found");
+  }
+
+  process.stdout.write("✅\n");
+
+  const baltaNonce = (await api.rpc.system.accountNextIndex(baltathar.address)).toNumber();
+  // Voting and closing on openTech proposal
+  process.stdout.write("Voting on openTechCommittee proposal...");
+  await Promise.all([
+    signAndSend(api.tx.openTechCommitteeCollective.vote(openTechProposal, index, true)),
+    signAndSend(
+      api.tx.openTechCommitteeCollective.vote(openTechProposal, index, true),
+      baltathar,
+      baltaNonce
+    ),
+    signAndSend(
+      api.tx.openTechCommitteeCollective.close(
+        openTechProposal,
+        index,
+        {
+          refTime: 2_000_000_000,
+          proofSize: 100_000,
+        },
+        100
+      ),
+      baltathar,
+      baltaNonce + 1
+    ),
+  ]);
+  process.stdout.write("✅\n");
+  // Voting on referendum with lots of money
+
+  process.stdout.write("Voting on main referendum proposal...");
+
+  const bal = (await api.query.system.account(dorothy.address)).data.free.toBigInt();
+
+  if (bal <= GLMR) {
+    throw new Error("Dorothy has no funds to vote with");
+  }
+
+  await signAndSend(
+    api.tx.convictionVoting.vote(proposalId, {
+      Standard: {
+        vote: { aye: true, conviction: "Locked6x" },
+        balance: bal - GLMR,
+      },
+    }),
+    dorothy
+  );
+
+  process.stdout.write("✅\n");
+
+  // Waiting one million years for the referendum to be enacted
+  process.stdout.write(`Waiting for referendum [${proposalId}] to be no longer ongoing...`);
+  let referendaInfo: PalletReferendaReferendumInfo | undefined;
+  for (;;) {
+    try {
+      referendaInfo = (await api.query.referenda.referendumInfoFor(proposalId)).unwrap();
+
+      if (!referendaInfo.isOngoing) {
+        process.stdout.write("✅\n");
+        break;
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    } catch (e) {
+      console.error(e);
+      throw new Error(`Error querying referendum info for proposalId: ${proposalId}`);
+    }
+  }
+
+  process.stdout.write(`${referendaInfo.isApproved ? "✅" : "❌"} \n`);
+  if (!referendaInfo.isApproved) {
+    throw new Error("Finished Referendum was not approved");
+  }
+};
+
 export const executeProposalWithCouncil = async (api: ApiPromise, encodedHash: string) => {
   let nonce = (await api.rpc.system.accountNextIndex(alith.address)).toNumber();
-  const referendumNextIndex = ((await api.query.democracy.referendumCount()) as any).toNumber();
+  const referendumNextIndex = (await api.query.democracy.referendumCount()).toNumber();
 
-  // process.stdout.write(
-  //   `Sending council motion (${encodedHash} ` +
-  //     `[threashold: 1, expected referendum: ${referendumNextIndex}])...`
-  // );
   const callData =
     (api.consts.system.version as any).specVersion.toNumber() >= 2000
       ? { Legacy: encodedHash }

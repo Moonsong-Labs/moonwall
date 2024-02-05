@@ -17,7 +17,7 @@ describeSuite({
     it({
       id: "T1",
       title: "this is a test case",
-      test: async function (context) {
+      test: async (context) => {
         // log(context.meta.mode)
         expect(true).toBe(true);
       },
@@ -26,7 +26,7 @@ describeSuite({
     it({
       id: "T2",
       title: "this is a test case2",
-      test: async function () {
+      test: async () => {
         expect(2).toBeGreaterThan(0);
       },
     });
@@ -34,7 +34,7 @@ describeSuite({
     it({
       id: "T3",
       title: "this is a test case3",
-      test: async function () {
+      test: async () => {
         console.log(`The latest block is ${(await api.provider!.getBlock("latest"))!.number}`);
         log((await MoonwallContext.getContext())!.providers);
         expect(2).toBeGreaterThan(0);
@@ -44,7 +44,7 @@ describeSuite({
     it({
       id: "T4",
       title: "Calling chain data",
-      test: async function () {
+      test: async () => {
         log(`The latest block is ${(await api.provider!.getBlock("latest"))!.number}`);
         log(`The latest safe block is ${(await api.provider!.getBlock("safe"))!.number}`);
         const bal = Number(
@@ -57,7 +57,7 @@ describeSuite({
     it({
       id: "T5",
       title: "Calling contract methods",
-      test: async function () {
+      test: async () => {
         const address = "0xFFFFFFfFea09FB06d082fd1275CD48b191cbCD1d";
         const contract = new ethers.Contract(address, xcAssetAbi, api);
         const totalSupply = Number(await contract.totalSupply());
