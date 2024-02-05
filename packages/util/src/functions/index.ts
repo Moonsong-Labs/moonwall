@@ -3,6 +3,7 @@ export * from "./common";
 export * from "./contextHelpers";
 export * from "./contracts";
 export * from "./ethers";
+export * from "./extrinsics";
 export * from "./jumping";
 export * from "./logging";
 export * from "./providers";
