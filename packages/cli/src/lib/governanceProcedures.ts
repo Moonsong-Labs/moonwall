@@ -538,6 +538,8 @@ export const executeOpenTechCommitteeProposal = async (api: ApiPromise, encodedH
     throw new Error("Proposal id not found");
   }
 
+  await api.tx.referenda.placeDecisionDeposit(proposalId).signAndSend(alith);
+
   // Opening Proposal to whiteList
   process.stdout.write(`Sending proposal to openTechCommittee to whitelist ${encodedHash}...`);
   await signAndSend(
