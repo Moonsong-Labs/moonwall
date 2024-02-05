@@ -3,7 +3,10 @@ import { expect } from "vitest";
 import type { ApiPromise } from "@polkadot/api";
 import { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types";
 import { KeyringPair } from "@polkadot/keyring/types";
-import { PalletDemocracyReferendumInfo } from "@polkadot/types/lookup";
+import {
+  PalletDemocracyReferendumInfo,
+  PalletReferendaReferendumInfo,
+} from "@polkadot/types/lookup";
 import { blake2AsHex } from "@polkadot/util-crypto";
 import {
   GLMR,
@@ -17,6 +20,7 @@ import {
 } from "@moonwall/util";
 import { DevModeContext } from "@moonwall/types";
 import { fastFowardToNextEvent } from "../internal/foundations/devModeHelpers";
+import { REFUSED } from "node:dns";
 
 export const COUNCIL_MEMBERS: KeyringPair[] = [baltathar, charleth, dorothy];
 export const COUNCIL_THRESHOLD = Math.ceil((COUNCIL_MEMBERS.length * 2) / 3);
@@ -387,8 +391,7 @@ export const maximizeConvictionVotingOf = async (
       .tx.convictionVoting.vote(refIndex, {
         Standard: {
           vote: { aye: true, conviction: "Locked6x" },
-          balance: ((await context.polkadotJs().query.system.account(alith.address)) as any).data
-            .free,
+          balance: (await context.polkadotJs().query.system.account(alith.address)).data.free,
         },
       })
       .paymentInfo(alith)
@@ -403,7 +406,7 @@ export const maximizeConvictionVotingOf = async (
           Standard: {
             vote: { aye: true, conviction: "Locked6x" },
             balance: await (
-              (await context.polkadotJs().query.system.account(voter.address)) as any
+              await context.polkadotJs().query.system.account(voter.address)
             ).data.free.sub(fee),
           },
         })
@@ -521,70 +524,88 @@ export const executeOpenTechCommitteeProposal = async (api: ApiPromise, encodedH
     )
     .signAsync(charleth);
 
+  const proposalId = (await api.query.referenda.referendumCount()).toNumber() - 1;
+
+  if (proposalId < 0) {
+    throw new Error("Proposal id not found");
+  }
+
   // Opening Proposal to whiteList
+  process.stdout.write(`Sending proposal to openTechCommittee to whitelist ${encodedHash}...`);
   await api.tx.openTechCommitteeCollective
     .propose(2, api.tx.whitelist.whitelistCall(encodedHash), 100)
     .signAndSend(alith);
-  const openTechProposal = (await api.query.openTechCommitteeCollective.proposals()).at(-1)
+  const openTechProposal = (await api.query.openTechCommitteeCollective.proposals()).at(-1);
 
-  if (!openTechProposal || openTechProposal?.isEmpty){
-    throw new Error("OpenTechProposal not found")
+  if (!openTechProposal || openTechProposal?.isEmpty) {
+    throw new Error("OpenTechProposal not found");
   }
 
-  // Voting on openTech proposal
+  const index = (await api.query.openTechCommitteeCollective.proposalCount()).toNumber() - 1;
+
+  if (index < 1) {
+    throw new Error("OpenTechProposal index not found");
+  }
+
+  process.stdout.write("✅\n");
+
+  const baltaNonce = (await api.rpc.system.accountNextIndex(baltathar.address)).toNumber();
+  // Voting and closing on openTech proposal
+  process.stdout.write("Voting on openTechCommittee proposal...");
   await Promise.all([
-    api.tx.openTechCommitteeCollective.vote(openTechProposal,)
-  ])
-
-  // Closing openTech proposal
-
+    api.tx.openTechCommitteeCollective.vote(openTechProposal, index, true).signAndSend(alith),
+    api.tx.openTechCommitteeCollective
+      .vote(openTechProposal, index, true)
+      .signAndSend(baltathar, { nonce: baltaNonce }),
+    api.tx.openTechCommitteeCollective
+      .close(
+        openTechProposal,
+        index,
+        {
+          refTime: 2_000_000_000,
+          proofSize: 100_000,
+        },
+        100
+      )
+      .signAndSend(baltathar, { nonce: baltaNonce + 1 }),
+  ]);
+  process.stdout.write("✅\n");
   // Voting on referendum with lots of money
+
+  process.stdout.write("Voting on main referendum proposal...");
+  await api.tx.convictionVoting
+    .vote(proposalId, {
+      Standard: {
+        vote: { aye: true, conviction: "Locked6x" },
+        balance: (await api.query.system.account(ethan.address)).data.free.toBigInt() - GLMR,
+      },
+    })
+    .signAndSend(ethan);
+
+  process.stdout.write("✅\n");
 
   // Waiting one million years for the referendum to be enacted
 
-  await Promise.all([
-    api.tx.openTechCommitteeCollective
-      .propose(2, encodedHash, 100)
-      .signAndSend(alith, { nonce: nonce++ }),
-    api.tx.openTechCommitteeCollective
-      .vote(
-        referendumNextIndex,
-
-        true
-      )
-      .signAndSend(alith, { nonce: nonce++ }),
-    api.tx.openTechCommitteeCollective
-      .vote(referendumNextIndex, true)
-      .signAndSend(alith, { nonce: nonce++ }),
-    api.tx.openTechCommitteeCollective
-      .close(referendumNextIndex, {
-        Standard: {
-          balance: voteAmount,
-          vote: { aye: true, conviction: 1 },
-        },
-      })
-      .signAndSend(alith, { nonce: nonce++ }),
-  ]);
-  process.stdout.write("✅\n");
-
-  process.stdout.write(`Waiting for referendum [${referendumNextIndex}] to be executed...`);
-  let referenda: PalletDemocracyReferendumInfo | undefined;
-  while (!referenda) {
+  process.stdout.write(`Waiting for referendum [${proposalId}] to be executed...`);
+  let referendaInfo: PalletReferendaReferendumInfo | undefined;
+  for (;;) {
     try {
-      referenda = (
-        (await api.query.democracy.referendumInfoOf.entries()).find(
-          (ref: any) =>
-            ref[1].unwrap().isFinished &&
-            (api.registry.createType("u32", ref[0].toU8a().slice(-4)) as any).toNumber() ===
-              referendumNextIndex
-        )?.[1] as any
-      ).unwrap();
-    } catch {
+      referendaInfo = (await api.query.referenda.referendumInfoFor(proposalId)).unwrap();
+
+      if (referendaInfo.isOngoing) {
+        process.stdout.write("✅\n");
+        break;
+      }
+
       await new Promise((resolve) => setTimeout(resolve, 1000));
+    } catch (e) {
+      console.error(e);
+      throw new Error(`Error querying referendum info for proposalId: ${proposalId}`);
     }
   }
-  process.stdout.write(`${referenda.asFinished.approved ? "✅" : "❌"} \n`);
-  if (!referenda.asFinished.approved) {
+
+  process.stdout.write(`${referendaInfo.isApproved ? "✅" : "❌"} \n`);
+  if (!referendaInfo.isApproved) {
     throw new Error("Finished Referendum was not approved");
   }
 };
