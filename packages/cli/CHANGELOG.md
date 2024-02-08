@@ -1,5 +1,15 @@
 # @moonwall/cli
 
+## 4.7.7
+
+### Patch Changes
+
+- c496727: Fix to run grep
+- 6d811ef: Gov Helpers
+- Updated dependencies [6d811ef]
+  - @moonwall/types@4.7.7
+  - @moonwall/util@4.7.7
+
 ## 4.7.6
 
 ### Patch Changes
