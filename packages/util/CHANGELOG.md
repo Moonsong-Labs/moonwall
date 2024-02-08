@@ -1,5 +1,13 @@
 # @moonwall/util
 
+## 4.7.7
+
+### Patch Changes
+
+- 6d811ef: Gov Helpers
+- Updated dependencies [6d811ef]
+  - @moonwall/types@4.7.7
+
 ## 4.7.6
 
 ### Patch Changes
