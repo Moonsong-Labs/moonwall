@@ -2,7 +2,6 @@ import { ChopsticksLaunchSpec, DevLaunchSpec, RepoSpec, ZombieLaunchSpec } from 
 import chalk from "chalk";
 import path from "path";
 import { standardRepos } from "../lib/repoDefinitions";
-import getPort from "get-port";
 
 export function parseZombieCmd(launchSpec: ZombieLaunchSpec) {
   if (launchSpec) {
@@ -67,7 +66,8 @@ export async function parseRunCmd(launchSpec: DevLaunchSpec, additionalRepos?: R
 
 export const getFreePort = async () => {
   const notionalPort = 10000 + Number(process.env.VITEST_POOL_ID || 1) * 100;
-  return getPort({ port: notionalPort });
+  // return getPort({ port: notionalPort });
+  return notionalPort;
 };
 
 export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
