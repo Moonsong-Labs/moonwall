@@ -13,7 +13,6 @@ import { EventRecord } from "@polkadot/types/interfaces";
 import chalk from "chalk";
 import Debug from "debug";
 import { setTimeout } from "timers/promises";
-import { assert } from "vitest";
 import {
   getEnvironmentFromConfig,
   importAsyncConfig,
@@ -204,7 +203,10 @@ export async function createDevBlock<
       }
       return found;
     });
-    assert(match, "Expected events not present in block");
+
+    if (!match) {
+      throw new Error("Expected events not present in block");
+    }
   }
 
   if (!options.allowFailures) {

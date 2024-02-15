@@ -1,13 +1,5 @@
 import "@moonbeam-network/api-augment";
-import { expect } from "vitest";
-import type { ApiPromise } from "@polkadot/api";
-import { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types";
-import { KeyringPair } from "@polkadot/keyring/types";
-import {
-  PalletDemocracyReferendumInfo,
-  PalletReferendaReferendumInfo,
-} from "@polkadot/types/lookup";
-import { blake2AsHex } from "@polkadot/util-crypto";
+import { DevModeContext } from "@moonwall/types";
 import {
   GLMR,
   alith,
@@ -19,9 +11,15 @@ import {
   filterAndApply,
   signAndSend,
 } from "@moonwall/util";
-import { DevModeContext } from "@moonwall/types";
-import { fastFowardToNextEvent } from "../internal/foundations/devModeHelpers";
-import { ISubmittableResult } from "@polkadot/types/types";
+import type { ApiPromise } from "@polkadot/api";
+import { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types";
+import { KeyringPair } from "@polkadot/keyring/types";
+import {
+  PalletDemocracyReferendumInfo,
+  PalletReferendaReferendumInfo,
+} from "@polkadot/types/lookup";
+import { blake2AsHex } from "@polkadot/util-crypto";
+import { fastFowardToNextEvent } from "../internal";
 
 export const COUNCIL_MEMBERS: KeyringPair[] = [baltathar, charleth, dorothy];
 export const COUNCIL_THRESHOLD = Math.ceil((COUNCIL_MEMBERS.length * 2) / 3);
@@ -445,8 +443,10 @@ export const execTechnicalCommitteeProposal = async <
     return proposalResult;
   }
 
-  expect(proposalResult.successful, `Council proposal refused: ${proposalResult?.error?.name}`).to
-    .be.true;
+  if (!proposalResult.successful) {
+    throw `Council proposal refused: ${proposalResult?.error?.name}`;
+  }
+
   const proposalHash = proposalResult.events
     .find(({ event: { method } }) => method.toString() === "Proposed")
     ?.event.data[2].toHex();

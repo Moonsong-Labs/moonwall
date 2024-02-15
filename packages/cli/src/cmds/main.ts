@@ -2,20 +2,25 @@ import { MoonwallConfig } from "@moonwall/types";
 import chalk from "chalk";
 import clear from "clear";
 import colors from "colors";
+import fs from "fs";
 import inquirer from "inquirer";
 import PressToContinuePrompt from "inquirer-press-to-continue";
 import fetch from "node-fetch";
+import path from "path";
 import { SemVer, lt } from "semver";
 import pkg from "../../package.json" assert { type: "json" };
-import { fetchArtifact, getVersions } from "../internal/cmdFunctions/fetchArtifact";
-import { createFolders, generateConfig } from "../internal/cmdFunctions/initialisation";
+import {
+  createFolders,
+  deriveTestIds,
+  executeScript,
+  fetchArtifact,
+  generateConfig,
+  getVersions,
+} from "../internal";
 import { importAsyncConfig } from "../lib/configReader";
 import { allReposAsync } from "../lib/repoDefinitions";
 import { runNetworkCmd } from "./runNetwork";
 import { testCmd } from "./runTests";
-import fs from "fs";
-import { executeScript } from "../internal/launcherCommon";
-import path from "path";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
@@ -80,8 +85,14 @@ async function mainMenu(config?: MoonwallConfig) {
             name: "4) Artifact Downloader:                Fetch artifacts (x86) from GitHub repos",
             value: "download",
           },
+
           {
-            name: "5) Quit Application",
+            name: "5) Rename TestIDs:                     Rename test id prefixes based on position in the directory tree",
+            value: "derive",
+          },
+
+          {
+            name: "6) Quit Application",
             value: "quit",
           },
         ],
@@ -141,6 +152,28 @@ async function mainMenu(config?: MoonwallConfig) {
         throw new Error("Config not defined, this is a defect please raise it.");
       }
       return await resolveExecChoice(config);
+    }
+
+    case "derive": {
+      clear();
+      const { rootDir } = await inquirer.prompt({
+        name: "rootDir",
+        type: "input",
+        message: "Enter the root testSuites directory to process:",
+        default: "suites",
+      });
+      await deriveTestIds(rootDir);
+
+      await inquirer.prompt({
+        name: "test complete",
+        type: "press-to-continue",
+        anyKey: true,
+        pressToContinueMessage: `ℹ️  Renaming task for ${chalk.bold(
+          `/${rootDir}`
+        )} has been completed. Press any key to continue...\n`,
+      });
+
+      return false;
     }
 
     default:

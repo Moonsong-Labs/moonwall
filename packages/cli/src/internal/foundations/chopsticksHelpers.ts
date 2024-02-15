@@ -5,7 +5,6 @@ import { ApiTypes, AugmentedEvent } from "@polkadot/api/types";
 import { FrameSystemEventRecord } from "@polkadot/types/lookup";
 import chalk from "chalk";
 import { setTimeout } from "timers/promises";
-import { assert } from "vitest";
 import { MoonwallContext } from "../../lib/globalContext";
 
 export async function getWsFromConfig(providerName?: string): Promise<WsProvider> {
@@ -93,7 +92,10 @@ export async function createChopsticksBlock(
       }
       return found;
     });
-    assert(match, "Expected events not present in block");
+
+    if (!match) {
+      throw new Error("Expected events not present in block");
+    }
   }
 
   if (options && options.allowFailures === true) {
