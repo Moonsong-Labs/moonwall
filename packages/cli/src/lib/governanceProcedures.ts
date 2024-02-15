@@ -19,7 +19,7 @@ import {
   PalletReferendaReferendumInfo,
 } from "@polkadot/types/lookup";
 import { blake2AsHex } from "@polkadot/util-crypto";
-import { fastFowardToNextEvent } from "../internal/foundations/devModeHelpers";
+import { fastFowardToNextEvent } from "../internal";
 
 export const COUNCIL_MEMBERS: KeyringPair[] = [baltathar, charleth, dorothy];
 export const COUNCIL_THRESHOLD = Math.ceil((COUNCIL_MEMBERS.length * 2) / 3);
