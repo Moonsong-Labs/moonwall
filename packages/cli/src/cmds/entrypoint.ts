@@ -3,8 +3,7 @@ import "@moonbeam-network/api-augment";
 import dotenv from "dotenv";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
-import { fetchArtifact } from "../internal/cmdFunctions/fetchArtifact";
-import { generateConfig } from "../internal/cmdFunctions/initialisation";
+import { fetchArtifact, deriveTestIds, generateConfig } from "../internal";
 import { main } from "./main";
 import { runNetworkCmd } from "./runNetwork";
 import { testCmd } from "./runTests";
@@ -121,6 +120,19 @@ yargs(hideBin(process.argv))
     async (argv) => {
       process.env.MOON_RUN_SCRIPTS = "true";
       await runNetworkCmd(argv as any);
+    }
+  )
+  .command<{ suitesRootDir: string }>(
+    "derive <suitesRootDir>",
+    "Derive test IDs based on positional order in the directory tree",
+    (yargs) => {
+      return yargs.positional("suitesRootDir", {
+        describe: "Root directory of the suites",
+        type: "string",
+      });
+    },
+    async (argv) => {
+      await deriveTestIds(argv.suitesRootDir);
     }
   )
   .demandCommand(1)
