@@ -1,5 +1,13 @@
 # @moonwall/cli
 
+## 4.7.8
+
+### Patch Changes
+
+- 7a4a5d5: Added Derive TestId feature
+  - @moonwall/types@4.7.8
+  - @moonwall/util@4.7.8
+
 ## 4.7.7
 
 ### Patch Changes
