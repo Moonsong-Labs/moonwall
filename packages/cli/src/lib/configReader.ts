@@ -1,11 +1,47 @@
 import "@moonbeam-network/api-augment";
 import { MoonwallConfig, Environment } from "@moonwall/types";
-import { readFile } from "fs/promises";
-import { readFileSync } from "fs";
+import { readFile, access } from "fs/promises";
+import { readFileSync, existsSync, constants } from "fs";
 import JSONC from "jsonc-parser";
 import path, { extname } from "path";
 
 let cachedConfig: MoonwallConfig | undefined;
+
+export async function configExists() {
+  try {
+    await access(process.env.MOON_CONFIG_PATH || "", constants.R_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function configSetup(args: string[]) {
+  if (args.includes("--configFile") || process.argv.includes("-c")) {
+    const index =
+      process.argv.indexOf("--configFile") !== -1
+        ? process.argv.indexOf("--configFile")
+        : process.argv.indexOf("-c") !== -1
+          ? process.argv.indexOf("-c")
+          : 0;
+
+    if (index === 0) {
+      throw new Error("Invalid configFile argument");
+    }
+
+    const configFile = process.argv[index + 1];
+
+    if (!existsSync(configFile)) {
+      throw new Error(`Config file not found at "${configFile}"`);
+    }
+
+    process.env.MOON_CONFIG_PATH = configFile;
+  }
+
+  if (!process.env.MOON_CONFIG_PATH) {
+    process.env.MOON_CONFIG_PATH = "moonwall.config.json";
+  }
+}
 
 async function parseConfig(filePath: string) {
   let result: any;

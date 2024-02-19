@@ -3,26 +3,58 @@ import path from "path";
 import fetch from "node-fetch";
 import semver from "semver";
 import chalk from "chalk";
+import inquirer from "inquirer";
 import { runTask } from "../processHelpers";
 import { minimatch } from "minimatch";
 import { downloader } from "./downloader";
-import { allReposAsync } from "../../lib/repoDefinitions";
+import { allReposAsync, standardRepos } from "../../lib/repoDefinitions";
 import { execSync } from "node:child_process";
+import { configExists } from "../../lib/configReader";
 
-export async function fetchArtifact(args) {
-  if (await fs.access(args.path).catch(() => true)) {
+export type fetchArtifactArgs = {
+  bin: string;
+  ver?: string;
+  path?: string;
+  overwrite?: boolean;
+  outputName?: string;
+};
+
+export async function fetchArtifact(args: fetchArtifactArgs) {
+  if (args.path && (await fs.access(args.path).catch(() => true))) {
     console.log("Folder not exists, creating");
     fs.mkdir(args.path);
   }
 
-  const binary: string = args.bin;
-  const repo = (await allReposAsync()).find((network) =>
-    network.binaries.find((bin) => bin.name === binary)
-  );
+  const checkOverwrite = async (path: string) => {
+    try {
+      await fs.access(path, fs.constants.R_OK);
+      if (args.overwrite) {
+        console.log("File exists, overwriting ...");
+      } else {
+        const result = await inquirer.prompt({
+          name: "continue",
+          type: "confirm",
+          message: "File exists, do you want to overwrite?",
+        });
+
+        if (!result.continue) {
+          return false;
+        }
+      }
+    } catch {
+      console.log("File does not exist, creating ...");
+    }
+    return true;
+  };
+
+  const binary = args.bin;
+  const repos = (await configExists()) ? await allReposAsync() : standardRepos();
+  const repo = repos.find((network) => network.binaries.find((bin) => bin.name === binary));
 
   if (!repo) {
     throw new Error(`Downloading ${binary} unsupported`);
   }
+
   const url = `https://api.github.com/repos/${repo.ghAuthor}/${repo.ghRepo}/releases`;
   const enteredPath = args.path ? args.path : "tmp/";
   // const binaryPath = path.join("./", enteredPath, binary);
@@ -38,7 +70,7 @@ export async function fetchArtifact(args) {
     : args.ver === "latest"
       ? releases.find((release) => release.assets.find((asset) => asset.name === binary))
       : releases
-          .filter((release) => release.tag_name.includes(args.ver))
+          .filter((release) => release.tag_name.includes(args.ver || ""))
           .find((release) => release.assets.find((asset) => minimatch(asset.name, binary)));
 
   if (!release) {
@@ -56,7 +88,12 @@ export async function fetchArtifact(args) {
   if (!binary.includes("-runtime")) {
     const url = asset.browser_download_url;
     const filename = path.basename(url);
-    const binPath = path.join("./", enteredPath, filename);
+    const binPath = args.outputName ? args.outputName : path.join("./", enteredPath, filename);
+
+    if ((await checkOverwrite(binPath)) === false) {
+      console.log("User chose not to overwrite existing file, exiting.");
+      return;
+    }
 
     await downloader(url, binPath);
     await fs.chmod(binPath, "755");
@@ -72,7 +109,15 @@ export async function fetchArtifact(args) {
     process.stdout.write(` ${chalk.green(version.trim())} ✓\n`);
     return;
   }
-  const binaryPath = path.join("./", args.path, `${args.bin}-${args.ver}.wasm`);
+  const binaryPath = args.outputName
+    ? args.outputName
+    : path.join("./", args.path || "", `${args.bin}-${args.ver}.wasm`);
+
+  if ((await checkOverwrite(binaryPath)) === false) {
+    console.log("User chose not to overwrite existing file, exiting.");
+    return;
+  }
+
   await downloader(asset.browser_download_url, binaryPath);
   await fs.chmod(binaryPath, "755");
   process.stdout.write(` ${chalk.green("done")} ✓\n`);
@@ -80,9 +125,8 @@ export async function fetchArtifact(args) {
 }
 
 export async function getVersions(name: string, runtime = false) {
-  const repo = (await allReposAsync()).find((network) =>
-    network.binaries.find((bin) => bin.name === name)
-  );
+  const repos = (await configExists()) ? await allReposAsync() : standardRepos();
+  const repo = repos.find((network) => network.binaries.find((bin) => bin.name === name));
   if (!repo) {
     throw new Error(`Network not found for ${name}`);
   }

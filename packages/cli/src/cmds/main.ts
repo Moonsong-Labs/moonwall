@@ -17,8 +17,8 @@ import {
   generateConfig,
   getVersions,
 } from "../internal";
-import { importAsyncConfig } from "../lib/configReader";
-import { allReposAsync } from "../lib/repoDefinitions";
+import { configExists, importAsyncConfig } from "../lib/configReader";
+import { allReposAsync, standardRepos } from "../lib/repoDefinitions";
 import { runNetworkCmd } from "./runNetwork";
 import { testCmd } from "./runTests";
 
@@ -26,12 +26,7 @@ inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
 export async function main() {
   for (;;) {
-    let globalConfig: MoonwallConfig | undefined;
-    try {
-      globalConfig = await importAsyncConfig();
-    } catch (e) {
-      console.log(e);
-    }
+    const globalConfig = (await configExists()) ? await importAsyncConfig() : undefined;
     clear();
     await printIntro();
     if (await mainMenu(globalConfig)) {
@@ -271,7 +266,8 @@ async function resolveExecChoice(config: MoonwallConfig) {
 }
 
 async function resolveDownloadChoice() {
-  const binList = (await allReposAsync()).reduce((acc, curr) => {
+  const repos = (await configExists()) ? await allReposAsync() : standardRepos();
+  const binList = repos.reduce((acc, curr) => {
     acc.push(...curr.binaries.flatMap((bin) => bin.name));
     acc.push(new inquirer.Separator());
     acc.push("Back");
@@ -337,7 +333,7 @@ async function resolveDownloadChoice() {
       name: "NetworkStarted",
       type: "press-to-continue",
       anyKey: true,
-      pressToContinueMessage: "✅ Artifact has been downloaded. Press any key to continue...\n",
+      pressToContinueMessage: "Press any key to continue...\n",
     });
     return;
   }
