@@ -24,13 +24,13 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
+      "types": "./dist/types/index.d.ts",
       "import": "./dist/index.js",
       "bun": "./src/cmds/entrypoint.ts"
     }
   },
   "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/types/index.d.ts",
   "bin": {
     "moonwall": "./moonwall.mjs",
     "moondebug": "./moondebug.mjs"
@@ -47,12 +47,12 @@
   ],
   "scripts": {
     "clean": "rm -rf dist && rm -rf node_modules",
-    "build": "pnpm exec rm -rf dist && tsup src --format esm  && pnpm generate-types",
+    "build": "pnpm exec rm -rf dist && tsup src --format esm --no-splitting && pnpm generate-types",
     "lint": "pnpm biome lint ./src",
     "lint:fix": "pnpm biome lint ./src --apply",
     "fmt": "biome format .",
     "fmt:fix": "biome format . --write",
-    "generate-types": "tsup src --format esm --dts ",
+    "generate-types": "tsc",
     "watch": "tsup src --format ,esm --dts --watch",
     "typecheck": "pnpm exec tsc --noEmit",
     "prepublish": "pnpm run build && pnpm run generate-types"

@@ -24,12 +24,12 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
+      "types": "./dist/types/index.d.ts",
       "import": "./dist/index.js"
     }
   },
   "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/types/index.d.ts",
   "engines": {
     "node": ">=20",
     "pnpm": ">=7"
@@ -42,10 +42,9 @@
   ],
   "scripts": {
     "clean": "rm -rf dist && rm -rf node_modules",
-    "build": "rm -rf dist && tsup src --format esm && pnpm generate-types",
-    "generate-types": "tsup src --format esm --dts && pnpm schema && pnpm typecheck",
-    "watch": "tsup src --format esm --dts --watch",
-    "typecheck": "tsc --noEmit",
+    "build": "rm -rf dist && tsup src --format esm --no-splitting && pnpm generate-types",
+    "generate-types": "tsc && pnpm schema",
+    "watch": "tsup src --format esm --watch",
     "lint": "pnpm biome lint ./src",
     "lint:fix": "pnpm biome lint ./src --apply",
     "fmt": "biome format .",
