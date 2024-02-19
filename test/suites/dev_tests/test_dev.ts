@@ -4,11 +4,7 @@ import {
   describeSuite,
   expect,
   fetchCompiledContract,
-  filterAndApply,
-  maximizeConvictionVotingOf,
-  execOpenTechCommitteeProposal,
-  whiteListedTrack,
-  notePreimage,
+  whiteListedTrack
 } from "@moonwall/cli";
 import {
   ALITH_ADDRESS,
@@ -20,9 +16,7 @@ import {
   GLMR,
   alith,
   baltathar,
-  deployViemContract,
-  ethan,
-  faith,
+  deployViemContract
 } from "@moonwall/util";
 import { BN } from "@polkadot/util";
 import { Wallet, parseEther } from "ethers";
