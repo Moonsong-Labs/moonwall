@@ -126,7 +126,7 @@ export async function runNetworkCmd(args) {
       anyKey: true,
       pressToContinueMessage: "✅  Press any key to continue...\n",
     },
-  ];
+  ] as const;
 
   if (
     (env.foundation.type === "dev" && !env.foundation.launchSpec[0].retainAllLogs) ||
@@ -145,7 +145,13 @@ export async function runNetworkCmd(args) {
   }
 
   if (!args.GrepTest) {
-    await inquirer.prompt(questions.find(({ name }) => name === "NetworkStarted"));
+    const question = questions.find(({ name }) => name === "NetworkStarted");
+
+    if (!question) {
+      throw new Error("Question not found. This is a bug, please raise an issue.");
+    }
+
+    await inquirer.prompt(question);
   } else {
     process.env.MOON_RECYCLE = "true";
     process.env.MOON_GREP = await args.GrepTest;
@@ -153,7 +159,11 @@ export async function runNetworkCmd(args) {
   }
 
   mainloop: for (;;) {
-    const choice = await inquirer.prompt(questions.find(({ name }) => name === "MenuChoice"));
+    const question = questions.find(({ name }) => name === "MenuChoice");
+    if (!question) {
+      throw new Error("Question not found. This is a bug, please raise an issue.");
+    }
+    const choice = await inquirer.prompt(question);
     const env = globalConfig.environments.find(({ name }) => name === args.envName);
 
     if (!env) {
@@ -189,7 +199,11 @@ export async function runNetworkCmd(args) {
         break;
 
       case 6: {
-        const quit = await inquirer.prompt(questions.find(({ name }) => name === "Quit"));
+        const question = questions.find(({ name }) => name === "Quit");
+        if (!question) {
+          throw new Error("Question not found. This is a bug, please raise an issue.");
+        }
+        const quit = await inquirer.prompt(question);
         if (quit.Quit === true) {
           break mainloop;
         }
@@ -348,7 +362,7 @@ const resolveTailChoice = async (env: Environment) => {
 
       bottomBarContents = bottomBarBase + resumePauseProse[tailing ? 0 : 1] + zombieContent;
 
-      ui.updateBottomBar(bottomBarContents, "\n");
+      ui.updateBottomBar(`${bottomBarContents}\n`);
     }
 
     switchNode = false;
@@ -402,6 +416,7 @@ const resolveTailChoice = async (env: Environment) => {
       };
 
       const handleInputData = async (key: any) => {
+        // @ts-expect-error - internal method
         ui.rl.input.pause();
         const char = key.toString().trim();
 
@@ -417,7 +432,9 @@ const resolveTailChoice = async (env: Environment) => {
         }
 
         if (char === "q") {
+          // @ts-expect-error - internal method
           ui.rl.input.removeListener("data", handleInputData);
+          // @ts-expect-error - internal method
           ui.rl.input.pause();
           fs.unwatchFile(logFilePath);
           resolve("");
@@ -429,7 +446,9 @@ const resolveTailChoice = async (env: Environment) => {
         }
 
         if (char === ",") {
+          // @ts-expect-error - internal method
           ui.rl.input.removeListener("data", handleInputData);
+          // @ts-expect-error - internal method
           ui.rl.input.pause();
           fs.unwatchFile(logFilePath);
           switchNode = true;
@@ -438,7 +457,9 @@ const resolveTailChoice = async (env: Environment) => {
         }
 
         if (char === ".") {
+          // @ts-expect-error - internal method
           ui.rl.input.removeListener("data", handleInputData);
+          // @ts-expect-error - internal method
           ui.rl.input.pause();
           fs.unwatchFile(logFilePath);
           switchNode = true;
@@ -447,17 +468,19 @@ const resolveTailChoice = async (env: Environment) => {
         }
 
         if (char === "g") {
+          // @ts-expect-error - internal method
           ui.rl.input.pause();
           tailing = false;
           await resolveGrepChoice(env, true);
           renderBottomBar(resumePauseProse[tailing ? 0 : 1]);
           tailing = true;
+          // @ts-expect-error - internal method
           ui.rl.input.resume();
         }
-
+        // @ts-expect-error - internal method
         ui.rl.input.resume();
       };
-
+      // @ts-expect-error - internal method
       ui.rl.input.on("data", handleInputData);
 
       fs.watchFile(logFilePath, () => {
@@ -469,6 +492,6 @@ const resolveTailChoice = async (env: Environment) => {
       break;
     }
   }
-
+  // @ts-expect-error - internal method
   ui.close();
 };

@@ -1,5 +1,5 @@
 import type { ApiPromise } from "@polkadot/api";
-import inquirer from "inquirer";
+import inquirer, { ChoiceCollection } from "inquirer";
 import { MoonwallContext } from "../../lib/globalContext";
 import { jumpRoundsDev, jumpToRoundDev } from "@moonwall/util";
 
@@ -12,7 +12,7 @@ export async function resolveDevInteractiveCmdChoice() {
     throw new Error("Provider not found. This is a bug, please raise an issue.");
   }
   const api = prov.api as ApiPromise;
-  const choices = [
+  const choices: ChoiceCollection = [
     { name: "🆗  Create Block", value: "createblock" },
     { name: "🆕  Create Unfinalized Block", value: "createUnfinalizedBlock" },
     { name: "➡️   Create N Blocks", value: "createNBlocks" },
@@ -56,7 +56,7 @@ export async function resolveDevInteractiveCmdChoice() {
       break;
 
     case "createNBlocks": {
-      const result = await new inquirer.prompt({
+      const result = await inquirer.prompt({
         name: "n",
         type: "number",
         message: "How many blocks? ",
@@ -75,7 +75,7 @@ export async function resolveDevInteractiveCmdChoice() {
     }
 
     case "jumpToRound": {
-      const result = await new inquirer.prompt({
+      const result = await inquirer.prompt({
         name: "round",
         type: "number",
         message: "Which round to jump to (in future)? ",
@@ -86,7 +86,7 @@ export async function resolveDevInteractiveCmdChoice() {
     }
 
     case "jumpRounds": {
-      const result = await new inquirer.prompt({
+      const result = await inquirer.prompt({
         name: "n",
         type: "number",
         message: "How many rounds? ",
