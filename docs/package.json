@@ -10,7 +10,7 @@
     "docs:preview": "vitepress preview"
   },
   "devDependencies": {
-    "vitepress": "1.0.0-rc.36"
+    "vitepress": "1.0.0-rc.44"
   },
   "dependencies": {
     "@algolia/client-search": "^4.22.1",

@@ -59,13 +59,13 @@
     "@polkadot/types": "10.11.2",
     "@polkadot/util": "12.6.2",
     "@polkadot/util-crypto": "12.6.2",
-    "@types/node": "20.11.13",
+    "@types/node": "20.11.19",
     "@zombienet/utils": "0.0.24",
     "bottleneck": "2.19.5",
     "debug": "4.3.4",
-    "ethers": "6.10.0",
-    "viem": "2.7.1",
-    "web3": "4.4.0"
+    "ethers": "6.11.1",
+    "viem": "2.7.10",
+    "web3": "4.5.0"
   },
   "peerDependencies": {
     "@polkadot/api": "10.11.2"
@@ -76,8 +76,8 @@
   "devDependencies": {
     "@biomejs/biome": "1.5.3",
     "@types/debug": "4.1.12",
-    "tsup": "8.0.1",
+    "tsup": "8.0.2",
     "typescript": "5.3.3",
-    "typescript-json-schema": "0.62.0"
+    "typescript-json-schema": "0.63.0"
   }
 }
