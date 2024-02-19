@@ -1,5 +1,5 @@
 ## Description
-![moonwall](./moonwall.png)
+![moonwall](resource/moonwall.png)
 
 Moonwall is a comprehensive blockchain test framework for Substrate-based networks
 
@@ -41,11 +41,11 @@ import { ALITH_ADDRESS } from "@moonwall/util";
 
 - `pnpm moonwall` : This can be used if locally installed, and will launch the main menu..
 
-- `pnpx @moonwall/cli run <ENV_NAME>` : To download and run the latest moonwall binary from npm.js repository, and run a network specified in your config file.
+- `pnpm moonwall run <ENV_NAME>` : Run a network specified in your config file.
 
-- `pnpm exec moonwall test <ENV_NAME>` : To run the locally compiled version of the binary, to start network and run tests against it.
+- `pnpm moonwall test <ENV_NAME>` : Start network and run tests against it.
 
-- `pnpm moonwall download <ARTIFACT NAME> <VERSION> <PATH>` : To run the locally compiled version of the binary, to download an artifact directly from github.
+- `pnpm moonwall download <ARTIFACT NAME> <VERSION> <PATH>` : Download an artifact directly from github.
 
 
 The combinations are endless, for more information you can see the pnpm docs [here](https://pnpm.io/cli/run).
