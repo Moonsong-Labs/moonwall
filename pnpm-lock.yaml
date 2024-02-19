@@ -160,6 +160,9 @@ importers:
       '@types/node':
         specifier: 20.11.13
         version: 20.11.13
+      '@types/semver':
+        specifier: ^7.5.7
+        version: 7.5.7
       '@types/ws':
         specifier: ^8.5.10
         version: 8.5.10
@@ -2287,6 +2290,10 @@ packages:
 
   /@types/semver@7.5.6:
     resolution: {integrity: sha512-dn1l8LaMea/IjDoHNd9J52uBbInB796CDffS6VdIxvqYCPSG0V0DzHp76GpaWnlhg88uYyPbXCDIowa86ybd5A==}
+    dev: true
+
+  /@types/semver@7.5.7:
+    resolution: {integrity: sha512-/wdoPq1QqkSj9/QOeKkFquEuPzQbHTWAMPH/PaUMB+JuR31lXhlWXRZ52IpfDYVlDOUBvX09uBrPwxGT1hjNBg==}
     dev: true
 
   /@types/through@0.0.33:

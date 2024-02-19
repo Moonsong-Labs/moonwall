@@ -112,6 +112,7 @@
     "@types/cli-progress": "3.11.5",
     "@types/debug": "4.1.12",
     "@types/node": "20.11.13",
+    "@types/semver": "^7.5.7",
     "@types/ws": "^8.5.10",
     "@types/yargs": "17.0.32",
     "tsup": "8.0.1",
