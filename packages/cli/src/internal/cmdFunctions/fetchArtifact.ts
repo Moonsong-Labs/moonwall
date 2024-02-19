@@ -1,6 +1,5 @@
 import fs from "node:fs/promises";
 import path from "path";
-import fetch from "node-fetch";
 import semver from "semver";
 import chalk from "chalk";
 import inquirer from "inquirer";
@@ -10,6 +9,17 @@ import { downloader } from "./downloader";
 import { allReposAsync, standardRepos } from "../../lib/repoDefinitions";
 import { execSync } from "node:child_process";
 import { configExists } from "../../lib/configReader";
+import { Octokit } from "@octokit/rest";
+
+const octokit = new Octokit({
+  baseUrl: "https://api.github.com",
+  log: {
+    debug: () => {},
+    info: () => {},
+    warn: console.warn,
+    error: console.error,
+  },
+});
 
 export type fetchArtifactArgs = {
   bin: string;
@@ -55,21 +65,28 @@ export async function fetchArtifact(args: fetchArtifactArgs) {
     throw new Error(`Downloading ${binary} unsupported`);
   }
 
-  const url = `https://api.github.com/repos/${repo.ghAuthor}/${repo.ghRepo}/releases`;
   const enteredPath = args.path ? args.path : "tmp/";
-  // const binaryPath = path.join("./", enteredPath, binary);
 
-  const releases = (await (await fetch(url)).json()) as Release[];
+  const releases = await octokit.rest.repos.listReleases({
+    owner: repo.ghAuthor,
+    repo: repo.ghRepo,
+  });
+
+  if (releases.status !== 200 || releases.data.length === 0) {
+    throw new Error(`No releases found for ${repo.ghAuthor}.${repo.ghRepo}, try again later.`);
+  }
+
+  // const releases = (await (await fetch(url)).json()) as Release[];
   const release = binary.includes("-runtime")
-    ? releases.find((release) => {
+    ? releases.data.find((release) => {
         if (args.ver === "latest") {
           return release.assets.find((asset) => asset.name.includes(binary));
         }
         return release.assets.find((asset) => asset.name === `${binary}-${args.ver}.wasm`);
       })
     : args.ver === "latest"
-      ? releases.find((release) => release.assets.find((asset) => asset.name === binary))
-      : releases
+      ? releases.data.find((release) => release.assets.find((asset) => asset.name === binary))
+      : releases.data
           .filter((release) => release.tag_name.includes(args.ver || ""))
           .find((release) => release.assets.find((asset) => minimatch(asset.name, binary)));
 
@@ -130,9 +147,17 @@ export async function getVersions(name: string, runtime = false) {
   if (!repo) {
     throw new Error(`Network not found for ${name}`);
   }
-  const url = `https://api.github.com/repos/${repo.ghAuthor}/${repo.ghRepo}/releases`;
-  const releases = (await (await fetch(url)).json()) as Release[];
-  const versions = releases
+
+  const releases = await octokit.rest.repos.listReleases({
+    owner: repo.ghAuthor,
+    repo: repo.ghRepo,
+  });
+
+  if (releases.status !== 200 || releases.data.length === 0) {
+    throw new Error(`No releases found for ${repo.ghAuthor}.${repo.ghRepo}, try again later.`);
+  }
+
+  const versions = releases.data
     .map((release) => {
       let tag = release.tag_name;
       if (release.tag_name.includes("v")) {
@@ -155,52 +180,4 @@ export async function getVersions(name: string, runtime = false) {
     : [...set].sort(
         (a, b) => (semver.valid(a) && semver.valid(b) ? semver.rcompare(a, b) : a) as any
       );
-}
-
-export interface Release {
-  url: string;
-  assets_url: string;
-  html_url: string;
-  id: number;
-  author: Author;
-  tag_name: string;
-  name: string;
-  draft: boolean;
-  prerelease: boolean;
-  created_at: string;
-  published_at: string;
-  assets: Asset[];
-  tarball_url: string;
-  zipball_url: string;
-  body: string;
-}
-
-export interface Author {
-  login: string;
-  id: number;
-  url: string;
-  repos_url: string;
-  type: string;
-}
-
-export interface Asset {
-  url: string;
-  id: number;
-  name: string;
-  label?: string;
-  uploader: Uploader;
-  content_type: string;
-  state: string;
-  size: number;
-  created_at: string;
-  updated_at: string;
-  browser_download_url: string;
-}
-
-export interface Uploader {
-  login: string;
-  id: number;
-  node_id: string;
-  url: string;
-  html_url: string;
 }

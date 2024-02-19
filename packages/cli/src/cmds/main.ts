@@ -5,7 +5,6 @@ import colors from "colors";
 import fs from "fs";
 import inquirer from "inquirer";
 import PressToContinuePrompt from "inquirer-press-to-continue";
-import fetch from "node-fetch";
 import path from "path";
 import { SemVer, lt } from "semver";
 import pkg from "../../package.json" assert { type: "json" };
@@ -21,6 +20,17 @@ import { configExists, importAsyncConfig } from "../lib/configReader";
 import { allReposAsync, standardRepos } from "../lib/repoDefinitions";
 import { runNetworkCmd } from "./runNetwork";
 import { testCmd } from "./runTests";
+import { Octokit } from "@octokit/rest";
+
+const octokit = new Octokit({
+  baseUrl: "https://api.github.com",
+  log: {
+    debug: () => {},
+    info: () => {},
+    warn: console.warn,
+    error: console.error,
+  },
+});
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
@@ -416,15 +426,18 @@ const resolveQuitChoice = async () => {
 const printIntro = async () => {
   const currentVersion = new SemVer(pkg.version);
 
-  interface GithubResponse {
-    tag_name: `${string}@${string}`;
-  }
-
   let remoteVersion = "";
   try {
-    const url = "https://api.github.com/repos/moonsong-labs/moonwall/releases";
-    const resp = await fetch(url);
-    const json = (await resp.json()) as GithubResponse[];
+    const releases = await octokit.rest.repos.listReleases({
+      owner: "moonsong-labs",
+      repo: "moonwall",
+    });
+
+    if (releases.status !== 200 || releases.data.length === 0) {
+      throw new Error("No releases found for moonsong-labs.moonwall, try again later.");
+    }
+    const json = releases.data;
+
     remoteVersion =
       json.find((a) => a.tag_name.includes("@moonwall/cli@"))?.tag_name.split("@")[2] || "unknown";
   } catch (error) {

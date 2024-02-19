@@ -66,6 +66,7 @@
     "@moonbeam-network/api-augment": "0.2700.0",
     "@moonwall/types": "workspace:*",
     "@moonwall/util": "workspace:*",
+    "@octokit/rest": "^20.0.2",
     "@polkadot/api": "10.11.2",
     "@polkadot/api-derive": "10.11.2",
     "@polkadot/keyring": "12.6.2",
