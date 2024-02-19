@@ -1,5 +1,5 @@
 import { promises as fsPromises } from "fs";
-import inquirer from "inquirer";
+import inquirer, { QuestionCollection, Question, ChoiceCollection } from "inquirer";
 import { parse } from "yaml";
 import { getEnvironmentFromConfig } from "../../lib/configReader";
 import { MoonwallContext } from "../../lib/globalContext";
@@ -54,7 +54,7 @@ export async function resolveChopsticksInteractiveCmdChoice() {
   );
   const port = parseInt(ports[0]);
 
-  const choices = [
+  const choices: ChoiceCollection = [
     { name: "🆗  Create Block", value: "createblock" },
     { name: "➡️  Create N Blocks", value: "createNBlocks" },
   ];
@@ -93,7 +93,7 @@ export async function resolveChopsticksInteractiveCmdChoice() {
       break;
 
     case "createNBlocks": {
-      const result = await new inquirer.prompt({
+      const result = await inquirer.prompt({
         name: "n",
         type: "number",
         message: "How many blocks? ",
@@ -105,7 +105,7 @@ export async function resolveChopsticksInteractiveCmdChoice() {
     }
 
     case "jumpToRound": {
-      const result = await new inquirer.prompt({
+      const result = await inquirer.prompt({
         name: "round",
         type: "number",
         message: "Which round to jump to (in future)? ",
@@ -116,7 +116,7 @@ export async function resolveChopsticksInteractiveCmdChoice() {
     }
 
     case "jumpRounds": {
-      const result = await new inquirer.prompt({
+      const result = await inquirer.prompt({
         name: "n",
         type: "number",
         message: "How many rounds? ",

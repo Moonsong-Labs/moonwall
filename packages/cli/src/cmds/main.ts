@@ -104,7 +104,7 @@ async function mainMenu(config?: MoonwallConfig) {
     filter(val) {
       return val;
     },
-  };
+  } as const;
 
   const answers = await inquirer.prompt(questionList);
 
@@ -283,7 +283,7 @@ async function resolveDownloadChoice() {
     acc.push("Back");
     acc.push(new inquirer.Separator());
     return acc;
-  }, [] as string[]);
+  }, [] as any[]);
 
   for (;;) {
     const firstChoice = await inquirer.prompt({

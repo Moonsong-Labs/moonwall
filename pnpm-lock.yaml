@@ -157,6 +157,9 @@ importers:
       '@types/debug':
         specifier: 4.1.12
         version: 4.1.12
+      '@types/inquirer':
+        specifier: ^9.0.7
+        version: 9.0.7
       '@types/node':
         specifier: 20.11.13
         version: 20.11.13

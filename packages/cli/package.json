@@ -111,6 +111,7 @@
     "@types/clear": "^0.1.4",
     "@types/cli-progress": "3.11.5",
     "@types/debug": "4.1.12",
+    "@types/inquirer": "^9.0.7",
     "@types/node": "20.11.13",
     "@types/semver": "^7.5.7",
     "@types/ws": "^8.5.10",
