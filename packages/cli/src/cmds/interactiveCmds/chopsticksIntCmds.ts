@@ -1,5 +1,5 @@
 import { promises as fsPromises } from "fs";
-import inquirer, { QuestionCollection, Question, ChoiceCollection } from "inquirer";
+import inquirer, { ChoiceCollection } from "inquirer";
 import { parse } from "yaml";
 import { getEnvironmentFromConfig } from "../../lib/configReader";
 import { MoonwallContext } from "../../lib/globalContext";
