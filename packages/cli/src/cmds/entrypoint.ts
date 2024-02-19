@@ -1,29 +1,18 @@
-import "../internal/logging";
 import "@moonbeam-network/api-augment";
 import dotenv from "dotenv";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
-import { fetchArtifact } from "../internal/cmdFunctions/fetchArtifact";
-import { generateConfig } from "../internal/cmdFunctions/initialisation";
+import { fetchArtifact, deriveTestIds, generateConfig, fetchArtifactArgs } from "../internal";
 import { main } from "./main";
 import { runNetworkCmd } from "./runNetwork";
 import { testCmd } from "./runTests";
+import { configSetup } from "../lib/configReader";
 dotenv.config();
 
-// Hack to expose config-path to all commands and fallback
-const parsed = yargs(hideBin(process.argv))
-  .options({
-    configFile: {
-      type: "string",
-      alias: "c",
-      description: "path to MoonwallConfig file",
-      default: "./moonwall.config.json",
-    },
-  })
-  .parseSync();
-process.env.MOON_CONFIG_PATH = parsed.configFile;
+configSetup(process.argv);
 
 yargs(hideBin(process.argv))
+  .wrap(null)
   .usage("Usage: $0")
   .version("2.0.0")
   .options({
@@ -31,25 +20,24 @@ yargs(hideBin(process.argv))
       type: "string",
       alias: "c",
       description: "path to MoonwallConfig file",
-      default: "./moonwall.config.json",
+      default: "moonwall.config.json",
     },
   })
-  .middleware((argv) => {
-    process.env.MOON_CONFIG_PATH = argv.configFile;
-  })
-  .command(`init`, "Run tests for a given Environment", async () => {
+  .command("init", "Run tests for a given Environment", async () => {
     await generateConfig();
   })
-  .command(
-    `download <bin> [ver] [path]`,
+  .command<fetchArtifactArgs>(
+    "download <bin> [ver] [path]",
     "Download x86 artifact from GitHub",
     (yargs) => {
       return yargs
         .positional("bin", {
           describe: "Name of artifact to download\n[ moonbeam | polkadot | *-runtime ]",
+          type: "string",
         })
         .positional("ver", {
           describe: "Artifact version to download",
+          type: "string",
           default: "latest",
         })
         .positional("path", {
@@ -61,7 +49,7 @@ yargs(hideBin(process.argv))
           describe: "If file exists, should it be overwritten?",
           type: "boolean",
           alias: "d",
-          default: true,
+          default: false,
         })
         .option("output-name", {
           describe: "Rename downloaded file to this name",
@@ -70,11 +58,11 @@ yargs(hideBin(process.argv))
         });
     },
     async (argv) => {
-      await fetchArtifact(argv as any);
+      await fetchArtifact(argv);
     }
   )
   .command(
-    `test <envName> [GrepTest]`,
+    "test <envName> [GrepTest]",
     "Run tests for a given Environment",
     (yargs) => {
       return yargs
@@ -91,7 +79,11 @@ yargs(hideBin(process.argv))
     async (args) => {
       if (args.envName) {
         process.env.MOON_RUN_SCRIPTS = "true";
-        if (!(await testCmd(args.envName.toString(), { testNamePattern: args.GrepTest }))) {
+        if (
+          !(await testCmd(args.envName.toString(), {
+            testNamePattern: args.GrepTest,
+          }))
+        ) {
           process.exitCode = 1;
         }
       } else {
@@ -102,7 +94,7 @@ yargs(hideBin(process.argv))
     }
   )
   .command(
-    `run <envName> [GrepTest]`,
+    "run <envName> [GrepTest]",
     "Start new network found in global config",
     (yargs) => {
       return yargs
@@ -117,6 +109,19 @@ yargs(hideBin(process.argv))
     async (argv) => {
       process.env.MOON_RUN_SCRIPTS = "true";
       await runNetworkCmd(argv as any);
+    }
+  )
+  .command<{ suitesRootDir: string }>(
+    "derive <suitesRootDir>",
+    "Derive test IDs based on positional order in the directory tree",
+    (yargs) => {
+      return yargs.positional("suitesRootDir", {
+        describe: "Root directory of the suites",
+        type: "string",
+      });
+    },
+    async (argv) => {
+      await deriveTestIds(argv.suitesRootDir);
     }
   )
   .demandCommand(1)

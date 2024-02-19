@@ -2,7 +2,6 @@ import { describeSuite, expect, beforeAll } from "@moonwall/cli";
 import { alith } from "@moonwall/util";
 import { parseEther } from "ethers";
 import { ApiPromise } from "@polkadot/api";
-import "@polkadot/api-augment";
 
 describeSuite({
   id: "D51",
@@ -19,7 +18,7 @@ describeSuite({
     it({
       id: "E01",
       title: "Balance starts at 0",
-      test: async function () {
+      test: async () => {
         const balanceBefore = (await api.query.system.account(DUMMY_ACCOUNT)).data.free;
         expect(balanceBefore.toString()).toEqual("0");
 
@@ -33,7 +32,7 @@ describeSuite({
     it({
       id: "E02",
       title: "State kept between tests",
-      test: async function () {
+      test: async () => {
         const balanceBefore = (await api.query.system.account(DUMMY_ACCOUNT)).data.free;
         expect(balanceBefore.toString()).toEqual(parseEther("1").toString());
 

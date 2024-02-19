@@ -2,41 +2,49 @@ import { MoonwallConfig } from "@moonwall/types";
 import chalk from "chalk";
 import clear from "clear";
 import colors from "colors";
+import fs from "fs";
 import inquirer from "inquirer";
 import PressToContinuePrompt from "inquirer-press-to-continue";
-import fetch from "node-fetch";
+import path from "path";
 import { SemVer, lt } from "semver";
 import pkg from "../../package.json" assert { type: "json" };
-import { fetchArtifact, getVersions } from "../internal/cmdFunctions/fetchArtifact";
-import { createFolders, generateConfig } from "../internal/cmdFunctions/initialisation";
-import { importAsyncConfig } from "../lib/configReader";
-import { allReposAsync } from "../lib/repoDefinitions";
+import {
+  createFolders,
+  deriveTestIds,
+  executeScript,
+  fetchArtifact,
+  generateConfig,
+  getVersions,
+} from "../internal";
+import { configExists, importAsyncConfig } from "../lib/configReader";
+import { allReposAsync, standardRepos } from "../lib/repoDefinitions";
 import { runNetworkCmd } from "./runNetwork";
 import { testCmd } from "./runTests";
-import fs from "fs";
-import { executeScript } from "../internal/launcherCommon";
-import path from "path";
+import { Octokit } from "@octokit/rest";
+
+const octokit = new Octokit({
+  baseUrl: "https://api.github.com",
+  log: {
+    debug: () => {},
+    info: () => {},
+    warn: console.warn,
+    error: console.error,
+  },
+});
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
 export async function main() {
   for (;;) {
-    let globalConfig: MoonwallConfig | undefined;
-    try {
-      globalConfig = await importAsyncConfig();
-    } catch (e) {
-      console.log(e);
-    }
+    const globalConfig = (await configExists()) ? await importAsyncConfig() : undefined;
     clear();
     await printIntro();
     if (await mainMenu(globalConfig)) {
       break;
-    } else {
-      continue;
     }
   }
 
-  process.stdout.write(`Goodbye! 👋\n`);
+  process.stdout.write("Goodbye! 👋\n");
 }
 
 async function mainMenu(config?: MoonwallConfig) {
@@ -44,7 +52,7 @@ async function mainMenu(config?: MoonwallConfig) {
   const questionList = {
     name: "MenuChoice",
     type: "list",
-    message: `Main Menu - Please select one of the following:`,
+    message: "Main Menu - Please select one of the following:",
     default: 0,
     pageSize: 12,
     choices: !configPresent
@@ -60,17 +68,17 @@ async function mainMenu(config?: MoonwallConfig) {
             value: "download",
           },
           {
-            name: `3) Quit Application`,
+            name: "3) Quit Application",
             value: "quit",
           },
         ]
       : [
           {
-            name: `1) Execute Script:                     Run scripts placed in your config defined script directory`,
+            name: "1) Execute Script:                     Run scripts placed in your config defined script directory",
             value: "exec",
           },
           {
-            name: `2) Network Launcher & Toolbox:         Launch network, access tools: tail logs, interactive tests etc`,
+            name: "2) Network Launcher & Toolbox:         Launch network, access tools: tail logs, interactive tests etc",
             value: "run",
           },
           {
@@ -82,15 +90,21 @@ async function mainMenu(config?: MoonwallConfig) {
             name: "4) Artifact Downloader:                Fetch artifacts (x86) from GitHub repos",
             value: "download",
           },
+
           {
-            name: `5) Quit Application`,
+            name: "5) Rename TestIDs:                     Rename test id prefixes based on position in the directory tree",
+            value: "derive",
+          },
+
+          {
+            name: "6) Quit Application",
             value: "quit",
           },
         ],
     filter(val) {
       return val;
     },
-  };
+  } as const;
 
   const answers = await inquirer.prompt(questionList);
 
@@ -100,7 +114,11 @@ async function mainMenu(config?: MoonwallConfig) {
       await createFolders();
       return false;
     case "run": {
-      const chosenRunEnv = await chooseRunEnv(config!);
+      if (!config) {
+        throw new Error("Config not defined, this is a defect please raise it.");
+      }
+
+      const chosenRunEnv = await chooseRunEnv(config);
       process.env.MOON_RUN_SCRIPTS = "true";
       if (chosenRunEnv.envName !== "back") {
         await runNetworkCmd(chosenRunEnv);
@@ -108,7 +126,11 @@ async function mainMenu(config?: MoonwallConfig) {
       return true;
     }
     case "test": {
-      const chosenTestEnv = await chooseTestEnv(config!);
+      if (!config) {
+        throw new Error("Config not defined, this is a defect please raise it.");
+      }
+
+      const chosenTestEnv = await chooseTestEnv(config);
       if (chosenTestEnv.envName !== "back") {
         process.env.MOON_RUN_SCRIPTS = "true";
         await testCmd(chosenTestEnv.envName);
@@ -130,8 +152,34 @@ async function mainMenu(config?: MoonwallConfig) {
     case "quit":
       return await resolveQuitChoice();
 
-    case "exec":
-      return await resolveExecChoice(config!);
+    case "exec": {
+      if (!config) {
+        throw new Error("Config not defined, this is a defect please raise it.");
+      }
+      return await resolveExecChoice(config);
+    }
+
+    case "derive": {
+      clear();
+      const { rootDir } = await inquirer.prompt({
+        name: "rootDir",
+        type: "input",
+        message: "Enter the root testSuites directory to process:",
+        default: "suites",
+      });
+      await deriveTestIds(rootDir);
+
+      await inquirer.prompt({
+        name: "test complete",
+        type: "press-to-continue",
+        anyKey: true,
+        pressToContinueMessage: `ℹ️  Renaming task for ${chalk.bold(
+          `/${rootDir}`
+        )} has been completed. Press any key to continue...\n`,
+      });
+
+      return false;
+    }
 
     default:
       throw new Error("Invalid choice");
@@ -201,9 +249,8 @@ async function resolveExecChoice(config: MoonwallConfig) {
 
       if (result["none-selected"]) {
         return false;
-      } else {
-        continue;
       }
+      continue;
     }
 
     for (const script of result.selections) {
@@ -222,26 +269,27 @@ async function resolveExecChoice(config: MoonwallConfig) {
       name: "test complete",
       type: "press-to-continue",
       anyKey: true,
-      pressToContinueMessage: `Press any key to continue...\n`,
+      pressToContinueMessage: "Press any key to continue...\n",
     });
     return false;
   }
 }
 
 async function resolveDownloadChoice() {
-  const binList = (await allReposAsync()).reduce((acc, curr) => {
-    acc.push(...curr.binaries.map((bin) => bin.name).flat());
+  const repos = (await configExists()) ? await allReposAsync() : standardRepos();
+  const binList = repos.reduce((acc, curr) => {
+    acc.push(...curr.binaries.flatMap((bin) => bin.name));
     acc.push(new inquirer.Separator());
     acc.push("Back");
     acc.push(new inquirer.Separator());
     return acc;
-  }, [] as string[]);
+  }, [] as any[]);
 
   for (;;) {
     const firstChoice = await inquirer.prompt({
       name: "artifact",
       type: "list",
-      message: `Download - which artifact?`,
+      message: "Download - which artifact?",
       choices: binList,
     });
     if (firstChoice.artifact === "Back") {
@@ -257,7 +305,7 @@ async function resolveDownloadChoice() {
       name: "binVersion",
       type: "list",
       default: "latest",
-      message: `Download - which version?`,
+      message: "Download - which version?",
       choices: [...versions, new inquirer.Separator(), "Back", new inquirer.Separator()],
     });
 
@@ -267,7 +315,7 @@ async function resolveDownloadChoice() {
     const chooseLocation = await inquirer.prompt({
       name: "path",
       type: "input",
-      message: `Download - where would you like it placed?`,
+      message: "Download - where would you like it placed?",
       default: "./tmp",
     });
 
@@ -295,7 +343,7 @@ async function resolveDownloadChoice() {
       name: "NetworkStarted",
       type: "press-to-continue",
       anyKey: true,
-      pressToContinueMessage: `✅ Artifact has been downloaded. Press any key to continue...\n`,
+      pressToContinueMessage: "Press any key to continue...\n",
     });
     return;
   }
@@ -304,7 +352,7 @@ async function resolveDownloadChoice() {
 const chooseTestEnv = async (config: MoonwallConfig) => {
   const envs = config.environments
     .map((a) => ({
-      name: `[${a.foundation.type}] ${a.name}${a.description ? ": \t\t" + a.description : ""}`,
+      name: `[${a.foundation.type}] ${a.name}${a.description ? `: \t\t${a.description}` : ""}`,
       value: a.name,
       disabled: false,
     }))
@@ -336,7 +384,7 @@ const chooseRunEnv = async (config: MoonwallConfig) => {
       a.foundation.type === "zombie"
     ) {
       result.name = `[${a.foundation.type}] ${a.name}${
-        a.description ? ": \t\t" + a.description : ""
+        a.description ? `: \t\t${a.description}` : ""
       }`;
     } else {
       result.name = chalk.dim(`[${a.foundation.type}] ${a.name}     NO NETWORK TO RUN`);
@@ -378,16 +426,20 @@ const resolveQuitChoice = async () => {
 const printIntro = async () => {
   const currentVersion = new SemVer(pkg.version);
 
-  interface GithubResponse {
-    tag_name: `${string}@${string}`;
-  }
-
   let remoteVersion = "";
   try {
-    const url = "https://api.github.com/repos/moonsong-labs/moonwall/releases";
-    const resp = await fetch(url);
-    const json = (await resp.json()) as GithubResponse[];
-    remoteVersion = json.find((a) => a.tag_name.includes("@moonwall/cli@"))!.tag_name.split("@")[2];
+    const releases = await octokit.rest.repos.listReleases({
+      owner: "moonsong-labs",
+      repo: "moonwall",
+    });
+
+    if (releases.status !== 200 || releases.data.length === 0) {
+      throw new Error("No releases found for moonsong-labs.moonwall, try again later.");
+    }
+    const json = releases.data;
+
+    remoteVersion =
+      json.find((a) => a.tag_name.includes("@moonwall/cli@"))?.tag_name.split("@")[2] || "unknown";
   } catch (error) {
     remoteVersion = "unknown";
     console.error(`Fetch Error: ${error}`);

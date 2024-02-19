@@ -8,7 +8,7 @@ describeSuite({
     it({
       id: "T01",
       title: "Passing Test",
-      test: async function () {
+      test: async () => {
         expect(true).to.be.true;
       },
     });
@@ -16,7 +16,7 @@ describeSuite({
     it({
       id: "T02",
       title: "another passing test",
-      test: function () {
+      test: () => {
         expect("true").to.contain("true");
       },
     });

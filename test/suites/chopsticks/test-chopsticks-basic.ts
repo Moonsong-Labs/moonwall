@@ -8,18 +8,18 @@ describeSuite({
   title: "Basic chopsticks test",
   foundationMethods: "chopsticks",
   testCases: ({ context, it, log }) => {
-
-    beforeAll(() => {
-    });
+    beforeAll(() => {});
 
     it({
       id: "T01",
       title: "Query the chain",
       timeout: 60000,
       // modifier:"only",
-      test: async function () {
+      test: async () => {
         const chainName = context.polkadotJs().consts.system.version.specName.toString();
-        const currentBlockHeight = (await context.polkadotJs().rpc.chain.getHeader()).number.toNumber();
+        const currentBlockHeight = (
+          await context.polkadotJs().rpc.chain.getHeader()
+        ).number.toNumber();
         log(`You are now connected to ${chainName} at height #${currentBlockHeight}`);
         expect(currentBlockHeight).toBeGreaterThan(0);
         expect(["dancebox", "moonriver", "moonbeam"].includes(chainName)).toBe(true);
@@ -33,12 +33,17 @@ describeSuite({
       id: "T02",
       title: "Send a transaction ",
       timeout: 60000,
-      test: async function () {
-        const currentBalance = (await context.polkadotJs().query.system.account(ETHAN_ADDRESS)).data.free;
-        await context.polkadotJs().tx.balances.transferAllowDeath(ETHAN_ADDRESS, parseEther("10")).signAndSend(alith);
+      test: async () => {
+        const currentBalance = (await context.polkadotJs().query.system.account(ETHAN_ADDRESS)).data
+          .free;
+        await context
+          .polkadotJs()
+          .tx.balances.transferAllowDeath(ETHAN_ADDRESS, parseEther("10"))
+          .signAndSend(alith);
         await context.createBlock();
 
-        const balanceAfter = (await context.polkadotJs().query.system.account(ETHAN_ADDRESS)).data.free;
+        const balanceAfter = (await context.polkadotJs().query.system.account(ETHAN_ADDRESS)).data
+          .free;
         expect(currentBalance.lt(balanceAfter)).toBeTruthy();
       },
     });
@@ -47,7 +52,7 @@ describeSuite({
       id: "T03",
       title: "Skips multiple blocks ",
       timeout: 60000,
-      test: async function () {
+      test: async () => {
         const currentBlock = (await context.polkadotJs().rpc.chain.getHeader()).number.toNumber();
         await context.createBlock({ count: 3 });
         const laterBlock = (await context.polkadotJs().rpc.chain.getHeader()).number.toNumber();
@@ -59,7 +64,7 @@ describeSuite({
       id: "T04",
       title: "Can overwrite storage values",
       timeout: 60000,
-      test: async function () {
+      test: async () => {
         const storageValue = [
           [
             ["0x3Cd0A705a2DC65e5b1E1205896BaA2be8A07c6e0"],
@@ -68,7 +73,9 @@ describeSuite({
         ];
 
         const balBefore = (
-          await context.polkadotJs().query.system.account("0x3Cd0A705a2DC65e5b1E1205896BaA2be8A07c6e0")
+          await context
+            .polkadotJs()
+            .query.system.account("0x3Cd0A705a2DC65e5b1E1205896BaA2be8A07c6e0")
         ).data.free;
 
         await context.setStorage({
@@ -78,7 +85,9 @@ describeSuite({
         });
         await context.createBlock();
         const balAfter = (
-          await context.polkadotJs().query.system.account("0x3Cd0A705a2DC65e5b1E1205896BaA2be8A07c6e0")
+          await context
+            .polkadotJs()
+            .query.system.account("0x3Cd0A705a2DC65e5b1E1205896BaA2be8A07c6e0")
         ).data.free;
         log(
           `Balance of 0x3Cd0A705a2DC65e5b1E1205896BaA2be8A07c6e0 before: ${formatEther(
@@ -95,7 +104,7 @@ describeSuite({
       title: "Do an upgrade test",
       timeout: 120000,
       modifier: "skip",
-      test: async function () {
+      test: async () => {
         const rtBefore = context.polkadotJs().consts.system.version.specVersion.toNumber();
         const ctx = await MoonwallContext.getContext();
         log(ctx.rtUpgradePath);
@@ -109,7 +118,7 @@ describeSuite({
       id: "T06",
       title: "Create block and check events",
       timeout: 60000,
-      test: async function () {
+      test: async () => {
         const expectEvents = [
           context.polkadotJs().events.system.ExtrinsicSuccess,
           context.polkadotJs().events.balances.Transfer,
@@ -117,7 +126,10 @@ describeSuite({
           // context.polkadotJs().events.authorFilter.EligibleUpdated
         ];
 
-        await context.polkadotJs().tx.balances.transferAllowDeath(CHARLETH_ADDRESS, parseEther("3")).signAndSend(alith);
+        await context
+          .polkadotJs()
+          .tx.balances.transferAllowDeath(CHARLETH_ADDRESS, parseEther("3"))
+          .signAndSend(alith);
         await context.createBlock({ expectEvents, logger: log });
       },
     });
@@ -126,9 +138,10 @@ describeSuite({
       id: "T07",
       title: "Create block, allow failures and check events",
       timeout: 60000,
-      test: async function () {
-        await context.polkadotJs().tx.balances
-          .forceTransfer(BALTATHAR_ADDRESS, CHARLETH_ADDRESS, parseEther("3"))
+      test: async () => {
+        await context
+          .polkadotJs()
+          .tx.balances.forceTransfer(BALTATHAR_ADDRESS, CHARLETH_ADDRESS, parseEther("3"))
           .signAndSend(alith);
         // await context.polkadotJs().tx.balances.transferAllowDeath(CHARLETH_ADDRESS, parseEther("3")).signAndSend(alith);
         const { result } = await context.createBlock({ allowFailures: true });

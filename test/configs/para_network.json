@@ -1,46 +1,58 @@
 {
-  "settings": {
-    "timeout": 1000,
-    "provider": "native"
-  },
-  "relaychain": {
-    "chain": "rococo-local",
-    "default_command": "tmp/polkadot",
-    "default_args": ["--no-hardware-benchmarks", "-lparachain=debug", "--database=paritydb"],
-    "nodes": [
-      {
-        "name": "alice",
-        "validator": true
-      },
-      {
-        "name": "bob",
-        "validator": true
-      }
-    ]
-  },
-  "parachains": [
-    {
-      "chain": "moonbase-local",
-      "id": 2000,
-      "collators": [
-        {
-          "args": ["--no-hardware-benchmarks", "-lparachain=debug", "--database=paritydb"],
-          "command": "tmp/moonbeam",
-          "name": "alith"
-        },
-        {
-          "args": ["--no-hardware-benchmarks", "-lparachain=debug", "--database=paritydb"],
-          "command": "tmp/moonbeam",
-          "name": "baltathar"
-        }
-      ]
-    }
-  ],
-  "types": {
-    "Header": {
-      "number": "u64",
-      "parent_hash": "Hash",
-      "post_state": "Hash"
-    }
-  }
+	"settings": {
+		"timeout": 1000,
+		"provider": "native"
+	},
+	"relaychain": {
+		"chain": "rococo-local",
+		"default_command": "tmp/polkadot",
+		"default_args": [
+			"--no-hardware-benchmarks",
+			"-lparachain=debug",
+			"--database=paritydb"
+		],
+		"nodes": [
+			{
+				"name": "alice",
+				"validator": true
+			},
+			{
+				"name": "bob",
+				"validator": true
+			}
+		]
+	},
+	"parachains": [
+		{
+			"chain": "moonbase-local",
+			"id": 2000,
+			"collators": [
+				{
+					"args": [
+						"--no-hardware-benchmarks",
+						"-lparachain=debug",
+						"--database=paritydb"
+					],
+					"command": "tmp/moonbeam",
+					"name": "alith"
+				},
+				{
+					"args": [
+						"--no-hardware-benchmarks",
+						"-lparachain=debug",
+						"--database=paritydb"
+					],
+					"command": "tmp/moonbeam",
+					"name": "baltathar"
+				}
+			]
+		}
+	],
+	"types": {
+		"Header": {
+			"number": "u64",
+			"parent_hash": "Hash",
+			"post_state": "Hash"
+		}
+	}
 }

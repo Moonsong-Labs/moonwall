@@ -1,24 +1,28 @@
 {
   "compilerOptions": {
+    "types": ["node"],
+
+    "lib": ["ESNext"],
     "target": "esnext",
     "module": "esnext",
     "baseUrl": "./",
-    "lib": ["ESNext"],
-    "declaration": true,
-    "outDir": "./dist",
+
     "moduleResolution": "Bundler",
-    "allowSyntheticDefaultImports": true,
-    "importHelpers": false,
-    "skipLibCheck": true,
-    "preserveSymlinks": true,
+
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "moduleDetection": "force",
+    "importHelpers": true,
     "skipDefaultLibCheck": true,
     "preserveConstEnums": true,
-    "noImplicitAny": false,
     "sourceMap": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "noEmit": true,
-    "strict": true
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "noImplicitAny": false
+
   },
   "exclude": ["**/dist/**", "./packages/*/*.d.ts", "./packages/*/*.d.cts", "node_modules"]
 }

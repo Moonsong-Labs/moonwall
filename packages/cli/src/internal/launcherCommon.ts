@@ -10,16 +10,16 @@ export async function commonChecks(env: Environment) {
   const globalConfig = await importAsyncConfig();
 
   // TODO: This is begging for some Dependency Injection
-  if (env.foundation.type == "dev") {
+  if (env.foundation.type === "dev") {
     await devBinCheck(env);
   }
 
-  if (env.foundation.type == "zombie") {
+  if (env.foundation.type === "zombie") {
     await zombieBinCheck(env);
   }
 
   if (
-    process.env.MOON_RUN_SCRIPTS == "true" &&
+    process.env.MOON_RUN_SCRIPTS === "true" &&
     globalConfig.scriptsDir &&
     env.runScripts &&
     env.runScripts.length > 0
@@ -37,7 +37,7 @@ async function zombieBinCheck(env: Environment) {
 
   const bins = parseZombieConfigForBins(env.foundation.zombieSpec.configPath);
   const pids = bins.flatMap((bin) => checkAlreadyRunning(bin));
-  pids.length == 0 || process.env.CI || (await promptAlreadyRunning(pids));
+  pids.length === 0 || process.env.CI || (await promptAlreadyRunning(pids));
 }
 
 async function devBinCheck(env: Environment) {
@@ -47,7 +47,7 @@ async function devBinCheck(env: Environment) {
 
   const binName = path.basename(env.foundation.launchSpec[0].binPath);
   const pids = checkAlreadyRunning(binName);
-  pids.length == 0 || process.env.CI || (await promptAlreadyRunning(pids));
+  pids.length === 0 || process.env.CI || (await promptAlreadyRunning(pids));
   await downloadBinsIfMissing(env.foundation.launchSpec[0].binPath);
 }
 
@@ -73,13 +73,13 @@ export async function executeScript(scriptCommand: string, args?: string) {
 
     switch (ext) {
       case ".js":
-        execSync("node " + scriptPath + ` ${args}`, { stdio: "inherit" });
+        execSync(`node ${scriptPath} ${args}`, { stdio: "inherit" });
         break;
       case ".ts":
-        execSync("pnpm tsx " + scriptPath + ` ${args}`, { stdio: "inherit" });
+        execSync(`pnpm tsx ${scriptPath} ${args}`, { stdio: "inherit" });
         break;
       case ".sh":
-        execSync(scriptPath + ` ${args}`, { stdio: "inherit" });
+        execSync(`${scriptPath} ${args}`, { stdio: "inherit" });
         break;
       default:
         console.log(`${ext} not supported, skipping ${script}`);

@@ -3,10 +3,7 @@ import fs from "fs";
 import path from "path";
 import type { Abi } from "viem";
 
-export function getAllCompiledContracts(
-  contractsDir: string = "./",
-  recurse: boolean = false
-): string[] {
+export function getAllCompiledContracts(contractsDir = "./", recurse = false): string[] {
   const contractsPath = path.isAbsolute(contractsDir)
     ? contractsDir
     : path.join(process.cwd(), contractsDir);
@@ -14,7 +11,7 @@ export function getAllCompiledContracts(
 
   let contractNames: string[] = [];
 
-  contracts.forEach((dirent) => {
+  for (const dirent of contracts) {
     const fullDirentPath = path.join(contractsPath, dirent.name);
 
     if (dirent.isDirectory() && recurse) {
@@ -22,7 +19,7 @@ export function getAllCompiledContracts(
     } else if (dirent.isFile() && path.extname(dirent.name) === ".json") {
       contractNames.push(path.basename(dirent.name, ".json"));
     }
-  });
+  }
 
   return contractNames;
 }

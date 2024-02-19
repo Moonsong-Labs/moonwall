@@ -6,7 +6,11 @@ import { setTimeout as timer } from "timers/promises";
 import net from "net";
 
 export async function checkZombieBins(config: LaunchConfig) {
-  const relayBinPath = config.relaychain.default_command!;
+  const relayBinPath = config.relaychain.default_command;
+
+  if (!relayBinPath) {
+    throw new Error("No relayBinPath '[relaychain.default_command]' specified in zombie config");
+  }
   await checkExists(relayBinPath);
   checkAccess(relayBinPath);
 
@@ -22,15 +26,24 @@ export async function checkZombieBins(config: LaunchConfig) {
     }
 
     if (para.collators) {
-      para.collators.forEach((coll) => {
+      for (const coll of para.collators) {
         if (!coll.command) {
           throw new Error(
-            "No command found for collators, please check your zombienet config file for para collators command"
+            "No command found for collators, please check your zombienet config file for collators command"
           );
         }
         checkExists(coll.command);
         checkAccess(coll.command);
-      });
+      }
+      // para.collators.forEach((coll) => {
+      //   if (!coll.command) {
+      //     throw new Error(
+      //       "No command found for collators, please check your zombienet config file for para collators command"
+      //     );
+      //   }
+      //   checkExists(coll.command);
+      //   checkAccess(coll.command);
+      // });
     }
   });
   await Promise.all(promises);
@@ -85,7 +98,7 @@ export async function sendIpcMessage(message: IPCRequestMessage): Promise<IPCRes
           }
 
           if (i > 100) {
-            reject(new Error(`Closing IPC connection failed`));
+            reject(new Error("Closing IPC connection failed"));
           }
           await timer(200);
         }

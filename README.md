@@ -1,7 +1,7 @@
 ## Description
-![moonwall](./moonwall.png)
+![moonwall](resource/moonwall.png)
 
-Test framework for testing on Moonbeam, Moonriver and more
+Moonwall is a comprehensive blockchain test framework for Substrate-based networks
 
 ## Installation
 
@@ -28,10 +28,10 @@ import { ALITH_ADDRESS } from "@moonwall/util";
 
 ## Functions
 
-- Init: Generates a new config file.
-- Run: Runs a network.
-- Test: Executes tests, and runs a network if neccesary.
-- Download: Gets node binaries for polkadot, moonbeam from GH.
+1. Execute Script: Run scripts placed in your config defined script directory.
+2. Network Launcher & Toolbox: Launch network, access tools: tail logs, interactive tests etc.
+3. Test Suite Execution: Run automated tests, start network if needed.
+4. Artifact Downloader: Fetch artifacts (x86) from GitHub repos.
 
 > :information_source: Use `--help` for more information about arguments for each command
 
@@ -41,11 +41,11 @@ import { ALITH_ADDRESS } from "@moonwall/util";
 
 - `pnpm moonwall` : This can be used if locally installed, and will launch the main menu..
 
-- `pnpx @moonwall/cli run <ENV_NAME>` : To download and run the latest moonwall binary from npm.js repository, and run a network specified in your config file.
+- `pnpm moonwall run <ENV_NAME>` : Run a network specified in your config file.
 
-- `pnpm exec moonwall test <ENV_NAME>` : To run the locally compiled version of the binary, to start network and run tests against it.
+- `pnpm moonwall test <ENV_NAME>` : Start network and run tests against it.
 
-- `pnpm moonwall download <ARTIFACT NAME> <VERSION> <PATH>` : To run the locally compiled version of the binary, to download an artifact directly from github.
+- `pnpm moonwall download <ARTIFACT NAME> <VERSION> <PATH>` : Download an artifact directly from github.
 
 
 The combinations are endless, for more information you can see the pnpm docs [here](https://pnpm.io/cli/run).

@@ -28,6 +28,7 @@ import {
   vitestAutoUrl,
 } from "../internal/providerFactories";
 import {
+  getEnvironmentFromConfig,
   importAsyncConfig,
   isEthereumDevConfig,
   isEthereumZombieConfig,
@@ -38,7 +39,7 @@ const debugSetup = Debug("global:context");
 
 export class MoonwallContext {
   private static instance: MoonwallContext | undefined;
-  configured: boolean = false;
+  configured = false;
   environment!: MoonwallEnvironment;
   providers: ConnectedProvider[];
   nodes: ChildProcess[];
@@ -48,7 +49,12 @@ export class MoonwallContext {
   ipcServer?: net.Server;
 
   constructor(config: MoonwallConfig) {
-    const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
+    const env = config.environments.find(({ name }) => name === process.env.MOON_TEST_ENV);
+
+    if (!env) {
+      throw new Error(`Environment ${process.env.MOON_TEST_ENV} not found in config`);
+    }
+
     this.providers = [];
     this.nodes = [];
     this.foundation = env.foundation.type;
@@ -56,7 +62,12 @@ export class MoonwallContext {
 
   public async setupFoundation() {
     const config = await importAsyncConfig();
-    const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
+    const env = config.environments.find(({ name }) => name === process.env.MOON_TEST_ENV);
+
+    if (!env) {
+      throw new Error(`Environment ${process.env.MOON_TEST_ENV} not found in config`);
+    }
+
     const foundationHandlers: Record<
       FoundationType,
       (env: Environment, config: MoonwallConfig) => Promise<IGlobalContextFoundation>
@@ -104,7 +115,7 @@ export class MoonwallContext {
     }
 
     const { cmd, args, launch } = await parseRunCmd(
-      env.foundation.launchSpec![0],
+      env.foundation.launchSpec[0],
       config.additionalRepos
     );
 
@@ -113,7 +124,7 @@ export class MoonwallContext {
       foundationType: "dev",
       nodes: [
         {
-          name: env.foundation.launchSpec![0].name,
+          name: env.foundation.launchSpec[0].name,
           cmd,
           args,
           launch,
@@ -155,19 +166,23 @@ export class MoonwallContext {
       throw new Error(`Foundation type must be 'chopsticks'`);
     }
 
+    if (!env.connections || env.connections.length === 0) {
+      throw new Error(
+        `${env.name} env config is missing connections specification, required by foundation CHOPSTICKS`
+      );
+    }
+
     this.rtUpgradePath = env.foundation.rtUpgradePath;
     return {
       name: env.name,
       foundationType: "chopsticks",
-      nodes: [parseChopsticksRunCmd(env.foundation.launchSpec!)],
-      providers: [...ProviderFactory.prepare(env.connections!)],
+      nodes: [parseChopsticksRunCmd(env.foundation.launchSpec)],
+      providers: [...ProviderFactory.prepare(env.connections)],
     } satisfies IGlobalContextFoundation;
   }
 
   private async startZombieNetwork() {
-    const config = await importAsyncConfig();
-    const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
-
+    const env = getEnvironmentFromConfig();
     if (env.foundation.type !== "zombie") {
       throw new Error(`Foundation type must be 'zombie', something has gone very wrong.`);
     }
@@ -189,9 +204,13 @@ export class MoonwallContext {
 
     const onProcessExit = () => {
       try {
-        const processIds = Object.values((this.zombieNetwork!.client as any).processMap)
-          .filter((item) => item!["pid"])
-          .map((process) => process!["pid"]);
+        if (!this.zombieNetwork) {
+          throw "Zombie network not found to kill";
+        }
+
+        const processIds = Object.values((this.zombieNetwork.client as any).processMap)
+          .filter((item: any) => item.pid)
+          .map((process: any) => process.pid);
         exec(`kill ${processIds.join(" ")}`, (error) => {
           if (error) {
             console.error(`Error killing process: ${error.message}`);
@@ -310,7 +329,11 @@ export class MoonwallContext {
         } catch (e: any) {
           console.log("📨 Error processing message from client:", data.toString());
           console.error(e.message);
-          writeToClient({ status: "failure", result: false, message: e.message });
+          writeToClient({
+            status: "failure",
+            result: false,
+            message: e.message,
+          });
         }
       });
     });
@@ -331,11 +354,10 @@ export class MoonwallContext {
 
   public async startNetwork() {
     const ctx = await MoonwallContext.getContext();
-    if (process.env.MOON_RECYCLE == "true") {
+    if (process.env.MOON_RECYCLE === "true") {
       return ctx;
     }
 
-    // const activeNodes = this.nodes.filter((node) => !node.killed);
     if (this.nodes.length > 0) {
       return ctx;
     }
@@ -347,7 +369,7 @@ export class MoonwallContext {
 
     const promises = nodes.map(async ({ cmd, args, name, launch }) => {
       if (launch) {
-        const { runningNode } = await launchNode(cmd, args, name!);
+        const { runningNode } = await launchNode(cmd, args, name || "node");
         this.nodes.push(runningNode);
       } else {
         return Promise.resolve();
@@ -358,11 +380,10 @@ export class MoonwallContext {
     return ctx;
   }
 
-  public async connectEnvironment(silent: boolean = false): Promise<MoonwallContext> {
-    const config = await importAsyncConfig();
-    const env = config.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
+  public async connectEnvironment(silent = false): Promise<MoonwallContext> {
+    const env = getEnvironmentFromConfig();
 
-    if (this.environment.foundationType == "zombie") {
+    if (this.environment.foundationType === "zombie") {
       this.environment.providers = env.connections
         ? ProviderFactory.prepare(env.connections)
         : isEthereumZombieConfig()
@@ -383,12 +404,18 @@ export class MoonwallContext {
     );
     await Promise.all(promises);
 
-    if (this.foundation == "zombie") {
-      let readStreams: any[];
+    if (this.foundation === "zombie") {
+      let readStreams: any[] = [];
       if (!isOptionSet("disableLogEavesdropping")) {
         !silent && console.log(`🦻 Eavesdropping on node logs at ${process.env.MOON_ZOMBIE_DIR}`);
-        const zombieNodeLogs = process.env
-          .MOON_ZOMBIE_NODES!.split("|")
+
+        const envVar = process.env.MOON_ZOMBIE_NODES;
+
+        if (!envVar) {
+          throw new Error("MOON_ZOMBIE_NODES not set, this is an error please raise.");
+        }
+        const zombieNodeLogs = envVar
+          .split("|")
           .map((nodeName) => `${process.env.MOON_ZOMBIE_DIR}/${nodeName}.log`);
 
         readStreams = zombieNodeLogs.map((logPath) => {
@@ -407,10 +434,10 @@ export class MoonwallContext {
       }
 
       const promises = this.providers
-        .filter(({ type }) => type == "polkadotJs")
+        .filter(({ type }) => type === "polkadotJs")
         .filter(
           ({ name }) =>
-            env.foundation.type == "zombie" &&
+            env.foundation.type === "zombie" &&
             (!env.foundation.zombieSpec.skipBlockCheck ||
               !env.foundation.zombieSpec.skipBlockCheck.includes(name))
         )
@@ -420,7 +447,7 @@ export class MoonwallContext {
             while (
               (
                 await (provider.api as ApiPromise).rpc.chain.getBlock()
-              ).block.header.number.toNumber() == 0
+              ).block.header.number.toNumber() === 0
             ) {
               await timer(500);
             }
@@ -432,7 +459,10 @@ export class MoonwallContext {
       await Promise.all(promises);
 
       if (!isOptionSet("disableLogEavesdropping")) {
-        readStreams!.forEach((readStream) => readStream.close());
+        for (const readStream of readStreams) {
+          readStream.close();
+        }
+        // readStreams.forEach((readStream) => readStream.close());
       }
     }
 
@@ -441,18 +471,20 @@ export class MoonwallContext {
 
   public async disconnect(providerName?: string) {
     if (providerName) {
-      this.providers.find(({ name }) => name === providerName)!.disconnect();
-      this.providers.filter(({ name }) => name !== providerName);
+      const prov = this.providers.find(({ name }) => name === providerName);
+
+      if (!prov) {
+        throw new Error(`Provider ${providerName} not found`);
+      }
+
+      prov.disconnect();
     } else {
       await Promise.all(this.providers.map((prov) => prov.disconnect()));
       this.providers = [];
     }
   }
 
-  public static async getContext(
-    config?: MoonwallConfig,
-    force: boolean = false
-  ): Promise<MoonwallContext> {
+  public static async getContext(config?: MoonwallConfig, force = false): Promise<MoonwallContext> {
     if (!MoonwallContext.instance?.configured || force) {
       if (!config) {
         throw new Error("❌ Config must be provided on Global Context instantiation");
@@ -465,7 +497,7 @@ export class MoonwallContext {
   }
 
   public static async destroy() {
-    const ctx = this.instance;
+    const ctx = MoonwallContext.instance;
 
     if (!ctx) {
       throw new Error("❌  No context to destroy");
@@ -505,8 +537,8 @@ export class MoonwallContext {
       console.log("🪓  Killing zombie nodes");
       await ctx.zombieNetwork.stop();
       const processIds = Object.values((ctx.zombieNetwork.client as any).processMap)
-        .filter((item) => item!["pid"])
-        .map((process) => process!["pid"]);
+        .filter((item: any) => item.pid)
+        .map((process: any) => process.pid);
 
       try {
         execSync(`kill ${processIds.join(" ")}`, {});

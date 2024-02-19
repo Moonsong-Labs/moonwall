@@ -5,16 +5,15 @@ import { ApiTypes, AugmentedEvent } from "@polkadot/api/types";
 import { FrameSystemEventRecord } from "@polkadot/types/lookup";
 import chalk from "chalk";
 import { setTimeout } from "timers/promises";
-import { assert } from "vitest";
 import { MoonwallContext } from "../../lib/globalContext";
 
 export async function getWsFromConfig(providerName?: string): Promise<WsProvider> {
   if (providerName) {
     const provider = (await MoonwallContext.getContext()).environment.providers.find(
-      ({ name }) => name == providerName
+      ({ name }) => name === providerName
     );
 
-    if (typeof provider == "undefined") {
+    if (typeof provider === "undefined") {
       throw new Error(`Cannot find provider ${chalk.bgWhiteBright.blackBright(providerName)}`);
     }
 
@@ -23,23 +22,22 @@ export async function getWsFromConfig(providerName?: string): Promise<WsProvider
     }
 
     return provider.ws();
-  } else {
-    const provider = (await MoonwallContext.getContext()).environment.providers.find(
-      ({ type }) => type == "polkadotJs"
-    );
-
-    if (typeof provider == "undefined") {
-      throw new Error(
-        `Cannot find providers of type ${chalk.bgWhiteBright.blackBright("polkadotJs")}`
-      );
-    }
-
-    if (!provider.ws) {
-      throw new Error("Provider does not have an attached ws() property ");
-    }
-
-    return provider.ws();
   }
+  const provider = (await MoonwallContext.getContext()).environment.providers.find(
+    ({ type }) => type === "polkadotJs"
+  );
+
+  if (typeof provider === "undefined") {
+    throw new Error(
+      `Cannot find providers of type ${chalk.bgWhiteBright.blackBright("polkadotJs")}`
+    );
+  }
+
+  if (!provider.ws) {
+    throw new Error("Provider does not have an attached ws() property ");
+  }
+
+  return provider.ws();
 }
 
 export async function sendNewBlockAndCheck(
@@ -78,7 +76,7 @@ export async function createChopsticksBlock(
   const apiAt = await context.polkadotJs(options.providerName).at(result);
   const actualEvents: any = await apiAt.query.system.events();
 
-  if (options && options.expectEvents) {
+  if (options?.expectEvents) {
     const match = options.expectEvents.every((eEvt) => {
       const found = actualEvents
         .map((aEvt) => eEvt.is(aEvt.event))
@@ -94,18 +92,22 @@ export async function createChopsticksBlock(
       }
       return found;
     });
-    assert(match, "Expected events not present in block");
+
+    if (!match) {
+      throw new Error("Expected events not present in block");
+    }
   }
 
   if (options && options.allowFailures === true) {
     // Skip ExtrinsicFailure Asserts
   } else {
-    actualEvents.forEach((event) => {
-      assert(
-        !context.polkadotJs().events.system.ExtrinsicFailed.is(event.event),
-        "ExtrinsicFailed event detected, enable 'allowFailures' if this is expected."
-      );
-    });
+    for (const event of actualEvents) {
+      if (context.polkadotJs().events.system.ExtrinsicFailed.is(event.event)) {
+        throw new Error(
+          `ExtrinsicFailed event detected, enable 'allowFailures' if this is expected.`
+        );
+      }
+    }
   }
   return { result };
 }
@@ -135,7 +137,7 @@ export async function sendNewBlockRequest(params?: {
   while (!ws.isConnected) {
     await setTimeout(100);
   }
-  if ((params && params.count) || (params && params.to)) {
+  if (params?.count || params?.to) {
     result = await ws.send("dev_newBlock", [{ count: params.count, to: params.to }]);
   } else {
     result = await ws.send("dev_newBlock", [{ count: 1 }]);
@@ -144,7 +146,7 @@ export async function sendNewBlockRequest(params?: {
   return result;
 }
 
-export async function sendSetStorageRequest(params?: {
+export async function sendSetStorageRequest(params: {
   providerName?: string;
   module: string;
   method: string;
@@ -156,8 +158,6 @@ export async function sendSetStorageRequest(params?: {
     await setTimeout(100);
   }
 
-  await ws.send("dev_setStorage", [
-    { [params!.module]: { [params!.method]: params!.methodParams } },
-  ]);
+  await ws.send("dev_setStorage", [{ [params.module]: { [params.method]: params.methodParams } }]);
   await ws.disconnect();
 }

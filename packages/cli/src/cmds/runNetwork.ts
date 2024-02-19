@@ -7,7 +7,12 @@ import PressToContinuePrompt from "inquirer-press-to-continue";
 import { parse } from "yaml";
 import { clearNodeLogs, reportLogLocation } from "../internal/cmdFunctions/tempLogs";
 import { commonChecks } from "../internal/launcherCommon";
-import { cacheConfig, importAsyncConfig, loadEnvVars } from "../lib/configReader";
+import {
+  cacheConfig,
+  getEnvironmentFromConfig,
+  importAsyncConfig,
+  loadEnvVars,
+} from "../lib/configReader";
 import { MoonwallContext, runNetworkOnly } from "../lib/globalContext";
 import {
   resolveChopsticksInteractiveCmdChoice,
@@ -24,7 +29,7 @@ export async function runNetworkCmd(args) {
   await cacheConfig();
   process.env.MOON_TEST_ENV = args.envName;
   const globalConfig = await importAsyncConfig();
-  const env = globalConfig.environments.find(({ name }) => name === args.envName)!;
+  const env = globalConfig.environments.find(({ name }) => name === args.envName);
 
   if (!env) {
     const envList = globalConfig.environments.map((env) => env.name);
@@ -57,8 +62,7 @@ export async function runNetworkCmd(args) {
     {
       name: "MenuChoice",
       type: "list",
-      message:
-        `Environment : ${chalk.bgGray.cyanBright(args.envName)}\n` + "Please select a choice: ",
+      message: `Environment : ${chalk.bgGray.cyanBright(args.envName)}\nPlease select a choice: `,
       default: () => lastSelected,
       pageSize: 10,
       choices: [
@@ -74,7 +78,7 @@ export async function runNetworkCmd(args) {
         },
         {
           name:
-            foundation == "dev" || foundation == "chopsticks" || foundation == "zombie"
+            foundation === "dev" || foundation === "chopsticks" || foundation === "zombie"
               ? `Command:   Run command on network (${chalk.bgGrey.cyanBright(foundation)})`
               : chalk.dim(
                   `Not applicable for foundation type (${chalk.bgGrey.cyanBright(foundation)})`
@@ -86,9 +90,9 @@ export async function runNetworkCmd(args) {
         {
           name:
             testFileDirs.length > 0
-              ? "Test:      Execute tests registered for this environment   (" +
-                chalk.bgGrey.cyanBright(testFileDirs) +
-                ")"
+              ? `Test:      Execute tests registered for this environment   (${chalk.bgGrey.cyanBright(
+                  testFileDirs
+                )})`
               : chalk.dim("Test:    NO TESTS SPECIFIED"),
           value: 4,
           disabled: testFileDirs.length > 0 ? false : true,
@@ -97,9 +101,9 @@ export async function runNetworkCmd(args) {
         {
           name:
             testFileDirs.length > 0
-              ? "GrepTest:  Execute individual test(s) based on grepping the name / ID (" +
-                chalk.bgGrey.cyanBright(testFileDirs) +
-                ")"
+              ? `GrepTest:  Execute individual test(s) based on grepping the name / ID (${chalk.bgGrey.cyanBright(
+                  testFileDirs
+                )})`
               : chalk.dim("Test:    NO TESTS SPECIFIED"),
           value: 5,
           disabled: testFileDirs.length > 0 ? false : true,
@@ -122,11 +126,11 @@ export async function runNetworkCmd(args) {
       anyKey: true,
       pressToContinueMessage: "✅  Press any key to continue...\n",
     },
-  ];
+  ] as const;
 
   if (
-    (env.foundation.type == "dev" && !env.foundation.launchSpec[0].retainAllLogs) ||
-    (env.foundation.type == "chopsticks" && !env.foundation.launchSpec[0].retainAllLogs)
+    (env.foundation.type === "dev" && !env.foundation.launchSpec[0].retainAllLogs) ||
+    (env.foundation.type === "chopsticks" && !env.foundation.launchSpec[0].retainAllLogs)
   ) {
     clearNodeLogs();
   }
@@ -135,12 +139,19 @@ export async function runNetworkCmd(args) {
   clear();
   const portsList = await reportServicePorts();
   reportLogLocation();
-  portsList.forEach(({ port }) =>
-    console.log(`  🖥️   https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0.0.1%3A${port}`)
-  );
+
+  for (const { port } of portsList) {
+    console.log(`  🖥️   https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0.0.1%3A${port}`);
+  }
 
   if (!args.GrepTest) {
-    await inquirer.prompt(questions.find(({ name }) => name == "NetworkStarted"));
+    const question = questions.find(({ name }) => name === "NetworkStarted");
+
+    if (!question) {
+      throw new Error("Question not found. This is a bug, please raise an issue.");
+    }
+
+    await inquirer.prompt(question);
   } else {
     process.env.MOON_RECYCLE = "true";
     process.env.MOON_GREP = await args.GrepTest;
@@ -148,8 +159,16 @@ export async function runNetworkCmd(args) {
   }
 
   mainloop: for (;;) {
-    const choice = await inquirer.prompt(questions.find(({ name }) => name == "MenuChoice"));
-    const env = globalConfig.environments.find(({ name }) => name === args.envName)!;
+    const question = questions.find(({ name }) => name === "MenuChoice");
+    if (!question) {
+      throw new Error("Question not found. This is a bug, please raise an issue.");
+    }
+    const choice = await inquirer.prompt(question);
+    const env = globalConfig.environments.find(({ name }) => name === args.envName);
+
+    if (!env) {
+      throw new Error("Environment not found in config. This is an error, please raise.");
+    }
 
     switch (choice.MenuChoice) {
       case 1:
@@ -180,7 +199,11 @@ export async function runNetworkCmd(args) {
         break;
 
       case 6: {
-        const quit = await inquirer.prompt(questions.find(({ name }) => name == "Quit"));
+        const question = questions.find(({ name }) => name === "Quit");
+        if (!question) {
+          throw new Error("Question not found. This is a bug, please raise an issue.");
+        }
+        const quit = await inquirer.prompt(question);
         if (quit.Quit === true) {
           break mainloop;
         }
@@ -197,9 +220,7 @@ export async function runNetworkCmd(args) {
 const reportServicePorts = async () => {
   const ctx = await MoonwallContext.getContext();
   const portsList: { port: string; name: string }[] = [];
-  const globalConfig = await importAsyncConfig();
-  const config = globalConfig.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
-
+  const config = getEnvironmentFromConfig();
   switch (config.foundation.type) {
     case "dev": {
       const args = ctx.environment.nodes[0].args;
@@ -222,21 +243,27 @@ const reportServicePorts = async () => {
     }
 
     case "zombie": {
-      ctx.zombieNetwork!.relay.forEach(({ wsUri, name }) => {
-        portsList.push({ name, port: wsUri.split("ws://127.0.0.1:")[1] });
-      });
+      const zombieNetwork = ctx.zombieNetwork;
 
-      Object.keys(ctx.zombieNetwork!.paras).forEach((paraId) => {
-        ctx.zombieNetwork!.paras[paraId].nodes.forEach(({ wsUri, name }) => {
+      if (!zombieNetwork) {
+        throw new Error("Zombie network not found. This is a bug, please raise an issue.");
+      }
+
+      for (const { wsUri, name } of zombieNetwork.relay) {
+        portsList.push({ name, port: wsUri.split("ws://127.0.0.1:")[1] });
+      }
+
+      for (const paraId of Object.keys(zombieNetwork.paras)) {
+        for (const { wsUri, name } of zombieNetwork.paras[paraId].nodes) {
           portsList.push({ name, port: wsUri.split("ws://127.0.0.1:")[1] });
-        });
-      });
+        }
+      }
     }
   }
 
-  portsList.forEach(({ name, port }) =>
-    console.log(`  🌐  Node ${name} has started, listening on ports - Websocket: ${port}`)
-  );
+  for (const { port, name } of portsList) {
+    console.log(`  🌐  Node ${name} has started, listening on ports - Websocket: ${port}`);
+  }
 
   return portsList;
 };
@@ -261,44 +288,47 @@ const resolveCommandChoice = async () => {
 
 const resolveInfoChoice = async (env: Environment) => {
   console.log(chalk.bgWhite.blackBright("Node Launch args:"));
-  console.dir((await MoonwallContext.getContext()).environment, { depth: null });
+  console.dir((await MoonwallContext.getContext()).environment, {
+    depth: null,
+  });
   console.log(chalk.bgWhite.blackBright("Launch Spec in Config File:"));
   console.dir(env, { depth: null });
   const portsList = await reportServicePorts();
   reportLogLocation();
-  portsList.forEach(({ port }) =>
-    console.log(`  🖥️   https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0.0.1%3A${port}`)
-  );
+
+  for (const { port } of portsList) {
+    console.log(`  🖥️   https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0.0.1%3A${port}`);
+  }
 };
 
-const resolveGrepChoice = async (env: Environment, silent: boolean = false) => {
+const resolveGrepChoice = async (env: Environment, silent = false) => {
   const choice = await inquirer.prompt({
     name: "grep",
     type: "input",
-    message: `What pattern would you like to filter for (ID/Title): `,
+    message: "What pattern would you like to filter for (ID/Title): ",
     default: process.env.MOON_GREP || "D01T01",
   });
   process.env.MOON_RECYCLE = "true";
   process.env.MOON_GREP = await choice.grep;
-  const opts = { testNamePattern: await choice.grep, silent };
+  const opts: any = { testNamePattern: await choice.grep, silent };
   if (silent) {
-    opts["reporters"] = ["dot"];
+    opts.reporters = ["dot"];
   }
   return await executeTests(env, opts);
 };
 
-const resolveTestChoice = async (env: Environment, silent: boolean = false) => {
+const resolveTestChoice = async (env: Environment, silent = false) => {
   process.env.MOON_RECYCLE = "true";
-  const opts = { silent };
+  const opts: any = { silent };
   if (silent) {
-    opts["reporters"] = ["dot"];
+    opts.reporters = ["dot"];
   }
   return await executeTests(env, opts);
 };
 
 const resolveTailChoice = async (env: Environment) => {
-  let tailing: boolean = true;
-  let zombieNodePointer: number = 0;
+  let tailing = true;
+  let zombieNodePointer = 0;
   let bottomBarContents = "";
   let switchNode: boolean;
   let zombieContent: string;
@@ -316,13 +346,13 @@ const resolveTailChoice = async (env: Environment) => {
   bottomBarContents = bottomBarBase + resumePauseProse[0];
 
   const ui = new inquirer.ui.BottomBar({
-    bottomBar: bottomBarContents + "\n",
+    bottomBar: `${bottomBarContents}\n`,
   });
 
   for (;;) {
     clear();
     if (process.env.MOON_ZOMBIE_NODES) {
-      zombieNodes = process.env.MOON_ZOMBIE_NODES.split("|")!;
+      zombieNodes = process.env.MOON_ZOMBIE_NODES.split("|");
 
       zombieContent = `, ${chalk.bgWhite.black("[,]")} Next Log, ${chalk.bgWhite.black(
         "[.]"
@@ -332,7 +362,7 @@ const resolveTailChoice = async (env: Environment) => {
 
       bottomBarContents = bottomBarBase + resumePauseProse[tailing ? 0 : 1] + zombieContent;
 
-      ui.updateBottomBar(bottomBarContents, "\n");
+      ui.updateBottomBar(`${bottomBarContents}\n`);
     }
 
     switchNode = false;
@@ -346,12 +376,11 @@ const resolveTailChoice = async (env: Environment) => {
         throw new Error("No log file path resolved, this should not happen. Please raise defect");
       }
 
-      // eslint-disable-next-line prefer-const
       let currentReadPosition = 0;
 
-      const printLogs = (newReadPosition: number, currentReadPosition: number) => {
+      const printLogs = (newReadPosition: number, curr: number) => {
         const stream = fs.createReadStream(logFilePath, {
-          start: currentReadPosition,
+          start: curr,
           end: newReadPosition,
         });
         stream.on("data", onData);
@@ -381,12 +410,13 @@ const resolveTailChoice = async (env: Environment) => {
 
       const renderBottomBar = (...parts: any[]) => {
         const content = process.env.MOON_ZOMBIE_NODES
-          ? bottomBarBase + " " + parts?.join(" ") + zombieContent + "\n"
-          : bottomBarBase + " " + parts?.join(" ") + "\n";
+          ? `${bottomBarBase} ${parts?.join(" ")}${zombieContent}\n`
+          : `${bottomBarBase} ${parts?.join(" ")}\n`;
         ui.updateBottomBar(content);
       };
 
       const handleInputData = async (key: any) => {
+        // @ts-expect-error - internal method
         ui.rl.input.pause();
         const char = key.toString().trim();
 
@@ -402,7 +432,9 @@ const resolveTailChoice = async (env: Environment) => {
         }
 
         if (char === "q") {
+          // @ts-expect-error - internal method
           ui.rl.input.removeListener("data", handleInputData);
+          // @ts-expect-error - internal method
           ui.rl.input.pause();
           fs.unwatchFile(logFilePath);
           resolve("");
@@ -414,7 +446,9 @@ const resolveTailChoice = async (env: Environment) => {
         }
 
         if (char === ",") {
+          // @ts-expect-error - internal method
           ui.rl.input.removeListener("data", handleInputData);
+          // @ts-expect-error - internal method
           ui.rl.input.pause();
           fs.unwatchFile(logFilePath);
           switchNode = true;
@@ -423,7 +457,9 @@ const resolveTailChoice = async (env: Environment) => {
         }
 
         if (char === ".") {
+          // @ts-expect-error - internal method
           ui.rl.input.removeListener("data", handleInputData);
+          // @ts-expect-error - internal method
           ui.rl.input.pause();
           fs.unwatchFile(logFilePath);
           switchNode = true;
@@ -432,17 +468,19 @@ const resolveTailChoice = async (env: Environment) => {
         }
 
         if (char === "g") {
+          // @ts-expect-error - internal method
           ui.rl.input.pause();
           tailing = false;
           await resolveGrepChoice(env, true);
           renderBottomBar(resumePauseProse[tailing ? 0 : 1]);
           tailing = true;
+          // @ts-expect-error - internal method
           ui.rl.input.resume();
         }
-
+        // @ts-expect-error - internal method
         ui.rl.input.resume();
       };
-
+      // @ts-expect-error - internal method
       ui.rl.input.on("data", handleInputData);
 
       fs.watchFile(logFilePath, () => {
@@ -454,6 +492,6 @@ const resolveTailChoice = async (env: Environment) => {
       break;
     }
   }
-
+  // @ts-expect-error - internal method
   ui.close();
 };

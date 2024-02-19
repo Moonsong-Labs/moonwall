@@ -3,10 +3,15 @@ import { BN } from "@polkadot/util";
 import fetch from "node-fetch";
 
 // Sort dict by key
-export function sortObjectByKeys(o) {
-  return Object.keys(o)
-    .sort()
-    .reduce((r, k) => ((r[k] = o[k]), r), {});
+export function sortObjectByKeys(obj: Record<string, any>): Record<string, any> {
+  const sortedKeys = Object.keys(obj).sort();
+  const sortedObj: Record<string, any> = {};
+
+  for (const key of sortedKeys) {
+    sortedObj[key] = obj[key];
+  }
+
+  return sortedObj;
 }
 
 // Perthings arithmetic conformant type.
@@ -14,7 +19,10 @@ class Perthing {
   private unit: BN;
   private perthing: BN;
 
-  constructor(unit: BN, numerator: BN | number, denominator?: BN | number) {
+  constructor(unit: BN, num: BN | number, denom?: BN | number) {
+    let numerator = num;
+    let denominator = denom;
+
     if (!(numerator instanceof BN)) {
       numerator = new BN(numerator.toString());
     }
@@ -90,13 +98,18 @@ export class Percent extends Perthing {
   }
 }
 
-export function getObjectMethods(obj) {
-  const properties = new Set();
-  let currentObj = obj;
-  do {
-    Object.getOwnPropertyNames(currentObj).map((item) => properties.add(item));
-  } while ((currentObj = Object.getPrototypeOf(currentObj)));
-  return [...properties.keys()].filter((item: any) => typeof obj[item] === "function");
+export function getObjectMethods(obj: any): string[] {
+  const properties = new Set<string>();
+  let currentObj: any = obj;
+
+  while (currentObj) {
+    for (const item of Object.getOwnPropertyNames(currentObj)) {
+      properties.add(item);
+    }
+    currentObj = Object.getPrototypeOf(currentObj);
+  }
+
+  return Array.from(properties).filter((item) => typeof obj[item] === "function");
 }
 
 export async function directRpcRequest(

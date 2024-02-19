@@ -37,9 +37,9 @@ describeSuite({
           await context.polkadotJs("zeitgeist").rpc.chain.getHeader()
         ).number.toNumber();
         await context.createBlock({ providerName: "zeitgeist" });
-        expect((await context.polkadotJs("zeitgeist").rpc.chain.getHeader()).number.toNumber()).toBe(
-          chain2Height + 1
-        );
+        expect(
+          (await context.polkadotJs("zeitgeist").rpc.chain.getHeader()).number.toNumber()
+        ).toBe(chain2Height + 1);
 
         const chain3Height = (
           await context.polkadotJs("polkadot").rpc.chain.getHeader()
@@ -51,21 +51,20 @@ describeSuite({
       },
     });
 
-
     it({
       id: "T03",
       title: "Verify it can upgrade in multichain setup",
-      modifier:"skip",
+      modifier: "skip",
       test: async () => {
-        const specVersion = context.polkadotJs("hydradx").consts.system.version.specVersion.toNumber();
+        const specVersion = context
+          .polkadotJs("hydradx")
+          .consts.system.version.specVersion.toNumber();
         await context.upgradeRuntime("hydradx");
         // log((await context.polkadotJs("hydradx").query.system.account(context.keyring.alice.address)).toHuman());
-        expect(context.polkadotJs("hydradx").consts.system.version.specVersion.toNumber()).toBeGreaterThan(
-          specVersion
-        );
+        expect(
+          context.polkadotJs("hydradx").consts.system.version.specVersion.toNumber()
+        ).toBeGreaterThan(specVersion);
       },
     });
-
-
   },
 });

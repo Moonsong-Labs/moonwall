@@ -14,7 +14,11 @@ export async function generateConfig() {
   for (;;) {
     if (await fs.access("moonwall.config.json").catch(() => true)) {
       const answers = await inquirer.prompt(generateQuestions);
-      const proceed = await inquirer.prompt(questions.find(({ name }) => name === "Confirm"));
+      const question = questions.find(({ name }) => name === "Confirm");
+      if (!question) {
+        throw new Error("Question not found");
+      }
+      const proceed = await inquirer.prompt(question);
 
       if (proceed.Confirm === false) {
         continue;
@@ -35,12 +39,11 @@ export async function generateConfig() {
       await fs.writeFile("moonwall.config", textBlob + JSONBlob, "utf-8");
       process.env.MOON_CONFIG_PATH = "./moonwall.config";
       break;
-    } else {
-      console.log("ℹ️  Config file already exists at this location. Quitting.");
-      return;
     }
+    console.log("ℹ️  Config file already exists at this location. Quitting.");
+    return;
   }
-  console.log(`Goodbye! 👋`);
+  console.log("Goodbye! 👋");
 }
 
 const generateQuestions = [
@@ -102,7 +105,7 @@ const questions = [
     pressToContinueMessage:
       "Config has not been generated due to errors, Press any key to exit  ❌\n",
   },
-];
+] as const;
 
 export function createConfig(options: {
   label: string;

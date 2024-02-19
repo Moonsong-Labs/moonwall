@@ -1,7 +1,7 @@
 import path from "path";
 import fs from "fs";
 
-export function clearNodeLogs(silent: boolean = true) {
+export function clearNodeLogs(silent = true) {
   const dirPath = path.join(process.cwd(), "tmp", "node_logs");
   if (!fs.existsSync(dirPath)) {
     fs.mkdirSync(dirPath, { recursive: true });
@@ -16,7 +16,7 @@ export function clearNodeLogs(silent: boolean = true) {
   }
 }
 
-export function reportLogLocation(silent: boolean = false) {
+export function reportLogLocation(silent = false) {
   const dirPath = path.join(process.cwd(), "tmp", "node_logs");
 
   if (!fs.existsSync(dirPath)) {
@@ -31,7 +31,10 @@ export function reportLogLocation(silent: boolean = false) {
       ? process.env.MOON_ZOMBIE_DIR
       : process.env.MOON_LOG_LOCATION
         ? process.env.MOON_LOG_LOCATION
-        : path.join(dirPath, result.find((file) => path.extname(file) == ".log")!);
+        : path.join(
+            dirPath,
+            result.find((file) => path.extname(file) === ".log") || "no_logs_found"
+          );
     consoleMessage = `  🪵   Log location: ${filePath}`;
   } catch (e) {
     console.error(e);

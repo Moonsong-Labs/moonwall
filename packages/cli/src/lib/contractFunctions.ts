@@ -44,7 +44,8 @@ function getCompiledPath(contractName: string) {
     throw new Error(
       `Neither solidity contract ${contractName}.sol nor its compiled json exists in ${contractsDir}`
     );
-  } else if (!compiledJsonPath) {
+  }
+  if (!compiledJsonPath) {
     throw new Error(
       `Compiled contract ${contractName}.json doesn't exist\n` +
         `Please ${chalk.bgWhiteBright.blackBright("recompile contract")} ${contractName}.sol`
@@ -63,7 +64,7 @@ export function fetchCompiledContract<TAbi extends Abi>(
     abi: parsed.contract.abi,
     bytecode: parsed.byteCode,
     methods: parsed.contract.evm.methodIdentifiers,
-    deployedBytecode: ("0x" + parsed.contract.evm.deployedBytecode.object) as `0x${string}`,
+    deployedBytecode: `0x${parsed.contract.evm.deployedBytecode.object}` as `0x${string}`,
   };
 }
 
@@ -136,9 +137,12 @@ export async function interactWithContract(
   const account = privateKeyToAccount(privateKey);
   const gasParam =
     gas === "estimate"
-      ? await context
-          .viem()
-          .estimateGas({ account: account.address, to: contractAddress, value: 0n, data })
+      ? await context.viem().estimateGas({
+          account: account.address,
+          to: contractAddress,
+          value: 0n,
+          data,
+        })
       : gas > 0n
         ? gas
         : 200_000n;
@@ -163,21 +167,29 @@ export async function interactWithContract(
 
   if (call) {
     if (web3Library === "viem") {
-      const result = await context
-        .viem()
-        .call({ account: account.address, to: contractAddress, value: 0n, data, gas: gasParam });
-      return decodeFunctionResult({ abi, functionName, data: result.data! });
-    } else {
-      const result = await context.ethers().call({
-        from: account.address,
+      const result = await context.viem().call({
+        account: account.address,
         to: contractAddress,
-        value: toHex(value),
+        value: 0n,
         data,
-        gasLimit: toHex(gasParam),
+        gas: gasParam,
       });
-      return new Interface(abi as InterfaceAbi).decodeFunctionResult(functionName, result);
+
+      if (!result.data) {
+        throw new Error("No data field returned from call");
+      }
+      return decodeFunctionResult({ abi, functionName, data: result.data });
     }
-  } else if (!rawTxOnly) {
+    const result = await context.ethers().call({
+      from: account.address,
+      to: contractAddress,
+      value: toHex(value),
+      data,
+      gasLimit: toHex(gasParam),
+    });
+    return new Interface(abi as InterfaceAbi).decodeFunctionResult(functionName, result);
+  }
+  if (!rawTxOnly) {
     if (web3Library === "viem") {
       const hash = await (context.viem() as any).sendTransaction({
         account: account,
@@ -187,20 +199,18 @@ export async function interactWithContract(
         gas: gasParam,
       });
       return hash;
-    } else {
-      const signer = new Wallet(privateKey, context.ethers().provider);
-      const { hash } = await signer.sendTransaction({
-        from: account.address,
-        to: contractAddress,
-        value: toHex(value),
-        data,
-        gasLimit: toHex(gasParam),
-      });
-      return hash;
     }
-  } else {
-    throw new Error("This should never happen, if it does there's a logic error in the code");
+    const signer = new Wallet(privateKey, context.ethers().provider);
+    const { hash } = await signer.sendTransaction({
+      from: account.address,
+      to: contractAddress,
+      value: toHex(value),
+      data,
+      gasLimit: toHex(gasParam),
+    });
+    return hash;
   }
+  throw new Error("This should never happen, if it does there's a logic error in the code");
 }
 
 export async function deployCreateCompiledContract<TOptions extends ContractDeploymentOptions>(

@@ -13,16 +13,18 @@ import { EventRecord } from "@polkadot/types/interfaces";
 import chalk from "chalk";
 import Debug from "debug";
 import { setTimeout } from "timers/promises";
-import { assert } from "vitest";
-import { importAsyncConfig, isEthereumDevConfig } from "../../lib/configReader";
+import {
+  getEnvironmentFromConfig,
+  importAsyncConfig,
+  isEthereumDevConfig,
+} from "../../lib/configReader";
 import { extractError } from "../../lib/contextHelpers";
 import { MoonwallContext } from "../../lib/globalContext";
 import { vitestAutoUrl } from "../providerFactories";
 const debug = Debug("DevTest");
 
 export async function getDevProviderPath() {
-  const globalConfig = await importAsyncConfig();
-  const env = globalConfig.environments.find(({ name }) => name == process.env.MOON_TEST_ENV)!;
+  const env = getEnvironmentFromConfig();
   return env.connections
     ? env.connections[0].endpoints[0].replace("ws://", "http://")
     : vitestAutoUrl();
@@ -43,15 +45,17 @@ export type CallType<TApi extends ApiTypes> =
   | Promise<string>;
 
 function returnSigner(options: BlockCreation) {
-  return "privateKey" in options.signer! && "type" in options.signer
-    ? generateKeyringPair(options.signer!.type, options.signer!.privateKey)
+  return options.signer && "privateKey" in options.signer && "type" in options.signer
+    ? generateKeyringPair(options.signer.type, options.signer.privateKey)
     : options.signer;
 }
 
 function returnDefaultSigner() {
   return isEthereumDevConfig()
     ? alith
-    : new Keyring({ type: "sr25519" }).addFromUri("//Alice", { name: "Alice default" });
+    : new Keyring({ type: "sr25519" }).addFromUri("//Alice", {
+        name: "Alice default",
+      });
 }
 
 export async function createDevBlock<
@@ -61,22 +65,21 @@ export async function createDevBlock<
   const containsViem =
     (context as DevModeContext).isEthereumChain &&
     context.viem() &&
-    (await MoonwallContext.getContext()).providers.find((prov) => prov.type == "viem")
+    (await MoonwallContext.getContext()).providers.find((prov) => prov.type === "viem")
       ? true
       : false;
   const api = context.polkadotJs();
 
   const originalBlockNumber = (await api.rpc.chain.getHeader()).number.toBigInt();
 
-  const signer = options.signer !== undefined ? returnSigner(options) : returnDefaultSigner();
+  const signer = options.signer ? returnSigner(options) : returnDefaultSigner();
 
   const results: ({ type: "eth"; hash: string } | { type: "sub"; hash: string })[] = [];
 
-  const txs =
-    transactions == undefined ? [] : Array.isArray(transactions) ? transactions : [transactions];
+  const txs = !transactions ? [] : Array.isArray(transactions) ? transactions : [transactions];
 
   for await (const call of txs) {
-    if (typeof call == "string") {
+    if (typeof call === "string") {
       // Ethereum
       results.push({
         type: "eth",
@@ -119,7 +122,7 @@ export async function createDevBlock<
   const blockResult = await createAndFinalizeBlock(api, parentHash, finalize);
 
   // No need to extract events if no transactions
-  if (results.length == 0) {
+  if (results.length === 0) {
     return {
       block: blockResult,
     };
@@ -131,25 +134,25 @@ export async function createDevBlock<
   const blockData = await api.rpc.chain.getBlock(blockResult.hash);
 
   const getExtIndex = (records: EventRecord[], result: { type: "sub" | "eth"; hash: string }) => {
-    if (result.type == "eth") {
+    if (result.type === "eth") {
       const res = records
         .find(
           ({ phase, event: { section, method, data } }) =>
             phase.isApplyExtrinsic &&
-            section == "ethereum" &&
-            method == "Executed" &&
-            data[2].toString() == result.hash
+            section === "ethereum" &&
+            method === "Executed" &&
+            data[2].toString() === result.hash
         )
         ?.phase?.asApplyExtrinsic?.toString();
 
-      return res === undefined ? undefined : Number(res);
-    } else {
-      return blockData.block.extrinsics.findIndex((ext) => ext.hash.toHex() == result.hash);
+      return typeof res === "undefined" ? undefined : Number(res);
     }
+    return blockData.block.extrinsics.findIndex((ext) => ext.hash.toHex() === result.hash);
   };
 
   const result: ExtrinsicCreation[] = results.map((result) => {
     const extrinsicIndex = getExtIndex(allRecords, result);
+    const extrinsicFound = typeof extrinsicIndex !== "undefined";
 
     // We retrieve the events associated with the extrinsic
     const events = allRecords.filter(
@@ -159,18 +162,18 @@ export async function createDevBlock<
 
     const failure = extractError(events);
     return {
-      extrinsic: extrinsicIndex! >= 0 ? blockData.block.extrinsics[extrinsicIndex!] : null,
+      extrinsic: extrinsicFound ? blockData.block.extrinsics[extrinsicIndex] : null,
       events,
       error:
         failure &&
         ((failure.isModule && api.registry.findMetaError(failure.asModule)) ||
           ({ name: failure.toString() } as RegistryError)),
-      successful: extrinsicIndex !== undefined && !failure,
+      successful: extrinsicFound && !failure,
       hash: result.hash,
     };
   });
 
-  if (results.find((res) => res.type == "eth")) {
+  if (results.find((res) => res.type === "eth")) {
     // Wait until new block is actually created
     // max wait 2s
     for (let i = 0; i < 1000; i++) {
@@ -200,16 +203,20 @@ export async function createDevBlock<
       }
       return found;
     });
-    assert(match, "Expected events not present in block");
+
+    if (!match) {
+      throw new Error("Expected events not present in block");
+    }
   }
 
   if (!options.allowFailures) {
-    actualEvents.forEach((event) => {
-      assert(
-        !api.events.system.ExtrinsicFailed.is(event.event),
-        "ExtrinsicFailed event detected, enable 'allowFailures' if this is expected."
-      );
-    });
+    for (const event of actualEvents) {
+      if (api.events.system.ExtrinsicFailed.is(event.event)) {
+        throw new Error(
+          "ExtrinsicFailed event detected, enable 'allowFailures' if this is expected."
+        );
+      }
+    }
   }
 
   return {
@@ -217,3 +224,20 @@ export async function createDevBlock<
     result: Array.isArray(transactions) ? result : (result[0] as any),
   };
 }
+
+export const fastFowardToNextEvent = async (context: DevModeContext) => {
+  const [entry] = await context.pjsApi.query.scheduler.agenda.entries();
+  const [key, _] = entry;
+  if (key.isEmpty) {
+    throw new Error("No items in scheduler.agenda");
+  }
+  const desiredHeight = Number(key.toHuman());
+  const currentHeight = (await context.pjsApi.rpc.chain.getHeader()).number.toNumber();
+
+  console.log(
+    `⏩️ Current height: ${currentHeight}, desired height: ${desiredHeight}, jumping ${
+      desiredHeight - currentHeight + 1
+    } blocks`
+  );
+  await context.jumpBlocks?.(desiredHeight - currentHeight + 1);
+};

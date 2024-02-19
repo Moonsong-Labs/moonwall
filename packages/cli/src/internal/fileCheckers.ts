@@ -78,7 +78,9 @@ export async function downloadBinsIfMissing(binPath: string) {
 
 export function checkListeningPorts(processId: number) {
   try {
-    const stdOut = execSync(`lsof -p  ${processId} | grep LISTEN`, { encoding: "utf-8" });
+    const stdOut = execSync(`lsof -p  ${processId} | grep LISTEN`, {
+      encoding: "utf-8",
+    });
     const binName = stdOut.split("\n")[0].split(" ")[0];
     const ports = stdOut
       .split("\n")
@@ -140,9 +142,12 @@ export async function promptAlreadyRunning(pids: number[]) {
 
   switch (choice.AlreadyRunning) {
     case "kill":
-      pids.forEach((pid) => {
+      for (const pid of pids) {
         execSync(`kill ${pid}`);
-      });
+      }
+      // pids.forEach((pid) => {
+      //   execSync(`kill ${pid}`);
+      // });
       break;
 
     case "continue":
@@ -166,10 +171,10 @@ export function checkAccess(path: string) {
 async function getBinaryArchitecture(filePath: string) {
   return new Promise((resolve, reject) => {
     const architectureMap = {
-      0x0: "unknown",
-      0x03: "x86",
-      0x3e: "x64",
-      0xb7: "arm64",
+      0: "unknown",
+      3: "x86",
+      62: "x64",
+      183: "arm64",
     };
 
     fs.open(filePath, "r", (err, fd) => {

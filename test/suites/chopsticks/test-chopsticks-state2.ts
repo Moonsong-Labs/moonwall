@@ -2,7 +2,6 @@ import { describeSuite, expect, beforeAll } from "@moonwall/cli";
 import { alith } from "@moonwall/util";
 import { parseEther } from "ethers";
 import { ApiPromise } from "@polkadot/api";
-import "@polkadot/api-augment";
 
 describeSuite({
   id: "S1",
@@ -20,7 +19,7 @@ describeSuite({
     it({
       id: "T01",
       title: "Check initial balance is zero",
-      test: async function () {
+      test: async () => {
         const currentBalance = (await api.query.system.account(RANDOM_ADDRESS)).data.free;
         expect(currentBalance.eq(0)).toBeTruthy();
       },
@@ -29,9 +28,11 @@ describeSuite({
     it({
       id: "T02",
       title: "Send a transaction ",
-      test: async function () {
+      test: async () => {
         const currentBalance = (await api.query.system.account(RANDOM_ADDRESS)).data.free;
-        await api.tx.balances.transferAllowDeath(RANDOM_ADDRESS, parseEther("10")).signAndSend(alith);
+        await api.tx.balances
+          .transferAllowDeath(RANDOM_ADDRESS, parseEther("10"))
+          .signAndSend(alith);
         await context.createBlock();
 
         const balanceAfter = (await api.query.system.account(RANDOM_ADDRESS)).data.free;

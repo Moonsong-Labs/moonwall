@@ -1,4 +1,3 @@
-import "@polkadot/api-augment";
 import { beforeAll, describeSuite, expect } from "@moonwall/cli";
 
 describeSuite({
@@ -11,7 +10,7 @@ describeSuite({
     it({
       id: "T01",
       title: "Checking that launched node can create blocks",
-      test: async function () {
+      test: async () => {
         const block = (
           await context.polkadotJs().rpc.chain.getBlock()
         ).block.header.number.toNumber();
@@ -30,7 +29,7 @@ describeSuite({
     it({
       id: "T02",
       title: "Checking that default keyring is correct",
-      test: async function () {
+      test: async () => {
         expect(context.keyring.alice.address).toBe(
           "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY"
         );

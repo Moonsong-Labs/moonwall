@@ -164,7 +164,7 @@ export type GenericTestContext = ITestContext<GenericContext>;
  * @property runtimeTag - The tag of the runtime.
  * @property from - The KeyringPair to be used for the upgrade.
  * @property waitMigration - A flag to indicate whether to wait for migration.
- * @property useGovernance - A flag to indicate whether to use governance for the upgrade.
+ * @property upgradeMethod - Specifies which upgrade method to use: "Governance", "WhiteListedCaller", "Sudo" (default).
  * @property localPath - The local path for the runtime.
  * @property logger - The debugger instance for logging.
  */
@@ -173,7 +173,7 @@ export interface UpgradePreferences {
   runtimeTag?: "local" | string;
   from?: KeyringPair;
   waitMigration?: boolean;
-  useGovernance?: boolean;
+  upgradeMethod?: "Governance" | "WhiteListedCaller" | "Sudo";
   localPath?: string;
   logger?: Debugger;
 }
@@ -325,7 +325,12 @@ export interface ChopsticksContext extends GenericContext {
   /**
    * Getter that returns an object with the default accounts already generated.
    */
-  keyring: { alice: KeyringPair; bob: KeyringPair; charlie: KeyringPair; dave: KeyringPair };
+  keyring: {
+    alice: KeyringPair;
+    bob: KeyringPair;
+    charlie: KeyringPair;
+    dave: KeyringPair;
+  };
 
   /**
    * Property that returns true if System.Account is AccountId32 (Substrate Account length is 32 bytes).
@@ -343,7 +348,10 @@ export interface ChopsticksContext extends GenericContext {
    * @param {number} blocksToJump The number of ParachainStaking rounds to jump forward.
    * @returns {Promise<void>} A Promise that resolves after the operation is fully complete.
    */
-  jumpRounds?: (options: { rounds: number; providerName?: string }) => Promise<void>;
+  jumpRounds?: (options: {
+    rounds: number;
+    providerName?: string;
+  }) => Promise<void>;
 }
 
 /**
@@ -368,7 +376,12 @@ export interface DevModeContext extends GenericContext {
   /**
    * Getter that returns an object with the default accounts already generated.
    */
-  keyring: { alice: KeyringPair; bob: KeyringPair; charlie: KeyringPair; dave: KeyringPair };
+  keyring: {
+    alice: KeyringPair;
+    bob: KeyringPair;
+    charlie: KeyringPair;
+    dave: KeyringPair;
+  };
 
   /**
    * Property that returns true if System.Account is AccountId32 (Substrate Account length is 32 bytes).
@@ -404,9 +417,7 @@ export interface DevModeContext extends GenericContext {
       | (EthersTransactionOptions & {
           libraryType: "ethers";
         }),
-  >(
-    options: TOptions
-  ): Promise<`0x${string}`>;
+  >(options: TOptions): Promise<`0x${string}`>;
 
   /**
    * Execute a non-state changing transaction to a precompiled contract address (i.e. read).

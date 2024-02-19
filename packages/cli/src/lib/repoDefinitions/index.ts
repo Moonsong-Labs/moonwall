@@ -14,7 +14,7 @@ export function allRepos() {
 export async function allReposAsync() {
   const defaultRepos: RepoSpec[] = [mb, pd, ts];
   const globalConfig = await importAsyncConfig();
-  const importedRepos = globalConfig.additionalRepos ? globalConfig.additionalRepos : [];
+  const importedRepos = globalConfig.additionalRepos || [];
   return [...defaultRepos, ...importedRepos];
 }
 
