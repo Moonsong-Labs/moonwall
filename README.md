@@ -1,5 +1,5 @@
 ## Description
-![moonwall](resource/moonwall.png)
+![moonwall](docs/public/moonwall.webp)
 
 Moonwall is a comprehensive blockchain test framework for Substrate-based networks
 
