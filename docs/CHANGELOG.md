@@ -1,5 +1,13 @@
 # @moonwall/docs
 
+## 5.0.0
+
+### Major Changes
+
+- 8bd1877: ESM ONLY
+
+  - This release moves to be an ESM only package!
+
 ## 4.7.9
 
 ## 4.7.8

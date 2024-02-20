@@ -1,5 +1,18 @@
 # @moonwall/util
 
+## 5.0.0
+
+### Major Changes
+
+- 8bd1877: ESM ONLY
+
+  - This release moves to be an ESM only package!
+
+### Patch Changes
+
+- Updated dependencies [8bd1877]
+  - @moonwall/types@5.0.0
+
 ## 4.7.9
 
 ### Patch Changes
