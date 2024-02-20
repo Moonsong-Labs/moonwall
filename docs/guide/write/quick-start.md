@@ -19,9 +19,9 @@ import {alith, GLMR} from "@moonwall/util"
 There are a few additional imports that are a good idea to have. You'll likely want to query the Polkadot API for blockchain state. We also use ether `utils` for `parseEther`.  
 
 ```typescript
+import "@polkadot/api-augment";
 import { ethers } from "ethers";
 import { ApiPromise } from "@polkadot/api";
-import "@polkadot/api-augment";
 ```
 
 

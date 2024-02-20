@@ -9,7 +9,7 @@ These steps are not required for projects that already have Moonwall integrated.
 Skip to [Testing - Quick Start](../test/quick-start) for advice on running tests in Moonwall.
 :::
 
-- [Node.js](https://nodejs.org/){target=_blank} version 18 or higher.
+- [Node.js](https://nodejs.org/){target=_blank} version 20.10 or higher.
 - MacOS or Linux Operating system (WSL counts!)
 - [pNPM](https://pnpm.io/){target=_blank}, a fast and efficient package manager
 

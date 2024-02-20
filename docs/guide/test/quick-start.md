@@ -34,7 +34,7 @@ For this quick start, we've chosen the dev foundation, which utilizes a local de
               "running": true,
               "newRpcBehaviour": true,
               "binPath": "tmp/moonbeam",
-              "ports": {"wsPort": 1337}
+              "ports": {"rpcPort": 1337}
             }]
          },
 ```

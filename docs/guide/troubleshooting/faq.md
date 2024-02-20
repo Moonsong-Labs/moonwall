@@ -60,7 +60,7 @@ Here's an example of the Astar environment in the Global Test Config:
           {
             "binPath": "./tmp/astar-collator",
             "disableDefaultEthProviders": true,
-            "options": ["--dev", "--sealing=manual", "--no-hardware-benchmarks", "--no-telemetry"],
+            "options": ["--dev"],
             "newRpcBehaviour": true
           }
         ]
