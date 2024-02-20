@@ -24,40 +24,36 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "require": "./dist/index.cjs",
+      "types": "./dist/types/src/index.d.ts",
       "import": "./dist/index.js",
       "bun": "./src/cmds/entrypoint.ts"
     }
   },
   "module": "./dist/index.js",
-  "main": "./dist/index.cjs",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/types/src/index.d.ts",
   "bin": {
     "moonwall": "./moonwall.mjs",
     "moondebug": "./moondebug.mjs"
   },
   "engines": {
-    "node": ">=20.0.0",
+    "node": ">=20",
     "pnpm": ">=7"
   },
   "files": [
     "dist",
     "bin",
     "*.d.ts",
-    "*.d.cts",
-    "*.mjs",
-    "*.cjs"
+    "*.mjs"
   ],
   "scripts": {
     "clean": "rm -rf dist && rm -rf node_modules",
-    "build": "pnpm exec rm -rf dist && tsup src --format cjs,esm  && pnpm generate-types",
+    "build": "pnpm exec rm -rf dist && tsup src --format esm --no-splitting && pnpm generate-types",
     "lint": "pnpm biome lint ./src",
     "lint:fix": "pnpm biome lint ./src --apply",
     "fmt": "biome format .",
     "fmt:fix": "biome format . --write",
-    "generate-types": "tsup src --format cjs,esm --dts ",
-    "watch": "tsup src --format cjs,esm --dts --watch",
+    "generate-types": "tsc",
+    "watch": "tsup src --format esm --watch",
     "typecheck": "pnpm exec tsc --noEmit",
     "prepublish": "pnpm run build && pnpm run generate-types"
   },
@@ -74,7 +70,7 @@
     "@polkadot/types-codec": "10.11.2",
     "@polkadot/util": "12.6.2",
     "@polkadot/util-crypto": "12.6.2",
-    "@vitest/ui": "1.2.2",
+    "@vitest/ui": "1.3.0",
     "@zombienet/orchestrator": "0.0.68",
     "@zombienet/utils": "0.0.24",
     "bottleneck": "2.19.5",
@@ -83,18 +79,18 @@
     "cli-progress": "3.12.0",
     "colors": "1.4.0",
     "debug": "4.3.4",
-    "dotenv": "16.4.1",
-    "ethers": "6.10.0",
+    "dotenv": "16.4.4",
+    "ethers": "6.11.1",
     "get-port": "^7.0.0",
-    "inquirer": "9.2.13",
+    "inquirer": "9.2.15",
     "inquirer-press-to-continue": "1.2.0",
     "jsonc-parser": "3.2.1",
     "minimatch": "9.0.3",
     "node-fetch": "3.3.2",
-    "semver": "7.5.4",
-    "viem": "2.7.1",
-    "vitest": "1.2.2",
-    "web3": "4.4.0",
+    "semver": "7.6.0",
+    "viem": "2.7.10",
+    "vitest": "1.3.0",
+    "web3": "4.5.0",
     "web3-providers-ws": "^4.0.7",
     "ws": "8.16.0",
     "yaml": "2.3.4",
@@ -112,12 +108,12 @@
     "@types/cli-progress": "3.11.5",
     "@types/debug": "4.1.12",
     "@types/inquirer": "^9.0.7",
-    "@types/node": "20.11.13",
+    "@types/node": "20.11.19",
     "@types/semver": "^7.5.7",
     "@types/ws": "^8.5.10",
     "@types/yargs": "17.0.32",
-    "tsup": "8.0.1",
-    "tsx": "4.7.0",
+    "tsup": "8.0.2",
+    "tsx": "4.7.1",
     "typescript": "5.3.3"
   },
   "publishConfig": {

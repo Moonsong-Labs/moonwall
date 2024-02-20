@@ -1,5 +1,5 @@
 import "@moonbeam-network/api-augment";
-import { ChopsticksContext, DevModeContext, UpgradePreferences } from "@moonwall/types";
+import { ChopsticksContext, UpgradePreferences } from "@moonwall/types";
 import type { ApiPromise } from "@polkadot/api";
 import type { WeightV2 } from "@polkadot/types/interfaces";
 import { blake2AsHex } from "@polkadot/util-crypto";
@@ -9,11 +9,9 @@ import fs, { existsSync, readFileSync } from "fs";
 import { getRuntimeWasm } from "./binariesHelpers";
 import {
   cancelReferendaWithCouncil,
-  execOpenTechCommitteeProposal,
   executeOpenTechCommitteeProposal,
   executeProposalWithCouncil,
 } from "./governanceProcedures";
-import { createAndFinalizeBlock } from "@moonwall/util";
 
 export async function upgradeRuntimeChopsticks(
   context: ChopsticksContext,
@@ -30,7 +28,7 @@ export async function upgradeRuntimeChopsticks(
     providerName,
     module: "parachainSystem",
     method: "authorizedUpgrade",
-    methodParams: rtHash,
+    methodParams: `${rtHash}01`, // 01 is for the RT ver check = true
   });
   await context.createBlock({ providerName });
 
@@ -121,7 +119,7 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
           // TODO: remove support for old style after all chains upgraded to 2400+
           const proposal =
             api.consts.system.version.specVersion.toNumber() >= 2400
-              ? api.tx.parachainSystem.authorizeUpgrade(blake2AsHex(code), false)
+              ? api.tx.parachainSystem.authorizeUpgrade(blake2AsHex(code), true)
               : (api.tx.parachainSystem as any).authorizeUpgrade(blake2AsHex(code));
           const encodedProposal = proposal.method.toHex();
           const encodedHash = blake2AsHex(encodedProposal);
@@ -198,7 +196,7 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
 
         case "WhiteListedCaller": {
           log("Using WhiteListed Caller...");
-          const proposal = api.tx.parachainSystem.authorizeUpgrade(blake2AsHex(code), false);
+          const proposal = api.tx.parachainSystem.authorizeUpgrade(blake2AsHex(code), true);
           const encodedProposal = proposal.method.toHex();
           const encodedHash = blake2AsHex(encodedProposal);
 
@@ -232,116 +230,11 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
               (api.registry.createType("u32", ref[0].toU8a().slice(-4)) as any).toNumber()
             )?.[0];
 
-          // TODO: Cancel ref if already exists e.g.
-          //
-          // if (typeof referendaIndex !== "undefined" && referendaIndex !== null) {
-          //   log("Vote for upgrade already in referendum, cancelling it.");
-          //   await killRefViaWhitelistTrack(api, referendaIndex);
-          // }
-
           await executeOpenTechCommitteeProposal(api, encodedHash);
 
           break;
         }
       }
-
-      // if (options.useGovernance) {
-      // log("Using governance...");
-      // // TODO: remove support for old style after all chains upgraded to 2400+
-      // const proposal =
-      //   (api.consts.system.version as any).specVersion.toNumber() >= 2400
-      //     ? (api.tx.parachainSystem as any).authorizeUpgrade(blake2AsHex(code), false)
-      //     : (api.tx.parachainSystem as any).authorizeUpgrade(blake2AsHex(code));
-      // const encodedProposal = proposal.method.toHex();
-      // const encodedHash = blake2AsHex(encodedProposal);
-
-      // log("Checking if preimage already exists...");
-      // // Check if already in governance
-      // const preImageExists: any =
-      //   api.query.preimage && (await api.query.preimage.statusFor(encodedHash));
-      // const democracyPreImageExists =
-      //   !api.query.preimage && ((await api.query.democracy.preimages(encodedHash)) as any);
-
-      // if (api.query.preimage && preImageExists.isSome && preImageExists.unwrap().isRequested) {
-      //   log(`Preimage ${encodedHash} already exists !\n`);
-      // } else if (!api.query.preimage && democracyPreImageExists) {
-      //   log(`Preimage ${encodedHash} already exists !\n`);
-      // } else {
-      //   log(
-      //     `Registering preimage (${sha256(Buffer.from(code))} [~${Math.floor(
-      //       code.length / 1024
-      //     )} kb])...`
-      //   );
-      //   if (api.query.preimage) {
-      //     await api.tx.preimage
-      //       .notePreimage(encodedProposal)
-      //       .signAndSend(options.from, { nonce: nonce++ });
-      //   } else {
-      //     // TODO: remove support for democracy after 2000
-      //     await api.tx.democracy
-      //       .notePreimage(encodedProposal)
-      //       .signAndSend(options.from, { nonce: nonce++ });
-      //   }
-      //   log("Complete ✅");
-      // }
-
-      // // Check if already in referendum
-      // const referendum = await api.query.democracy.referendumInfoOf.entries();
-      // // TODO: remove support for democracy after 2000
-      // const referendaIndex = api.query.preimage
-      //   ? referendum
-      //       .filter(
-      //         (ref: any) =>
-      //           ref[1].unwrap().isOngoing &&
-      //           ref[1].unwrap().asOngoing.proposal.isLookup &&
-      //           ref[1].unwrap().asOngoing.proposal.asLookup.hash.toHex() === encodedHash
-      //       )
-      //       .map((ref) =>
-      //         (api.registry.createType("u32", ref[0].toU8a().slice(-4)) as any).toNumber()
-      //       )?.[0]
-      //   : referendum
-      //       .filter(
-      //         (ref: any) =>
-      //           ref[1].unwrap().isOngoing &&
-      //           (ref[1].unwrap().asOngoing as any).proposalHash.toHex() === encodedHash
-      //       )
-      //       .map((ref) =>
-      //         (api.registry.createType("u32", ref[0].toU8a().slice(-4)) as any).toNumber()
-      //       )?.[0];
-
-      // if (referendaIndex !== null && referendaIndex !== undefined) {
-      //   log("Vote for upgrade already in referendum, cancelling it.");
-      //   await cancelReferendaWithCouncil(api, referendaIndex);
-      // }
-      // await executeProposalWithCouncil(api, encodedHash);
-
-      // // Needs to retrieve nonce after those governance calls
-      // nonce = (await api.rpc.system.accountNextIndex(options.from.address)).toNumber();
-      // log("Enacting authorized upgrade...");
-      // await api.tx.parachainSystem
-      //   .enactAuthorizedUpgrade(code)
-      //   .signAndSend(options.from, { nonce: nonce++ });
-      // log("Complete ✅");
-      // } else {
-      // log(
-      //   `Sending sudo.setCode (${sha256(Buffer.from(code))} [~${Math.floor(
-      //     code.length / 1024
-      //   )} kb])...`
-      // );
-      // const isWeightV1 = !api.registry.createType<WeightV2>("Weight").proofSize;
-      // await api.tx.sudo
-      //   .sudoUncheckedWeight(
-      //     await api.tx.system.setCodeWithoutChecks(code),
-      //     isWeightV1
-      //       ? "1"
-      //       : {
-      //           proofSize: 1,
-      //           refTime: 1,
-      //         }
-      //   )
-      //   .signAndSend(options.from, { nonce: nonce++ });
-      // log("✅");
-      // }
 
       log(`Waiting to apply new runtime (${chalk.red("~4min")})...`);
       let isInitialVersion = true;
