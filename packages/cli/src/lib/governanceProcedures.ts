@@ -29,7 +29,7 @@ export const TECHNICAL_COMMITTEE_THRESHOLD = Math.ceil(
 );
 export const OPEN_TECHNICAL_COMMITTEE_MEMBERS: KeyringPair[] = [alith, baltathar];
 export const OPEN_TECHNICAL_COMMITTEE_THRESHOLD = Math.ceil(
-  (TECHNICAL_COMMITTEE_MEMBERS.length * 2) / 3
+  (OPEN_TECHNICAL_COMMITTEE_MEMBERS.length * 2) / 3
 );
 
 // TODO: Refactor to support both instant sealing and parachain environment
@@ -137,7 +137,9 @@ export const whiteListedTrack = async <
 
   console.log(`🏛️ Referendum submitted with proposal id: ${proposalId}`);
   await context.createBlock(context.pjsApi.tx.referenda.placeDecisionDeposit(proposalId));
-  await execOpenTechCommitteeProposal(context, proposalHash);
+
+  const whitelistCall = context.pjsApi.tx.whitelist.whitelistCall(proposalHash);
+  await execOpenTechCommitteeProposal(context, whitelistCall);
   await maximizeConvictionVotingOf(context, [ethan], proposalId);
   await context.createBlock();
 
@@ -147,16 +149,18 @@ export const whiteListedTrack = async <
 };
 
 // Creates a OpenTechCommitteeProposal and attempts to execute it
-export const execOpenTechCommitteeProposal = async (
+export const execOpenTechCommitteeProposal = async <
+  Call extends SubmittableExtrinsic<ApiType>,
+  ApiType extends ApiTypes,
+>(
   context: DevModeContext,
-  polkadotCallHash: string,
+  call: Call | string,
   voters: KeyringPair[] = OPEN_TECHNICAL_COMMITTEE_MEMBERS,
   threshold: number = OPEN_TECHNICAL_COMMITTEE_THRESHOLD
 ) => {
-  const whitelistCall = context.pjsApi.tx.whitelist.whitelistCall(polkadotCallHash).method.toHex();
   const openTechCommitteeProposal = context.pjsApi.tx.openTechCommitteeCollective.propose(
     threshold,
-    whitelistCall,
+    call,
     100
   );
   const { result: result2 } = await context.createBlock(openTechCommitteeProposal, {
@@ -197,26 +201,17 @@ export const execOpenTechCommitteeProposal = async (
 
   // Close proposal
   const result = await context.createBlock(
-    [
-      context.pjsApi.tx.openTechCommitteeCollective.close(
-        openTechProposal,
-        openTechProposalIndex,
-        {
-          refTime: 2_000_000_000,
-          proofSize: 100_000,
-        },
-        100
-      ),
-    ],
+    context.pjsApi.tx.openTechCommitteeCollective.close(
+      openTechProposal,
+      openTechProposalIndex,
+      {
+        refTime: 2_000_000_000,
+        proofSize: 100_000,
+      },
+      100
+    ),
     { signer: voters[0] }
   );
-
-  const isWhitelisted = (await context.pjsApi.query.whitelist.whitelistedCall(polkadotCallHash))
-    .isSome;
-
-  if (!isWhitelisted) {
-    throw new Error("Whitelisted procedure failed");
-  }
 
   return result;
 };
