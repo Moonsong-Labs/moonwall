@@ -2,13 +2,18 @@
 
 Here are the parameters that you can configure in your Moonwall Config file when setting up your Foundations.
 
-## Generic Foundation Spec
+## Common Foundation Parameters
 
+*The following parameters are applicable to all foundation types:*
 - **name** *string*: The name of the launch spec.
 - **running** *boolean*: Optional. This is currently UNUSED.
 - **options** *string[]*: Optional. An array of options for the launch spec.
 
-## Dev
+## Foundation-Specific Parameters
+
+*The following parameters are specific to each foundation type:*
+
+### Dev
 
 - **binPath** *string*: The path to the binary file.
 - **disableDefaultEthProviders** *boolean*: Optional. Determines if the default Ethereum provider connections should be disabled. When set to true, the framework will not automatically connect the Ethereum providers. Default behavior is to connect with Ethers, Viem & Web3 frameworks. Note: This also acts as a feature gate for context methods like createTxn and readPrecompile.
@@ -21,13 +26,13 @@ Here are the parameters that you can configure in your Moonwall Config file when
 
 - **retainAllLogs** *boolean*: Optional. An optional flag to retain node logs from previous runs.
 
-## Read Only 
+### Read Only 
 
 - **rateLimiter** *boolean* or Bottleneck.ConstructorOptions: Optional. Rate limiter options, on by default. Can be set to false to disable.
 - **disableRuntimeVersionCheck** *boolean*: Optional. Disable runtime version check. Runtime Version check is enabled by default.
 
 
-## Zombie
+### Zombie
 
 - **additionalZombieConfig** *OrcOptionsInterface*: Optional. Additional configuration for the zombie network.
 - **disableDefaultEthProviders** *boolean*: Optional. Determines if the default Ethereum provider connections should be disabled. When set to true, the framework will not automatically connect the Ethereum providers. Default behavior is to connect with Ethers, Viem & Web3 frameworks.
@@ -36,7 +41,7 @@ Here are the parameters that you can configure in your Moonwall Config file when
 - **skipBlockCheck** *string[]*: Optional. An array of blocks to skip checking.
 
 
-## Chopsticks
+### Chopsticks
 
 - **configPath** *string*: The path to the config file.
 - **wsPort** *number*: An optional WebSocket port. Note that this port option is only for single mode, not xcm, in Chopsticks.
