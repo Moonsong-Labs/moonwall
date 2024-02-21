@@ -11,6 +11,8 @@ dotenv.config();
 
 configSetup(process.argv);
 
+export type RunCommandArgs = { envName: string; GrepTest?: string; subDirectory?: string };
+
 yargs(hideBin(process.argv))
   .wrap(null)
   .usage("Usage: $0")
@@ -74,6 +76,11 @@ yargs(hideBin(process.argv))
         .positional("GrepTest", {
           type: "string",
           description: "Pattern to grep test ID/Description to run",
+        })
+        .option("subDirectory", {
+          describe: "Additional sub-directory filter for test suites",
+          alias: "d",
+          type: "string",
         });
     },
     async (args) => {
@@ -82,6 +89,7 @@ yargs(hideBin(process.argv))
         if (
           !(await testCmd(args.envName.toString(), {
             testNamePattern: args.GrepTest,
+            subDirectory: args.subDirectory,
           }))
         ) {
           process.exitCode = 1;
@@ -93,7 +101,7 @@ yargs(hideBin(process.argv))
       }
     }
   )
-  .command(
+  .command<RunCommandArgs>(
     "run <envName> [GrepTest]",
     "Start new network found in global config",
     (yargs) => {
@@ -104,11 +112,16 @@ yargs(hideBin(process.argv))
         .positional("GrepTest", {
           type: "string",
           description: "Pattern to grep test ID/Description to run",
+        })
+        .option("subDirectory", {
+          describe: "Additional sub-directory filter for test suites",
+          alias: "d",
+          type: "string",
         });
     },
     async (argv) => {
       process.env.MOON_RUN_SCRIPTS = "true";
-      await runNetworkCmd(argv as any);
+      await runNetworkCmd(argv);
     }
   )
   .command<{ suitesRootDir: string }>(

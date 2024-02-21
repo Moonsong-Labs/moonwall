@@ -50,7 +50,7 @@ export async function testCmd(envName: string, additionalArgs?: object): Promise
   return false;
 }
 
-export async function executeTests(env: Environment, additionalArgs?: object) {
+export async function executeTests(env: Environment, additionalArgs?: any) {
   return new Promise<Vitest>(async (resolve, reject) => {
     const globalConfig = await importAsyncConfig();
     if (env.foundation.type === "read_only") {
@@ -118,7 +118,11 @@ export async function executeTests(env: Environment, additionalArgs?: object) {
     }
 
     try {
-      const folders = env.testFileDir.map((folder) => path.join(".", folder, "/"));
+      const testFileDir = additionalArgs?.subDirectory
+        ? env.testFileDir.map((folder) => path.join(folder, additionalArgs.subDirectory))
+        : env.testFileDir;
+
+      const folders = testFileDir.map((folder) => path.join(".", folder, "/"));
       resolve(
         (await startVitest("test", folders, {
           ...options,
