@@ -1,5 +1,14 @@
 # @moonwall/cli
 
+## 5.0.1
+
+### Patch Changes
+
+- cac3d9f: gov fix
+- Updated dependencies [cac3d9f]
+  - @moonwall/types@5.0.1
+  - @moonwall/util@5.0.1
+
 ## 5.0.0
 
 ### Major Changes
