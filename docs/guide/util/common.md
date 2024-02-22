@@ -1,5 +1,38 @@
 # Common Helpers
 
+## Moonwall Utils
+
+Moonwall Utils is a utils package for Moonwall that includes a suite of constants, functions, classes, and types that are useful when writing tests with Moonwall. 
+
+### Installation
+
+Moonwall Utils can be installed with the following command:
+
+```bash
+npm i @moonwall/util
+```
+
+### Moonwall Utils Reference
+
+#### Generic Account Constants
+
+Moonwall Utils has a variety of account constants intended for generic substrate networks. A full list of these constants is available in `accounts.js` of the `constants` folder of Moonwall Utils.
+
+The aforementioned account constants include all of the prefunded developer accounts (Alith, Baltathar, Charleth, Dorothy, Ethan, Faith, Gerald, Goliath). These constants include DEBUG_MODE and DISPLAY_LOG for debugging purposes. Paths for the base, custom specifications, binary, and relay binary are configurable through environment variables, accommodating custom or override runtime paths as well as Ethereum API commands.
+
+Token constants are defined in terms of GLMR, (which is equivalent to ETH as both ETH and GLMR have a token decimal precision of 18) setting default balances for genesis, staking (delegating), and proposal amounts. The account constants also include gas and weight per second, limits for block weight and gas, and calculations for extrinsic gas limits and base weights. 
+
+#### Moonbeam-Specific Constants
+
+Moonwall Utils also has constants primarily intended for Moonbeam networks. A full list of these constants is available in `chain.js` of the `constants` folder of Moonwall Utils. `Chain.js` includes various environmental configurations, such as DEBUG_MODE for debugging, DISPLAY_LOG and MOONBEAM_LOG for logging configurations, and several paths (BASE_PATH, CUSTOM_SPEC_PATH, BINARY_PATH, etc.) for specifying the locations of binaries and custom specifications.
+
+Network-specific parameters include the definition of GLMR and its smaller units (MILLIGLMR, MICROGLMR), along with default genesis balances and staking amounts. It also defines the gas economics with constants like WEIGHT_PER_SECOND, GAS_PER_SECOND, and limits for block weight and gas.
+
+Precompile addresses are specified for various functionalities (e.g., parachain staking, crowdloan rewards, native ERC20 handling). Precompiles enable EVM developers to access Moonbeam's powerful substrate features from a Solidity interface in the EVM. 
+
+Additional constants provided include time-related constants such as standard time conversions and block production intervals. Additionally, it details proxy types and contract randomness statuses, offering a framework for contract interactions and governance. Runtime constants are tailored for different Moonbeam networks (Moonbase, Moonriver, Moonbeam), adjusting fee multipliers and base fee limits to suit each network's economic model.
+
+
 ## Artifact Downloader
 
 Moonwall has an integrated artifact downloader that allows you to quickly grab client artifacts that you need, without having to leave the CLI. 
