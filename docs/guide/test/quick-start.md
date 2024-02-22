@@ -43,9 +43,7 @@ For more information about each of the above parameters, please see [foundation 
 
 ### Connections and Providers
 
-You'll define a new connection for each type of connection that you'd like to have to your chain. 
-
-The 5 types of connections are as follows:
+You'll define a new connection for each type of connection that you'd like to have to your chain. The 5 types of connections are as follows:
 
 - polkadotJs
 - ethers
