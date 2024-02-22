@@ -20,14 +20,16 @@ import {
   resolveZombieInteractiveCmdChoice,
 } from "./interactiveCmds";
 import { executeTests } from "./runTests";
+import { RunCommandArgs } from "./entrypoint";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
 let lastSelected = 0;
 
-export async function runNetworkCmd(args) {
+export async function runNetworkCmd(args: RunCommandArgs) {
   await cacheConfig();
   process.env.MOON_TEST_ENV = args.envName;
+  process.env.MOON_SUBDIR = args.subDirectory;
   const globalConfig = await importAsyncConfig();
   const env = globalConfig.environments.find(({ name }) => name === args.envName);
 
@@ -144,6 +146,10 @@ export async function runNetworkCmd(args) {
     console.log(`  🖥️   https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0.0.1%3A${port}`);
   }
 
+  if (process.env.MOON_SUBDIR) {
+    console.log(chalk.bgWhite.blackBright(`📍 Subdirectory Filter: ${process.env.MOON_SUBDIR}`));
+  }
+
   if (!args.GrepTest) {
     const question = questions.find(({ name }) => name === "NetworkStarted");
 
@@ -154,8 +160,8 @@ export async function runNetworkCmd(args) {
     await inquirer.prompt(question);
   } else {
     process.env.MOON_RECYCLE = "true";
-    process.env.MOON_GREP = await args.GrepTest;
-    await executeTests(env, { testNamePattern: await args.GrepTest });
+    process.env.MOON_GREP = args.GrepTest;
+    await executeTests(env, { testNamePattern: args.GrepTest, subDirectory: args.subDirectory });
   }
 
   mainloop: for (;;) {
@@ -299,6 +305,9 @@ const resolveInfoChoice = async (env: Environment) => {
   for (const { port } of portsList) {
     console.log(`  🖥️   https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0.0.1%3A${port}`);
   }
+  if (process.env.MOON_SUBDIR) {
+    console.log(chalk.bgWhite.blackBright(`📍 Subdirectory Filter: ${process.env.MOON_SUBDIR}`));
+  }
 };
 
 const resolveGrepChoice = async (env: Environment, silent = false) => {
@@ -310,7 +319,11 @@ const resolveGrepChoice = async (env: Environment, silent = false) => {
   });
   process.env.MOON_RECYCLE = "true";
   process.env.MOON_GREP = await choice.grep;
-  const opts: any = { testNamePattern: await choice.grep, silent };
+  const opts: any = {
+    testNamePattern: await choice.grep,
+    silent,
+    subDirectory: process.env.MOON_SUBDIR,
+  };
   if (silent) {
     opts.reporters = ["dot"];
   }
@@ -319,7 +332,7 @@ const resolveGrepChoice = async (env: Environment, silent = false) => {
 
 const resolveTestChoice = async (env: Environment, silent = false) => {
   process.env.MOON_RECYCLE = "true";
-  const opts: any = { silent };
+  const opts: any = { silent, subDirectory: process.env.MOON_SUBDIR };
   if (silent) {
     opts.reporters = ["dot"];
   }

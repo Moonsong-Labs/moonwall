@@ -5,17 +5,17 @@ id = 2_001
 [parachains.collator]
 args = ["-lparachain=debug"]
 command = "polkadot-parachain"
-image = "parity/polkadot-parachain:1.3.0"
+image = "parity/polkadot-parachain:1.7.0"
 name = "collator02"
 
 [relaychain]
 chain = "rococo-local"
-default_image = "docker.io/parity/polkadot:v1.3.0"
+default_image = "docker.io/parity/polkadot:v1.7.0"
 
-[relaychain.genesis.runtime.configuration.config]
+[relaychain.genesis.runtimeGenesis.patch.configuration.config]
 scheduling_lookahead = 4
 
-[relaychain.genesis.runtime.configuration.config.async_backing_params]
+[relaychain.genesis.runtimeGenesis.patch.configuration.config.async_backing_params]
 allowed_ancestry_len = 4
 max_candidate_depth = 4
 

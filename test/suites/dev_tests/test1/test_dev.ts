@@ -35,7 +35,7 @@ import {
   verifyMessage,
 } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
-import { tokenAbi, bytecode as tokenBytecode } from "../../_test_data/token";
+import { tokenAbi, bytecode as tokenBytecode } from "../../../_test_data/token";
 
 describeSuite({
   id: "D01",
@@ -618,6 +618,7 @@ describeSuite({
         log(`Previous block #${block}, new block #${block2}`);
         log(`Previous round #${round}, new round #${round2}`);
         expect(round2).toBe(round + 1);
+
       },
     });
 
