@@ -43,6 +43,16 @@ For more information about each of the above parameters, please see [foundation 
 
 ### Connections and Providers
 
+You'll define a new connection for each type of connection that you'd like to have to your chain. 
+
+The 5 types of connections are as follows:
+
+- polkadotJs
+- ethers
+- web3
+- moon
+- viem
+
 We've defined here our endpoint information and set up two connections, one that uses the polkadotJs provider and another that uses the Ethers provider. Of course, if you don't have a need for the Ethers connection, you don't need to include it. 
 
 ```json
