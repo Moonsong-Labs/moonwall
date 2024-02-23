@@ -14,7 +14,15 @@ export function sidebarGuide(): DefaultTheme.SidebarItem[] {
         { text: "Networks Supported", link: "networks" },
       ],
     },
-
+    {
+      text: "Writing Tests",
+      collapsed: false,
+      base: "/guide/write/",
+      items: [
+        { text: "Quick Start", link: "quick-start" },
+        { text: "Context Functions", link: "context-functions" },
+      ],
+    },
     {
       text: "Running Tests",
       collapsed: false,
@@ -27,12 +35,13 @@ export function sidebarGuide(): DefaultTheme.SidebarItem[] {
       ],
     },
     {
-      text: "Writing Tests",
-      collapsed: false,
-      base: "/guide/write/",
+      text: "Config",
+      collapsed: true,
+      base: "/config/",
       items: [
-        { text: "Quick Start", link: "quick-start" },
-        { text: "Context Functions", link: "context-functions" },
+        { text: "Environment", link: "environment" },
+        { text: "Foundation", link: "foundation" },
+        { text: "moonwall-config", link: "moonwall-config" },
       ],
     },
     {
@@ -64,14 +73,6 @@ export function sidebarGuide(): DefaultTheme.SidebarItem[] {
       items: [
         { text: "Errors", link: "errors" },
         { text: "FAQ", link: "faq" },
-      ],
-    },
-    {
-      text: "Guide Examples",
-      collapsed: false,
-      base: "/guide/",
-      items: [
-        { text: "Markdown Examples", link: "markdown-examples" },
       ],
     },
   ];

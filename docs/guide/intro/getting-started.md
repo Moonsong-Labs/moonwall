@@ -9,8 +9,9 @@ These steps are not required for projects that already have Moonwall integrated.
 Skip to [Testing - Quick Start](../test/quick-start) for advice on running tests in Moonwall.
 :::
 
-- [Node.js](https://nodejs.org/) version 18 or higher.
+- [Node.js](https://nodejs.org/){target=_blank} version 20.10 or higher.
 - MacOS or Linux Operating system (WSL counts!)
+- [pNPM](https://pnpm.io/){target=_blank}, a fast and efficient package manager
 
 Moonwall should be installed as dependency to the project under test.
 
@@ -34,9 +35,15 @@ npm add -D @moonwall/cli
 
 :::
 
+You can install Moonwall globally with the following command: 
+
+```sh
+pnpm -g i @moonwall/cli
+```
+
 ## Initializing Moonwall
 
-The first thing to do is to create a Moonwall config file. This can be initiated with the command:
+The first thing to do is to create a Moonwall config file. This can be initiated with the command below or you can [use the CLI to take the same steps](/guide/cmd/cli).
 
 ::: code-group
 
@@ -65,7 +72,7 @@ which should give you an output like:
 ? Provide a label for the config file (moonwall_config) 
 ```
 
-From here you can follow the questions in the wizard to build a stock moonwall config to start you off.
+From here you can follow the questions in the wizard to build a stock moonwall config to start you off. For information, please see the [init command](/guide/cmd/init). 
 
 ::: info
 The items in brackets are the default options, which you can accept with `ENTER`
@@ -83,7 +90,7 @@ This isn't too important as you will always be able to create new environment sp
 - `fork` : 🚧 Not yet implemented! Will be part of a new way of forking the network with a real client
 
 ::: tip
-This is the very brief rundown of foundations. For their specific information please visit the relevant sections in [Config](../../config/environment).
+This is the very brief rundown of foundations. For their specific information please visit the relevant sections in [Config](/guide/intro/foundations).
 :::
 
 ## Generated Config
@@ -116,7 +123,7 @@ If using a code-editor like Visual Studio Code, intellisense is available for va
 
 ## Downloading a Binary
 
-For this example lets download a copy of the Moonbeam node via the CLI menus.
+For this example let's download a copy of the Moonbeam node via the CLI menus.
 
 Launch the app:
 
@@ -150,15 +157,15 @@ The main menu will pop up with the following options:
 
 ```sh
 ? Main Menu - Please select one of the following: (Use arrow keys)
-  - 1) Initialise:                       ✅  CONFIG ALREADY GENERATED (Disabled)
-❯ 2) Network Launcher & Toolbox:         Launch network, access tools: tail logs, interactive tests etc. 
-  3) Test Suite Execution:               Run automated tests, start network if needed. 
-  - 4) Batch-Run Tests:                  🏗️  NOT YET IMPLEMENTED  (Disabled)
-  5) Artifact Downloader:                Fetch artifacts (x86) from GitHub repos. 
-  6) Quit Application 
+  1) Execute Script:                     Run scripts placed in your config defined script directory
+❯ 2) Network Launcher & Toolbox:         Launch network, access tools: tail logs, interactive tests
+ etc
+  3) Test Suite Execution:               Run automated tests, start network if needed
+  4) Artifact Downloader:                Fetch artifacts (x86) from GitHub repos
+  5) Quit Application
 ```
 
-Choosing option `5` (via ↕️ keys & ↩️), follow the prompts to download the binary to your desired location (remember this location!)
+Choosing option `4` (via ↕️ keys & ↩️), follow the prompts to download the binary to your desired location (remember this location!)
 
 Open your code editor and edit the `moonwall.config.json` so that it now has the location of the binary:
 
@@ -188,7 +195,7 @@ Open your code editor and edit the `moonwall.config.json` so that it now has the
 
 ## Running the Network
 
-Now that we have a very basic environment config, lets start the network!
+Now that we have a very basic environment config, let's start the network!
 
 Open the Moonwall application except this time select: `2) Network Launcher & Toolbox:` and choose the environment you created (this is "default_env" above).
 
