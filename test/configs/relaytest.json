@@ -1,67 +1,63 @@
 {
-    "parachains": [
-      {
-        "cumulus_based": true,
-        "id": 2001,
-        "collator": {
-          "args": [
-            "-lparachain=debug"
-          ],
-          "command": "polkadot-parachain",
-          "image": "parity/polkadot-parachain:1.3.0",
-          "name": "collator02"
-        }
-      }
-    ],
-    "relaychain": {
-      "chain": "rococo-local",
-      "default_image": "docker.io/parity/polkadot:v1.3.0",
-      "node_groups": [
-        {
-          "args": [
-            "-lparachain=debug"
-          ],
-          "count": 3,
-          "name": "alice"
-        }
-      ],
-      "default_resources": {
-        "limits": {
-          "cpu": "2",
-          "memory": "4G"
-        },
-        "requests": {
-          "cpu": "1",
-          "memory": "2G"
-        }
-      },
-      "genesis": {
-        "runtimeGenesis": {
-          "patch": {
-            "configuration": {
-              "config": {
-                "group_rotation_frequency": 4,
-                "needed_approvals": 1,
-                "relay_vrf_modulo_samples": 6,
-                "scheduling_lookahead": 3,
-                "async_backing_params": {
-                  "allowed_ancestry_len": 3,
-                  "max_candidate_depth": 4
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "settings": {
-      "timeout": 1000
-    },
-    "types": {
-      "Header": {
-        "number": "u64",
-        "parent_hash": "Hash",
-        "post_state": "Hash"
-      }
-    }
-  }
+	"parachains": [
+		{
+			"cumulus_based": true,
+			"id": 2001,
+			"collator": {
+				"args": ["-lparachain=debug"],
+				"command": "polkadot-parachain",
+				"image": "parity/polkadot-parachain:1.3.0",
+				"name": "collator02"
+			}
+		}
+	],
+	"relaychain": {
+		"chain": "rococo-local",
+		"default_image": "docker.io/parity/polkadot:v1.3.0",
+		"node_groups": [
+			{
+				"args": ["-lparachain=debug"],
+				"count": 3,
+				"name": "alice"
+			}
+		],
+		"default_resources": {
+			"limits": {
+				"cpu": "2",
+				"memory": "4G"
+			},
+			"requests": {
+				"cpu": "1",
+				"memory": "2G"
+			}
+		},
+		"genesis": {
+			"runtimeGenesis": {
+				"patch": {
+					"configuration": {
+						"config": {
+							"group_rotation_frequency": 4,
+							"needed_approvals": 1,
+							"relay_vrf_modulo_samples": 6,
+							"scheduling_lookahead": 3,
+							"async_backing_params": {
+								"allowed_ancestry_len": 3,
+								"max_candidate_depth": 4
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"settings": {
+		"timeout": 1000
+	},
+	"types": {
+		"Header": {
+			"number": "u64",
+			"parent_hash": "Hash",
+			"post_state": "Hash"
+		}
+	}
+}

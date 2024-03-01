@@ -4,7 +4,7 @@ import {
   describeSuite,
   expect,
   fetchCompiledContract,
-  whiteListedTrack
+  whiteListedTrack,
 } from "@moonwall/cli";
 import {
   ALITH_ADDRESS,
@@ -16,7 +16,7 @@ import {
   GLMR,
   alith,
   baltathar,
-  deployViemContract
+  deployViemContract,
 } from "@moonwall/util";
 import { BN } from "@polkadot/util";
 import { Wallet, parseEther } from "ethers";
@@ -618,7 +618,6 @@ describeSuite({
         log(`Previous block #${block}, new block #${block2}`);
         log(`Previous round #${round}, new round #${round2}`);
         expect(round2).toBe(round + 1);
-
       },
     });
 
@@ -641,9 +640,7 @@ describeSuite({
         expect(postStatus).toBe(false);
 
         expect(
-          (await context.pjsApi.query.parachainSystem.authorizedUpgrade())
-            .unwrap()
-            .codeHash.toHex()
+          (await context.pjsApi.query.parachainSystem.authorizedUpgrade()).unwrap().codeHash.toHex()
         ).toBe("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
       },
     });
