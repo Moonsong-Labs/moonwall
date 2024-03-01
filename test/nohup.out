@@ -1,6 +1,0 @@
-Crash Annotation GraphicsCriticalError: |[0][GFX1-]: vaapitest: ERROR (t=0.312529) [GFX1-]: vaapitest: ERROR
-Crash Annotation GraphicsCriticalError: |[0][GFX1-]: vaapitest: ERROR (t=0.312529) |[1][GFX1-]: vaapitest: VA-API test failed: failed to initialise VAAPI connection.
- (t=0.312574) [GFX1-]: vaapitest: VA-API test failed: failed to initialise VAAPI connection.
-
-stdout is a tty false, in CI false.  using logfile: true
-stdout is a tty false, in CI false.  using logfile: true
