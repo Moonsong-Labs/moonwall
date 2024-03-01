@@ -24,18 +24,30 @@ export async function upgradeRuntimeChopsticks(
   const rtWasm = readFileSync(path);
   const rtHex = `0x${rtWasm.toString("hex")}`;
   const rtHash = blake2AsHex(rtHex);
-  await context.setStorage({
-    providerName,
-    module: "parachainSystem",
-    method: "authorizedUpgrade",
-    methodParams: `${rtHash}01`, // 01 is for the RT ver check = true
-  });
-  await context.createBlock({ providerName });
-
   const api = context.polkadotJs(providerName);
   const signer = context.keyring.alice;
 
-  await api.tx.parachainSystem.enactAuthorizedUpgrade(rtHex).signAndSend(signer);
+  if ("authorizedUpgrade" in api.query.system) {
+    await context.setStorage({
+      providerName,
+      module: "system",
+      method: "authorizedUpgrade",
+      methodParams: `${rtHash}01`, // 01 is for the RT ver check = true
+    });
+    await context.createBlock({ providerName });
+
+    await api.tx.system.enactAuthorizedUpgrade(rtHex).signAndSend(signer);
+  } else {
+    await context.setStorage({
+      providerName,
+      module: "parachainSystem",
+      method: "authorizedUpgrade",
+      methodParams: `${rtHash}01`, // 01 is for the RT ver check = true
+    });
+    await context.createBlock({ providerName });
+
+    await api.tx.parachainSystem.enactAuthorizedUpgrade(rtHex).signAndSend(signer);
+  }
 
   await context.createBlock({ providerName, count: 3 });
 }
