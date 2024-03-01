@@ -58,20 +58,26 @@ describeSuite({
 
         log("Please wait, this will take at least 30s for transaction to complete");
 
-        await new Promise((resolve) => {
-          paraApi.tx.balances
-            .transferAllowDeath(ALITH_ADDRESS, 2n * GLMR)
-            .signAndSend(baltathar, ({ status, events }) => {
-              if (status.isInBlock) {
-                log("Transaction is in block");
-              }
-              if (status.isFinalized) {
-                log("Transaction is finalized!");
-                resolve(events);
-              }
-            });
-        });
+        // Uncomment when we upgrade to polkadot 1.7
+        // await new Promise((resolve) => {
+        //   paraApi.tx.balances
+        //     .transferAllowDeath(ALITH_ADDRESS, 2n * GLMR)
+        //     .signAndSend(baltathar, ({ status, events }) => {
+        //       if (status.isInBlock) {
+        //         log("Transaction is in block");
+        //       }
+        //       if (status.isFinalized) {
+        //         log("Transaction is finalized!");
+        //         resolve(events);
+        //       }
+        //     });
+        // });
+        
+        await paraApi.tx.balances
+          .transferAllowDeath(ALITH_ADDRESS, 2n * GLMR)
+          .signAndSend(baltathar);
 
+        await context.waitBlock(4, "parachain", "quantity");
         const balAfter = (await paraApi.query.system.account(ALITH_ADDRESS)).data.free;
         expect(balBefore.lt(balAfter)).to.be.true;
       },
