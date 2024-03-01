@@ -155,7 +155,7 @@
 			"testFileDir": ["suites/zombie"],
 			"timeout": 300000,
 			"envVars": ["DEBUG_COLORS=1"],
-			"reporters": ["basic"],
+			"reporters": ["default"],
 			"foundation": {
 				"type": "zombie",
 				"rtUpgradePath": "./tmp/moonbase-runtime-2401.wasm",

@@ -45,7 +45,7 @@ describeSuite({
       title: "Check parachain api correctly connected (2)",
       timeout: 120000,
       test: async () => {
-        await context.waitBlock(5, "parachain", "height");
+        await context.waitBlock(2, "parachain", "height");
       },
     });
 
@@ -77,7 +77,7 @@ describeSuite({
           .transferAllowDeath(ALITH_ADDRESS, 2n * GLMR)
           .signAndSend(baltathar);
 
-        await context.waitBlock(2, "parachain", "quantity");
+        await context.waitBlock(4, "parachain", "quantity");
         const balAfter = (await paraApi.query.system.account(ALITH_ADDRESS)).data.free;
         expect(balBefore.lt(balAfter)).to.be.true;
       },
