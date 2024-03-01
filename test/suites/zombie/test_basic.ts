@@ -72,12 +72,12 @@ describeSuite({
         //       }
         //     });
         // });
-        
+
         await paraApi.tx.balances
           .transferAllowDeath(ALITH_ADDRESS, 2n * GLMR)
           .signAndSend(baltathar);
 
-        await context.waitBlock(4, "parachain", "quantity");
+        await context.waitBlock(2, "parachain", "quantity");
         const balAfter = (await paraApi.query.system.account(ALITH_ADDRESS)).data.free;
         expect(balBefore.lt(balAfter)).to.be.true;
       },
