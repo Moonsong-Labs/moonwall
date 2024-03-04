@@ -1,5 +1,13 @@
 # @moonwall/cli
 
+## 5.0.2
+
+### Patch Changes
+
+- dad03aa: Support new 1.7.0 upgrade
+  - @moonwall/types@5.0.2
+  - @moonwall/util@5.0.2
+
 ## 5.0.1
 
 ### Patch Changes

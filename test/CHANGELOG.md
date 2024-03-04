@@ -1,5 +1,11 @@
 # @moonwall/tests
 
+## 5.0.2
+
+### Patch Changes
+
+- dad03aa: Support new 1.7.0 upgrade
+
 ## 5.0.1
 
 ### Patch Changes
