@@ -29,7 +29,9 @@ let lastSelected = 0;
 export async function runNetworkCmd(args: RunCommandArgs) {
   await cacheConfig();
   process.env.MOON_TEST_ENV = args.envName;
-  process.env.MOON_SUBDIR = args.subDirectory;
+  if (args.subDirectory) {
+    process.env.MOON_SUBDIR = args.subDirectory;
+  }
   const globalConfig = await importAsyncConfig();
   const env = globalConfig.environments.find(({ name }) => name === args.envName);
 

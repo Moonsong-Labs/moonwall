@@ -4,7 +4,7 @@ import {
   describeSuite,
   expect,
   fetchCompiledContract,
-  whiteListedTrack
+  whiteListedTrack,
 } from "@moonwall/cli";
 import {
   ALITH_ADDRESS,
@@ -16,7 +16,7 @@ import {
   GLMR,
   alith,
   baltathar,
-  deployViemContract
+  deployViemContract,
 } from "@moonwall/util";
 import { BN } from "@polkadot/util";
 import { Wallet, parseEther } from "ethers";
@@ -618,7 +618,6 @@ describeSuite({
         log(`Previous block #${block}, new block #${block2}`);
         log(`Previous round #${round}, new round #${round2}`);
         expect(round2).toBe(round + 1);
-
       },
     });
 
@@ -626,6 +625,7 @@ describeSuite({
       id: "T26",
       title: "it can fast execute an openGov proposal",
       test: async () => {
+        // change this to system.authorizedupgrade after sdk 1.7
         const value = (await context.pjsApi.query.parachainSystem.authorizedUpgrade()).isNone;
         expect(value, "parachainSystem.authorizedUpgrade should be empty to begin with").toBe(true);
 
@@ -640,9 +640,7 @@ describeSuite({
         expect(postStatus).toBe(false);
 
         expect(
-          (await context.pjsApi.query.parachainSystem.authorizedUpgrade())
-            .unwrap()
-            .codeHash.toHex()
+          (await context.pjsApi.query.parachainSystem.authorizedUpgrade()).unwrap().codeHash.toHex()
         ).toBe("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
       },
     });
