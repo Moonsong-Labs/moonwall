@@ -36,7 +36,7 @@ export async function upgradeRuntimeChopsticks(
     });
     await context.createBlock({ providerName });
 
-    await api.tx.system.enactAuthorizedUpgrade(rtHex).signAndSend(signer);
+    await api.tx.system.applyAuthorizedUpgrade(rtHex).signAndSend(signer);
   } else {
     await context.setStorage({
       providerName,
