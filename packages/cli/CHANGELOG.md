@@ -1,5 +1,14 @@
 # @moonwall/cli
 
+## 5.1.1
+
+### Patch Changes
+
+- c260636: pkg update
+- Updated dependencies [c260636]
+  - @moonwall/types@5.1.1
+  - @moonwall/util@5.1.1
+
 ## 5.1.0
 
 ### Minor Changes
