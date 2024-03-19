@@ -34,7 +34,12 @@
 		"node": ">=20",
 		"pnpm": ">=7"
 	},
-	"files": ["dist", "bin", "*.d.ts", "*.mjs"],
+	"files": [
+		"dist",
+		"bin",
+		"*.d.ts",
+		"*.mjs"
+	],
 	"scripts": {
 		"clean": "rm -rf dist && rm -rf node_modules",
 		"build": "rm -rf dist && tsup src --format esm --no-splitting --sourcemap && pnpm generate-types",
@@ -59,8 +64,8 @@
 		"bottleneck": "2.19.5",
 		"debug": "4.3.4",
 		"ethers": "6.11.1",
-		"viem": "2.7.10",
-		"web3": "4.5.0"
+		"viem": "2.8.13",
+		"web3": "4.6.0"
 	},
 	"peerDependencies": {
 		"@polkadot/api": "10.11.2"
