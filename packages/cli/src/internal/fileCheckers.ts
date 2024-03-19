@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import { execSync } from "child_process";
+import { execSync } from "node:child_process";
 import chalk from "chalk";
 import os from "node:os";
 import inquirer from "inquirer";
@@ -113,7 +113,7 @@ export function checkAlreadyRunning(binaryName: string): number[] {
       timeout: 2000,
     });
     const pIdStrings = stdout.split("\n").filter(Boolean);
-    return pIdStrings.map((pId) => parseInt(pId, 10));
+    return pIdStrings.map((pId) => Number.parseInt(pId, 10));
   } catch (error: any) {
     if (error.status === 1) {
       return [];

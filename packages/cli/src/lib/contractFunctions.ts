@@ -1,4 +1,4 @@
-import {
+import type {
   ContractCallOptions,
   ContractDeploymentOptions,
   DevModeContext,
@@ -14,11 +14,11 @@ import {
   deployViemContract,
 } from "@moonwall/util";
 import chalk from "chalk";
-import { Interface, InterfaceAbi, Wallet } from "ethers";
-import fs, { readFileSync } from "fs";
-import path from "path";
+import { Interface, type InterfaceAbi, Wallet } from "ethers";
+import fs, { readFileSync } from "node:fs";
+import path from "node:path";
 import type { Abi } from "viem";
-import { Log, decodeFunctionResult, encodeFunctionData, toHex } from "viem";
+import { type Log, decodeFunctionResult, encodeFunctionData, toHex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { importJsonConfig } from "./configReader";
 

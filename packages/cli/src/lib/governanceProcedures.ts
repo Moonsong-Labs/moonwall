@@ -1,5 +1,5 @@
 import "@moonbeam-network/api-augment";
-import { DevModeContext } from "@moonwall/types";
+import type { DevModeContext } from "@moonwall/types";
 import {
   GLMR,
   alith,
@@ -12,9 +12,9 @@ import {
   signAndSend,
 } from "@moonwall/util";
 import type { ApiPromise } from "@polkadot/api";
-import { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types";
-import { KeyringPair } from "@polkadot/keyring/types";
-import {
+import type { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types";
+import type { KeyringPair } from "@polkadot/keyring/types";
+import type {
   PalletDemocracyReferendumInfo,
   PalletReferendaReferendumInfo,
 } from "@polkadot/types/lookup";

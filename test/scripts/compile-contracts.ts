@@ -1,7 +1,7 @@
 import { CompiledContract } from "@moonwall/cli";
 import chalk from "chalk";
 import fs from "fs/promises";
-import path from "path";
+import path from "node:path";
 import solc from "solc";
 import { Abi } from "viem";
 import crypto from "crypto";

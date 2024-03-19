@@ -14,9 +14,9 @@
  * 2. Files in a case-insensitive lexicographical order.
  */
 import chalk from "chalk";
-import fs from "fs";
+import fs from "node:fs";
 import inquirer from "inquirer";
-import path from "path";
+import path from "node:path";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 

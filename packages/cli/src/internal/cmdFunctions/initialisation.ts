@@ -1,5 +1,5 @@
-import { FoundationType, MoonwallConfig } from "@moonwall/types";
-import fs from "fs/promises";
+import type { FoundationType, MoonwallConfig } from "@moonwall/types";
+import fs from "node:fs/promises";
 import inquirer from "inquirer";
 import PressToContinuePrompt from "inquirer-press-to-continue";
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);

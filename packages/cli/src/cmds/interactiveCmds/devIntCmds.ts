@@ -1,5 +1,5 @@
 import type { ApiPromise } from "@polkadot/api";
-import inquirer, { ChoiceCollection } from "inquirer";
+import inquirer, { type ChoiceCollection } from "inquirer";
 import { MoonwallContext } from "../../lib/globalContext";
 import { jumpRoundsDev, jumpToRoundDev } from "@moonwall/util";
 

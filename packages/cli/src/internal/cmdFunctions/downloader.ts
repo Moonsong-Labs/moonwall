@@ -41,7 +41,7 @@ export async function downloader(url: string, outputPath: string): Promise<void>
   readStream.pipe(writeStream);
 
   await new Promise((resolve, reject) => {
-    const contentLength = parseInt(response.headers.get("Content-Length") || "0");
+    const contentLength = Number.parseInt(response.headers.get("Content-Length") || "0");
     onStart(contentLength);
 
     readStream.on("data", (chunk) => {

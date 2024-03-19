@@ -1,11 +1,11 @@
-import { MoonwallConfig } from "@moonwall/types";
+import type { MoonwallConfig } from "@moonwall/types";
 import chalk from "chalk";
 import clear from "clear";
 import colors from "colors";
-import fs from "fs";
+import fs from "node:fs";
 import inquirer from "inquirer";
 import PressToContinuePrompt from "inquirer-press-to-continue";
-import path from "path";
+import path from "node:path";
 import { SemVer, lt } from "semver";
 import pkg from "../../package.json" assert { type: "json" };
 import {

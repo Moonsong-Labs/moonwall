@@ -1,4 +1,8 @@
-import { ChopsticksBlockCreation, ChopsticksContext, FoundationHandler } from "@moonwall/types";
+import type {
+  ChopsticksBlockCreation,
+  ChopsticksContext,
+  FoundationHandler,
+} from "@moonwall/types";
 import {
   ALITH_PRIVATE_KEY,
   BALTATHAR_PRIVATE_KEY,
@@ -103,7 +107,7 @@ export const chopsticksHandler: FoundationHandler<"chopsticks"> = ({
         ? await getWsFromConfig(options.providerName)
         : await getWsFromConfig();
       // @ts-ignore - internal endpoints are not exposed
-      const port = parseInt(ws.__internal__endpoints[0].split(":")[2].split("/")[0]);
+      const port = Number.parseInt(ws.__internal__endpoints[0].split(":")[2].split("/")[0]);
       await jumpRoundsChopsticks(api, port, options.rounds);
     },
   } satisfies ChopsticksContext;

@@ -1,6 +1,11 @@
 import "@moonbeam-network/api-augment";
-import { u128 } from "@polkadot/types-codec";
-import { AccountId20, DispatchError, DispatchInfo, EventRecord } from "@polkadot/types/interfaces";
+import type { u128 } from "@polkadot/types-codec";
+import type {
+  AccountId20,
+  DispatchError,
+  DispatchInfo,
+  EventRecord,
+} from "@polkadot/types/interfaces";
 
 // export interface ExtrinsicCreation {
 //   extrinsic: GenericExtrinsic<AnyTuple>;

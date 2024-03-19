@@ -1,4 +1,4 @@
-import { RepoSpec } from "@moonwall/types";
+import type { RepoSpec } from "@moonwall/types";
 import mb from "./moonbeam";
 import pd from "./polkadot";
 import ts from "./tanssi";

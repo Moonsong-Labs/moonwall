@@ -1,6 +1,6 @@
-import { Web3 } from "web3";
-import { AccessListish, ContractFactory } from "ethers";
-import { Debugger } from "debug";
+import type { Web3 } from "web3";
+import { type AccessListish, ContractFactory } from "ethers";
+import type { Debugger } from "debug";
 
 /**
  * @name TransactionOptions

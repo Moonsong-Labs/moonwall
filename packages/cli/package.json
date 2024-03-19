@@ -1,122 +1,117 @@
 {
-  "name": "@moonwall/cli",
-  "type": "module",
-  "version": "5.0.3",
-  "description": "Testing framework for the Moon family of projects",
-  "author": "timbrinded",
-  "license": "ISC",
-  "homepage": "https://github.com/Moonsong-Labs/moonwall#readme",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Moonsong-Labs/moonwall.git",
-    "directory": "packages/cli"
-  },
-  "bugs": {
-    "url": "https://github.com/Moonsong-Labs/moonwall/issues"
-  },
-  "keywords": [
-    "moonwall",
-    "moonbeam",
-    "moondance",
-    "polkadot",
-    "kusama",
-    "substrate"
-  ],
-  "exports": {
-    ".": {
-      "types": "./dist/types/src/index.d.ts",
-      "import": "./dist/index.js",
-      "bun": "./src/cmds/entrypoint.ts"
-    }
-  },
-  "module": "./dist/index.js",
-  "types": "./dist/types/src/index.d.ts",
-  "bin": {
-    "moonwall": "./moonwall.mjs",
-    "moondebug": "./moondebug.mjs"
-  },
-  "engines": {
-    "node": ">=20",
-    "pnpm": ">=7"
-  },
-  "files": [
-    "dist",
-    "bin",
-    "*.d.ts",
-    "*.mjs"
-  ],
-  "scripts": {
-    "clean": "rm -rf dist && rm -rf node_modules",
-    "build": "pnpm exec rm -rf dist && tsup src --format esm --no-splitting --sourcemap && pnpm generate-types",
-    "lint": "pnpm biome lint ./src",
-    "lint:fix": "pnpm biome lint ./src --apply",
-    "fmt": "biome format .",
-    "fmt:fix": "biome format . --write",
-    "generate-types": "tsc",
-    "watch": "tsup src --format esm --watch",
-    "typecheck": "pnpm exec tsc --noEmit",
-    "prepublish": "pnpm run build && pnpm run generate-types"
-  },
-  "dependencies": {
-    "@acala-network/chopsticks": "0.9.8",
-    "@moonbeam-network/api-augment": "0.2700.0",
-    "@moonwall/types": "workspace:*",
-    "@moonwall/util": "workspace:*",
-    "@octokit/rest": "^20.0.2",
-    "@polkadot/api": "10.11.2",
-    "@polkadot/api-derive": "10.11.2",
-    "@polkadot/keyring": "12.6.2",
-    "@polkadot/types": "10.11.2",
-    "@polkadot/types-codec": "10.11.2",
-    "@polkadot/util": "12.6.2",
-    "@polkadot/util-crypto": "12.6.2",
-    "@vitest/ui": "1.3.0",
-    "@zombienet/orchestrator": "0.0.68",
-    "@zombienet/utils": "0.0.24",
-    "bottleneck": "2.19.5",
-    "chalk": "5.3.0",
-    "clear": "0.1.0",
-    "cli-progress": "3.12.0",
-    "colors": "1.4.0",
-    "debug": "4.3.4",
-    "dotenv": "16.4.4",
-    "ethers": "6.11.1",
-    "get-port": "^7.0.0",
-    "inquirer": "9.2.15",
-    "inquirer-press-to-continue": "1.2.0",
-    "jsonc-parser": "3.2.1",
-    "minimatch": "9.0.3",
-    "node-fetch": "3.3.2",
-    "semver": "7.6.0",
-    "viem": "2.7.10",
-    "vitest": "1.3.0",
-    "web3": "4.5.0",
-    "web3-providers-ws": "^4.0.7",
-    "ws": "8.16.0",
-    "yaml": "2.3.4",
-    "yargs": "17.7.2"
-  },
-  "peerDependencies": {
-    "@acala-network/chopsticks": "0.9.8",
-    "@polkadot/api": "10.11.2",
-    "@vitest/ui": "1.2.2",
-    "vitest": "1.2.2"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "1.5.3",
-    "@types/clear": "^0.1.4",
-    "@types/cli-progress": "3.11.5",
-    "@types/debug": "4.1.12",
-    "@types/inquirer": "^9.0.7",
-    "@types/node": "20.11.19",
-    "@types/semver": "^7.5.7",
-    "@types/ws": "^8.5.10",
-    "@types/yargs": "17.0.32",
-    "tsup": "8.0.2",
-    "tsx": "4.7.1",
-    "typescript": "5.3.3"
-  },
-  "publishConfig": {
-    "access": "public"
-  }
+	"name": "@moonwall/cli",
+	"type": "module",
+	"version": "5.0.3",
+	"description": "Testing framework for the Moon family of projects",
+	"author": "timbrinded",
+	"license": "ISC",
+	"homepage": "https://github.com/Moonsong-Labs/moonwall#readme",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Moonsong-Labs/moonwall.git",
+		"directory": "packages/cli"
+	},
+	"bugs": {
+		"url": "https://github.com/Moonsong-Labs/moonwall/issues"
+	},
+	"keywords": [
+		"moonwall",
+		"moonbeam",
+		"moondance",
+		"polkadot",
+		"kusama",
+		"substrate"
+	],
+	"exports": {
+		".": {
+			"types": "./dist/types/src/index.d.ts",
+			"import": "./dist/index.js",
+			"bun": "./src/cmds/entrypoint.ts"
+		}
+	},
+	"module": "./dist/index.js",
+	"types": "./dist/types/src/index.d.ts",
+	"bin": {
+		"moonwall": "./moonwall.mjs",
+		"moondebug": "./moondebug.mjs"
+	},
+	"engines": {
+		"node": ">=20",
+		"pnpm": ">=7"
+	},
+	"files": ["dist", "bin", "*.d.ts", "*.mjs"],
+	"scripts": {
+		"clean": "rm -rf dist && rm -rf node_modules",
+		"build": "pnpm exec rm -rf dist && tsup src --format esm --no-splitting --sourcemap && pnpm generate-types",
+		"lint": "pnpm biome lint ./src",
+		"lint:fix": "pnpm biome lint ./src --apply",
+		"fmt": "biome format .",
+		"fmt:fix": "biome format . --write",
+		"generate-types": "tsc",
+		"watch": "tsup src --format esm --watch",
+		"typecheck": "pnpm exec tsc --noEmit",
+		"prepublish": "pnpm run build && pnpm run generate-types"
+	},
+	"dependencies": {
+		"@acala-network/chopsticks": "0.9.10",
+		"@moonbeam-network/api-augment": "0.2801.0",
+		"@moonwall/types": "workspace:*",
+		"@moonwall/util": "workspace:*",
+		"@octokit/rest": "^20.0.2",
+		"@polkadot/api": "10.12.3",
+		"@polkadot/api-derive": "10.12.3",
+		"@polkadot/keyring": "12.6.2",
+		"@polkadot/types": "10.12.3",
+		"@polkadot/types-codec": "10.12.3",
+		"@polkadot/util": "12.6.2",
+		"@polkadot/util-crypto": "12.6.2",
+		"@vitest/ui": "1.4.0",
+		"@zombienet/orchestrator": "0.0.76",
+		"@zombienet/utils": "0.0.24",
+		"bottleneck": "2.19.5",
+		"chalk": "5.3.0",
+		"clear": "0.1.0",
+		"cli-progress": "3.12.0",
+		"colors": "1.4.0",
+		"debug": "4.3.4",
+		"dotenv": "16.4.5",
+		"ethers": "6.11.1",
+		"get-port": "^7.0.0",
+		"inquirer": "9.2.16",
+		"inquirer-press-to-continue": "1.2.0",
+		"jsonc-parser": "3.2.1",
+		"minimatch": "9.0.3",
+		"node-fetch": "3.3.2",
+		"semver": "7.6.0",
+		"viem": "2.8.13",
+		"vitest": "1.4.0",
+		"web3": "4.6.0",
+		"web3-providers-ws": "^4.0.7",
+		"ws": "8.16.0",
+		"yaml": "2.4.1",
+		"yargs": "17.7.2"
+	},
+	"peerDependencies": {
+		"@acala-network/chopsticks": "0.9.10",
+		"@polkadot/api": "10.11.2",
+		"@vitest/ui": "1.2.2",
+		"vitest": "1.2.2"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.6.1",
+		"@types/clear": "^0.1.4",
+		"@types/cli-progress": "3.11.5",
+		"@types/debug": "4.1.12",
+		"@types/inquirer": "^9.0.7",
+		"@types/node": "20.11.29",
+		"@types/semver": "^7.5.8",
+		"@types/ws": "^8.5.10",
+		"@types/yargs": "17.0.32",
+		"tsup": "8.0.2",
+		"tsx": "4.7.1",
+		"typescript": "5.4.2"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
 }

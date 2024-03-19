@@ -1,4 +1,4 @@
-import Bottleneck from "bottleneck";
+import type Bottleneck from "bottleneck";
 import type { LogType } from "@zombienet/utils";
 
 /**

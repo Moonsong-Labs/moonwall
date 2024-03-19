@@ -1,5 +1,10 @@
 import "@moonbeam-network/api-augment";
-import { BlockCreation, DevModeContext, ExtrinsicCreation, GenericContext } from "@moonwall/types";
+import type {
+  BlockCreation,
+  DevModeContext,
+  ExtrinsicCreation,
+  GenericContext,
+} from "@moonwall/types";
 import {
   alith,
   createAndFinalizeBlock,
@@ -8,11 +13,11 @@ import {
 } from "@moonwall/util";
 import { Keyring } from "@polkadot/api";
 import type { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types";
-import { RegistryError } from "@polkadot/types-codec/types/registry";
-import { EventRecord } from "@polkadot/types/interfaces";
+import type { RegistryError } from "@polkadot/types-codec/types/registry";
+import type { EventRecord } from "@polkadot/types/interfaces";
 import chalk from "chalk";
 import Debug from "debug";
-import { setTimeout } from "timers/promises";
+import { setTimeout } from "node:timers/promises";
 import {
   getEnvironmentFromConfig,
   importAsyncConfig,

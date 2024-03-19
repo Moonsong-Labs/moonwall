@@ -2,7 +2,7 @@ import "@moonbeam-network/api-augment";
 import dotenv from "dotenv";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
-import { fetchArtifact, deriveTestIds, generateConfig, fetchArtifactArgs } from "../internal";
+import { fetchArtifact, deriveTestIds, generateConfig, type fetchArtifactArgs } from "../internal";
 import { main } from "./main";
 import { runNetworkCmd } from "./runNetwork";
 import { testCmd } from "./runTests";

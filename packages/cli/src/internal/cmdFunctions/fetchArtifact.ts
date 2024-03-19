@@ -1,5 +1,5 @@
 import fs from "node:fs/promises";
-import path from "path";
+import path from "node:path";
 import semver from "semver";
 import chalk from "chalk";
 import inquirer from "inquirer";

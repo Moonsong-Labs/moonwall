@@ -1,7 +1,7 @@
-import { MoonwallProvider, ProviderConfig, ProviderType, ViemClient } from "@moonwall/types";
+import type { MoonwallProvider, ProviderConfig, ProviderType, ViemClient } from "@moonwall/types";
 import { ALITH_PRIVATE_KEY, deriveViemChain } from "@moonwall/util";
 import { ApiPromise, WsProvider } from "@polkadot/api";
-import { ApiOptions } from "@polkadot/api/types";
+import type { ApiOptions } from "@polkadot/api/types";
 import { Wallet, ethers } from "ethers";
 import { createWalletClient, http, publicActions } from "viem";
 import { privateKeyToAccount } from "viem/accounts";

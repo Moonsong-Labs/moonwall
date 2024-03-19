@@ -1,5 +1,5 @@
 import { beforeAll, expect, describe, test } from "bun:test";
-import { setTimeout as timer } from "timers/promises";
+import { setTimeout as timer } from "node:timers/promises";
 
 describe("B02" + "This is a timbo test suite", () => {
   beforeAll(() => {

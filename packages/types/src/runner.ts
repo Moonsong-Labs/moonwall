@@ -1,9 +1,9 @@
-import { ApiPromise } from "@polkadot/api";
-import { ApiTypes } from "@polkadot/api/types";
-import { KeyringPair } from "@polkadot/keyring/types";
-import { Debugger } from "debug";
-import { Wallet, TransactionRequest } from "ethers";
-import {
+import type { ApiPromise } from "@polkadot/api";
+import type { ApiTypes } from "@polkadot/api/types";
+import type { KeyringPair } from "@polkadot/keyring/types";
+import type { Debugger } from "debug";
+import type { Wallet, TransactionRequest } from "ethers";
+import type {
   Abi,
   Account,
   Log,
@@ -12,14 +12,14 @@ import {
   Transport,
   WalletClient,
 } from "viem";
-import { Chain } from "viem/chains";
-import { Web3 } from "web3";
-import { FoundationType } from "./config";
-import { BlockCreation, BlockCreationResponse, ChopsticksBlockCreation } from "./context";
-import { ContractDeploymentOptions } from "./contracts";
-import { TransactionType } from "./eth";
-import { CallType } from "./foundations";
-import { DeepPartial } from "./helpers";
+import type { Chain } from "viem/chains";
+import type { Web3 } from "web3";
+import type { FoundationType } from "./config";
+import type { BlockCreation, BlockCreationResponse, ChopsticksBlockCreation } from "./context";
+import type { ContractDeploymentOptions } from "./contracts";
+import type { TransactionType } from "./eth";
+import type { CallType } from "./foundations";
+import type { DeepPartial } from "./helpers";
 
 /**
  * @name CustomTest
@@ -33,18 +33,16 @@ import { DeepPartial } from "./helpers";
  * @property notChainType - The chain type excluded from the test.
  * @property timeout - The test timeout value.
  */
-export interface CustomTest {
-  (params: {
-    id: string;
-    title: string;
-    test: (vitestContext: any) => void;
-    modifier?: "only" | "skip";
-    minRtVersion?: number;
-    chainType?: "moonriver" | "moonbeam" | "moonbase";
-    notChainType?: "moonbeam" | "moonriver" | "moonbase";
-    timeout?: number;
-  }): void;
-}
+export type CustomTest = (params: {
+  id: string;
+  title: string;
+  test: (vitestContext: any) => void;
+  modifier?: "only" | "skip";
+  minRtVersion?: number;
+  chainType?: "moonriver" | "moonbeam" | "moonbase";
+  notChainType?: "moonbeam" | "moonriver" | "moonbase";
+  timeout?: number;
+}) => void;
 
 export type FoundationMethod = "dev" | "chopsticks" | "zombie" | "read_only" | "fork";
 

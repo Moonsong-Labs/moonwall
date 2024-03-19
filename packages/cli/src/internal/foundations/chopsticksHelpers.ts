@@ -1,10 +1,10 @@
 import "@moonbeam-network/api-augment";
-import { ChopsticksBlockCreation, GenericContext } from "@moonwall/types";
-import { WsProvider } from "@polkadot/api";
-import { ApiTypes, AugmentedEvent } from "@polkadot/api/types";
-import { FrameSystemEventRecord } from "@polkadot/types/lookup";
+import type { ChopsticksBlockCreation, GenericContext } from "@moonwall/types";
+import type { WsProvider } from "@polkadot/api";
+import type { ApiTypes, AugmentedEvent } from "@polkadot/api/types";
+import type { FrameSystemEventRecord } from "@polkadot/types/lookup";
 import chalk from "chalk";
-import { setTimeout } from "timers/promises";
+import { setTimeout } from "node:timers/promises";
 import { MoonwallContext } from "../../lib/globalContext";
 
 export async function getWsFromConfig(providerName?: string): Promise<WsProvider> {

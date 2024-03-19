@@ -1,6 +1,6 @@
-import { Abi, DeployContractParameters } from "viem";
-import { DeepPartial } from "./helpers";
-import { TransactionType } from "./eth";
+import type { Abi, DeployContractParameters } from "viem";
+import type { DeepPartial } from "./helpers";
+import type { TransactionType } from "./eth";
 
 /**
  * Type representing a Moonwall Contract.

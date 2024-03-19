@@ -1,7 +1,7 @@
-import child_process from "child_process";
+import child_process from "node:child_process";
 import { promisify } from "node:util";
 import Debug from "debug";
-import { ChildProcessWithoutNullStreams } from "node:child_process";
+import type { ChildProcessWithoutNullStreams } from "node:child_process";
 const debug = Debug("actions:runner");
 const execAsync = promisify(child_process.exec);
 

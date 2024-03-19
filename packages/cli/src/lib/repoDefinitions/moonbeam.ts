@@ -1,4 +1,4 @@
-import { RepoSpec } from "@moonwall/types";
+import type { RepoSpec } from "@moonwall/types";
 
 const repo: RepoSpec = {
   name: "moonbeam",
