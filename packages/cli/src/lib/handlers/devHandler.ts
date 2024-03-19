@@ -1,4 +1,4 @@
-import {
+import type {
   BlockCreation,
   CallType,
   ContractCallOptions,
@@ -22,7 +22,7 @@ import {
   jumpRoundsDev,
 } from "@moonwall/util";
 import { Keyring } from "@polkadot/api";
-import { ApiTypes } from "@polkadot/api/types";
+import type { ApiTypes } from "@polkadot/api/types";
 import { createDevBlock } from "../../internal/foundations/devModeHelpers";
 import { getEnvironmentFromConfig, importJsonConfig, isEthereumDevConfig } from "../configReader";
 import {

@@ -1,5 +1,5 @@
 import { describeSuite, expect } from "@moonwall/cli";
-import { setTimeout } from "timers/promises";
+import { setTimeout } from "node:timers/promises";
 
 describeSuite({
   id: "B06",

@@ -1,5 +1,5 @@
-import { promises as fsPromises } from "fs";
-import inquirer, { ChoiceCollection } from "inquirer";
+import { promises as fsPromises } from "node:fs";
+import inquirer, { type ChoiceCollection } from "inquirer";
 import { parse } from "yaml";
 import { getEnvironmentFromConfig } from "../../lib/configReader";
 import { MoonwallContext } from "../../lib/globalContext";
@@ -52,7 +52,7 @@ export async function resolveChopsticksInteractiveCmdChoice() {
         return (yaml.port as string) || "8000";
       })
   );
-  const port = parseInt(ports[0]);
+  const port = Number.parseInt(ports[0]);
 
   const choices: ChoiceCollection = [
     { name: "🆗  Create Block", value: "createblock" },

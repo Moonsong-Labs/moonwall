@@ -1,6 +1,11 @@
-import { ChopsticksLaunchSpec, DevLaunchSpec, RepoSpec, ZombieLaunchSpec } from "@moonwall/types";
+import type {
+  ChopsticksLaunchSpec,
+  DevLaunchSpec,
+  RepoSpec,
+  ZombieLaunchSpec,
+} from "@moonwall/types";
 import chalk from "chalk";
-import path from "path";
+import path from "node:path";
 import { standardRepos } from "../lib/repoDefinitions";
 
 export function parseZombieCmd(launchSpec: ZombieLaunchSpec) {

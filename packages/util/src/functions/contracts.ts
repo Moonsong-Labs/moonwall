@@ -1,6 +1,6 @@
-import { CompiledContract } from "@moonwall/types";
-import fs from "fs";
-import path from "path";
+import type { CompiledContract } from "@moonwall/types";
+import fs from "node:fs";
+import path from "node:path";
 import type { Abi } from "viem";
 
 export function getAllCompiledContracts(contractsDir = "./", recurse = false): string[] {

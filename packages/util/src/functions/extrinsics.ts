@@ -1,6 +1,6 @@
-import { SubmittableExtrinsic } from "@polkadot/api/types";
-import { ISubmittableResult } from "@polkadot/types/types";
-import { KeyringPair } from "@polkadot/keyring/types";
+import type { SubmittableExtrinsic } from "@polkadot/api/types";
+import type { ISubmittableResult } from "@polkadot/types/types";
+import type { KeyringPair } from "@polkadot/keyring/types";
 import { alith } from "../constants";
 
 export const signAndSend = async (

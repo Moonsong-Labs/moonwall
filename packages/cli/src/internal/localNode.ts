@@ -1,11 +1,11 @@
-import { exec, spawn } from "child_process";
-import fs from "fs";
-import path from "path";
+import { exec, spawn } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
 import WebSocket from "ws";
 import { checkAccess, checkExists } from "./fileCheckers";
 import Debug from "debug";
-import { setTimeout as timer } from "timers/promises";
-import util from "util";
+import { setTimeout as timer } from "node:timers/promises";
+import util from "node:util";
 
 const execAsync = util.promisify(exec);
 const debug = Debug("global:localNode");

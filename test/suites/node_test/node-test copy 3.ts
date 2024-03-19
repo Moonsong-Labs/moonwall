@@ -1,6 +1,6 @@
 import { before, describe, it } from "node:test";
 import { expect } from "chai";
-import { setTimeout as timer } from "timers/promises";
+import { setTimeout as timer } from "node:timers/promises";
 
 describe("B02" + "This is a timbo test suite", () => {
   before(() => {

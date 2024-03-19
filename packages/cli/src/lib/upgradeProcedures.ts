@@ -1,11 +1,11 @@
 import "@moonbeam-network/api-augment";
-import { ChopsticksContext, UpgradePreferences } from "@moonwall/types";
+import type { ChopsticksContext, UpgradePreferences } from "@moonwall/types";
 import type { ApiPromise } from "@polkadot/api";
 import type { WeightV2 } from "@polkadot/types/interfaces";
 import { blake2AsHex } from "@polkadot/util-crypto";
 import chalk from "chalk";
 import { sha256 } from "ethers";
-import fs, { existsSync, readFileSync } from "fs";
+import fs, { existsSync, readFileSync } from "node:fs";
 import { getRuntimeWasm } from "./binariesHelpers";
 import {
   cancelReferendaWithCouncil,

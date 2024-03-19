@@ -1,9 +1,9 @@
 import "@moonbeam-network/api-augment";
-import { MoonwallConfig, Environment } from "@moonwall/types";
-import { readFile, access } from "fs/promises";
-import { readFileSync, existsSync, constants } from "fs";
+import type { MoonwallConfig, Environment } from "@moonwall/types";
+import { readFile, access } from "node:fs/promises";
+import { readFileSync, existsSync, constants } from "node:fs";
 import JSONC from "jsonc-parser";
-import path, { extname } from "path";
+import path, { extname } from "node:path";
 
 let cachedConfig: MoonwallConfig | undefined;
 

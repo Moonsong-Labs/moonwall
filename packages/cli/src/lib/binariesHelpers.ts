@@ -1,7 +1,7 @@
 import "@moonbeam-network/api-augment";
-import path from "path";
-import fs from "fs";
-import child_process from "child_process";
+import path from "node:path";
+import fs from "node:fs";
+import child_process from "node:child_process";
 
 import { OVERRIDE_RUNTIME_PATH } from "@moonwall/util";
 

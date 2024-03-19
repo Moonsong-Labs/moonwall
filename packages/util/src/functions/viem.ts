@@ -1,4 +1,4 @@
-import {
+import type {
   ContractDeploymentOptions,
   DeepPartial,
   DevModeContext,
@@ -7,16 +7,16 @@ import {
 } from "@moonwall/types";
 import type { Abi } from "viem";
 import {
-  BlockTag,
-  DeployContractParameters,
-  TransactionSerializable,
+  type BlockTag,
+  type DeployContractParameters,
+  type TransactionSerializable,
   createWalletClient,
   hexToNumber,
   http,
 } from "viem";
-import { setTimeout as timer } from "timers/promises";
+import { setTimeout as timer } from "node:timers/promises";
 import { privateKeyToAccount } from "viem/accounts";
-import { Chain } from "viem/chains";
+import type { Chain } from "viem/chains";
 import { ALITH_ADDRESS, ALITH_PRIVATE_KEY } from "../constants/accounts";
 import { directRpcRequest } from "./common";
 

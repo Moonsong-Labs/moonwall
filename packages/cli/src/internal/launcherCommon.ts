@@ -1,8 +1,8 @@
-import { Environment } from "@moonwall/types";
+import type { Environment } from "@moonwall/types";
 import chalk from "chalk";
-import { execSync } from "child_process";
-import fs from "fs";
-import path from "path";
+import { execSync } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
 import { importAsyncConfig, parseZombieConfigForBins } from "../lib/configReader";
 import { checkAlreadyRunning, downloadBinsIfMissing, promptAlreadyRunning } from "./fileCheckers";
 

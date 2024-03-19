@@ -12,12 +12,12 @@ import type {
   TestCasesFn,
   ViemClient,
 } from "@moonwall/types";
-import { ApiPromise } from "@polkadot/api";
+import type { ApiPromise } from "@polkadot/api";
 import Bottleneck from "bottleneck";
 import Debug from "debug";
-import { Wallet } from "ethers";
+import type { Wallet } from "ethers";
 import { afterAll, beforeAll, describe, it } from "vitest";
-import { Web3 } from "web3";
+import type { Web3 } from "web3";
 import { getEnvironmentFromConfig, importAsyncConfig } from "./configReader";
 import { MoonwallContext, contextCreator } from "./globalContext";
 import { chopsticksHandler } from "./handlers/chopsticksHandler";

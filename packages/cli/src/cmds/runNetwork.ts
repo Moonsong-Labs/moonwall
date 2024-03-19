@@ -1,7 +1,7 @@
-import { Environment } from "@moonwall/types";
+import type { Environment } from "@moonwall/types";
 import chalk from "chalk";
 import clear from "clear";
-import fs, { promises as fsPromises } from "fs";
+import fs, { promises as fsPromises } from "node:fs";
 import inquirer from "inquirer";
 import PressToContinuePrompt from "inquirer-press-to-continue";
 import { parse } from "yaml";
@@ -20,7 +20,7 @@ import {
   resolveZombieInteractiveCmdChoice,
 } from "./interactiveCmds";
 import { executeTests } from "./runTests";
-import { RunCommandArgs } from "./entrypoint";
+import type { RunCommandArgs } from "./entrypoint";
 
 inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 

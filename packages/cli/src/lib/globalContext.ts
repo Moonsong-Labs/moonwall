@@ -1,5 +1,5 @@
 import "@moonbeam-network/api-augment";
-import {
+import type {
   ConnectedProvider,
   Environment,
   FoundationType,
@@ -7,17 +7,17 @@ import {
   MoonwallEnvironment,
   MoonwallProvider,
 } from "@moonwall/types";
-import { ApiPromise } from "@polkadot/api";
-import zombie, { Network } from "@zombienet/orchestrator";
+import type { ApiPromise } from "@polkadot/api";
+import zombie, { type Network } from "@zombienet/orchestrator";
 import Debug from "debug";
-import fs from "fs";
-import net from "net";
-import readline from "readline";
-import { setTimeout as timer } from "timers/promises";
+import fs from "node:fs";
+import net from "node:net";
+import readline from "node:readline";
+import { setTimeout as timer } from "node:timers/promises";
 import { parseChopsticksRunCmd, parseRunCmd, parseZombieCmd } from "../internal/commandParsers";
 import {
-  IPCRequestMessage,
-  IPCResponseMessage,
+  type IPCRequestMessage,
+  type IPCResponseMessage,
   checkZombieBins,
   getZombieConfig,
 } from "../internal/foundations/zombieHelpers";
@@ -34,7 +34,7 @@ import {
   isEthereumZombieConfig,
   isOptionSet,
 } from "./configReader";
-import { ChildProcess, exec, execSync } from "node:child_process";
+import { type ChildProcess, exec, execSync } from "node:child_process";
 const debugSetup = Debug("global:context");
 
 export class MoonwallContext {

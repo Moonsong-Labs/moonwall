@@ -1,8 +1,8 @@
-import { ApiPromise } from "@polkadot/api";
+import type { ApiPromise } from "@polkadot/api";
 import type { TxWithEvent } from "@polkadot/api-derive/types";
-import { Option, u32, u64 } from "@polkadot/types";
+import type { Option, u32, u64 } from "@polkadot/types";
 import type { ITuple } from "@polkadot/types-codec/types";
-import {
+import type {
   BlockHash,
   DispatchError,
   DispatchInfo,
@@ -12,7 +12,7 @@ import {
   RuntimeDispatchInfoV1,
 } from "@polkadot/types/interfaces";
 import type { Block, SignedBlock } from "@polkadot/types/interfaces/runtime/types";
-import { FrameSystemEventRecord, SpWeightsWeightV2Weight } from "@polkadot/types/lookup";
+import type { FrameSystemEventRecord, SpWeightsWeightV2Weight } from "@polkadot/types/lookup";
 import Bottleneck from "bottleneck";
 import Debug from "debug";
 const debug = Debug("test:blocks");

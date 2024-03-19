@@ -1,12 +1,12 @@
 {
-  "extends": "../../tsconfig.json",
-  "compilerOptions": {
-    "outDir": "dist/types",
-    "allowImportingTsExtensions": false,
-    "noEmit": false,
-    "declaration": true,
-    "emitDeclarationOnly": true
-  },
-  "include": ["./src/**/*.ts"],
-  "exclude": ["**/dist/**"],
+	"extends": "../../tsconfig.json",
+	"compilerOptions": {
+		"outDir": "dist/types",
+		"allowImportingTsExtensions": false,
+		"noEmit": false,
+		"declaration": true,
+		"emitDeclarationOnly": true
+	},
+	"include": ["./src/**/*.ts"],
+	"exclude": ["**/dist/**"]
 }
