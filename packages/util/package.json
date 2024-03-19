@@ -34,12 +34,7 @@
 		"node": ">=20",
 		"pnpm": ">=7"
 	},
-	"files": [
-		"dist",
-		"bin",
-		"*.d.ts",
-		"*.mjs"
-	],
+	"files": ["dist", "bin", "*.d.ts", "*.mjs"],
 	"scripts": {
 		"clean": "rm -rf dist && rm -rf node_modules",
 		"build": "pnpm exec rm -rf dist && tsup src --format esm --no-splitting --sourcemap && pnpm generate-types",
