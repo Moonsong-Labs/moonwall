@@ -179,14 +179,15 @@ export const execOpenTechCommitteeProposal = async <
   });
 
   if (typeof openTechProposal === "undefined" || typeof openTechProposalIndex === "undefined") {
-    throw new Error("Error submitting OpenTechCommittee proposal");
+    console.error("Error submitting OpenTechCommittee proposal");
+    return result2;
   }
 
   console.log(
-    `🏛️ OpenTechCommittee proposal submitted with proposal id: ${openTechProposalIndex} and hash: ${openTechProposal.slice(
+    `🏛️ OpenTechCommittee proposal submitted with proposal id: ${openTechProposalIndex} and hash: ${openTechProposal?.slice(
       0,
       6
-    )}...${openTechProposal.slice(-4)}`
+    )}...${openTechProposal?.slice(-4)}`
   );
 
   // Vote on it
@@ -200,7 +201,7 @@ export const execOpenTechCommitteeProposal = async <
   }
 
   // Close proposal
-  const result = await context.createBlock(
+  const { result } = await context.createBlock(
     context.pjsApi.tx.openTechCommitteeCollective.close(
       openTechProposal,
       openTechProposalIndex,
@@ -212,6 +213,10 @@ export const execOpenTechCommitteeProposal = async <
     ),
     { signer: voters[0] }
   );
+
+  if (!result) {
+    throw new Error("No result in block");
+  }
 
   return result;
 };
@@ -512,7 +517,12 @@ export const executeOpenTechCommitteeProposal = async (api: ApiPromise, encodedH
       {
         Origins: { whitelistedcaller: "WhitelistedCaller" },
       },
-      { Lookup: { hash: dispatchCallPreimageHash, len: dispatchCallPreimageLen } },
+      {
+        Lookup: {
+          hash: dispatchCallPreimageHash,
+          len: dispatchCallPreimageLen,
+        },
+      },
       { After: { After: 0 } }
     ),
     charleth
