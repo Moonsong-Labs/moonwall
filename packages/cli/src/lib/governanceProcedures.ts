@@ -700,7 +700,6 @@ export const cancelReferendaWithCouncil = async (api: ApiPromise, refIndex: numb
   await executeProposalWithCouncil(api, encodedHash);
 };
 
-
 export const fastFowardToNextEvent = async (context: DevModeContext) => {
   const [entry] = await context.pjsApi.query.scheduler.agenda.entries();
   const [key, _] = entry;
