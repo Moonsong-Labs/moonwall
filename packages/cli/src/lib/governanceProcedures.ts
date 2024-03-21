@@ -19,7 +19,6 @@ import type {
   PalletReferendaReferendumInfo,
 } from "@polkadot/types/lookup";
 import { blake2AsHex } from "@polkadot/util-crypto";
-import { fastFowardToNextEvent } from "../internal";
 
 export const COUNCIL_MEMBERS: KeyringPair[] = [baltathar, charleth, dorothy];
 export const COUNCIL_THRESHOLD = Math.ceil((COUNCIL_MEMBERS.length * 2) / 3);
@@ -699,4 +698,22 @@ export const cancelReferendaWithCouncil = async (api: ApiPromise, refIndex: numb
   let nonce = (await api.rpc.system.accountNextIndex(alith.address)).toNumber();
   await api.tx.democracy.notePreimage(encodedProposal).signAndSend(alith, { nonce: nonce++ });
   await executeProposalWithCouncil(api, encodedHash);
+};
+
+
+export const fastFowardToNextEvent = async (context: DevModeContext) => {
+  const [entry] = await context.pjsApi.query.scheduler.agenda.entries();
+  const [key, _] = entry;
+  if (key.isEmpty) {
+    throw new Error("No items in scheduler.agenda");
+  }
+  const desiredHeight = Number(key.toHuman());
+  const currentHeight = (await context.pjsApi.rpc.chain.getHeader()).number.toNumber();
+
+  console.log(
+    `⏩️ Current height: ${currentHeight}, desired height: ${desiredHeight}, jumping ${
+      desiredHeight - currentHeight + 1
+    } blocks`
+  );
+  await context.jumpBlocks?.(desiredHeight - currentHeight + 1);
 };

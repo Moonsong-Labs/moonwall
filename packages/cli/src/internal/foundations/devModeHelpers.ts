@@ -229,20 +229,3 @@ export async function createDevBlock<
     result: Array.isArray(transactions) ? result : (result[0] as any),
   };
 }
-
-export const fastFowardToNextEvent = async (context: DevModeContext) => {
-  const [entry] = await context.pjsApi.query.scheduler.agenda.entries();
-  const [key, _] = entry;
-  if (key.isEmpty) {
-    throw new Error("No items in scheduler.agenda");
-  }
-  const desiredHeight = Number(key.toHuman());
-  const currentHeight = (await context.pjsApi.rpc.chain.getHeader()).number.toNumber();
-
-  console.log(
-    `⏩️ Current height: ${currentHeight}, desired height: ${desiredHeight}, jumping ${
-      desiredHeight - currentHeight + 1
-    } blocks`
-  );
-  await context.jumpBlocks?.(desiredHeight - currentHeight + 1);
-};
