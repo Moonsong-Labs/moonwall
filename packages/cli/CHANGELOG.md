@@ -1,5 +1,13 @@
 # @moonwall/cli
 
+## 5.1.2
+
+### Patch Changes
+
+- 893cd9e: Small gov fix
+  - @moonwall/types@5.1.2
+  - @moonwall/util@5.1.2
+
 ## 5.1.1
 
 ### Patch Changes
