@@ -19,7 +19,6 @@ import type {
   PalletReferendaReferendumInfo,
 } from "@polkadot/types/lookup";
 import { blake2AsHex } from "@polkadot/util-crypto";
-import { fastFowardToNextEvent } from "../internal";
 
 export const COUNCIL_MEMBERS: KeyringPair[] = [baltathar, charleth, dorothy];
 export const COUNCIL_THRESHOLD = Math.ceil((COUNCIL_MEMBERS.length * 2) / 3);
@@ -179,14 +178,15 @@ export const execOpenTechCommitteeProposal = async <
   });
 
   if (typeof openTechProposal === "undefined" || typeof openTechProposalIndex === "undefined") {
-    throw new Error("Error submitting OpenTechCommittee proposal");
+    console.error("Error submitting OpenTechCommittee proposal");
+    return result2;
   }
 
   console.log(
-    `🏛️ OpenTechCommittee proposal submitted with proposal id: ${openTechProposalIndex} and hash: ${openTechProposal.slice(
+    `🏛️ OpenTechCommittee proposal submitted with proposal id: ${openTechProposalIndex} and hash: ${openTechProposal?.slice(
       0,
       6
-    )}...${openTechProposal.slice(-4)}`
+    )}...${openTechProposal?.slice(-4)}`
   );
 
   // Vote on it
@@ -200,7 +200,7 @@ export const execOpenTechCommitteeProposal = async <
   }
 
   // Close proposal
-  const result = await context.createBlock(
+  const { result } = await context.createBlock(
     context.pjsApi.tx.openTechCommitteeCollective.close(
       openTechProposal,
       openTechProposalIndex,
@@ -212,6 +212,10 @@ export const execOpenTechCommitteeProposal = async <
     ),
     { signer: voters[0] }
   );
+
+  if (!result) {
+    throw new Error("No result in block");
+  }
 
   return result;
 };
@@ -512,7 +516,12 @@ export const executeOpenTechCommitteeProposal = async (api: ApiPromise, encodedH
       {
         Origins: { whitelistedcaller: "WhitelistedCaller" },
       },
-      { Lookup: { hash: dispatchCallPreimageHash, len: dispatchCallPreimageLen } },
+      {
+        Lookup: {
+          hash: dispatchCallPreimageHash,
+          len: dispatchCallPreimageLen,
+        },
+      },
       { After: { After: 0 } }
     ),
     charleth
@@ -689,4 +698,21 @@ export const cancelReferendaWithCouncil = async (api: ApiPromise, refIndex: numb
   let nonce = (await api.rpc.system.accountNextIndex(alith.address)).toNumber();
   await api.tx.democracy.notePreimage(encodedProposal).signAndSend(alith, { nonce: nonce++ });
   await executeProposalWithCouncil(api, encodedHash);
+};
+
+export const fastFowardToNextEvent = async (context: DevModeContext) => {
+  const [entry] = await context.pjsApi.query.scheduler.agenda.entries();
+  const [key, _] = entry;
+  if (key.isEmpty) {
+    throw new Error("No items in scheduler.agenda");
+  }
+  const desiredHeight = Number(key.toHuman());
+  const currentHeight = (await context.pjsApi.rpc.chain.getHeader()).number.toNumber();
+
+  console.log(
+    `⏩️ Current height: ${currentHeight}, desired height: ${desiredHeight}, jumping ${
+      desiredHeight - currentHeight + 1
+    } blocks`
+  );
+  await context.jumpBlocks?.(desiredHeight - currentHeight + 1);
 };
