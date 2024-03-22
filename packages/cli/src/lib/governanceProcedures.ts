@@ -19,6 +19,7 @@ import type {
   PalletReferendaReferendumInfo,
 } from "@polkadot/types/lookup";
 import { blake2AsHex } from "@polkadot/util-crypto";
+import { u8aToBigInt, u8aToNumber } from "@polkadot/util";
 
 export const COUNCIL_MEMBERS: KeyringPair[] = [baltathar, charleth, dorothy];
 export const COUNCIL_THRESHOLD = Math.ceil((COUNCIL_MEMBERS.length * 2) / 3);
@@ -706,7 +707,9 @@ export const fastFowardToNextEvent = async (context: DevModeContext) => {
   if (key.isEmpty) {
     throw new Error("No items in scheduler.agenda");
   }
-  const desiredHeight = Number(key.toHuman());
+  const decodedKey: object = key.toHuman() as any;
+
+  const desiredHeight = Number((decodedKey[0].valueOf() as string).replaceAll(",", ""));
   const currentHeight = (await context.pjsApi.rpc.chain.getHeader()).number.toNumber();
 
   console.log(
