@@ -1,5 +1,14 @@
 # @moonwall/cli
 
+## 5.1.4
+
+### Patch Changes
+
+- 5d82cd9: Another minor gov fn
+- Updated dependencies [5d82cd9]
+  - @moonwall/types@5.1.4
+  - @moonwall/util@5.1.4
+
 ## 5.1.3
 
 ### Patch Changes

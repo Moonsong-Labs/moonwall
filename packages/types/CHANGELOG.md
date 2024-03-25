@@ -1,5 +1,11 @@
 # @moonwall/types
 
+## 5.1.4
+
+### Patch Changes
+
+- 5d82cd9: Another minor gov fn
+
 ## 5.1.3
 
 ## 5.1.2
