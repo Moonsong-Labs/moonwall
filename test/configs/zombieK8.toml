@@ -1,0 +1,28 @@
+[relaychain]
+chain = "rococo-local"
+default_image = "docker.io/parity/polkadot:v1.8.0"
+
+[[relaychain.node_groups]]
+args = [
+    "-lparachain=debug",
+]
+count = 2
+name = "relay"
+
+[[parachains]]
+id = 1282
+chain = "moonbase-local"
+
+[parachains.collator]
+name = "mb"
+image = "docker.io/moonbeamfoundation/moonbeam:latest"
+command = "/moonbeam/moonbeam"
+args = ["-lparachain=debug"]
+
+[settings]
+timeout = 1_000
+
+[types.Header]
+number = "u64"
+parent_hash = "Hash"
+post_state = "Hash"

@@ -55,12 +55,12 @@
   "dependencies": {
     "@moonbeam-network/api-augment": "0.2801.0",
     "@moonwall/types": "workspace:*",
-    "@polkadot/api": "10.12.4",
-    "@polkadot/api-derive": "10.12.4",
+    "@polkadot/api": "10.12.6",
+    "@polkadot/api-derive": "10.12.6",
     "@polkadot/keyring": "12.6.2",
-    "@polkadot/rpc-provider": "10.12.4",
-    "@polkadot/types": "10.12.4",
-    "@polkadot/types-codec": "10.12.4",
+    "@polkadot/rpc-provider": "10.12.6",
+    "@polkadot/types": "10.12.6",
+    "@polkadot/types-codec": "10.12.6",
     "@polkadot/util": "12.6.2",
     "@polkadot/util-crypto": "12.6.2",
     "bottleneck": "2.19.5",
@@ -71,30 +71,30 @@
     "debug": "4.3.4",
     "dotenv": "16.4.5",
     "ethers": "6.11.1",
-    "inquirer": "9.2.16",
+    "inquirer": "9.2.17",
     "inquirer-press-to-continue": "1.2.0",
     "node-fetch": "3.3.2",
     "rlp": "3.0.0",
     "semver": "7.6.0",
-    "viem": "2.8.13",
+    "viem": "2.9.9",
     "vitest": "1.4.0",
-    "web3": "4.6.0",
+    "web3": "4.7.0",
     "ws": "8.16.0",
     "yaml": "2.4.1",
     "yargs": "17.7.2"
   },
   "peerDependencies": {
-    "@polkadot/api": "10.11.2",
-    "vitest": "1.2.2"
+    "@polkadot/api": "^10.11.2",
+    "vitest": "^1.2.2"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.6.1",
+    "@biomejs/biome": "1.6.4",
     "@types/debug": "4.1.12",
-    "@types/node": "20.11.30",
+    "@types/node": "20.12.4",
     "@types/ws": "^8.5.10",
     "@types/yargs": "17.0.32",
     "tsup": "8.0.2",
-    "typescript": "5.4.2"
+    "typescript": "5.4.3"
   },
   "publishConfig": {
     "access": "public"

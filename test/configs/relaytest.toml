@@ -1,16 +1,6 @@
-[[parachains]]
-cumulus_based = true
-id = 2_001
-
-[parachains.collator]
-args = ["-lparachain=debug"]
-command = "polkadot-parachain"
-image = "parity/polkadot-parachain:1.7.0"
-name = "collator02"
-
 [relaychain]
 chain = "rococo-local"
-default_image = "docker.io/parity/polkadot:v1.7.0"
+image = "docker.io/parity/polkadot:v1.9.0"
 
 [relaychain.genesis.runtimeGenesis.patch.configuration.config]
 scheduling_lookahead = 4
@@ -22,7 +12,27 @@ max_candidate_depth = 4
 [[relaychain.node_groups]]
 args = ["-lparachain=debug"]
 count = 2
-name = "alice"
+name = "relay"
+
+[[parachains]]
+cumulus_based = true
+id = 2_001
+
+[parachains.collator]
+args = ["-lparachain=debug"]
+command = "polkadot-parachain"
+image = "docker.io/parity/polkadot-parachain:1.8.0"
+name = "generic-para"
+
+[[parachains]]
+id = 1282
+chain = "moonbase-local"
+
+[parachains.collator]
+name = "mb"
+image = "docker.io/moonbeamfoundation/moonbeam:latest"
+command = "/moonbeam/moonbeam"
+args = ["-lparachain=debug"]
 
 [settings]
 timeout = 1_000
