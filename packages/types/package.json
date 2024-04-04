@@ -68,7 +68,7 @@
     "web3": "4.7.0"
   },
   "peerDependencies": {
-    "@polkadot/api": "10.11.2"
+    "@polkadot/api": "^10.12.6"
   },
   "publishConfig": {
     "access": "public"

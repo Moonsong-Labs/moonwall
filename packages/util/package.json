@@ -84,8 +84,8 @@
     "yargs": "17.7.2"
   },
   "peerDependencies": {
-    "@polkadot/api": "10.11.2",
-    "vitest": "1.2.2"
+    "@polkadot/api": "^10.11.2",
+    "vitest": "^1.2.2"
   },
   "devDependencies": {
     "@biomejs/biome": "1.6.4",
