@@ -1,5 +1,13 @@
 # @moonwall/util
 
+## 5.1.5
+
+### Patch Changes
+
+- 3ec6cde: Package Update
+- Updated dependencies [3ec6cde]
+  - @moonwall/types@5.1.5
+
 ## 5.1.4
 
 ### Patch Changes
