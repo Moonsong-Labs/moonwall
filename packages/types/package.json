@@ -47,25 +47,25 @@
     "watch": "tsup src --format esm --watch",
     "lint": "pnpm biome lint ./src",
     "lint:fix": "pnpm biome lint ./src --apply",
-    "fmt": "biome format .",
-    "fmt:fix": "biome format . --write",
+    "fmt": "biome format src",
+    "fmt:fix": "biome format src --write",
     "prepublish": "pnpm run build && pnpm run generate-types",
     "schema": "typescript-json-schema --tsNodeRegister --esModuleInterop -o config_schema.json ./src/config.ts MoonwallConfig && pnpm biome format config_schema.json --write"
   },
   "dependencies": {
-    "@polkadot/api": "10.12.4",
-    "@polkadot/api-base": "10.12.4",
+    "@polkadot/api": "10.12.6",
+    "@polkadot/api-base": "10.12.6",
     "@polkadot/keyring": "12.6.2",
-    "@polkadot/types": "10.12.4",
+    "@polkadot/types": "10.12.6",
     "@polkadot/util": "12.6.2",
     "@polkadot/util-crypto": "12.6.2",
-    "@types/node": "20.11.30",
+    "@types/node": "20.12.4",
     "@zombienet/utils": "0.0.24",
     "bottleneck": "2.19.5",
     "debug": "4.3.4",
     "ethers": "6.11.1",
-    "viem": "2.8.13",
-    "web3": "4.6.0"
+    "viem": "2.9.9",
+    "web3": "4.7.0"
   },
   "peerDependencies": {
     "@polkadot/api": "10.11.2"
@@ -74,10 +74,10 @@
     "access": "public"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.6.1",
+    "@biomejs/biome": "1.6.4",
     "@types/debug": "4.1.12",
     "tsup": "8.0.2",
-    "typescript": "5.4.2",
+    "typescript": "5.4.3",
     "typescript-json-schema": "0.63.0"
   }
 }
