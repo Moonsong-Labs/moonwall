@@ -134,7 +134,7 @@ yargs(hideBin(process.argv))
       });
     },
     async (argv) => {
-      await deriveTestIds(argv.suitesRootDir);
+      await deriveTestIds({ rootDir: argv.suitesRootDir });
     }
   )
   .demandCommand(1)

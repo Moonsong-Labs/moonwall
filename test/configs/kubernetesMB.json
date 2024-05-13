@@ -1,36 +1,36 @@
 {
-	"parachains": [
-		{
-			"id": 1282,
-			"chain": "moonbase-local",
-			"chain_spec_path": "/tmp/zombie-5934ea727785d7b7cfb05d04dc91027d_-1678604-EepQT32GXviB/moonbase-local-1282-rococo-local.json",
-			"collator": {
-				"args": ["-lparachain=debug"],
-				"command": "/moonbeam/moonbeam",
-				"image": "moonbeamfoundation/moonbeam:latest",
-				"name": "alith"
-			}
-		}
-	],
-	"relaychain": {
-		"chain": "rococo-local",
-		"default_image": "docker.io/parity/polkadot:latest",
-		"node_groups": [
-			{
-				"args": ["-lparachain=debug"],
-				"count": 3,
-				"name": "alice"
-			}
-		]
-	},
-	"settings": {
-		"timeout": 1000
-	},
-	"types": {
-		"Header": {
-			"number": "u64",
-			"parent_hash": "Hash",
-			"post_state": "Hash"
-		}
-	}
+  "parachains": [
+    {
+      "id": 1282,
+      "chain": "moonbase-local",
+      "chain_spec_path": "/tmp/zombie-5934ea727785d7b7cfb05d04dc91027d_-1678604-EepQT32GXviB/moonbase-local-1282-rococo-local.json",
+      "collator": {
+        "args": ["-lparachain=debug"],
+        "command": "/moonbeam/moonbeam",
+        "image": "moonbeamfoundation/moonbeam:latest",
+        "name": "alith"
+      }
+    }
+  ],
+  "relaychain": {
+    "chain": "rococo-local",
+    "default_image": "docker.io/parity/polkadot:latest",
+    "node_groups": [
+      {
+        "args": ["-lparachain=debug"],
+        "count": 3,
+        "name": "alice"
+      }
+    ]
+  },
+  "settings": {
+    "timeout": 1000
+  },
+  "types": {
+    "Header": {
+      "number": "u64",
+      "parent_hash": "Hash",
+      "post_state": "Hash"
+    }
+  }
 }

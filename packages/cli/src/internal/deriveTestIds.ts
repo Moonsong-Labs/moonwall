@@ -3,8 +3,17 @@ import fs from "node:fs";
 import inquirer from "inquirer";
 import path from "node:path";
 
-export async function deriveTestIds(rootDir: string) {
+interface DeriveTestIdsOptions {
+  rootDir: string;
+  prefixDepth?: number;
+  prefixName?: string;
+}
+
+export async function deriveTestIds(params: DeriveTestIdsOptions) {
   const usedPrefixes: Set<string> = new Set();
+
+  const { rootDir } = params;
+  const prefixDepth = params.prefixDepth ?? 1;
 
   try {
     await fs.promises.access(rootDir, fs.constants.R_OK);
@@ -21,7 +30,7 @@ export async function deriveTestIds(rootDir: string) {
   const foldersToRename: { prefix: string; dir: string }[] = [];
 
   for (const dir of topLevelDirs) {
-    const prefix = generatePrefix(dir, usedPrefixes);
+    const prefix = params.prefixName ?? generatePrefix(dir, usedPrefixes);
     foldersToRename.push({ prefix, dir });
   }
 
@@ -56,25 +65,29 @@ function getTopLevelDirs(rootDir: string): string[] {
 }
 
 function generatePrefix(directory: string, usedPrefixes: Set<string>): string {
-  let prefix = directory[0].toUpperCase();
+  const sanitizedDir = directory.replace(/[-_ ]/g, "").toUpperCase();
+  let prefix = sanitizedDir[0];
 
-  if (usedPrefixes.has(prefix)) {
-    const match = directory.match(/[-_](\w)/);
-    if (match) {
-      // if directory name has a '-' or '_'
-      prefix += match[1].toUpperCase();
-    } else {
-      prefix = directory[1].toUpperCase();
-    }
+  let additionalIndex = 1;
+  while (usedPrefixes.has(prefix) && additionalIndex < sanitizedDir.length) {
+    prefix += sanitizedDir[additionalIndex];
+    additionalIndex++;
   }
 
+  let numericSuffix = 0;
   while (usedPrefixes.has(prefix)) {
-    const charCode = prefix.charCodeAt(1);
-    if (charCode >= 90) {
-      // If it's Z, wrap around to A
-      prefix = `${String.fromCharCode(prefix.charCodeAt(0) + 1)}A`;
+    if (numericSuffix < 10) {
+      numericSuffix++;
+      prefix = sanitizedDir[0] + numericSuffix.toString();
     } else {
-      prefix = prefix[0] + String.fromCharCode(charCode + 1);
+      let lastChar = prefix.slice(-1).charCodeAt(0);
+      if (lastChar >= 90) {
+        // 'Z'
+        lastChar = 65; // 'A'
+      } else {
+        lastChar++;
+      }
+      prefix = sanitizedDir[0] + String.fromCharCode(lastChar);
     }
   }
 

@@ -167,7 +167,7 @@ async function mainMenu(config?: MoonwallConfig) {
         message: "Enter the root testSuites directory to process:",
         default: "suites",
       });
-      await deriveTestIds(rootDir);
+      await deriveTestIds({ rootDir });
 
       await inquirer.prompt({
         name: "test complete",

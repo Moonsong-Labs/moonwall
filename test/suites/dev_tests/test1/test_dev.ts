@@ -14,8 +14,10 @@ import {
   CHARLETH_ADDRESS,
   DOROTHY_ADDRESS,
   GLMR,
+  PRECOMPILES,
   alith,
   baltathar,
+  createViemTransaction,
   deployViemContract,
 } from "@moonwall/util";
 import { BN } from "@polkadot/util";
@@ -479,14 +481,34 @@ describeSuite({
 
         log(`Allowance of baltathar is:  ${allowanceBefore}`);
 
-        const tx = await context.writePrecompile?.({
-          precompileName: "NativeErc20",
+        // const tx = await context.writePrecompile?.({
+        //   precompileName: "NativeErc20",
+        //   functionName: "approve",
+        //   args: [BALTATHAR_ADDRESS, GLMR],
+        //   gas: 400_123n,
+        //   // web3Library: "ethers",
+        //   rawTxOnly:true,
+
+        // });
+
+        const { abi } = fetchCompiledContract(PRECOMPILES.NativeErc20[1]);
+        const data = encodeFunctionData({
+          abi,
           functionName: "approve",
           args: [BALTATHAR_ADDRESS, GLMR],
         });
+
+        const tx = await createViemTransaction(context, {
+          to: PRECOMPILES.NativeErc20[0],
+          value: 0n,
+          data,
+          txnType: "legacy",
+          gas: 400_123n,
+        });
+
         log(`Txn hash is ${tx}`);
 
-        await context.createBlock();
+        await context.createBlock(tx);
 
         const allowanceAfter = (await context.readPrecompile?.({
           precompileName: "NativeErc20",
