@@ -648,8 +648,8 @@ describeSuite({
       title: "it can fast execute an openGov proposal",
       test: async () => {
         // change this to system.authorizedupgrade after sdk 1.7
-        const value = (await context.pjsApi.query.parachainSystem.authorizedUpgrade()).isNone;
-        expect(value, "parachainSystem.authorizedUpgrade should be empty to begin with").toBe(true);
+        const value = (await context.pjsApi.query.system.authorizedUpgrade()).isNone;
+        expect(value, "system.authorizedUpgrade should be empty to begin with").toBe(true);
 
         const extrinsicCall = context.pjsApi.tx.parachainSystem.authorizeUpgrade(
           "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
