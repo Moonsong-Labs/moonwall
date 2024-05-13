@@ -6,7 +6,7 @@ import path from "node:path";
 interface DeriveTestIdsOptions {
   rootDir: string;
   prefixDepth?: number;
-  prefixName?: string;
+  prefixPhrase?: string;
 }
 
 export async function deriveTestIds(params: DeriveTestIdsOptions) {
@@ -30,7 +30,7 @@ export async function deriveTestIds(params: DeriveTestIdsOptions) {
   const foldersToRename: { prefix: string; dir: string }[] = [];
 
   for (const dir of topLevelDirs) {
-    const prefix = params.prefixName ?? generatePrefix(dir, usedPrefixes);
+    const prefix = generatePrefix(dir, usedPrefixes, params.prefixPhrase);
     foldersToRename.push({ prefix, dir });
   }
 
@@ -64,13 +64,13 @@ function getTopLevelDirs(rootDir: string): string[] {
     .filter((dir) => fs.statSync(path.join(rootDir, dir)).isDirectory());
 }
 
-function generatePrefix(directory: string, usedPrefixes: Set<string>): string {
+function generatePrefix(directory: string, usedPrefixes: Set<string>, rootPrefix?: string): string {
   const sanitizedDir = directory.replace(/[-_ ]/g, "").toUpperCase();
-  let prefix = sanitizedDir[0];
+  let prefix = rootPrefix ?? sanitizedDir[0];
 
   let additionalIndex = 1;
   while (usedPrefixes.has(prefix) && additionalIndex < sanitizedDir.length) {
-    prefix += sanitizedDir[additionalIndex];
+    prefix += rootPrefix?.[additionalIndex] ?? sanitizedDir[additionalIndex];
     additionalIndex++;
   }
 
