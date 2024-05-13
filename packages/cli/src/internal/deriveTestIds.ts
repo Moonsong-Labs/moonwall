@@ -5,15 +5,14 @@ import path from "node:path";
 
 interface DeriveTestIdsOptions {
   rootDir: string;
-  prefixDepth?: number;
+  singlePrefix?: boolean;
   prefixPhrase?: string;
 }
 
 export async function deriveTestIds(params: DeriveTestIdsOptions) {
   const usedPrefixes: Set<string> = new Set();
 
-  const { rootDir } = params;
-  const prefixDepth = params.prefixDepth ?? 1;
+  const { rootDir, singlePrefix } = params;
 
   try {
     await fs.promises.access(rootDir, fs.constants.R_OK);
@@ -29,9 +28,14 @@ export async function deriveTestIds(params: DeriveTestIdsOptions) {
 
   const foldersToRename: { prefix: string; dir: string }[] = [];
 
-  for (const dir of topLevelDirs) {
-    const prefix = generatePrefix(dir, usedPrefixes, params.prefixPhrase);
-    foldersToRename.push({ prefix, dir });
+  if (singlePrefix) {
+    const prefix = generatePrefix(rootDir, usedPrefixes, params.prefixPhrase);
+    foldersToRename.push({ prefix, dir: "." });
+  } else {
+    for (const dir of topLevelDirs) {
+      const prefix = generatePrefix(dir, usedPrefixes, params.prefixPhrase);
+      foldersToRename.push({ prefix, dir });
+    }
   }
 
   const result = await inquirer.prompt({

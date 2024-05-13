@@ -1,7 +1,7 @@
 import { describeSuite, expect } from "@moonwall/cli";
 
 describeSuite({
-  id: "FO03",
+  id: "D0203",
   title: "New Test Suite",
   foundationMethods: "read_only",
   testCases: ({ it }) => {

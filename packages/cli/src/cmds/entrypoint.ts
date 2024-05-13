@@ -128,7 +128,11 @@ yargs(hideBin(process.argv))
       await runNetworkCmd(argv);
     }
   )
-  .command<{ suitesRootDir: string; prefixPhrase?: string }>(
+  .command<{
+    suitesRootDir: string;
+    prefixPhrase?: string;
+    singlePrefix: boolean;
+  }>(
     "derive <suitesRootDir>",
     "Derive test IDs based on positional order in the directory tree",
     (yargs) => {
@@ -141,10 +145,20 @@ yargs(hideBin(process.argv))
           describe: "Root phrase to generate prefixes from (e.g. DEV)",
           alias: "p",
           type: "string",
+        })
+        .option("singlePrefix", {
+          describe: "Use a single prefix for all suites, instead of deriving from folder names",
+          alias: "l",
+          default: false,
+          type: "boolean",
         });
     },
-    async ({ suitesRootDir, prefixPhrase }) => {
-      await deriveTestIds({ rootDir: suitesRootDir, prefixPhrase });
+    async ({ suitesRootDir, prefixPhrase, singlePrefix }) => {
+      await deriveTestIds({
+        rootDir: suitesRootDir,
+        prefixPhrase,
+        singlePrefix,
+      });
     }
   )
   .demandCommand(1)

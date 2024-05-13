@@ -1,7 +1,7 @@
 import { expect, describeSuite, beforeAll } from "@moonwall/cli";
 
 describeSuite({
-  id: "FOLD01",
+  id: "D0401",
   title: "This is a jimbo test suite",
   foundationMethods: "read_only",
   testCases: ({ it, log }) => {

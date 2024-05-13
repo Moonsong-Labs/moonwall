@@ -2,7 +2,7 @@ import { expect, describeSuite, beforeAll } from "@moonwall/cli";
 import { setupLogger } from "@moonwall/util";
 
 describeSuite({
-  id: "D0302",
+  id: "D010202",
   title: "This is a timbo test suite",
   foundationMethods: "read_only",
   testCases: ({ it, log }) => {

@@ -1,14 +1,13 @@
 import { describeSuite, expect } from "@moonwall/cli";
-import { setTimeout } from "node:timers/promises";
 
 describeSuite({
-  id: "D0402",
+  id: "D010203",
   title: "New Test Suite",
   foundationMethods: "read_only",
   testCases: ({ it }) => {
     it({
       id: "T01",
-      title: "Sample test",
+      title: "Passing Test",
       test: () => {
         expect(true).to.be.true;
       },
@@ -19,16 +18,7 @@ describeSuite({
       title: "Skipped test",
       modifier: "skip",
       test: () => {
-        expect(true).to.be.true;
-      },
-    });
-
-    it({
-      id: "T03",
-      title: "Long test",
-      test: async () => {
-        await setTimeout(5000);
-        expect(true).to.be.true;
+        expect(false).to.be.true;
       },
     });
   },
