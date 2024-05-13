@@ -651,18 +651,17 @@ describeSuite({
         const value = (await context.pjsApi.query.system.authorizedUpgrade()).isNone;
         expect(value, "system.authorizedUpgrade should be empty to begin with").toBe(true);
 
-        const extrinsicCall = context.pjsApi.tx.parachainSystem.authorizeUpgrade(
-          "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-          false
+        const extrinsicCall = context.pjsApi.tx.system.authorizeUpgrade(
+          "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         );
 
         await whiteListedTrack(context, extrinsicCall);
 
-        const postStatus = (await context.pjsApi.query.parachainSystem.authorizedUpgrade()).isNone;
+        const postStatus = (await context.pjsApi.query.system.authorizedUpgrade()).isNone;
         expect(postStatus).toBe(false);
 
         expect(
-          (await context.pjsApi.query.parachainSystem.authorizedUpgrade()).unwrap().codeHash.toHex()
+          (await context.pjsApi.query.system.authorizedUpgrade()).unwrap().codeHash.toHex()
         ).toBe("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
       },
     });
