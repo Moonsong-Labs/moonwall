@@ -53,10 +53,10 @@
     "schema": "typescript-json-schema --tsNodeRegister --esModuleInterop -o config_schema.json ./src/config.ts MoonwallConfig && pnpm biome format config_schema.json --write"
   },
   "dependencies": {
-    "@polkadot/api": "10.12.6",
-    "@polkadot/api-base": "10.12.6",
+    "@polkadot/api": "11.1.1",
+    "@polkadot/api-base": "11.1.1",
     "@polkadot/keyring": "12.6.2",
-    "@polkadot/types": "10.12.6",
+    "@polkadot/types": "11.1.1",
     "@polkadot/util": "12.6.2",
     "@polkadot/util-crypto": "12.6.2",
     "@types/node": "20.12.12",
