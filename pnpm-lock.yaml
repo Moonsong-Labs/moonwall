@@ -380,8 +380,8 @@ importers:
         specifier: workspace:*
         version: link:../packages/util
       '@openzeppelin/contracts':
-        specifier: 4.9.3
-        version: 4.9.3
+        specifier: 5.0.2
+        version: 5.0.2
       '@polkadot/api':
         specifier: 11.1.1
         version: 11.1.1
@@ -401,8 +401,8 @@ importers:
         specifier: 1.4.0
         version: 1.4.0(vitest@1.4.0)
       chai:
-        specifier: 5.1.0
-        version: 5.1.0
+        specifier: 5.1.1
+        version: 5.1.1
       chalk:
         specifier: 5.3.0
         version: 5.3.0
@@ -1118,8 +1118,8 @@ packages:
   '@octokit/types@13.5.0':
     resolution: {integrity: sha512-HdqWTf5Z3qwDVlzCrP8UJquMwunpDiMPt5er+QjGzL4hqr/vBVY/MauQgS1xWxCDT1oMx1EULyqxncdCY/NVSQ==}
 
-  '@openzeppelin/contracts@4.9.3':
-    resolution: {integrity: sha512-He3LieZ1pP2TNt5JbkPA4PNT9WC3gOTOlDcFGJW4Le4QKqwmiNJCRt44APfxMxvq7OugU/cqYuPcSBzOw38DAg==}
+  '@openzeppelin/contracts@5.0.2':
+    resolution: {integrity: sha512-ytPc6eLGcHHnapAZ9S+5qsdomhjo6QBHTDRRBFfTxXIpsicMhVPouPgmUPebZZZGX7vt9USA+Z+0M0dSVtSUEA==}
 
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
@@ -2035,8 +2035,8 @@ packages:
     resolution: {integrity: sha512-13sOfMv2+DWduEU+/xbun3LScLoqN17nBeTLUsmDfKdoiC1fr0n9PU4guu4AhRcOVFk/sW8LyZWHuhWtQZiF+g==}
     engines: {node: '>=4'}
 
-  chai@5.1.0:
-    resolution: {integrity: sha512-kDZ7MZyM6Q1DhR9jy7dalKohXQ2yrlXkk59CR52aRKxJrobmlBNqnFQxX9xOX8w+4mz8SYlKJa/7D7ddltFXCw==}
+  chai@5.1.1:
+    resolution: {integrity: sha512-pT1ZgP8rPNqUgieVaEY+ryQr6Q4HXNg8Ei9UnLUrjN4IA7dvQC5JB+/kxVcPNDHyBcc/26CXPkbNzq3qwrOEKA==}
     engines: {node: '>=12'}
 
   chalk@2.4.2:
@@ -5591,7 +5591,7 @@ snapshots:
     dependencies:
       '@octokit/openapi-types': 22.2.0
 
-  '@openzeppelin/contracts@4.9.3': {}
+  '@openzeppelin/contracts@5.0.2': {}
 
   '@pkgjs/parseargs@0.11.0':
     optional: true
@@ -6840,7 +6840,7 @@ snapshots:
       pathval: 1.1.1
       type-detect: 4.0.8
 
-  chai@5.1.0:
+  chai@5.1.1:
     dependencies:
       assertion-error: 2.0.1
       check-error: 2.1.1
