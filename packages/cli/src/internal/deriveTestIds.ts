@@ -3,8 +3,16 @@ import fs from "node:fs";
 import inquirer from "inquirer";
 import path from "node:path";
 
-export async function deriveTestIds(rootDir: string) {
+interface DeriveTestIdsOptions {
+  rootDir: string;
+  singlePrefix?: boolean;
+  prefixPhrase?: string;
+}
+
+export async function deriveTestIds(params: DeriveTestIdsOptions) {
   const usedPrefixes: Set<string> = new Set();
+
+  const { rootDir, singlePrefix } = params;
 
   try {
     await fs.promises.access(rootDir, fs.constants.R_OK);
@@ -20,9 +28,14 @@ export async function deriveTestIds(rootDir: string) {
 
   const foldersToRename: { prefix: string; dir: string }[] = [];
 
-  for (const dir of topLevelDirs) {
-    const prefix = generatePrefix(dir, usedPrefixes);
-    foldersToRename.push({ prefix, dir });
+  if (singlePrefix) {
+    const prefix = generatePrefix(rootDir, usedPrefixes, params.prefixPhrase);
+    foldersToRename.push({ prefix, dir: "." });
+  } else {
+    for (const dir of topLevelDirs) {
+      const prefix = generatePrefix(dir, usedPrefixes, params.prefixPhrase);
+      foldersToRename.push({ prefix, dir });
+    }
   }
 
   const result = await inquirer.prompt({
@@ -55,26 +68,30 @@ function getTopLevelDirs(rootDir: string): string[] {
     .filter((dir) => fs.statSync(path.join(rootDir, dir)).isDirectory());
 }
 
-function generatePrefix(directory: string, usedPrefixes: Set<string>): string {
-  let prefix = directory[0].toUpperCase();
+function generatePrefix(directory: string, usedPrefixes: Set<string>, rootPrefix?: string): string {
+  const sanitizedDir = directory.replace(/[-_ ]/g, "").toUpperCase();
+  let prefix = rootPrefix ?? sanitizedDir[0];
 
-  if (usedPrefixes.has(prefix)) {
-    const match = directory.match(/[-_](\w)/);
-    if (match) {
-      // if directory name has a '-' or '_'
-      prefix += match[1].toUpperCase();
-    } else {
-      prefix = directory[1].toUpperCase();
-    }
+  let additionalIndex = 1;
+  while (usedPrefixes.has(prefix) && additionalIndex < sanitizedDir.length) {
+    prefix += rootPrefix?.[additionalIndex] ?? sanitizedDir[additionalIndex];
+    additionalIndex++;
   }
 
+  let numericSuffix = 0;
   while (usedPrefixes.has(prefix)) {
-    const charCode = prefix.charCodeAt(1);
-    if (charCode >= 90) {
-      // If it's Z, wrap around to A
-      prefix = `${String.fromCharCode(prefix.charCodeAt(0) + 1)}A`;
+    if (numericSuffix < 10) {
+      numericSuffix++;
+      prefix = sanitizedDir[0] + numericSuffix.toString();
     } else {
-      prefix = prefix[0] + String.fromCharCode(charCode + 1);
+      let lastChar = prefix.slice(-1).charCodeAt(0);
+      if (lastChar >= 90) {
+        // 'Z'
+        lastChar = 65; // 'A'
+      } else {
+        lastChar++;
+      }
+      prefix = sanitizedDir[0] + String.fromCharCode(lastChar);
     }
   }
 

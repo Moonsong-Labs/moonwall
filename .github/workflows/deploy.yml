@@ -24,13 +24,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v4
         with:
-          version: 8
+          version: 9.1.2
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20.11.1
+          node-version: 20.12.2
           cache: pnpm
       - name: Setup Pages
         uses: actions/configure-pages@v3

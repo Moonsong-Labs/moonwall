@@ -14,8 +14,10 @@ import {
   CHARLETH_ADDRESS,
   DOROTHY_ADDRESS,
   GLMR,
+  PRECOMPILES,
   alith,
   baltathar,
+  createViemTransaction,
   deployViemContract,
 } from "@moonwall/util";
 import { BN } from "@polkadot/util";
@@ -479,14 +481,34 @@ describeSuite({
 
         log(`Allowance of baltathar is:  ${allowanceBefore}`);
 
-        const tx = await context.writePrecompile?.({
-          precompileName: "NativeErc20",
+        // const tx = await context.writePrecompile?.({
+        //   precompileName: "NativeErc20",
+        //   functionName: "approve",
+        //   args: [BALTATHAR_ADDRESS, GLMR],
+        //   gas: 400_123n,
+        //   // web3Library: "ethers",
+        //   rawTxOnly:true,
+
+        // });
+
+        const { abi } = fetchCompiledContract(PRECOMPILES.NativeErc20[1]);
+        const data = encodeFunctionData({
+          abi,
           functionName: "approve",
           args: [BALTATHAR_ADDRESS, GLMR],
         });
+
+        const tx = await createViemTransaction(context, {
+          to: PRECOMPILES.NativeErc20[0],
+          value: 0n,
+          data,
+          txnType: "legacy",
+          gas: 400_123n,
+        });
+
         log(`Txn hash is ${tx}`);
 
-        await context.createBlock();
+        await context.createBlock(tx);
 
         const allowanceAfter = (await context.readPrecompile?.({
           precompileName: "NativeErc20",
@@ -626,21 +648,20 @@ describeSuite({
       title: "it can fast execute an openGov proposal",
       test: async () => {
         // change this to system.authorizedupgrade after sdk 1.7
-        const value = (await context.pjsApi.query.parachainSystem.authorizedUpgrade()).isNone;
-        expect(value, "parachainSystem.authorizedUpgrade should be empty to begin with").toBe(true);
+        const value = (await context.pjsApi.query.system.authorizedUpgrade()).isNone;
+        expect(value, "system.authorizedUpgrade should be empty to begin with").toBe(true);
 
-        const extrinsicCall = context.pjsApi.tx.parachainSystem.authorizeUpgrade(
-          "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-          false
+        const extrinsicCall = context.pjsApi.tx.system.authorizeUpgrade(
+          "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         );
 
         await whiteListedTrack(context, extrinsicCall);
 
-        const postStatus = (await context.pjsApi.query.parachainSystem.authorizedUpgrade()).isNone;
+        const postStatus = (await context.pjsApi.query.system.authorizedUpgrade()).isNone;
         expect(postStatus).toBe(false);
 
         expect(
-          (await context.pjsApi.query.parachainSystem.authorizedUpgrade()).unwrap().codeHash.toHex()
+          (await context.pjsApi.query.system.authorizedUpgrade()).unwrap().codeHash.toHex()
         ).toBe("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
       },
     });

@@ -11,7 +11,11 @@ dotenv.config();
 
 configSetup(process.argv);
 
-export type RunCommandArgs = { envName: string; GrepTest?: string; subDirectory?: string };
+export type RunCommandArgs = {
+  envName: string;
+  GrepTest?: string;
+  subDirectory?: string;
+};
 
 yargs(hideBin(process.argv))
   .wrap(null)
@@ -124,17 +128,37 @@ yargs(hideBin(process.argv))
       await runNetworkCmd(argv);
     }
   )
-  .command<{ suitesRootDir: string }>(
+  .command<{
+    suitesRootDir: string;
+    prefixPhrase?: string;
+    singlePrefix: boolean;
+  }>(
     "derive <suitesRootDir>",
     "Derive test IDs based on positional order in the directory tree",
     (yargs) => {
-      return yargs.positional("suitesRootDir", {
-        describe: "Root directory of the suites",
-        type: "string",
-      });
+      return yargs
+        .positional("suitesRootDir", {
+          describe: "Root directory of the suites",
+          type: "string",
+        })
+        .option("prefixPhrase", {
+          describe: "Root phrase to generate prefixes from (e.g. DEV)",
+          alias: "p",
+          type: "string",
+        })
+        .option("singlePrefix", {
+          describe: "Use a single prefix for all suites, instead of deriving from folder names",
+          alias: "l",
+          default: false,
+          type: "boolean",
+        });
     },
-    async (argv) => {
-      await deriveTestIds(argv.suitesRootDir);
+    async ({ suitesRootDir, prefixPhrase, singlePrefix }) => {
+      await deriveTestIds({
+        rootDir: suitesRootDir,
+        prefixPhrase,
+        singlePrefix,
+      });
     }
   )
   .demandCommand(1)
