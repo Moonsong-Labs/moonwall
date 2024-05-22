@@ -34,7 +34,12 @@
     "node": ">=20",
     "pnpm": ">=7"
   },
-  "files": ["dist", "bin", "*.d.ts", "*.mjs"],
+  "files": [
+    "dist",
+    "bin",
+    "*.d.ts",
+    "*.mjs"
+  ],
   "scripts": {
     "clean": "rm -rf dist && rm -rf node_modules",
     "build": "rm -rf dist && tsup src --format esm --no-splitting --sourcemap && pnpm generate-types",
@@ -54,7 +59,7 @@
     "@polkadot/types": "10.12.6",
     "@polkadot/util": "12.6.2",
     "@polkadot/util-crypto": "12.6.2",
-    "@types/node": "20.12.4",
+    "@types/node": "20.12.12",
     "@zombienet/utils": "0.0.24",
     "bottleneck": "2.19.5",
     "debug": "4.3.4",
@@ -69,10 +74,10 @@
     "access": "public"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.6.4",
+    "@biomejs/biome": "1.7.3",
     "@types/debug": "4.1.12",
     "tsup": "8.0.2",
-    "typescript": "5.4.3",
+    "typescript": "5.4.5",
     "typescript-json-schema": "0.63.0"
   }
 }
