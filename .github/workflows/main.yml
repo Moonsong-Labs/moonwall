@@ -11,12 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v4
         with:
-          version: 8
+          version: 9.1.2
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.11.1
+          node-version: 20.12.2
           cache: "pnpm"
       - run: pnpm install
       - run: pnpm run build
@@ -25,12 +25,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v4
         with:
-          version: 8
+          version: 9.1.2
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.11.1
+          node-version: 20.12.2
           cache: "pnpm"
       - run: pnpm install
       - run: pnpm run lint
@@ -39,12 +39,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v4
         with:
-          version: 8
+          version: 9.1.2
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.11.1
+          node-version: 20.12.2
           cache: "pnpm"
       - run: pnpm install
       - run: pnpm run fmt
@@ -54,12 +54,12 @@ jobs:
     needs: ["build"]
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v4
         with:
-          version: 8
+          version: 9.1.2
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.11.1
+          node-version: 20.12.2
           cache: "pnpm"
       - uses: oven-sh/setup-bun@v1
         with:
@@ -81,12 +81,12 @@ jobs:
       - uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v4
         with:
           version: "latest"
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.11.1
+          node-version: 20.12.2
           cache: "pnpm"
       - name: Build like before
         run: |
@@ -116,12 +116,12 @@ jobs:
       - uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v4
         with:
           version: "latest"
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.11.1
+          node-version: 20.12.2
           cache: "pnpm"
       - name: Build like before
         run: |
@@ -148,12 +148,12 @@ jobs:
         suite: ["chopsticks", "multi_chopsticks", "chopsticks_round"]
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v4
         with:
-          version: 8
+          version: 9.1.2
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.11.1
+          node-version: 20.12.2
           cache: "pnpm"
       - name: Build like before
         run: |
@@ -186,12 +186,12 @@ jobs:
         suite: ["eth_test", "viem_test"]
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v4
         with:
-          version: 8
+          version: 9.1.2
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.11.1
+          node-version: 20.12.2
           cache: "pnpm"
       - name: Build like before
         run: |
@@ -217,12 +217,12 @@ jobs:
         suite: ["zombie_test", "zombie_multi_para"]
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v4
         with:
-          version: 8
+          version: 9.1.2
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.11.1
+          node-version: 20.12.2
           cache: "pnpm"
       - uses: oven-sh/setup-bun@v1
         with:
