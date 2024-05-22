@@ -34,8 +34,8 @@ importers:
   packages/cli:
     dependencies:
       '@acala-network/chopsticks':
-        specifier: 0.9.13
-        version: 0.9.13(debug@4.3.4)(ts-node@10.9.2(@types/node@20.12.12)(typescript@5.4.5))
+        specifier: 0.10.2
+        version: 0.10.2(debug@4.3.4)(ts-node@10.9.2(@types/node@20.12.12)(typescript@5.4.5))
       '@moonbeam-network/api-augment':
         specifier: 0.2902.0
         version: 0.2902.0
@@ -362,8 +362,8 @@ importers:
         version: 9.2.22
     devDependencies:
       '@acala-network/chopsticks':
-        specifier: 0.9.13
-        version: 0.9.13(debug@4.3.4)(ts-node@10.9.2(@types/node@20.12.12)(typescript@5.4.5))
+        specifier: 0.10.2
+        version: 0.10.2(debug@4.3.4)(ts-node@10.9.2(@types/node@20.12.12)(typescript@5.4.5))
       '@biomejs/biome':
         specifier: 1.7.3
         version: 1.7.3
@@ -436,17 +436,17 @@ importers:
 
 packages:
 
-  '@acala-network/chopsticks-core@0.9.13':
-    resolution: {integrity: sha512-cuXTgg6hl9Jw6qHIxzsLd7rCWnfO+ZvCpFKx8MHCS6NXIyUj01O8S7vtz5B6pfDK8VoCKs8zEoOS/ahoTbDL/Q==}
+  '@acala-network/chopsticks-core@0.10.2':
+    resolution: {integrity: sha512-84wfUyY5vCZDmS71j1RMw+xYy7flENIvY+jWOF4KxJYrOj7z3AVoLVlyqrkcIXpsIqmKizUnF8ze5xcVGr/Elg==}
 
-  '@acala-network/chopsticks-db@0.9.13':
-    resolution: {integrity: sha512-Ipc3N9cxzSdrgyvDgcQDapnqN/hJpXsJ/WtDnhiQ8AbX2jZH9fd3kWMBvMRsUYx8TrT5HlQE7EryxTGYdy/y/A==}
+  '@acala-network/chopsticks-db@0.10.2':
+    resolution: {integrity: sha512-9MA+ByIb+YupFxK36V1N7FBiQeip99MFVG02dah9SWvM01m90bZFn9VIBUQivN/iFAVWMX/7Jt7W8/J9FhnEcg==}
 
-  '@acala-network/chopsticks-executor@0.9.13':
-    resolution: {integrity: sha512-3Wl9YuHcEV0xJUyXOQrAil3knu4GDJqKwJX5OiQBYxfuAYals0GyAP1q5GMzALmMkPt1GCyAkam3zjcdzXWTXQ==}
+  '@acala-network/chopsticks-executor@0.10.2':
+    resolution: {integrity: sha512-Y7oJqrxdH9WGSW5aE5RUXDz2SKrSH7NoRX+zr23dtR686Hqw8zKNGF8Vwj7HnHJbROVDHhGYVffyGvC4Ja2RgA==}
 
-  '@acala-network/chopsticks@0.9.13':
-    resolution: {integrity: sha512-8KY6fEO+6ErCttzKpHssifClijoq7FSenTy00Rut6EPTMYKOlrz+DMRsi9TO9vIEm9oUro9wjCUhQVh8hUMcuw==}
+  '@acala-network/chopsticks@0.10.2':
+    resolution: {integrity: sha512-QsOAjwosjiCR9oCnqtMLjO2D6Ov31qIm3AbVVqv9i/JS30ot9MljSJMyUibI5YRq6UhMvdRuxem5MBwrcVmFdQ==}
     hasBin: true
 
   '@adraffy/ens-normalize@1.10.0':
@@ -4833,9 +4833,9 @@ packages:
 
 snapshots:
 
-  '@acala-network/chopsticks-core@0.9.13':
+  '@acala-network/chopsticks-core@0.10.2':
     dependencies:
-      '@acala-network/chopsticks-executor': 0.9.13
+      '@acala-network/chopsticks-executor': 0.10.2
       '@polkadot/rpc-provider': 10.13.1
       '@polkadot/types': 10.13.1
       '@polkadot/types-codec': 10.13.1
@@ -4855,9 +4855,9 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@acala-network/chopsticks-db@0.9.13(ts-node@10.9.2(@types/node@20.12.12)(typescript@5.4.5))':
+  '@acala-network/chopsticks-db@0.10.2(ts-node@10.9.2(@types/node@20.12.12)(typescript@5.4.5))':
     dependencies:
-      '@acala-network/chopsticks-core': 0.9.13
+      '@acala-network/chopsticks-core': 0.10.2
       '@polkadot/util': 12.6.2
       idb: 8.0.0
       sqlite3: 5.1.7
@@ -4884,15 +4884,15 @@ snapshots:
       - typeorm-aurora-data-api-driver
       - utf-8-validate
 
-  '@acala-network/chopsticks-executor@0.9.13':
+  '@acala-network/chopsticks-executor@0.10.2':
     dependencies:
       '@polkadot/util': 12.6.2
       '@polkadot/wasm-util': 7.3.2(@polkadot/util@12.6.2)
 
-  '@acala-network/chopsticks@0.9.13(debug@4.3.4)(ts-node@10.9.2(@types/node@20.12.12)(typescript@5.4.5))':
+  '@acala-network/chopsticks@0.10.2(debug@4.3.4)(ts-node@10.9.2(@types/node@20.12.12)(typescript@5.4.5))':
     dependencies:
-      '@acala-network/chopsticks-core': 0.9.13
-      '@acala-network/chopsticks-db': 0.9.13(ts-node@10.9.2(@types/node@20.12.12)(typescript@5.4.5))
+      '@acala-network/chopsticks-core': 0.10.2
+      '@acala-network/chopsticks-db': 0.10.2(ts-node@10.9.2(@types/node@20.12.12)(typescript@5.4.5))
       '@pnpm/npm-conf': 2.2.2
       '@polkadot/api-augment': 10.13.1
       '@polkadot/types': 10.13.1

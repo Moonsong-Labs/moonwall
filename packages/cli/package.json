@@ -58,7 +58,7 @@
     "prepublish": "pnpm run build && pnpm run generate-types"
   },
   "dependencies": {
-    "@acala-network/chopsticks": "0.9.13",
+    "@acala-network/chopsticks": "0.10.2",
     "@moonbeam-network/api-augment": "0.2902.0",
     "@moonwall/types": "workspace:*",
     "@moonwall/util": "workspace:*",
