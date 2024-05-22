@@ -73,11 +73,11 @@ importers:
         specifier: 1.4.0
         version: 1.4.0(vitest@1.4.0)
       '@zombienet/orchestrator':
-        specifier: 0.0.76
-        version: 0.0.76(@polkadot/util@12.6.2)(@types/node@20.12.12)(chokidar@3.6.0)
+        specifier: 0.0.85
+        version: 0.0.85(@polkadot/util@12.6.2)(@types/node@20.12.12)(chokidar@3.6.0)
       '@zombienet/utils':
-        specifier: 0.0.24
-        version: 0.0.24(@types/node@20.12.12)(chokidar@3.6.0)(typescript@5.4.5)
+        specifier: 0.0.25
+        version: 0.0.25(@types/node@20.12.12)(chokidar@3.6.0)(typescript@5.4.5)
       bottleneck:
         specifier: 2.19.5
         version: 2.19.5
@@ -206,8 +206,8 @@ importers:
         specifier: 20.12.12
         version: 20.12.12
       '@zombienet/utils':
-        specifier: 0.0.24
-        version: 0.0.24(@types/node@20.12.12)(chokidar@3.6.0)(typescript@5.4.5)
+        specifier: 0.0.25
+        version: 0.0.25(@types/node@20.12.12)(chokidar@3.6.0)(typescript@5.4.5)
       bottleneck:
         specifier: 2.19.5
         version: 2.19.5
@@ -1202,16 +1202,8 @@ packages:
     resolution: {integrity: sha512-+hH7Azj7pOj0iyjLj8ORxJVNUKAfZCH68rM9VQRs+/N9NmpxSMx8AxBKCynSgSJoiDXr84Zm862wJHoa4Ytf2g==}
     engines: {node: '>=18'}
 
-  '@polkadot/api-derive@10.13.1':
-    resolution: {integrity: sha512-ef0H0GeCZ4q5Om+c61eLLLL29UxFC2/u/k8V1K2JOIU+2wD5LF7sjAoV09CBMKKHfkLenRckVk2ukm4rBqFRpg==}
-    engines: {node: '>=18'}
-
   '@polkadot/api-derive@11.1.1':
     resolution: {integrity: sha512-OR2DfUg9Nd3JvCw3hUXbLPyiaUBPzb1mVXc2qngqdz4Y1Sg0yakTwKjSiFBEgQE7qO0Fjq9BYKLi5Ci66jciAw==}
-    engines: {node: '>=18'}
-
-  '@polkadot/api@10.13.1':
-    resolution: {integrity: sha512-YrKWR4TQR5CDyGkF0mloEUo7OsUA+bdtENpJGOtNavzOQUDEbxFE0PVzokzZfVfHhHX2CojPVmtzmmLxztyJkg==}
     engines: {node: '>=18'}
 
   '@polkadot/api@11.1.1':
@@ -1762,12 +1754,12 @@ packages:
   '@vueuse/shared@10.9.0':
     resolution: {integrity: sha512-Uud2IWncmAfJvRaFYzv5OHDli+FbOzxiVEQdLCKQKLyhz94PIyFC3CHcH7EDMwIn8NPtD06+PNbC/PiO0LGLtw==}
 
-  '@zombienet/orchestrator@0.0.76':
-    resolution: {integrity: sha512-/w0iJFgYp1fnCp0EsZE/lMTnwhauezE0CEo+5tlxgwfThMkRd7ftsnu+umG1j2aOGX7xIofJold0R+i1ka0WJA==}
+  '@zombienet/orchestrator@0.0.85':
+    resolution: {integrity: sha512-uhQceBpdFJJBbcvIHPUUqELDDEcthILlPChuKo5xllfGOUqUczQiUd1Jli0j8TNwnWDXIihccTtiN81AB7jjbg==}
     engines: {node: '>=18'}
 
-  '@zombienet/utils@0.0.24':
-    resolution: {integrity: sha512-CUHn4u04ryfRqCQQsZHSpMIpMxzdMvSZR86Gp3Hwexf7wZTkHNZ5hsJnQO+J/yl28ny0GcjLJSU1hZ2kMV+hqw==}
+  '@zombienet/utils@0.0.25':
+    resolution: {integrity: sha512-VS+tWmdZ8ozRkA1Lgb/Si9iISgJz8AEQpPnlnlIg3lfVHYFqAD7M5DpiFv24AAEBSraokVhUv9E9E1uE4d4f0w==}
     engines: {node: '>=18'}
 
   JSONStream@1.3.5:
@@ -5740,23 +5732,6 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@polkadot/api-derive@10.13.1':
-    dependencies:
-      '@polkadot/api': 10.13.1
-      '@polkadot/api-augment': 10.13.1
-      '@polkadot/api-base': 10.13.1
-      '@polkadot/rpc-core': 10.13.1
-      '@polkadot/types': 10.13.1
-      '@polkadot/types-codec': 10.13.1
-      '@polkadot/util': 12.6.2
-      '@polkadot/util-crypto': 12.6.2(@polkadot/util@12.6.2)
-      rxjs: 7.8.1
-      tslib: 2.6.2
-    transitivePeerDependencies:
-      - bufferutil
-      - supports-color
-      - utf-8-validate
-
   '@polkadot/api-derive@11.1.1':
     dependencies:
       '@polkadot/api': 11.1.1
@@ -5767,30 +5742,6 @@ snapshots:
       '@polkadot/types-codec': 11.1.1
       '@polkadot/util': 12.6.2
       '@polkadot/util-crypto': 12.6.2(@polkadot/util@12.6.2)
-      rxjs: 7.8.1
-      tslib: 2.6.2
-    transitivePeerDependencies:
-      - bufferutil
-      - supports-color
-      - utf-8-validate
-
-  '@polkadot/api@10.13.1':
-    dependencies:
-      '@polkadot/api-augment': 10.13.1
-      '@polkadot/api-base': 10.13.1
-      '@polkadot/api-derive': 10.13.1
-      '@polkadot/keyring': 12.6.2(@polkadot/util-crypto@12.6.2(@polkadot/util@12.6.2))(@polkadot/util@12.6.2)
-      '@polkadot/rpc-augment': 10.13.1
-      '@polkadot/rpc-core': 10.13.1
-      '@polkadot/rpc-provider': 10.13.1
-      '@polkadot/types': 10.13.1
-      '@polkadot/types-augment': 10.13.1
-      '@polkadot/types-codec': 10.13.1
-      '@polkadot/types-create': 10.13.1
-      '@polkadot/types-known': 10.13.1
-      '@polkadot/util': 12.6.2
-      '@polkadot/util-crypto': 12.6.2(@polkadot/util@12.6.2)
-      eventemitter3: 5.0.1
       rxjs: 7.8.1
       tslib: 2.6.2
     transitivePeerDependencies:
@@ -6536,12 +6487,12 @@ snapshots:
       - '@vue/composition-api'
       - vue
 
-  '@zombienet/orchestrator@0.0.76(@polkadot/util@12.6.2)(@types/node@20.12.12)(chokidar@3.6.0)':
+  '@zombienet/orchestrator@0.0.85(@polkadot/util@12.6.2)(@types/node@20.12.12)(chokidar@3.6.0)':
     dependencies:
-      '@polkadot/api': 10.13.1
+      '@polkadot/api': 11.1.1
       '@polkadot/keyring': 12.6.2(@polkadot/util-crypto@12.6.2(@polkadot/util@12.6.2))(@polkadot/util@12.6.2)
       '@polkadot/util-crypto': 12.6.2(@polkadot/util@12.6.2)
-      '@zombienet/utils': 0.0.24(@types/node@20.12.12)(chokidar@3.6.0)(typescript@5.4.5)
+      '@zombienet/utils': 0.0.25(@types/node@20.12.12)(chokidar@3.6.0)(typescript@5.4.5)
       JSONStream: 1.3.5
       chai: 4.4.1
       debug: 4.3.4(supports-color@8.1.1)
@@ -6568,7 +6519,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@zombienet/utils@0.0.24(@types/node@20.12.12)(chokidar@3.6.0)(typescript@5.4.5)':
+  '@zombienet/utils@0.0.25(@types/node@20.12.12)(chokidar@3.6.0)(typescript@5.4.5)':
     dependencies:
       cli-table3: 0.6.5
       debug: 4.3.4(supports-color@8.1.1)
