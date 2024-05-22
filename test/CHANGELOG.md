@@ -1,5 +1,11 @@
 # @moonwall/tests
 
+## 5.2.0
+
+### Minor Changes
+
+- 9f2bcd7: Package Updates (May)
+
 ## 5.1.5
 
 ### Patch Changes
