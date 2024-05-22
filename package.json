@@ -23,8 +23,8 @@
     "typecheck": "pnpm -r --filter='./packages/**' run typecheck"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.6.1",
+    "@biomejs/biome": "1.6.4",
     "@changesets/cli": "2.27.1",
-    "typescript": "5.4.2"
+    "typescript": "5.4.3"
   }
 }

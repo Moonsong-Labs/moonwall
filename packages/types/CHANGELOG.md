@@ -1,5 +1,11 @@
 # @moonwall/types
 
+## 5.1.5
+
+### Patch Changes
+
+- 3ec6cde: Package Update
+
 ## 5.1.4
 
 ### Patch Changes
