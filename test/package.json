@@ -3,7 +3,7 @@
   "type": "module",
   "version": "5.1.5",
   "private": true,
-  "packageManager": "pnpm@9.1.1",
+  "packageManager": "pnpm@9.1.2",
   "description": "Testing framework for the Moon family of projects",
   "scripts": {
     "clean": "rm -rf node_modules",
