@@ -67,12 +67,11 @@ export async function createDevBlock<
   ApiType extends ApiTypes,
   Calls extends CallType<ApiType> | Array<CallType<ApiType>>,
 >(context: GenericContext, options: BlockCreation, transactions?: Calls) {
-  const containsViem =
+  const containsViem = !!(
     (context as DevModeContext).isEthereumChain &&
     context.viem() &&
     (await MoonwallContext.getContext()).providers.find((prov) => prov.type === "viem")
-      ? true
-      : false;
+  );
   const api = context.polkadotJs();
 
   const originalBlockNumber = (await api.rpc.chain.getHeader()).number.toBigInt();

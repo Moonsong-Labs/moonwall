@@ -821,7 +821,7 @@
           }
         ]
       },
-      "envVars": ["LOG_LEVEL=debug", "VERBOSE_LOG"],
+      "envVars": ["LOG_LEVEL=debug", "VERBOSE_LOG=true"],
       "connections": [
         {
           "name": "polkadot",

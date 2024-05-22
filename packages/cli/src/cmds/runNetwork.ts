@@ -99,7 +99,7 @@ export async function runNetworkCmd(args: RunCommandArgs) {
                 )})`
               : chalk.dim("Test:    NO TESTS SPECIFIED"),
           value: 4,
-          disabled: testFileDirs.length > 0 ? false : true,
+          disabled: !(testFileDirs.length > 0),
           short: "test",
         },
         {
@@ -110,7 +110,7 @@ export async function runNetworkCmd(args: RunCommandArgs) {
                 )})`
               : chalk.dim("Test:    NO TESTS SPECIFIED"),
           value: 5,
-          disabled: testFileDirs.length > 0 ? false : true,
+          disabled: !(testFileDirs.length > 0),
           short: "grep",
         },
         new inquirer.Separator(),

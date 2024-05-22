@@ -14,12 +14,8 @@ import {
 import type { ApiPromise } from "@polkadot/api";
 import type { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types";
 import type { KeyringPair } from "@polkadot/keyring/types";
-import type {
-  PalletDemocracyReferendumInfo,
-  PalletReferendaReferendumInfo,
-} from "@polkadot/types/lookup";
+import type { PalletReferendaReferendumInfo } from "@polkadot/types/lookup";
 import { blake2AsHex } from "@polkadot/util-crypto";
-import { u8aToBigInt, u8aToNumber } from "@polkadot/util";
 
 export const COUNCIL_MEMBERS: KeyringPair[] = [baltathar, charleth, dorothy];
 export const COUNCIL_THRESHOLD = Math.ceil((COUNCIL_MEMBERS.length * 2) / 3);
@@ -700,7 +696,7 @@ export const executeOpenTechCommitteeProposal = async (api: ApiPromise, encodedH
 
 export const executeProposalWithCouncil = async (api: ApiPromise, encodedHash: string) => {
   let nonce = (await api.rpc.system.accountNextIndex(alith.address)).toNumber();
-  const referendumNextIndex = (await api.query.democracy.referendumCount()).toNumber();
+  const referendumNextIndex = ((await api.query.democracy.referendumCount()) as any).toNumber();
 
   const callData =
     (api.consts.system.version as any).specVersion.toNumber() >= 2000
@@ -731,7 +727,7 @@ export const executeProposalWithCouncil = async (api: ApiPromise, encodedHash: s
   process.stdout.write("✅\n");
 
   process.stdout.write(`Waiting for referendum [${referendumNextIndex}] to be executed...`);
-  let referenda: PalletDemocracyReferendumInfo | undefined;
+  let referenda: any;
   while (!referenda) {
     try {
       referenda = (
