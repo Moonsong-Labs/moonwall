@@ -3,7 +3,7 @@
   "type": "module",
   "version": "5.2.0",
   "private": true,
-  "packageManager": "pnpm@9.1.2",
+  "packageManager": "pnpm@9.1.4",
   "description": "Testing framework for the Moon family of projects",
   "scripts": {
     "clean": "rm -rf node_modules",
@@ -33,7 +33,7 @@
     "chai": "5.1.1",
     "chalk": "5.3.0",
     "ethers": "6.12.1",
-    "pnpm": "9.1.2",
+    "pnpm": "9.1.4",
     "solc": "0.8.25",
     "tsx": "4.10.5",
     "typescript": "5.4.5",
