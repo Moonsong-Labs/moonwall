@@ -1,5 +1,13 @@
 # @moonwall/cli
 
+## 5.2.1
+
+### Patch Changes
+
+- a73230d: downloader fix
+  - @moonwall/types@5.2.1
+  - @moonwall/util@5.2.1
+
 ## 5.2.0
 
 ### Minor Changes

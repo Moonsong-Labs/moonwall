@@ -1,5 +1,11 @@
 # @moonwall/tests
 
+## 5.2.1
+
+### Patch Changes
+
+- a73230d: downloader fix
+
 ## 5.2.0
 
 ### Minor Changes
