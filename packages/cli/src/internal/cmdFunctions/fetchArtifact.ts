@@ -56,7 +56,6 @@ export async function fetchArtifact(args: fetchArtifactArgs) {
     }
     return true;
   };
-
   const binary = args.bin;
   const repos = (await configExists()) ? await allReposAsync() : standardRepos();
   const repo = repos.find((network) => network.binaries.find((bin) => bin.name === binary));
@@ -123,7 +122,7 @@ export async function fetchArtifact(args: fetchArtifactArgs) {
       return;
     }
     const version = (await runTask(`./${binPath} --version`)).trim();
-    process.stdout.write(` ${chalk.green(version.trim())} ✓\n`);
+    process.stdout.write(`${path.basename(binPath)} ${chalk.green(version.trim())} ✓\n`);
     return;
   }
   const binaryPath = args.outputName
