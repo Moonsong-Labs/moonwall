@@ -795,7 +795,7 @@
       "connections": []
     },
     {
-      "name": "dev_smoke_tests_skip",
+      "name": "dev_smoke",
       "foundation": {
           "launchSpec": {
             "disableRuntimeVersionCheck": true

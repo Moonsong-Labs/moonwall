@@ -110,7 +110,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        suite: ["dev_test", "dev_multi", "dev_seq"]
+        suite: ["dev_test", "dev_multi", "dev_seq", "dev_smoke"]
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v1
@@ -244,3 +244,4 @@ jobs:
         run: |
           cd test
           bun moonwall test ${{matrix.suite}}
+
