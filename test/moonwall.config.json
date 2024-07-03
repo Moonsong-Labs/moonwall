@@ -795,6 +795,24 @@
       "connections": []
     },
     {
+      "name": "dev_smoke_tests_skip",
+      "foundation": {
+          "launchSpec": {
+            "disableRuntimeVersionCheck": true
+          },
+          "type": "read_only"
+        },
+      "connections": [],
+      "testFileDir": ["/suites/smoke"],
+      "skipTests": [
+          {
+              "name": "ST00T02",
+              "reason": "https://github.com/moonbeam-foundation/moonbeam/issue/1234",
+              "since": "2024-01-28T00:00:00Z"
+          }
+      ]
+    },
+    {
       "name": "multi_chopsticks",
       "testFileDir": ["suites/multi_chopsticks"],
       "foundation": {
