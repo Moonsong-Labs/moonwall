@@ -1,4 +1,4 @@
-import type { Environment } from "@moonwall/types";
+import type { Environment, SkipTestSpec} from "@moonwall/types";
 import chalk from "chalk";
 import path from "node:path";
 import type { UserConfig, Vitest } from "vitest";
@@ -106,8 +106,10 @@ export async function executeTests(env: Environment, additionalArgs?: any) {
       },
     } satisfies UserConfig;
 
+    const skipOptions = addSkipConfig(baseOptions, additionalArgs?.skipTests);
+
     // TODO: Create options builder class
-    const options = addThreadConfig(baseOptions, env.multiThreads);
+    const options = addThreadConfig(skipOptions, env.multiThreads);
 
     if (
       globalConfig.environments.find((env) => env.name === process.env.MOON_TEST_ENV)?.foundation
@@ -195,4 +197,18 @@ function addThreadConfig(
     }
   }
   return configWithThreads;
+}
+
+// Add skip tests to the config, by replacing the testNamePattern with a negative lookahead pattern
+function addSkipConfig(config: UserConfig, skipTests: SkipTestSpec[] | undefined): UserConfig {
+  // example pattern: (?!\s*foo\s*$)
+  const skipTestsPatterns = skipTests?.map((test) => `(?!\s*${test.name}\s*$)`).join("");
+  // final negative pattern: ^(?!\s*foo\s*$).+$
+  if (skipTests) {
+    return {
+      ...config,
+      testNamePattern: `^${skipTestsPatterns}.+$`,
+    };
+  }
+  return config;
 }

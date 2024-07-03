@@ -127,7 +127,30 @@ export type Environment = {
    * Toggle whether createBlock() will finalize blocks by default or not.
    */
   defaultFinalization?: boolean;
+
+  /**
+   * A list of test to skip. 
+   */
+  skipTests? : SkipTestSpec[];
 };
+
+export type SkipTestSpec = {
+
+  /**
+   * The name of the test to skip. Eg. "S22C500"
+   */
+  name: string;
+
+  /**
+   * The reason for skipping the test. Must be provided. Eg. link to issue or PR.
+   */
+  reason: string;
+
+  /**
+   * The date when the test was skipped. Must be provided and be RFC3339 compliant. Eg. "2021-09-01T00:00:00Z"
+   */
+  since: string;
+}
 
 /**
  * @name IFoundation
