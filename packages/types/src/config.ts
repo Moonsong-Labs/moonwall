@@ -129,13 +129,12 @@ export type Environment = {
   defaultFinalization?: boolean;
 
   /**
-   * A list of test to skip. 
+   * A list of test to skip.
    */
-  skipTests? : SkipTestSpec[];
+  skipTests?: SkipTestSpec[];
 };
 
 export type SkipTestSpec = {
-
   /**
    * The name of the test to skip. Eg. "S22C500"
    */
@@ -150,7 +149,7 @@ export type SkipTestSpec = {
    * The date when the test was skipped. Must be provided and be RFC3339 compliant. Eg. "2021-09-01T00:00:00Z"
    */
   since: string;
-}
+};
 
 /**
  * @name IFoundation
