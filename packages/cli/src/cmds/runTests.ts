@@ -106,10 +106,15 @@ export async function executeTests(env: Environment, additionalArgs?: any) {
       },
     } satisfies UserConfig;
 
-    const skipOptions = addSkipConfig(baseOptions, additionalArgs?.skipTests);
+    // transform  in regexp pattern
+    if(env.skipTests && env.skipTests.length > 0){
+      // the final pattern will look like this: "^((?!SO00T02|SM00T01|SM00T03).)*$"
+      additionalArgs.testNamePattern = `^((?!${env.skipTests?.map((test) => `${test.name}`).join("|")}).)*$`;
+    }
+    
 
     // TODO: Create options builder class
-    const options = addThreadConfig(skipOptions, env.multiThreads);
+    const options = addThreadConfig(baseOptions, env.multiThreads);
 
     if (
       globalConfig.environments.find((env) => env.name === process.env.MOON_TEST_ENV)?.foundation
@@ -197,18 +202,4 @@ function addThreadConfig(
     }
   }
   return configWithThreads;
-}
-
-// Add skip tests to the config, by replacing the testNamePattern with a negative lookahead pattern
-function addSkipConfig(config: UserConfig, skipTests: SkipTestSpec[] | undefined): UserConfig {
-  // example pattern: (?!\s*foo\s*$)
-  const skipTestsPatterns = skipTests?.map((test) => `(?!\s*${test.name}\s*$)`).join("");
-  // final negative pattern: ^(?!\s*foo\s*$).+$
-  if (skipTests) {
-    return {
-      ...config,
-      testNamePattern: `^${skipTestsPatterns}.+$`,
-    };
-  }
-  return config;
 }

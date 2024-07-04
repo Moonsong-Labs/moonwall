@@ -136,17 +136,17 @@ export type Environment = {
 
 export type SkipTestSpec = {
   /**
-   * The name of the test to skip. Eg. "S22C500"
+   * The name of the test to skip. Eg. S22C500
    */
   name: string;
 
   /**
-   * The reason for skipping the test. Must be provided. Eg. link to issue or PR.
+   * The reason for skipping the test. Must be provided. Eg. https://github.com/org/repo/issues/123.
    */
   reason: string;
 
   /**
-   * The date when the test was skipped. Must be provided and be RFC3339 compliant. Eg. "2021-09-01T00:00:00Z"
+   * The date when the test was skipped. Must be provided and be RFC3339 compliant. Eg. 2021-09-01T00:00:00Z
    */
   since: string;
 };
