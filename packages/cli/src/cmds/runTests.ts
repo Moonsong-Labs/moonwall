@@ -145,16 +145,24 @@ function addThreadConfig(
   const configWithThreads: UserConfig = {
     ...config,
     fileParallelism: false,
-    pool: "threads",
+    pool: "forks",
     poolOptions: {
-      threads: {
+      forks: {
         isolate: true,
-        minThreads: 1,
-        maxThreads: 1,
-        singleThread: false,
-        useAtomics: true,
-      },
-    },
+        minForks: 1,
+        maxForks: 3,
+        singleFork: false,
+      }
+    }
+    // poolOptions: {
+    //   threads: {
+    //     isolate: true,
+    //     minThreads: 1,
+    //     maxThreads: 1,
+    //     singleThread: false,
+    //     useAtomics: true,
+    //   },
+    // },
   };
 
   if (threads === true && process.env.MOON_RECYCLE !== "true") {
@@ -162,13 +170,19 @@ function addThreadConfig(
       throw new Error("poolOptions not defined in config, this is an error please raise.");
     }
     configWithThreads.fileParallelism = true;
-    configWithThreads.poolOptions.threads = {
+    configWithThreads.poolOptions.forks = {
       isolate: true,
-      minThreads: 1,
-      maxThreads: 3,
-      singleThread: false,
-      useAtomics: true,
+      minForks: 1,
+      maxForks: 3,
+      singleFork: false,
     };
+    // configWithThreads.poolOptions.threads = {
+    //   isolate: true,
+    //   minThreads: 1,
+    //   maxThreads: 3,
+    //   singleThread: false,
+    //   useAtomics: true,
+    // };
   }
 
   if (typeof threads === "number" && process.env.MOON_RECYCLE !== "true") {
@@ -176,13 +190,13 @@ function addThreadConfig(
       throw new Error("poolOptions not defined in config, this is an error please raise.");
     }
 
-    if (!configWithThreads.poolOptions.threads) {
-      throw new Error("poolOptions.threads not defined in config, this is an error please raise.");
+    if (!configWithThreads.poolOptions.forks) {
+      throw new Error("poolOptions.forks not defined in config, this is an error please raise.");
     }
 
     configWithThreads.fileParallelism = true;
-    configWithThreads.poolOptions.threads.maxThreads = threads;
-    configWithThreads.poolOptions.threads.singleThread = false;
+    configWithThreads.poolOptions.forks.maxForks = threads;
+    configWithThreads.poolOptions.forks.singleFork = false;
   }
 
   if (typeof threads === "object" && process.env.MOON_RECYCLE !== "true") {

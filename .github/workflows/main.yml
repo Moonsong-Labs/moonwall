@@ -107,6 +107,8 @@ jobs:
   test_dev:
     runs-on: ubuntu-latest
     needs: ["build"]
+    env:
+      NODE_OPTIONS: "--no-deprecation"
     strategy:
       fail-fast: false
       matrix:
