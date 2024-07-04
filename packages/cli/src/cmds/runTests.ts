@@ -154,15 +154,6 @@ function addThreadConfig(
         singleFork: false,
       },
     },
-    // poolOptions: {
-    //   threads: {
-    //     isolate: true,
-    //     minThreads: 1,
-    //     maxThreads: 1,
-    //     singleThread: false,
-    //     useAtomics: true,
-    //   },
-    // },
   };
 
   if (threads === true && process.env.MOON_RECYCLE !== "true") {
@@ -176,13 +167,6 @@ function addThreadConfig(
       maxForks: 3,
       singleFork: false,
     };
-    // configWithThreads.poolOptions.threads = {
-    //   isolate: true,
-    //   minThreads: 1,
-    //   maxThreads: 3,
-    //   singleThread: false,
-    //   useAtomics: true,
-    // };
   }
 
   if (typeof threads === "number" && process.env.MOON_RECYCLE !== "true") {

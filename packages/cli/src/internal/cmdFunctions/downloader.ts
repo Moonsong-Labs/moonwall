@@ -1,6 +1,6 @@
 import { SingleBar, Presets } from "cli-progress";
 import fs from "node:fs";
-import { Readable } from "stream";
+import { Readable } from "node:stream";
 
 interface ProgressBarOptions {
   etaAsynchronousUpdate: boolean;
@@ -12,7 +12,6 @@ export async function downloader(url: string, outputPath: string): Promise<void>
   const tempPath = `${outputPath}.tmp`;
   const writeStream = fs.createWriteStream(tempPath);
   let transferredBytes = 0;
-  let progressBar: SingleBar;
 
   if (url.startsWith("ws")) {
     console.log("You've passed a WebSocket URL to fetch. Is this intended?");
@@ -27,7 +26,7 @@ export async function downloader(url: string, outputPath: string): Promise<void>
   const readStream = Readable.fromWeb(response.body);
   const contentLength = Number.parseInt(response.headers.get("Content-Length") || "0");
 
-  progressBar = initializeProgressBar();
+  const progressBar = initializeProgressBar();
   progressBar.start(contentLength, 0);
 
   readStream.pipe(writeStream);
