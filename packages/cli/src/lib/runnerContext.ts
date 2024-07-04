@@ -61,7 +61,6 @@ let limiter: Bottleneck | undefined = undefined;
  *        },
  *      });
  */
-// biome-ignore lint/suspicious/noExportsInTest: <explanation>
 export function describeSuite<T extends FoundationType>({
   id: suiteId,
   title,
