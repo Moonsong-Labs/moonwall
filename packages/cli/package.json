@@ -86,7 +86,6 @@
     "inquirer-press-to-continue": "1.2.0",
     "jsonc-parser": "3.3.1",
     "minimatch": "9.0.5",
-    "node-fetch": "3.3.2",
     "semver": "7.6.2",
     "viem": "2.17.0",
     "vitest": "1.6.0",
