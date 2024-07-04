@@ -152,8 +152,8 @@ function addThreadConfig(
         minForks: 1,
         maxForks: 3,
         singleFork: false,
-      }
-    }
+      },
+    },
     // poolOptions: {
     //   threads: {
     //     isolate: true,
