@@ -302,9 +302,6 @@ importers:
       inquirer-press-to-continue:
         specifier: 1.2.0
         version: 1.2.0(inquirer@9.3.3)
-      node-fetch:
-        specifier: 3.3.2
-        version: 3.3.2
       rlp:
         specifier: 3.0.0
         version: 3.0.0

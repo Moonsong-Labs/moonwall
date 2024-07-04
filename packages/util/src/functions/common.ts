@@ -1,6 +1,5 @@
 import "@moonbeam-network/api-augment";
 import { BN } from "@polkadot/util";
-import fetch from "node-fetch";
 
 // Sort dict by key
 export function sortObjectByKeys(obj: Record<string, any>): Record<string, any> {
@@ -123,6 +122,10 @@ export async function directRpcRequest(
     method,
     params,
   };
+
+  if (endpoint.startsWith("ws")) {
+    console.log("you've passed a websocket to fetch, is this intended?");
+  }
 
   const response = await fetch(endpoint, {
     method: "POST",

@@ -75,7 +75,6 @@ export async function fetchArtifact(args: fetchArtifactArgs) {
     throw new Error(`No releases found for ${repo.ghAuthor}.${repo.ghRepo}, try again later.`);
   }
 
-  // const releases = (await (await fetch(url)).json()) as Release[];
   const release = binary.includes("-runtime")
     ? releases.data.find((release) => {
         if (args.ver === "latest") {

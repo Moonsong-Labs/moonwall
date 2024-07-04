@@ -30,6 +30,10 @@ export async function downloader(url: string, outputPath: string): Promise<void>
   const writeStream = fs.createWriteStream(tempPath);
   let transferredBytes = 0;
 
+  if (url.startsWith("ws")) {
+    console.log("you've passed a websocket to fetch, is this intended?");
+  }
+
   const response = await fetch(url);
 
   if (!response.body) {
