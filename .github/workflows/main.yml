@@ -16,7 +16,7 @@ jobs:
           version: 9.1.4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: "pnpm"
       - run: pnpm install
       - run: pnpm run build
@@ -30,7 +30,7 @@ jobs:
           version: 9.1.4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: "pnpm"
       - run: pnpm install
       - run: pnpm run lint
@@ -44,7 +44,7 @@ jobs:
           version: 9.1.4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: "pnpm"
       - run: pnpm install
       - run: pnpm run fmt
@@ -59,7 +59,7 @@ jobs:
           version: 9.1.4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: "pnpm"
       - uses: oven-sh/setup-bun@v1
         with:
@@ -86,7 +86,7 @@ jobs:
           version: 9.1.4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: "pnpm"
       - name: Build like before
         run: |
@@ -124,7 +124,7 @@ jobs:
           version: 9.1.4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: "pnpm"
       - name: Build like before
         run: |
@@ -156,7 +156,7 @@ jobs:
           version: 9.1.4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: "pnpm"
       - name: Build like before
         run: |
@@ -194,7 +194,7 @@ jobs:
           version: 9.1.4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: "pnpm"
       - name: Build like before
         run: |
@@ -225,7 +225,7 @@ jobs:
           version: 9.1.4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: "pnpm"
       - uses: oven-sh/setup-bun@v1
         with:
