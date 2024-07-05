@@ -8,7 +8,7 @@ import { commonChecks } from "../internal/launcherCommon";
 import { cacheConfig, importAsyncConfig, loadEnvVars } from "../lib/configReader";
 import { MoonwallContext, contextCreator, runNetworkOnly } from "../lib/globalContext";
 
-export async function testCmd(envName: string, additionalArgs?: object): Promise<boolean> {
+export async function testCmd(envName: string, additionalArgs?: testRunArgs): Promise<boolean> {
   await cacheConfig();
   const globalConfig = await importAsyncConfig();
   const env = globalConfig.environments.find(({ name }) => name === envName);
@@ -50,7 +50,13 @@ export async function testCmd(envName: string, additionalArgs?: object): Promise
   return false;
 }
 
-export async function executeTests(env: Environment, additionalArgs?: any) {
+export type testRunArgs = {
+  testNamePattern?: string;
+  subDirectory?: string;
+  shard?: string;
+};
+
+export async function executeTests(env: Environment, additionalArgs?: testRunArgs) {
   return new Promise<Vitest>(async (resolve, reject) => {
     const globalConfig = await importAsyncConfig();
     if (env.foundation.type === "read_only") {
@@ -118,9 +124,11 @@ export async function executeTests(env: Environment, additionalArgs?: any) {
     }
 
     try {
-      const testFileDir = additionalArgs?.subDirectory
-        ? env.testFileDir.map((folder) => path.join(folder, additionalArgs.subDirectory))
-        : env.testFileDir;
+      const testFileDir =
+        additionalArgs?.subDirectory !== undefined
+          ? // @ts-expect-error - bug in tsc
+            env.testFileDir.map((folder) => path.join(folder, additionalArgs.subDirectory))
+          : env.testFileDir;
 
       const folders = testFileDir.map((folder) => path.join(".", folder, "/"));
       resolve(
