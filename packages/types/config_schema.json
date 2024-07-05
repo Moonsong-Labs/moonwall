@@ -631,6 +631,27 @@
             },
             "type": "array"
           },
+          "skipTests": {
+            "description": "A list of test to skip.",
+            "items": {
+              "properties": {
+                "name": {
+                  "description": "The name of the test to skip. Eg. S22C500",
+                  "type": "string"
+                },
+                "reason": {
+                  "description": "The reason for skipping the test. Must be provided. Eg. https://github.com/org/repo/issues/123.",
+                  "type": "string"
+                },
+                "since": {
+                  "description": "The date when the test was skipped. Must be provided and be RFC3339 compliant. Eg. 2021-09-01T00:00:00Z",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "type": "array"
+          },
           "testFileDir": {
             "description": "An array of directories with test files.",
             "items": {

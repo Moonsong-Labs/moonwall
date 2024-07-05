@@ -795,6 +795,40 @@
       "connections": []
     },
     {
+      "name": "dev_smoke",
+      "foundation": {
+        "launchSpec": {
+          "disableRuntimeVersionCheck": true
+        },
+        "type": "read_only"
+      },
+      "connections": [
+        {
+          "name": "para",
+          "type": "polkadotJs",
+          "endpoints": ["wss://moonbeam-rpc.dwellir.com"]
+        }
+      ],
+      "testFileDir": ["/suites/smoke"],
+      "skipTests": [
+        {
+          "name": "SO00T02",
+          "reason": "https://github.com/moonbeam-foundation/moonbeam/issue/1",
+          "since": "2024-01-28T00:00:00Z"
+        },
+        {
+          "name": "SM00T01",
+          "reason": "https://github.com/moonbeam-foundation/moonbeam/issue/2",
+          "since": "2024-01-28T00:00:00Z"
+        },
+        {
+          "name": "SM00T03",
+          "reason": "https://github.com/moonbeam-foundation/moonbeam/issue/3",
+          "since": "2024-01-28T00:00:00Z"
+        }
+      ]
+    },
+    {
       "name": "multi_chopsticks",
       "testFileDir": ["suites/multi_chopsticks"],
       "foundation": {

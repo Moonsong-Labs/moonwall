@@ -1,5 +1,13 @@
 # @moonwall/types
 
+## 5.3.0
+
+### Minor Changes
+
+- b5f857f: Support skipping tests by ID in config
+
+  This feature is amazing but also dangerous! Remember with great power comes great responsibilities
+
 ## 5.2.0
 
 ### Minor Changes

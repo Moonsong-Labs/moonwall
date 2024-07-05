@@ -112,6 +112,12 @@ export async function executeTests(env: Environment, additionalArgs?: testRunArg
       },
     } satisfies UserConfig;
 
+    // transform  in regexp pattern
+    if (env.skipTests && env.skipTests.length > 0) {
+      // the final pattern will look like this: "^((?!SO00T02|SM00T01|SM00T03).)*$"
+      additionalArgs.testNamePattern = `^((?!${env.skipTests?.map((test) => `${test.name}`).join("|")}).)*$`;
+    }
+
     // TODO: Create options builder class
     const options = addThreadConfig(baseOptions, env.multiThreads);
 
