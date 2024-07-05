@@ -16,7 +16,7 @@ jobs:
           version: 9.1.4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.12.2
+          node-version: 20
           cache: "pnpm"
       - run: pnpm install
       - run: pnpm run build
@@ -30,7 +30,7 @@ jobs:
           version: 9.1.4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.12.2
+          node-version: 20
           cache: "pnpm"
       - run: pnpm install
       - run: pnpm run lint
@@ -44,7 +44,7 @@ jobs:
           version: 9.1.4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.12.2
+          node-version: 20
           cache: "pnpm"
       - run: pnpm install
       - run: pnpm run fmt
@@ -59,7 +59,7 @@ jobs:
           version: 9.1.4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.12.2
+          node-version: 20
           cache: "pnpm"
       - uses: oven-sh/setup-bun@v1
         with:
@@ -86,7 +86,7 @@ jobs:
           version: 9.1.4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.12.2
+          node-version: 20
           cache: "pnpm"
       - name: Build like before
         run: |
@@ -107,10 +107,13 @@ jobs:
   test_dev:
     runs-on: ubuntu-latest
     needs: ["build"]
+    env:
+      NODE_OPTIONS: "--no-deprecation"
     strategy:
       fail-fast: false
       matrix:
         suite: ["dev_test", "dev_multi", "dev_seq", "dev_smoke"]
+        shard: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v1
@@ -121,7 +124,7 @@ jobs:
           version: 9.1.4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.12.2
+          node-version: 20
           cache: "pnpm"
       - name: Build like before
         run: |
@@ -137,7 +140,7 @@ jobs:
       - name: Run ${{matrix.suite}} dev test
         run: |
           cd test
-          bun moonwall test ${{matrix.suite}}
+          bun moonwall test ${{matrix.suite}}  --ts ${{ matrix.shard }}/4
 
   test_chopsticks:
     runs-on: ubuntu-latest
@@ -153,7 +156,7 @@ jobs:
           version: 9.1.4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.12.2
+          node-version: 20
           cache: "pnpm"
       - name: Build like before
         run: |
@@ -191,7 +194,7 @@ jobs:
           version: 9.1.4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.12.2
+          node-version: 20
           cache: "pnpm"
       - name: Build like before
         run: |
@@ -222,7 +225,7 @@ jobs:
           version: 9.1.4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.12.2
+          node-version: 20
           cache: "pnpm"
       - uses: oven-sh/setup-bun@v1
         with:
@@ -244,4 +247,3 @@ jobs:
         run: |
           cd test
           bun moonwall test ${{matrix.suite}}
-

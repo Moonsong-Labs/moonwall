@@ -5,7 +5,7 @@ import { hideBin } from "yargs/helpers";
 import { fetchArtifact, deriveTestIds, generateConfig, type fetchArtifactArgs } from "../internal";
 import { main } from "./main";
 import { runNetworkCmd } from "./runNetwork";
-import { testCmd } from "./runTests";
+import { testCmd, testRunArgs } from "./runTests";
 import { configSetup } from "../lib/configReader";
 dotenv.config();
 
@@ -85,6 +85,11 @@ yargs(hideBin(process.argv))
           describe: "Additional sub-directory filter for test suites",
           alias: "d",
           type: "string",
+        })
+        .option("testShard", {
+          describe: "Test Shard info for CI",
+          alias: "ts",
+          type: "string",
         });
     },
     async (args) => {
@@ -94,6 +99,7 @@ yargs(hideBin(process.argv))
           !(await testCmd(args.envName.toString(), {
             testNamePattern: args.GrepTest,
             subDirectory: args.subDirectory,
+            shard: args.testShard,
           }))
         ) {
           process.exitCode = 1;

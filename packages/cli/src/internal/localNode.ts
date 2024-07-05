@@ -1,4 +1,4 @@
-import { exec, spawn } from "node:child_process";
+import { exec, spawn, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import WebSocket from "ws";
@@ -22,6 +22,7 @@ export async function launchNode(cmd: string, args: string[], name: string) {
   const dirPath = path.join(process.cwd(), "tmp", "node_logs");
 
   const runningNode = spawn(cmd, args);
+
   const logLocation = path
     .join(
       dirPath,
@@ -60,11 +61,30 @@ export async function launchNode(cmd: string, args: string[], name: string) {
     runningNode.stdout?.removeListener("data", logHandler);
   });
 
-  probe: for (let i = 0; ; i++) {
-    if (!runningNode.pid) {
-      throw new Error("Running node has no PID registered, this is a bug. Please report it.");
-    }
+  if (!runningNode.pid) {
+    const errorMessage = "Failed to start child process";
+    console.error(errorMessage);
+    fs.appendFileSync(logLocation, `${errorMessage}\n`);
+    throw new Error(errorMessage);
+  }
 
+  // Check if the process exited immediately
+  if (runningNode.exitCode !== null) {
+    const errorMessage = `Child process exited immediately with code ${runningNode.exitCode}`;
+    console.error(errorMessage);
+    fs.appendFileSync(logLocation, `${errorMessage}\n`);
+    throw new Error(errorMessage);
+  }
+
+  const isRunning = await isPidRunning(runningNode.pid);
+
+  if (!isRunning) {
+    const errorMessage = `Process with PID ${runningNode.pid} is not running`;
+    spawnSync(cmd, args, { stdio: "inherit" });
+    throw new Error(errorMessage);
+  }
+
+  probe: for (let i = 0; ; i++) {
     try {
       const ports = await findPortsByPid(runningNode.pid);
       if (ports) {
@@ -87,6 +107,18 @@ export async function launchNode(cmd: string, args: string[], name: string) {
   }
 
   return { runningNode, fsStream };
+}
+
+function isPidRunning(pid: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    exec(`ps -p ${pid} -o pid=`, (error, stdout, stderr) => {
+      if (error) {
+        resolve(false);
+      } else {
+        resolve(stdout.trim() !== "");
+      }
+    });
+  });
 }
 
 async function checkWebSocketJSONRPC(port: number): Promise<boolean> {
