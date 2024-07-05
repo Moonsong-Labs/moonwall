@@ -1,5 +1,20 @@
 # @moonwall/cli
 
+## 5.3.0
+
+### Minor Changes
+
+- b5f857f: Support skipping tests by ID in config
+
+  This feature is amazing but also dangerous! Remember with great power comes great responsibilities
+
+### Patch Changes
+
+- a73230d: downloader fix
+- Updated dependencies [b5f857f]
+  - @moonwall/types@5.3.0
+  - @moonwall/util@5.3.0
+
 ## 5.2.0
 
 ### Minor Changes
