@@ -1,5 +1,14 @@
 # @moonwall/cli
 
+## 5.3.1
+
+### Patch Changes
+
+- bad99a1: Change to forks
+- Updated dependencies [bad99a1]
+  - @moonwall/types@5.3.1
+  - @moonwall/util@5.3.1
+
 ## 5.3.0
 
 ### Minor Changes
