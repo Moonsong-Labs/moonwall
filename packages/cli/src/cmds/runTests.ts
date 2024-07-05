@@ -56,7 +56,7 @@ export type testRunArgs = {
   shard?: string;
 };
 
-export async function executeTests(env: Environment, additionalArgs?: testRunArgs) {
+export async function executeTests(env: Environment, testRunArgs?: testRunArgs) {
   return new Promise<Vitest>(async (resolve, reject) => {
     const globalConfig = await importAsyncConfig();
     if (env.foundation.type === "read_only") {
@@ -111,6 +111,8 @@ export async function executeTests(env: Environment, additionalArgs?: testRunArg
         }
       },
     } satisfies UserConfig;
+
+    const additionalArgs: testRunArgs = testRunArgs || {};
 
     // transform  in regexp pattern
     if (env.skipTests && env.skipTests.length > 0) {
