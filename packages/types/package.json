@@ -59,12 +59,12 @@
     "@polkadot/types": "12.1.1",
     "@polkadot/util": "12.6.2",
     "@polkadot/util-crypto": "12.6.2",
-    "@types/node": "20.14.9",
+    "@types/node": "20.14.10",
     "@zombienet/utils": "0.0.25",
     "bottleneck": "2.19.5",
     "debug": "4.3.5",
     "ethers": "6.13.1",
-    "viem": "2.17.0",
+    "viem": "2.17.3",
     "web3": "4.10.0"
   },
   "peerDependencies": {
