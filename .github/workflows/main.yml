@@ -5,6 +5,7 @@ on:
       - "**"
 env:
   WSS_URL: ws://127.0.0.1:9955
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   build:

@@ -3,6 +3,7 @@ import chalk from "chalk";
 import clear from "clear";
 import colors from "colors";
 import fs from "node:fs";
+import cfonts from "cfonts";
 import inquirer from "inquirer";
 import PressToContinuePrompt from "inquirer-press-to-continue";
 import path from "node:path";
@@ -445,55 +446,24 @@ const printIntro = async () => {
     console.error(`Fetch Error: ${error}`);
   }
 
-  const logo =
-    chalk.cyan(`\n                                                                                                                  
-                                      ####################                      
-                                  ############################                  
-                               ###################################              
-                            ########################################            
-                           ###########################################          
-                         ##############################################         
-                        ################################################        
-                       .#################################################       
-                       ##################################################       
-                       ##################################################       
-`) +
-    chalk.red(`                                                                                
-🧱🧱🧱   🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱  🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱
-  🧱🧱🧱🧱  🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱
-              🧱🧱🧱   🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱
-      🧱🧱   🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱   🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱
-        🧱🧱   🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱    🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱
-                                       🧱🧱🧱  🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱
-                      🧱🧱🧱🧱  🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱      
-                                                                                                                                                              
-\n`);
-  process.stdout.write(logo);
-  process.stdout.write(
-    colors.rainbow(
-      "================================================================================\n"
-    )
-  );
+  cfonts.say("Moonwall", {
+    gradient: ["#FF66FF", "#9966FF", "#99CCFF", "#99FFFF", "#33FFFF", "#3366FF"],
+    transitionGradient: true,
+    lineHeight: 4,
+  });
 
-  if (remoteVersion !== "unknown" && lt(currentVersion, new SemVer(remoteVersion))) {
-    process.stdout.write(
-      chalk.bgCyan.white(
-        `                 MOONWALL   V${currentVersion.version}   (New version ${remoteVersion} available!)             \n`
-      )
-    );
-  } else {
-    process.stdout.write(
-      chalk.bgCyan.white(
-        `                                MOONWALL  V${currentVersion.version}                                \n`
-      )
-    );
-  }
+  const versionText =
+    remoteVersion !== "unknown" && lt(currentVersion, new SemVer(remoteVersion))
+      ? `V${currentVersion.version} (New version ${remoteVersion} available!) ${currentVersion.version}`
+      : `V${currentVersion.version}`;
 
-  process.stdout.write(
-    colors.rainbow(
-      "================================================================================\n"
-    )
-  );
+  const dividerLength = 90;
+  const leftPadding = Math.floor((dividerLength - versionText.length) / 2);
+  const rightPadding = dividerLength - versionText.length - leftPadding;
+
+  const formattedDivider = `${colors.rainbow("=".repeat(leftPadding))}${chalk.bgCyan.grey(versionText)}${colors.rainbow("=".repeat(rightPadding))}\n`;
+
+  console.log(formattedDivider);
 };
 
 const getExtString = (file: string) => {

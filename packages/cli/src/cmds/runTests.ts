@@ -102,6 +102,7 @@ export async function executeTests(env: Environment, testRunArgs?: testRunArgs) 
     const options = new VitestOptionsBuilder()
       .setReporters(env.reporters || ["default"])
       .setOutputFile(env.reportFile)
+      .setName(env.name)
       .setTimeout(env.timeout || globalConfig.defaultTestTimeout)
       .setInclude(env.include || ["**/*{test,spec,test_,test-}*{ts,mts,cts}"])
       .addThreadConfig(env.multiThreads)
@@ -150,6 +151,7 @@ class VitestOptionsBuilder {
       optimizer: { ssr: { enabled: false }, web: { enabled: false } },
     },
     include: ["**/*{test,spec,test_,test-}*{ts,mts,cts}"],
+
     onConsoleLog(log) {
       if (filterList.includes(log.trim())) return false;
       if (log.includes("has multiple versions, ensure that there is only one installed.")) {
@@ -157,6 +159,11 @@ class VitestOptionsBuilder {
       }
     },
   };
+
+  setName(name: string): this {
+    this.options.name = name;
+    return this;
+  }
 
   setReporters(reporters: string[]): this {
     this.options.reporters = reporters;
