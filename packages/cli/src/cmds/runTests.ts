@@ -193,11 +193,11 @@ class VitestOptionsBuilder {
     this.options.fileParallelism = false;
     this.options.pool = "forks";
     this.options.poolOptions = {
-      forks: {
+      threads: {
         isolate: true,
-        minForks: 1,
-        maxForks: 3,
-        singleFork: false,
+        minThreads: 1,
+        maxThreads: 3,
+        singleThread: false,
       },
     };
 
@@ -207,9 +207,9 @@ class VitestOptionsBuilder {
 
     if (typeof threads === "number" && process.env.MOON_RECYCLE !== "true") {
       this.options.fileParallelism = true;
-      if (this.options.poolOptions?.forks) {
-        this.options.poolOptions.forks.maxForks = threads;
-        this.options.poolOptions.forks.singleFork = false;
+      if (this.options.poolOptions?.threads) {
+        this.options.poolOptions.threads.maxThreads = threads;
+        this.options.poolOptions.threads.singleThread = false;
       }
     }
 
