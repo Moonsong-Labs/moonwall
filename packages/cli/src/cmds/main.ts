@@ -3,6 +3,7 @@ import chalk from "chalk";
 import clear from "clear";
 import colors from "colors";
 import fs from "node:fs";
+import cfonts from "cfonts";
 import inquirer from "inquirer";
 import PressToContinuePrompt from "inquirer-press-to-continue";
 import path from "node:path";
@@ -36,7 +37,9 @@ inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
 export async function main() {
   for (;;) {
-    const globalConfig = (await configExists()) ? await importAsyncConfig() : undefined;
+    const globalConfig = (await configExists())
+      ? await importAsyncConfig()
+      : undefined;
     clear();
     await printIntro();
     if (await mainMenu(globalConfig)) {
@@ -60,7 +63,9 @@ async function mainMenu(config?: MoonwallConfig) {
           {
             name: !configPresent
               ? "1) Initialise:                         Generate a new Moonwall Config File"
-              : chalk.dim("1) Initialise:                       ✅  CONFIG ALREADY GENERATED"),
+              : chalk.dim(
+                  "1) Initialise:                       ✅  CONFIG ALREADY GENERATED",
+                ),
             value: "init",
           },
           {
@@ -115,7 +120,9 @@ async function mainMenu(config?: MoonwallConfig) {
       return false;
     case "run": {
       if (!config) {
-        throw new Error("Config not defined, this is a defect please raise it.");
+        throw new Error(
+          "Config not defined, this is a defect please raise it.",
+        );
       }
 
       const chosenRunEnv = await chooseRunEnv(config);
@@ -127,7 +134,9 @@ async function mainMenu(config?: MoonwallConfig) {
     }
     case "test": {
       if (!config) {
-        throw new Error("Config not defined, this is a defect please raise it.");
+        throw new Error(
+          "Config not defined, this is a defect please raise it.",
+        );
       }
 
       const chosenTestEnv = await chooseTestEnv(config);
@@ -139,7 +148,7 @@ async function mainMenu(config?: MoonwallConfig) {
           type: "press-to-continue",
           anyKey: true,
           pressToContinueMessage: `ℹ️  Test run for ${chalk.bgWhiteBright.black(
-            chosenTestEnv.envName
+            chosenTestEnv.envName,
           )} has been completed. Press any key to continue...\n`,
         });
       }
@@ -154,7 +163,9 @@ async function mainMenu(config?: MoonwallConfig) {
 
     case "exec": {
       if (!config) {
-        throw new Error("Config not defined, this is a defect please raise it.");
+        throw new Error(
+          "Config not defined, this is a defect please raise it.",
+        );
       }
       return await resolveExecChoice(config);
     }
@@ -174,7 +185,7 @@ async function mainMenu(config?: MoonwallConfig) {
         type: "press-to-continue",
         anyKey: true,
         pressToContinueMessage: `ℹ️  Renaming task for ${chalk.bold(
-          `/${rootDir}`
+          `/${rootDir}`,
         )} has been completed. Press any key to continue...\n`,
       });
 
@@ -195,7 +206,7 @@ async function resolveExecChoice(config: MoonwallConfig) {
       type: "press-to-continue",
       anyKey: true,
       pressToContinueMessage: `ℹ️  No scriptDir property defined at ${chalk.bgWhiteBright.black(
-        "moonwall.config.json"
+        "moonwall.config.json",
       )}\n Press any key to continue...\n`,
     });
     return false;
@@ -207,7 +218,7 @@ async function resolveExecChoice(config: MoonwallConfig) {
       type: "press-to-continue",
       anyKey: true,
       pressToContinueMessage: `ℹ️  No scriptDir found at at ${chalk.bgWhiteBright.black(
-        path.join(process.cwd(), scriptDir)
+        path.join(process.cwd(), scriptDir),
       )}\n Press any key to continue...\n`,
     });
     return false;
@@ -221,7 +232,7 @@ async function resolveExecChoice(config: MoonwallConfig) {
       type: "press-to-continue",
       anyKey: true,
       pressToContinueMessage: `ℹ️  No scripts found at ${chalk.bgWhiteBright.black(
-        path.join(process.cwd(), config.scriptsDir || "")
+        path.join(process.cwd(), config.scriptsDir || ""),
       )}\n Press any key to continue...\n`,
     });
   }
@@ -234,7 +245,8 @@ async function resolveExecChoice(config: MoonwallConfig) {
   for (;;) {
     const result = await inquirer.prompt({
       name: "selections",
-      message: "Select which scripts you'd like to run (press ↩️ with none selected to go 🔙)\n",
+      message:
+        "Select which scripts you'd like to run (press ↩️ with none selected to go 🔙)\n",
       type: "checkbox",
       choices,
     });
@@ -257,7 +269,7 @@ async function resolveExecChoice(config: MoonwallConfig) {
       const result = await inquirer.prompt({
         name: "args",
         message: `Enter any arguments for ${chalk.bgWhiteBright.black(
-          script
+          script,
         )} (press enter for none)`,
         type: "input",
       });
@@ -276,7 +288,9 @@ async function resolveExecChoice(config: MoonwallConfig) {
 }
 
 async function resolveDownloadChoice() {
-  const repos = (await configExists()) ? await allReposAsync() : standardRepos();
+  const repos = (await configExists())
+    ? await allReposAsync()
+    : standardRepos();
   const binList = repos.reduce((acc, curr) => {
     acc.push(...curr.binaries.flatMap((bin) => bin.name));
     acc.push(new inquirer.Separator());
@@ -298,7 +312,7 @@ async function resolveDownloadChoice() {
 
     const versions = await getVersions(
       firstChoice.artifact,
-      firstChoice.artifact.includes("runtime")
+      firstChoice.artifact.includes("runtime"),
     );
 
     const chooseversion = await inquirer.prompt({
@@ -306,7 +320,12 @@ async function resolveDownloadChoice() {
       type: "list",
       default: "latest",
       message: "Download - which version?",
-      choices: [...versions, new inquirer.Separator(), "Back", new inquirer.Separator()],
+      choices: [
+        ...versions,
+        new inquirer.Separator(),
+        "Back",
+        new inquirer.Separator(),
+      ],
     });
 
     if (chooseversion.binVersion === "Back") {
@@ -323,9 +342,9 @@ async function resolveDownloadChoice() {
       name: "continue",
       type: "confirm",
       message: `You are about to download ${chalk.bgWhite.blackBright(
-        firstChoice.artifact
+        firstChoice.artifact,
       )} v-${chalk.bgWhite.blackBright(chooseversion.binVersion)} to: ${chalk.bgWhite.blackBright(
-        chooseLocation.path
+        chooseLocation.path,
       )}.\n Would you like to continue? `,
       default: true,
     });
@@ -362,7 +381,7 @@ const chooseTestEnv = async (config: MoonwallConfig) => {
       new inquirer.Separator(),
       { name: "Back", value: "back" },
       new inquirer.Separator(),
-    ] as any)
+    ] as any),
   );
   const result = await inquirer.prompt({
     name: "envName",
@@ -387,16 +406,22 @@ const chooseRunEnv = async (config: MoonwallConfig) => {
         a.description ? `: \t\t${a.description}` : ""
       }`;
     } else {
-      result.name = chalk.dim(`[${a.foundation.type}] ${a.name}     NO NETWORK TO RUN`);
+      result.name = chalk.dim(
+        `[${a.foundation.type}] ${a.name}     NO NETWORK TO RUN`,
+      );
       result.disabled = true;
     }
     return result;
   });
 
   const choices = [
-    ...envs.filter(({ disabled }) => disabled === false).sort((a, b) => (a.name > b.name ? 1 : -1)),
+    ...envs
+      .filter(({ disabled }) => disabled === false)
+      .sort((a, b) => (a.name > b.name ? 1 : -1)),
     new inquirer.Separator(),
-    ...envs.filter(({ disabled }) => disabled === true).sort((a, b) => (a.name > b.name ? 1 : -1)),
+    ...envs
+      .filter(({ disabled }) => disabled === true)
+      .sort((a, b) => (a.name > b.name ? 1 : -1)),
     new inquirer.Separator(),
     { name: "Back", value: "back" },
     new inquirer.Separator(),
@@ -434,66 +459,46 @@ const printIntro = async () => {
     });
 
     if (releases.status !== 200 || releases.data.length === 0) {
-      throw new Error("No releases found for moonsong-labs.moonwall, try again later.");
+      throw new Error(
+        "No releases found for moonsong-labs.moonwall, try again later.",
+      );
     }
     const json = releases.data;
 
     remoteVersion =
-      json.find((a) => a.tag_name.includes("@moonwall/cli@"))?.tag_name.split("@")[2] || "unknown";
+      json
+        .find((a) => a.tag_name.includes("@moonwall/cli@"))
+        ?.tag_name.split("@")[2] || "unknown";
   } catch (error) {
     remoteVersion = "unknown";
     console.error(`Fetch Error: ${error}`);
   }
 
-  const logo =
-    chalk.cyan(`\n                                                                                                                  
-                                      ####################                      
-                                  ############################                  
-                               ###################################              
-                            ########################################            
-                           ###########################################          
-                         ##############################################         
-                        ################################################        
-                       .#################################################       
-                       ##################################################       
-                       ##################################################       
-`) +
-    chalk.red(`                                                                                
-🧱🧱🧱   🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱  🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱
-  🧱🧱🧱🧱  🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱
-              🧱🧱🧱   🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱
-      🧱🧱   🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱   🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱
-        🧱🧱   🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱    🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱
-                                       🧱🧱🧱  🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱
-                      🧱🧱🧱🧱  🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱      
-                                                                                                                                                              
-\n`);
-  process.stdout.write(logo);
-  process.stdout.write(
-    colors.rainbow(
-      "================================================================================\n"
-    )
-  );
+  cfonts.say("Moonwall", {
+    gradient: [
+      "#FF66FF",
+      "#9966FF",
+      "#99CCFF",
+      "#99FFFF",
+      "#33FFFF",
+      "#3366FF",
+    ],
+    transitionGradient: true,
+    lineHeight: 4,
+  });
 
-  if (remoteVersion !== "unknown" && lt(currentVersion, new SemVer(remoteVersion))) {
-    process.stdout.write(
-      chalk.bgCyan.white(
-        `                 MOONWALL   V${currentVersion.version}   (New version ${remoteVersion} available!)             \n`
-      )
-    );
-  } else {
-    process.stdout.write(
-      chalk.bgCyan.white(
-        `                                MOONWALL  V${currentVersion.version}                                \n`
-      )
-    );
-  }
+  const versionText =
+    remoteVersion !== "unknown" && lt(currentVersion, new SemVer(remoteVersion))
+      ? `V${currentVersion.version} (New version ${remoteVersion} available!) ${currentVersion.version}`
+      : `V${currentVersion.version}`;
 
-  process.stdout.write(
-    colors.rainbow(
-      "================================================================================\n"
-    )
-  );
+  const dividerLength = 90;
+  const leftPadding = Math.floor((dividerLength - versionText.length) / 2);
+  const rightPadding = dividerLength - versionText.length - leftPadding;
+
+  const formattedDivider = `${colors.rainbow("=".repeat(leftPadding))}${chalk.bgCyan.grey(versionText)}${colors.rainbow("=".repeat(rightPadding))}\n`;
+
+  console.log(formattedDivider);
 };
 
 const getExtString = (file: string) => {
