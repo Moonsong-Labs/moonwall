@@ -1,5 +1,14 @@
 # @moonwall/tests
 
+## 5.3.3
+
+### Patch Changes
+
+- 1b3256a: Update Vitest
+  - Use Vitest 2.0.0
+  - New menu graphics!
+  - GITHUB_TOKEN support on downloader feature
+
 ## 5.3.2
 
 ## 5.3.1
