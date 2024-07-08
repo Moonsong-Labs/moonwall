@@ -1,5 +1,13 @@
 # @moonwall/cli
 
+## 5.3.2
+
+### Patch Changes
+
+- dbbe309: Revert default pooloptions
+  - @moonwall/types@5.3.2
+  - @moonwall/util@5.3.2
+
 ## 5.3.1
 
 ### Patch Changes
