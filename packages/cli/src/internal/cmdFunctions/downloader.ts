@@ -17,7 +17,11 @@ export async function downloader(url: string, outputPath: string): Promise<void>
     console.log("You've passed a WebSocket URL to fetch. Is this intended?");
   }
 
-  const response = await fetch(url);
+  const headers: any = {};
+  if (process.env.GITHUB_TOKEN) {
+    headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
+  }
+  const response = await fetch(url, { headers });
 
   if (!response.body) {
     throw new Error("No response body");
