@@ -150,6 +150,9 @@ class VitestOptionsBuilder {
     deps: {
       optimizer: { ssr: { enabled: false }, web: { enabled: false } },
     },
+    env: {
+      NODE_OPTIONS: "--no-warnings --no-deprecation",
+    },
     include: ["**/*{test,spec,test_,test-}*{ts,mts,cts}"],
 
     onConsoleLog(log) {

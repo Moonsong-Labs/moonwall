@@ -110,6 +110,7 @@ jobs:
     needs: ["build"]
     env:
       NODE_OPTIONS: "--no-deprecation"
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     strategy:
       fail-fast: false
       matrix:
