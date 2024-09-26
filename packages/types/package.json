@@ -63,9 +63,9 @@
     "@zombienet/utils": "0.0.25",
     "bottleneck": "2.19.5",
     "debug": "4.3.5",
-    "ethers": "6.13.1",
-    "viem": "2.17.3",
-    "web3": "4.10.0"
+    "ethers": "6.13.2",
+    "viem": "2.21.5",
+    "web3": "4.13.0"
   },
   "peerDependencies": {
     "@polkadot/api": "^10.12.6"
@@ -76,7 +76,7 @@
   "devDependencies": {
     "@biomejs/biome": "1.9.2",
     "@types/debug": "4.1.12",
-    "tsup": "8.1.0",
+    "tsup": "8.3.0",
     "typescript": "5.5.3",
     "typescript-json-schema": "0.64.0"
   }
