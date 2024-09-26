@@ -90,11 +90,10 @@
     "semver": "7.6.2",
     "viem": "2.21.15",
     "vitest": "2.0.1",
-    "vue": "^3.4.31",
     "web3": "4.13.0",
     "web3-providers-ws": "^4.0.7",
     "ws": "8.18.0",
-    "yaml": "2.4.5",
+    "yaml": "2.5.1",
     "yargs": "17.7.2"
   },
   "peerDependencies": {
@@ -112,9 +111,9 @@
     "@types/node": "20.14.10",
     "@types/semver": "^7.5.8",
     "@types/ws": "^8.5.10",
-    "@types/yargs": "17.0.32",
+    "@types/yargs": "17.0.33",
     "tsup": "8.3.0",
-    "tsx": "4.16.2",
+    "tsx": "4.19.1",
     "typescript": "5.5.3"
   },
   "publishConfig": {

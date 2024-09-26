@@ -62,7 +62,6 @@
     "@polkadot/types": "13.2.1",
     "@polkadot/types-codec": "13.2.1",
     "@polkadot/util": "13.1.1",
-    "@polkadot/util-crypto": "13.1.1",
     "bottleneck": "2.19.5",
     "chalk": "5.3.0",
     "clear": "0.1.0",
@@ -79,7 +78,6 @@
     "vitest": "2.0.1",
     "web3": "4.13.0",
     "ws": "8.18.0",
-    "yaml": "2.4.5",
     "yargs": "17.7.2"
   },
   "peerDependencies": {
@@ -91,7 +89,7 @@
     "@types/debug": "4.1.12",
     "@types/node": "20.14.10",
     "@types/ws": "^8.5.10",
-    "@types/yargs": "17.0.32",
+    "@types/yargs": "17.0.33",
     "tsup": "8.3.0",
     "typescript": "5.5.3"
   },
