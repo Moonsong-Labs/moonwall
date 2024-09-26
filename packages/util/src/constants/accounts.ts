@@ -79,13 +79,13 @@ export const faith: KeyringPair = keyringEth.addFromUri(FAITH_PRIVATE_KEY);
 export const goliath: KeyringPair = keyringEth.addFromUri(GOLIATH_PRIVATE_KEY);
 
 // deprecated
-export const gerald = keyringEth.addFromUri(GERALD_PRIVATE_KEY);
+export const gerald: KeyringPair = keyringEth.addFromUri(GERALD_PRIVATE_KEY);
 
 let accountSeed = 10000;
 export function generateKeyringPair(
   type: "ethereum" | "sr25519" | "ed25519" = "ethereum",
   privateKey?: string
-) {
+): KeyringPair {
   const key = privateKey || `0xDEADBEEF${(accountSeed++).toString(16).padStart(56, "0")}`;
   if (type === "sr25519") {
     return keyringSr25519.addFromUri(key);
