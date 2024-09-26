@@ -17,7 +17,7 @@
     "bun_test": "bun test suites/bun_test/*"
   },
   "devDependencies": {
-    "@acala-network/chopsticks": "0.12.2",
+    "@acala-network/chopsticks": "0.15.0",
     "@biomejs/biome": "1.9.2",
     "@moonbeam-network/api-augment": "0.2902.0",
     "@moonwall/cli": "workspace:*",

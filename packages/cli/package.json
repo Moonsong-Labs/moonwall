@@ -58,7 +58,7 @@
     "prepublish": "pnpm run build && pnpm run generate-types"
   },
   "dependencies": {
-    "@acala-network/chopsticks": "0.12.2",
+    "@acala-network/chopsticks": "0.15.0",
     "@moonbeam-network/api-augment": "0.2902.0",
     "@moonwall/types": "workspace:*",
     "@moonwall/util": "workspace:*",
@@ -98,7 +98,7 @@
     "yargs": "17.7.2"
   },
   "peerDependencies": {
-    "@acala-network/chopsticks": "^0.9.10",
+    "@acala-network/chopsticks": "^0.15.0",
     "@polkadot/api": "^10.11.2",
     "@vitest/ui": "^1.2.2",
     "vitest": "^1.2.2"
