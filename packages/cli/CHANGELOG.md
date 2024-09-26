@@ -1,5 +1,22 @@
 # @moonwall/cli
 
+## 5.4.0
+
+### Minor Changes
+
+- df30d19: Package Updates
+
+  - Package updates for ETH libs
+  - Package updates for PolkadotJS
+  - Package updates for tooling
+  - Added `--unsafe-force-node-key-generation` to default node args
+
+### Patch Changes
+
+- Updated dependencies [df30d19]
+  - @moonwall/types@5.4.0
+  - @moonwall/util@5.4.0
+
 ## 5.3.3
 
 ### Patch Changes
