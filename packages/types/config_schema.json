@@ -13,6 +13,10 @@
     "ChopsticksLaunchSpec": {
       "description": "A launch specification object for the \"chopsticks\" foundation type.",
       "properties": {
+        "address": {
+          "description": "Server listening interface\nAdded in: https://github.com/AcalaNetwork/chopsticks/pull/826",
+          "type": "string"
+        },
         "allowUnresolvedImports": {
           "description": "An optional flag to NOT throw when the host fails to export a function expected by the runtime.",
           "type": "boolean"

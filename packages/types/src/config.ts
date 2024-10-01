@@ -314,6 +314,12 @@ export interface ChopsticksLaunchSpec extends GenericLaunchSpec {
    * An optional flag to retain node logs from previous runs.
    */
   retainAllLogs?: boolean;
+
+  /**
+   * Server listening interface
+   * Added in: https://github.com/AcalaNetwork/chopsticks/pull/826
+   */
+  address?: string;
 }
 
 /**
