@@ -165,11 +165,14 @@ async function checkWebSocketJSONRPC(port: number): Promise<boolean> {
 async function findPortsByPid(pid: number, retryCount = 600, retryDelay = 100): Promise<number[]> {
   for (let i = 0; i < retryCount; i++) {
     try {
-      const { stdout } = await execAsync(`lsof -i -n -P | grep LISTEN | grep ${pid}`);
+      const { stdout } = await execAsync(`lsof -p ${pid} -n -P | grep LISTEN`);
       const ports: number[] = [];
       const lines = stdout.split("\n");
       for (const line of lines) {
-        const regex = /(?:\*|127\.0\.0\.1):(\d+)/;
+        // Example outputs:
+        // - lsof node      97796 romarq   26u  IPv6 0xb6c3e894a2247189      0t0  TCP *:8000 (LISTEN)
+        // - lsof node      97242 romarq   26u  IPv6 0x330c461cca8d2b63      0t0  TCP [::1]:8000 (LISTEN)
+        const regex = /(?:.+):(\d+)/;
         const match = line.match(regex);
         if (match) {
           ports.push(Number(match[1]));
@@ -179,6 +182,7 @@ async function findPortsByPid(pid: number, retryCount = 600, retryDelay = 100): 
       if (ports.length) {
         return ports;
       }
+      throw new Error("Could not find any ports");
     } catch (error) {
       if (i === retryCount - 1) {
         throw error;

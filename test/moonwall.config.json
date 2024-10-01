@@ -860,17 +860,17 @@
         {
           "name": "polkadot",
           "type": "polkadotJs",
-          "endpoints": ["ws://127.0.0.1:8002"]
+          "endpoints": ["ws://localhost:8002"]
         },
         {
           "name": "hydradx",
           "type": "polkadotJs",
-          "endpoints": ["ws://127.0.0.1:8000"]
+          "endpoints": ["ws://localhost:8000"]
         },
         {
           "name": "zeitgeist",
           "type": "polkadotJs",
-          "endpoints": ["ws://127.0.0.1:8001"]
+          "endpoints": ["ws://localhost:8001"]
         }
       ]
     }
