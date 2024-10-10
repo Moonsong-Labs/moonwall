@@ -1,5 +1,14 @@
 # @moonwall/tests
 
+## 5.5.0
+
+### Minor Changes
+
+- ec1eed4: Update chopsticks
+
+  - Update chopsticks to version 0.16.1 and fixes issue when detecting port on running process
+  - Fixes some dependency conflicts
+
 ## 5.4.0
 
 ### Minor Changes
