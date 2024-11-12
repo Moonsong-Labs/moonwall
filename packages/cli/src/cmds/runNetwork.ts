@@ -431,7 +431,6 @@ const resolveTailChoice = async (env: Environment) => {
       };
 
       const handleInputData = async (key: any) => {
-        // @ts-expect-error - internal method
         ui.rl.input.pause();
         const char = key.toString().trim();
 
@@ -447,9 +446,7 @@ const resolveTailChoice = async (env: Environment) => {
         }
 
         if (char === "q") {
-          // @ts-expect-error - internal method
           ui.rl.input.removeListener("data", handleInputData);
-          // @ts-expect-error - internal method
           ui.rl.input.pause();
           fs.unwatchFile(logFilePath);
           resolve("");
@@ -461,9 +458,7 @@ const resolveTailChoice = async (env: Environment) => {
         }
 
         if (char === ",") {
-          // @ts-expect-error - internal method
           ui.rl.input.removeListener("data", handleInputData);
-          // @ts-expect-error - internal method
           ui.rl.input.pause();
           fs.unwatchFile(logFilePath);
           switchNode = true;
@@ -472,9 +467,7 @@ const resolveTailChoice = async (env: Environment) => {
         }
 
         if (char === ".") {
-          // @ts-expect-error - internal method
           ui.rl.input.removeListener("data", handleInputData);
-          // @ts-expect-error - internal method
           ui.rl.input.pause();
           fs.unwatchFile(logFilePath);
           switchNode = true;
@@ -483,19 +476,15 @@ const resolveTailChoice = async (env: Environment) => {
         }
 
         if (char === "g") {
-          // @ts-expect-error - internal method
           ui.rl.input.pause();
           tailing = false;
           await resolveGrepChoice(env, true);
           renderBottomBar(resumePauseProse[tailing ? 0 : 1]);
           tailing = true;
-          // @ts-expect-error - internal method
           ui.rl.input.resume();
         }
-        // @ts-expect-error - internal method
         ui.rl.input.resume();
       };
-      // @ts-expect-error - internal method
       ui.rl.input.on("data", handleInputData);
 
       fs.watchFile(logFilePath, () => {
@@ -507,6 +496,5 @@ const resolveTailChoice = async (env: Environment) => {
       break;
     }
   }
-  // @ts-expect-error - internal method
   ui.close();
 };

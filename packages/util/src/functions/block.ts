@@ -1,3 +1,4 @@
+import "@moonbeam-network/api-augment";
 import type { ApiPromise } from "@polkadot/api";
 import type { TxWithEvent } from "@polkadot/api-derive/types";
 import type { Option, u32, u64 } from "@polkadot/types";
