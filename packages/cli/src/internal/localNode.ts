@@ -91,7 +91,6 @@ export async function launchNode(cmd: string, args: string[], name: string) {
         for (const port of ports) {
           try {
             await checkWebSocketJSONRPC(port);
-            // console.log(`Port ${port} supports WebSocket JSON RPC!`);
             break probe;
           } catch {}
         }

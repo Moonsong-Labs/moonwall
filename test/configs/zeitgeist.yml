@@ -1,7 +1,5 @@
 endpoint: wss://main.rpc.zeitgeist.pm/ws
-# endpoint: wss://zeitgeist-rpc.dwellir.com
-# endpoint: wss://zeitgeist.api.onfinality.io/public-ws
-block: 4601408
+block: 6802268
 mock-signature-host: true
 db: ./tmp/ztg_db_mba.sqlite
 port: 8001

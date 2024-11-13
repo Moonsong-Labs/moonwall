@@ -2,7 +2,6 @@
 **/dist/
 **/.tsup/
 test/html/*
-*.sqlite
 **/*.log
 downloads/*
 *.wasm
@@ -23,3 +22,5 @@ artifacts
 
 
 .idea
+db.sqlite*
+polkadot*

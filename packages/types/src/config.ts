@@ -529,7 +529,7 @@ export type RepoSpec = {
  *
  * @example
  * {
- *   "name": "hydradx"
+ *   "name": "hydration"
  * }
  *
  * @example

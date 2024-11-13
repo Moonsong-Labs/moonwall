@@ -6,6 +6,7 @@ import type {
   MoonwallConfig,
   MoonwallEnvironment,
   MoonwallProvider,
+  ProviderType,
 } from "@moonwall/types";
 import type { ApiPromise } from "@polkadot/api";
 import zombie, { type Network } from "@zombienet/orchestrator";
@@ -35,6 +36,7 @@ import {
   isOptionSet,
 } from "./configReader";
 import { type ChildProcess, exec, execSync } from "node:child_process";
+import { promisify } from "node:util";
 const debugSetup = Debug("global:context");
 
 export class MoonwallContext {
@@ -369,13 +371,32 @@ export class MoonwallContext {
 
     const promises = nodes.map(async ({ cmd, args, name, launch }) => {
       if (launch) {
-        const { runningNode } = await launchNode(cmd, args, name || "node");
-        this.nodes.push(runningNode);
+        try {
+          const { runningNode } = await launchNode(cmd, args, name || "node");
+          this.nodes.push(runningNode);
+        } catch (error: any) {
+          throw new Error(`Failed to start node '${name || "unnamed"}': ${error.message}`);
+        }
       } else {
         return Promise.resolve();
       }
     });
-    await Promise.allSettled(promises);
+
+    try {
+      await Promise.race([
+        Promise.allSettled(promises),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Network startup timed out after 30 seconds")), 30000)
+        ),
+      ]);
+    } catch (error: any) {
+      console.error(`Error starting network: ${error.message}`);
+      console.error(
+        "Current nodes:",
+        this.nodes.map((n) => ({ pid: n.pid }))
+      );
+      throw error;
+    }
 
     return ctx;
   }
@@ -395,14 +416,62 @@ export class MoonwallContext {
       return MoonwallContext.getContext();
     }
 
-    const promises = this.environment.providers.map(
-      async ({ name, type, connect }) =>
-        new Promise(async (resolve) => {
-          this.providers.push(await ProviderInterfaceFactory.populate(name, type, connect as any));
-          resolve("");
-        })
-    );
-    await Promise.all(promises);
+    const connectWithRetry = async (provider: {
+      name: string;
+      type: ProviderType;
+      connect: any;
+    }) => {
+      const maxRetries = 15;
+      const retryDelay = 1000;
+      const connectTimeout = 10000;
+
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          const connectedProvider = await Promise.race([
+            ProviderInterfaceFactory.populate(provider.name, provider.type, provider.connect),
+            new Promise<never>((_, reject) =>
+              setTimeout(() => reject(new Error("Connection attempt timed out")), connectTimeout)
+            ),
+          ]);
+
+          this.providers.push(connectedProvider);
+          debugSetup(`✅ Provider ${provider.name} connected on attempt ${attempt}`);
+          return;
+        } catch (error: any) {
+          console.error(
+            `Error connecting provider ${provider.name} on attempt ${attempt}: ${error.message}`
+          );
+
+          if (attempt === maxRetries) {
+            throw new Error(
+              `Failed to connect provider '${provider.name}' after ${maxRetries} attempts: ${error.message}`
+            );
+          }
+
+          debugSetup(
+            `⚠️  Retrying provider ${provider.name} connection, attempt ${attempt + 1}/${maxRetries}`
+          );
+          await new Promise((resolve) => setTimeout(resolve, retryDelay));
+        }
+      }
+    };
+
+    try {
+      await Promise.race([
+        Promise.all(this.environment.providers.map((provider) => connectWithRetry(provider))),
+        new Promise((_, reject) =>
+          setTimeout(
+            () => reject(new Error("Provider connection timed out after 30 seconds")),
+            30000
+          )
+        ),
+      ]);
+    } catch (error: any) {
+      console.error(`Error connecting to environment: ${error.message}`);
+      console.error("Current providers:", this.providers.map((p) => p.name).join(", "));
+      console.error(`Total providers: ${this.environment.providers.map((p) => p.name).join(", ")}`);
+      throw error;
+    }
 
     if (this.foundation === "zombie") {
       let readStreams: any[] = [];
@@ -477,12 +546,41 @@ export class MoonwallContext {
         throw new Error(`Provider ${providerName} not found`);
       }
 
-      prov.disconnect();
+      try {
+        await prov.disconnect();
+        debugSetup(`✅ Provider ${providerName} disconnected`);
+      } catch (error: any) {
+        console.error(`❌ Error disconnecting provider ${providerName}: ${error.message}`);
+      }
     } else {
-      await Promise.all(this.providers.map((prov) => prov.disconnect()));
+      await Promise.all(
+        this.providers.map(async (prov) => {
+          try {
+            await prov.disconnect();
+            debugSetup(`✅ Provider ${prov.name} disconnected`);
+          } catch (error: any) {
+            console.error(`❌ Error disconnecting provider ${prov.name}: ${error.message}`);
+          }
+        })
+      );
       this.providers = [];
     }
   }
+
+  // public async disconnect(providerName?: string) {
+  //   if (providerName) {
+  //     const prov = this.providers.find(({ name }) => name === providerName);
+
+  //     if (!prov) {
+  //       throw new Error(`Provider ${providerName} not found`);
+  //     }
+
+  //     prov.disconnect();
+  //   } else {
+  //     await Promise.all(this.providers.map((prov) => prov.disconnect()));
+  //     this.providers = [];
+  //   }
+  // }
 
   public static async getContext(config?: MoonwallConfig, force = false): Promise<MoonwallContext> {
     if (!MoonwallContext.instance?.configured || force) {
@@ -582,9 +680,15 @@ export interface IGlobalContextFoundation {
   foundationType: FoundationType;
 }
 
+const execAsync = promisify(exec);
+
 async function isPidRunning(pid: number): Promise<boolean> {
-  const output = exec(`ps -p ${pid} -o pid=`);
-  return output.exitCode === 0;
+  try {
+    const { stdout } = await execAsync(`ps -p ${pid} -o pid=`);
+    return stdout.trim() === pid.toString();
+  } catch (error) {
+    return false;
+  }
 }
 
 async function waitForPidsToDie(pids: number[]): Promise<void> {

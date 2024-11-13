@@ -42,6 +42,7 @@ export class ProviderFactory {
       name: this.providerConfig.name,
       type: this.providerConfig.type,
       connect: async () => {
+        process.env.DEFAULT_TIMEOUT_MS = "30000";
         const options: ApiOptions = {
           provider: new WsProvider(this.url),
           initWasm: false,
@@ -226,7 +227,10 @@ export class ProviderInterfaceFactory {
   }
 
   private async createPolkadotJs(): Promise<ProviderInterface> {
+    debug(`🔌 Connecting PolkadotJs provider: ${this.name}`);
     const api = (await this.connect()) as ApiPromise;
+    debug(`✅ PolkadotJs provider ${this.name} connected`);
+    1;
     return {
       name: this.name,
       api,
@@ -309,7 +313,15 @@ export class ProviderInterfaceFactory {
     type: ProviderType,
     connect: () => Promise<ApiPromise> | Wallet | Web3 | Promise<ViemClient> | null
   ): Promise<ProviderInterface> {
-    return await new ProviderInterfaceFactory(name, type, connect).create();
+    debug(`🔄 Populating provider: ${name} of type: ${type}`);
+    try {
+      const providerInterface = await new ProviderInterfaceFactory(name, type, connect).create();
+      debug(`✅ Successfully populated provider: ${name}`);
+      return providerInterface;
+    } catch (error: any) {
+      console.error(`❌ Failed to populate provider: ${name} - ${error.message}`);
+      throw error;
+    }
   }
 }
 
