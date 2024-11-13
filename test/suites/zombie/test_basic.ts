@@ -1,7 +1,7 @@
 import "@moonbeam-network/api-augment";
 import { beforeAll, describeSuite, expect } from "@moonwall/cli";
 import { ALITH_ADDRESS, GLMR, baltathar } from "@moonwall/util";
-import { ApiPromise } from "@polkadot/api";
+import { ApiPromise, WsProvider } from "@polkadot/api";
 
 describeSuite({
   id: "Z1",
@@ -99,11 +99,23 @@ describeSuite({
     it({
       id: "T06",
       title: "Restart a node from test script",
-      timeout: 600000,
+      timeout: 240000,
       test: async () => {
+        const initialHeight = (await context.polkadotJs("parachain").rpc.chain.getHeader()).number.toNumber();
+        console.log("Initial height", initialHeight);
         await context.restartNode("alith");
-        await context.waitBlock(2, "parachain", "quantity");
-      },
-    });
+        console.log("Node restarted");
+
+        const newApi = await ApiPromise.create({provider: new WsProvider("ws://localhost:33345")});
+
+        for (; ;) {
+          const newHeight = (await newApi.rpc.chain.getHeader()).number.toNumber();
+          console.log("New height", newHeight);
+          if (newHeight > initialHeight + 1) {
+            break;
+          }
+        }
+      }
+    })
   },
 });

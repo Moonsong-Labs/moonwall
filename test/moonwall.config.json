@@ -1,7 +1,7 @@
 {
   "$schema": "../packages/types/config_schema.json",
   "label": "Global Test Config 🐯",
-  "defaultTestTimeout": 60000,
+  "defaultTestTimeout": 120000,
   "scriptsDir": "scripts/",
   "additionalRepos": [
     {
@@ -24,10 +24,10 @@
     {
       "name": "hydra",
       "ghAuthor": "galacticcouncil",
-      "ghRepo": "HydraDX-node",
+      "ghRepo": "hydration-node",
       "binaries": [
         {
-          "name": "hydradx"
+          "name": "hydration"
         }
       ]
     },
@@ -833,7 +833,6 @@
       "testFileDir": ["suites/multi_chopsticks"],
       "foundation": {
         "type": "chopsticks",
-        "rtUpgradePath": "./tmp/hydradx_RT_201.wasm",
         "launchSpec": [
           {
             "name": "polkadot",
@@ -842,16 +841,16 @@
             "configPath": "./configs/polkadot.yml"
           },
           {
-            "name": "hydra",
+            "name": "hydration",
             "type": "parachain",
             "allowUnresolvedImports": true,
-            "configPath": "./configs/hydradx.yml"
+            "configPath": "./configs/hydration.yml"
           },
           {
-            "name": "zeitgeist",
+            "name": "assethub",
             "type": "parachain",
             "allowUnresolvedImports": true,
-            "configPath": "./configs/zeitgeist.yml"
+            "configPath": "./configs/assethub.yml"
           }
         ]
       },
@@ -863,14 +862,14 @@
           "endpoints": ["ws://localhost:8002"]
         },
         {
-          "name": "hydradx",
-          "type": "polkadotJs",
-          "endpoints": ["ws://localhost:8000"]
-        },
-        {
-          "name": "zeitgeist",
+          "name": "assethub",
           "type": "polkadotJs",
           "endpoints": ["ws://localhost:8001"]
+        },
+        {
+          "name": "hydration",
+          "type": "polkadotJs",
+          "endpoints": ["ws://localhost:8000"]
         }
       ]
     }

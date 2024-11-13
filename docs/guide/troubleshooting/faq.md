@@ -33,7 +33,7 @@ Make sure that you specify the correct version of Moonwall that you'd like to us
     "@moonwall/util": "^4.7.5",
     "ethers":"^6.10.0",
     "@polkadot/api": "^10.11.2",
-    "typescript": "^5.3.3"
+    "typescript": "^5.6.3"
   }
 }
 ```

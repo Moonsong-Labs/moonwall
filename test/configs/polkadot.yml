@@ -1,6 +1,4 @@
-endpoint:
-  - wss://rpc.polkadot.io
-  - wss://polkadot-rpc.dwellir.com
+endpoint: wss://rpc-polkadot.luckyfriday.io
 mock-signature-host: true
 block: 18867218
 port: 8002
