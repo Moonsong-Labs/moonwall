@@ -37,6 +37,7 @@ import {
 } from "./configReader";
 import { type ChildProcess, exec, execSync } from "node:child_process";
 import { promisify } from "node:util";
+import { withTimeout } from "../internal";
 const debugSetup = Debug("global:context");
 
 export class MoonwallContext {
@@ -356,6 +357,7 @@ export class MoonwallContext {
 
   public async startNetwork() {
     const ctx = await MoonwallContext.getContext();
+
     if (process.env.MOON_RECYCLE === "true") {
       return ctx;
     }
@@ -363,40 +365,32 @@ export class MoonwallContext {
     if (this.nodes.length > 0) {
       return ctx;
     }
+
     const nodes = ctx.environment.nodes;
 
     if (this.environment.foundationType === "zombie") {
       return await this.startZombieNetwork();
     }
 
-    const promises = nodes.map(async ({ cmd, args, name, launch }) => {
-      if (launch) {
-        try {
-          const { runningNode } = await launchNode(cmd, args, name || "node");
-          this.nodes.push(runningNode);
-        } catch (error: any) {
-          throw new Error(`Failed to start node '${name || "unnamed"}': ${error.message}`);
-        }
-      } else {
-        return Promise.resolve();
-      }
-    });
+    const maxStartupTimeout = 30000; // 30 seconds
 
-    try {
-      await Promise.race([
-        Promise.allSettled(promises),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("Network startup timed out after 30 seconds")), 30000)
-        ),
-      ]);
-    } catch (error: any) {
-      console.error(`Error starting network: ${error.message}`);
-      console.error(
-        "Current nodes:",
-        this.nodes.map((n) => ({ pid: n.pid }))
-      );
-      throw error;
-    }
+    await withTimeout(
+      Promise.all(
+        nodes.map(async ({ cmd, args, name, launch }) => {
+          if (launch) {
+            try {
+              const { runningNode } = await launchNode(cmd, args, name || "node");
+              this.nodes.push(runningNode);
+              debugSetup(`✅ Node '${name || "unnamed"}' started with PID ${runningNode.pid}`);
+            } catch (error: any) {
+              throw new Error(`Failed to start node '${name || "unnamed"}': ${error.message}`);
+            }
+          }
+        })
+      ),
+      maxStartupTimeout
+    );
+    debugSetup("✅ All network nodes started successfully.");
 
     return ctx;
   }
@@ -416,17 +410,19 @@ export class MoonwallContext {
       return MoonwallContext.getContext();
     }
 
+    const maxRetries = 15;
+    const retryDelay = 1000; // 1 second
+    const connectTimeout = 10000; // 10 seconds per attempt
+
     const connectWithRetry = async (provider: {
       name: string;
       type: ProviderType;
       connect: any;
     }) => {
-      const maxRetries = 15;
-      const retryDelay = 1000;
-      const connectTimeout = 10000;
-
       for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
+          debugSetup(`🔄 Connecting provider ${provider.name}, attempt ${attempt}`);
+
           const connectedProvider = await Promise.race([
             ProviderInterfaceFactory.populate(provider.name, provider.type, provider.connect),
             new Promise<never>((_, reject) =>
@@ -439,7 +435,7 @@ export class MoonwallContext {
           return;
         } catch (error: any) {
           console.error(
-            `Error connecting provider ${provider.name} on attempt ${attempt}: ${error.message}`
+            `❌ Error connecting provider ${provider.name} on attempt ${attempt}: ${error.message}`
           );
 
           if (attempt === maxRetries) {
@@ -451,21 +447,13 @@ export class MoonwallContext {
           debugSetup(
             `⚠️  Retrying provider ${provider.name} connection, attempt ${attempt + 1}/${maxRetries}`
           );
-          await new Promise((resolve) => setTimeout(resolve, retryDelay));
+          await timer(retryDelay);
         }
       }
     };
 
     try {
-      await Promise.race([
-        Promise.all(this.environment.providers.map((provider) => connectWithRetry(provider))),
-        new Promise((_, reject) =>
-          setTimeout(
-            () => reject(new Error("Provider connection timed out after 30 seconds")),
-            30000
-          )
-        ),
-      ]);
+      await Promise.all(this.environment.providers.map(connectWithRetry));
     } catch (error: any) {
       console.error(`Error connecting to environment: ${error.message}`);
       console.error("Current providers:", this.providers.map((p) => p.name).join(", "));
@@ -474,68 +462,72 @@ export class MoonwallContext {
     }
 
     if (this.foundation === "zombie") {
-      let readStreams: any[] = [];
-      if (!isOptionSet("disableLogEavesdropping")) {
-        !silent && console.log(`🦻 Eavesdropping on node logs at ${process.env.MOON_ZOMBIE_DIR}`);
-
-        const envVar = process.env.MOON_ZOMBIE_NODES;
-
-        if (!envVar) {
-          throw new Error("MOON_ZOMBIE_NODES not set, this is an error please raise.");
-        }
-        const zombieNodeLogs = envVar
-          .split("|")
-          .map((nodeName) => `${process.env.MOON_ZOMBIE_DIR}/${nodeName}.log`);
-
-        readStreams = zombieNodeLogs.map((logPath) => {
-          const readStream = fs.createReadStream(logPath, { encoding: "utf8" });
-          const lineReader = readline.createInterface({
-            input: readStream,
-          });
-
-          lineReader.on("line", (line) => {
-            if (line.includes("WARN") || line.includes("ERROR")) {
-              console.log(line);
-            }
-          });
-          return readStream;
-        });
-      }
-
-      const promises = this.providers
-        .filter(({ type }) => type === "polkadotJs")
-        .filter(
-          ({ name }) =>
-            env.foundation.type === "zombie" &&
-            (!env.foundation.zombieSpec.skipBlockCheck ||
-              !env.foundation.zombieSpec.skipBlockCheck.includes(name))
-        )
-        .map(async (provider) => {
-          return await new Promise(async (resolve) => {
-            !silent && console.log(`⏲️  Waiting for chain ${provider.name} to produce blocks...`);
-            while (
-              (
-                await (provider.api as ApiPromise).rpc.chain.getBlock()
-              ).block.header.number.toNumber() === 0
-            ) {
-              await timer(500);
-            }
-            !silent && console.log(`✅ Chain ${provider.name} producing blocks, continuing`);
-            resolve("");
-          });
-        });
-
-      await Promise.all(promises);
-
-      if (!isOptionSet("disableLogEavesdropping")) {
-        for (const readStream of readStreams) {
-          readStream.close();
-        }
-        // readStreams.forEach((readStream) => readStream.close());
-      }
+      await this.handleZombiePostConnection(silent, env);
     }
 
     return MoonwallContext.getContext();
+  }
+
+  private async handleZombiePostConnection(silent: boolean, env: Environment) {
+    let readStreams: fs.ReadStream[] = [];
+
+    if (!isOptionSet("disableLogEavesdropping")) {
+      !silent && console.log(`🦻 Eavesdropping on node logs at ${process.env.MOON_ZOMBIE_DIR}`);
+
+      const envVar = process.env.MOON_ZOMBIE_NODES;
+
+      if (!envVar) {
+        throw new Error("MOON_ZOMBIE_NODES not set, this is an error please raise.");
+      }
+
+      const zombieNodeLogs = envVar
+        .split("|")
+        .map((nodeName) => `${process.env.MOON_ZOMBIE_DIR}/${nodeName}.log`);
+
+      readStreams = zombieNodeLogs.map((logPath) => {
+        const readStream = fs.createReadStream(logPath, { encoding: "utf8" });
+        const lineReader = readline.createInterface({
+          input: readStream,
+        });
+
+        lineReader.on("line", (line) => {
+          if (line.includes("WARN") || line.includes("ERROR")) {
+            console.log(line);
+          }
+        });
+
+        return readStream;
+      });
+    }
+
+    const polkadotJsProviders = this.providers
+      .filter(({ type }) => type === "polkadotJs")
+      .filter(
+        ({ name }) =>
+          env.foundation.type === "zombie" &&
+          (!env.foundation.zombieSpec.skipBlockCheck ||
+            !env.foundation.zombieSpec.skipBlockCheck.includes(name))
+      );
+
+    await Promise.all(
+      polkadotJsProviders.map(async (provider) => {
+        !silent && console.log(`⏲️  Waiting for chain ${provider.name} to produce blocks...`);
+        while (
+          (
+            await (provider.api as ApiPromise).rpc.chain.getBlock()
+          ).block.header.number.toNumber() === 0
+        ) {
+          await timer(500);
+        }
+        !silent && console.log(`✅ Chain ${provider.name} producing blocks, continuing`);
+      })
+    );
+
+    if (!isOptionSet("disableLogEavesdropping")) {
+      for (const readStream of readStreams) {
+        readStream.close();
+      }
+    }
   }
 
   public async disconnect(providerName?: string) {
@@ -566,21 +558,6 @@ export class MoonwallContext {
       this.providers = [];
     }
   }
-
-  // public async disconnect(providerName?: string) {
-  //   if (providerName) {
-  //     const prov = this.providers.find(({ name }) => name === providerName);
-
-  //     if (!prov) {
-  //       throw new Error(`Provider ${providerName} not found`);
-  //     }
-
-  //     prov.disconnect();
-  //   } else {
-  //     await Promise.all(this.providers.map((prov) => prov.disconnect()));
-  //     this.providers = [];
-  //   }
-  // }
 
   public static async getContext(config?: MoonwallConfig, force = false): Promise<MoonwallContext> {
     if (!MoonwallContext.instance?.configured || force) {

@@ -5,6 +5,21 @@ import type { ChildProcessWithoutNullStreams } from "node:child_process";
 const debug = Debug("actions:runner");
 const execAsync = promisify(child_process.exec);
 
+/**
+ * Wraps a promise with a timeout. If the original promise does not resolve within the specified time, it rejects.
+ * @param promise The original promise to wrap.
+ * @param ms The timeout duration in milliseconds.
+ * @returns A promise that either resolves/rejects with the original promise or rejects with a timeout error.
+ */
+export const withTimeout = <T>(promise: Promise<T>, ms: number): Promise<T> => {
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("Operation timed out")), ms)
+    ),
+  ]);
+};
+
 // Execute process and return the output
 export async function runTask(
   cmd: string,
