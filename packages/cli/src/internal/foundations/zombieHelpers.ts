@@ -1,6 +1,7 @@
 import type { LaunchConfig } from "@zombienet/orchestrator";
 import chalk from "chalk";
 import fs from "node:fs";
+import invariant from "tiny-invariant";
 import { checkAccess, checkExists } from "../fileCheckers";
 import { setTimeout as timer } from "node:timers/promises";
 import net from "node:net";
@@ -79,12 +80,15 @@ export async function sendIpcMessage(message: IPCRequestMessage): Promise<IPCRes
   return new Promise(async (resolve, reject) => {
     let response: IPCResponseMessage;
     const ipcPath = process.env.MOON_IPC_SOCKET;
+    invariant(ipcPath, "No IPC path found. This is a bug, please report it.");
 
-    if (!ipcPath) {
-      throw new Error("No IPC path found. This is a bug, please report it.");
-    }
+    const client = net.createConnection({ path: ipcPath }, () => {
+      console.log("📨 Successfully connected to IPC server");
+    });
 
-    const client = net.createConnection({ path: ipcPath });
+    client.on("error", (err) => {
+      console.error("📨 IPC client connection error:", err);
+    });
 
     // Listener to return control flow after server responds
     client.on("data", async (data) => {

@@ -33,7 +33,9 @@
           "--database=paritydb"
         ],
         "command": "tmp/moonbeam",
-        "name": "alith"
+        "name": "alith",
+      "ws_port": 33345
+
       }
     }
   ],

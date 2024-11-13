@@ -15,6 +15,7 @@ import fs from "node:fs";
 import net from "node:net";
 import readline from "node:readline";
 import { setTimeout as timer } from "node:timers/promises";
+import path from "node:path";
 import { parseChopsticksRunCmd, parseRunCmd, parseZombieCmd } from "../internal/commandParsers";
 import {
   type IPCRequestMessage,
@@ -198,6 +199,14 @@ export class MoonwallContext {
     await checkZombieBins(zombieConfig);
 
     const network = await zombie.start("", zombieConfig, { logType: "silent" });
+    const ipcLogPath = path.join(network.tmpDir, "ipc-server.log");
+    const ipcLogger = fs.createWriteStream(ipcLogPath, { flags: "a" });
+
+    const logIpc = (message: string) => {
+      const timestamp = new Date().toISOString();
+      ipcLogger.write(`${timestamp} - ${message}\n`);
+    };
+
     process.env.MOON_RELAY_WSS = network.relay[0].wsUri;
     process.env.MOON_PARA_WSS = Object.values(network.paras)[0].nodes[0].wsUri;
 
@@ -224,12 +233,18 @@ export class MoonwallContext {
       }
     };
 
+    // Refactored IPC Server Implementation Starts Here
     const socketPath = `${network.tmpDir}/node-ipc.sock`;
 
+    // Remove existing socket file if it exists to prevent EADDRINUSE errors
+    if (fs.existsSync(socketPath)) {
+      fs.unlinkSync(socketPath);
+      logIpc(`Removed existing socket at ${socketPath}`);
+    }
+
     const server = net.createServer((client) => {
-      // client.on("end", () => {
-      //   console.log("📨 IPC client disconnected");
-      // });
+      logIpc("📨 IPC server created");
+      logIpc(`Socket path: ${socketPath}`);
 
       // Client message handling
       client.on("data", async (data) => {
@@ -237,7 +252,7 @@ export class MoonwallContext {
           if (client.writable) {
             client.write(JSON.stringify(message));
           } else {
-            console.log("Client disconnected, cannot send response.");
+            logIpc("Client disconnected, cannot send response.");
           }
         };
 
@@ -262,10 +277,36 @@ export class MoonwallContext {
             }
 
             case "restart": {
-              await this.disconnect();
-              await zombieClient.restartNode(message.nodeName, null);
-              await timer(1000); // TODO: Replace when zombienet has an appropriate fn
-              await this.connectEnvironment(true);
+              logIpc(`📨 Restart command received for node:  ${message.nodeName}`);
+              try {
+                await this.disconnect();
+                logIpc("✅ Disconnected all providers.");
+              } catch (err) {
+                logIpc(`❌ Error during disconnect: ${err}`);
+                throw err;
+              }
+
+              try {
+                logIpc(`📨 Restarting node: ${message.nodeName}`);
+                // Timeout is in seconds 🤦
+                await zombieClient.restartNode(message.nodeName, 5);
+                logIpc(`✅ Restarted node: ${message.nodeName}`);
+              } catch (err) {
+                logIpc(`❌ Error during node restart: ${err}`);
+                throw err;
+              }
+
+              await timer(5000); // TODO: Replace when zombienet has an appropriate fn
+
+              try {
+                logIpc("🔄 Reconnecting environment...");
+                await this.connectEnvironment();
+                logIpc("✅ Reconnected environment.");
+              } catch (err) {
+                logIpc(`❌ Error during environment reconnection: ${err}`);
+                throw err;
+              }
+
               writeToClient({
                 status: "success",
                 result: true,
@@ -305,12 +346,12 @@ export class MoonwallContext {
               // await this.disconnect();
               const pid = (network.client as any).processMap[message.nodeName].pid;
               delete (network.client as any).processMap[message.nodeName];
-              const result = exec(`kill ${pid}`, { timeout: 1000 });
+              const killResult = execSync(`kill ${pid}`, { stdio: "ignore" });
               // await this.connectEnvironment(true);
               writeToClient({
                 status: "success",
-                result: result.exitCode === 0,
-                message: `${message.nodeName}, pid ${pid} killed with exitCode ${result.exitCode}`,
+                result: true,
+                message: `${message.nodeName}, pid ${pid} killed`,
               });
               break;
             }
@@ -330,8 +371,8 @@ export class MoonwallContext {
               throw new Error(`Invalid command received: ${message.cmd}`);
           }
         } catch (e: any) {
-          console.log("📨 Error processing message from client:", data.toString());
-          console.error(e.message);
+          logIpc("📨 Error processing message from client");
+          logIpc(e.message);
           writeToClient({
             status: "failure",
             result: false,
@@ -339,10 +380,32 @@ export class MoonwallContext {
           });
         }
       });
+
+      // Handle client errors
+      client.on("error", (err) => {
+        logIpc(`📨 IPC client error:${err}`);
+      });
+
+      // Handle client disconnection
+      client.on("close", () => {
+        logIpc("📨 IPC client disconnected");
+      });
+    });
+
+    // Handle server errors to prevent crashes
+    server.on("error", (err) => {
+      console.error("IPC Server error:", err);
     });
 
     server.listen(socketPath, () => {
-      console.log("📨 IPC Server listening on", socketPath);
+      logIpc(`📨 IPC Server attempting to listen on ${socketPath}`);
+      try {
+        fs.chmodSync(socketPath, 0o600);
+        logIpc("📨 Successfully set socket permissions");
+      } catch (err) {
+        console.error("📨 Error setting socket permissions:", err);
+      }
+      logIpc(`📨 IPC Server listening on ${socketPath}`);
     });
 
     this.ipcServer = server;
@@ -624,7 +687,9 @@ export class MoonwallContext {
 
       await waitForPidsToDie(processIds);
 
-      ctx.ipcServer?.close();
+      ctx.ipcServer?.close(() => {
+        console.log("IPC Server closed.");
+      });
       ctx.ipcServer?.removeAllListeners();
     }
   }
