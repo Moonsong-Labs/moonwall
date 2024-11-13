@@ -169,6 +169,24 @@
       }
     },
     {
+      "name": "zombie_noPara",
+      "testFileDir": ["suites/zombieNoPara"],
+      "timeout": 300000,
+      "envVars": ["DEBUG_COLORS=1"],
+      "reporters": ["default"],
+      "foundation": {
+        "type": "zombie",
+        "zombieSpec": {
+          "name": "zombienet",
+          "disableDefaultEthProviders": true,
+          "additionalZombieConfig": {
+            "silent": true
+          },
+          "configPath": "./configs/zombieNoPara.json"
+        }
+      }
+    },
+    {
       "name": "para_test",
       "testFileDir": ["suites/zombie"],
       "multiThreads": false,

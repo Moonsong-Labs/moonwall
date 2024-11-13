@@ -219,7 +219,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        suite: ["zombie_test", "zombie_multi_para"]
+        suite: ["zombie_test", "zombie_multi_para", "zombie_noPara"]
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
