@@ -1,7 +1,7 @@
 {
   "name": "@moonwall/tests",
   "type": "module",
-  "version": "5.5.0",
+  "version": "5.6.0",
   "private": true,
   "packageManager": "pnpm@9.1.4",
   "description": "Testing framework for the Moon family of projects",
@@ -24,10 +24,10 @@
     "@moonwall/types": "workspace:*",
     "@moonwall/util": "workspace:*",
     "@openzeppelin/contracts": "5.0.2",
-    "@polkadot/api":  "*",
-    "@polkadot/util":  "*",
+    "@polkadot/api": "*",
+    "@polkadot/util": "*",
     "@types/node": "*",
-    "@types/yargs":  "*",
+    "@types/yargs": "*",
     "@vitest/ui": "*",
     "chai": "5.1.1",
     "chalk": "*",
@@ -40,6 +40,6 @@
     "viem": "*",
     "vitest": "*",
     "web3": "*",
-    "yargs":  "*"
+    "yargs": "*"
   }
 }

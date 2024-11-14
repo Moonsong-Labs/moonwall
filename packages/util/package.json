@@ -1,7 +1,7 @@
 {
   "name": "@moonwall/util",
   "type": "module",
-  "version": "5.5.0",
+  "version": "5.6.0",
   "description": "Testing framework for the Moon family of projects",
   "author": "timbrinded",
   "license": "ISC",
@@ -78,15 +78,15 @@
     "viem": "*",
     "vitest": "*",
     "web3": "*",
-    "ws":  "*",
-    "yargs":  "*"
+    "ws": "*",
+    "yargs": "*"
   },
   "devDependencies": {
-    "@biomejs/biome":  "*",
-    "@types/debug":  "*",
+    "@biomejs/biome": "*",
+    "@types/debug": "*",
     "@types/node": "*",
-    "@types/ws":  "*",
-    "@types/yargs":  "*",
+    "@types/ws": "*",
+    "@types/yargs": "*",
     "tsup": "*",
     "typescript": "*"
   },
