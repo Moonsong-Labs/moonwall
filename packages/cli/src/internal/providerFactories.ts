@@ -149,7 +149,7 @@ export class ProviderFactory {
   public static prepareDefaultZombie(): MoonwallProvider[] {
     const MOON_PARA_WSS = process.env.MOON_PARA_WSS || "error";
     const MOON_RELAY_WSS = process.env.MOON_RELAY_WSS || "error";
-    return ProviderFactory.prepare([
+    const providers = [
       {
         name: "w3",
         type: "web3",
@@ -165,34 +165,45 @@ export class ProviderFactory {
         type: "viem",
         endpoints: [MOON_PARA_WSS],
       },
-      {
-        name: "parachain",
-        type: "polkadotJs",
-        endpoints: [MOON_PARA_WSS],
-      },
+
       {
         name: "relaychain",
         type: "polkadotJs",
         endpoints: [MOON_RELAY_WSS],
       },
-    ]);
+    ] satisfies ProviderConfig[];
+
+    if (MOON_PARA_WSS !== "error") {
+      providers.push({
+        name: "parachain",
+        type: "polkadotJs",
+        endpoints: [MOON_PARA_WSS],
+      });
+    }
+
+    return ProviderFactory.prepare(providers);
   }
 
   public static prepareNoEthDefaultZombie(): MoonwallProvider[] {
     const MOON_PARA_WSS = process.env.MOON_PARA_WSS || "error";
     const MOON_RELAY_WSS = process.env.MOON_RELAY_WSS || "error";
-    return ProviderFactory.prepare([
-      {
-        name: "parachain",
-        type: "polkadotJs",
-        endpoints: [MOON_PARA_WSS],
-      },
+
+    const providers = [
       {
         name: "relaychain",
         type: "polkadotJs",
         endpoints: [MOON_RELAY_WSS],
       },
-    ]);
+    ] satisfies ProviderConfig[];
+
+    if (MOON_PARA_WSS !== "error") {
+      providers.push({
+        name: "parachain",
+        type: "polkadotJs",
+        endpoints: [MOON_PARA_WSS],
+      });
+    }
+    return ProviderFactory.prepare(providers);
   }
 }
 

@@ -1,7 +1,7 @@
 import type { Environment } from "@moonwall/types";
 import chalk from "chalk";
 import path from "node:path";
-import type { UserConfig, Vitest } from "vitest";
+import type { UserConfig, Vitest } from "vitest/node";
 import { startVitest } from "vitest/node";
 import { clearNodeLogs } from "../internal/cmdFunctions/tempLogs";
 import { commonChecks } from "../internal/launcherCommon";

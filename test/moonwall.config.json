@@ -79,6 +79,19 @@
       }
     },
     {
+      "name": "failing_prescript",
+      "testFileDir": ["suites/basic"],
+      "description": "Test that failing pre-scripts are caught",
+      "runScripts": ["failing-script.ts"],
+      "foundation": {
+        "type": "read_only",
+        "launchSpec": {
+          "disableRuntimeVersionCheck": true
+        }
+      },
+      "connections": []
+    },
+    {
       "name": "dev_tanssi",
       "testFileDir": ["suites/tanssi"],
       "description": "Basic Tanssi dev test",
@@ -168,6 +181,25 @@
         }
       }
     },
+    {
+      "name": "zombie_noPara",
+      "testFileDir": ["suites/zombieNoPara"],
+      "timeout": 300000,
+      "envVars": ["DEBUG_COLORS=1"],
+      "reporters": ["default"],
+      "foundation": {
+        "type": "zombie",
+        "zombieSpec": {
+          "name": "zombienet",
+          "disableDefaultEthProviders": true,
+          "additionalZombieConfig": {
+            "silent": true
+          },
+          "configPath": "./configs/zombieNoPara.json"
+        }
+      }
+    },
+
     {
       "name": "para_test",
       "testFileDir": ["suites/zombie"],

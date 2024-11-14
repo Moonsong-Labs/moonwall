@@ -219,7 +219,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        suite: ["zombie_test", "zombie_multi_para"]
+        suite: ["zombie_test", "zombie_multi_para", "zombie_noPara"]
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -241,10 +241,9 @@ jobs:
           cd test
           bun moonwall download moonbeam latest ./tmp
 
-          # Change these to latest once MB is compatible with 1.2.0
-          bun moonwall download polkadot 1.8.0 ./tmp
-          bun moonwall download polkadot-execute-worker 1.8.0 ./tmp
-          bun moonwall download polkadot-prepare-worker 1.8.0 ./tmp
+          bun moonwall download polkadot stable2407 ./tmp
+          bun moonwall download polkadot-execute-worker stable2407 ./tmp
+          bun moonwall download polkadot-prepare-worker stable2407 ./tmp
       - name: Run ${{matrix.suite}}
         run: |
           cd test

@@ -208,7 +208,10 @@ export class MoonwallContext {
     };
 
     process.env.MOON_RELAY_WSS = network.relay[0].wsUri;
-    process.env.MOON_PARA_WSS = Object.values(network.paras)[0].nodes[0].wsUri;
+
+    if (Object.entries(network.paras).length > 0) {
+      process.env.MOON_PARA_WSS = Object.values(network.paras)[0].nodes[0].wsUri;
+    }
 
     const nodeNames = Object.keys(network.nodesByName);
     process.env.MOON_ZOMBIE_DIR = `${network.tmpDir}`;
