@@ -84,7 +84,8 @@ export async function executeScript(scriptCommand: string, args?: string) {
       default:
         console.log(`${ext} not supported, skipping ${script}`);
     }
-  } catch (err) {
+  } catch (err: any) {
     console.error(`Error executing script: ${chalk.bgGrey.redBright(err)}`);
+    throw new Error(err);
   }
 }

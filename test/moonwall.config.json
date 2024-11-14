@@ -79,6 +79,19 @@
       }
     },
     {
+      "name": "failing_prescript",
+      "testFileDir": ["suites/basic"],
+      "description": "Test that failing pre-scripts are caught",
+      "runScripts": ["failing-script.ts"],
+      "foundation": {
+        "type": "read_only",
+        "launchSpec": {
+          "disableRuntimeVersionCheck": true
+        }
+      },
+      "connections": []
+    },
+    {
       "name": "dev_tanssi",
       "testFileDir": ["suites/tanssi"],
       "description": "Basic Tanssi dev test",
@@ -186,6 +199,7 @@
         }
       }
     },
+
     {
       "name": "para_test",
       "testFileDir": ["suites/zombie"],
