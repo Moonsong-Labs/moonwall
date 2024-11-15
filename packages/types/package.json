@@ -56,14 +56,15 @@
     "@polkadot/api": "*",
     "@polkadot/api-base": "*",
     "@polkadot/keyring": "*",
-    "@polkadot/util-crypto": "*",
     "@polkadot/types": "*",
     "@polkadot/util": "*",
+    "@polkadot/util-crypto": "*",
     "@types/node": "*",
     "@zombienet/utils": "*",
     "bottleneck": "*",
     "debug": "*",
     "ethers": "*",
+    "polkadot-api": "^1.7.4",
     "viem": "*",
     "web3": "*"
   },
@@ -72,7 +73,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "*",
-    "@types/debug":"*",
+    "@types/debug": "*",
     "tsup": "*",
     "typescript": "*",
     "typescript-json-schema": "0.64.0"

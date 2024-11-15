@@ -7,6 +7,8 @@ import { createWalletClient, http, publicActions } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { Web3 } from "web3";
 import { WebSocketProvider } from "web3-providers-ws";
+import { createClient, type PolkadotClient } from "polkadot-api";
+import { getWsProvider, WsEvent } from "polkadot-api/ws-provider/web";
 import Debug from "debug";
 const debug = Debug("global:providers");
 
@@ -31,6 +33,8 @@ export class ProviderFactory {
         return this.createEthers();
       case "viem":
         return this.createViem();
+      case "papi":
+        return this.createPapi();
       default:
         return this.createDefault();
     }
@@ -102,6 +106,33 @@ export class ProviderFactory {
           account: privateKeyToAccount(this.privateKey as `0x${string}`),
           transport: http(this.url.replace("ws", "http")),
         }).extend(publicActions),
+    };
+  }
+
+  private createPapi(): MoonwallProvider {
+    debug(`🟢  Papi provider ${this.providerConfig.name} details prepared`);
+    return {
+      name: this.providerConfig.name,
+      type: this.providerConfig.type,
+      connect: () => {
+        const provider = getWsProvider(this.url, (status) => {
+          switch (status.type) {
+            case WsEvent.CONNECTING:
+              console.log("Connecting... 🔌");
+              break;
+            case WsEvent.CONNECTED:
+              console.log("Connected! ⚡");
+              break;
+            case WsEvent.ERROR:
+              console.log("Errored... 😢");
+              break;
+            case WsEvent.CLOSE:
+              console.log("Closed 🚪");
+              break;
+          }
+        });
+        return createClient(provider);
+      },
     };
   }
 
@@ -211,7 +242,7 @@ export interface ProviderInterface {
   name: string;
   api: any;
   type: ProviderType;
-  greet: () => void | Promise<void> | { rtVersion: number; rtName: string };
+  greet: () => Promise<void> | Promise<{ rtVersion: number; rtName: string }>;
   disconnect: () => void | Promise<void> | any;
 }
 
@@ -219,7 +250,13 @@ export class ProviderInterfaceFactory {
   constructor(
     private name: string,
     private type: ProviderType,
-    private connect: () => Promise<ApiPromise> | Wallet | Web3 | Promise<ViemClient> | null
+    private connect: () =>
+      | Promise<ApiPromise>
+      | Wallet
+      | Web3
+      | Promise<ViemClient>
+      | PolkadotClient
+      | null
   ) {}
 
   public async create(): Promise<ProviderInterface> {
@@ -232,6 +269,8 @@ export class ProviderInterfaceFactory {
         return this.createEthers();
       case "viem":
         return this.createViem();
+      case "papi":
+        return this.createPapi();
       default:
         throw new Error("UNKNOWN TYPE");
     }
@@ -246,7 +285,7 @@ export class ProviderInterfaceFactory {
       name: this.name,
       api,
       type: this.type,
-      greet: () => {
+      greet: async () => {
         debug(
           `👋  Provider ${this.name} is connected to chain` +
             ` ${(api.consts.system.version as any).specName.toString()} ` +
@@ -319,10 +358,27 @@ export class ProviderInterfaceFactory {
     };
   }
 
+  private async createPapi(): Promise<ProviderInterface> {
+    const api = (await this.connect()) as PolkadotClient;
+    return {
+      name: this.name,
+      api,
+      type: this.type,
+      greet: async () => {
+        const unsafeApi = await api.getUnsafeApi();
+        const { spec_version, spec_name } = await unsafeApi.constants.System.Version();
+        return { rtVersion: spec_version as number, rtName: spec_name as string };
+      },
+      async disconnect() {
+        api.destroy();
+      },
+    };
+  }
+
   public static async populate(
     name: string,
     type: ProviderType,
-    connect: () => Promise<ApiPromise> | Wallet | Web3 | Promise<ViemClient> | null
+    connect: () => Promise<ApiPromise> | Wallet | Web3 | Promise<ViemClient> | PolkadotClient | null
   ): Promise<ProviderInterface> {
     debug(`🔄 Populating provider: ${name} of type: ${type}`);
     try {

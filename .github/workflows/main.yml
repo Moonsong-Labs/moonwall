@@ -188,7 +188,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        suite: ["eth_test", "viem_test"]
+        suite: ["eth_test", "viem_test", "papi_readonly"]
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4

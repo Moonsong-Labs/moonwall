@@ -307,8 +307,8 @@
       "type": "object"
     },
     "ProviderType": {
-      "description": "The type of provider. Can be \"polkadotJs\", \"ethers\", \"web3\", \"viem\"",
-      "enum": ["ethers", "polkadotJs", "viem", "web3"],
+      "description": "The type of provider. Can be \"polkadotJs\", \"ethers\", \"web3\", \"viem\", \"papi\"",
+      "enum": ["ethers", "papi", "polkadotJs", "viem", "web3"],
       "type": "string"
     },
     "ReadOnlyLaunchSpec": {

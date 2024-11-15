@@ -14,7 +14,8 @@
     "fmt": "biome format .",
     "fmt:fix": "biome format . --write",
     "node_test": "node --no-warnings --loader tsx --test suites/node_test/*.ts",
-    "bun_test": "bun test suites/bun_test/*"
+    "bun_test": "bun test suites/bun_test/*",
+    "postinstall": "papi"
   },
   "devDependencies": {
     "@acala-network/chopsticks": "*",
@@ -24,10 +25,10 @@
     "@moonwall/types": "workspace:*",
     "@moonwall/util": "workspace:*",
     "@openzeppelin/contracts": "5.0.2",
-    "@polkadot/api":  "*",
-    "@polkadot/util":  "*",
+    "@polkadot/api": "*",
+    "@polkadot/util": "*",
     "@types/node": "*",
-    "@types/yargs":  "*",
+    "@types/yargs": "*",
     "@vitest/ui": "*",
     "chai": "5.1.1",
     "chalk": "*",
@@ -40,6 +41,10 @@
     "viem": "*",
     "vitest": "*",
     "web3": "*",
-    "yargs":  "*"
+    "yargs": "*"
+  },
+  "dependencies": {
+    "@polkadot-api/descriptors": "file:.papi/descriptors",
+    "polkadot-api": "^1.7.4"
   }
 }

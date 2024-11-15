@@ -24,6 +24,7 @@ import { chopsticksHandler } from "./handlers/chopsticksHandler";
 import { devHandler } from "./handlers/devHandler";
 import { readOnlyHandler } from "./handlers/readOnlyHandler";
 import { zombieHandler } from "./handlers/zombieHandler";
+import { PolkadotClient } from "polkadot-api";
 
 const RT_VERSION = Number(process.env.MOON_RTVERSION);
 const RT_NAME = process.env.MOON_RTNAME;
@@ -150,6 +151,7 @@ export function describeSuite<T extends FoundationType>({
       polkadotJs: (apiName?: string): ApiPromise => getApi("polkadotJs", apiName),
       ethers: (apiName?: string): Wallet => getApi("ethers", apiName),
       web3: (apiName?: string): Web3 => getApi("web3", apiName),
+      papi: (apiName?: string): PolkadotClient => getApi("papi", apiName),
     };
 
     const foundationHandlers: Record<FoundationType, FoundationHandler<any>> = {
