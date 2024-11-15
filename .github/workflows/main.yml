@@ -208,7 +208,7 @@ jobs:
       - name: Run standard ${{matrix.suite}}
         run: |
           cd test
-          bun papi
+          bun papi add dot -n polkadot
           bun moonwall test ${{matrix.suite}}
       #  disabled until web3.js fix their stuff
       # - name: Run standard web3 run
