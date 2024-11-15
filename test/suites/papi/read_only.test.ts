@@ -70,6 +70,7 @@ describeSuite({
         const safeApi = await context.papi().getTypedApi(dot)
         expect(safeApi).not.toBeNull();
         const block = await safeApi.query.System.Number.getValue();
+        expect(block).toBeGreaterThan(0);
       },
     })
   },
