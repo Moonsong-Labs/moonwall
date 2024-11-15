@@ -1,3 +1,3 @@
-console.log("This script will fail on purpose.")
+console.log("This script will fail on purpose.");
 
-process.exit(1)
+process.exit(1);

@@ -1,6 +1,6 @@
 import { describeSuite, expect, beforeAll, afterAll } from "@moonwall/cli";
 import type { PolkadotClient } from "polkadot-api";
-import  { dot } from "@polkadot-api/descriptors";
+import { dot } from "@polkadot-api/descriptors";
 
 describeSuite({
   id: "P01",
@@ -67,11 +67,11 @@ describeSuite({
       id: "T5",
       title: "Can get safeApi ",
       test: async () => {
-        const safeApi = await context.papi().getTypedApi(dot)
+        const safeApi = await context.papi().getTypedApi(dot);
         expect(safeApi).not.toBeNull();
         const block = await safeApi.query.System.Number.getValue();
         expect(block).toBeGreaterThan(0);
       },
-    })
+    });
   },
 });

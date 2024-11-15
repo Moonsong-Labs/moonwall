@@ -56,8 +56,7 @@ describeSuite({
     it({
       id: "C300",
       title: `should have only finalized blocks in the past ${(
-        timePeriod /
-        (1000 * 60 * 60)
+        timePeriod / (1000 * 60 * 60)
       ).toFixed(2)} hours #C300`,
       test: async function () {
         this.timeout(timeout);

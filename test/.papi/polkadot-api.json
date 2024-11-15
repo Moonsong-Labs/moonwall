@@ -1,0 +1,14 @@
+{
+  "version": 0,
+  "descriptorPath": ".papi/descriptors",
+  "entries": {
+    "dot": {
+      "chain": "polkadot",
+      "metadata": ".papi/metadata/dot.scale"
+    },
+    "mb": {
+      "wsUrl": "ws://127.0.0.1:9955",
+      "metadata": ".papi/metadata/mb.scale"
+    }
+  }
+}

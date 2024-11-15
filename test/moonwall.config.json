@@ -923,6 +923,32 @@
           "endpoints": ["wss://rpc.polkadot.io"]
         }
       ]
+    },
+    {
+      "name": "papi_dev",
+      "testFileDir": ["suites/papi"],
+      "include": ["**/dev*"],
+      "envVars": [""],
+      "foundation": {
+        "type": "dev",
+        "launchSpec": [
+          {
+            "name": "moonbeam",
+            "running": true,
+            "binPath": "./tmp/moonbeam",
+            "ports": {
+              "rpcPort": 9955
+            }
+          }
+        ]
+      },
+      "connections": [
+        {
+          "name": "papi",
+          "type": "papi",
+          "endpoints": ["ws://127.0.0.1:9955"]
+        }
+      ]
     }
   ]
 }

@@ -101,21 +101,25 @@ describeSuite({
       title: "Restart a node from test script",
       timeout: 240000,
       test: async () => {
-        const initialHeight = (await context.polkadotJs("parachain").rpc.chain.getHeader()).number.toNumber();
+        const initialHeight = (
+          await context.polkadotJs("parachain").rpc.chain.getHeader()
+        ).number.toNumber();
         console.log("Initial height", initialHeight);
         await context.restartNode("alith");
         console.log("Node restarted");
 
-        const newApi = await ApiPromise.create({provider: new WsProvider("ws://localhost:33345")});
+        const newApi = await ApiPromise.create({
+          provider: new WsProvider("ws://localhost:33345"),
+        });
 
-        for (; ;) {
+        for (;;) {
           const newHeight = (await newApi.rpc.chain.getHeader()).number.toNumber();
           console.log("New height", newHeight);
           if (newHeight > initialHeight + 1) {
             break;
           }
         }
-      }
-    })
+      },
+    });
   },
 });
