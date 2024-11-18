@@ -25,7 +25,5 @@ describeSuite({
         expect(network).to.contain("rococo");
       },
     });
-
-  
   },
 });

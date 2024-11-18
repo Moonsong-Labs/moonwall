@@ -17,6 +17,9 @@ At time of writing, Moonwall supports the following providers:
 
 PolkadotJs is a suite of tools, including a JavaScript library, for interacting with the Polkadot network and other Substrate-based blockchains. To learn more about PolkadotJs, you can check out the [PolkadotJs docs](https://polkadot.js.org/docs/api/){target=_blank}
 
+### Polkadot-API (PAPI)
+
+[Polkadot-API](https://github.com/polkadot-api/polkadot-api){target=_blank} is a modern, lightweight, and fast alternative to the PolkadotJs library for interacting with Substrate-based blockchains. It is designed to be more performant and have a smaller bundle size compared to PolkadotJs, while maintaining compatibility with the Polkadot ecosystem. For more information about Polkadot-API, check out the [Polkadot-API docs](https://papi.how/){target=_blank}.
 
 ### Ethers
 

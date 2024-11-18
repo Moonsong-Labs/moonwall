@@ -1,7 +1,8 @@
-endpoint: wss://polkadot-asset-hub-rpc.polkadot.io
+endpoint: wss://rpc-asset-hub-polkadot.luckyfriday.io
 mock-signature-host: true
 block: ${env.POLKADOT_ASSET_HUB_BLOCK_NUMBER}
 db: ./tmp/db.sqlite
+port: 8001
 
 import-storage:
   System:

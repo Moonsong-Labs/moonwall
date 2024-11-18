@@ -20,6 +20,7 @@ import type { ContractDeploymentOptions } from "./contracts";
 import type { TransactionType } from "./eth";
 import type { CallType } from "./foundations";
 import type { DeepPartial } from "./helpers";
+import type { PolkadotClient } from "polkadot-api";
 
 /**
  * @name CustomTest
@@ -189,10 +190,12 @@ export interface GenericContext {
   api(type: "ethers", name?: string): Wallet;
   api(type: "web3", name?: string): Web3;
   api(type: "viem", name?: string): ViemClient;
+  api(type: "papi", name?: string): PolkadotClient;
   viem(name?: string): ViemClient;
   polkadotJs(apiName?: string): ApiPromise;
   ethers(name?: string): Wallet;
   web3(name?: string): Web3;
+  papi(name?: string): PolkadotClient;
 }
 
 /**

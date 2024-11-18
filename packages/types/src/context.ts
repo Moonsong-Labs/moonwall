@@ -11,6 +11,7 @@ import type { Web3 } from "web3";
 import type { FoundationType, ProviderType } from "./config";
 import type { CallType } from "./foundations";
 import type { ViemClient } from "./runner";
+import type { PolkadotClient } from "polkadot-api";
 
 /**
  * @name MoonwallEnvironment
@@ -38,7 +39,13 @@ export type MoonwallEnvironment = {
 export interface MoonwallProvider {
   name: string;
   type: ProviderType;
-  connect: () => Promise<ApiPromise> | Wallet | Web3<any> | Promise<ViemClient> | null;
+  connect: () =>
+    | Promise<ApiPromise>
+    | Wallet
+    | Web3<any>
+    | Promise<ViemClient>
+    | PolkadotClient
+    | null;
   ws?: () => WsProvider;
 }
 
@@ -56,7 +63,7 @@ export interface ConnectedProvider {
   type: ProviderType;
   api: ProviderApi;
   disconnect: () => Promise<void>;
-  greet: () => Promise<void> | void | { rtName: string; rtVersion: number };
+  greet: () => Promise<void> | Promise<{ rtName: string; rtVersion: number }>;
 }
 
 export type ProviderApi = {
@@ -69,6 +76,7 @@ export type ProviderMap = {
   web3: Web3;
   moon: ApiPromise;
   viem: ViemClient;
+  papi: PolkadotClient;
 };
 
 /**

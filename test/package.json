@@ -14,7 +14,8 @@
     "fmt": "biome format .",
     "fmt:fix": "biome format . --write",
     "node_test": "node --no-warnings --loader tsx --test suites/node_test/*.ts",
-    "bun_test": "bun test suites/bun_test/*"
+    "bun_test": "bun test suites/bun_test/*",
+    "postinstall": "papi"
   },
   "devDependencies": {
     "@acala-network/chopsticks": "*",
@@ -41,5 +42,9 @@
     "vitest": "*",
     "web3": "*",
     "yargs": "*"
+  },
+  "dependencies": {
+    "@polkadot-api/descriptors": "file:.papi/descriptors",
+    "polkadot-api": "^1.7.4"
   }
 }

@@ -114,7 +114,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        suite: ["dev_test", "dev_multi", "dev_seq", "dev_smoke"]
+        suite: ["dev_test", "dev_multi", "dev_seq", "dev_smoke", "papi_dev"]
         shard: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v4
@@ -142,6 +142,7 @@ jobs:
       - name: Run ${{matrix.suite}} dev test
         run: |
           cd test
+          bun papi generate
           bun moonwall test ${{matrix.suite}}  --ts ${{ matrix.shard }}/4
 
   test_chopsticks:
@@ -188,7 +189,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        suite: ["eth_test", "viem_test"]
+        suite: ["eth_test", "viem_test", "papi_readonly"]
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -208,6 +209,7 @@ jobs:
       - name: Run standard ${{matrix.suite}}
         run: |
           cd test
+          bun papi add dot -n polkadot
           bun moonwall test ${{matrix.suite}}
       #  disabled until web3.js fix their stuff
       # - name: Run standard web3 run

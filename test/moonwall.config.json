@@ -904,6 +904,51 @@
           "endpoints": ["ws://localhost:8000"]
         }
       ]
+    },
+    {
+      "name": "papi_readonly",
+      "testFileDir": ["suites/papi"],
+      "include": ["**/read_only*"],
+      "envVars": [""],
+      "foundation": {
+        "type": "read_only",
+        "launchSpec": {
+          "disableRuntimeVersionCheck": true
+        }
+      },
+      "connections": [
+        {
+          "name": "papi",
+          "type": "papi",
+          "endpoints": ["wss://rpc.polkadot.io"]
+        }
+      ]
+    },
+    {
+      "name": "papi_dev",
+      "testFileDir": ["suites/papi"],
+      "include": ["**/dev*"],
+      "envVars": [""],
+      "foundation": {
+        "type": "dev",
+        "launchSpec": [
+          {
+            "name": "moonbeam",
+            "running": true,
+            "binPath": "./tmp/moonbeam",
+            "ports": {
+              "rpcPort": 9955
+            }
+          }
+        ]
+      },
+      "connections": [
+        {
+          "name": "papi",
+          "type": "papi",
+          "endpoints": ["ws://127.0.0.1:9955"]
+        }
+      ]
     }
   ]
 }
