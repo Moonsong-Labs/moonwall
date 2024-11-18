@@ -25,6 +25,7 @@ describeSuite({
       id: "T02",
       title: "Verify multiple chains can increment block numbers",
       test: async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10000));
         const chain1Height = (
           await context.polkadotJs("hydration").rpc.chain.getHeader()
         ).number.toNumber();
@@ -36,10 +37,13 @@ describeSuite({
         const chain2Height = (
           await context.polkadotJs("assethub").rpc.chain.getHeader()
         ).number.toNumber();
-        await context.createBlock({ providerName: "assethub" });
+        await context.createBlock({ providerName: "assethub", allowFailures: true });
         expect((await context.polkadotJs("assethub").rpc.chain.getHeader()).number.toNumber()).toBe(
           chain2Height + 1
         );
+        console.dir((await context.polkadotJs("assethub").rpc.chain.getBlock()).toHuman(), {
+          depth: null,
+        });
 
         const chain3Height = (
           await context.polkadotJs("polkadot").rpc.chain.getHeader()
