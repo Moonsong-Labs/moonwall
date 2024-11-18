@@ -12,7 +12,7 @@
     "lint": "pnpm -r --filter='./packages/**' run lint",
     "lint:fix": "pnpm -r --filter='./packages/**' run lint:fix",
     "changeset": "changeset",
-    "changeset:release": "changeset publish",
+    "changeset:release": "sleep 1 && pnpm changeset publish",
     "changeset:version": "changeset version",
     "clean-all": "rm -rf node_modules && pnpm -r --filter='./packages/**' run clean && pnpm store prune",
     "pristine-build": "pnpm clean-all && pnpm i && pnpm build && pnpm generate-types",
