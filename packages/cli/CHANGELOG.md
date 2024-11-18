@@ -1,5 +1,20 @@
 # @moonwall/cli
 
+## 5.7.0
+
+### Minor Changes
+
+- 9fed50b: November Update
+  - [[#435](https://github.com/Moonsong-Labs/moonwall/issues/435)] Zombienets dont require parachains anymore
+  - [[#408](https://github.com/Moonsong-Labs/moonwall/issues/408)] preScript failures halt test runs
+  - [[#405](https://github.com/Moonsong-Labs/moonwall/issues/405)] Add PAPI Support
+
+### Patch Changes
+
+- Updated dependencies [9fed50b]
+  - @moonwall/types@5.7.0
+  - @moonwall/util@5.7.0
+
 ## 5.6.0
 
 ### Minor Changes
