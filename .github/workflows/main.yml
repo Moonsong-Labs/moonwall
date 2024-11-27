@@ -175,10 +175,12 @@ jobs:
       - name: Check if files were modified in the 2 minutes
         run: |
           cd test
+          find suites/update/__snapshots__/test_basic.ts.snap suites/update/timbo.txt
           find suites/update/__snapshots__/test_basic.ts.snap suites/update/timbo.txt -mmin -2 | wc -l | grep -q "2"
       - name: Check console output for snapshot updates
         run: |
           cd test
+          cat snapshot_output.txt
           grep -q "Snapshots  3 updated" snapshot_output.txt
 
   test_chopsticks:
