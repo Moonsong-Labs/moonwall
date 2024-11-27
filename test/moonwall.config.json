@@ -79,6 +79,17 @@
       }
     },
     {
+      "name": "update_snapshot",
+      "testFileDir": ["suites/update"],
+      "foundation": {
+        "type": "read_only",
+        "launchSpec": {
+          "disableRuntimeVersionCheck": true
+        }
+      },
+      "connections": []
+    },
+    {
       "name": "failing_prescript",
       "testFileDir": ["suites/basic"],
       "description": "Test that failing pre-scripts are caught",
