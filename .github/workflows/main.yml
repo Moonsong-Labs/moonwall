@@ -148,8 +148,6 @@ jobs:
   test_update:
     runs-on: ubuntu-latest
     needs: ["build"]
-    env:
-      CI: false
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v1
@@ -173,7 +171,7 @@ jobs:
         id: update_test
         run: |
           cd test
-          bun moonwall test update_snapshot -u > snapshot_output.txt 2>&1
+          CI=false bun moonwall test update_snapshot -u > snapshot_output.txt 2>&1
       - name: Check if files were modified in the 2 minutes
         run: |
           cd test

@@ -17,7 +17,7 @@ describeSuite({
       title: "In-line snapshot",
       test: () => {
         // biome-ignore lint/style/noUnusedTemplateLiteral: <explanation>
-        expect(random).toMatchInlineSnapshot(`40`);
+        expect(random).toMatchInlineSnapshot(`7`);
       },
     });
 
