@@ -105,7 +105,7 @@ yargs(hideBin(process.argv))
             testNamePattern: args.GrepTest,
             subDirectory: args.subDirectory,
             shard: args.testShard,
-            update: args.update ,
+            update: args.update,
           }))
         ) {
           process.exitCode = 1;
