@@ -87,7 +87,6 @@ This isn't too important as you will always be able to create new environment sp
 - `chopsticks` : Using Acala Foundation's Chopsticks to start a lazily-forked network.
 - `read_only`: Not starting a network but instead connecting to one that already exists.
 - `zombie`: Using ParityTech's ZombieNetwork framework to run a multi-node network
-- `fork` : 🚧 Not yet implemented! Will be part of a new way of forking the network with a real client
 
 ::: tip
 This is the very brief rundown of foundations. For their specific information please visit the relevant sections in [Config](/guide/intro/foundations).

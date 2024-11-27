@@ -8,15 +8,17 @@ describeSuite({
   foundationMethods: "dev",
   options: {
     forkConfig: {
-      endpoint: "https://moonbeam.public.blastapi.io",
-      block: 100,
+      url: "https://moonbeam.public.blastapi.io",
+      verbose: true
     },
   },
-  testCases: ({ it, context }) => {
+  testCases: ({ it, context , log}) => {
     let polkadotJs: ApiPromise;
 
-    beforeAll(() => {
+    beforeAll(async () => {
       polkadotJs = context.polkadotJs();
+      log("Waiting a minute for lazy loading to do its thing");
+      await new Promise((resolve) => setTimeout(resolve, 60_000)); // wait for  LL loading 1 minute
     });
 
     it({

@@ -49,8 +49,3 @@ Use Read Only if Moonwall doesn't need to start any networks - you've already go
 ::: tip
 Zombie is the ideal Foundation for testing cross chain interactions including XCM.
 :::
-
-
-### Fork:
-
-- 🚧 Not yet implemented! Will be part of a new way of forking the network with a real client.

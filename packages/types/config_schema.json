@@ -73,7 +73,7 @@
           "type": "string"
         },
         "defaultForkConfig": {
-          "description": "Default Fork options for the node (overriden by per-test fork options)",
+          "description": "BETA: Default Fork options for the node (overriden by per-test fork options)",
           "properties": {
             "blockNumber": {
               "description": "The block number to fork from (optional)",

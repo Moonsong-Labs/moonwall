@@ -103,7 +103,7 @@ export type FoundationHandler<T extends FoundationType> = (params: {
 }) => void;
 
 /**
- * Represents overrides for launching a test environment.
+ * BETA: Represents overrides for launching a test environment.
  * @property forkConfig - Optional configuration for forking a network.
  */
 export type LaunchOverrides = {

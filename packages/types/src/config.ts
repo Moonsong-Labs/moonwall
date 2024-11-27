@@ -337,7 +337,7 @@ export interface DevLaunchSpec extends GenericLaunchSpec {
   newRpcBehaviour?: boolean;
 
   /**
-   * Default Fork options for the node (overriden by per-test fork options)
+   * BETA: Default Fork options for the node (overriden by per-test fork options)
    */
   defaultForkConfig?: ForkConfig;
 

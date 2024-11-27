@@ -953,6 +953,9 @@
     {
       "name": "fork_test",
       "testFileDir": ["suites/fork_test"],
+      "runScripts": [
+        "compile-wasm.ts compile -b tmp/moonbeam -o tmp/wasm -c moonbeam-dev"
+      ],
       "foundation": {
         "type": "dev",
         "launchSpec": [
@@ -960,11 +963,12 @@
             "name": "moonbeam",
             "binPath": "tmp/moonbeam",
             "newRpcBehaviour": true,
+            "disableDefaultEthProviders": true,
             "options": [
               "--ethapi=txpool",
               "--no-hardware-benchmarks",
               "--no-telemetry",
-              "--wasmtime-precompiled=wasm",
+              "--wasmtime-precompiled=tmp/wasm",
               "--unsafe-force-node-key-generation",
               "--reserved-only",
               "--no-grandpa",
@@ -977,7 +981,7 @@
             ],
             "defaultForkConfig": {
               "url": "https://moonbeam.unitedbloc.com",
-              "stateOverridePath": "tmp/mbStateOverride.json",
+              "stateOverridePath": "./configs/mbStateOverride.json",
               "verbose": true
             }
           }
