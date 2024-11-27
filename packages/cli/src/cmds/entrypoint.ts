@@ -90,6 +90,11 @@ yargs(hideBin(process.argv))
           describe: "Test Shard info for CI",
           alias: "ts",
           type: "string",
+        })
+        .option("update", {
+          describe: "Update all snapshots",
+          alias: "u",
+          type: "boolean",
         });
     },
     async (args) => {
@@ -100,6 +105,7 @@ yargs(hideBin(process.argv))
             testNamePattern: args.GrepTest,
             subDirectory: args.subDirectory,
             shard: args.testShard,
+            update: args.update,
           }))
         ) {
           process.exitCode = 1;

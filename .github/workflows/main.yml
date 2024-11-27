@@ -145,6 +145,46 @@ jobs:
           bun papi generate
           bun moonwall test ${{matrix.suite}}  --ts ${{ matrix.shard }}/4
 
+  test_update:
+    runs-on: ubuntu-latest
+    needs: ["build"]
+    env: 
+      NO_COLOR: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.1.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 23
+          cache: "pnpm"
+      - name: Build like before
+        run: |
+          pnpm install  
+          pnpm run build
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - name: Run snapshot update test
+        id: update_test
+        run: |
+          cd test
+          bun moonwall test update_snapshot -u > snapshot_output.txt 2>&1
+      - name: Check if files were modified in the 2 minutes
+        run: |
+          cd test
+          find suites/update/__snapshots__/test_basic.ts.snap suites/update/timbo.txt
+          find suites/update/__snapshots__/test_basic.ts.snap suites/update/timbo.txt -mmin -2 | wc -l | grep -q "2"
+      - name: Check console output for snapshot updates
+        run: |
+          cd test
+          cat snapshot_output.txt
+          grep "Snapshots  3 updated" snapshot_output.txt
+
   test_chopsticks:
     runs-on: ubuntu-latest
     needs: ["build"]

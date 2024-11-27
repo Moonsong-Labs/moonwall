@@ -54,6 +54,7 @@ export type testRunArgs = {
   testNamePattern?: string;
   subDirectory?: string;
   shard?: string;
+  update?: boolean;
 };
 
 export async function executeTests(env: Environment, testRunArgs?: testRunArgs) {
