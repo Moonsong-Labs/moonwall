@@ -14,7 +14,7 @@ import type {
 } from "viem";
 import type { Chain } from "viem/chains";
 import type { Web3 } from "web3";
-import type { FoundationType } from "./config";
+import type { ForkConfig, FoundationType } from "./config";
 import type { BlockCreation, BlockCreationResponse, ChopsticksBlockCreation } from "./context";
 import type { ContractDeploymentOptions } from "./contracts";
 import type { TransactionType } from "./eth";
@@ -58,7 +58,7 @@ export type FoundationContextMap = {
         ? ZombieContext
         : K extends "read_only"
           ? ReadOnlyContext
-            : /* default: */ GenericContext;
+          : /* default: */ GenericContext;
 };
 
 export type TestContextMap = {
@@ -73,24 +73,6 @@ export type TestCasesFn<T extends FoundationType> = (params: {
 
 // TODO: Extend to include skipIf() and runIf()
 export type TestCaseModifier = "only" | "skip";
-
-/**
- * Fork configuration options for test cases
- */
-export interface ForkConfig {
-  /**
-   * RPC endpoint to fork from
-   */
-  endpoint: string;
-  /**
-   * Block number to fork from
-   */
-  block?: number;
-  /**
-   * Path to state override file
-   */
-  stateOverridePath?: string;
-}
 
 export interface ITestCase {
   id: string;
@@ -110,12 +92,7 @@ export type TestSuiteConfig<T extends FoundationType = FoundationType> = {
   foundationMethods: T;
   description?: string;
   testCases: TestCasesFn<T>;
-} & (T extends "dev"
-  ? {
-      forkConfig: ForkConfig;
-    }
-  : // biome-ignore lint/complexity/noBannedTypes: good enough for now
-    {});
+};
 
 export type FoundationHandler<T extends FoundationType> = (params: {
   testCases: TestCasesFn<T>;
@@ -125,15 +102,21 @@ export type FoundationHandler<T extends FoundationType> = (params: {
   ctx?: any;
 }) => void;
 
+/**
+ * Represents overrides for launching a test environment.
+ * @property forkConfig - Optional configuration for forking a network.
+ */
+export type LaunchOverrides = {
+  forkConfig?: ForkConfig;
+};
+
 export type ITestSuiteType<T extends FoundationMethod> = {
   id: string;
   title: string;
   testCases: (TestContext: TestContextMap[T]) => void;
   foundationMethods: T;
   // TODO: Make this foundation dependent
-  options?: {
-    forkConfig: ForkConfig;
-  };
+  options?: LaunchOverrides;
   minRtVersion?: number;
   chainType?: ChainType;
   notChainType?: ChainType;

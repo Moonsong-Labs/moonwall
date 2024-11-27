@@ -3,6 +3,8 @@ import type {
   DevLaunchSpec,
   RepoSpec,
   ZombieLaunchSpec,
+  LaunchOverrides,
+  ForkConfig,
 } from "@moonwall/types";
 import chalk from "chalk";
 import path from "node:path";
@@ -39,76 +41,127 @@ function fetchDefaultArgs(binName: string, additionalRepos: RepoSpec[] = []): st
   return defaultArgs;
 }
 
-export async function parseRunCmd(launchSpec: DevLaunchSpec, additionalRepos?: RepoSpec[]) {
-  const launch = !launchSpec.running ? true : launchSpec.running;
-  const cmd = launchSpec.binPath;
-  const args = launchSpec.options
-    ? [...launchSpec.options]
-    : fetchDefaultArgs(path.basename(launchSpec.binPath), additionalRepos);
+export class LaunchCommandParser {
+  private args: string[];
+  private cmd: string;
+  private launch: boolean;
+  private launchSpec: DevLaunchSpec;
+  private additionalRepos?: RepoSpec[];
+  private launchOverrides?: LaunchOverrides;
 
-  const overrideArg = (newArg: string) => {
+  constructor(options: {
+    launchSpec: DevLaunchSpec;
+    additionalRepos?: RepoSpec[];
+    launchOverrides?: LaunchOverrides;
+  }) {
+    const { launchSpec, additionalRepos, launchOverrides } = options;
+    this.launchSpec = launchSpec;
+    this.additionalRepos = additionalRepos;
+    this.launchOverrides = launchOverrides;
+    this.launch = !launchSpec.running ? true : launchSpec.running;
+    this.cmd = launchSpec.binPath;
+    this.args = launchSpec.options
+      ? [...launchSpec.options]
+      : fetchDefaultArgs(path.basename(launchSpec.binPath), additionalRepos);
+  }
+
+  private overrideArg(newArg: string): void {
     const newArgKey = newArg.split("=")[0];
-    const existingIndex = args.findIndex((arg) => arg.startsWith(`${newArgKey}=`));
+    const existingIndex = this.args.findIndex((arg) => arg.startsWith(`${newArgKey}=`));
 
     if (existingIndex !== -1) {
-      args[existingIndex] = newArg;
+      this.args[existingIndex] = newArg;
     } else {
-      args.push(newArg);
-    }
-  };
-
-  if (launchSpec.ports) {
-    const ports = launchSpec.ports;
-    if (ports.p2pPort) {
-      overrideArg(`--port=${ports.p2pPort}`);
-    }
-    if (ports.wsPort) {
-      overrideArg(`--ws-port=${ports.wsPort}`);
-    }
-    if (ports.rpcPort) {
-      overrideArg(`--rpc-port=${ports.rpcPort}`);
-    }
-  } else {
-    const freePort = (await getFreePort()).toString();
-    process.env.MOONWALL_RPC_PORT = freePort;
-
-    if (launchSpec.newRpcBehaviour) {
-      overrideArg(`--rpc-port=${freePort}`);
-    } else {
-      overrideArg(`--ws-port=${freePort}`);
+      this.args.push(newArg);
     }
   }
 
-  const forkOptions = launchSpec.defaultForkConfig;
+  withPorts() {
+    if (this.launchSpec.ports) {
+      const ports = this.launchSpec.ports;
+      if (ports.p2pPort) {
+        this.overrideArg(`--port=${ports.p2pPort}`);
+      }
+      if (ports.wsPort) {
+        this.overrideArg(`--ws-port=${ports.wsPort}`);
+      }
+      if (ports.rpcPort) {
+        this.overrideArg(`--rpc-port=${ports.rpcPort}`);
+      }
+    } else {
+      const freePort = getFreePort().toString();
+      process.env.MOONWALL_RPC_PORT = freePort;
 
-  console.log("forkOptions");
-  console.dir(forkOptions, { depth: null });
-  if (forkOptions) {
+      if (this.launchSpec.newRpcBehaviour) {
+        this.overrideArg(`--rpc-port=${freePort}`);
+      } else {
+        this.overrideArg(`--ws-port=${freePort}`);
+      }
+    }
+    return this;
+  }
+
+  withDefaultForkConfig(): LaunchCommandParser {
+    const forkOptions = this.launchSpec.defaultForkConfig;
+    if (forkOptions) {
+      this.applyForkOptions(forkOptions);
+    }
+    return this;
+  }
+
+  withLaunchOverrides(): LaunchCommandParser {
+    if (this.launchOverrides?.forkConfig) {
+      this.applyForkOptions(this.launchOverrides.forkConfig);
+    }
+    return this;
+  }
+
+  private print() {
+    console.log(chalk.cyan(`Command to run is: ${chalk.bold(this.cmd)}`));
+    console.log(chalk.cyan(`Arguments are: ${chalk.bold(this.args.join(" "))}`));
+    return this;
+  }
+
+  private applyForkOptions(forkOptions: ForkConfig): void {
     if (forkOptions.url) {
       invariant(forkOptions.url.startsWith("http"), "Fork URL must start with http:// or https://");
-      overrideArg(`--fork-chain-from-rpc=${forkOptions.url}`);
+      this.overrideArg(`--fork-chain-from-rpc=${forkOptions.url}`);
     }
     if (forkOptions.blockNumber) {
-      overrideArg(`--block=${forkOptions.blockNumber}`);
+      this.overrideArg(`--block=${forkOptions.blockNumber}`);
     }
     if (forkOptions.stateOverridePath) {
-      overrideArg(`--fork-state-overrides=${forkOptions.stateOverridePath}`);
+      this.overrideArg(`--fork-state-overrides=${forkOptions.stateOverridePath}`);
     }
     if (forkOptions.verbose) {
-      overrideArg("-llazy-loading=trace");
+      this.overrideArg("-llazy-loading=trace");
     }
   }
 
-  console.log("post args");
-  console.log(args);
-  return { cmd, args, launch };
-}
+  build(): { cmd: string; args: string[]; launch: boolean } {
+    return {
+      cmd: this.cmd,
+      args: this.args,
+      launch: this.launch,
+    };
+  }
 
-export const getFreePort = async () => {
-  const notionalPort = 10000 + Number(process.env.VITEST_POOL_ID || 1) * 100;
-  // return getPort({ port: notionalPort });
-  return notionalPort;
-};
+  static create(options: {
+    launchSpec: DevLaunchSpec;
+    additionalRepos?: RepoSpec[];
+    launchOverrides?: LaunchOverrides;
+    verbose?: boolean;
+  }) {
+    const parser = new LaunchCommandParser(options);
+    const parsed = parser.withPorts().withDefaultForkConfig().withLaunchOverrides();
+
+    if (options.verbose) {
+      parsed.print();
+    }
+
+    return parsed.build();
+  }
+}
 
 export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
   cmd: string;
@@ -167,3 +220,8 @@ export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
     launch,
   };
 }
+
+export const getFreePort = () => {
+  const notionalPort = 10000 + Number(process.env.VITEST_POOL_ID || 1) * 100;
+  return notionalPort;
+};

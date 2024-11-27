@@ -83,7 +83,6 @@ export function describeSuite<T extends FoundationType>({
   let ctx: MoonwallContext | null = null;
 
   beforeAll(async () => {
-
     const env = getEnvironmentFromConfig();
     if (env.foundation.type === "dev") {
       // Pass options to contextCreator if they exist

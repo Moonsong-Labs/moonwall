@@ -16,10 +16,6 @@ export async function launchNode(cmd: string, args: string[], name: string) {
     checkAccess(cmd);
   }
 
-  console.log("REMOVE ME")
-  console.log(cmd)
-  console.log(args)
-
   const port = args.find((a) => a.includes("port"))?.split("=")[1];
   debug(`\x1b[36mStarting ${name} node on port ${port}...\x1b[0m`);
 

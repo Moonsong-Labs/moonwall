@@ -3,6 +3,7 @@ import type {
   ConnectedProvider,
   Environment,
   FoundationType,
+  LaunchOverrides,
   MoonwallConfig,
   MoonwallEnvironment,
   MoonwallProvider,
@@ -16,7 +17,11 @@ import net from "node:net";
 import readline from "node:readline";
 import { setTimeout as timer } from "node:timers/promises";
 import path from "node:path";
-import { parseChopsticksRunCmd, parseRunCmd, parseZombieCmd } from "../internal/commandParsers";
+import {
+  LaunchCommandParser,
+  parseChopsticksRunCmd,
+  parseZombieCmd,
+} from "../internal/commandParsers";
 import {
   type IPCRequestMessage,
   type IPCResponseMessage,
@@ -52,16 +57,16 @@ export class MoonwallContext {
   zombieNetwork?: Network;
   rtUpgradePath?: string;
   ipcServer?: net.Server;
-  injectedOptions?: object
+  injectedOptions?: LaunchOverrides;
 
-  constructor(config: MoonwallConfig, options?: object) {
+  constructor(config: MoonwallConfig, options?: LaunchOverrides) {
     const env = config.environments.find(({ name }) => name === process.env.MOON_TEST_ENV);
     invariant(env, `Environment ${process.env.MOON_TEST_ENV} not found in config`);
 
     this.providers = [];
     this.nodes = [];
     this.foundation = env.foundation.type;
-    this.injectedOptions = options
+    this.injectedOptions = options;
   }
 
   public async setupFoundation() {
@@ -77,10 +82,8 @@ export class MoonwallContext {
       read_only: this.handleReadOnly,
       chopsticks: this.handleChopsticks,
       dev: this.handleDev,
-      zombie: this.handleZombie
+      zombie: this.handleZombie,
     };
-    console.log("RUNNING FOUNDATION HANDLER")
-    console.dir(env.foundation,{depth: null})
 
     const foundationHandler = foundationHandlers[env.foundation.type];
     this.environment = {
@@ -113,10 +116,12 @@ export class MoonwallContext {
   private async handleDev(env: Environment, config: MoonwallConfig) {
     invariant(env.foundation.type === "dev", "Foundation type must be 'dev'");
 
-    const { cmd, args, launch } = await parseRunCmd(
-      env.foundation.launchSpec[0],
-      config.additionalRepos
-    );
+    const { cmd, args, launch } = LaunchCommandParser.create({
+      launchSpec: env.foundation.launchSpec[0],
+      additionalRepos: config.additionalRepos,
+      launchOverrides: this.injectedOptions,
+      verbose: false,
+    });
 
     return {
       name: env.name,
@@ -429,9 +434,6 @@ export class MoonwallContext {
 
     const nodes = ctx.environment.nodes;
 
-    console.log("remove me")
-    console.dir(nodes, {depth:null})
-
     if (this.environment.foundationType === "zombie") {
       return await this.startZombieNetwork();
     }
@@ -623,9 +625,15 @@ export class MoonwallContext {
     }
   }
 
-  //TODO: Type options
-  public static async getContext(config?: MoonwallConfig, options?: object, force = false): Promise<MoonwallContext> {
-    invariant(!(options && MoonwallContext.instance), "Attempting to open a new context with overrides when context already exists");
+  public static async getContext(
+    config?: MoonwallConfig,
+    options?: LaunchOverrides,
+    force = false
+  ): Promise<MoonwallContext> {
+    invariant(
+      !(options && MoonwallContext.instance),
+      "Attempting to open a new context with overrides when context already exists"
+    );
 
     if (!MoonwallContext.instance?.configured || force) {
       invariant(config, "Config must be provided on Global Context instantiation");
@@ -690,8 +698,7 @@ export class MoonwallContext {
   }
 }
 
-// TODO: Type this properly!
-export const contextCreator = async (options?: object) => {
+export const contextCreator = async (options?: LaunchOverrides) => {
   const config = await importAsyncConfig();
   const ctx = await MoonwallContext.getContext(config, options);
   await runNetworkOnly();

@@ -958,15 +958,13 @@
         "launchSpec": [
           {
             "name": "moonbeam",
-            "running": true,
-            "binPath": "./tmp/moonbeam",
-            "disableDefaultEthProviders": true,
+            "binPath": "tmp/moonbeam",
             "newRpcBehaviour": true,
             "options": [
-              "-llazy-loading=trace",
               "--ethapi=txpool",
               "--no-hardware-benchmarks",
               "--no-telemetry",
+              "--wasmtime-precompiled=wasm",
               "--unsafe-force-node-key-generation",
               "--reserved-only",
               "--no-grandpa",
@@ -978,8 +976,9 @@
               "--tmp"
             ],
             "defaultForkConfig": {
-              "url": "https://moonbeam.kaki.dev",
-              "stateOverridePath": "./configs/mbStateOverride.json"
+              "url": "https://moonbeam.unitedbloc.com",
+              "stateOverridePath": "tmp/mbStateOverride.json",
+              "verbose": true
             }
           }
         ]
