@@ -17,3 +17,4 @@ cache
 artifacts
 **/tmp/*
 **/contracts/out/
+snapshot_output.txt

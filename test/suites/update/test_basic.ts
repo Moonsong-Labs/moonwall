@@ -5,7 +5,7 @@ describeSuite({
   title: "This is a test suite that tests the update snapshot feature",
   foundationMethods: "read_only",
   testCases: ({ it, log }) => {
-    let random: number
+    let random: number;
 
     beforeAll(() => {
       random = Math.floor(Math.random() * 100);

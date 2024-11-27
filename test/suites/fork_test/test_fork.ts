@@ -10,7 +10,7 @@ describeSuite({
     forkConfig: {
       url: "https://moonbeam.unitedbloc.com",
       verbose: true,
-      blockHash: "0xffe39256c17cc4523a07c907bcf1aeeef4db217cd57cfcfb95d56088e0bb9f2d"
+      blockHash: "0xffe39256c17cc4523a07c907bcf1aeeef4db217cd57cfcfb95d56088e0bb9f2d",
     },
   },
   testCases: ({ it, context, log }) => {
@@ -55,7 +55,10 @@ describeSuite({
         const {
           data: { free },
         } = await polkadotJs.query.system.account(testAccount);
-        expect(free.toBigInt(), `Free balance should match what account ${testAccount} has at block #8508372`).toBe(76562560590695097485140n);
+        expect(
+          free.toBigInt(),
+          `Free balance should match what account ${testAccount} has at block #8508372`
+        ).toBe(76562560590695097485140n);
       },
     });
   },
