@@ -181,7 +181,7 @@ jobs:
         run: |
           cd test
           cat snapshot_output.txt
-          grep -q "Snapshots  3 updated" snapshot_output.txt
+          grep "Snapshots  3 updated" snapshot_output.txt
 
   test_chopsticks:
     runs-on: ubuntu-latest
