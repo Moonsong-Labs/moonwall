@@ -69,8 +69,30 @@
       "description": "A launch specification object for the \"dev\" foundation type.",
       "properties": {
         "binPath": {
-          "description": "The path to the binary file.",
+          "description": "The path to the binary to execute",
           "type": "string"
+        },
+        "defaultForkConfig": {
+          "description": "BETA: Default Fork options for the node (overriden by per-test fork options)",
+          "properties": {
+            "blockHash": {
+              "description": "The block hash to fork from",
+              "type": "string"
+            },
+            "stateOverridePath": {
+              "description": "The state override path (optional)",
+              "type": "string"
+            },
+            "url": {
+              "description": "The URL to fork from",
+              "type": "string"
+            },
+            "verbose": {
+              "description": "Turns on trace logging for LazyLoading service (optional)",
+              "type": "boolean"
+            }
+          },
+          "type": "object"
         },
         "disableDefaultEthProviders": {
           "description": "Determines if the default Ethereum provider connections should be disabled.\nWhen set to true, the framework will not automatically connect the Ethereum providers.\nDefault behavior (when unset or set to false) is to connect with Ethers, Viem & Web3 frameworks.\n\nNote: This also acts as a feature gate for context methods like createTxn and readPrecompile.",
@@ -92,7 +114,7 @@
           "type": "array"
         },
         "ports": {
-          "description": "An optional object with p2pPort, wsPort, and rpcPort.",
+          "description": "Port configuration",
           "properties": {
             "p2pPort": {
               "description": "The port for peer-to-peer (P2P) communication.",
@@ -177,15 +199,6 @@
             },
             "type": {
               "const": "read_only",
-              "type": "string"
-            }
-          },
-          "type": "object"
-        },
-        {
-          "properties": {
-            "type": {
-              "const": "fork",
               "type": "string"
             }
           },

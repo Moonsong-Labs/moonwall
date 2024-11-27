@@ -1,4 +1,4 @@
-import { ViemClient, beforeAll, describeSuite, expect } from "@moonwall/cli";
+import { type ViemClient, beforeAll, describeSuite, expect } from "@moonwall/cli";
 import { xcAssetAbi } from "@moonwall/util";
 import { formatEther, formatUnits, getContract } from "viem";
 

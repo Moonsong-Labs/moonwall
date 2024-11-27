@@ -3,6 +3,7 @@ import type {
   ConnectedProvider,
   Environment,
   FoundationType,
+  LaunchOverrides,
   MoonwallConfig,
   MoonwallEnvironment,
   MoonwallProvider,
@@ -16,7 +17,11 @@ import net from "node:net";
 import readline from "node:readline";
 import { setTimeout as timer } from "node:timers/promises";
 import path from "node:path";
-import { parseChopsticksRunCmd, parseRunCmd, parseZombieCmd } from "../internal/commandParsers";
+import {
+  LaunchCommandParser,
+  parseChopsticksRunCmd,
+  parseZombieCmd,
+} from "../internal/commandParsers";
 import {
   type IPCRequestMessage,
   type IPCResponseMessage,
@@ -39,6 +44,7 @@ import {
 import { type ChildProcess, exec, execSync } from "node:child_process";
 import { promisify } from "node:util";
 import { withTimeout } from "../internal";
+import invariant from "tiny-invariant";
 const debugSetup = Debug("global:context");
 
 export class MoonwallContext {
@@ -51,26 +57,23 @@ export class MoonwallContext {
   zombieNetwork?: Network;
   rtUpgradePath?: string;
   ipcServer?: net.Server;
+  injectedOptions?: LaunchOverrides;
 
-  constructor(config: MoonwallConfig) {
+  constructor(config: MoonwallConfig, options?: LaunchOverrides) {
     const env = config.environments.find(({ name }) => name === process.env.MOON_TEST_ENV);
-
-    if (!env) {
-      throw new Error(`Environment ${process.env.MOON_TEST_ENV} not found in config`);
-    }
+    invariant(env, `Environment ${process.env.MOON_TEST_ENV} not found in config`);
 
     this.providers = [];
     this.nodes = [];
     this.foundation = env.foundation.type;
+    this.injectedOptions = options;
   }
 
   public async setupFoundation() {
     const config = await importAsyncConfig();
     const env = config.environments.find(({ name }) => name === process.env.MOON_TEST_ENV);
 
-    if (!env) {
-      throw new Error(`Environment ${process.env.MOON_TEST_ENV} not found in config`);
-    }
+    invariant(env, `Environment ${process.env.MOON_TEST_ENV} not found in config`);
 
     const foundationHandlers: Record<
       FoundationType,
@@ -80,7 +83,6 @@ export class MoonwallContext {
       chopsticks: this.handleChopsticks,
       dev: this.handleDev,
       zombie: this.handleZombie,
-      fork: this.handleReadOnly, // TODO: Implement fork
     };
 
     const foundationHandler = foundationHandlers[env.foundation.type];
@@ -93,9 +95,7 @@ export class MoonwallContext {
   }
 
   private async handleZombie(env: Environment) {
-    if (env.foundation.type !== "zombie") {
-      throw new Error(`Foundation type must be 'zombie'`);
-    }
+    invariant(env.foundation.type === "zombie", "Foundation type must be 'zombie'");
 
     const { cmd: zombieConfig } = await parseZombieCmd(env.foundation.zombieSpec);
     this.rtUpgradePath = env.foundation.rtUpgradePath;
@@ -114,14 +114,14 @@ export class MoonwallContext {
   }
 
   private async handleDev(env: Environment, config: MoonwallConfig) {
-    if (env.foundation.type !== "dev") {
-      throw new Error(`Foundation type must be 'dev'`);
-    }
+    invariant(env.foundation.type === "dev", "Foundation type must be 'dev'");
 
-    const { cmd, args, launch } = await parseRunCmd(
-      env.foundation.launchSpec[0],
-      config.additionalRepos
-    );
+    const { cmd, args, launch } = LaunchCommandParser.create({
+      launchSpec: env.foundation.launchSpec[0],
+      additionalRepos: config.additionalRepos,
+      launchOverrides: this.injectedOptions,
+      verbose: false,
+    });
 
     return {
       name: env.name,
@@ -149,15 +149,13 @@ export class MoonwallContext {
   }
 
   private async handleReadOnly(env: Environment) {
-    if (env.foundation.type !== "read_only") {
-      throw new Error(`Foundation type must be 'read_only'`);
-    }
+    invariant(env.foundation.type === "read_only", "Foundation type must be 'read_only'");
 
-    if (!env.connections) {
-      throw new Error(
-        `${env.name} env config is missing connections specification, required by foundation READ_ONLY`
-      );
-    }
+    invariant(
+      env.connections,
+      `${env.name} env config is missing connections specification, required by foundation READ_ONLY`
+    );
+
     return {
       name: env.name,
       foundationType: "read_only",
@@ -166,15 +164,11 @@ export class MoonwallContext {
   }
 
   private async handleChopsticks(env: Environment) {
-    if (env.foundation.type !== "chopsticks") {
-      throw new Error(`Foundation type must be 'chopsticks'`);
-    }
-
-    if (!env.connections || env.connections.length === 0) {
-      throw new Error(
-        `${env.name} env config is missing connections specification, required by foundation CHOPSTICKS`
-      );
-    }
+    invariant(env.foundation.type === "chopsticks", "Foundation type must be 'chopsticks'");
+    invariant(
+      env.connections && env.connections.length > 0,
+      `${env.name} env config is missing connections specification, required by foundation CHOPSTICKS`
+    );
 
     this.rtUpgradePath = env.foundation.rtUpgradePath;
     return {
@@ -187,9 +181,10 @@ export class MoonwallContext {
 
   private async startZombieNetwork() {
     const env = getEnvironmentFromConfig();
-    if (env.foundation.type !== "zombie") {
-      throw new Error(`Foundation type must be 'zombie', something has gone very wrong.`);
-    }
+    invariant(
+      env.foundation.type === "zombie",
+      "Foundation type must be 'zombie', something has gone very wrong."
+    );
 
     console.log("🧟 Spawning zombie nodes ...");
     const nodes = this.environment.nodes;
@@ -219,9 +214,7 @@ export class MoonwallContext {
 
     const onProcessExit = () => {
       try {
-        if (!this.zombieNetwork) {
-          throw "Zombie network not found to kill";
-        }
+        invariant(this.zombieNetwork, "Zombie network not found to kill");
 
         const processIds = Object.values((this.zombieNetwork.client as any).processMap)
           .filter((item: any) => item.pid)
@@ -261,12 +254,9 @@ export class MoonwallContext {
 
         try {
           const message: IPCRequestMessage = JSON.parse(data.toString());
+          invariant(message.nodeName, "nodeName not provided in message");
 
           const zombieClient = network.client;
-
-          if (!message.nodeName) {
-            throw new Error("nodeName not provided in message");
-          }
 
           switch (message.cmd) {
             case "networkmap": {
@@ -371,7 +361,7 @@ export class MoonwallContext {
             }
 
             default:
-              throw new Error(`Invalid command received: ${message.cmd}`);
+              invariant(false, `Invalid command received: ${message.cmd}`);
           }
         } catch (e: any) {
           logIpc("📨 Error processing message from client");
@@ -542,9 +532,7 @@ export class MoonwallContext {
 
       const envVar = process.env.MOON_ZOMBIE_NODES;
 
-      if (!envVar) {
-        throw new Error("MOON_ZOMBIE_NODES not set, this is an error please raise.");
-      }
+      invariant(envVar, "MOON_ZOMBIE_NODES not set, this is an error please raise.");
 
       const zombieNodeLogs = envVar
         .split("|")
@@ -599,10 +587,7 @@ export class MoonwallContext {
   public async disconnect(providerName?: string) {
     if (providerName) {
       const prov = this.providers.find(({ name }) => name === providerName);
-
-      if (!prov) {
-        throw new Error(`Provider ${providerName} not found`);
-      }
+      invariant(prov, `Provider ${providerName} not found`);
 
       try {
         await prov.disconnect();
@@ -625,12 +610,20 @@ export class MoonwallContext {
     }
   }
 
-  public static async getContext(config?: MoonwallConfig, force = false): Promise<MoonwallContext> {
+  public static async getContext(
+    config?: MoonwallConfig,
+    options?: LaunchOverrides,
+    force = false
+  ): Promise<MoonwallContext> {
+    invariant(
+      !(options && MoonwallContext.instance),
+      "Attempting to open a new context with overrides when context already exists"
+    );
+
     if (!MoonwallContext.instance?.configured || force) {
-      if (!config) {
-        throw new Error("❌ Config must be provided on Global Context instantiation");
-      }
-      MoonwallContext.instance = new MoonwallContext(config);
+      invariant(config, "Config must be provided on Global Context instantiation");
+
+      MoonwallContext.instance = new MoonwallContext(config, options);
       await MoonwallContext.instance.setupFoundation();
       debugSetup(`🟢  Moonwall context "${config.label}" created`);
     }
@@ -640,9 +633,7 @@ export class MoonwallContext {
   public static async destroy() {
     const ctx = MoonwallContext.instance;
 
-    if (!ctx) {
-      throw new Error("❌  No context to destroy");
-    }
+    invariant(ctx, "No context to destroy");
 
     try {
       await ctx.disconnect();
@@ -652,16 +643,10 @@ export class MoonwallContext {
 
     while (ctx.nodes.length > 0) {
       const node = ctx.nodes.pop();
-
-      if (!node) {
-        throw new Error("❌  No nodes to destroy");
-      }
+      invariant(node, "No node to destroy");
 
       const pid = node.pid;
-
-      if (!pid) {
-        throw new Error("❌  No pid to destroy");
-      }
+      invariant(pid, "No pid to destroy");
 
       node.kill("SIGINT");
       for (;;) {
@@ -698,9 +683,9 @@ export class MoonwallContext {
   }
 }
 
-export const contextCreator = async () => {
+export const contextCreator = async (options?: LaunchOverrides) => {
   const config = await importAsyncConfig();
-  const ctx = await MoonwallContext.getContext(config);
+  const ctx = await MoonwallContext.getContext(config, options);
   await runNetworkOnly();
   await ctx.connectEnvironment();
   return ctx;

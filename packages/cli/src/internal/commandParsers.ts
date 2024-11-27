@@ -3,10 +3,13 @@ import type {
   DevLaunchSpec,
   RepoSpec,
   ZombieLaunchSpec,
+  LaunchOverrides,
+  ForkConfig,
 } from "@moonwall/types";
 import chalk from "chalk";
 import path from "node:path";
 import { standardRepos } from "../lib/repoDefinitions";
+import invariant from "tiny-invariant";
 
 export function parseZombieCmd(launchSpec: ZombieLaunchSpec) {
   if (launchSpec) {
@@ -38,42 +41,127 @@ function fetchDefaultArgs(binName: string, additionalRepos: RepoSpec[] = []): st
   return defaultArgs;
 }
 
-export async function parseRunCmd(launchSpec: DevLaunchSpec, additionalRepos?: RepoSpec[]) {
-  const launch = !launchSpec.running ? true : launchSpec.running;
-  const cmd = launchSpec.binPath;
-  const args = launchSpec.options
-    ? [...launchSpec.options]
-    : fetchDefaultArgs(path.basename(launchSpec.binPath), additionalRepos);
+export class LaunchCommandParser {
+  private args: string[];
+  private cmd: string;
+  private launch: boolean;
+  private launchSpec: DevLaunchSpec;
+  private additionalRepos?: RepoSpec[];
+  private launchOverrides?: LaunchOverrides;
 
-  if (launchSpec.ports) {
-    const ports = launchSpec.ports;
-    if (ports.p2pPort) {
-      args.push(`--port=${ports.p2pPort}`);
-    }
-    if (ports.wsPort) {
-      args.push(`--ws-port=${ports.wsPort}`);
-    }
-    if (ports.rpcPort) {
-      args.push(`--rpc-port=${ports.rpcPort}`);
-    }
-  } else {
-    const freePort = (await getFreePort()).toString();
-    process.env.MOONWALL_RPC_PORT = freePort;
+  constructor(options: {
+    launchSpec: DevLaunchSpec;
+    additionalRepos?: RepoSpec[];
+    launchOverrides?: LaunchOverrides;
+  }) {
+    const { launchSpec, additionalRepos, launchOverrides } = options;
+    this.launchSpec = launchSpec;
+    this.additionalRepos = additionalRepos;
+    this.launchOverrides = launchOverrides;
+    this.launch = !launchSpec.running ? true : launchSpec.running;
+    this.cmd = launchSpec.binPath;
+    this.args = launchSpec.options
+      ? [...launchSpec.options]
+      : fetchDefaultArgs(path.basename(launchSpec.binPath), additionalRepos);
+  }
 
-    if (launchSpec.newRpcBehaviour) {
-      args.push(`--rpc-port=${freePort}`);
+  private overrideArg(newArg: string): void {
+    const newArgKey = newArg.split("=")[0];
+    const existingIndex = this.args.findIndex((arg) => arg.startsWith(`${newArgKey}=`));
+
+    if (existingIndex !== -1) {
+      this.args[existingIndex] = newArg;
     } else {
-      args.push(`--ws-port=${freePort}`);
+      this.args.push(newArg);
     }
   }
-  return { cmd, args, launch };
-}
 
-export const getFreePort = async () => {
-  const notionalPort = 10000 + Number(process.env.VITEST_POOL_ID || 1) * 100;
-  // return getPort({ port: notionalPort });
-  return notionalPort;
-};
+  withPorts() {
+    if (this.launchSpec.ports) {
+      const ports = this.launchSpec.ports;
+      if (ports.p2pPort) {
+        this.overrideArg(`--port=${ports.p2pPort}`);
+      }
+      if (ports.wsPort) {
+        this.overrideArg(`--ws-port=${ports.wsPort}`);
+      }
+      if (ports.rpcPort) {
+        this.overrideArg(`--rpc-port=${ports.rpcPort}`);
+      }
+    } else {
+      const freePort = getFreePort().toString();
+      process.env.MOONWALL_RPC_PORT = freePort;
+
+      if (this.launchSpec.newRpcBehaviour) {
+        this.overrideArg(`--rpc-port=${freePort}`);
+      } else {
+        this.overrideArg(`--ws-port=${freePort}`);
+      }
+    }
+    return this;
+  }
+
+  withDefaultForkConfig(): LaunchCommandParser {
+    const forkOptions = this.launchSpec.defaultForkConfig;
+    if (forkOptions) {
+      this.applyForkOptions(forkOptions);
+    }
+    return this;
+  }
+
+  withLaunchOverrides(): LaunchCommandParser {
+    if (this.launchOverrides?.forkConfig) {
+      this.applyForkOptions(this.launchOverrides.forkConfig);
+    }
+    return this;
+  }
+
+  private print() {
+    console.log(chalk.cyan(`Command to run is: ${chalk.bold(this.cmd)}`));
+    console.log(chalk.cyan(`Arguments are: ${chalk.bold(this.args.join(" "))}`));
+    return this;
+  }
+
+  private applyForkOptions(forkOptions: ForkConfig): void {
+    if (forkOptions.url) {
+      invariant(forkOptions.url.startsWith("http"), "Fork URL must start with http:// or https://");
+      this.overrideArg(`--fork-chain-from-rpc=${forkOptions.url}`);
+    }
+    if (forkOptions.blockHash) {
+      this.overrideArg(`--block=${forkOptions.blockHash}`);
+    }
+    if (forkOptions.stateOverridePath) {
+      this.overrideArg(`--fork-state-overrides=${forkOptions.stateOverridePath}`);
+    }
+    if (forkOptions.verbose) {
+      this.overrideArg("-llazy-loading=trace");
+    }
+  }
+
+  build(): { cmd: string; args: string[]; launch: boolean } {
+    return {
+      cmd: this.cmd,
+      args: this.args,
+      launch: this.launch,
+    };
+  }
+
+  static create(options: {
+    launchSpec: DevLaunchSpec;
+    additionalRepos?: RepoSpec[];
+    launchOverrides?: LaunchOverrides;
+    verbose?: boolean;
+  }) {
+    const parser = new LaunchCommandParser(options);
+    const parsed = parser.withPorts().withDefaultForkConfig().withLaunchOverrides();
+
+    if (options.verbose) {
+      parsed.print();
+    }
+
+    return parsed.build();
+  }
+}
 
 export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
   cmd: string;
@@ -132,3 +220,8 @@ export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
     launch,
   };
 }
+
+export const getFreePort = () => {
+  const notionalPort = 10000 + Number(process.env.VITEST_POOL_ID || 1) * 100;
+  return notionalPort;
+};

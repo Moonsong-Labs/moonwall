@@ -173,10 +173,6 @@ export type IFoundation =
   | {
       type: "read_only";
       launchSpec: ReadOnlyLaunchSpec;
-    }
-  | {
-      type: "fork";
-      // launchSpec: ForkLaunchSpec;
     };
 
 /**
@@ -230,12 +226,6 @@ export interface ReadOnlyLaunchSpec extends GenericLaunchSpec {
    */
   disableRuntimeVersionCheck?: boolean;
 }
-
-/**
- * A launch specification object for the "fork" foundation type.
- * @extends GenericLaunchSpec
- */
-export interface ForkLaunchSpec extends GenericLaunchSpec {}
 
 /**
  * A launch specification object for the "zombie" foundation type.
@@ -328,7 +318,7 @@ export interface ChopsticksLaunchSpec extends GenericLaunchSpec {
  */
 export interface DevLaunchSpec extends GenericLaunchSpec {
   /**
-   * The path to the binary file.
+   * The path to the binary to execute
    */
   binPath: string;
 
@@ -347,7 +337,12 @@ export interface DevLaunchSpec extends GenericLaunchSpec {
   newRpcBehaviour?: boolean;
 
   /**
-   * An optional object with p2pPort, wsPort, and rpcPort.
+   * BETA: Default Fork options for the node (overriden by per-test fork options)
+   */
+  defaultForkConfig?: ForkConfig;
+
+  /**
+   * Port configuration
    */
   ports?: {
     /**
@@ -541,4 +536,23 @@ export type RepoSpec = {
 export type Bin = {
   name: string;
   defaultArgs?: string[];
+};
+
+export type ForkConfig = {
+  /**
+   * The URL to fork from
+   */
+  url: string;
+  /**
+   * The block hash to fork from
+   */
+  blockHash?: string;
+  /**
+   * The state override path (optional)
+   */
+  stateOverridePath?: string;
+  /**
+   * Turns on trace logging for LazyLoading service (optional)
+   */
+  verbose?: boolean;
 };

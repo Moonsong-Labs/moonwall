@@ -70,6 +70,7 @@ export function describeSuite<T extends FoundationType>({
   minRtVersion,
   chainType,
   notChainType,
+  options,
 }: ITestSuiteType<T>): void {
   if (
     (minRtVersion && minRtVersion > RT_VERSION) ||
@@ -83,6 +84,11 @@ export function describeSuite<T extends FoundationType>({
 
   beforeAll(async () => {
     const env = getEnvironmentFromConfig();
+    if (env.foundation.type === "dev") {
+      // Pass options to contextCreator if they exist
+      ctx = await contextCreator(options);
+    }
+
     ctx = await contextCreator();
     if (env.foundation.type === "read_only") {
       const settings = loadParams(env.foundation.launchSpec);
@@ -159,7 +165,6 @@ export function describeSuite<T extends FoundationType>({
       chopsticks: chopsticksHandler,
       zombie: zombieHandler,
       read_only: readOnlyHandler,
-      fork: readOnlyHandler,
     };
 
     const handler = foundationHandlers[foundationMethods];

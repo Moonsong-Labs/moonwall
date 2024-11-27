@@ -14,7 +14,7 @@ import type {
 } from "viem";
 import type { Chain } from "viem/chains";
 import type { Web3 } from "web3";
-import type { FoundationType } from "./config";
+import type { ForkConfig, FoundationType } from "./config";
 import type { BlockCreation, BlockCreationResponse, ChopsticksBlockCreation } from "./context";
 import type { ContractDeploymentOptions } from "./contracts";
 import type { TransactionType } from "./eth";
@@ -86,6 +86,14 @@ export interface ITestCase {
   timeout?: number;
 }
 
+export type TestSuiteConfig<T extends FoundationType = FoundationType> = {
+  id: string;
+  title: string;
+  foundationMethods: T;
+  description?: string;
+  testCases: TestCasesFn<T>;
+};
+
 export type FoundationHandler<T extends FoundationType> = (params: {
   testCases: TestCasesFn<T>;
   context: GenericContext;
@@ -94,12 +102,21 @@ export type FoundationHandler<T extends FoundationType> = (params: {
   ctx?: any;
 }) => void;
 
+/**
+ * BETA: Represents overrides for launching a test environment.
+ * @property forkConfig - Optional configuration for forking a network.
+ */
+export type LaunchOverrides = {
+  forkConfig?: ForkConfig;
+};
+
 export type ITestSuiteType<T extends FoundationMethod> = {
   id: string;
   title: string;
   testCases: (TestContext: TestContextMap[T]) => void;
   foundationMethods: T;
-  options?: object;
+  // TODO: Make this foundation dependent
+  options?: LaunchOverrides;
   minRtVersion?: number;
   chainType?: ChainType;
   notChainType?: ChainType;

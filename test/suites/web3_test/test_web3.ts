@@ -1,6 +1,6 @@
 import { describeSuite, expect, beforeAll } from "@moonwall/cli";
 import { xcAssetAbi } from "@moonwall/util";
-import Web3 from "web3";
+import type Web3 from "web3";
 
 describeSuite({
   id: "W3",

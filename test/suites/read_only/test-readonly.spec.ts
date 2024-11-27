@@ -1,7 +1,7 @@
 import "@moonbeam-network/api-augment";
 import { describeSuite } from "@moonwall/cli";
 import { checkBlockFinalized } from "@moonwall/util";
-import { Wallet } from "ethers";
+import type { Wallet } from "ethers";
 
 describeSuite({
   id: "S01",
