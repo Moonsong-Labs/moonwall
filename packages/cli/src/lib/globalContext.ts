@@ -149,15 +149,13 @@ export class MoonwallContext {
   }
 
   private async handleReadOnly(env: Environment) {
-    if (env.foundation.type !== "read_only") {
-      throw new Error(`Foundation type must be 'read_only'`);
-    }
+    invariant(env.foundation.type === "read_only", "Foundation type must be 'read_only'");
 
-    if (!env.connections) {
-      throw new Error(
-        `${env.name} env config is missing connections specification, required by foundation READ_ONLY`
-      );
-    }
+    invariant(
+      env.connections,
+      `${env.name} env config is missing connections specification, required by foundation READ_ONLY`
+    );
+
     return {
       name: env.name,
       foundationType: "read_only",
@@ -166,15 +164,11 @@ export class MoonwallContext {
   }
 
   private async handleChopsticks(env: Environment) {
-    if (env.foundation.type !== "chopsticks") {
-      throw new Error(`Foundation type must be 'chopsticks'`);
-    }
-
-    if (!env.connections || env.connections.length === 0) {
-      throw new Error(
-        `${env.name} env config is missing connections specification, required by foundation CHOPSTICKS`
-      );
-    }
+    invariant(env.foundation.type === "chopsticks", "Foundation type must be 'chopsticks'");
+    invariant(
+      env.connections && env.connections.length > 0,
+      `${env.name} env config is missing connections specification, required by foundation CHOPSTICKS`
+    );
 
     this.rtUpgradePath = env.foundation.rtUpgradePath;
     return {
@@ -187,9 +181,10 @@ export class MoonwallContext {
 
   private async startZombieNetwork() {
     const env = getEnvironmentFromConfig();
-    if (env.foundation.type !== "zombie") {
-      throw new Error(`Foundation type must be 'zombie', something has gone very wrong.`);
-    }
+    invariant(
+      env.foundation.type === "zombie",
+      "Foundation type must be 'zombie', something has gone very wrong."
+    );
 
     console.log("🧟 Spawning zombie nodes ...");
     const nodes = this.environment.nodes;
@@ -219,9 +214,7 @@ export class MoonwallContext {
 
     const onProcessExit = () => {
       try {
-        if (!this.zombieNetwork) {
-          throw "Zombie network not found to kill";
-        }
+        invariant(this.zombieNetwork, "Zombie network not found to kill");
 
         const processIds = Object.values((this.zombieNetwork.client as any).processMap)
           .filter((item: any) => item.pid)
@@ -261,12 +254,9 @@ export class MoonwallContext {
 
         try {
           const message: IPCRequestMessage = JSON.parse(data.toString());
+          invariant(message.nodeName, "nodeName not provided in message");
 
           const zombieClient = network.client;
-
-          if (!message.nodeName) {
-            throw new Error("nodeName not provided in message");
-          }
 
           switch (message.cmd) {
             case "networkmap": {
@@ -371,7 +361,7 @@ export class MoonwallContext {
             }
 
             default:
-              throw new Error(`Invalid command received: ${message.cmd}`);
+              invariant(false, `Invalid command received: ${message.cmd}`);
           }
         } catch (e: any) {
           logIpc("📨 Error processing message from client");
@@ -542,9 +532,7 @@ export class MoonwallContext {
 
       const envVar = process.env.MOON_ZOMBIE_NODES;
 
-      if (!envVar) {
-        throw new Error("MOON_ZOMBIE_NODES not set, this is an error please raise.");
-      }
+      invariant(envVar, "MOON_ZOMBIE_NODES not set, this is an error please raise.");
 
       const zombieNodeLogs = envVar
         .split("|")
@@ -599,10 +587,7 @@ export class MoonwallContext {
   public async disconnect(providerName?: string) {
     if (providerName) {
       const prov = this.providers.find(({ name }) => name === providerName);
-
-      if (!prov) {
-        throw new Error(`Provider ${providerName} not found`);
-      }
+      invariant(prov, `Provider ${providerName} not found`);
 
       try {
         await prov.disconnect();
