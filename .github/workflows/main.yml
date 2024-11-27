@@ -150,7 +150,6 @@ jobs:
     needs: ["build"]
     env: 
       NO_COLOR: 1
-
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v1
@@ -174,7 +173,7 @@ jobs:
         id: update_test
         run: |
           cd test
-          CI=false bun moonwall test update_snapshot -u > snapshot_output.txt 2>&1
+          bun moonwall test update_snapshot -u > snapshot_output.txt 2>&1
       - name: Check if files were modified in the 2 minutes
         run: |
           cd test
