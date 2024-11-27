@@ -1,5 +1,17 @@
 # @moonwall/tests
 
+## 5.8.0
+
+### Minor Changes
+
+- c792425: Added Fork config to dev foundations
+
+  - BETA: Added ability to use moonbeam's fork API both via moonwall.config and also in a test
+
+### Patch Changes
+
+- b8d0d67: Add snapshot update option
+
 ## 5.7.0
 
 ### Minor Changes

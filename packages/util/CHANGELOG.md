@@ -1,5 +1,19 @@
 # @moonwall/util
 
+## 5.8.0
+
+### Minor Changes
+
+- c792425: Added Fork config to dev foundations
+
+  - BETA: Added ability to use moonbeam's fork API both via moonwall.config and also in a test
+
+### Patch Changes
+
+- Updated dependencies [b8d0d67]
+- Updated dependencies [c792425]
+  - @moonwall/types@5.8.0
+
 ## 5.7.0
 
 ### Minor Changes
