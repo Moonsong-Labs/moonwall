@@ -148,6 +148,9 @@ jobs:
   test_update:
     runs-on: ubuntu-latest
     needs: ["build"]
+    env: 
+      NO_COLOR: 1
+
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v1
