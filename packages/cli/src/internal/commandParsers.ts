@@ -7,6 +7,7 @@ import type {
 import chalk from "chalk";
 import path from "node:path";
 import { standardRepos } from "../lib/repoDefinitions";
+import invariant from "tiny-invariant";
 
 export function parseZombieCmd(launchSpec: ZombieLaunchSpec) {
   if (launchSpec) {
@@ -45,27 +46,61 @@ export async function parseRunCmd(launchSpec: DevLaunchSpec, additionalRepos?: R
     ? [...launchSpec.options]
     : fetchDefaultArgs(path.basename(launchSpec.binPath), additionalRepos);
 
+  const overrideArg = (newArg: string) => {
+    const newArgKey = newArg.split("=")[0];
+    const existingIndex = args.findIndex((arg) => arg.startsWith(`${newArgKey}=`));
+
+    if (existingIndex !== -1) {
+      args[existingIndex] = newArg;
+    } else {
+      args.push(newArg);
+    }
+  };
+
   if (launchSpec.ports) {
     const ports = launchSpec.ports;
     if (ports.p2pPort) {
-      args.push(`--port=${ports.p2pPort}`);
+      overrideArg(`--port=${ports.p2pPort}`);
     }
     if (ports.wsPort) {
-      args.push(`--ws-port=${ports.wsPort}`);
+      overrideArg(`--ws-port=${ports.wsPort}`);
     }
     if (ports.rpcPort) {
-      args.push(`--rpc-port=${ports.rpcPort}`);
+      overrideArg(`--rpc-port=${ports.rpcPort}`);
     }
   } else {
     const freePort = (await getFreePort()).toString();
     process.env.MOONWALL_RPC_PORT = freePort;
 
     if (launchSpec.newRpcBehaviour) {
-      args.push(`--rpc-port=${freePort}`);
+      overrideArg(`--rpc-port=${freePort}`);
     } else {
-      args.push(`--ws-port=${freePort}`);
+      overrideArg(`--ws-port=${freePort}`);
     }
   }
+
+  const forkOptions = launchSpec.defaultForkConfig;
+
+  console.log("forkOptions");
+  console.dir(forkOptions, { depth: null });
+  if (forkOptions) {
+    if (forkOptions.url) {
+      invariant(forkOptions.url.startsWith("http"), "Fork URL must start with http:// or https://");
+      overrideArg(`--fork-chain-from-rpc=${forkOptions.url}`);
+    }
+    if (forkOptions.blockNumber) {
+      overrideArg(`--block=${forkOptions.blockNumber}`);
+    }
+    if (forkOptions.stateOverridePath) {
+      overrideArg(`--fork-state-overrides=${forkOptions.stateOverridePath}`);
+    }
+    if (forkOptions.verbose) {
+      overrideArg("-llazy-loading=trace");
+    }
+  }
+
+  console.log("post args");
+  console.log(args);
   return { cmd, args, launch };
 }
 

@@ -39,6 +39,7 @@ import {
 import { type ChildProcess, exec, execSync } from "node:child_process";
 import { promisify } from "node:util";
 import { withTimeout } from "../internal";
+import invariant from "tiny-invariant";
 const debugSetup = Debug("global:context");
 
 export class MoonwallContext {
@@ -51,26 +52,23 @@ export class MoonwallContext {
   zombieNetwork?: Network;
   rtUpgradePath?: string;
   ipcServer?: net.Server;
+  injectedOptions?: object
 
-  constructor(config: MoonwallConfig) {
+  constructor(config: MoonwallConfig, options?: object) {
     const env = config.environments.find(({ name }) => name === process.env.MOON_TEST_ENV);
-
-    if (!env) {
-      throw new Error(`Environment ${process.env.MOON_TEST_ENV} not found in config`);
-    }
+    invariant(env, `Environment ${process.env.MOON_TEST_ENV} not found in config`);
 
     this.providers = [];
     this.nodes = [];
     this.foundation = env.foundation.type;
+    this.injectedOptions = options
   }
 
   public async setupFoundation() {
     const config = await importAsyncConfig();
     const env = config.environments.find(({ name }) => name === process.env.MOON_TEST_ENV);
 
-    if (!env) {
-      throw new Error(`Environment ${process.env.MOON_TEST_ENV} not found in config`);
-    }
+    invariant(env, `Environment ${process.env.MOON_TEST_ENV} not found in config`);
 
     const foundationHandlers: Record<
       FoundationType,
@@ -79,9 +77,10 @@ export class MoonwallContext {
       read_only: this.handleReadOnly,
       chopsticks: this.handleChopsticks,
       dev: this.handleDev,
-      zombie: this.handleZombie,
-      fork: this.handleReadOnly, // TODO: Implement fork
+      zombie: this.handleZombie
     };
+    console.log("RUNNING FOUNDATION HANDLER")
+    console.dir(env.foundation,{depth: null})
 
     const foundationHandler = foundationHandlers[env.foundation.type];
     this.environment = {
@@ -93,9 +92,7 @@ export class MoonwallContext {
   }
 
   private async handleZombie(env: Environment) {
-    if (env.foundation.type !== "zombie") {
-      throw new Error(`Foundation type must be 'zombie'`);
-    }
+    invariant(env.foundation.type === "zombie", "Foundation type must be 'zombie'");
 
     const { cmd: zombieConfig } = await parseZombieCmd(env.foundation.zombieSpec);
     this.rtUpgradePath = env.foundation.rtUpgradePath;
@@ -114,9 +111,7 @@ export class MoonwallContext {
   }
 
   private async handleDev(env: Environment, config: MoonwallConfig) {
-    if (env.foundation.type !== "dev") {
-      throw new Error(`Foundation type must be 'dev'`);
-    }
+    invariant(env.foundation.type === "dev", "Foundation type must be 'dev'");
 
     const { cmd, args, launch } = await parseRunCmd(
       env.foundation.launchSpec[0],
@@ -434,6 +429,9 @@ export class MoonwallContext {
 
     const nodes = ctx.environment.nodes;
 
+    console.log("remove me")
+    console.dir(nodes, {depth:null})
+
     if (this.environment.foundationType === "zombie") {
       return await this.startZombieNetwork();
     }
@@ -625,12 +623,14 @@ export class MoonwallContext {
     }
   }
 
-  public static async getContext(config?: MoonwallConfig, force = false): Promise<MoonwallContext> {
+  //TODO: Type options
+  public static async getContext(config?: MoonwallConfig, options?: object, force = false): Promise<MoonwallContext> {
+    invariant(!(options && MoonwallContext.instance), "Attempting to open a new context with overrides when context already exists");
+
     if (!MoonwallContext.instance?.configured || force) {
-      if (!config) {
-        throw new Error("❌ Config must be provided on Global Context instantiation");
-      }
-      MoonwallContext.instance = new MoonwallContext(config);
+      invariant(config, "Config must be provided on Global Context instantiation");
+
+      MoonwallContext.instance = new MoonwallContext(config, options);
       await MoonwallContext.instance.setupFoundation();
       debugSetup(`🟢  Moonwall context "${config.label}" created`);
     }
@@ -640,9 +640,7 @@ export class MoonwallContext {
   public static async destroy() {
     const ctx = MoonwallContext.instance;
 
-    if (!ctx) {
-      throw new Error("❌  No context to destroy");
-    }
+    invariant(ctx, "No context to destroy");
 
     try {
       await ctx.disconnect();
@@ -652,16 +650,10 @@ export class MoonwallContext {
 
     while (ctx.nodes.length > 0) {
       const node = ctx.nodes.pop();
-
-      if (!node) {
-        throw new Error("❌  No nodes to destroy");
-      }
+      invariant(node, "No node to destroy");
 
       const pid = node.pid;
-
-      if (!pid) {
-        throw new Error("❌  No pid to destroy");
-      }
+      invariant(pid, "No pid to destroy");
 
       node.kill("SIGINT");
       for (;;) {
@@ -698,9 +690,10 @@ export class MoonwallContext {
   }
 }
 
-export const contextCreator = async () => {
+// TODO: Type this properly!
+export const contextCreator = async (options?: object) => {
   const config = await importAsyncConfig();
-  const ctx = await MoonwallContext.getContext(config);
+  const ctx = await MoonwallContext.getContext(config, options);
   await runNetworkOnly();
   await ctx.connectEnvironment();
   return ctx;

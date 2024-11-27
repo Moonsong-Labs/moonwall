@@ -21,9 +21,9 @@ import {
   deployViemContract,
 } from "@moonwall/util";
 import { BN } from "@polkadot/util";
-import { Wallet, parseEther } from "ethers";
+import { type Wallet, parseEther } from "ethers";
 import {
-  Abi,
+  type Abi,
   createWalletClient,
   decodeErrorResult,
   decodeEventLog,

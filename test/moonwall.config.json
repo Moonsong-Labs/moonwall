@@ -949,6 +949,41 @@
           "endpoints": ["ws://127.0.0.1:9955"]
         }
       ]
+    },
+    {
+      "name": "fork_test",
+      "testFileDir": ["suites/fork_test"],
+      "foundation": {
+        "type": "dev",
+        "launchSpec": [
+          {
+            "name": "moonbeam",
+            "running": true,
+            "binPath": "./tmp/moonbeam",
+            "disableDefaultEthProviders": true,
+            "newRpcBehaviour": true,
+            "options": [
+              "-llazy-loading=trace",
+              "--ethapi=txpool",
+              "--no-hardware-benchmarks",
+              "--no-telemetry",
+              "--unsafe-force-node-key-generation",
+              "--reserved-only",
+              "--no-grandpa",
+              "--no-prometheus",
+              "--force-authoring",
+              "--rpc-cors=all",
+              "--alice",
+              "--sealing=manual",
+              "--tmp"
+            ],
+            "defaultForkConfig": {
+              "url": "https://moonbeam.kaki.dev",
+              "stateOverridePath": "./configs/mbStateOverride.json"
+            }
+          }
+        ]
+      }
     }
   ]
 }

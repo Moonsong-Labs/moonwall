@@ -123,7 +123,7 @@ export function createConfig(options: {
         testFileDir: [options.testDir],
         foundation: {
           type: options.foundation as any,
-        },
+        } as any,
       },
     ],
   };

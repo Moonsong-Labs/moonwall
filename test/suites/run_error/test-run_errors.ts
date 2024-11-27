@@ -1,4 +1,4 @@
-import { describeSuite, expect, beforeAll, ApiPromise, Web3 } from "@moonwall/cli";
+import { describeSuite, expect, beforeAll, type ApiPromise, type Web3 } from "@moonwall/cli";
 import { ALITH_ADDRESS } from "@moonwall/util";
 
 describeSuite({

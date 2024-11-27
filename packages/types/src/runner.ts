@@ -58,7 +58,7 @@ export type FoundationContextMap = {
         ? ZombieContext
         : K extends "read_only"
           ? ReadOnlyContext
-          : /* default: */ GenericContext;
+            : /* default: */ GenericContext;
 };
 
 export type TestContextMap = {
@@ -74,6 +74,24 @@ export type TestCasesFn<T extends FoundationType> = (params: {
 // TODO: Extend to include skipIf() and runIf()
 export type TestCaseModifier = "only" | "skip";
 
+/**
+ * Fork configuration options for test cases
+ */
+export interface ForkConfig {
+  /**
+   * RPC endpoint to fork from
+   */
+  endpoint: string;
+  /**
+   * Block number to fork from
+   */
+  block?: number;
+  /**
+   * Path to state override file
+   */
+  stateOverridePath?: string;
+}
+
 export interface ITestCase {
   id: string;
   title: string;
@@ -85,6 +103,19 @@ export interface ITestCase {
   // networkName?: string; TODO: Implement this
   timeout?: number;
 }
+
+export type TestSuiteConfig<T extends FoundationType = FoundationType> = {
+  id: string;
+  title: string;
+  foundationMethods: T;
+  description?: string;
+  testCases: TestCasesFn<T>;
+} & (T extends "dev"
+  ? {
+      forkConfig: ForkConfig;
+    }
+  : // biome-ignore lint/complexity/noBannedTypes: good enough for now
+    {});
 
 export type FoundationHandler<T extends FoundationType> = (params: {
   testCases: TestCasesFn<T>;
@@ -99,7 +130,10 @@ export type ITestSuiteType<T extends FoundationMethod> = {
   title: string;
   testCases: (TestContext: TestContextMap[T]) => void;
   foundationMethods: T;
-  options?: object;
+  // TODO: Make this foundation dependent
+  options?: {
+    forkConfig: ForkConfig;
+  };
   minRtVersion?: number;
   chainType?: ChainType;
   notChainType?: ChainType;

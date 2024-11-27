@@ -120,8 +120,7 @@ export async function executeTests(env: Environment, testRunArgs?: testRunArgs) 
       const testFileDir =
         additionalArgs?.subDirectory !== undefined
           ? env.testFileDir.map((folder) =>
-              // @ts-expect-error - bug in tsc
-              path.join(folder, additionalArgs.subDirectory)
+              path.join(folder, additionalArgs.subDirectory || "error")
             )
           : env.testFileDir;
 
