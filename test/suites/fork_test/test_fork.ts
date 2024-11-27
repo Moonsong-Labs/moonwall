@@ -10,6 +10,7 @@ describeSuite({
     forkConfig: {
       url: "https://moonbeam.unitedbloc.com",
       verbose: true,
+      blockHash: "0xffe39256c17cc4523a07c907bcf1aeeef4db217cd57cfcfb95d56088e0bb9f2d"
     },
   },
   testCases: ({ it, context, log }) => {
@@ -41,6 +42,20 @@ describeSuite({
           data: { free },
         } = await polkadotJs.query.system.account(testAccount);
         expect(free.toBigInt(), "Free balance should be 1337000").toBe(1337000000000000000000n);
+      },
+    });
+
+    it({
+      id: "T03",
+      title: "Check that forking works at a particular height",
+      test: async () => {
+        const testAccount = "0x0f300B667c55B28f4609EecE5628Cc27445A10cC";
+        log(`Address: ${testAccount}`);
+
+        const {
+          data: { free },
+        } = await polkadotJs.query.system.account(testAccount);
+        expect(free.toBigInt(), `Free balance should match what account ${testAccount} has at block #8508372`).toBe(76562560590695097485140n);
       },
     });
   },

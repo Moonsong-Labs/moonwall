@@ -127,8 +127,8 @@ export class LaunchCommandParser {
       invariant(forkOptions.url.startsWith("http"), "Fork URL must start with http:// or https://");
       this.overrideArg(`--fork-chain-from-rpc=${forkOptions.url}`);
     }
-    if (forkOptions.blockNumber) {
-      this.overrideArg(`--block=${forkOptions.blockNumber}`);
+    if (forkOptions.blockHash) {
+      this.overrideArg(`--block=${forkOptions.blockHash}`);
     }
     if (forkOptions.stateOverridePath) {
       this.overrideArg(`--fork-state-overrides=${forkOptions.stateOverridePath}`);

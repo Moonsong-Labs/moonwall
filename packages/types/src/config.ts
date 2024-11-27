@@ -544,9 +544,9 @@ export type ForkConfig = {
    */
   url: string;
   /**
-   * The block number to fork from (optional)
+   * The block hash to fork from
    */
-  blockNumber?: number;
+  blockHash?: string;
   /**
    * The state override path (optional)
    */

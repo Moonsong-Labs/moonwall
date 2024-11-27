@@ -75,9 +75,9 @@
         "defaultForkConfig": {
           "description": "BETA: Default Fork options for the node (overriden by per-test fork options)",
           "properties": {
-            "blockNumber": {
-              "description": "The block number to fork from (optional)",
-              "type": "number"
+            "blockHash": {
+              "description": "The block hash to fork from",
+              "type": "string"
             },
             "stateOverridePath": {
               "description": "The state override path (optional)",
