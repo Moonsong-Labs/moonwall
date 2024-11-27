@@ -953,9 +953,7 @@
     {
       "name": "fork_test",
       "testFileDir": ["suites/fork_test"],
-      "runScripts": [
-        "compile-wasm.ts compile -b tmp/moonbeam -o tmp/wasm -c moonbeam-dev"
-      ],
+
       "foundation": {
         "type": "dev",
         "launchSpec": [
@@ -968,7 +966,6 @@
               "--ethapi=txpool",
               "--no-hardware-benchmarks",
               "--no-telemetry",
-              "--wasmtime-precompiled=tmp/wasm",
               "--unsafe-force-node-key-generation",
               "--reserved-only",
               "--no-grandpa",
