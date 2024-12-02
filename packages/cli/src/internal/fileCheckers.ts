@@ -2,8 +2,8 @@ import fs from "node:fs";
 import { execSync } from "node:child_process";
 import chalk from "chalk";
 import os from "node:os";
-import inquirer from "inquirer";
 import path from "node:path";
+import { select } from "@inquirer/prompts";
 
 export async function checkExists(path: string) {
   const binPath = path.split(" ")[0];
@@ -38,9 +38,7 @@ export async function downloadBinsIfMissing(binPath: string) {
   const binDir = path.dirname(binPath);
   const binPathExists = fs.existsSync(binPath);
   if (!binPathExists && process.arch === "x64") {
-    const choices = await inquirer.prompt({
-      name: "download",
-      type: "list",
+    const download = await select({
       message: `The binary ${chalk.bgBlack.greenBright(
         binName
       )} is missing from ${chalk.bgBlack.greenBright(
@@ -53,7 +51,7 @@ export async function downloadBinsIfMissing(binPath: string) {
       ],
     });
 
-    if (!choices.download) {
+    if (!download) {
       process.exit(0);
     } else {
       execSync(`mkdir -p ${binDir}`);
@@ -123,9 +121,7 @@ export function checkAlreadyRunning(binaryName: string): number[] {
 }
 
 export async function promptAlreadyRunning(pids: number[]) {
-  const choice = await inquirer.prompt({
-    name: "AlreadyRunning",
-    type: "list",
+  const alreadyRunning = await select({
     message: `The following processes are already running: \n${pids
       .map((pid) => {
         const { binName, ports } = checkListeningPorts(pid);
@@ -140,7 +136,7 @@ export async function promptAlreadyRunning(pids: number[]) {
     ],
   });
 
-  switch (choice.AlreadyRunning) {
+  switch (alreadyRunning) {
     case "kill":
       for (const pid of pids) {
         execSync(`kill ${pid}`);

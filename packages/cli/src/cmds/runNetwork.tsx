@@ -1,9 +1,9 @@
 import type { Environment } from "@moonwall/types";
 import chalk from "chalk";
 import clear from "clear";
-import fs, { promises as fsPromises } from "node:fs";
-import inquirer from "inquirer";
-import PressToContinuePrompt from "inquirer-press-to-continue";
+import { promises as fsPromises } from "node:fs";
+import { render } from "ink";
+import { LogViewer as LogStreamer } from "./components/LogViewer";
 import { parse } from "yaml";
 import { clearNodeLogs, reportLogLocation } from "../internal/cmdFunctions/tempLogs";
 import { commonChecks } from "../internal/launcherCommon";
@@ -21,8 +21,7 @@ import {
 } from "./interactiveCmds";
 import { executeTests } from "./runTests";
 import type { RunCommandArgs } from "./entrypoint";
-
-inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
+import { confirm, input, select, Separator } from "@inquirer/prompts";
 
 let lastSelected = 0;
 
@@ -50,87 +49,87 @@ export async function runNetworkCmd(args: RunCommandArgs) {
 
   const testFileDirs = env.testFileDir;
   const foundation = env.foundation.type;
-  const questions = [
-    {
-      type: "confirm",
-      name: "Quit",
-      message: "ℹ️  Are you sure you'd like to close network and quit? \n",
-      default: false,
-    },
-    {
-      name: "Choice",
-      type: "list",
-      message: "What would you like todo now",
-      choices: ["Chill", "Info", "Test", "Quit"],
-    },
-    {
-      name: "MenuChoice",
-      type: "list",
-      message: `Environment : ${chalk.bgGray.cyanBright(args.envName)}\nPlease select a choice: `,
-      default: () => lastSelected,
-      pageSize: 10,
-      choices: [
-        {
-          name: "Tail:      Print the logs of the current running node to this console",
-          value: 1,
-          short: "tail",
-        },
-        {
-          name: `Info:      Display Information about this environment ${args.envName}`,
-          value: 2,
-          short: "info",
-        },
-        {
-          name:
-            foundation === "dev" || foundation === "chopsticks" || foundation === "zombie"
-              ? `Command:   Run command on network (${chalk.bgGrey.cyanBright(foundation)})`
-              : chalk.dim(
-                  `Not applicable for foundation type (${chalk.bgGrey.cyanBright(foundation)})`
-                ),
-          value: 3,
-          short: "cmd",
-          disabled: foundation !== "dev" && foundation !== "chopsticks" && foundation !== "zombie",
-        },
-        {
-          name:
-            testFileDirs.length > 0
-              ? `Test:      Execute tests registered for this environment   (${chalk.bgGrey.cyanBright(
-                  testFileDirs
-                )})`
-              : chalk.dim("Test:    NO TESTS SPECIFIED"),
-          value: 4,
-          disabled: !(testFileDirs.length > 0),
-          short: "test",
-        },
-        {
-          name:
-            testFileDirs.length > 0
-              ? `GrepTest:  Execute individual test(s) based on grepping the name / ID (${chalk.bgGrey.cyanBright(
-                  testFileDirs
-                )})`
-              : chalk.dim("Test:    NO TESTS SPECIFIED"),
-          value: 5,
-          disabled: !(testFileDirs.length > 0),
-          short: "grep",
-        },
-        new inquirer.Separator(),
-        {
-          name: "Quit:      Close network and quit the application",
-          value: 6,
-          short: "quit",
-        },
-      ],
-      filter(val) {
-        return val;
-      },
-    },
-    {
-      name: "NetworkStarted",
-      type: "press-to-continue",
-      anyKey: true,
-      pressToContinueMessage: "✅  Press any key to continue...\n",
-    },
-  ] as const;
+  // const questions = [
+  //   // {
+  //   //   type: "confirm",
+  //   //   name: "Quit",
+  //   //   message: "ℹ️  Are you sure you'd like to close network and quit? \n",
+  //   //   default: false,
+  //   // },
+  //   // {
+  //   //   name: "Choice",
+  //   //   type: "list",
+  //   //   message: "What would you like todo now",
+  //   //   choices: ["Chill", "Info", "Test", "Quit"],
+  //   // },
+  //   {
+  //     name: "MenuChoice",
+  //     type: "list",
+  //     message: `Environment : ${chalk.bgGray.cyanBright(args.envName)}\nPlease select a choice: `,
+  //     default: () => lastSelected,
+  //     pageSize: 10,
+  //     choices: [
+  //       {
+  //         name: "Tail:      Print the logs of the current running node to this console",
+  //         value: 1,
+  //         short: "tail",
+  //       },
+  //       {
+  //         name: `Info:      Display Information about this environment ${args.envName}`,
+  //         value: 2,
+  //         short: "info",
+  //       },
+  //       {
+  //         name:
+  //           foundation === "dev" || foundation === "chopsticks" || foundation === "zombie"
+  //             ? `Command:   Run command on network (${chalk.bgGrey.cyanBright(foundation)})`
+  //             : chalk.dim(
+  //               `Not applicable for foundation type (${chalk.bgGrey.cyanBright(foundation)})`
+  //             ),
+  //         value: 3,
+  //         short: "cmd",
+  //         disabled: foundation !== "dev" && foundation !== "chopsticks" && foundation !== "zombie",
+  //       },
+  //       {
+  //         name:
+  //           testFileDirs.length > 0
+  //             ? `Test:      Execute tests registered for this environment   (${chalk.bgGrey.cyanBright(
+  //               testFileDirs
+  //             )})`
+  //             : chalk.dim("Test:    NO TESTS SPECIFIED"),
+  //         value: 4,
+  //         disabled: !(testFileDirs.length > 0),
+  //         short: "test",
+  //       },
+  //       {
+  //         name:
+  //           testFileDirs.length > 0
+  //             ? `GrepTest:  Execute individual test(s) based on grepping the name / ID (${chalk.bgGrey.cyanBright(
+  //               testFileDirs
+  //             )})`
+  //             : chalk.dim("Test:    NO TESTS SPECIFIED"),
+  //         value: 5,
+  //         disabled: !(testFileDirs.length > 0),
+  //         short: "grep",
+  //       },
+  //       new Separator(),
+  //       {
+  //         name: "Quit:      Close network and quit the application",
+  //         value: 6,
+  //         short: "quit",
+  //       },
+  //     ],
+  //     filter(val) {
+  //       return val;
+  //     },
+  //   },
+  //   // {
+  //   //   name: "NetworkStarted",
+  //   //   type: "press-to-continue",
+  //   //   anyKey: true,
+  //   //   pressToContinueMessage: "✅  Press any key to continue...\n",
+  //   // },
+  // ] as const;
 
   if (
     (env.foundation.type === "dev" && !env.foundation.launchSpec[0].retainAllLogs) ||
@@ -153,32 +152,91 @@ export async function runNetworkCmd(args: RunCommandArgs) {
   }
 
   if (!args.GrepTest) {
-    const question = questions.find(({ name }) => name === "NetworkStarted");
+    // const question = questions.find(({ name }) => name === "NetworkStarted");
 
-    if (!question) {
-      throw new Error("Question not found. This is a bug, please raise an issue.");
-    }
+    // if (!question) {
+    //   throw new Error("Question not found. This is a bug, please raise an issue.");
+    // }
 
-    await inquirer.prompt(question);
+    await input({
+      message: "✅  Press any key to continue...\n"
+    })
   } else {
     process.env.MOON_RECYCLE = "true";
     process.env.MOON_GREP = args.GrepTest;
     await executeTests(env, { testNamePattern: args.GrepTest, subDirectory: args.subDirectory });
   }
 
-  mainloop: for (;;) {
-    const question = questions.find(({ name }) => name === "MenuChoice");
-    if (!question) {
-      throw new Error("Question not found. This is a bug, please raise an issue.");
-    }
-    const choice = await inquirer.prompt(question);
+  mainloop: for (; ;) {
+    // const question = questions.find(({ name }) => name === "MenuChoice");
+    // if (!question) {
+    //   throw new Error("Question not found. This is a bug, please raise an issue.");
+    // }
+    // const choice = await inquirer.prompt(question);
+
+    const menuChoice = await select({
+      message: `Environment : ${chalk.bgGray.cyanBright(args.envName)}\nPlease select a choice: `,
+      default: () => lastSelected,
+      pageSize: 10,
+      choices: [
+        {
+          name: "Tail:      Print the logs of the current running node to this console",
+          value: 1,
+          short: "tail",
+        },
+        {
+          name: `Info:      Display Information about this environment ${args.envName}`,
+          value: 2,
+          short: "info",
+        },
+        {
+          name:
+            foundation === "dev" || foundation === "chopsticks" || foundation === "zombie"
+              ? `Command:   Run command on network (${chalk.bgGrey.cyanBright(foundation)})`
+              : chalk.dim(
+                `Not applicable for foundation type (${chalk.bgGrey.cyanBright(foundation)})`
+              ),
+          value: 3,
+          short: "cmd",
+          disabled: foundation !== "dev" && foundation !== "chopsticks" && foundation !== "zombie",
+        },
+        {
+          name:
+            testFileDirs.length > 0
+              ? `Test:      Execute tests registered for this environment   (${chalk.bgGrey.cyanBright(
+                testFileDirs
+              )})`
+              : chalk.dim("Test:    NO TESTS SPECIFIED"),
+          value: 4,
+          disabled: !(testFileDirs.length > 0),
+          short: "test",
+        },
+        {
+          name:
+            testFileDirs.length > 0
+              ? `GrepTest:  Execute individual test(s) based on grepping the name / ID (${chalk.bgGrey.cyanBright(
+                testFileDirs
+              )})`
+              : chalk.dim("Test:    NO TESTS SPECIFIED"),
+          value: 5,
+          disabled: !(testFileDirs.length > 0),
+          short: "grep",
+        },
+        new Separator(),
+        {
+          name: "Quit:      Close network and quit the application",
+          value: 6,
+          short: "quit",
+        },
+      ]
+    })
     const env = globalConfig.environments.find(({ name }) => name === args.envName);
 
     if (!env) {
       throw new Error("Environment not found in config. This is an error, please raise.");
     }
 
-    switch (choice.MenuChoice) {
+    switch (menuChoice) {
       case 1:
         clear();
         await resolveTailChoice(env);
@@ -207,12 +265,17 @@ export async function runNetworkCmd(args: RunCommandArgs) {
         break;
 
       case 6: {
-        const question = questions.find(({ name }) => name === "Quit");
-        if (!question) {
-          throw new Error("Question not found. This is a bug, please raise an issue.");
-        }
-        const quit = await inquirer.prompt(question);
-        if (quit.Quit === true) {
+        // const question = questions.find(({ name }) => name === "Quit");
+        // if (!question) {
+        //   throw new Error("Question not found. This is a bug, please raise an issue.");
+        // }
+        // const quit = await inquirer.prompt(question);
+
+        const quit = await confirm({
+          message: "ℹ️  Are you sure you'd like to close network and quit? \n",
+          default: false,
+        });
+        if (quit === true) {
           break mainloop;
         }
         break;
@@ -313,16 +376,14 @@ const resolveInfoChoice = async (env: Environment) => {
 };
 
 const resolveGrepChoice = async (env: Environment, silent = false) => {
-  const choice = await inquirer.prompt({
-    name: "grep",
-    type: "input",
+  const grep = await input({
     message: "What pattern would you like to filter for (ID/Title): ",
     default: process.env.MOON_GREP || "D01T01",
   });
   process.env.MOON_RECYCLE = "true";
-  process.env.MOON_GREP = await choice.grep;
+  process.env.MOON_GREP =  grep;
   const opts: any = {
-    testNamePattern: await choice.grep,
+    testNamePattern: grep,
     silent,
     subDirectory: process.env.MOON_SUBDIR,
   };
@@ -342,159 +403,67 @@ const resolveTestChoice = async (env: Environment, silent = false) => {
 };
 
 const resolveTailChoice = async (env: Environment) => {
-  let tailing = true;
   let zombieNodePointer = 0;
-  let bottomBarContents = "";
   let switchNode: boolean;
-  let zombieContent: string;
-  let zombieNodes: string[];
+  let zombieNodes: string[] | undefined;
 
-  const resumePauseProse = [
-    `, ${chalk.bgWhite.black("[p]")} Pause tail`,
-    `, ${chalk.bgWhite.black("[r]")} Resume tail`,
-  ];
+  if (process.env.MOON_ZOMBIE_NODES) {
+    zombieNodes = process.env.MOON_ZOMBIE_NODES.split("|");
+  }
 
-  const bottomBarBase = `📜 Tailing Logs, commands: ${chalk.bgWhite.black(
-    "[q]"
-  )} Quit, ${chalk.bgWhite.black("[t]")} Test, ${chalk.bgWhite.black("[g]")} Grep test`;
-
-  bottomBarContents = bottomBarBase + resumePauseProse[0];
-
-  const ui = new inquirer.ui.BottomBar({
-    bottomBar: `${bottomBarContents}\n`,
-  });
-
-  for (;;) {
-    clear();
-    if (process.env.MOON_ZOMBIE_NODES) {
-      zombieNodes = process.env.MOON_ZOMBIE_NODES.split("|");
-
-      zombieContent = `, ${chalk.bgWhite.black("[,]")} Next Log, ${chalk.bgWhite.black(
-        "[.]"
-      )} Previous Log  | CurrentLog: ${chalk.bgWhite.black(
-        `${zombieNodes[zombieNodePointer]} (${zombieNodePointer + 1}/${zombieNodes.length})`
-      )}`;
-
-      bottomBarContents = bottomBarBase + resumePauseProse[tailing ? 0 : 1] + zombieContent;
-
-      ui.updateBottomBar(`${bottomBarContents}\n`);
-    }
-
+  for (; ;) {
     switchNode = false;
-    await new Promise(async (resolve) => {
-      const onData = (chunk: any) => ui.log.write(chunk.toString());
+    await new Promise<void>(async (resolve) => {
       const logFilePath = process.env.MOON_ZOMBIE_NODES
-        ? `${process.env.MOON_ZOMBIE_DIR}/${zombieNodes[zombieNodePointer]}.log`
+        ? `${process.env.MOON_ZOMBIE_DIR}/${zombieNodes?.[zombieNodePointer]}.log`
         : process.env.MOON_LOG_LOCATION;
 
       if (!logFilePath) {
         throw new Error("No log file path resolved, this should not happen. Please raise defect");
       }
 
-      let currentReadPosition = 0;
+      const { waitUntilExit } = render(
+        <LogStreamer
+          env={env}
+          logFilePath={logFilePath}
+          onExit={() => resolve()}
+          onTest={async () => { await resolveTestChoice(env, true) }}
+          onGrep={async () => { await resolveGrepChoice(env, true) }}
+          onNextLog={
+            zombieNodes
+              ? () => {
+                switchNode = true;
+                zombieNodePointer = (zombieNodePointer + 1) % zombieNodes!.length;
+                resolve();
+              }
+              : undefined
+          }
+          onPrevLog={
+            zombieNodes
+              ? () => {
+                switchNode = true;
+                zombieNodePointer = (zombieNodePointer - 1 + zombieNodes!.length) % zombieNodes!.length;
+                resolve();
+              }
+              : undefined
+          }
+          zombieInfo={
+            zombieNodes
+              ? {
+                currentNode: zombieNodes[zombieNodePointer],
+                position: zombieNodePointer + 1,
+                total: zombieNodes.length,
+              }
+              : undefined
+          }
+        />
+      );
 
-      const printLogs = (newReadPosition: number, curr: number) => {
-        const stream = fs.createReadStream(logFilePath, {
-          start: curr,
-          end: newReadPosition,
-        });
-        stream.on("data", onData);
-        stream.on("end", () => {
-          currentReadPosition = newReadPosition;
-        });
-      };
-
-      const readLog = () => {
-        const stats = fs.statSync(logFilePath);
-        const newReadPosition = stats.size;
-
-        if (newReadPosition > currentReadPosition && tailing) {
-          printLogs(newReadPosition, currentReadPosition);
-        }
-      };
-
-      const incrPtr = () => {
-        zombieNodePointer = (zombieNodePointer + 1) % zombieNodes.length;
-      };
-
-      const decrPtr = () => {
-        zombieNodePointer = (zombieNodePointer - 1 + zombieNodes.length) % zombieNodes.length;
-      };
-
-      printLogs(fs.statSync(logFilePath).size, 0);
-
-      const renderBottomBar = (...parts: any[]) => {
-        const content = process.env.MOON_ZOMBIE_NODES
-          ? `${bottomBarBase} ${parts?.join(" ")}${zombieContent}\n`
-          : `${bottomBarBase} ${parts?.join(" ")}\n`;
-        ui.updateBottomBar(content);
-      };
-
-      const handleInputData = async (key: any) => {
-        ui.rl.input.pause();
-        const char = key.toString().trim();
-
-        if (char === "p") {
-          tailing = false;
-          renderBottomBar(resumePauseProse[1]);
-        }
-
-        if (char === "r") {
-          printLogs(fs.statSync(logFilePath).size, currentReadPosition);
-          tailing = true;
-          renderBottomBar(resumePauseProse[0]);
-        }
-
-        if (char === "q") {
-          ui.rl.input.removeListener("data", handleInputData);
-          ui.rl.input.pause();
-          fs.unwatchFile(logFilePath);
-          resolve("");
-        }
-
-        if (char === "t") {
-          await resolveTestChoice(env, true);
-          renderBottomBar(resumePauseProse[tailing ? 0 : 1]);
-        }
-
-        if (char === ",") {
-          ui.rl.input.removeListener("data", handleInputData);
-          ui.rl.input.pause();
-          fs.unwatchFile(logFilePath);
-          switchNode = true;
-          incrPtr();
-          resolve("");
-        }
-
-        if (char === ".") {
-          ui.rl.input.removeListener("data", handleInputData);
-          ui.rl.input.pause();
-          fs.unwatchFile(logFilePath);
-          switchNode = true;
-          decrPtr();
-          resolve("");
-        }
-
-        if (char === "g") {
-          ui.rl.input.pause();
-          tailing = false;
-          await resolveGrepChoice(env, true);
-          renderBottomBar(resumePauseProse[tailing ? 0 : 1]);
-          tailing = true;
-          ui.rl.input.resume();
-        }
-        ui.rl.input.resume();
-      };
-      ui.rl.input.on("data", handleInputData);
-
-      fs.watchFile(logFilePath, () => {
-        readLog();
-      });
+      await waitUntilExit();
     });
 
     if (!switchNode) {
       break;
     }
   }
-  ui.close();
 };

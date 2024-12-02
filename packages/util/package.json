@@ -53,6 +53,7 @@
     "prepublish": "pnpm run build && pnpm run generate-types"
   },
   "dependencies": {
+    "@inquirer/prompts": "*",
     "@moonbeam-network/api-augment": "*",
     "@moonwall/types": "workspace:*",
     "@polkadot/api": "*",
@@ -71,8 +72,6 @@
     "debug": "4.3.7",
     "dotenv": "16.4.5",
     "ethers": "*",
-    "inquirer": "*",
-    "inquirer-press-to-continue": "1.2.0",
     "rlp": "3.0.0",
     "semver": "*",
     "viem": "*",

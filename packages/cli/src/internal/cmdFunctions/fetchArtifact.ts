@@ -2,7 +2,6 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import semver from "semver";
 import chalk from "chalk";
-import inquirer from "inquirer";
 import { runTask } from "../processHelpers";
 import { minimatch } from "minimatch";
 import { downloader } from "./downloader";
@@ -10,6 +9,7 @@ import { allReposAsync, standardRepos } from "../../lib/repoDefinitions";
 import { execSync } from "node:child_process";
 import { configExists } from "../../lib/configReader";
 import { Octokit } from "@octokit/rest";
+import { confirm } from "@inquirer/prompts";
 
 const octokit = new Octokit({
   baseUrl: "https://api.github.com",
@@ -41,13 +41,11 @@ export async function fetchArtifact(args: fetchArtifactArgs) {
       if (args.overwrite) {
         console.log("File exists, overwriting ...");
       } else {
-        const result = await inquirer.prompt({
-          name: "continue",
-          type: "confirm",
+        const cont = await confirm({
           message: "File exists, do you want to overwrite?",
         });
 
-        if (!result.continue) {
+        if (!cont) {
           return false;
         }
       }

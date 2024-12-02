@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import fs from "node:fs";
-import inquirer from "inquirer";
+import { confirm } from "@inquirer/prompts";
 import path from "node:path";
 
 interface DeriveTestIdsOptions {
@@ -38,13 +38,11 @@ export async function deriveTestIds(params: DeriveTestIdsOptions) {
     }
   }
 
-  const result = await inquirer.prompt({
-    type: "confirm",
-    name: "confirm",
+  const result = await confirm({
     message: `This will rename ${foldersToRename.length} suites IDs in ${rootDir}, continue?`,
   });
 
-  if (!result.confirm) {
+  if (!result) {
     console.log("🔴 Aborted");
     return;
   }
