@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Box, Text, useInput, useApp } from "ink";
 import chalk from "chalk";
 import fs from "node:fs";
-import { executeTests } from "../runTests";
+import { executeTests, testRunArgs } from "../runTests";
+import { UserConfig } from "vitest/dist/node.js";
 
 interface LogViewerProps {
   env: any;
@@ -28,6 +29,7 @@ export const LogViewer: React.FC<LogViewerProps> = ({
   zombieInfo,
 }) => {
   const [logs, setLogs] = useState<string[]>([]);
+  const [testOutput, setTestOutput] = useState<string[]>([]);
   const [tailing, setTailing] = useState(true);
   const [currentReadPosition, setCurrentReadPosition] = useState(0);
   const [isExecutingCommand, setIsExecutingCommand] = useState(false);
@@ -51,18 +53,74 @@ export const LogViewer: React.FC<LogViewerProps> = ({
     };
   }, []);
 
+  const readLog = useCallback(() => {
+    if (!tailing || !fs.existsSync(logFilePath)) return;
+
+    try {
+      const stats = fs.statSync(logFilePath);
+      const newReadPosition = stats.size;
+
+      if (newReadPosition > currentReadPosition) {
+        const stream = fs.createReadStream(logFilePath, {
+          start: currentReadPosition,
+          end: newReadPosition,
+        });
+
+        let newContent = "";
+        stream.on("data", (chunk) => {
+          newContent += chunk.toString();
+        });
+
+        stream.on("end", () => {
+          const lines = newContent.split("\n")
+            .filter(line => line.trim())
+            .map(line => line.trimEnd());
+          
+          setLogs(prev => [...prev, ...lines]);
+          setCurrentReadPosition(newReadPosition);
+        });
+
+        stream.on("error", (error) => {
+          console.error("Error reading log file:", error);
+        });
+      }
+    } catch (error) {
+      console.error("Error in readLog:", error);
+    }
+  }, [tailing, logFilePath, currentReadPosition]);
+
+  const setupWatcher = useCallback(() => {
+    fs.watchFile(logFilePath, readLog);
+  }, [logFilePath, readLog]);
+
+  const removeWatcher = useCallback(() => {
+    fs.unwatchFile(logFilePath);
+  }, [logFilePath]);
+
   const handleGrepSubmit = useCallback(async () => {
     process.env.MOON_RECYCLE = "true";
     process.env.MOON_GREP = grepInput;
-    const opts: any = {
+    const opts: testRunArgs & UserConfig  = {
       testNamePattern: grepInput,
-      silent: true,
       subDirectory: process.env.MOON_SUBDIR,
+      silent: false,
+      reporters: ["basic"],
+      onConsoleLog: (log: string)=> {
+        if (!log.includes("has multiple versions, ensure that there is only one installed.")) {
+        setTestOutput(prev => [...prev, log]);
+        }
+        return false;
+      },
+      onStackTrace: (error, frame) =>{
+        setTestOutput(prev => [...prev, error.message]);
+        return false;
+      }
     };
-    opts.reporters = ["dot"];
     
     setIsExecutingCommand(true);
+    setTestOutput([]); // Clear previous test output
     removeWatcher();
+
     try {
       await executeTests(env, opts);
     } finally {
@@ -70,10 +128,9 @@ export const LogViewer: React.FC<LogViewerProps> = ({
       setIsExecutingCommand(false);
       if (tailing) {
         setupWatcher();
-        readLog();
       }
     }
-  }, [grepInput, env, tailing]);
+  }, [grepInput, env, tailing, setupWatcher, removeWatcher]);
 
   const resumePauseProse = [
     `, ${chalk.bgWhite.black("[p]")} Pause tail`,
@@ -91,16 +148,6 @@ export const LogViewer: React.FC<LogViewerProps> = ({
         `${zombieInfo.currentNode} (${zombieInfo.position}/${zombieInfo.total})`
       )}`
     : "";
-
-  const setupWatcher = () => {
-    fs.watchFile(logFilePath, () => {
-      readLog();
-    });
-  };
-
-  const removeWatcher = () => {
-    fs.unwatchFile(logFilePath);
-  };
 
   useInput((input, key) => {
     if (isGrepMode) {
@@ -173,30 +220,6 @@ export const LogViewer: React.FC<LogViewerProps> = ({
     };
   }, [isGrepMode]);
 
-  const readLog = () => {
-    if (!tailing) return;
-
-    const stats = fs.statSync(logFilePath);
-    const newReadPosition = stats.size;
-
-    if (newReadPosition > currentReadPosition) {
-      const stream = fs.createReadStream(logFilePath, {
-        start: currentReadPosition,
-        end: newReadPosition,
-      });
-
-      let newContent = "";
-      stream.on("data", (chunk) => {
-        newContent += chunk.toString();
-      });
-
-      stream.on("end", () => {
-        setLogs((prev) => [...prev, ...newContent.split("\n")]);
-        setCurrentReadPosition(newReadPosition);
-      });
-    }
-  };
-
   useEffect(() => {
     // Initial read
     const stats = fs.statSync(logFilePath);
@@ -208,7 +231,8 @@ export const LogViewer: React.FC<LogViewerProps> = ({
     });
 
     stream.on("end", () => {
-      setLogs(content.split("\n"));
+      const lines = content.split("\n").filter(line => line.trim());
+      setLogs(lines);
       setCurrentReadPosition(stats.size);
     });
 
@@ -224,11 +248,40 @@ export const LogViewer: React.FC<LogViewerProps> = ({
 
   return (
     <Box flexDirection="column" height={process.stdout.rows}>
-      <Box flexGrow={1} flexDirection="column" marginBottom={-1}>
-        {logs.slice(-process.stdout.rows + 1).map((line, i) => (
-          <Text key={i}>{line}</Text>
-        ))}
+      <Box flexDirection="row" flexGrow={1}>
+        {/* Logs Section */}
+        <Box 
+          flexDirection="column" 
+          width={testOutput.length > 0 ? "60%" : "100%"} 
+          borderStyle="round" 
+          borderColor="blue"
+        >
+          <Box paddingX={1}>
+            <Text bold>Node Logs</Text>
+          </Box>
+          <Box flexGrow={1} flexDirection="column">
+            {logs.slice(-Math.floor(process.stdout.rows * 0.6)).map((line, i) => (
+              <Text key={i}>{line}</Text>
+            ))}
+          </Box>
+        </Box>
+
+        {/* Test Output Section - Only show if there's output */}
+        {testOutput.length > 0 && (
+          <Box flexDirection="column" width="40%" borderStyle="round" borderColor="yellow">
+            <Box paddingX={1}>
+              <Text bold>Test Output</Text>
+            </Box>
+            <Box flexGrow={1} flexDirection="column">
+              {testOutput.slice(-Math.floor(process.stdout.rows * 0.6)).map((line, i) => (
+                <Text key={i}>{line}</Text>
+              ))}
+            </Box>
+          </Box>
+        )}
       </Box>
+
+      {/* Bottom Bar */}
       {!isExecutingCommand && !isGrepMode && (
         <Box flexDirection="column" margin={0} padding={0}>
           <Text dimColor>{"─".repeat(process.stdout.columns)}</Text>
