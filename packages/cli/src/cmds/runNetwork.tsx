@@ -49,87 +49,6 @@ export async function runNetworkCmd(args: RunCommandArgs) {
 
   const testFileDirs = env.testFileDir;
   const foundation = env.foundation.type;
-  // const questions = [
-  //   // {
-  //   //   type: "confirm",
-  //   //   name: "Quit",
-  //   //   message: "ℹ️  Are you sure you'd like to close network and quit? \n",
-  //   //   default: false,
-  //   // },
-  //   // {
-  //   //   name: "Choice",
-  //   //   type: "list",
-  //   //   message: "What would you like todo now",
-  //   //   choices: ["Chill", "Info", "Test", "Quit"],
-  //   // },
-  //   {
-  //     name: "MenuChoice",
-  //     type: "list",
-  //     message: `Environment : ${chalk.bgGray.cyanBright(args.envName)}\nPlease select a choice: `,
-  //     default: () => lastSelected,
-  //     pageSize: 10,
-  //     choices: [
-  //       {
-  //         name: "Tail:      Print the logs of the current running node to this console",
-  //         value: 1,
-  //         short: "tail",
-  //       },
-  //       {
-  //         name: `Info:      Display Information about this environment ${args.envName}`,
-  //         value: 2,
-  //         short: "info",
-  //       },
-  //       {
-  //         name:
-  //           foundation === "dev" || foundation === "chopsticks" || foundation === "zombie"
-  //             ? `Command:   Run command on network (${chalk.bgGrey.cyanBright(foundation)})`
-  //             : chalk.dim(
-  //               `Not applicable for foundation type (${chalk.bgGrey.cyanBright(foundation)})`
-  //             ),
-  //         value: 3,
-  //         short: "cmd",
-  //         disabled: foundation !== "dev" && foundation !== "chopsticks" && foundation !== "zombie",
-  //       },
-  //       {
-  //         name:
-  //           testFileDirs.length > 0
-  //             ? `Test:      Execute tests registered for this environment   (${chalk.bgGrey.cyanBright(
-  //               testFileDirs
-  //             )})`
-  //             : chalk.dim("Test:    NO TESTS SPECIFIED"),
-  //         value: 4,
-  //         disabled: !(testFileDirs.length > 0),
-  //         short: "test",
-  //       },
-  //       {
-  //         name:
-  //           testFileDirs.length > 0
-  //             ? `GrepTest:  Execute individual test(s) based on grepping the name / ID (${chalk.bgGrey.cyanBright(
-  //               testFileDirs
-  //             )})`
-  //             : chalk.dim("Test:    NO TESTS SPECIFIED"),
-  //         value: 5,
-  //         disabled: !(testFileDirs.length > 0),
-  //         short: "grep",
-  //       },
-  //       new Separator(),
-  //       {
-  //         name: "Quit:      Close network and quit the application",
-  //         value: 6,
-  //         short: "quit",
-  //       },
-  //     ],
-  //     filter(val) {
-  //       return val;
-  //     },
-  //   },
-  //   // {
-  //   //   name: "NetworkStarted",
-  //   //   type: "press-to-continue",
-  //   //   anyKey: true,
-  //   //   pressToContinueMessage: "✅  Press any key to continue...\n",
-  //   // },
-  // ] as const;
 
   if (
     (env.foundation.type === "dev" && !env.foundation.launchSpec[0].retainAllLogs) ||
@@ -152,15 +71,8 @@ export async function runNetworkCmd(args: RunCommandArgs) {
   }
 
   if (!args.GrepTest) {
-    // const question = questions.find(({ name }) => name === "NetworkStarted");
 
-    // if (!question) {
-    //   throw new Error("Question not found. This is a bug, please raise an issue.");
-    // }
-
-    await input({
-      message: "✅  Press any key to continue...\n"
-    })
+    await input({ message: "✅  Press any key to continue...\n", })
   } else {
     process.env.MOON_RECYCLE = "true";
     process.env.MOON_GREP = args.GrepTest;
@@ -168,11 +80,6 @@ export async function runNetworkCmd(args: RunCommandArgs) {
   }
 
   mainloop: for (; ;) {
-    // const question = questions.find(({ name }) => name === "MenuChoice");
-    // if (!question) {
-    //   throw new Error("Question not found. This is a bug, please raise an issue.");
-    // }
-    // const choice = await inquirer.prompt(question);
 
     const menuChoice = await select({
       message: `Environment : ${chalk.bgGray.cyanBright(args.envName)}\nPlease select a choice: `,
@@ -265,12 +172,6 @@ export async function runNetworkCmd(args: RunCommandArgs) {
         break;
 
       case 6: {
-        // const question = questions.find(({ name }) => name === "Quit");
-        // if (!question) {
-        //   throw new Error("Question not found. This is a bug, please raise an issue.");
-        // }
-        // const quit = await inquirer.prompt(question);
-
         const quit = await confirm({
           message: "ℹ️  Are you sure you'd like to close network and quit? \n",
           default: false,
@@ -381,7 +282,7 @@ const resolveGrepChoice = async (env: Environment, silent = false) => {
     default: process.env.MOON_GREP || "D01T01",
   });
   process.env.MOON_RECYCLE = "true";
-  process.env.MOON_GREP =  grep;
+  process.env.MOON_GREP = grep;
   const opts: any = {
     testNamePattern: grep,
     silent,
