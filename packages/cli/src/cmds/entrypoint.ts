@@ -5,9 +5,32 @@ import { hideBin } from "yargs/helpers";
 import { fetchArtifact, deriveTestIds, generateConfig, type fetchArtifactArgs } from "../internal";
 import { main } from "./main";
 import { runNetworkCmd } from "./runNetwork";
-import { testCmd, testRunArgs } from "./runTests";
+import { testCmd } from "./runTests";
 import { configSetup } from "../lib/configReader";
 dotenv.config();
+
+function handleCursor() {
+  const hideCursor = "\x1B[?25l";
+  const showCursor = "\x1B[?25h";
+
+  process.stdout.write(hideCursor);
+
+  process.on("exit", () => {
+    process.stdout.write(showCursor);
+  });
+
+  process.on("SIGINT", () => {
+    process.stdout.write(showCursor);
+    process.exit(0);
+  });
+
+  process.on("SIGTERM", () => {
+    process.stdout.write(showCursor);
+    process.exit(0);
+  });
+}
+
+handleCursor();
 
 configSetup(process.argv);
 
