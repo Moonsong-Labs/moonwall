@@ -328,8 +328,6 @@ const resolveTailChoice = async (env: Environment) => {
           env={env}
           logFilePath={logFilePath}
           onExit={() => resolve()}
-          onTest={async () => { await resolveTestChoice(env, true) }}
-          // onGrep={async () => { await resolveGrepChoice(env, true) }}
           onNextLog={
             zombieNodes
               ? () => {
