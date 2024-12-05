@@ -20,6 +20,7 @@
   "devDependencies": {
     "@acala-network/chopsticks": "*",
     "@biomejs/biome": "*",
+    "@inquirer/prompts": "*",
     "@moonbeam-network/api-augment": "*",
     "@moonwall/cli": "workspace:*",
     "@moonwall/types": "workspace:*",
@@ -33,7 +34,6 @@
     "chai": "5.1.1",
     "chalk": "*",
     "ethers": "*",
-    "inquirer": "*",
     "pnpm": "*",
     "solc": "0.8.27",
     "tsx": "*",

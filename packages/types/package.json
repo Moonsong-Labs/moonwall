@@ -64,7 +64,7 @@
     "bottleneck": "*",
     "debug": "*",
     "ethers": "*",
-    "polkadot-api": "^1.7.4",
+    "polkadot-api": "*",
     "viem": "*",
     "web3": "*"
   },

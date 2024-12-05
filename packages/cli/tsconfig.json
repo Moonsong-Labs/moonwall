@@ -4,8 +4,9 @@
     "outDir": "dist/types",
     "allowImportingTsExtensions": false,
     "noEmit": false,
-    "declaration": true
+    "declaration": true,
+    "jsx": "react-jsx"
   },
-  "include": ["./src/**/*.ts"],
+  "include": ["./src/**/*.ts", "./src/**/*.tsx"],
   "exclude": ["**/dist/**"]
 }

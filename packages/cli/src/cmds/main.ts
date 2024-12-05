@@ -4,8 +4,6 @@ import clear from "clear";
 import colors from "colors";
 import fs from "node:fs";
 import cfonts from "cfonts";
-import inquirer from "inquirer";
-import PressToContinuePrompt from "inquirer-press-to-continue";
 import path from "node:path";
 import { SemVer, lt } from "semver";
 import pkg from "../../package.json" assert { type: "json" };
@@ -22,6 +20,7 @@ import { allReposAsync, standardRepos } from "../lib/repoDefinitions";
 import { runNetworkCmd } from "./runNetwork";
 import { testCmd } from "./runTests";
 import { Octokit } from "@octokit/rest";
+import { checkbox, confirm, input, select, Separator } from "@inquirer/prompts";
 
 const octokit = new Octokit({
   baseUrl: "https://api.github.com",
@@ -32,8 +31,6 @@ const octokit = new Octokit({
     error: console.error,
   },
 });
-
-inquirer.registerPrompt("press-to-continue", PressToContinuePrompt);
 
 export async function main() {
   for (;;) {
@@ -50,9 +47,66 @@ export async function main() {
 
 async function mainMenu(config?: MoonwallConfig) {
   const configPresent = config !== undefined;
-  const questionList = {
-    name: "MenuChoice",
-    type: "list",
+  // const questionList = {
+  //   name: "MenuChoice",
+  //   type: "list",
+  //   message: "Main Menu - Please select one of the following:",
+  //   default: 0,
+  //   pageSize: 12,
+  //   choices: !configPresent
+  //     ? [
+  //         {
+  //           name: !configPresent
+  //             ? "1) Initialise:                         Generate a new Moonwall Config File"
+  //             : chalk.dim("1) Initialise:                       ✅  CONFIG ALREADY GENERATED"),
+  //           value: "init",
+  //         },
+  //         {
+  //           name: "2) Artifact Downloader:                Fetch artifacts (x86) from GitHub repos",
+  //           value: "download",
+  //         },
+  //         {
+  //           name: "3) Quit Application",
+  //           value: "quit",
+  //         },
+  //       ]
+  //     : [
+  //         {
+  //           name: "1) Execute Script:                     Run scripts placed in your config defined script directory",
+  //           value: "exec",
+  //         },
+  //         {
+  //           name: "2) Network Launcher & Toolbox:         Launch network, access tools: tail logs, interactive tests etc",
+  //           value: "run",
+  //         },
+  //         {
+  //           name: "3) Test Suite Execution:               Run automated tests, start network if needed",
+  //           value: "test",
+  //         },
+
+  //         {
+  //           name: "4) Artifact Downloader:                Fetch artifacts (x86) from GitHub repos",
+  //           value: "download",
+  //         },
+
+  //         {
+  //           name: "5) Rename TestIDs:                     Rename test id prefixes based on position in the directory tree",
+  //           value: "derive",
+  //         },
+
+  //         {
+  //           name: "6) Quit Application",
+  //           value: "quit",
+  //         },
+  //       ],
+  //   filter(val) {
+  //     return val;
+  //   },
+  // } as const;
+
+  // const answers = await inquirer.prompt(questionList);
+
+  const menuChoice = await select({
     message: "Main Menu - Please select one of the following:",
     default: 0,
     pageSize: 12,
@@ -102,14 +156,9 @@ async function mainMenu(config?: MoonwallConfig) {
             value: "quit",
           },
         ],
-    filter(val) {
-      return val;
-    },
-  } as const;
+  });
 
-  const answers = await inquirer.prompt(questionList);
-
-  switch (answers.MenuChoice) {
+  switch (menuChoice) {
     case "init":
       await generateConfig();
       await createFolders();
@@ -135,14 +184,20 @@ async function mainMenu(config?: MoonwallConfig) {
       if (chosenTestEnv.envName !== "back") {
         process.env.MOON_RUN_SCRIPTS = "true";
         await testCmd(chosenTestEnv.envName);
-        await inquirer.prompt({
-          name: "test complete",
-          type: "press-to-continue",
-          anyKey: true,
-          pressToContinueMessage: `ℹ️  Test run for ${chalk.bgWhiteBright.black(
+
+        await input({
+          message: `ℹ️  Test run for ${chalk.bgWhiteBright.black(
             chosenTestEnv.envName
           )} has been completed. Press any key to continue...\n`,
         });
+        // await inquirer.prompt({
+        //   name: "test complete",
+        //   type: "press-to-continue",
+        //   anyKey: true,
+        //   pressToContinueMessage: `ℹ️  Test run for ${chalk.bgWhiteBright.black(
+        //     chosenTestEnv.envName
+        //   )} has been completed. Press any key to continue...\n`,
+        // });
       }
       return true;
     }
@@ -162,19 +217,14 @@ async function mainMenu(config?: MoonwallConfig) {
 
     case "derive": {
       clear();
-      const { rootDir } = await inquirer.prompt({
-        name: "rootDir",
-        type: "input",
+      const rootDir = await input({
         message: "Enter the root testSuites directory to process:",
         default: "suites",
       });
       await deriveTestIds({ rootDir });
 
-      await inquirer.prompt({
-        name: "test complete",
-        type: "press-to-continue",
-        anyKey: true,
-        pressToContinueMessage: `ℹ️  Renaming task for ${chalk.bold(
+      await input({
+        message: `ℹ️  Renaming task for ${chalk.bold(
           `/${rootDir}`
         )} has been completed. Press any key to continue...\n`,
       });
@@ -191,11 +241,8 @@ async function resolveExecChoice(config: MoonwallConfig) {
   const scriptDir = config.scriptsDir;
 
   if (!scriptDir) {
-    await inquirer.prompt({
-      name: "test complete",
-      type: "press-to-continue",
-      anyKey: true,
-      pressToContinueMessage: `ℹ️  No scriptDir property defined at ${chalk.bgWhiteBright.black(
+    await input({
+      message: `ℹ️  No scriptDir property defined at ${chalk.bgWhiteBright.black(
         "moonwall.config.json"
       )}\n Press any key to continue...\n`,
     });
@@ -203,11 +250,8 @@ async function resolveExecChoice(config: MoonwallConfig) {
   }
 
   if (!fs.existsSync(scriptDir)) {
-    await inquirer.prompt({
-      name: "test complete",
-      type: "press-to-continue",
-      anyKey: true,
-      pressToContinueMessage: `ℹ️  No scriptDir found at at ${chalk.bgWhiteBright.black(
+    await input({
+      message: `ℹ️  No scriptDir found at at ${chalk.bgWhiteBright.black(
         path.join(process.cwd(), scriptDir)
       )}\n Press any key to continue...\n`,
     });
@@ -217,11 +261,8 @@ async function resolveExecChoice(config: MoonwallConfig) {
   const files = await fs.promises.readdir(scriptDir);
 
   if (!files) {
-    await inquirer.prompt({
-      name: "test complete",
-      type: "press-to-continue",
-      anyKey: true,
-      pressToContinueMessage: `ℹ️  No scripts found at ${chalk.bgWhiteBright.black(
+    await input({
+      message: `ℹ️  No scripts found at ${chalk.bgWhiteBright.black(
         path.join(process.cwd(), config.scriptsDir || "")
       )}\n Press any key to continue...\n`,
     });
@@ -233,44 +274,35 @@ async function resolveExecChoice(config: MoonwallConfig) {
   });
 
   for (;;) {
-    const result = await inquirer.prompt({
-      name: "selections",
+    const selections = await checkbox({
       message: "Select which scripts you'd like to run (press ↩️ with none selected to go 🔙)\n",
-      type: "checkbox",
       choices,
     });
 
-    if (result.selections.length === 0) {
-      const result = await inquirer.prompt({
-        name: "none-selected",
+    if (selections.length === 0) {
+      const noneSelected = await confirm({
         message: "No scripts have been selected to run, do you wish to exit?",
-        type: "confirm",
         default: true,
       });
 
-      if (result["none-selected"]) {
+      if (noneSelected) {
         return false;
       }
       continue;
     }
 
-    for (const script of result.selections) {
-      const result = await inquirer.prompt({
-        name: "args",
+    for (const script of selections) {
+      const args = await input({
         message: `Enter any arguments for ${chalk.bgWhiteBright.black(
           script
         )} (press enter for none)`,
-        type: "input",
       });
 
-      await executeScript(script, result.args);
+      await executeScript(script, args);
     }
 
-    await inquirer.prompt({
-      name: "test complete",
-      type: "press-to-continue",
-      anyKey: true,
-      pressToContinueMessage: "Press any key to continue...\n",
+    await input({
+      message: "Press any key to continue...\n",
     });
     return false;
   }
@@ -280,71 +312,57 @@ async function resolveDownloadChoice() {
   const repos = (await configExists()) ? await allReposAsync() : standardRepos();
   const binList = repos.reduce((acc, curr) => {
     acc.push(...curr.binaries.flatMap((bin) => bin.name));
-    acc.push(new inquirer.Separator());
+    acc.push(new Separator());
     acc.push("Back");
-    acc.push(new inquirer.Separator());
+    acc.push(new Separator());
     return acc;
   }, [] as any[]);
 
   for (;;) {
-    const firstChoice = await inquirer.prompt({
-      name: "artifact",
-      type: "list",
+    const firstChoice = await select({
       message: "Download - which artifact?",
       choices: binList,
     });
-    if (firstChoice.artifact === "Back") {
+    if (firstChoice === "Back") {
       return;
     }
 
     const versions = await getVersions(
-      firstChoice.artifact,
-      firstChoice.artifact.includes("runtime")
+      firstChoice as string,
+      (firstChoice as string).includes("runtime")
     );
 
-    const chooseversion = await inquirer.prompt({
-      name: "binVersion",
-      type: "list",
+    const chooseversion = await select({
       default: "latest",
       message: "Download - which version?",
-      choices: [...versions, new inquirer.Separator(), "Back", new inquirer.Separator()],
+      choices: [...versions, new Separator(), "Back", new Separator()],
     });
 
-    if (chooseversion.binVersion === "Back") {
+    if (chooseversion === "Back") {
       continue;
     }
-    const chooseLocation = await inquirer.prompt({
-      name: "path",
-      type: "input",
+    const chooseLocation = await input({
       message: "Download - where would you like it placed?",
       default: "./tmp",
     });
 
-    const result = await inquirer.prompt({
-      name: "continue",
-      type: "confirm",
+    const result = await confirm({
       message: `You are about to download ${chalk.bgWhite.blackBright(
-        firstChoice.artifact
-      )} v-${chalk.bgWhite.blackBright(chooseversion.binVersion)} to: ${chalk.bgWhite.blackBright(
-        chooseLocation.path
+        firstChoice
+      )} v-${chalk.bgWhite.blackBright(chooseversion)} to: ${chalk.bgWhite.blackBright(
+        chooseLocation
       )}.\n Would you like to continue? `,
       default: true,
     });
 
-    if (result.continue === false) {
+    if (result === false) {
       continue;
     }
 
     await fetchArtifact({
-      bin: firstChoice.artifact,
-      ver: chooseversion.binVersion,
-      path: chooseLocation.path,
-    });
-    await inquirer.prompt({
-      name: "NetworkStarted",
-      type: "press-to-continue",
-      anyKey: true,
-      pressToContinueMessage: "Press any key to continue...\n",
+      bin: firstChoice as string,
+      ver: chooseversion as string,
+      path: chooseLocation as string,
     });
     return;
   }
@@ -358,22 +376,14 @@ const chooseTestEnv = async (config: MoonwallConfig) => {
       disabled: false,
     }))
     .sort((a, b) => (a.name > b.name ? -1 : +1));
-  envs.push(
-    ...([
-      new inquirer.Separator(),
-      { name: "Back", value: "back" },
-      new inquirer.Separator(),
-    ] as any)
-  );
-  const result = await inquirer.prompt({
-    name: "envName",
+  envs.push(...([new Separator(), { name: "Back", value: "back" }, new Separator()] as any));
+  const envName = await select({
     message: "Select a environment to run",
-    type: "list",
     pageSize: 12,
     choices: envs,
   });
 
-  return result;
+  return { envName };
 };
 
 const chooseRunEnv = async (config: MoonwallConfig) => {
@@ -396,32 +406,28 @@ const chooseRunEnv = async (config: MoonwallConfig) => {
 
   const choices = [
     ...envs.filter(({ disabled }) => disabled === false).sort((a, b) => (a.name > b.name ? 1 : -1)),
-    new inquirer.Separator(),
+    new Separator(),
     ...envs.filter(({ disabled }) => disabled === true).sort((a, b) => (a.name > b.name ? 1 : -1)),
-    new inquirer.Separator(),
+    new Separator(),
     { name: "Back", value: "back" },
-    new inquirer.Separator(),
+    new Separator(),
   ];
 
-  const result = await inquirer.prompt({
-    name: "envName",
+  const envName = await select({
     message: "Select a environment to run",
-    type: "list",
     pageSize: 12,
     choices,
   });
 
-  return result;
+  return { envName };
 };
 
 const resolveQuitChoice = async () => {
-  const result = await inquirer.prompt({
-    name: "Quit",
-    type: "confirm",
+  const result = await confirm({
     message: "Are you sure you want to Quit?",
     default: false,
   });
-  return result.Quit;
+  return result;
 };
 
 const printIntro = async () => {

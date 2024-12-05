@@ -1,10 +1,19 @@
 import { promises as fsPromises } from "node:fs";
-import inquirer, { type ChoiceCollection } from "inquirer";
 import { parse } from "yaml";
 import { getEnvironmentFromConfig } from "../../lib/configReader";
 import { MoonwallContext } from "../../lib/globalContext";
 import type { ApiPromise } from "@polkadot/api";
 import { jumpBlocksChopsticks, jumpRoundsChopsticks, jumpToRoundChopsticks } from "@moonwall/util";
+import { number, select, Separator } from "@inquirer/prompts";
+import assert from "node:assert";
+
+type Choice<Value> = {
+  value: Value;
+  name?: string;
+  description?: string;
+  short?: string;
+  disabled?: boolean | string;
+};
 
 export async function resolveChopsticksInteractiveCmdChoice() {
   const config = getEnvironmentFromConfig();
@@ -21,14 +30,12 @@ export async function resolveChopsticksInteractiveCmdChoice() {
     }
     const nodes = config.foundation.launchSpec.map(({ name }) => name);
 
-    const result = await inquirer.prompt({
-      name: "name",
-      type: "list",
+    const name = await select({
       choices: nodes,
       message: "Which network would you like to interact with? ",
     });
 
-    return result.name;
+    return name;
   };
 
   const nodeSelected = isMultiChain ? await promptNode() : config.foundation.launchSpec[0].name;
@@ -54,7 +61,7 @@ export async function resolveChopsticksInteractiveCmdChoice() {
   );
   const port = Number.parseInt(ports[0]);
 
-  const choices: ChoiceCollection = [
+  const choices: (string | Separator)[] | (Separator | Choice<unknown>)[] = [
     { name: "🆗  Create Block", value: "createblock" },
     { name: "➡️  Create N Blocks", value: "createNBlocks" },
   ];
@@ -77,52 +84,73 @@ export async function resolveChopsticksInteractiveCmdChoice() {
     );
   }
 
-  choices.push(...[new inquirer.Separator(), { name: "🔙  Go Back", value: "back" }]);
+  choices.push(...[new Separator(), { name: "🔙  Go Back", value: "back" }]);
 
-  const choice = await inquirer.prompt({
-    name: "cmd",
-    type: "list",
+  const cmd = await select({
     choices,
     message: "What command would you like to run? ",
     default: "createBlock",
   });
 
-  switch (choice.cmd) {
+  switch (cmd) {
     case "createblock":
-      await jumpBlocksChopsticks(port, 1);
+      try {
+        await jumpBlocksChopsticks(port, 1);
+      } catch (e: any) {
+        console.error(e.message);
+      }
       break;
 
     case "createNBlocks": {
-      const result = await inquirer.prompt({
-        name: "n",
-        type: "number",
-        message: "How many blocks? ",
-      });
+      try {
+        const nBlocks = await number({
+          message: "How many blocks? ",
+        });
 
-      await jumpBlocksChopsticks(port, result.n);
+        assert(typeof nBlocks === "number", "Number must be a number");
 
+        assert(nBlocks > 0, "Number must be greater than 0");
+
+        await jumpBlocksChopsticks(port, nBlocks);
+      } catch (e: any) {
+        console.error(e.message);
+      }
       break;
     }
 
     case "jumpToRound": {
-      const result = await inquirer.prompt({
-        name: "round",
-        type: "number",
-        message: "Which round to jump to (in future)? ",
-      });
-      console.log("💤 This may take a while....");
-      await jumpToRoundChopsticks(api, port, result.round);
+      try {
+        const round = await number({
+          message: "Which round to jump to (in future)? ",
+        });
+        assert(typeof round === "number", "Number must be a number");
+
+        assert(round > 0, "Number must be greater than 0");
+        console.log("💤 This may take a while....");
+
+        await jumpToRoundChopsticks(api, port, round);
+      } catch (e: any) {
+        console.error(e.message);
+      }
+
       break;
     }
 
     case "jumpRounds": {
-      const result = await inquirer.prompt({
-        name: "n",
-        type: "number",
-        message: "How many rounds? ",
-      });
-      console.log("💤 This may take a while....");
-      await jumpRoundsChopsticks(api, port, result.n);
+      try {
+        const rounds = await number({
+          message: "How many rounds? ",
+        });
+        assert(typeof rounds === "number", "Number must be a number");
+
+        assert(rounds > 0, "Number must be greater than 0");
+
+        console.log("💤 This may take a while....");
+        await jumpRoundsChopsticks(api, port, rounds);
+      } catch (e: any) {
+        console.error(e.message);
+      }
+
       break;
     }
 

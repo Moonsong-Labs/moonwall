@@ -66,9 +66,11 @@ export function getZombieConfig(path: string) {
   return JSON.parse(buffer) as LaunchConfig;
 }
 
+export type CmdCodes = "restart" | "pause" | "resume" | "kill" | "isup" | "init" | "networkmap";
+
 export type IPCRequestMessage = {
   text: string;
-  cmd: "restart" | "pause" | "resume" | "kill" | "isup" | "init" | "networkmap";
+  cmd: CmdCodes;
   nodeName?: string;
 };
 
