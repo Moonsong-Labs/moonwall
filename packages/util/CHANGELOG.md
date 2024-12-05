@@ -1,5 +1,16 @@
 # @moonwall/util
 
+## 5.9.0
+
+### Minor Changes
+
+- 543bda2: Update Inquirer
+
+### Patch Changes
+
+- Updated dependencies [543bda2]
+  - @moonwall/types@5.9.0
+
 ## 5.8.0
 
 ### Minor Changes
