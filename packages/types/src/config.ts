@@ -137,10 +137,10 @@ export type Environment = {
    * An optional object to add extra arguments to the Vitest test runner.
    *  Use with caution as this will override the default arguments, which
    * may cause unexpected behaviour.
-   * 
+   *
    * Visit https://vitest.dev/config/ for more info
    */
-    vitestArgs?: Record<string, any>;
+  vitestArgs?: Record<string, any>;
 };
 
 export type SkipTestSpec = {

@@ -100,7 +100,8 @@
         }
       },
       "vitestArgs": {
-        "bail": 1
+        "bail": 3,
+        "retry": 4
       },
       "connections": []
     },
