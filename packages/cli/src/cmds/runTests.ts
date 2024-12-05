@@ -58,7 +58,7 @@ export type testRunArgs = {
   vitestPassthroughArgs?: string[];
 };
 
-export async function executeTests(env: Environment, testRunArgs?: testRunArgs) {
+export async function executeTests(env: Environment, testRunArgs?: testRunArgs & UserConfig) {
   return new Promise<Vitest>(async (resolve, reject) => {
     const globalConfig = await importAsyncConfig();
     if (env.foundation.type === "read_only") {
@@ -93,14 +93,7 @@ export async function executeTests(env: Environment, testRunArgs?: testRunArgs) 
       }
     }
 
-    const additionalArgs: Omit<testRunArgs, "vitestPassthroughArgs"> = testRunArgs
-      ? {
-          testNamePattern: testRunArgs.testNamePattern,
-          subDirectory: testRunArgs.subDirectory,
-          shard: testRunArgs.shard,
-          update: testRunArgs.update,
-        }
-      : {};
+    const additionalArgs = { ...testRunArgs };
 
     const vitestOptions = testRunArgs?.vitestPassthroughArgs?.reduce<UserConfig>((acc, arg) => {
       const [key, value] = arg.split("=");

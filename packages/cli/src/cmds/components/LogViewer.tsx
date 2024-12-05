@@ -98,7 +98,7 @@ export const LogViewer: React.FC<LogViewerProps> = ({
       silent: false,
       subDirectory: process.env.MOON_SUBDIR,
       outputFile: tmpFile,
-      reporters: ['basic', 'json'],
+      reporters: ['dot', 'json'],
       onConsoleLog: (log) => {
         if (!log.includes("has multiple versions, ensure that there is only one installed.")) {
           setTestOutput(prev => [...prev, log]);
