@@ -1,5 +1,45 @@
 # @moonwall/cli
 
+## 5.9.0
+
+### Minor Changes
+
+- 543bda2: Update Inquirer
+
+### Patch Changes
+
+- 7cce71c: Added vitest arg pass through
+- 7cce71c: ### Enhanced Test CLI Options
+
+  #### New Features
+
+  - Added support for passing Vitest configuration options directly through CLI
+
+    ```bash
+    moonwall test dev_test --vitest "bail=2 retry=2"
+    ```
+
+  This can also be added to your `moonwall.config.json` file like:
+
+  ```json
+  {
+    "name": "passthrough_test",
+    "testFileDir": ["suites/multi_fail"],
+    "description": "Testing that bail can be passed through",
+    "foundation": {
+      "type": "read_only"
+    },
+    "vitestArgs": {
+      "bail": 1
+    },
+    "connections": []
+  }
+  ```
+
+- Updated dependencies [543bda2]
+  - @moonwall/types@5.9.0
+  - @moonwall/util@5.9.0
+
 ## 5.8.0
 
 ### Minor Changes

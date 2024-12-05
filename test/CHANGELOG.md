@@ -1,5 +1,15 @@
 # @moonwall/tests
 
+## 5.9.0
+
+### Minor Changes
+
+- 543bda2: Update Inquirer
+
+### Patch Changes
+
+- 7cce71c: Added vitest arg pass through
+
 ## 5.8.0
 
 ### Minor Changes

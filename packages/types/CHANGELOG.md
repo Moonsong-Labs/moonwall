@@ -1,5 +1,11 @@
 # @moonwall/types
 
+## 5.9.0
+
+### Minor Changes
+
+- 543bda2: Update Inquirer
+
 ## 5.8.0
 
 ### Minor Changes
