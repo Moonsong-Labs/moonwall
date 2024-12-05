@@ -1,5 +1,13 @@
 # @moonwall/cli
 
+## 5.9.1
+
+### Patch Changes
+
+- f91f797: fix tail
+  - @moonwall/types@5.9.1
+  - @moonwall/util@5.9.1
+
 ## 5.9.0
 
 ### Minor Changes
