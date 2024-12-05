@@ -356,6 +356,9 @@ importers:
       viem:
         specifier: '*'
         version: 2.21.53(typescript@5.7.2)(zod@3.23.8)
+      vitest:
+        specifier: '*'
+        version: 2.1.4(@types/node@22.10.1)(@vitest/ui@2.1.4)(jsdom@23.2.0)
       web3:
         specifier: '*'
         version: 4.15.0(encoding@0.1.13)(typescript@5.7.2)(zod@3.23.8)

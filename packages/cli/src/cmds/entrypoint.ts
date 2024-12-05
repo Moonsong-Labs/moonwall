@@ -118,6 +118,11 @@ yargs(hideBin(process.argv))
           describe: "Update all snapshots",
           alias: "u",
           type: "boolean",
+        })
+        .option("vitestArgPassthrough", {
+          describe: "Arguments to pass directly to Vitest (space-delimited)",
+          alias: "vitest",
+          type: "string",
         });
     },
     async (args) => {
@@ -129,6 +134,7 @@ yargs(hideBin(process.argv))
             subDirectory: args.subDirectory,
             shard: args.testShard,
             update: args.update,
+            vitestPassthroughArgs: args.vitestArgPassthrough?.split(" "),
           }))
         ) {
           process.exitCode = 1;

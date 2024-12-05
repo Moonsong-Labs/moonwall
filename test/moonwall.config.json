@@ -90,6 +90,22 @@
       "connections": []
     },
     {
+      "name": "passthrough_test",
+      "testFileDir": ["suites/multi_fail"],
+      "description": "Testing that bail can be passed through",
+      "foundation": {
+        "type": "read_only",
+        "launchSpec": {
+          "disableRuntimeVersionCheck": true
+        }
+      },
+      "vitestArgs": {
+        "bail": 3,
+        "retry": 4
+      },
+      "connections": []
+    },
+    {
       "name": "failing_prescript",
       "testFileDir": ["suites/basic"],
       "description": "Test that failing pre-scripts are caught",

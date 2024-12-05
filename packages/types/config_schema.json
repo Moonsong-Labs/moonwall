@@ -454,6 +454,9 @@
       },
       "type": "object"
     },
+    "Record<string,any>": {
+      "type": "object"
+    },
     "ZombieLaunchSpec": {
       "description": "A launch specification object for the \"zombie\" foundation type.",
       "properties": {
@@ -679,6 +682,10 @@
           "timeout": {
             "description": "The default timeout for tests and hooks",
             "type": "number"
+          },
+          "vitestArgs": {
+            "$ref": "#/definitions/Record<string,any>",
+            "description": "An optional object to add extra arguments to the Vitest test runner.\n Use with caution as this will override the default arguments, which\nmay cause unexpected behaviour.\n\nVisit https://vitest.dev/config/ for more info"
           }
         },
         "type": "object"

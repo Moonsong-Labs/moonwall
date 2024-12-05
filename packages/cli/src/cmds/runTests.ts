@@ -55,6 +55,7 @@ export type testRunArgs = {
   subDirectory?: string;
   shard?: string;
   update?: boolean;
+  vitestPassthroughArgs?: string[];
 };
 
 export async function executeTests(env: Environment, testRunArgs?: testRunArgs) {
@@ -92,7 +93,23 @@ export async function executeTests(env: Environment, testRunArgs?: testRunArgs) 
       }
     }
 
-    const additionalArgs: testRunArgs = testRunArgs || {};
+    const additionalArgs: Omit<testRunArgs, "vitestPassthroughArgs"> = testRunArgs
+      ? {
+          testNamePattern: testRunArgs.testNamePattern,
+          subDirectory: testRunArgs.subDirectory,
+          shard: testRunArgs.shard,
+          update: testRunArgs.update,
+        }
+      : {};
+
+    const vitestOptions = testRunArgs?.vitestPassthroughArgs?.reduce<UserConfig>((acc, arg) => {
+      const [key, value] = arg.split("=");
+      return {
+        // biome-ignore lint/performance/noAccumulatingSpread: this is fine
+        ...acc,
+        [key]: Number(value) || value,
+      };
+    }, {});
 
     // transform  in regexp pattern
     if (env.skipTests && env.skipTests.length > 0) {
@@ -107,6 +124,7 @@ export async function executeTests(env: Environment, testRunArgs?: testRunArgs) 
       .setTimeout(env.timeout || globalConfig.defaultTestTimeout)
       .setInclude(env.include || ["**/*{test,spec,test_,test-}*{ts,mts,cts}"])
       .addThreadConfig(env.multiThreads)
+      .addVitestPassthroughArgs(env.vitestArgs)
       .build();
 
     if (
@@ -126,12 +144,14 @@ export async function executeTests(env: Environment, testRunArgs?: testRunArgs) 
           : env.testFileDir;
 
       const folders = testFileDir.map((folder) => path.join(".", folder, "/"));
-      resolve(
-        (await startVitest("test", folders, {
-          ...options,
-          ...additionalArgs,
-        })) as Vitest
-      );
+      const optionsToUse = {
+        ...options,
+        ...additionalArgs,
+        ...vitestOptions,
+      } satisfies UserConfig;
+
+      console.log(`Options to use: ${JSON.stringify(optionsToUse, null, 2)}`);
+      resolve((await startVitest("test", folders, optionsToUse)) as Vitest);
     } catch (e) {
       console.error(e);
       reject(e);
@@ -196,6 +216,11 @@ class VitestOptionsBuilder {
 
   setInclude(include: string[]): this {
     this.options.include = include;
+    return this;
+  }
+
+  addVitestPassthroughArgs(args?: object): this {
+    this.options = { ...this.options, ...args };
     return this;
   }
 
