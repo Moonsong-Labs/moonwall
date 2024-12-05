@@ -99,6 +99,9 @@
           "disableRuntimeVersionCheck": true
         }
       },
+      "vitestArgs": {
+        "bail": 1
+      },
       "connections": []
     },
     {

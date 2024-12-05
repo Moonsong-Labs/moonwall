@@ -124,6 +124,7 @@ export async function executeTests(env: Environment, testRunArgs?: testRunArgs) 
       .setTimeout(env.timeout || globalConfig.defaultTestTimeout)
       .setInclude(env.include || ["**/*{test,spec,test_,test-}*{ts,mts,cts}"])
       .addThreadConfig(env.multiThreads)
+      .addVitestPassthroughArgs(env.vitestArgs)
       .build();
 
     if (
@@ -215,6 +216,11 @@ class VitestOptionsBuilder {
 
   setInclude(include: string[]): this {
     this.options.include = include;
+    return this;
+  }
+
+  addVitestPassthroughArgs(args?: object): this {
+    this.options = { ...this.options, ...args };
     return this;
   }
 
