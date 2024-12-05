@@ -316,7 +316,7 @@ export const LogViewer: React.FC<LogViewerProps> = ({
                   minHeight={4}
                 >
                   <Text>
-                    {`${parsedOutput.numPassedTests}/${parsedOutput.numTotalTests} tests passed`}
+                    {`${parsedOutput.numPassedTests}/${parsedOutput.numTotalTests - parsedOutput.numPendingTests} tests passed`}
                     {parsedOutput.numFailedTests > 0 ? ` (${parsedOutput.numFailedTests} failed)` : ""}
                   </Text>
                 </Box>
