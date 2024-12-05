@@ -1,5 +1,11 @@
 # @moonwall/util
 
+## 5.9.1
+
+### Patch Changes
+
+- @moonwall/types@5.9.1
+
 ## 5.9.0
 
 ### Minor Changes
