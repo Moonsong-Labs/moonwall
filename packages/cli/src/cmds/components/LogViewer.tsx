@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Box, Text, useInput, useApp } from "ink";
+import { Box, Text, useInput, useApp, Static, Spacer } from "ink";
 import chalk from "chalk";
 import fs from "node:fs";
 import { executeTests, testRunArgs } from "../runTests";
 import { UserConfig } from "vitest/dist/node.js";
 import tmp from 'tmp';
+import { JsonTestResults } from "vitest/reporters"
 
 interface LogViewerProps {
   env: any;
@@ -28,9 +29,9 @@ export const LogViewer: React.FC<LogViewerProps> = ({
   zombieInfo,
 }) => {
   const [logs, setLogs] = useState<string[]>([]);
-  const [testOutput, setTestOutput] = useState<(string | JSX.Element)[]>([]);
+  const [testOutput, setTestOutput] = useState<string[]>([]);
+  const [parsedOutput, setParsedOutput] = useState<JsonTestResults>();
   const [tailing, setTailing] = useState(true);
-  const [currentReadPosition, setCurrentReadPosition] = useState(0);
   const [isExecutingCommand, setIsExecutingCommand] = useState(false);
   const [isGrepMode, setIsGrepMode] = useState(false);
   const [grepInput, setGrepInput] = useState(process.env.MOON_GREP || "D01T01");
@@ -49,6 +50,7 @@ export const LogViewer: React.FC<LogViewerProps> = ({
     };
 
     hideCursor();
+    setupWatcher()
 
     const cursorCheck = setInterval(hideCursor, 100);
 
@@ -62,40 +64,24 @@ export const LogViewer: React.FC<LogViewerProps> = ({
     if (!tailing || !fs.existsSync(logFilePath)) return;
 
     try {
-      const stats = fs.statSync(logFilePath);
-      const newReadPosition = stats.size;
+      const fileContent = fs.readFileSync(logFilePath, 'utf-8');
+      const lines = fileContent.split("\n")
+        .filter(line => line.trim())
+        .map(line => line.trimEnd());
 
-      if (newReadPosition > currentReadPosition) {
-        const stream = fs.createReadStream(logFilePath, {
-          start: currentReadPosition,
-          end: newReadPosition,
-        });
-
-        let newContent = "";
-        stream.on("data", (chunk) => {
-          newContent += chunk.toString();
-        });
-
-        stream.on("end", () => {
-          const lines = newContent.split("\n")
-            .filter(line => line.trim())
-            .map(line => line.trimEnd());
-          
-          setLogs(prev => [...prev, ...lines]);
-          setCurrentReadPosition(newReadPosition);
-        });
-
-        stream.on("error", (error) => {
-          console.error("Error reading log file:", error);
-        });
-      }
+      setLogs(lines);
     } catch (error) {
       console.error("Error in readLog:", error);
     }
-  }, [tailing, logFilePath, currentReadPosition]);
+  }, [tailing, logFilePath]);
 
   const setupWatcher = useCallback(() => {
-    fs.watchFile(logFilePath, readLog);
+    readLog();
+    fs.watchFile(logFilePath, { interval: 100 }, (curr, prev) => {
+      if (curr.size !== prev.size) {
+        readLog();
+      }
+    });
   }, [logFilePath, readLog]);
 
   const removeWatcher = useCallback(() => {
@@ -104,6 +90,7 @@ export const LogViewer: React.FC<LogViewerProps> = ({
 
   const handleGrepSubmit = useCallback(async () => {
     setTestOutput([]);
+    setParsedOutput(undefined);
     process.env.MOON_RECYCLE = "true";
     process.env.MOON_GREP = grepInput;
     const opts: testRunArgs & UserConfig = {
@@ -111,61 +98,21 @@ export const LogViewer: React.FC<LogViewerProps> = ({
       silent: false,
       subDirectory: process.env.MOON_SUBDIR,
       outputFile: tmpFile,
-      reporters: ['basic','json'],
+      reporters: ['basic', 'json'],
       onConsoleLog: (log) => {
         if (!log.includes("has multiple versions, ensure that there is only one installed.")) {
-          setTestOutput(prev => [...prev, truncateIfMultiline(log)]);
+          setTestOutput(prev => [...prev, log]);
         }
         return false;
       }
     };
-    
+
     setIsExecutingCommand(true);
 
     try {
       await executeTests(env, opts);
       const jsonOutput = JSON.parse(fs.readFileSync(tmpFile, 'utf-8'));
-      const testResults = jsonOutput.testResults || [];
-      const outputLines: (string | JSX.Element)[] = [];
-
-      const TestSummary: React.FC<{ total: number; passed?: number; failed?: number }> = ({ total, passed, failed }) => (
-        <Box borderStyle="arrow" borderColor="gray" padding={1} flexDirection="column">
-          <Text>Total Tests: {total}</Text>
-          {passed !== undefined && passed > 0 && <Text>Passed: {passed}</Text>}
-          {failed !== undefined && failed > 0 && <Text color="red">Failed: {failed}</Text>}
-        </Box>
-      );
-
-      if (jsonOutput.numTotalTests > 0) {
-        outputLines.push(
-          <TestSummary 
-            total={jsonOutput.numTotalTests} 
-            passed={jsonOutput.numPassedTests} 
-            failed={jsonOutput.numFailedTests}
-          />,
-        );
-      }
-
-      testResults.forEach((result: any) => {
-        result.assertionResults?.forEach((assertion: any) => {
-          const duration = assertion.duration ? `+${assertion.duration}ms` : '';
-          if (assertion.status === 'passed') {
-            outputLines.push(`test:dev_test ${truncateIfMultiline(assertion.title)} ${duration}`);
-          } else if (assertion.status === 'failed') {
-            outputLines.push(
-              `test:dev_test ${truncateIfMultiline(assertion.title)} ${duration}`,
-              `Error: ${truncateIfMultiline(assertion.failureMessages?.join(' ') || 'Unknown error')}`
-            );
-          }
-        });
-
-        // Handle test file errors
-        if (result.failureMessage) {
-          outputLines.push(`Error in ${result.testFilePath}:`, truncateIfMultiline(result.failureMessage));
-        }
-      });
-
-      setTestOutput(prev => [...prev, ...outputLines]);
+      setParsedOutput(jsonOutput);
     } catch (error: any) {
       setTestOutput(prev => [...prev, `Error: ${error.message}`]);
     } finally {
@@ -175,65 +122,33 @@ export const LogViewer: React.FC<LogViewerProps> = ({
         setupWatcher();
       }
     }
-  }, [grepInput, env, tailing, setupWatcher]);
+  }, [grepInput, env, tailing]);
 
   const handleTest = useCallback(async () => {
     setTestOutput([]);
+    setParsedOutput(undefined);
     process.env.MOON_RECYCLE = "true";
     const opts: testRunArgs & UserConfig = {
       silent: false,
       subDirectory: process.env.MOON_SUBDIR,
       outputFile: tmpFile,
-      reporters: ['basic','json'],
+      reporters: ['dot', 'json'],
       onConsoleLog: (log) => {
         if (!log.includes("has multiple versions, ensure that there is only one installed.")) {
-            setTestOutput(prev => [...prev, truncateIfMultiline(log)]);
+          setTestOutput(prev => [...prev, log]);
         }
         return false;
       }
     };
-    
+
     setIsExecutingCommand(true);
 
     try {
       await executeTests(env, opts);
       const jsonOutput = JSON.parse(fs.readFileSync(tmpFile, 'utf-8'));
-      const testResults = jsonOutput.testResults || [];
-      const outputLines: (string | JSX.Element)[] = [];
 
-      testResults.forEach((result: any) => {
-        result.assertionResults?.forEach((assertion: any) => {
-          const duration = assertion.duration ? `+${assertion.duration}ms` : '';
-          if (assertion.status === 'passed') {
-            outputLines.push(`test:dev_test ${truncateIfMultiline(assertion.title)} ${duration}`);
-          } else if (assertion.status === 'failed') {
-            outputLines.push(
-              `test:dev_test ${truncateIfMultiline(assertion.title)} ${duration}`,
-              `Error: ${truncateIfMultiline(assertion.failureMessages?.join(' ') || 'Unknown error')}`
-            );
-          }
-        });
+      setParsedOutput(jsonOutput);
 
-        // Handle test file errors
-        if (result.failureMessage) {
-          outputLines.push(`Error in ${result.testFilePath}:`, truncateIfMultiline(result.failureMessage));
-        }
-      });
-
-      setTestOutput(prev => [...prev, ...outputLines]);
-      
-      // Add summary box at the end
-      if (jsonOutput.numTotalTests > 0) {
-        setTestOutput(prev => [
-          ...prev,
-          '',
-          <Box borderStyle="arrow" borderColor="gray" padding={1} flexDirection="column">
-            <Text>Total Tests: {jsonOutput.numTotalTests}</Text>
-            {jsonOutput.numPassedTests > 0 && <Text>Passed: {jsonOutput.numPassedTests}</Text>}
-            {jsonOutput.numFailedTests > 0 && <Text>Failed: {jsonOutput.numFailedTests}</Text>}
-          </Box>
-        ]);
-      }
     } catch (error: any) {
       setTestOutput(prev => [...prev, `Error: ${error.message}`]);
     } finally {
@@ -243,39 +158,6 @@ export const LogViewer: React.FC<LogViewerProps> = ({
       }
     }
   }, [env, tailing, setupWatcher]);
-
-  const truncateIfMultiline = (msg: string) => {
-    const maxWidth = process.stdout.columns - 20; // More padding for test output
-    if (!msg) return msg;
-    
-    // If it's a hex string or long number, truncate more aggressively
-    if (/^(0x)?[0-9a-f]{32,}/i.test(msg)) {
-      return msg.slice(0, 40) + '...';
-    }
-    
-    if (msg.includes('\n') || msg.length > maxWidth) {
-      const firstLine = msg.split('\n')[0];
-      return firstLine.length > maxWidth ? firstLine.slice(0, maxWidth - 3) + '...' : firstLine + '...';
-    }
-    return msg;
-  };
-
-  const resumePauseProse = [
-    `, ${chalk.bgWhite.black("[p]")} Pause tail`,
-    `, ${chalk.bgWhite.black("[r]")} Resume tail`,
-  ];
-
-  const bottomBarBase = `📜 Tailing Logs, commands: ${chalk.bgWhite.black(
-    "[q]"
-  )} Quit, ${chalk.bgWhite.black("[t]")} Test, ${chalk.bgWhite.black("[g]")} Grep test`;
-
-  const zombieContent = zombieInfo
-    ? `, ${chalk.bgWhite.black("[,]")} Next Log, ${chalk.bgWhite.black(
-        "[.]"
-      )} Previous Log  | CurrentLog: ${chalk.bgWhite.black(
-        `${zombieInfo.currentNode} (${zombieInfo.position}/${zombieInfo.total})`
-      )}`
-    : "";
 
   useInput((input, key) => {
     if (isGrepMode) {
@@ -334,26 +216,22 @@ export const LogViewer: React.FC<LogViewerProps> = ({
     if (key.downArrow && testOutput.length > 0) {
       setTestScrollOffset(prev => Math.max(0, prev - 1));
     }
-    // Reset scroll position when switching modes
     if (input === 'g') {
       setTestScrollOffset(0);
     }
   });
 
-  // Control blinking cursor for grep mode
   useEffect(() => {
     const timer = setInterval(() => {
       setShowCursor(prev => !prev);
     }, 500);
-    
+
     return () => {
       clearInterval(timer);
     };
   }, [isGrepMode]);
 
   useEffect(() => {
-    // Initial read
-    const stats = fs.statSync(logFilePath);
     const stream = fs.createReadStream(logFilePath);
     let content = "";
 
@@ -364,10 +242,8 @@ export const LogViewer: React.FC<LogViewerProps> = ({
     stream.on("end", () => {
       const lines = content.split("\n").filter(line => line.trim());
       setLogs(lines);
-      setCurrentReadPosition(stats.size);
     });
 
-    // Watch for changes if tailing is enabled
     if (tailing) {
       setupWatcher();
     }
@@ -382,34 +258,36 @@ export const LogViewer: React.FC<LogViewerProps> = ({
   }, [testOutput.length]);
 
   return (
-    <Box flexDirection="column" height={process.stdout.rows-1}>
+    <Box flexDirection="column" height={process.stdout.rows - 1}>
       <Box flexDirection="row" flexGrow={1}>
         {/* Logs Section */}
-        <Box 
-          flexDirection="column" 
-          width={testOutput.length > 0 ? "60%" : "100%"} 
-          borderStyle="round" 
+        <Box
+          flexDirection="column"
+          width={testOutput.length > 0 ? "60%" : "100%"}
+          borderStyle="round"
           borderColor="blue"
           height={process.stdout.rows - 3}
         >
+
           <Box paddingX={1}>
             <Text backgroundColor="blue" color="black" bold>
               {" " + logFilePath.split("/").slice(-2).join("/") + " "}
             </Text>
           </Box>
-          <Box flexGrow={1} flexDirection="column">
-          {logs.slice(-Math.max(1, maxVisibleLines)).map((line, i) => (
-              <Text key={i}>{line}</Text>
+
+          <Box flexGrow={1} flexDirection="column" padding={1}>
+            {logs.slice(-Math.max(1, maxVisibleLines)).map((line, i) => (
+              <Text key={i} wrap="wrap">{line}</Text>
             ))}
           </Box>
         </Box>
 
         {/* Test Output Section - Only show if there's output */}
         {testOutput.length > 0 && (
-          <Box 
-            flexDirection="column" 
-            width="40%" 
-            borderStyle="round" 
+          <Box
+            flexDirection="column"
+            width="40%"
+            borderStyle="round"
             borderColor="yellow"
             height={process.stdout.rows - 3}
           >
@@ -418,18 +296,30 @@ export const LogViewer: React.FC<LogViewerProps> = ({
                 {" Test Output "}
               </Text>
             </Box>
-            <Box flexGrow={1} flexDirection="column">
-              {testOutput.map((line, i) => 
-                typeof line === 'string' ? (
-                  <Text key={i}>{line}</Text>
-                ) : (
-                  <Box key={i}>{line}</Box>
-                )
-              ).slice(testScrollOffset, testScrollOffset + maxVisibleLines)}
+
+            <Box flexDirection="column" padding={1} height={process.stdout.rows - 5}>
+              <Box flexGrow={1} flexDirection="column" overflow="hidden">
+                {testOutput.map((line, i) => (
+                  <Text key={i} wrap="wrap">{line}</Text>
+                )).slice(testScrollOffset, testScrollOffset + maxVisibleLines)}
+              </Box>
               {testOutput.length > maxVisibleLines && (
                 <Text color="gray">
                   {`[${Math.round((testScrollOffset / Math.max(1, testOutput.length - maxVisibleLines)) * 100)}% scroll, use ↑/↓ to scroll]`}
                 </Text>
+              )}
+              {parsedOutput && (
+                <Box 
+                  borderStyle="singleDouble" 
+                  borderColor={!parsedOutput.success ? "red" : "green"} 
+                  flexDirection="column" 
+                  minHeight={4}
+                >
+                  <Text>
+                    {`${parsedOutput.numPassedTests}/${parsedOutput.numTotalTests} tests passed`}
+                    {parsedOutput.numFailedTests > 0 ? ` (${parsedOutput.numFailedTests} failed)` : ""}
+                  </Text>
+                </Box>
               )}
             </Box>
           </Box>
@@ -440,16 +330,18 @@ export const LogViewer: React.FC<LogViewerProps> = ({
       {!isExecutingCommand && !isGrepMode && (
         <Box flexDirection="column" margin={0} padding={0}>
           <Text>
-            {bottomBarBase}
-            {resumePauseProse[tailing ? 0 : 1]}
-            {zombieContent}
+            {`📜 Tailing Logs, commands: ${chalk.bgWhite.black("[q]")} Quit, ${chalk.bgWhite.black("[t]")} Test, ${chalk.bgWhite.black("[g]")} Grep test`}
+            {`, ${chalk.bgWhite.black("[p]")} Pause tail`}
+            {`, ${chalk.bgWhite.black("[r]")} Resume tail`}
+            {zombieInfo
+              ? `, ${chalk.bgWhite.black("[,]")} Next Log, ${chalk.bgWhite.black("[.]")} Previous Log  | CurrentLog: ${chalk.bgWhite.black(`${zombieInfo.currentNode} (${zombieInfo.position}/${zombieInfo.total})`)}`
+              : ""}
             {testOutput.length > maxVisibleLines && ", use ↑/↓ to scroll test output"}
           </Text>
         </Box>
       )}
       {!isExecutingCommand && isGrepMode && (
         <Box flexDirection="column" margin={0} padding={0}>
-          {/* <Text dimColor>{"─".repeat(process.stdout.columns)}</Text> */}
           <Text>
             Pattern to filter (ID/Title) [Enter to submit, Esc to cancel]: <Text color="green">{grepInput}</Text><Text color="green">{showCursor ? "▋" : " "}</Text>
           </Text>
