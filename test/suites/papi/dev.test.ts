@@ -32,7 +32,7 @@ describeSuite({
         const blockbefore = await api.query.System.Number.getValue();
 
         await customDevRpcRequest("engine_createBlock", [true, true]);
-
+        await new Promise((resolve) => setTimeout(resolve, 500));
         const blockafter = await api.query.System.Number.getValue();
         expect(blockafter).toBeGreaterThan(blockbefore);
       },
