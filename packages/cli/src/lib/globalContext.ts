@@ -439,13 +439,13 @@ export class MoonwallContext {
           if (launch) {
             try {
               const env = getEnvironmentFromConfig();
-              invariant(env.foundation.type === "dev", "Foundation type must be 'dev'");
-              const result = await launchNode(
-                cmd,
+              const result = await launchNode({
+                command: cmd,
                 args,
-                name || "node",
-                env.foundation.launchSpec[0]
-              );
+                name: name || "node",
+                launchSpec:
+                  "launchSpec" in env.foundation ? env.foundation.launchSpec[0] : undefined,
+              });
               this.nodes.push(result.runningNode);
               if (result.runningNode instanceof ChildProcess) {
                 debugSetup(

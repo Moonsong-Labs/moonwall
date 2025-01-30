@@ -75,12 +75,14 @@ async function launchDockerContainer(
   }
 }
 
-export async function launchNode(
-  cmd: string,
-  args: string[],
-  name: string,
-  config?: DevLaunchSpec
-) {
+export async function launchNode(options: {
+  command: string;
+  args: string[];
+  name: string;
+  launchSpec?: DevLaunchSpec;
+}) {
+  const { command: cmd, args, name, launchSpec: config } = options;
+
   if (config?.useDocker) {
     return launchDockerContainer(cmd, args, name, config.dockerConfig);
   }
