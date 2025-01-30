@@ -100,12 +100,14 @@ export class ProviderFactory {
     return {
       name: this.providerConfig.name,
       type: this.providerConfig.type,
-      connect: async () =>
-        createWalletClient({
+      connect: async () => {
+        const client = createWalletClient({
           chain: await deriveViemChain(this.url),
           account: privateKeyToAccount(this.privateKey as `0x${string}`),
           transport: http(this.url.replace("ws", "http")),
-        }).extend(publicActions),
+        }).extend(publicActions);
+        return client as ViemClient;
+      },
     };
   }
 
