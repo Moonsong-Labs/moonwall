@@ -1,4 +1,10 @@
-import type { MoonwallProvider, ProviderConfig, ProviderType, ViemClient } from "@moonwall/types";
+import type {
+  MoonwallProvider,
+  ProviderConfig,
+  ProviderMap,
+  ProviderType,
+  ViemClient,
+} from "@moonwall/types";
 import { ALITH_PRIVATE_KEY, deriveViemChain } from "@moonwall/util";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import type { ApiOptions } from "@polkadot/api/types";
@@ -240,19 +246,19 @@ export class ProviderFactory {
   }
 }
 
-export interface ProviderInterface {
+interface GenericProvider<T extends ProviderType> {
   name: string;
-  api: any;
-  type: ProviderType;
+  api: ProviderMap[T];
+  type: T;
   greet: () => Promise<void> | Promise<{ rtVersion: number; rtName: string }>;
-  disconnect: () => void | Promise<void> | any;
+  disconnect: () => void | Promise<void>;
 }
 
 export class ProviderInterfaceFactory {
   constructor(
-    private name: string,
-    private type: ProviderType,
-    private connect: () =>
+    public name: string,
+    public type: ProviderType,
+    public connect: () =>
       | Promise<ApiPromise>
       | Wallet
       | Web3
@@ -261,7 +267,7 @@ export class ProviderInterfaceFactory {
       | null
   ) {}
 
-  public async create(): Promise<ProviderInterface> {
+  public async create(): Promise<GenericProvider<this["type"]>> {
     switch (this.type) {
       case "polkadotJs":
         return this.createPolkadotJs();
@@ -278,7 +284,7 @@ export class ProviderInterfaceFactory {
     }
   }
 
-  private async createPolkadotJs(): Promise<ProviderInterface> {
+  private async createPolkadotJs(): Promise<GenericProvider<"polkadotJs">> {
     debug(`🔌 Connecting PolkadotJs provider: ${this.name}`);
     const api = (await this.connect()) as ApiPromise;
     debug(`✅ PolkadotJs provider ${this.name} connected`);
@@ -286,32 +292,30 @@ export class ProviderInterfaceFactory {
     return {
       name: this.name,
       api,
-      type: this.type,
+      type: "polkadotJs",
       greet: async () => {
         debug(
           `👋  Provider ${this.name} is connected to chain` +
-            ` ${(api.consts.system.version as any).specName.toString()} ` +
-            `RT${(api.consts.system.version as any).specVersion.toNumber()}`
+            ` ${api.consts.system.version.specName.toString()} ` +
+            `RT${api.consts.system.version.specVersion.toNumber()}`
         );
         return {
-          rtVersion: (api.consts.system.version as any).specVersion.toNumber(),
-          rtName: (api.consts.system.version as any).specName.toString(),
+          rtVersion: api.consts.system.version.specVersion.toNumber(),
+          rtName: api.consts.system.version.specName.toString(),
         };
       },
       disconnect: async () => api.disconnect(),
     };
   }
 
-  private async createWeb3(): Promise<ProviderInterface> {
+  private async createWeb3(): Promise<GenericProvider<"web3">> {
     const api = (await this.connect()) as Web3;
     return {
       name: this.name,
       api,
-      type: this.type,
+      type: "web3",
       greet: async () =>
-        console.log(
-          `👋 Provider ${this.name} is connected to chain ${await (api.eth as any).getChainId()}`
-        ),
+        console.log(`👋 Provider ${this.name} is connected to chain ${await api.eth.getChainId()}`),
       disconnect: async () => {
         if (!api.eth.net.currentProvider) {
           throw new Error("No connected web3 provider to disconnect from");
@@ -321,12 +325,12 @@ export class ProviderInterfaceFactory {
     };
   }
 
-  private async createEthers(): Promise<ProviderInterface> {
+  private async createEthers(): Promise<GenericProvider<"ethers">> {
     const api = (await this.connect()) as Wallet;
     return {
       name: this.name,
       api,
-      type: this.type,
+      type: "ethers",
       greet: async () => {
         if (!api.provider) {
           throw new Error("No connected ethers provider to greet with");
@@ -346,12 +350,12 @@ export class ProviderInterfaceFactory {
     };
   }
 
-  private async createViem(): Promise<ProviderInterface> {
+  private async createViem(): Promise<GenericProvider<"viem">> {
     const api = (await this.connect()) as ViemClient;
     return {
       name: this.name,
       api,
-      type: this.type,
+      type: "viem",
       greet: async () =>
         console.log(`👋 Provider ${this.name} is connected to chain ${await api.getChainId()}`),
       disconnect: async () => {
@@ -360,12 +364,12 @@ export class ProviderInterfaceFactory {
     };
   }
 
-  private async createPapi(): Promise<ProviderInterface> {
+  private async createPapi(): Promise<GenericProvider<"papi">> {
     const api = (await this.connect()) as PolkadotClient;
     return {
       name: this.name,
       api,
-      type: this.type,
+      type: "papi",
       greet: async () => {
         const unsafeApi = await api.getUnsafeApi();
         const { spec_version, spec_name } = await unsafeApi.constants.System.Version();
@@ -381,14 +385,18 @@ export class ProviderInterfaceFactory {
     name: string,
     type: ProviderType,
     connect: () => Promise<ApiPromise> | Wallet | Web3 | Promise<ViemClient> | PolkadotClient | null
-  ): Promise<ProviderInterface> {
+  ) {
     debug(`🔄 Populating provider: ${name} of type: ${type}`);
     try {
       const providerInterface = await new ProviderInterfaceFactory(name, type, connect).create();
       debug(`✅ Successfully populated provider: ${name}`);
       return providerInterface;
-    } catch (error: any) {
-      console.error(`❌ Failed to populate provider: ${name} - ${error.message}`);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error(`❌ Failed to populate provider: ${name} - ${error.message}`);
+      } else {
+        console.error(`❌ Failed to populate provider: ${name} - Unknown error`);
+      }
       throw error;
     }
   }
