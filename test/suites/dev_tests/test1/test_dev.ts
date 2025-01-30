@@ -21,7 +21,7 @@ import {
   deployViemContract,
 } from "@moonwall/util";
 import { BN } from "@polkadot/util";
-import { type Wallet, parseEther } from "ethers";
+import { Wallet, ethers, parseEther } from "ethers";
 import {
   type Abi,
   createWalletClient,
@@ -38,6 +38,7 @@ import {
 } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { tokenAbi, bytecode as tokenBytecode } from "../../../_test_data/token";
+import assert from "node:assert";
 
 describeSuite({
   id: "D01",
@@ -280,7 +281,6 @@ describeSuite({
           transport: http("211312awd"),
         }).extend(publicActions);
 
-        context.ethers();
         expect(signature.length).to.be.greaterThan(0);
         expect(valid).to.be.true;
       },
@@ -368,6 +368,7 @@ describeSuite({
           tokenBytecode
         );
         log(`Deployed contract at ${contractAddress}`);
+        assert(contractAddress, "Contract address is undefined");
 
         const txHash = await context.viem().writeContract({
           abi: tokenAbi,
@@ -415,8 +416,8 @@ describeSuite({
       id: "T18",
       title: "It can use different apis",
       test: async () => {
-        log(await context.ethers().provider?.getBalance(BALTATHAR_ADDRESS));
-        expect(await context.api("ethers").provider?.getBalance(BALTATHAR_ADDRESS)).toBeGreaterThan(
+        log(await context.viem().getBalance({address: BALTATHAR_ADDRESS}));
+        expect(await context.api("viem").getBalance({address: BALTATHAR_ADDRESS})).toBeGreaterThan(
           0n
         );
       },
@@ -432,7 +433,7 @@ describeSuite({
         const rawTxn1 = await context.createTxn?.({
           to: address1,
           value: parseEther("1.0"),
-          libraryType: "ethers",
+          libraryType: "viem",
         });
 
         await context.createBlock(rawTxn1);

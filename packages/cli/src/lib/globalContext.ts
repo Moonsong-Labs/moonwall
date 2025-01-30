@@ -8,6 +8,7 @@ import type {
   MoonwallEnvironment,
   MoonwallProvider,
   ProviderType,
+  DevLaunchSpec,
 } from "@moonwall/types";
 import type { ApiPromise } from "@polkadot/api";
 import zombie, { type Network } from "@zombienet/orchestrator";
@@ -41,9 +42,10 @@ import {
   isEthereumZombieConfig,
   isOptionSet,
 } from "./configReader";
-import { type ChildProcess, exec, execSync } from "node:child_process";
+import { ChildProcess, exec, execSync } from "node:child_process";
 import { promisify } from "node:util";
 import { withTimeout } from "../internal";
+import Docker from "dockerode";
 import invariant from "tiny-invariant";
 const debugSetup = Debug("global:context");
 
@@ -52,12 +54,13 @@ export class MoonwallContext {
   configured = false;
   environment!: MoonwallEnvironment;
   providers: ConnectedProvider[];
-  nodes: ChildProcess[];
+  nodes: (ChildProcess | Docker.Container)[];
   foundation: FoundationType;
   zombieNetwork?: Network;
   rtUpgradePath?: string;
   ipcServer?: net.Server;
   injectedOptions?: LaunchOverrides;
+  private nodeCleanupHandlers: (() => Promise<void>)[] = [];
 
   constructor(config: MoonwallConfig, options?: LaunchOverrides) {
     const env = config.environments.find(({ name }) => name === process.env.MOON_TEST_ENV);
@@ -435,9 +438,20 @@ export class MoonwallContext {
         nodes.map(async ({ cmd, args, name, launch }) => {
           if (launch) {
             try {
-              const { runningNode } = await launchNode(cmd, args, name || "node");
-              this.nodes.push(runningNode);
-              debugSetup(`✅ Node '${name || "unnamed"}' started with PID ${runningNode.pid}`);
+              const env = getEnvironmentFromConfig();
+              invariant(env.foundation.type === "dev", "Foundation type must be 'dev'");
+              const result = await launchNode(
+                cmd,
+                args,
+                name || "node",
+                env.foundation.launchSpec[0]
+              );
+              this.nodes.push(result.runningNode);
+              if (result.runningNode instanceof ChildProcess) {
+                debugSetup(
+                  `✅ Node '${name || "unnamed"}' started with PID ${result.runningNode.pid}`
+                );
+              }
             } catch (error: any) {
               throw new Error(`Failed to start node '${name || "unnamed"}': ${error.message}`);
             }
@@ -608,6 +622,37 @@ export class MoonwallContext {
       );
       this.providers = [];
     }
+
+    // Clean up nodes
+    if (this.nodes.length > 0) {
+      for (const node of this.nodes) {
+        if (node instanceof ChildProcess) {
+          try {
+            if (node.pid) {
+              process.kill(node.pid);
+            }
+          } catch (e) {
+            // Ignore errors when killing processes
+          }
+        }
+
+        if (node instanceof Docker.Container) {
+          try {
+            await node.stop();
+            await node.remove();
+          } catch (e) {
+            // Ignore errors when stopping containers
+          }
+        }
+      }
+      this.nodes = [];
+    }
+
+    // Run any cleanup handlers (e.g. for Docker containers)
+    if (this.nodeCleanupHandlers.length > 0) {
+      await Promise.all(this.nodeCleanupHandlers.map((handler) => handler()));
+      this.nodeCleanupHandlers = [];
+    }
   }
 
   public static async getContext(
@@ -645,17 +690,26 @@ export class MoonwallContext {
       const node = ctx.nodes.pop();
       invariant(node, "No node to destroy");
 
-      const pid = node.pid;
-      invariant(pid, "No pid to destroy");
+      if (node instanceof ChildProcess) {
+        const pid = node.pid;
+        invariant(pid, "No pid to destroy");
 
-      node.kill("SIGINT");
-      for (;;) {
-        const isRunning = await isPidRunning(pid);
-        if (isRunning) {
-          await timer(10);
-        } else {
-          break;
+        node.kill("SIGINT");
+        for (;;) {
+          const isRunning = await isPidRunning(pid);
+          if (isRunning) {
+            await timer(10);
+          } else {
+            break;
+          }
         }
+      }
+
+      if (node instanceof Docker.Container) {
+        console.log("🛑  Stopping container");
+        await node.stop();
+        await node.remove();
+        console.log("🛑  Container stopped and removed");
       }
     }
 

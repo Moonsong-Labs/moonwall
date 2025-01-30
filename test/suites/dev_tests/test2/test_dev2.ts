@@ -57,8 +57,6 @@ describeSuite({
         const tx = polkadotJs.tx.rootTesting.fillBlock(60 * 10 ** 7);
         await polkadotJs.tx.sudo.sudo(tx).signAndSend(alith);
 
-        polkadotJs;
-
         await context.createBlock();
         const blockFill = await polkadotJs.query.system.blockWeight();
         expect(blockFill.normal.refTime.unwrap().gt(new BN(0))).to.be.true;

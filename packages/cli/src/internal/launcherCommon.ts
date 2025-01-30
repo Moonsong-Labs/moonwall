@@ -45,6 +45,14 @@ async function devBinCheck(env: Environment) {
     throw new Error("This function is only for dev environments");
   }
 
+  if (!env.foundation.launchSpec || !env.foundation.launchSpec[0]) {
+    throw new Error("Dev environment requires a launchSpec configuration");
+  }
+
+  if (env.foundation.launchSpec[0].useDocker) {
+    return;
+  }
+
   const binName = path.basename(env.foundation.launchSpec[0].binPath);
   const pids = checkAlreadyRunning(binName);
   pids.length === 0 || process.env.CI || (await promptAlreadyRunning(pids));

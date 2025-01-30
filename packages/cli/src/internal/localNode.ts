@@ -6,11 +6,85 @@ import { checkAccess, checkExists } from "./fileCheckers";
 import Debug from "debug";
 import { setTimeout as timer } from "node:timers/promises";
 import util from "node:util";
+import type { DevLaunchSpec } from "@moonwall/types";
+import Docker from "dockerode";
 
 const execAsync = util.promisify(exec);
 const debug = Debug("global:localNode");
 
-export async function launchNode(cmd: string, args: string[], name: string) {
+// TODO: Derive ports properly
+async function launchDockerContainer(
+  imageName: string,
+  args: string[],
+  name: string,
+  dockerConfig?: DevLaunchSpec["dockerConfig"]
+) {
+  const docker = new Docker();
+  const port = args.find((a) => a.includes("port"))?.split("=")[1];
+  debug(`\x1b[36mStarting Docker container ${imageName} on port ${port}...\x1b[0m`);
+
+  const dirPath = path.join(process.cwd(), "tmp", "node_logs");
+  const logLocation = path.join(dirPath, `${name}_docker_${Date.now()}.log`);
+  const fsStream = fs.createWriteStream(logLocation);
+  process.env.MOON_LOG_LOCATION = logLocation;
+
+  const containerOptions = {
+    Image: imageName,
+    platform: "linux/amd64",
+    Cmd: args,
+    name: dockerConfig?.containerName || `moonwall_${name}_${Date.now()}`,
+    NetworkingConfig: {
+      EndpointsConfig: {
+        docker_default: {},
+      },
+    },
+    HostConfig: {
+      PortBindings: {
+        "9944/tcp": [{ HostPort: "9944" }],
+      },
+    },
+    Env: dockerConfig?.runArgs?.filter((arg) => arg.startsWith("env:")).map((arg) => arg.slice(4)),
+  } satisfies Docker.ContainerCreateOptions;
+
+  try {
+    const container = await docker.createContainer(containerOptions);
+    await container.start();
+
+    const containerInfo = await container.inspect();
+    if (!containerInfo.State.Running) {
+      const errorMessage = `Container failed to start: ${containerInfo.State.Error}`;
+      console.error(errorMessage);
+      fs.appendFileSync(logLocation, `${errorMessage}\n`);
+      throw new Error(errorMessage);
+    }
+
+    for (let i = 0; i < 300; i++) {
+      if (await checkWebSocketJSONRPC(9944)) {
+        break;
+      }
+      await timer(100);
+    }
+
+    return { runningNode: container, fsStream };
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error(`Docker container launch failed: ${error.message}`);
+      fs.appendFileSync(logLocation, `Docker launch error: ${error.message}\n`);
+    }
+    throw error;
+  }
+}
+
+export async function launchNode(
+  cmd: string,
+  args: string[],
+  name: string,
+  config?: DevLaunchSpec
+) {
+  if (config?.useDocker) {
+    return launchDockerContainer(cmd, args, name, config.dockerConfig);
+  }
+
   if (cmd.includes("moonbeam")) {
     await checkExists(cmd);
     checkAccess(cmd);

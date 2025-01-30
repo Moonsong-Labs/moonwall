@@ -62,7 +62,9 @@ export class LaunchCommandParser {
     this.cmd = launchSpec.binPath;
     this.args = launchSpec.options
       ? [...launchSpec.options]
-      : fetchDefaultArgs(path.basename(launchSpec.binPath), additionalRepos);
+      : launchSpec.useDocker
+        ? []
+        : fetchDefaultArgs(path.basename(launchSpec.binPath), additionalRepos);
   }
 
   private overrideArg(newArg: string): void {

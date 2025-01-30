@@ -95,7 +95,7 @@ export class ProviderFactory {
       name: this.providerConfig.name,
       type: this.providerConfig.type,
       connect: () => {
-        const provider = new ethers.WebSocketProvider(this.url);
+        const provider = new ethers.JsonRpcProvider(this.url.replace("ws", "http"));
         return new Wallet(this.privateKey, provider);
       },
     };

@@ -69,7 +69,7 @@
       "description": "A launch specification object for the \"dev\" foundation type.",
       "properties": {
         "binPath": {
-          "description": "The path to the binary to execute",
+          "description": "The path to the binary to execute OR the Docker image to use",
           "type": "string"
         },
         "defaultForkConfig": {
@@ -97,6 +97,27 @@
         "disableDefaultEthProviders": {
           "description": "Determines if the default Ethereum provider connections should be disabled.\nWhen set to true, the framework will not automatically connect the Ethereum providers.\nDefault behavior (when unset or set to false) is to connect with Ethers, Viem & Web3 frameworks.\n\nNote: This also acts as a feature gate for context methods like createTxn and readPrecompile.",
           "type": "boolean"
+        },
+        "dockerConfig": {
+          "description": "Docker-specific configuration",
+          "properties": {
+            "containerName": {
+              "description": "Docker container name. If not provided, one will be generated",
+              "type": "string"
+            },
+            "network": {
+              "description": "Docker network to connect to. If not provided, the default network will be used",
+              "type": "string"
+            },
+            "runArgs": {
+              "description": "Additional Docker run arguments (e.g. environment variables, volumes)",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          "type": "object"
         },
         "name": {
           "description": "The name of the launch spec.",
@@ -137,6 +158,10 @@
         },
         "running": {
           "description": "UNUSED",
+          "type": "boolean"
+        },
+        "useDocker": {
+          "description": "If true, binPath will be treated as a Docker image instead of a local binary",
           "type": "boolean"
         }
       },

@@ -65,7 +65,7 @@
   },
   "pnpm": {
     "overrides": {
-       "@moonbeam-network/api-augment": "0.3401.2",
+      "@moonbeam-network/api-augment": "0.3401.2",
       "@polkadot/api": "15.0.1",
       "@polkadot/api-base": "15.0.1",
       "@polkadot/api-derive": "15.0.1",

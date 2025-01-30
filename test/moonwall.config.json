@@ -45,7 +45,9 @@
   "environments": [
     {
       "name": "interbtc",
-      "testFileDir": ["suites/basic"],
+      "testFileDir": [
+        "suites/basic"
+      ],
       "description": "A star is born",
       "foundation": {
         "type": "dev",
@@ -59,7 +61,9 @@
     },
     {
       "name": "astar",
-      "testFileDir": ["suites/basic"],
+      "testFileDir": [
+        "suites/basic"
+      ],
       "description": "A star is born",
       "foundation": {
         "type": "dev",
@@ -80,7 +84,9 @@
     },
     {
       "name": "update_snapshot",
-      "testFileDir": ["suites/update"],
+      "testFileDir": [
+        "suites/update"
+      ],
       "foundation": {
         "type": "read_only",
         "launchSpec": {
@@ -91,7 +97,9 @@
     },
     {
       "name": "passthrough_test",
-      "testFileDir": ["suites/multi_fail"],
+      "testFileDir": [
+        "suites/multi_fail"
+      ],
       "description": "Testing that bail can be passed through",
       "foundation": {
         "type": "read_only",
@@ -107,9 +115,13 @@
     },
     {
       "name": "failing_prescript",
-      "testFileDir": ["suites/basic"],
+      "testFileDir": [
+        "suites/basic"
+      ],
       "description": "Test that failing pre-scripts are caught",
-      "runScripts": ["failing-script.ts"],
+      "runScripts": [
+        "failing-script.ts"
+      ],
       "foundation": {
         "type": "read_only",
         "launchSpec": {
@@ -120,7 +132,9 @@
     },
     {
       "name": "dev_tanssi",
-      "testFileDir": ["suites/tanssi"],
+      "testFileDir": [
+        "suites/tanssi"
+      ],
       "description": "Basic Tanssi dev test",
       "foundation": {
         "type": "dev",
@@ -135,8 +149,12 @@
     },
     {
       "name": "viem_test",
-      "testFileDir": ["suites/viem"],
-      "envVars": [""],
+      "testFileDir": [
+        "suites/viem"
+      ],
+      "envVars": [
+        ""
+      ],
       "foundation": {
         "type": "read_only",
         "launchSpec": {
@@ -147,14 +165,18 @@
         {
           "name": "viem",
           "type": "viem",
-          "endpoints": ["wss://rpc.api.moonbeam.network"]
+          "endpoints": [
+            "wss://rpc.api.moonbeam.network"
+          ]
         }
       ]
     },
     {
       "name": "zombie_wasm",
       "description": "For upgrade testing using zombienet",
-      "testFileDir": ["suites/zombie"],
+      "testFileDir": [
+        "suites/zombie"
+      ],
       "foundation": {
         "type": "zombie",
         "rtUpgradePath": "./tmp/moonbase-runtime-2400.wasm",
@@ -166,7 +188,9 @@
     },
     {
       "name": "zombie_multi_para",
-      "testFileDir": ["suites/multizombie"],
+      "testFileDir": [
+        "suites/multizombie"
+      ],
       "timeout": 300000,
       "foundation": {
         "type": "zombie",
@@ -174,28 +198,40 @@
           "name": "zombienet",
           "configPath": "./configs/zombieMulti.json",
           "disableLogEavesdropping": true,
-          "skipBlockCheck": ["para2"]
+          "skipBlockCheck": [
+            "para2"
+          ]
         }
       },
       "connections": [
         {
           "name": "para1",
           "type": "polkadotJs",
-          "endpoints": ["ws://127.0.0.1:33345"]
+          "endpoints": [
+            "ws://127.0.0.1:33345"
+          ]
         },
         {
           "name": "para2",
           "type": "polkadotJs",
-          "endpoints": ["ws://127.0.0.1:22345"]
+          "endpoints": [
+            "ws://127.0.0.1:22345"
+          ]
         }
       ]
     },
     {
       "name": "zombie_test",
-      "testFileDir": ["suites/zombie"],
+      "testFileDir": [
+        "suites/zombie"
+      ],
       "timeout": 300000,
-      "envVars": ["DEBUG_COLORS=1"],
-      "reporters": ["default"],
+      "envVars": [
+        "DEBUG_COLORS=1"
+      ],
+      "reporters": [
+        "default"
+      ],
       "foundation": {
         "type": "zombie",
         "rtUpgradePath": "./tmp/moonbase-runtime-2401.wasm",
@@ -210,10 +246,16 @@
     },
     {
       "name": "zombie_noPara",
-      "testFileDir": ["suites/zombieNoPara"],
+      "testFileDir": [
+        "suites/zombieNoPara"
+      ],
       "timeout": 300000,
-      "envVars": ["DEBUG_COLORS=1"],
-      "reporters": ["default"],
+      "envVars": [
+        "DEBUG_COLORS=1"
+      ],
+      "reporters": [
+        "default"
+      ],
       "foundation": {
         "type": "zombie",
         "zombieSpec": {
@@ -226,10 +268,11 @@
         }
       }
     },
-
     {
       "name": "para_test",
-      "testFileDir": ["suites/zombie"],
+      "testFileDir": [
+        "suites/zombie"
+      ],
       "multiThreads": false,
       "foundation": {
         "type": "zombie",
@@ -242,7 +285,9 @@
     {
       "name": "basic",
       "description": "Suite of tests that doesnt involve any blockchain stuff",
-      "testFileDir": ["suites/basic/"],
+      "testFileDir": [
+        "suites/basic/"
+      ],
       "foundation": {
         "launchSpec": {
           "disableRuntimeVersionCheck": true
@@ -259,7 +304,9 @@
     {
       "name": "derive",
       "description": "Suite of tests that doesnt involve any blockchain stuff",
-      "testFileDir": ["suites/derive/"],
+      "testFileDir": [
+        "suites/derive/"
+      ],
       "foundation": {
         "launchSpec": {
           "disableRuntimeVersionCheck": true
@@ -275,8 +322,12 @@
     },
     {
       "name": "tanssi_chopsticks",
-      "testFileDir": ["suites/chopsticks/"],
-      "include": ["**/*basic*"],
+      "testFileDir": [
+        "suites/chopsticks/"
+      ],
+      "include": [
+        "**/*basic*"
+      ],
       "foundation": {
         "type": "chopsticks",
         "rtUpgradePath": "./tmp/dancebox_runtime.compact.compressed.wasm",
@@ -293,16 +344,27 @@
         {
           "name": "MB",
           "type": "polkadotJs",
-          "endpoints": ["ws://127.0.0.1:8000"]
+          "endpoints": [
+            "ws://127.0.0.1:8000"
+          ]
         }
       ]
     },
     {
       "name": "chopsticks",
-      "envVars": ["DEBUG_COLORS=1"],
-      "testFileDir": ["suites/chopsticks/"],
-      "include": ["**/*basic*"],
-      "reporters": ["default", "json"],
+      "envVars": [
+        "DEBUG_COLORS=1"
+      ],
+      "testFileDir": [
+        "suites/chopsticks/"
+      ],
+      "include": [
+        "**/*basic*"
+      ],
+      "reporters": [
+        "default",
+        "json"
+      ],
       "reportFile": {
         "json": "tmp/testResults.json"
       },
@@ -323,14 +385,20 @@
         {
           "name": "MB",
           "type": "polkadotJs",
-          "endpoints": ["ws://127.0.0.1:10000"]
+          "endpoints": [
+            "ws://127.0.0.1:10000"
+          ]
         }
       ]
     },
     {
       "name": "chopsticks_round",
-      "testFileDir": ["suites/chopsticks-round/"],
-      "reporters": ["default"],
+      "testFileDir": [
+        "suites/chopsticks-round/"
+      ],
+      "reporters": [
+        "default"
+      ],
       "foundation": {
         "type": "chopsticks",
         "launchSpec": [
@@ -347,14 +415,20 @@
         {
           "name": "MB",
           "type": "polkadotJs",
-          "endpoints": ["ws://127.0.0.1:10000"]
+          "endpoints": [
+            "ws://127.0.0.1:10000"
+          ]
         }
       ]
     },
     {
       "name": "chopsticks_state",
-      "testFileDir": ["suites/chopsticks/"],
-      "include": ["**/*state*"],
+      "testFileDir": [
+        "suites/chopsticks/"
+      ],
+      "include": [
+        "**/*state*"
+      ],
       "foundation": {
         "type": "chopsticks",
         "launchSpec": [
@@ -370,14 +444,20 @@
         {
           "name": "MB",
           "type": "polkadotJs",
-          "endpoints": ["ws://127.0.0.1:10000"]
+          "endpoints": [
+            "ws://127.0.0.1:10000"
+          ]
         }
       ]
     },
     {
       "name": "moonbeam_smoke",
-      "testFileDir": ["suites/dummy-smoke/"],
-      "include": ["**/*conditional*"],
+      "testFileDir": [
+        "suites/dummy-smoke/"
+      ],
+      "include": [
+        "**/*conditional*"
+      ],
       "foundation": {
         "type": "read_only"
       },
@@ -385,14 +465,20 @@
         {
           "name": "MB",
           "type": "polkadotJs",
-          "endpoints": ["wss://moonbeam.api.onfinality.io/public-ws"]
+          "endpoints": [
+            "wss://moonbeam.api.onfinality.io/public-ws"
+          ]
         }
       ]
     },
     {
       "name": "moonriver_smoke",
-      "testFileDir": ["suites/dummy-smoke/"],
-      "include": ["**/*conditional*"],
+      "testFileDir": [
+        "suites/dummy-smoke/"
+      ],
+      "include": [
+        "**/*conditional*"
+      ],
       "foundation": {
         "type": "read_only"
       },
@@ -400,14 +486,20 @@
         {
           "name": "MB",
           "type": "polkadotJs",
-          "endpoints": ["wss://wss.api.moonriver.moonbeam.network"]
+          "endpoints": [
+            "wss://wss.api.moonriver.moonbeam.network"
+          ]
         }
       ]
     },
     {
       "name": "chop_state_test",
-      "testFileDir": ["suites/chopsticks/"],
-      "include": ["**/*state*"],
+      "testFileDir": [
+        "suites/chopsticks/"
+      ],
+      "include": [
+        "**/*state*"
+      ],
       "foundation": {
         "type": "chopsticks",
         "launchSpec": [
@@ -424,7 +516,9 @@
         {
           "name": "MB",
           "type": "polkadotJs",
-          "endpoints": ["ws://127.0.0.1:12000"]
+          "endpoints": [
+            "ws://127.0.0.1:12000"
+          ]
         }
       ]
     },
@@ -468,19 +562,28 @@
         {
           "name": "MB",
           "type": "polkadotJs",
-          "endpoints": ["ws://127.0.0.1:10000"]
+          "endpoints": [
+            "ws://127.0.0.1:10000"
+          ]
         },
         {
           "name": "MR",
           "type": "polkadotJs",
-          "endpoints": ["ws://127.0.0.1:12000"]
+          "endpoints": [
+            "ws://127.0.0.1:12000"
+          ]
         }
       ]
     },
     {
       "name": "dev_multi",
-      "testFileDir": ["suites/test_separation"],
-      "reporters": ["basic", "html"],
+      "testFileDir": [
+        "suites/test_separation"
+      ],
+      "reporters": [
+        "basic",
+        "html"
+      ],
       "multiThreads": true,
       "foundation": {
         "type": "dev",
@@ -496,8 +599,13 @@
     },
     {
       "name": "dev_threadsingle",
-      "testFileDir": ["suites/test_separation"],
-      "reporters": ["basic", "html"],
+      "testFileDir": [
+        "suites/test_separation"
+      ],
+      "reporters": [
+        "basic",
+        "html"
+      ],
       "multiThreads": {
         "threads": {
           "isolate": false,
@@ -519,8 +627,13 @@
     },
     {
       "name": "dev_forksingle",
-      "testFileDir": ["suites/test_separation"],
-      "reporters": ["basic", "html"],
+      "testFileDir": [
+        "suites/test_separation"
+      ],
+      "reporters": [
+        "basic",
+        "html"
+      ],
       "multiThreads": {
         "forks": {
           "minForks": 1,
@@ -543,14 +656,19 @@
     },
     {
       "name": "dev_forkMulti",
-      "testFileDir": ["suites/test_separation"],
+      "testFileDir": [
+        "suites/test_separation"
+      ],
       "multiThreads": {
         "forks": {
           "isolate": false,
           "singleFork": false
         }
       },
-      "reporters": ["basic", "html"],
+      "reporters": [
+        "basic",
+        "html"
+      ],
       "foundation": {
         "type": "dev",
         "launchSpec": [
@@ -565,8 +683,13 @@
     },
     {
       "name": "dev_vmsingle",
-      "testFileDir": ["suites/test_separation"],
-      "reporters": ["basic", "html"],
+      "testFileDir": [
+        "suites/test_separation"
+      ],
+      "reporters": [
+        "basic",
+        "html"
+      ],
       "multiThreads": {
         "vmThreads": {
           "minThreads": 1,
@@ -589,14 +712,19 @@
     },
     {
       "name": "dev_vmMulti",
-      "testFileDir": ["suites/test_separation"],
+      "testFileDir": [
+        "suites/test_separation"
+      ],
       "multiThreads": {
         "vmThreads": {
           "useAtomics": false,
           "memoryLimit": 0.25
         }
       },
-      "reporters": ["basic", "html"],
+      "reporters": [
+        "basic",
+        "html"
+      ],
       "foundation": {
         "type": "dev",
         "launchSpec": [
@@ -611,7 +739,9 @@
     },
     {
       "name": "dev_seq",
-      "testFileDir": ["suites/test_separation"],
+      "testFileDir": [
+        "suites/test_separation"
+      ],
       "multiThreads": false,
       "foundation": {
         "type": "dev",
@@ -627,7 +757,9 @@
     },
     {
       "name": "wrongFoundation",
-      "testFileDir": ["suites/run_error/"],
+      "testFileDir": [
+        "suites/run_error/"
+      ],
       "foundation": {
         "type": "read_only"
       },
@@ -635,18 +767,24 @@
         {
           "name": "w3",
           "type": "web3",
-          "endpoints": ["wss://moonbeam.api.onfinality.io/public-ws"]
+          "endpoints": [
+            "wss://moonbeam.api.onfinality.io/public-ws"
+          ]
         },
         {
           "name": "mb",
           "type": "polkadotJs",
-          "endpoints": ["wss://moonbeam.api.onfinality.io/public-ws"]
+          "endpoints": [
+            "wss://moonbeam.api.onfinality.io/public-ws"
+          ]
         }
       ]
     },
     {
       "name": "pass",
-      "testFileDir": ["suites/run_error/"],
+      "testFileDir": [
+        "suites/run_error/"
+      ],
       "foundation": {
         "type": "dev",
         "launchSpec": [
@@ -677,18 +815,24 @@
         {
           "name": "w3",
           "type": "web3",
-          "endpoints": ["ws://127.0.0.1:9944"]
+          "endpoints": [
+            "ws://127.0.0.1:9944"
+          ]
         },
         {
           "name": "mb",
           "type": "polkadotJs",
-          "endpoints": ["ws://127.0.0.1:9944"]
+          "endpoints": [
+            "ws://127.0.0.1:9944"
+          ]
         }
       ]
     },
     {
       "name": "web3_test",
-      "testFileDir": ["suites/web3_test/"],
+      "testFileDir": [
+        "suites/web3_test/"
+      ],
       "foundation": {
         "type": "read_only"
       },
@@ -696,19 +840,27 @@
         {
           "name": "w3",
           "type": "web3",
-          "endpoints": ["wss://rpc.api.moonbeam.network"]
+          "endpoints": [
+            "wss://rpc.api.moonbeam.network"
+          ]
         },
         {
           "name": "MB",
           "type": "polkadotJs",
-          "endpoints": ["wss://rpc.api.moonbeam.network"]
+          "endpoints": [
+            "wss://rpc.api.moonbeam.network"
+          ]
         }
       ]
     },
     {
       "name": "eth_test",
-      "testFileDir": ["suites/eth_test"],
-      "include": ["**/{test,spec,test_,test-}*{ts,mts,cts}"],
+      "testFileDir": [
+        "suites/eth_test"
+      ],
+      "include": [
+        "**/{test,spec,test_,test-}*{ts,mts,cts}"
+      ],
       "multiThreads": false,
       "foundation": {
         "type": "read_only",
@@ -723,19 +875,27 @@
         {
           "name": "para",
           "type": "polkadotJs",
-          "endpoints": ["wss://moonbeam-rpc.dwellir.com"]
+          "endpoints": [
+            "wss://moonbeam-rpc.dwellir.com"
+          ]
         },
         {
           "name": "eth",
           "type": "ethers",
-          "endpoints": ["wss://moonbeam-rpc.dwellir.com"]
+          "endpoints": [
+            "wss://moonbeam-rpc.dwellir.com"
+          ]
         }
       ]
     },
     {
       "name": "readonly",
-      "testFileDir": ["suites/read_only/"],
-      "include": ["**/{test,spec,test_,test-}*{ts,mts,cts}"],
+      "testFileDir": [
+        "suites/read_only/"
+      ],
+      "include": [
+        "**/{test,spec,test_,test-}*{ts,mts,cts}"
+      ],
       "multiThreads": false,
       "foundation": {
         "type": "read_only",
@@ -750,25 +910,40 @@
         {
           "name": "eth",
           "type": "ethers",
-          "endpoints": ["wss://rpc.api.moonbeam.network"]
+          "endpoints": [
+            "wss://rpc.api.moonbeam.network"
+          ]
         },
         {
           "name": "para",
           "type": "polkadotJs",
-          "endpoints": ["wss://rpc.api.moonbeam.network"]
+          "endpoints": [
+            "wss://rpc.api.moonbeam.network"
+          ]
         }
       ]
     },
     {
       "name": "dev_test",
-      "testFileDir": ["suites/dev_tests"],
-      "envVars": ["DEBUG_COLORS=1", "TIMBO_TEST_ENV='TIMBO timbo timbo'"],
-      "reporters": ["basic", "html", "json"],
+      "testFileDir": [
+        "suites/dev_tests"
+      ],
+      "envVars": [
+        "DEBUG_COLORS=1",
+        "TIMBO_TEST_ENV='TIMBO timbo timbo'"
+      ],
+      "reporters": [
+        "basic",
+        "html",
+        "json"
+      ],
       "reportFile": {
         "json": "tmp/testResults.json"
       },
       "contracts": "contracts/",
-      "runScripts": ["compile-contracts.ts compile -p contracts/precompiles"],
+      "runScripts": [
+        "compile-contracts.ts compile -p contracts/precompiles"
+      ],
       "defaultSigner": {
         "type": "ethereum",
         "privateKey": "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
@@ -805,22 +980,30 @@
         {
           "name": "eth",
           "type": "ethers",
-          "endpoints": ["${WSS_URL}"]
+          "endpoints": [
+            "${WSS_URL}"
+          ]
         },
         {
           "name": "w3",
           "type": "web3",
-          "endpoints": ["${WSS_URL}"]
+          "endpoints": [
+            "${WSS_URL}"
+          ]
         },
         {
           "name": "viem",
           "type": "viem",
-          "endpoints": ["${WSS_URL}"]
+          "endpoints": [
+            "${WSS_URL}"
+          ]
         },
         {
           "name": "pjs",
           "type": "polkadotJs",
-          "endpoints": ["${WSS_URL}"],
+          "endpoints": [
+            "${WSS_URL}"
+          ],
           "rpc": {
             "polkadotJs": {
               "isTxFinalized": {
@@ -865,10 +1048,14 @@
         {
           "name": "para",
           "type": "polkadotJs",
-          "endpoints": ["wss://moonbeam-rpc.dwellir.com"]
+          "endpoints": [
+            "wss://moonbeam-rpc.dwellir.com"
+          ]
         }
       ],
-      "testFileDir": ["/suites/smoke"],
+      "testFileDir": [
+        "/suites/smoke"
+      ],
       "skipTests": [
         {
           "name": "SO00T02",
@@ -889,7 +1076,9 @@
     },
     {
       "name": "multi_chopsticks",
-      "testFileDir": ["suites/multi_chopsticks"],
+      "testFileDir": [
+        "suites/multi_chopsticks"
+      ],
       "foundation": {
         "type": "chopsticks",
         "launchSpec": [
@@ -913,30 +1102,45 @@
           }
         ]
       },
-      "envVars": ["LOG_LEVEL=debug", "VERBOSE_LOG=true"],
+      "envVars": [
+        "LOG_LEVEL=debug",
+        "VERBOSE_LOG=true"
+      ],
       "connections": [
         {
           "name": "polkadot",
           "type": "polkadotJs",
-          "endpoints": ["ws://localhost:8002"]
+          "endpoints": [
+            "ws://localhost:8002"
+          ]
         },
         {
           "name": "assethub",
           "type": "polkadotJs",
-          "endpoints": ["ws://localhost:8001"]
+          "endpoints": [
+            "ws://localhost:8001"
+          ]
         },
         {
           "name": "hydration",
           "type": "polkadotJs",
-          "endpoints": ["ws://localhost:8000"]
+          "endpoints": [
+            "ws://localhost:8000"
+          ]
         }
       ]
     },
     {
       "name": "papi_readonly",
-      "testFileDir": ["suites/papi"],
-      "include": ["**/read_only*"],
-      "envVars": [""],
+      "testFileDir": [
+        "suites/papi"
+      ],
+      "include": [
+        "**/read_only*"
+      ],
+      "envVars": [
+        ""
+      ],
       "foundation": {
         "type": "read_only",
         "launchSpec": {
@@ -947,15 +1151,23 @@
         {
           "name": "papi",
           "type": "papi",
-          "endpoints": ["wss://rpc.polkadot.io"]
+          "endpoints": [
+            "wss://rpc.polkadot.io"
+          ]
         }
       ]
     },
     {
       "name": "papi_dev",
-      "testFileDir": ["suites/papi"],
-      "include": ["**/dev*"],
-      "envVars": [""],
+      "testFileDir": [
+        "suites/papi"
+      ],
+      "include": [
+        "**/dev*"
+      ],
+      "envVars": [
+        ""
+      ],
       "foundation": {
         "type": "dev",
         "launchSpec": [
@@ -973,14 +1185,17 @@
         {
           "name": "papi",
           "type": "papi",
-          "endpoints": ["ws://127.0.0.1:9955"]
+          "endpoints": [
+            "ws://127.0.0.1:9955"
+          ]
         }
       ]
     },
     {
       "name": "fork_test",
-      "testFileDir": ["suites/fork_test"],
-
+      "testFileDir": [
+        "suites/fork_test"
+      ],
       "foundation": {
         "type": "dev",
         "launchSpec": [
@@ -1011,6 +1226,86 @@
           }
         ]
       }
+    },
+    {
+      "name": "docker-dev",
+      "description": "Development environment using Docker",
+      "testFileDir": [
+        "./suites/dev_tests"
+      ],
+      "reporters": [
+        "verbose"      ],
+        "contracts": "contracts/",
+        "runScripts": [
+          "compile-contracts.ts compile -p contracts/precompiles"
+        ],
+        "defaultSigner": {
+          "type": "ethereum",
+          "privateKey": "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
+        },
+        "defaultAllowFailures": false,
+      "foundation": {
+        "type": "dev",
+        "launchSpec": [
+          {
+            "name": "moonbeam-docker",
+            "binPath": "moonbeamfoundation/moonbeam:latest",
+            "useDocker": true,
+            "newRpcBehaviour": true,
+            "multiThreads": false,
+            "disableDefaultEthProviders": false,
+            "dockerConfig": {
+              "containerName": "moonbeam-docker"
+            },
+            "ports": {
+              "rpcPort": 9944
+            },
+            "options": [
+              "--dev",
+              "--no-hardware-benchmarks",
+              "--no-telemetry",
+              "--reserved-only",
+              "--rpc-cors=all",
+              "--no-grandpa",
+              "--unsafe-rpc-external",
+              "--rpc-methods=unsafe",
+              "--sealing=manual",
+              "--force-authoring",
+              "--no-prometheus"
+            ]
+          }
+        ]
+      },
+      "connections": [
+        {
+          "name": "moonbeam",
+          "type": "polkadotJs",
+          "endpoints": [
+            "ws://127.0.0.1:9944"
+          ]
+        },
+        {
+          "name": "eth",
+          "type": "ethers",
+          "endpoints": [
+            "ws://127.0.0.1:9944"
+          ]
+        },
+        {
+          "name": "w3",
+          "type": "web3",
+          "endpoints": [
+            "ws://127.0.0.1:9944"
+          ]
+        },
+        {
+          "name": "viem",
+          "type": "viem",
+          "endpoints": [
+            "ws://127.0.0.1:9944"
+          ]
+        }
+      ]
     }
   ]
 }
