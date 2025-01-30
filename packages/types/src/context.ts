@@ -62,7 +62,7 @@ export interface ConnectedProvider {
   name: string;
   type: ProviderType;
   api: ProviderApi;
-  disconnect: () => Promise<void>;
+  disconnect: () => Promise<void> | void;
   greet: () => Promise<void> | Promise<{ rtName: string; rtVersion: number }>;
 }
 
