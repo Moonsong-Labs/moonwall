@@ -1236,7 +1236,6 @@
       "reporters": [
         "verbose"
       ],
-      "printVitestOptions": true,
       "contracts": "contracts/",
       "runScripts": [
         "compile-contracts.ts compile -p contracts/precompiles"
@@ -1255,7 +1254,6 @@
             "useDocker": true,
             "newRpcBehaviour": true,
             "multiThreads": false,
-            "disableDefaultEthProviders": false,
             "dockerConfig": {
               "containerName": "moonbeam-docker",
               "exposePorts": [

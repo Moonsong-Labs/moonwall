@@ -45,11 +45,6 @@ async function launchDockerContainer(
     platform: "linux/amd64",
     Cmd: args,
     name: dockerConfig?.containerName || `moonwall_${name}_${Date.now()}`,
-    NetworkingConfig: {
-      EndpointsConfig: {
-        docker_default: {},
-      },
-    },
     ExposedPorts: {
       ...Object.fromEntries(
         dockerConfig?.exposePorts?.map(({ internalPort }) => [`${internalPort}/tcp`, {}]) || []
@@ -66,6 +61,8 @@ async function launchDockerContainer(
   } satisfies Docker.ContainerCreateOptions;
 
   try {
+    await pullImage(imageName, docker);
+
     const container = await docker.createContainer(containerOptions);
     await container.start();
 
@@ -287,4 +284,20 @@ async function findPortsByPid(pid: number, retryCount = 600, retryDelay = 100): 
   }
 
   return [];
+}
+
+async function pullImage(imageName: string, docker: Docker) {
+  console.log(`Pulling Docker image: ${imageName}`);
+
+  const pullStream = await docker.pull(imageName);
+  // Dockerode pull doesn't wait for completion by default 🫠
+  await new Promise((resolve, reject) => {
+    docker.modem.followProgress(pullStream, (err: Error | null, output: any[]) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(output);
+      }
+    });
+  });
 }

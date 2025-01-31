@@ -67,7 +67,6 @@
     "bottleneck": "2.19.5",
     "chalk": "*",
     "clear": "0.1.0",
-    "cli-progress": "3.12.0",
     "colors": "1.4.0",
     "debug": "4.3.7",
     "dotenv": "16.4.5",

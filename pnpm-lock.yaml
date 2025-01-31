@@ -435,9 +435,6 @@ importers:
       clear:
         specifier: 0.1.0
         version: 0.1.0
-      cli-progress:
-        specifier: 3.12.0
-        version: 3.12.0
       colors:
         specifier: 1.4.0
         version: 1.4.0

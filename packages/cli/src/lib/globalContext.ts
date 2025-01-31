@@ -431,20 +431,21 @@ export class MoonwallContext {
       return await this.startZombieNetwork();
     }
 
-    const maxStartupTimeout = 30000; // 30 seconds
+    const env = getEnvironmentFromConfig();
+    const launchSpec = "launchSpec" in env.foundation ? env.foundation.launchSpec[0] : undefined;
+
+    const maxStartupTimeout = launchSpec?.useDocker ? 300000 : 30000; // 5 minutes for Docker, 30s otherwise
 
     await withTimeout(
       Promise.all(
         nodes.map(async ({ cmd, args, name, launch }) => {
           if (launch) {
             try {
-              const env = getEnvironmentFromConfig();
               const result = await launchNode({
                 command: cmd,
                 args,
                 name: name || "node",
-                launchSpec:
-                  "launchSpec" in env.foundation ? env.foundation.launchSpec[0] : undefined,
+                launchSpec,
               });
               this.nodes.push(result.runningNode);
               if (result.runningNode instanceof ChildProcess) {
