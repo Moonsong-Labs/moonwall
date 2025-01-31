@@ -1,5 +1,19 @@
 # @moonwall/cli
 
+## 5.10.0
+
+### Minor Changes
+
+- 626e860: Add Docker Support
+- 4bc50ea: Package Updates
+
+### Patch Changes
+
+- Updated dependencies [626e860]
+- Updated dependencies [4bc50ea]
+  - @moonwall/types@5.10.0
+  - @moonwall/util@5.10.0
+
 ## 5.9.1
 
 ### Patch Changes
