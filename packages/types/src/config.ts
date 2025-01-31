@@ -53,6 +53,11 @@ export type Environment = {
   name: string;
 
   /**
+   * Print vitest options to the console.
+   */
+  printVitestOptions?: boolean;
+
+  /**
    * Description of the environment to display in menus.
    */
   description?: string;
@@ -327,9 +332,44 @@ export interface ChopsticksLaunchSpec extends GenericLaunchSpec {
  */
 export interface DevLaunchSpec extends GenericLaunchSpec {
   /**
-   * The path to the binary to execute
+   * The path to the binary to execute OR the Docker image to use
    */
   binPath: string;
+
+  /**
+   * If true, binPath will be treated as a Docker image instead of a local binary
+   */
+  useDocker?: boolean;
+
+  /**
+   * Docker-specific configuration
+   */
+  dockerConfig?: {
+    /**
+     * Additional Docker run arguments (e.g. environment variables, volumes)
+     */
+    runArgs?: string[];
+
+    /**
+     * Docker container name. If not provided, one will be generated
+     */
+    containerName?: string;
+
+    /**
+     * Docker network to connect to. If not provided, the default network will be used
+     */
+    network?: string;
+
+    /**
+     * Port mappings from host to container
+     */
+    exposePorts?: {
+      // The port to connect to on localhost
+      hostPort: number;
+      // The port inside the container
+      internalPort: number;
+    }[];
+  };
 
   /**
    * Determines if the default Ethereum provider connections should be disabled.

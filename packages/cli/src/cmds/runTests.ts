@@ -143,7 +143,9 @@ export async function executeTests(env: Environment, testRunArgs?: testRunArgs &
         ...vitestOptions,
       } satisfies UserConfig;
 
-      console.log(`Options to use: ${JSON.stringify(optionsToUse, null, 2)}`);
+      if (env.printVitestOptions) {
+        console.log(`Options to use: ${JSON.stringify(optionsToUse, null, 2)}`);
+      }
       resolve((await startVitest("test", folders, optionsToUse)) as Vitest);
     } catch (e) {
       console.error(e);

@@ -6,11 +6,103 @@ import { checkAccess, checkExists } from "./fileCheckers";
 import Debug from "debug";
 import { setTimeout as timer } from "node:timers/promises";
 import util from "node:util";
+import type { DevLaunchSpec } from "@moonwall/types";
+import Docker from "dockerode";
+import invariant from "tiny-invariant";
 
 const execAsync = util.promisify(exec);
 const debug = Debug("global:localNode");
 
-export async function launchNode(cmd: string, args: string[], name: string) {
+// TODO: Add multi-threading support
+async function launchDockerContainer(
+  imageName: string,
+  args: string[],
+  name: string,
+  dockerConfig?: DevLaunchSpec["dockerConfig"]
+) {
+  const docker = new Docker();
+  const port = args.find((a) => a.includes("port"))?.split("=")[1];
+  debug(`\x1b[36mStarting Docker container ${imageName} on port ${port}...\x1b[0m`);
+
+  const dirPath = path.join(process.cwd(), "tmp", "node_logs");
+  const logLocation = path.join(dirPath, `${name}_docker_${Date.now()}.log`);
+  const fsStream = fs.createWriteStream(logLocation);
+  process.env.MOON_LOG_LOCATION = logLocation;
+
+  const portBindings = dockerConfig?.exposePorts?.reduce<Record<string, { HostPort: string }[]>>(
+    (acc, { hostPort, internalPort }) => {
+      acc[`${internalPort}/tcp`] = [{ HostPort: hostPort.toString() }];
+      return acc;
+    },
+    {}
+  );
+
+  const rpcPort = args.find((a) => a.includes("rpc-port"))?.split("=")[1];
+  invariant(rpcPort, "RPC port not found, this is a bug");
+
+  const containerOptions = {
+    Image: imageName,
+    platform: "linux/amd64",
+    Cmd: args,
+    name: dockerConfig?.containerName || `moonwall_${name}_${Date.now()}`,
+    ExposedPorts: {
+      ...Object.fromEntries(
+        dockerConfig?.exposePorts?.map(({ internalPort }) => [`${internalPort}/tcp`, {}]) || []
+      ),
+      [`${rpcPort}/tcp`]: {},
+    },
+    HostConfig: {
+      PortBindings: {
+        ...portBindings,
+        [`${rpcPort}/tcp`]: [{ HostPort: rpcPort }],
+      },
+    },
+    Env: dockerConfig?.runArgs?.filter((arg) => arg.startsWith("env:")).map((arg) => arg.slice(4)),
+  } satisfies Docker.ContainerCreateOptions;
+
+  try {
+    await pullImage(imageName, docker);
+
+    const container = await docker.createContainer(containerOptions);
+    await container.start();
+
+    const containerInfo = await container.inspect();
+    if (!containerInfo.State.Running) {
+      const errorMessage = `Container failed to start: ${containerInfo.State.Error}`;
+      console.error(errorMessage);
+      fs.appendFileSync(logLocation, `${errorMessage}\n`);
+      throw new Error(errorMessage);
+    }
+
+    for (let i = 0; i < 300; i++) {
+      if (await checkWebSocketJSONRPC(Number.parseInt(rpcPort))) {
+        break;
+      }
+      await timer(100);
+    }
+
+    return { runningNode: container, fsStream };
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error(`Docker container launch failed: ${error.message}`);
+      fs.appendFileSync(logLocation, `Docker launch error: ${error.message}\n`);
+    }
+    throw error;
+  }
+}
+
+export async function launchNode(options: {
+  command: string;
+  args: string[];
+  name: string;
+  launchSpec?: DevLaunchSpec;
+}) {
+  const { command: cmd, args, name, launchSpec: config } = options;
+
+  if (config?.useDocker) {
+    return launchDockerContainer(cmd, args, name, config.dockerConfig);
+  }
+
   if (cmd.includes("moonbeam")) {
     await checkExists(cmd);
     checkAccess(cmd);
@@ -192,4 +284,20 @@ async function findPortsByPid(pid: number, retryCount = 600, retryDelay = 100): 
   }
 
   return [];
+}
+
+async function pullImage(imageName: string, docker: Docker) {
+  console.log(`Pulling Docker image: ${imageName}`);
+
+  const pullStream = await docker.pull(imageName);
+  // Dockerode pull doesn't wait for completion by default 🫠
+  await new Promise((resolve, reject) => {
+    docker.modem.followProgress(pullStream, (err: Error | null, output: any[]) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(output);
+      }
+    });
+  });
 }

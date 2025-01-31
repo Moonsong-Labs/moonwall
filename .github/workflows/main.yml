@@ -114,7 +114,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        suite: ["dev_test", "dev_multi", "dev_seq", "dev_smoke", "papi_dev", "fork_test"]
+        suite: ["dev_test", "dev_multi", "dev_seq", "dev_smoke", "papi_dev", "fork_test", "dev_docker"]
         shard: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v4

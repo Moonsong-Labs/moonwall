@@ -57,7 +57,7 @@ export async function downloader(url: string, outputPath: string): Promise<void>
   fs.rmSync(tempPath);
 }
 
-function initializeProgressBar(): SingleBar {
+export function initializeProgressBar(): SingleBar {
   const options: ProgressBarOptions = {
     etaAsynchronousUpdate: true,
     etaBuffer: 40,
