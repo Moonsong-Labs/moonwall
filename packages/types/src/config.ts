@@ -53,6 +53,11 @@ export type Environment = {
   name: string;
 
   /**
+   * Print vitest options to the console.
+   */
+  printVitestOptions?: boolean;
+
+  /**
    * Description of the environment to display in menus.
    */
   description?: string;
@@ -354,6 +359,16 @@ export interface DevLaunchSpec extends GenericLaunchSpec {
      * Docker network to connect to. If not provided, the default network will be used
      */
     network?: string;
+
+    /**
+     * Port mappings from host to container
+     */
+    exposePorts?: {
+      // The port to connect to on localhost
+      hostPort: number;
+      // The port inside the container
+      internalPort: number;
+    }[];
   };
 
   /**

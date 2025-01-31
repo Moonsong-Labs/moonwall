@@ -8,11 +8,12 @@ import { setTimeout as timer } from "node:timers/promises";
 import util from "node:util";
 import type { DevLaunchSpec } from "@moonwall/types";
 import Docker from "dockerode";
+import invariant from "tiny-invariant";
 
 const execAsync = util.promisify(exec);
 const debug = Debug("global:localNode");
 
-// TODO: Derive ports properly
+// TODO: Add multi-threading support
 async function launchDockerContainer(
   imageName: string,
   args: string[],
@@ -28,6 +29,17 @@ async function launchDockerContainer(
   const fsStream = fs.createWriteStream(logLocation);
   process.env.MOON_LOG_LOCATION = logLocation;
 
+  const portBindings = dockerConfig?.exposePorts?.reduce<Record<string, { HostPort: string }[]>>(
+    (acc, { hostPort, internalPort }) => {
+      acc[`${internalPort}/tcp`] = [{ HostPort: hostPort.toString() }];
+      return acc;
+    },
+    {}
+  );
+
+  const rpcPort = args.find((a) => a.includes("rpc-port"))?.split("=")[1];
+  invariant(rpcPort, "RPC port not found, this is a bug");
+
   const containerOptions = {
     Image: imageName,
     platform: "linux/amd64",
@@ -38,9 +50,16 @@ async function launchDockerContainer(
         docker_default: {},
       },
     },
+    ExposedPorts: {
+      ...Object.fromEntries(
+        dockerConfig?.exposePorts?.map(({ internalPort }) => [`${internalPort}/tcp`, {}]) || []
+      ),
+      [`${rpcPort}/tcp`]: {},
+    },
     HostConfig: {
       PortBindings: {
-        "9944/tcp": [{ HostPort: "9944" }],
+        ...portBindings,
+        [`${rpcPort}/tcp`]: [{ HostPort: rpcPort }],
       },
     },
     Env: dockerConfig?.runArgs?.filter((arg) => arg.startsWith("env:")).map((arg) => arg.slice(4)),
@@ -59,7 +78,7 @@ async function launchDockerContainer(
     }
 
     for (let i = 0; i < 300; i++) {
-      if (await checkWebSocketJSONRPC(9944)) {
+      if (await checkWebSocketJSONRPC(Number.parseInt(rpcPort))) {
         break;
       }
       await timer(100);

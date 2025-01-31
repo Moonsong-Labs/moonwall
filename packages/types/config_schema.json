@@ -105,6 +105,21 @@
               "description": "Docker container name. If not provided, one will be generated",
               "type": "string"
             },
+            "exposePorts": {
+              "description": "Port mappings from host to container",
+              "items": {
+                "properties": {
+                  "hostPort": {
+                    "type": "number"
+                  },
+                  "internalPort": {
+                    "type": "number"
+                  }
+                },
+                "type": "object"
+              },
+              "type": "array"
+            },
             "network": {
               "description": "Docker network to connect to. If not provided, the default network will be used",
               "type": "string"
@@ -647,6 +662,10 @@
           "name": {
             "description": "The name of the environment.",
             "type": "string"
+          },
+          "printVitestOptions": {
+            "description": "Print vitest options to the console.",
+            "type": "boolean"
           },
           "reportFile": {
             "anyOf": [

@@ -1228,22 +1228,24 @@
       }
     },
     {
-      "name": "docker-dev",
+      "name": "dev_docker",
       "description": "Development environment using Docker",
       "testFileDir": [
         "./suites/dev_tests"
       ],
       "reporters": [
-        "verbose"      ],
-        "contracts": "contracts/",
-        "runScripts": [
-          "compile-contracts.ts compile -p contracts/precompiles"
-        ],
-        "defaultSigner": {
-          "type": "ethereum",
-          "privateKey": "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
-        },
-        "defaultAllowFailures": false,
+        "verbose"
+      ],
+      "printVitestOptions": true,
+      "contracts": "contracts/",
+      "runScripts": [
+        "compile-contracts.ts compile -p contracts/precompiles"
+      ],
+      "defaultSigner": {
+        "type": "ethereum",
+        "privateKey": "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
+      },
+      "defaultAllowFailures": false,
       "foundation": {
         "type": "dev",
         "launchSpec": [
@@ -1255,10 +1257,16 @@
             "multiThreads": false,
             "disableDefaultEthProviders": false,
             "dockerConfig": {
-              "containerName": "moonbeam-docker"
+              "containerName": "moonbeam-docker",
+              "exposePorts": [
+                {
+                  "hostPort": 30333,
+                  "internalPort": 30333
+                }
+              ]
             },
             "ports": {
-              "rpcPort": 9944
+              "rpcPort": 9966
             },
             "options": [
               "--dev",
@@ -1281,28 +1289,28 @@
           "name": "moonbeam",
           "type": "polkadotJs",
           "endpoints": [
-            "ws://127.0.0.1:9944"
+            "ws://127.0.0.1:9966"
           ]
         },
         {
           "name": "eth",
           "type": "ethers",
           "endpoints": [
-            "ws://127.0.0.1:9944"
+            "ws://127.0.0.1:9966"
           ]
         },
         {
           "name": "w3",
           "type": "web3",
           "endpoints": [
-            "ws://127.0.0.1:9944"
+            "ws://127.0.0.1:9966"
           ]
         },
         {
           "name": "viem",
           "type": "viem",
           "endpoints": [
-            "ws://127.0.0.1:9944"
+            "ws://127.0.0.1:9966"
           ]
         }
       ]
