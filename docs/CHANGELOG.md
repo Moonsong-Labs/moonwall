@@ -1,5 +1,13 @@
 # @moonwall/docs
 
+## 5.10.0
+
+### Minor Changes
+
+- 626e860: Add Docker Support
+- bfaa04e: Updated `init` command
+- 4bc50ea: Package Updates
+
 ## 5.9.1
 
 ## 5.9.0
