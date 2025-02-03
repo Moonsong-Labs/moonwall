@@ -160,7 +160,7 @@ async function mainMenu(config?: MoonwallConfig) {
 
   switch (menuChoice) {
     case "init":
-      await generateConfig();
+      await generateConfig({});
       await createFolders();
       return false;
     case "run": {

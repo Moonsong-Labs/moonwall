@@ -1,0 +1,1317 @@
+{
+  "$schema": "../packages/types/config_schema.json",
+  "label": "Global Test Config 🐯",
+  "defaultTestTimeout": 120000,
+  "scriptsDir": "scripts/",
+  "additionalRepos": [
+    {
+      "name": "astar",
+      "ghAuthor": "AstarNetwork",
+      "ghRepo": "Astar",
+      "binaries": [
+        {
+          "name": "astar-collator*ubuntu-x86*",
+          "type": "tar",
+          "defaultArgs": [
+            "--dev",
+            "--sealing=manual",
+            "--no-hardware-benchmarks",
+            "--no-telemetry"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "hydra",
+      "ghAuthor": "galacticcouncil",
+      "ghRepo": "hydration-node",
+      "binaries": [
+        {
+          "name": "hydration"
+        }
+      ]
+    },
+    {
+      "name": "interlay",
+      "ghAuthor": "interlay",
+      "ghRepo": "interbtc",
+      "binaries": [
+        {
+          "name": "interbtc-parachain"
+        }
+      ]
+    }
+  ],
+  "environments": [
+    {
+      "name": "interbtc",
+      "testFileDir": [
+        "suites/basic"
+      ],
+      "description": "A star is born",
+      "foundation": {
+        "type": "dev",
+        "launchSpec": [
+          {
+            "binPath": "./tmp/interbtc-parachain",
+            "disableDefaultEthProviders": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "astar",
+      "testFileDir": [
+        "suites/basic"
+      ],
+      "description": "A star is born",
+      "foundation": {
+        "type": "dev",
+        "launchSpec": [
+          {
+            "binPath": "./tmp/astar-collator",
+            "disableDefaultEthProviders": true,
+            "options": [
+              "--dev",
+              "--sealing=manual",
+              "--no-hardware-benchmarks",
+              "--no-telemetry"
+            ],
+            "newRpcBehaviour": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "update_snapshot",
+      "testFileDir": [
+        "suites/update"
+      ],
+      "foundation": {
+        "type": "read_only",
+        "launchSpec": {
+          "disableRuntimeVersionCheck": true
+        }
+      },
+      "connections": []
+    },
+    {
+      "name": "passthrough_test",
+      "testFileDir": [
+        "suites/multi_fail"
+      ],
+      "description": "Testing that bail can be passed through",
+      "foundation": {
+        "type": "read_only",
+        "launchSpec": {
+          "disableRuntimeVersionCheck": true
+        }
+      },
+      "vitestArgs": {
+        "bail": 3,
+        "retry": 4
+      },
+      "connections": []
+    },
+    {
+      "name": "failing_prescript",
+      "testFileDir": [
+        "suites/basic"
+      ],
+      "description": "Test that failing pre-scripts are caught",
+      "runScripts": [
+        "failing-script.ts"
+      ],
+      "foundation": {
+        "type": "read_only",
+        "launchSpec": {
+          "disableRuntimeVersionCheck": true
+        }
+      },
+      "connections": []
+    },
+    {
+      "name": "dev_tanssi",
+      "testFileDir": [
+        "suites/tanssi"
+      ],
+      "description": "Basic Tanssi dev test",
+      "foundation": {
+        "type": "dev",
+        "launchSpec": [
+          {
+            "binPath": "./tmp/tanssi-node",
+            "disableDefaultEthProviders": true,
+            "newRpcBehaviour": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "viem_test",
+      "testFileDir": [
+        "suites/viem"
+      ],
+      "envVars": [
+        ""
+      ],
+      "foundation": {
+        "type": "read_only",
+        "launchSpec": {
+          "disableRuntimeVersionCheck": true
+        }
+      },
+      "connections": [
+        {
+          "name": "viem",
+          "type": "viem",
+          "endpoints": [
+            "wss://rpc.api.moonbeam.network"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "zombie_wasm",
+      "description": "For upgrade testing using zombienet",
+      "testFileDir": [
+        "suites/zombie"
+      ],
+      "foundation": {
+        "type": "zombie",
+        "rtUpgradePath": "./tmp/moonbase-runtime-2400.wasm",
+        "zombieSpec": {
+          "name": "zombienet",
+          "configPath": "./configs/zombieOverride.json"
+        }
+      }
+    },
+    {
+      "name": "zombie_multi_para",
+      "testFileDir": [
+        "suites/multizombie"
+      ],
+      "timeout": 300000,
+      "foundation": {
+        "type": "zombie",
+        "zombieSpec": {
+          "name": "zombienet",
+          "configPath": "./configs/zombieMulti.json",
+          "disableLogEavesdropping": true,
+          "skipBlockCheck": [
+            "para2"
+          ]
+        }
+      },
+      "connections": [
+        {
+          "name": "para1",
+          "type": "polkadotJs",
+          "endpoints": [
+            "ws://127.0.0.1:33345"
+          ]
+        },
+        {
+          "name": "para2",
+          "type": "polkadotJs",
+          "endpoints": [
+            "ws://127.0.0.1:22345"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "zombie_test",
+      "testFileDir": [
+        "suites/zombie"
+      ],
+      "timeout": 300000,
+      "envVars": [
+        "DEBUG_COLORS=1"
+      ],
+      "reporters": [
+        "default"
+      ],
+      "foundation": {
+        "type": "zombie",
+        "rtUpgradePath": "./tmp/moonbase-runtime-2401.wasm",
+        "zombieSpec": {
+          "name": "zombienet",
+          "additionalZombieConfig": {
+            "silent": true
+          },
+          "configPath": "./configs/zombie.json"
+        }
+      }
+    },
+    {
+      "name": "zombie_noPara",
+      "testFileDir": [
+        "suites/zombieNoPara"
+      ],
+      "timeout": 300000,
+      "envVars": [
+        "DEBUG_COLORS=1"
+      ],
+      "reporters": [
+        "default"
+      ],
+      "foundation": {
+        "type": "zombie",
+        "zombieSpec": {
+          "name": "zombienet",
+          "disableDefaultEthProviders": true,
+          "additionalZombieConfig": {
+            "silent": true
+          },
+          "configPath": "./configs/zombieNoPara.json"
+        }
+      }
+    },
+    {
+      "name": "para_test",
+      "testFileDir": [
+        "suites/zombie"
+      ],
+      "multiThreads": false,
+      "foundation": {
+        "type": "zombie",
+        "zombieSpec": {
+          "name": "zombienet",
+          "configPath": "./configs/para_network.json"
+        }
+      }
+    },
+    {
+      "name": "basic",
+      "description": "Suite of tests that doesnt involve any blockchain stuff",
+      "testFileDir": [
+        "suites/basic/"
+      ],
+      "foundation": {
+        "launchSpec": {
+          "disableRuntimeVersionCheck": true
+        },
+        "type": "read_only"
+      },
+      "runScripts": [
+        "compile-contracts.ts compile -p contracts/precompiles",
+        "greeting.js timbo",
+        "shelley_prose.sh"
+      ],
+      "connections": []
+    },
+    {
+      "name": "derive",
+      "description": "Suite of tests that doesnt involve any blockchain stuff",
+      "testFileDir": [
+        "suites/derive/"
+      ],
+      "foundation": {
+        "launchSpec": {
+          "disableRuntimeVersionCheck": true
+        },
+        "type": "read_only"
+      },
+      "runScripts": [
+        "compile-contracts.ts compile -p contracts/precompiles",
+        "greeting.js timbo",
+        "shelley_prose.sh"
+      ],
+      "connections": []
+    },
+    {
+      "name": "tanssi_chopsticks",
+      "testFileDir": [
+        "suites/chopsticks/"
+      ],
+      "include": [
+        "**/*basic*"
+      ],
+      "foundation": {
+        "type": "chopsticks",
+        "rtUpgradePath": "./tmp/dancebox_runtime.compact.compressed.wasm",
+        "launchSpec": [
+          {
+            "name": "tanssi",
+            "type": "parachain",
+            "buildBlockMode": "manual",
+            "configPath": "./configs/dancebox.yml"
+          }
+        ]
+      },
+      "connections": [
+        {
+          "name": "MB",
+          "type": "polkadotJs",
+          "endpoints": [
+            "ws://127.0.0.1:8000"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "chopsticks",
+      "envVars": [
+        "DEBUG_COLORS=1"
+      ],
+      "testFileDir": [
+        "suites/chopsticks/"
+      ],
+      "include": [
+        "**/*basic*"
+      ],
+      "reporters": [
+        "default",
+        "json"
+      ],
+      "reportFile": {
+        "json": "tmp/testResults.json"
+      },
+      "foundation": {
+        "type": "chopsticks",
+        "rtUpgradePath": "./tmp/moonbeam_runtime.compact.compressed.wasm",
+        "launchSpec": [
+          {
+            "name": "MB",
+            "type": "parachain",
+            "buildBlockMode": "manual",
+            "allowUnresolvedImports": true,
+            "configPath": "./configs/moonbeamChopsticks.yml"
+          }
+        ]
+      },
+      "connections": [
+        {
+          "name": "MB",
+          "type": "polkadotJs",
+          "endpoints": [
+            "ws://127.0.0.1:10000"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "chopsticks_round",
+      "testFileDir": [
+        "suites/chopsticks-round/"
+      ],
+      "reporters": [
+        "default"
+      ],
+      "foundation": {
+        "type": "chopsticks",
+        "launchSpec": [
+          {
+            "name": "MB",
+            "type": "parachain",
+            "buildBlockMode": "manual",
+            "allowUnresolvedImports": true,
+            "configPath": "./configs/moonbeamChopsticksRound.yml"
+          }
+        ]
+      },
+      "connections": [
+        {
+          "name": "MB",
+          "type": "polkadotJs",
+          "endpoints": [
+            "ws://127.0.0.1:10000"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "chopsticks_state",
+      "testFileDir": [
+        "suites/chopsticks/"
+      ],
+      "include": [
+        "**/*state*"
+      ],
+      "foundation": {
+        "type": "chopsticks",
+        "launchSpec": [
+          {
+            "name": "mb",
+            "type": "parachain",
+            "buildBlockMode": "manual",
+            "configPath": "./configs/moonriverChopsticks.yml"
+          }
+        ]
+      },
+      "connections": [
+        {
+          "name": "MB",
+          "type": "polkadotJs",
+          "endpoints": [
+            "ws://127.0.0.1:10000"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "moonbeam_smoke",
+      "testFileDir": [
+        "suites/dummy-smoke/"
+      ],
+      "include": [
+        "**/*conditional*"
+      ],
+      "foundation": {
+        "type": "read_only"
+      },
+      "connections": [
+        {
+          "name": "MB",
+          "type": "polkadotJs",
+          "endpoints": [
+            "wss://moonbeam.api.onfinality.io/public-ws"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "moonriver_smoke",
+      "testFileDir": [
+        "suites/dummy-smoke/"
+      ],
+      "include": [
+        "**/*conditional*"
+      ],
+      "foundation": {
+        "type": "read_only"
+      },
+      "connections": [
+        {
+          "name": "MB",
+          "type": "polkadotJs",
+          "endpoints": [
+            "wss://wss.api.moonriver.moonbeam.network"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "chop_state_test",
+      "testFileDir": [
+        "suites/chopsticks/"
+      ],
+      "include": [
+        "**/*state*"
+      ],
+      "foundation": {
+        "type": "chopsticks",
+        "launchSpec": [
+          {
+            "name": "mb",
+            "type": "parachain",
+            "running": false,
+            "buildBlockMode": "manual",
+            "configPath": "./configs/moonbeamChopsticks.yml"
+          }
+        ]
+      },
+      "connections": [
+        {
+          "name": "MB",
+          "type": "polkadotJs",
+          "endpoints": [
+            "ws://127.0.0.1:12000"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "chopsticks_network_only",
+      "testFileDir": [],
+      "foundation": {
+        "type": "chopsticks",
+        "launchSpec": [
+          {
+            "name": "mb",
+            "type": "parachain",
+            "buildBlockMode": "manual",
+            "configPath": "./configs/moonbeamChopsticks.yml"
+          }
+        ]
+      },
+      "connections": []
+    },
+    {
+      "name": "chopsticks_xcm",
+      "testFileDir": [],
+      "foundation": {
+        "type": "chopsticks",
+        "launchSpec": [
+          {
+            "name": "mb",
+            "type": "parachain",
+            "buildBlockMode": "manual",
+            "configPath": "./configs/moonriverChopsticks.yml"
+          },
+          {
+            "name": "mb",
+            "type": "parachain",
+            "buildBlockMode": "manual",
+            "configPath": "./configs/moonbeamChopsticks.yml"
+          }
+        ]
+      },
+      "connections": [
+        {
+          "name": "MB",
+          "type": "polkadotJs",
+          "endpoints": [
+            "ws://127.0.0.1:10000"
+          ]
+        },
+        {
+          "name": "MR",
+          "type": "polkadotJs",
+          "endpoints": [
+            "ws://127.0.0.1:12000"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "dev_multi",
+      "testFileDir": [
+        "suites/test_separation"
+      ],
+      "reporters": [
+        "basic",
+        "html"
+      ],
+      "multiThreads": true,
+      "foundation": {
+        "type": "dev",
+        "launchSpec": [
+          {
+            "name": "moonbeam",
+            "running": true,
+            "newRpcBehaviour": true,
+            "binPath": "./tmp/moonbeam"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dev_threadsingle",
+      "testFileDir": [
+        "suites/test_separation"
+      ],
+      "reporters": [
+        "basic",
+        "html"
+      ],
+      "multiThreads": {
+        "threads": {
+          "isolate": false,
+          "singleThread": true,
+          "useAtomics": false
+        }
+      },
+      "foundation": {
+        "type": "dev",
+        "launchSpec": [
+          {
+            "name": "moonbeam",
+            "running": true,
+            "newRpcBehaviour": true,
+            "binPath": "./tmp/moonbeam"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dev_forksingle",
+      "testFileDir": [
+        "suites/test_separation"
+      ],
+      "reporters": [
+        "basic",
+        "html"
+      ],
+      "multiThreads": {
+        "forks": {
+          "minForks": 1,
+          "maxForks": 1,
+          "isolate": false,
+          "singleFork": true
+        }
+      },
+      "foundation": {
+        "type": "dev",
+        "launchSpec": [
+          {
+            "name": "moonbeam",
+            "running": true,
+            "newRpcBehaviour": true,
+            "binPath": "./tmp/moonbeam"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dev_forkMulti",
+      "testFileDir": [
+        "suites/test_separation"
+      ],
+      "multiThreads": {
+        "forks": {
+          "isolate": false,
+          "singleFork": false
+        }
+      },
+      "reporters": [
+        "basic",
+        "html"
+      ],
+      "foundation": {
+        "type": "dev",
+        "launchSpec": [
+          {
+            "name": "moonbeam",
+            "running": true,
+            "newRpcBehaviour": true,
+            "binPath": "./tmp/moonbeam"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dev_vmsingle",
+      "testFileDir": [
+        "suites/test_separation"
+      ],
+      "reporters": [
+        "basic",
+        "html"
+      ],
+      "multiThreads": {
+        "vmThreads": {
+          "minThreads": 1,
+          "maxThreads": 1,
+          "useAtomics": false,
+          "memoryLimit": 0.25
+        }
+      },
+      "foundation": {
+        "type": "dev",
+        "launchSpec": [
+          {
+            "name": "moonbeam",
+            "running": true,
+            "newRpcBehaviour": true,
+            "binPath": "./tmp/moonbeam"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dev_vmMulti",
+      "testFileDir": [
+        "suites/test_separation"
+      ],
+      "multiThreads": {
+        "vmThreads": {
+          "useAtomics": false,
+          "memoryLimit": 0.25
+        }
+      },
+      "reporters": [
+        "basic",
+        "html"
+      ],
+      "foundation": {
+        "type": "dev",
+        "launchSpec": [
+          {
+            "name": "moonbeam",
+            "running": true,
+            "newRpcBehaviour": true,
+            "binPath": "./tmp/moonbeam"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dev_seq",
+      "testFileDir": [
+        "suites/test_separation"
+      ],
+      "multiThreads": false,
+      "foundation": {
+        "type": "dev",
+        "launchSpec": [
+          {
+            "name": "moonbeam",
+            "running": true,
+            "newRpcBehaviour": true,
+            "binPath": "./tmp/moonbeam"
+          }
+        ]
+      }
+    },
+    {
+      "name": "wrongFoundation",
+      "testFileDir": [
+        "suites/run_error/"
+      ],
+      "foundation": {
+        "type": "read_only"
+      },
+      "connections": [
+        {
+          "name": "w3",
+          "type": "web3",
+          "endpoints": [
+            "wss://moonbeam.api.onfinality.io/public-ws"
+          ]
+        },
+        {
+          "name": "mb",
+          "type": "polkadotJs",
+          "endpoints": [
+            "wss://moonbeam.api.onfinality.io/public-ws"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "pass",
+      "testFileDir": [
+        "suites/run_error/"
+      ],
+      "foundation": {
+        "type": "dev",
+        "launchSpec": [
+          {
+            "name": "moonbeam",
+            "binPath": "./tmp/moonbeam",
+            "ports": {
+              "p2pPort": 30333,
+              "wsPort": 9944,
+              "rpcPort": 9933
+            },
+            "options": [
+              "--dev",
+              "--no-hardware-benchmarks",
+              "--no-telemetry",
+              "--reserved-only",
+              "--rpc-cors=all",
+              "--no-grandpa",
+              "--unsafe-ws-external",
+              "--sealing=manual",
+              "--force-authoring",
+              "--no-prometheus"
+            ]
+          }
+        ]
+      },
+      "connections": [
+        {
+          "name": "w3",
+          "type": "web3",
+          "endpoints": [
+            "ws://127.0.0.1:9944"
+          ]
+        },
+        {
+          "name": "mb",
+          "type": "polkadotJs",
+          "endpoints": [
+            "ws://127.0.0.1:9944"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "web3_test",
+      "testFileDir": [
+        "suites/web3_test/"
+      ],
+      "foundation": {
+        "type": "read_only"
+      },
+      "connections": [
+        {
+          "name": "w3",
+          "type": "web3",
+          "endpoints": [
+            "wss://rpc.api.moonbeam.network"
+          ]
+        },
+        {
+          "name": "MB",
+          "type": "polkadotJs",
+          "endpoints": [
+            "wss://rpc.api.moonbeam.network"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "eth_test",
+      "testFileDir": [
+        "suites/eth_test"
+      ],
+      "include": [
+        "**/{test,spec,test_,test-}*{ts,mts,cts}"
+      ],
+      "multiThreads": false,
+      "foundation": {
+        "type": "read_only",
+        "launchSpec": {
+          "rateLimiter": {
+            "maxConcurrent": 5,
+            "minTime": 10000
+          }
+        }
+      },
+      "connections": [
+        {
+          "name": "para",
+          "type": "polkadotJs",
+          "endpoints": [
+            "wss://moonbeam-rpc.dwellir.com"
+          ]
+        },
+        {
+          "name": "eth",
+          "type": "ethers",
+          "endpoints": [
+            "wss://moonbeam-rpc.dwellir.com"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "readonly",
+      "testFileDir": [
+        "suites/read_only/"
+      ],
+      "include": [
+        "**/{test,spec,test_,test-}*{ts,mts,cts}"
+      ],
+      "multiThreads": false,
+      "foundation": {
+        "type": "read_only",
+        "launchSpec": {
+          "rateLimiter": {
+            "maxConcurrent": 5,
+            "minTime": 10000
+          }
+        }
+      },
+      "connections": [
+        {
+          "name": "eth",
+          "type": "ethers",
+          "endpoints": [
+            "wss://rpc.api.moonbeam.network"
+          ]
+        },
+        {
+          "name": "para",
+          "type": "polkadotJs",
+          "endpoints": [
+            "wss://rpc.api.moonbeam.network"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "dev_test",
+      "testFileDir": [
+        "suites/dev_tests"
+      ],
+      "envVars": [
+        "DEBUG_COLORS=1",
+        "TIMBO_TEST_ENV='TIMBO timbo timbo'"
+      ],
+      "reporters": [
+        "basic",
+        "html",
+        "json"
+      ],
+      "reportFile": {
+        "json": "tmp/testResults.json"
+      },
+      "contracts": "contracts/",
+      "runScripts": [
+        "compile-contracts.ts compile -p contracts/precompiles"
+      ],
+      "defaultSigner": {
+        "type": "ethereum",
+        "privateKey": "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
+      },
+      "defaultAllowFailures": false,
+      "multiThreads": false,
+      "foundation": {
+        "type": "dev",
+        "launchSpec": [
+          {
+            "name": "moonbeam",
+            "running": false,
+            "binPath": "tmp/moonbeam",
+            "newRpcBehaviour": true,
+            "retainAllLogs": false,
+            "ports": {
+              "rpcPort": 9955
+            },
+            "options": [
+              "--dev",
+              "--no-hardware-benchmarks",
+              "--no-telemetry",
+              "--reserved-only",
+              "--rpc-cors=all",
+              "--no-grandpa",
+              "--sealing=manual",
+              "--force-authoring",
+              "--no-prometheus"
+            ]
+          }
+        ]
+      },
+      "connections": [
+        {
+          "name": "eth",
+          "type": "ethers",
+          "endpoints": [
+            "${WSS_URL}"
+          ]
+        },
+        {
+          "name": "w3",
+          "type": "web3",
+          "endpoints": [
+            "${WSS_URL}"
+          ]
+        },
+        {
+          "name": "viem",
+          "type": "viem",
+          "endpoints": [
+            "${WSS_URL}"
+          ]
+        },
+        {
+          "name": "pjs",
+          "type": "polkadotJs",
+          "endpoints": [
+            "${WSS_URL}"
+          ],
+          "rpc": {
+            "polkadotJs": {
+              "isTxFinalized": {
+                "description": "Just a test method",
+                "params": [
+                  {
+                    "name": "txHash",
+                    "type": "Hash"
+                  }
+                ],
+                "type": "bool"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "dev_network_only",
+      "testFileDir": [],
+      "foundation": {
+        "type": "dev",
+        "launchSpec": [
+          {
+            "name": "moonbeam",
+            "running": true,
+            "binPath": "./tmp/moonbeam"
+          }
+        ]
+      },
+      "connections": []
+    },
+    {
+      "name": "dev_smoke",
+      "foundation": {
+        "launchSpec": {
+          "disableRuntimeVersionCheck": true
+        },
+        "type": "read_only"
+      },
+      "connections": [
+        {
+          "name": "para",
+          "type": "polkadotJs",
+          "endpoints": [
+            "wss://moonbeam-rpc.dwellir.com"
+          ]
+        }
+      ],
+      "testFileDir": [
+        "/suites/smoke"
+      ],
+      "skipTests": [
+        {
+          "name": "SO00T02",
+          "reason": "https://github.com/moonbeam-foundation/moonbeam/issue/1",
+          "since": "2024-01-28T00:00:00Z"
+        },
+        {
+          "name": "SM00T01",
+          "reason": "https://github.com/moonbeam-foundation/moonbeam/issue/2",
+          "since": "2024-01-28T00:00:00Z"
+        },
+        {
+          "name": "SM00T03",
+          "reason": "https://github.com/moonbeam-foundation/moonbeam/issue/3",
+          "since": "2024-01-28T00:00:00Z"
+        }
+      ]
+    },
+    {
+      "name": "multi_chopsticks",
+      "testFileDir": [
+        "suites/multi_chopsticks"
+      ],
+      "foundation": {
+        "type": "chopsticks",
+        "launchSpec": [
+          {
+            "name": "polkadot",
+            "type": "relaychain",
+            "allowUnresolvedImports": true,
+            "configPath": "./configs/polkadot.yml"
+          },
+          {
+            "name": "hydration",
+            "type": "parachain",
+            "allowUnresolvedImports": true,
+            "configPath": "./configs/hydration.yml"
+          },
+          {
+            "name": "assethub",
+            "type": "parachain",
+            "allowUnresolvedImports": true,
+            "configPath": "./configs/assethub.yml"
+          }
+        ]
+      },
+      "envVars": [
+        "LOG_LEVEL=debug",
+        "VERBOSE_LOG=true"
+      ],
+      "connections": [
+        {
+          "name": "polkadot",
+          "type": "polkadotJs",
+          "endpoints": [
+            "ws://localhost:8002"
+          ]
+        },
+        {
+          "name": "assethub",
+          "type": "polkadotJs",
+          "endpoints": [
+            "ws://localhost:8001"
+          ]
+        },
+        {
+          "name": "hydration",
+          "type": "polkadotJs",
+          "endpoints": [
+            "ws://localhost:8000"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "papi_readonly",
+      "testFileDir": [
+        "suites/papi"
+      ],
+      "include": [
+        "**/read_only*"
+      ],
+      "envVars": [
+        ""
+      ],
+      "foundation": {
+        "type": "read_only",
+        "launchSpec": {
+          "disableRuntimeVersionCheck": true
+        }
+      },
+      "connections": [
+        {
+          "name": "papi",
+          "type": "papi",
+          "endpoints": [
+            "wss://rpc.polkadot.io"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "papi_dev",
+      "testFileDir": [
+        "suites/papi"
+      ],
+      "include": [
+        "**/dev*"
+      ],
+      "envVars": [
+        ""
+      ],
+      "foundation": {
+        "type": "dev",
+        "launchSpec": [
+          {
+            "name": "moonbeam",
+            "running": true,
+            "binPath": "./tmp/moonbeam",
+            "ports": {
+              "rpcPort": 9955
+            }
+          }
+        ]
+      },
+      "connections": [
+        {
+          "name": "papi",
+          "type": "papi",
+          "endpoints": [
+            "ws://127.0.0.1:9955"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "fork_test",
+      "testFileDir": [
+        "suites/fork_test"
+      ],
+      "foundation": {
+        "type": "dev",
+        "launchSpec": [
+          {
+            "name": "moonbeam",
+            "binPath": "tmp/moonbeam",
+            "newRpcBehaviour": true,
+            "disableDefaultEthProviders": true,
+            "options": [
+              "--ethapi=txpool",
+              "--no-hardware-benchmarks",
+              "--no-telemetry",
+              "--unsafe-force-node-key-generation",
+              "--reserved-only",
+              "--no-grandpa",
+              "--no-prometheus",
+              "--force-authoring",
+              "--rpc-cors=all",
+              "--alice",
+              "--sealing=manual",
+              "--tmp"
+            ],
+            "defaultForkConfig": {
+              "url": "https://moonbeam.unitedbloc.com",
+              "stateOverridePath": "./configs/mbStateOverride.json",
+              "verbose": true
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "dev_docker",
+      "description": "Development environment using Docker",
+      "testFileDir": [
+        "./suites/dev_tests"
+      ],
+      "reporters": [
+        "verbose"
+      ],
+      "contracts": "contracts/",
+      "runScripts": [
+        "compile-contracts.ts compile -p contracts/precompiles"
+      ],
+      "defaultSigner": {
+        "type": "ethereum",
+        "privateKey": "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
+      },
+      "defaultAllowFailures": false,
+      "foundation": {
+        "type": "dev",
+        "launchSpec": [
+          {
+            "name": "moonbeam-docker",
+            "binPath": "moonbeamfoundation/moonbeam:latest",
+            "useDocker": true,
+            "newRpcBehaviour": true,
+            "multiThreads": false,
+            "dockerConfig": {
+              "containerName": "moonbeam-docker",
+              "exposePorts": [
+                {
+                  "hostPort": 30333,
+                  "internalPort": 30333
+                }
+              ]
+            },
+            "ports": {
+              "rpcPort": 9966
+            },
+            "options": [
+              "--dev",
+              "--no-hardware-benchmarks",
+              "--no-telemetry",
+              "--reserved-only",
+              "--rpc-cors=all",
+              "--no-grandpa",
+              "--unsafe-rpc-external",
+              "--rpc-methods=unsafe",
+              "--sealing=manual",
+              "--force-authoring",
+              "--no-prometheus"
+            ]
+          }
+        ]
+      },
+      "connections": [
+        {
+          "name": "moonbeam",
+          "type": "polkadotJs",
+          "endpoints": [
+            "ws://127.0.0.1:9966"
+          ]
+        },
+        {
+          "name": "eth",
+          "type": "ethers",
+          "endpoints": [
+            "ws://127.0.0.1:9966"
+          ]
+        },
+        {
+          "name": "w3",
+          "type": "web3",
+          "endpoints": [
+            "ws://127.0.0.1:9966"
+          ]
+        },
+        {
+          "name": "viem",
+          "type": "viem",
+          "endpoints": [
+            "ws://127.0.0.1:9966"
+          ]
+        }
+      ]
+    }
+  ]
+}
