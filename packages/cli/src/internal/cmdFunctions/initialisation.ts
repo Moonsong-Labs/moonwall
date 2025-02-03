@@ -8,8 +8,6 @@ export async function createFolders() {
   await fs.mkdir("tmp").catch(() => "tmp folder already exists, skipping");
 }
 
-const Foundations = ["dev", "chopsticks", "zombie", "read_only"] as const;
-
 export async function generateConfig(argv: { acceptAllDefaults?: boolean }) {
   interface ConfigAnswers {
     label: string;
@@ -153,17 +151,34 @@ const sampleTest = `import { describeSuite, expect } from "@moonwall/cli";
 
 describeSuite({
   id: "B01",
-  title: "Tests that are using the production APIs",
+  title: "Sample test suite for moonbeam network",
   foundationMethods: "dev",
   testCases: ({ context, it }) => {
+
+    const ALITH_ADDRESS = "0xf24FF3a9CF04c71Dbc94D0b566f7A27B94566cac"
+
     it({
       id: "T01",
-      title: "Passing Test",
+      title: "Test that API is connected correctly",
       test: async () => {
-        expect(true).to.be.true;
+        const chainName = context.pjsApi.consts.system.version.specName.toString();
+        const specVersion = context.pjsApi.consts.system.version.specVersion.toNumber();
+        expect(chainName.length).toBeGreaterThan(0)
+        expect(chainName).toBe("moonbase")
+        expect(specVersion).toBeGreaterThan(0)
+      },
+    });
+
+    it({
+      id: "T02",
+      title: "Test that chain queries can be made",
+      test: async () => {
+        const balance = (await context.pjsApi.query.system.account(ALITH_ADDRESS)).data.free
+        expect(balance.toBigInt()).toBeGreaterThan(0n)
       },
     });
 
   },
 });
+
 `;
