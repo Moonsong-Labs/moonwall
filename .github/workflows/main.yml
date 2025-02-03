@@ -49,6 +49,32 @@ jobs:
           cache: "pnpm"
       - run: pnpm install
       - run: pnpm run fmt
+  
+  test_init:
+    runs-on: ubuntu-latest
+    needs: ["build"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.1.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 23
+          cache: "pnpm"
+      - name: Build like before
+        run: |
+          pnpm install   
+          pnpm run build
+      - name: Initialize config
+        run: |
+          cd test
+          rm moonwall.config.json
+          pnpm moonwall init --acceptAllDefaults
+      - name: Run test
+        run: |
+          cd test
+          pnpm moonwall test default_env
 
   test_basic:
     runs-on: ubuntu-latest

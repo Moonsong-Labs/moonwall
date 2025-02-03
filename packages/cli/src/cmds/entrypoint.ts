@@ -52,9 +52,19 @@ yargs(hideBin(process.argv))
       default: "moonwall.config.json",
     },
   })
-  .command("init", "Run tests for a given Environment", async () => {
-    await generateConfig();
-  })
+  .command(
+    "init",
+    "Run tests for a given Environment",
+    (yargs) =>
+      yargs.option("acceptAllDefaults", {
+        type: "boolean",
+        description: "Accept all defaults",
+        alias: "A",
+      }),
+    async (argv) => {
+      await generateConfig(argv);
+    }
+  )
   .command<fetchArtifactArgs>(
     "download <bin> [ver] [path]",
     "Download x86 artifact from GitHub",
