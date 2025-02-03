@@ -1,5 +1,12 @@
 # @moonwall/tests
 
+## 5.10.0
+
+### Minor Changes
+
+- 626e860: Add Docker Support
+- 4bc50ea: Package Updates
+
 ## 5.9.1
 
 ## 5.9.0
