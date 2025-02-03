@@ -119,6 +119,8 @@ export function createSampleConfig(options: {
   testDir: string;
 }): MoonwallConfig {
   return {
+    $schema:
+      "https://raw.githubusercontent.com/Moonsong-Labs/moonwall/main/packages/types/config_schema.json",
     label: options.label,
     defaultTestTimeout: options.timeout,
     environments: [
