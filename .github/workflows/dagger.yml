@@ -1,7 +1,8 @@
 name: dagger
 on:
   push:
-    branches: [main]
+    branches:
+      - "**"
 
 jobs:
   build-env:
