@@ -55,7 +55,6 @@ describeSuite({
       timeout: 60000,
       test: async () => {
         const balBefore = (await paraApi.query.system.account(ALITH_ADDRESS)).data.free;
-        
         log("Please wait, this will take at least 30s for transaction to complete");
 
         // Uncomment when we upgrade to polkadot 1.7
