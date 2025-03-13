@@ -71,4 +71,17 @@ class Moonwall {
       .withExec(["pnpm", "typecheck"])
       .stdout()
   }
+  
+  /**
+   * Run static analysis on the codebase
+   * 
+   * @param source - The source directory to analyze
+   * @returns The command output
+   */
+  @func()
+  async staticAnalysis(source: Directory){
+    await this.format(source)
+    await this.lint(source)
+    await this.typecheck(source)
+  }
 }
