@@ -5,7 +5,7 @@ on:
       - "**"
 
 jobs:
-  build-env:
+  format:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -13,11 +13,57 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Build Environment
+      - name: Run Format Checks
         uses: dagger/dagger-for-github@8.0.0
         with:
           verb: call
-          args: "build-env --source=."
+          args: "format --source=."
           cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
           version: 0.16.3
+  lint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run Lint Checks
+        uses: dagger/dagger-for-github@8.0.0
+        with:
+          verb: call
+          args: "lint --source=."
+          cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
+          version: 0.16.3
+          
+  typecheck:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run Type Checks
+        uses: dagger/dagger-for-github@8.0.0
+        with:
+          verb: call
+          args: "typecheck --source=."
+          cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
+          version: 0.16.3
+  # build-env:
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: read
+  #     packages: write
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+  #     - name: Build Environment
+  #       uses: dagger/dagger-for-github@8.0.0
+  #       with:
+  #         verb: call
+  #         args: "build-env --source=."
+  #         cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
+  #         version: 0.16.3
           
