@@ -16,8 +16,8 @@ jobs:
       - name: Build Environment
         uses: dagger/dagger-for-github@8.0.0
         with:
-          args: call
-          dagger-flags: "build-env --source=."
+          verb: call
+          args: "build-env --source=."
           cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
           version: 0.16.3
           
