@@ -1246,9 +1246,10 @@
       },
       "defaultAllowFailures": false,
       "foundation": {
-        "type": "dev",
+        "type": "docker-compose",
         "launchSpec": [
           {
+            "composeFile": "docker-compose.yml",
             "name": "moonbeam-docker",
             "binPath": "moonbeamfoundation/moonbeam:latest",
             "useDocker": true,

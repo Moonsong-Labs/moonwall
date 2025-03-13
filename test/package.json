@@ -14,8 +14,7 @@
     "fmt": "biome format .",
     "fmt:fix": "biome format . --write",
     "node_test": "node --no-warnings --loader tsx --test suites/node_test/*.ts",
-    "bun_test": "bun test suites/bun_test/*",
-    "postinstall": "papi"
+    "bun_test": "bun test suites/bun_test/*"
   },
   "devDependencies": {
     "@acala-network/chopsticks": "*",

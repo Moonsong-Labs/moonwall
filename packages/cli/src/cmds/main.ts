@@ -377,7 +377,7 @@ const chooseTestEnv = async (config: MoonwallConfig) => {
     }))
     .sort((a, b) => (a.name > b.name ? -1 : +1));
   envs.push(...([new Separator(), { name: "Back", value: "back" }, new Separator()] as any));
-  const envName = await select({
+  const envName = await select<string>({
     message: "Select a environment to run",
     pageSize: 12,
     choices: envs,
@@ -413,7 +413,7 @@ const chooseRunEnv = async (config: MoonwallConfig) => {
     new Separator(),
   ];
 
-  const envName = await select({
+  const envName = await select<string>({
     message: "Select a environment to run",
     pageSize: 12,
     choices,
