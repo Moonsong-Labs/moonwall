@@ -5,7 +5,7 @@ on:
       - "**"
 
 jobs:
-  staticAnalysis:
+  full-ci:
     runs-on: ubuntu-latest
     permissions:
       contents: read
