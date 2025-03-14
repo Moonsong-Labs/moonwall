@@ -4,13 +4,7 @@
  * This module provides CI/CD functions for the Moonwall project, including
  * formatting and linting capabilities.
  */
-import {
-  dag,
-  type Container,
-  type Directory,
-  object,
-  func,
-} from "@dagger.io/dagger";
+import { dag, type Container, type Directory, object, func } from "@dagger.io/dagger";
 
 @object()
 class Moonwall {
@@ -95,19 +89,13 @@ class Moonwall {
    */
   @func()
   async staticAnalysis(source: Directory): Promise<void> {
-    await Promise.all([
-      this.format(source),
-      this.lint(source),
-      this.typecheck(source),
-    ]);
+    await Promise.all([this.format(source), this.lint(source), this.typecheck(source)]);
   }
 
   @func()
   async runMoonwallTest(source: Directory, testEnv: string): Promise<void> {
     await Promise.all([
-      this.buildTestEnv(source)
-        .withExec(["pnpm", "moonwall", "test", testEnv])
-        .stdout(),
+      this.buildTestEnv(source).withExec(["pnpm", "moonwall", "test", testEnv]).stdout(),
     ]);
   }
 
@@ -119,17 +107,15 @@ class Moonwall {
    */
   @func()
   async test(source: Directory): Promise<void> {
-    await Promise.all(
-      [
-        this.runMoonwallTest(source, "dev_test"),
-        this.runMoonwallTest(source, "dev_multi"),
-        this.runMoonwallTest(source, "dev_seq"),
-        this.runMoonwallTest(source, "dev_smoke"),
-        this.runMoonwallTest(source, "papi_dev"),
-        this.runMoonwallTest(source, "fork_test"),
-        // this.runMoonwallTest(source, "dev_docker"),
-      ]
-    );
+    await Promise.all([
+      this.runMoonwallTest(source, "dev_test"),
+      this.runMoonwallTest(source, "dev_multi"),
+      this.runMoonwallTest(source, "dev_seq"),
+      this.runMoonwallTest(source, "dev_smoke"),
+      this.runMoonwallTest(source, "papi_dev"),
+      this.runMoonwallTest(source, "fork_test"),
+      // this.runMoonwallTest(source, "dev_docker"),
+    ]);
   }
 
   /**

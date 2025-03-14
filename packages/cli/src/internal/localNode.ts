@@ -174,7 +174,7 @@ export async function launchNode(options: {
     try {
       const ports = (await checkLsofExists())
         ? await findPortsByPid(runningNode.pid)
-        : [Number(argPort) ?? 9944];
+        : [ argPort ? Number.parseInt(argPort) : 9944];
       if (ports) {
         for (const port of ports) {
           try {
