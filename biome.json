@@ -17,6 +17,9 @@
       "semicolons": "always",
       "indentStyle": "space",
       "lineWidth": 100
+    },
+    "parser": {
+      "unsafeParameterDecoratorsEnabled": true
     }
   },
   "linter": {
