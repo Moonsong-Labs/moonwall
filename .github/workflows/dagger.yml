@@ -17,6 +17,6 @@ jobs:
         uses: dagger/dagger-for-github@8.0.0
         with:
           verb: call
-          args: "static-analysis --source=."
+          args: "full-ci --source=."
           cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
           version: 0.16.3

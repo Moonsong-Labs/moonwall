@@ -75,7 +75,7 @@ async function launchDockerContainer(
     }
 
     for (let i = 0; i < 300; i++) {
-      if (await checkWebSocketJSONRPC(Number.parseInt(rpcPort))) {
+      if (await checkHTTPJSONRPC(Number.parseInt(rpcPort))) {
         break;
       }
       await timer(100);
@@ -112,16 +112,10 @@ export async function launchNode(options: {
   debug(`\x1b[36mStarting ${name} node on port ${port}...\x1b[0m`);
 
   const dirPath = path.join(process.cwd(), "tmp", "node_logs");
-
+  const argPort = args.find((a) => a.includes("port"))?.split("=")[1];
   const runningNode = spawn(cmd, args);
-
   const logLocation = path
-    .join(
-      dirPath,
-      `${path.basename(cmd)}_node_${args.find((a) => a.includes("port"))?.split("=")[1]}_${
-        runningNode.pid
-      }.log`
-    )
+    .join(dirPath, `${path.basename(cmd)}_node_${argPort}_${runningNode.pid}.log`)
     .replaceAll("node_node_undefined", "chopsticks");
 
   process.env.MOON_LOG_LOCATION = logLocation;
@@ -178,11 +172,13 @@ export async function launchNode(options: {
 
   probe: for (let i = 0; ; i++) {
     try {
-      const ports = await findPortsByPid(runningNode.pid);
+      const ports = (await checkLsofExists())
+        ? await findPortsByPid(runningNode.pid)
+        : [Number(argPort) ?? 9944];
       if (ports) {
         for (const port of ports) {
           try {
-            await checkWebSocketJSONRPC(port);
+            await checkHTTPJSONRPC(port);
             break probe;
           } catch {}
         }
@@ -286,6 +282,15 @@ async function findPortsByPid(pid: number, retryCount = 600, retryDelay = 100): 
   return [];
 }
 
+async function checkLsofExists() {
+  try {
+    await execAsync("lsof -V");
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
 async function pullImage(imageName: string, docker: Docker) {
   console.log(`Pulling Docker image: ${imageName}`);
 
@@ -300,4 +305,30 @@ async function pullImage(imageName: string, docker: Docker) {
       }
     });
   });
+}
+
+async function checkHTTPJSONRPC(port: number): Promise<boolean> {
+  try {
+    const response = await fetch(`http://localhost:${port}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        method: "system_chain",
+        params: [],
+      }),
+    });
+
+    if (!response.ok) {
+      return false;
+    }
+
+    const data = (await response.json()) as { jsonrpc: string; id: number };
+    return data.jsonrpc === "2.0" && data.id === 1;
+  } catch {
+    return false;
+  }
 }
