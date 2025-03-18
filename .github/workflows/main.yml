@@ -307,7 +307,7 @@ jobs:
       - name: Download binaries
         run: |
           cd test
-          bun moonwall download moonbeam 0.43 ./tmp
+          bun moonwall download moonbeam 0.42 ./tmp
 
           bun moonwall download polkadot stable2409 ./tmp
           bun moonwall download polkadot-execute-worker stable2409 ./tmp

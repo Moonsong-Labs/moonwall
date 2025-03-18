@@ -24,7 +24,7 @@
   },
   "parachains": [
     {
-      "chain": "moonbase-local",
+      "chain": "3",
       "id": 2000,
       "collator": {
         "args": [
