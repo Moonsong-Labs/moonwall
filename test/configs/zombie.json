@@ -24,12 +24,13 @@
   },
   "parachains": [
     {
-      "chain": "3",
-      "id": 2000,
+      "chain": "moonbase-local",
+      "id": 1000,
       "collator": {
         "args": [
           "--no-hardware-benchmarks",
           "-lparachain=debug",
+          "--force-authoring",
           "--database=paritydb"
         ],
         "command": "tmp/moonbeam",
