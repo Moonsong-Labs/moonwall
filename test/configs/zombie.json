@@ -22,10 +22,20 @@
       }
     ]
   },
+
   "parachains": [
     {
       "chain": "moonbase-local",
       "id": 1000,
+      "genesis": {
+        "runtimeGenesis": {
+          "patch": {
+            "parachainInfo": {
+              "parachainId": 1000
+            }
+          }
+        }
+      },
       "collator": {
         "args": [
           "--no-hardware-benchmarks",
