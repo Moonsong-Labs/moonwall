@@ -63,7 +63,7 @@ export class Moonwall {
   buildTestEnv(@argument({ defaultPath: "/" }) source: Directory): Container {
     return this.buildEnv(source)
       .withWorkdir("test")
-      .withExec(["pnpm", "moonwall", "download", "moonbeam"]);
+      .withExec(["pnpm", "moonwall", "download", "moonbeam", "0.43", "tmp"]);
   }
 
   @func()
@@ -71,9 +71,30 @@ export class Moonwall {
     @argument({ defaultPath: "/" }) source: Directory
   ): Container {
     return this.buildTestEnv(source)
-      .withExec(["pnpm", "moonwall", "download", "polkadot"])
-      .withExec(["pnpm", "moonwall", "download", "polkadot-execute-worker"])
-      .withExec(["pnpm", "moonwall", "download", "polkadot-prepare-worker"]);
+      .withExec([
+        "pnpm",
+        "moonwall",
+        "download",
+        "polkadot",
+        "stable2409",
+        "tmp",
+      ])
+      .withExec([
+        "pnpm",
+        "moonwall",
+        "download",
+        "polkadot-execute-worker",
+        "stable2409",
+        "tmp",
+      ])
+      .withExec([
+        "pnpm",
+        "moonwall",
+        "download",
+        "polkadot-prepare-worker",
+        "stable2409",
+        "tmp",
+      ]);
   }
 
   /**
@@ -148,10 +169,10 @@ export class Moonwall {
   ): Promise<string> {
     return downloadPolkadot
       ? this.buildTestEnvWithPolkadot(source)
-          .withExec(["pnpm", "moonwall", "test", testEnv, "0.43", "tmp"])
+          .withExec(["pnpm", "moonwall", "test", testEnv])
           .stdout()
       : this.buildTestEnv(source)
-          .withExec(["pnpm", "moonwall", "test", testEnv, "stable2409", "tmp"])
+          .withExec(["pnpm", "moonwall", "test", testEnv])
           .stdout();
   }
 
@@ -164,15 +185,15 @@ export class Moonwall {
   @func()
   async devTest(
     @argument({ defaultPath: "/" }) source: Directory
-  ): Promise<void> {    
+  ): Promise<void> {
     await Promise.all([
-       this.runMoonwallTest(source, "dev_multi"),
-       this.runMoonwallTest(source, "dev_seq"),
-       this.runMoonwallTest(source, "dev_test"),
-       this.runMoonwallTest(source, "dev_smoke"),
-       this.runMoonwallTest(source, "papi_dev"),
-       this.runMoonwallTest(source, "fork_test"),
-    ])
+      this.runMoonwallTest(source, "dev_multi"),
+      this.runMoonwallTest(source, "dev_seq"),
+      this.runMoonwallTest(source, "dev_test"),
+      this.runMoonwallTest(source, "dev_smoke"),
+      this.runMoonwallTest(source, "papi_dev"),
+      this.runMoonwallTest(source, "fork_test"),
+    ]);
     // This requires some Docker-outside-of-Docker approach, so do later
     // this.runMoonwallTest(source, "dev_docker"),
   }
