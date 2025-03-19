@@ -4,7 +4,14 @@
  * This module provides CI/CD functions for the Moonwall project, including
  * formatting and linting capabilities.
  */
-import { dag, type Container, type Directory, object, argument, func } from "@dagger.io/dagger";
+import {
+  dag,
+  type Container,
+  type Directory,
+  object,
+  argument,
+  func,
+} from "@dagger.io/dagger";
 
 @object()
 export class Moonwall {
@@ -31,6 +38,7 @@ export class Moonwall {
         "git",
         "vim",
         "htop",
+        "docker",
         "net-tools",
         "dnsutils",
         "iputils-ping",
@@ -58,6 +66,16 @@ export class Moonwall {
       .withExec(["pnpm", "moonwall", "download", "moonbeam"]);
   }
 
+  @func()
+  buildTestEnvWithPolkadot(
+    @argument({ defaultPath: "/" }) source: Directory
+  ): Container {
+    return this.buildTestEnv(source)
+      .withExec(["pnpm", "moonwall", "download", "polkadot"])
+      .withExec(["pnpm", "moonwall", "download", "polkadot-execute-worker"])
+      .withExec(["pnpm", "moonwall", "download", "polkadot-prepare-worker"]);
+  }
+
   /**
    * Format the codebase using Biome
    *
@@ -66,7 +84,10 @@ export class Moonwall {
    * @returns The command output
    */
   @func()
-  async format(@argument({ defaultPath: "/" }) source: Directory, fix = false): Promise<string> {
+  async format(
+    @argument({ defaultPath: "/" }) source: Directory,
+    fix = false
+  ): Promise<string> {
     const command = fix ? ["pnpm", "fmt:fix"] : ["pnpm", "fmt"];
 
     return this.buildEnv(source).withExec(command).stdout();
@@ -80,7 +101,10 @@ export class Moonwall {
    * @returns The command output
    */
   @func()
-  async lint(@argument({ defaultPath: "/" }) source: Directory, fix = false): Promise<string> {
+  async lint(
+    @argument({ defaultPath: "/" }) source: Directory,
+    fix = false
+  ): Promise<string> {
     const command = fix ? ["pnpm", "lint:fix"] : ["pnpm", "lint"];
 
     return this.buildEnv(source).withExec(command).stdout();
@@ -93,7 +117,9 @@ export class Moonwall {
    * @returns The command output
    */
   @func()
-  async typecheck(@argument({ defaultPath: "/" }) source: Directory): Promise<string> {
+  async typecheck(
+    @argument({ defaultPath: "/" }) source: Directory
+  ): Promise<string> {
     return this.buildEnv(source).withExec(["pnpm", "typecheck"]).stdout();
   }
 
@@ -104,16 +130,29 @@ export class Moonwall {
    * @returns The command output
    */
   @func()
-  async staticAnalysis(@argument({ defaultPath: "/" }) source: Directory): Promise<string[]> {
-    return Promise.all([this.format(source), this.lint(source), this.typecheck(source)]);
+  async staticAnalysis(
+    @argument({ defaultPath: "/" }) source: Directory
+  ): Promise<string[]> {
+    return Promise.all([
+      this.format(source),
+      this.lint(source),
+      this.typecheck(source),
+    ]);
   }
 
   @func()
   async runMoonwallTest(
     @argument({ defaultPath: "/" }) source: Directory,
-    testEnv: string
+    testEnv: string,
+    downloadPolkadot = false
   ): Promise<string> {
-    return this.buildTestEnv(source).withExec(["pnpm", "moonwall", "test", testEnv]).stdout();
+    return downloadPolkadot
+      ? this.buildTestEnvWithPolkadot(source)
+          .withExec(["pnpm", "moonwall", "test", testEnv])
+          .stdout()
+      : this.buildTestEnv(source)
+          .withExec(["pnpm", "moonwall", "test", testEnv])
+          .stdout();
   }
 
   /**
@@ -123,13 +162,30 @@ export class Moonwall {
    * @returns The test execution results
    */
   @func()
-  async test(@argument({ defaultPath: "/" }) source: Directory): Promise<void> {
+  async devTest(
+    @argument({ defaultPath: "/" }) source: Directory
+  ): Promise<void> {
     await this.runMoonwallTest(source, "dev_test");
     await this.runMoonwallTest(source, "dev_multi");
     await this.runMoonwallTest(source, "dev_seq");
     await this.runMoonwallTest(source, "dev_smoke");
     await this.runMoonwallTest(source, "papi_dev");
     await this.runMoonwallTest(source, "fork_test");
+    // This requires some Docker-outside-of-Docker approach, so do later
+    // this.runMoonwallTest(source, "dev_docker"),
+  }
+
+  @func()
+  async zombieTest(
+    @argument({ defaultPath: "/" }) source: Directory
+  ): Promise<void> {
+    await this.runMoonwallTest(source, "zombie_test", true);
+  }
+
+  @func()
+  async test(@argument({ defaultPath: "/" }) source: Directory): Promise<void> {
+    await this.devTest(source);
+    // This requires some Docker-outside-of-Docker approach, so do later
     // this.runMoonwallTest(source, "dev_docker"),
   }
 
@@ -140,7 +196,9 @@ export class Moonwall {
    * @returns The command output
    */
   @func()
-  async fullCI(@argument({ defaultPath: "/" }) source: Directory): Promise<void> {
+  async fullCI(
+    @argument({ defaultPath: "/" }) source: Directory
+  ): Promise<void> {
     await Promise.all([this.staticAnalysis(source), this.test(source)]);
   }
 }

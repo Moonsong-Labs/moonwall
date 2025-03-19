@@ -5,45 +5,57 @@ on:
       - "**"
 
 jobs:
-  # full-ci:
-  #   runs-on: ubuntu-latest
-  #   permissions:
-  #     contents: read
-  #     packages: write
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
-  #     - uses: dagger/dagger-for-github@8.0.0
-  #       with:
-  #         verb: call
-  #         args: "full-ci --source=."
-  #         cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
-  #         version: 0.16.3
-  static-analysis:
-    runs-on: depot-ubuntu-24.04-16
+  dagger-small:
+    runs-on: depot-ubuntu-24.04-small
     permissions:
       contents: read
       packages: write
+
+    strategy:
+      matrix:
+        function: [static-analysis, dev-test, zombie-test]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - uses: dagger/dagger-for-github@8.0.0
         with:
           verb: call
-          args: "static-analysis --source=."
+          args: ${{matrix.function}}
           cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
           version: 0.16.3
-  test:
-    runs-on: depot-ubuntu-24.04-16
+  dagger:
+    runs-on: depot-ubuntu-24.04-8
     permissions:
       contents: read
       packages: write
+
+    strategy:
+      matrix:
+        function: [static-analysis, dev-test, zombie-test]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - uses: dagger/dagger-for-github@8.0.0
         with:
           verb: call
-          args: "test --source=."
+          args: ${{matrix.function}}
+          cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
+          version: 0.16.3
+  dagger-large:
+    runs-on: depot-ubuntu-24.04-16
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      matrix:
+        function: [static-analysis, dev-test, zombie-test]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - uses: dagger/dagger-for-github@8.0.0
+        with:
+          verb: call
+          args: ${{matrix.function}}
           cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
           version: 0.16.3
