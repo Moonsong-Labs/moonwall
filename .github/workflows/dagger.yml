@@ -6,7 +6,7 @@ on:
 
 jobs:
   dagger-small:
-    runs-on: depot-ubuntu-24.04-small
+    runs-on: depot-ubuntu-24.04
     permissions:
       contents: read
       packages: write

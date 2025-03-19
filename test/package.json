@@ -11,6 +11,7 @@
     "test": "pnpm moonwall test 'basic chopsticks'",
     "lint": "pnpm biome lint ./suites",
     "lint:fix": "pnpm biome lint ./suites --apply",
+    "postinstall": "papi",
     "fmt": "biome format .",
     "fmt:fix": "biome format . --write",
     "node_test": "node --no-warnings --loader tsx --test suites/node_test/*.ts",
