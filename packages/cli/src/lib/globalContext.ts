@@ -434,7 +434,7 @@ export class MoonwallContext {
     const env = getEnvironmentFromConfig();
     const launchSpec = "launchSpec" in env.foundation ? env.foundation.launchSpec[0] : undefined;
 
-    const maxStartupTimeout = launchSpec?.useDocker ? 300000 : 30000; // 5 minutes for Docker, 30s otherwise
+    const maxStartupTimeout = launchSpec?.useDocker ? 300000 : 120000; // 5 minutes for Docker, 2 minutes otherwise
 
     await withTimeout(
       Promise.all(
