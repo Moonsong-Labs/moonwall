@@ -30,7 +30,7 @@
         "runtimeGenesis": {
           "patch": {
             "parachainInfo": {
-              "parachainId": 1000
+              "parachainId": 2000
             }
           }
         }
@@ -53,7 +53,7 @@
         "runtimeGenesis": {
           "patch": {
             "parachainInfo": {
-              "parachainId": 1000
+              "parachainId": 2500
             }
           }
         }
