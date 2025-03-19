@@ -20,7 +20,7 @@ jobs:
   #         cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
   #         version: 0.16.3
   static-analysis:
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-24.04-16
     permissions:
       contents: read
       packages: write
@@ -34,7 +34,7 @@ jobs:
           cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
           version: 0.16.3
   test:
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-24.04-16
     permissions:
       contents: read
       packages: write
