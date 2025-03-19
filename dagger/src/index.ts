@@ -148,10 +148,10 @@ export class Moonwall {
   ): Promise<string> {
     return downloadPolkadot
       ? this.buildTestEnvWithPolkadot(source)
-          .withExec(["pnpm", "moonwall", "test", testEnv])
+          .withExec(["pnpm", "moonwall", "test", testEnv, "0.43", "tmp"])
           .stdout()
       : this.buildTestEnv(source)
-          .withExec(["pnpm", "moonwall", "test", testEnv])
+          .withExec(["pnpm", "moonwall", "test", testEnv, "stable2409", "tmp"])
           .stdout();
   }
 
@@ -164,13 +164,15 @@ export class Moonwall {
   @func()
   async devTest(
     @argument({ defaultPath: "/" }) source: Directory
-  ): Promise<void> {
-    await this.runMoonwallTest(source, "dev_test");
-    await this.runMoonwallTest(source, "dev_multi");
-    await this.runMoonwallTest(source, "dev_seq");
-    await this.runMoonwallTest(source, "dev_smoke");
-    await this.runMoonwallTest(source, "papi_dev");
-    await this.runMoonwallTest(source, "fork_test");
+  ): Promise<void> {    
+    await Promise.all([
+       this.runMoonwallTest(source, "dev_multi"),
+       this.runMoonwallTest(source, "dev_seq"),
+       this.runMoonwallTest(source, "dev_test"),
+       this.runMoonwallTest(source, "dev_smoke"),
+       this.runMoonwallTest(source, "papi_dev"),
+       this.runMoonwallTest(source, "fork_test"),
+    ])
     // This requires some Docker-outside-of-Docker approach, so do later
     // this.runMoonwallTest(source, "dev_docker"),
   }

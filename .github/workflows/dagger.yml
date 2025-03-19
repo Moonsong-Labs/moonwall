@@ -12,6 +12,7 @@ jobs:
       packages: write
 
     strategy:
+      fail-fast: false
       matrix:
         function: [static-analysis, dev-test, zombie-test]
     steps:
@@ -30,6 +31,7 @@ jobs:
       packages: write
 
     strategy:
+      fail-fast: false
       matrix:
         function: [static-analysis, dev-test, zombie-test]
     steps:
@@ -48,6 +50,7 @@ jobs:
       packages: write
 
     strategy:
+      fail-fast: false
       matrix:
         function: [static-analysis, dev-test, zombie-test]
     steps:
