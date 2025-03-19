@@ -23,7 +23,6 @@ export class Moonwall {
    */
   @func()
   buildEnv(@argument({ defaultPath: "/" }) source: Directory): Container {
-    const nodeCache = dag.cacheVolume("node");
     return dag
       .container()
       .from("node:23-bookworm")
@@ -45,7 +44,7 @@ export class Moonwall {
         "procps",
       ])
       .withDirectory("/src", source)
-      .withMountedCache("/src/node_modules", nodeCache)
+      .withMountedCache("/src/node_modules", dag.cacheVolume("node-23"))
       .withWorkdir("/src")
       .withExec(["npm", "install", "-g", "pnpm@9.1.4"])
       .withEnvVariable("CI", "1")
