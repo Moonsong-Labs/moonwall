@@ -24,27 +24,24 @@ jobs:
           args: ${{matrix.function}}
           cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
           version: 0.16.3
+          
   dagger-depot:
-    runs-on: depot-ubuntu-24.04-8,dagger=0.16.3
-    permissions:
-      contents: read
-      packages: write
-
-    strategy:
-      fail-fast: false
-      matrix:
-        function: [static-analysis, dev-test, zombie-test]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - uses: dagger/dagger-for-github@8.0.0
-        with:
-          verb: call
-          args: ${{matrix.function}}
-          cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
-          version: 0.16.3
+      runs-on: depot-ubuntu-24.04,dagger=0.16.3
+      permissions:
+        contents: read
+        packages: write
+  
+      strategy:
+        fail-fast: false
+        matrix:
+          function: [static-analysis, dev-test, zombie-test]
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v4
+        - run: dagger call ${{matrix.function}}
+        
   dagger-depot-large:
-    runs-on: depot-ubuntu-24.04-16
+    runs-on: depot-ubuntu-24.04-16,dagger=0.16.3
     permissions:
       contents: read
       packages: write
@@ -61,4 +58,3 @@ jobs:
           verb: call
           args: ${{matrix.function}}
           cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
-          version: 0.16.3
