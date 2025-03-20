@@ -44,7 +44,7 @@ jobs:
           cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
           version: 0.16.3
   dagger-depot-large:
-    runs-on: depot-ubuntu-24.04-16,dagger=0.16.3
+    runs-on: depot-ubuntu-24.04-16
     permissions:
       contents: read
       packages: write
