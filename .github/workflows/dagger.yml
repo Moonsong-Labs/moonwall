@@ -36,8 +36,7 @@ jobs:
         matrix:
           function: [static-analysis, dev-test, zombie-test]
       steps:
-        - name: Checkout
-          uses: actions/checkout@v4
+        - uses: actions/checkout@v4
         - run: dagger call ${{matrix.function}}
         
   dagger-depot-large:
@@ -45,16 +44,10 @@ jobs:
     permissions:
       contents: read
       packages: write
-
     strategy:
       fail-fast: false
       matrix:
         function: [static-analysis, dev-test, zombie-test]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - uses: dagger/dagger-for-github@8.0.0
-        with:
-          verb: call
-          args: ${{matrix.function}}
-          cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
+      - uses: actions/checkout@v4
+      - run: dagger call ${{matrix.function}}
