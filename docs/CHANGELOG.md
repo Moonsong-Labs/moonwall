@@ -1,5 +1,7 @@
 # @moonwall/docs
 
+## 5.11.0
+
 ## 5.10.0
 
 ### Minor Changes

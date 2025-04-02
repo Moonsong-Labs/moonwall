@@ -1,5 +1,11 @@
 # @moonwall/tests
 
+## 5.11.0
+
+### Minor Changes
+
+- eebc9e2: Update Package Deps
+
 ## 5.10.0
 
 ### Minor Changes
