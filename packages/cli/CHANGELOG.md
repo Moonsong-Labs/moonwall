@@ -1,5 +1,17 @@
 # @moonwall/cli
 
+## 5.11.0
+
+### Minor Changes
+
+- eebc9e2: Update Package Deps
+
+### Patch Changes
+
+- Updated dependencies [eebc9e2]
+  - @moonwall/types@5.11.0
+  - @moonwall/util@5.11.0
+
 ## 5.10.0
 
 ### Minor Changes
