@@ -77,6 +77,6 @@
     "@types/debug": "*",
     "tsup": "*",
     "typescript": "*",
-    "typescript-json-schema": "0.64.0"
+    "typescript-json-schema": "0.65.1"
   }
 }
