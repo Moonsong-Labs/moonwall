@@ -65,7 +65,6 @@
   },
   "pnpm": {
     "overrides": {
-      "@moonbeam-network/api-augment": "0.3401.2",
       "@polkadot/api": "15.9.1",
       "@polkadot/api-base": "15.9.1",
       "@polkadot/api-derive": "15.9.1",
@@ -75,12 +74,16 @@
       "@polkadot/types-codec": "15.9.1",
       "@polkadot/util": "13.4.3",
       "@polkadot/util-crypto": "13.4.3",
-      "@vitest/ui": "3.1.1",
-      "web3": "4.16.0",
-      "ethers": "6.13.5",
-      "polkadot-api": "1.8.4",
-      "vitest": "3.0.4",
-      "viem": "2.22.16"
-    }
+      "polkadot-api": "1.9.9"
+    },
+    "onlyBuiltDependencies": [
+      "@biomejs/biome",
+      "cpu-features",
+      "esbuild",
+      "protobufjs",
+      "sqlite3",
+      "ssh2",
+      "vue-demi"
+    ]
   }
 }

@@ -53,8 +53,8 @@
     "prepublish": "pnpm run build && pnpm run generate-types"
   },
   "dependencies": {
-    "@inquirer/prompts": "*",
-    "@moonbeam-network/api-augment": "*",
+    "@inquirer/prompts": "^7.4.0",
+    "@moonbeam-network/api-augment": "0.3500.0",
     "@moonwall/types": "workspace:*",
     "@polkadot/api": "*",
     "@polkadot/api-derive": "*",
@@ -72,20 +72,20 @@
     "dotenv": "16.4.7",
     "ethers": "*",
     "rlp": "3.0.0",
-    "semver": "*",
-    "viem": "*",
-    "vitest": "*",
+    "semver": "^7.7.1",
+    "viem": "2.24.3",
+    "vitest": "3.1.1",
     "web3": "*",
-    "ws": "*",
+    "ws": "^8.18.1",
     "yargs": "*"
   },
   "devDependencies": {
     "@biomejs/biome": "*",
     "@types/debug": "*",
-    "@types/node": "*",
-    "@types/ws": "*",
+    "@types/node": "^22.13.17",
+    "@types/ws": "^8.18.1",
     "@types/yargs": "*",
-    "tsup": "*",
+    "tsup": "^8.4.0",
     "typescript": "*"
   },
   "publishConfig": {
