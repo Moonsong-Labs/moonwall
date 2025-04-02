@@ -22,14 +22,25 @@
       }
     ]
   },
+
   "parachains": [
     {
       "chain": "moonbase-local",
-      "id": 2000,
+      "id": 1000,
+      "genesis": {
+        "runtimeGenesis": {
+          "patch": {
+            "parachainInfo": {
+              "parachainId": 1000
+            }
+          }
+        }
+      },
       "collator": {
         "args": [
           "--no-hardware-benchmarks",
           "-lparachain=debug",
+          "--force-authoring",
           "--database=paritydb"
         ],
         "command": "tmp/moonbeam",

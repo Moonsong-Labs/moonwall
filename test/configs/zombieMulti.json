@@ -26,6 +26,15 @@
     {
       "chain": "moonbase-local",
       "id": 2000,
+      "genesis": {
+        "runtimeGenesis": {
+          "patch": {
+            "parachainInfo": {
+              "parachainId": 2000
+            }
+          }
+        }
+      },
       "collator": {
         "args": [
           "--no-hardware-benchmarks",
@@ -40,6 +49,15 @@
     {
       "chain": "moonbase-local",
       "id": 2500,
+      "genesis": {
+        "runtimeGenesis": {
+          "patch": {
+            "parachainInfo": {
+              "parachainId": 2500
+            }
+          }
+        }
+      },
       "collator": {
         "args": [
           "--no-hardware-benchmarks",
