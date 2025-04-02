@@ -45,7 +45,7 @@
         ],
         "command": "tmp/moonbeam",
         "name": "alith",
-        "ws_port": 33345
+        "rpc_port": 33345
       }
     }
   ],

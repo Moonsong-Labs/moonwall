@@ -41,7 +41,7 @@
           "-lparachain=debug",
           "--database=paritydb"
         ],
-        "ws_port": 33345,
+        "rpc_port": 33345,
         "command": "tmp/moonbeam",
         "name": "alith"
       }
@@ -64,7 +64,7 @@
           "-lparachain=debug",
           "--database=paritydb"
         ],
-        "ws_port": 22345,
+        "rpc_port": 22345,
         "command": "tmp/moonbeam",
         "name": "baltathar"
       }
