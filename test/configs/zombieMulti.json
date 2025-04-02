@@ -26,13 +26,22 @@
     {
       "chain": "moonbase-local",
       "id": 2000,
+      "genesis": {
+        "runtimeGenesis": {
+          "patch": {
+            "parachainInfo": {
+              "parachainId": 2000
+            }
+          }
+        }
+      },
       "collator": {
         "args": [
           "--no-hardware-benchmarks",
           "-lparachain=debug",
           "--database=paritydb"
         ],
-        "ws_port": 33345,
+        "rpc_port": 33345,
         "command": "tmp/moonbeam",
         "name": "alith"
       }
@@ -40,13 +49,22 @@
     {
       "chain": "moonbase-local",
       "id": 2500,
+      "genesis": {
+        "runtimeGenesis": {
+          "patch": {
+            "parachainInfo": {
+              "parachainId": 2500
+            }
+          }
+        }
+      },
       "collator": {
         "args": [
           "--no-hardware-benchmarks",
           "-lparachain=debug",
           "--database=paritydb"
         ],
-        "ws_port": 22345,
+        "rpc_port": 22345,
         "command": "tmp/moonbeam",
         "name": "baltathar"
       }
