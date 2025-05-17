@@ -12,7 +12,7 @@ The **chopsticks** foundation type leverages the [Chopsticks](https://github.com
 | `name`                  | `string`                                       | A unique name for this environment.                                                                   |
 | `configPath`            | `string`                                       | Path to your Chopsticks configuration file.                                                           |
 | `wsPort` (optional)     | `number`                                       | WebSocket port for single-mode networks.                                                              |
-| `type` (optional)       | `"relaychain"` or `"parachain"`            | Network type (e.g. `relaychain` for collator setups).                                                 |
+| `type` (optional)       | `"relaychain"` or `"parachain"`                 | Chain type, i.e. solo or parachain                                                    |
 | `wasmOverride` (optional)| `string`                                      | Path to a custom WASM runtime override.                                                               |
 | `allowUnresolvedImports` (optional)| `boolean`                          | Skip errors when host functions expected by the runtime are missing.                                   |
 | `buildBlockMode` (optional)| `"batch" \| "manual" \| "instant"`  | Block building mode for single-mode networks.                                                         |
