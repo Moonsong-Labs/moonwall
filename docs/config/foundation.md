@@ -57,7 +57,7 @@ Here are the parameters that you can configure in your Moonwall Config file when
 In most cases you'll want **allowUnresolvedImports** to be set to true. Otherwise, Chopsticks may throw strange errors due to upstream bugs with [Smoldot](https://github.com/smol-dot/smoldot){target=blank}
 :::
 - **buildBlockMode** *batch*, *manual*, or *instant*: An optional block building mode, can be "batch", "manual" or "instant". This is only supported for single mode chopsticks.
--- **retainAllLogs** *boolean*: An optional flag to retain node logs from previous runs.
+- **retainAllLogs** *boolean*: An optional flag to retain node logs from previous runs.
 
 ## Fork Config
 
