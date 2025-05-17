@@ -60,7 +60,7 @@ export default defineConfig({
     // sidebar: sidebar,
     sidebar: {
       "/guide/": { base: "/guide/", items: sidebarGuide() },
-      "/config/": { base: "/config/", items: sidebarGuide() },
+      "/config/": { base: "/config/", items: sidebarConfig() },
     },
 
     lastUpdated: {

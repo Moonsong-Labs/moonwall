@@ -41,6 +41,9 @@ export function sidebarGuide(): DefaultTheme.SidebarItem[] {
       items: [
         { text: "Environment", link: "environment" },
         { text: "Foundation", link: "foundation" },
+        { text: "Chopsticks", link: "chopsticks" },
+        { text: "Read-Only", link: "read-only" },
+        { text: "Zombie", link: "zombie" },
         { text: "moonwall-config", link: "moonwall-config" },
       ],
     },
@@ -85,12 +88,13 @@ export function sidebarConfig(): DefaultTheme.SidebarItem[] {
       collapsed: false,
       items: [
         { text: "Introduction", link: "intro" },
-        { text: "Global Config FIle", link: "moonwall-config" },
+        { text: "Global Config File", link: "moonwall-config" },
         { text: "Environments", link: "environment" },
-        { text: "Dev Networks", link: "dev" },
-        { text: "Read-only Networks", link: "read-only" },
-        { text: "Chopsticks Networks", link: "chopsticks" },
-        { text: "Zombienet Networks", link: "zombie" },
+        { text: "Foundation", link: "foundation" },
+        { text: "Dev Foundation", link: "dev" },
+        { text: "Read-Only Foundation", link: "read-only" },
+        { text: "Chopsticks Foundation", link: "chopsticks" },
+        { text: "Zombie Foundation", link: "zombie" },
       ],
     },
   ];
