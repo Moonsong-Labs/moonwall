@@ -11,6 +11,9 @@ jobs:
   cache_moonbeam:
     runs-on: ubuntu-latest
     steps:
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
       - name: Set cache key
         id: set-cache-key
         run: echo "key=moonbeam-bin-v0.45" >> $GITHUB_OUTPUT
@@ -25,7 +28,7 @@ jobs:
         run: |
           mkdir -p test/tmp
           cd test
-          bun moonwall download moonbeam 0.45 ./tmp
+          bunx moonwall download moonbeam 0.45 ./tmp
       - uses: actions/cache/save@v4
         if: steps.moonbeam-cache-restore.outputs.cache-hit != 'true'
         with:
