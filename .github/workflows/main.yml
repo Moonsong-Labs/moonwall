@@ -11,9 +11,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: oven-sh/setup-bun@v1
+      - uses: pnpm/action-setup@v4
         with:
-          bun-version: latest
+          version: 9.1.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 23 # Changed from 20 to 23 to match other jobs, ensure consistency
+          cache: "pnpm"
+      - run: pnpm install
+      - run: pnpm run build
       - name: Set moonbeam cache key
         id: set-moonbeam-cache-key
         run: echo "key=moonbeam-bin-v0.45" >> $GITHUB_OUTPUT
@@ -29,22 +35,13 @@ jobs:
         run: |
           mkdir -p test/tmp
           cd test
-          bunx moonwall download moonbeam 0.45 ./tmp
+          pnpm moonwall download moonbeam 0.45 ./tmp
       - name: Save moonbeam binary to cache
         uses: actions/cache/save@v4
         if: steps.moonbeam-cache-restore.outputs.cache-hit != 'true'
         with:
           path: test/tmp/moonbeam
           key: ${{ steps.set-moonbeam-cache-key.outputs.key }}
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9.1.4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 23 # Changed from 20 to 23 to match other jobs, ensure consistency
-          cache: "pnpm"
-      - run: pnpm install
-      - run: pnpm run build
 
   lint:
     runs-on: ubuntu-latest
