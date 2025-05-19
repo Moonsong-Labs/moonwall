@@ -416,10 +416,10 @@ describeSuite({
       id: "T18",
       title: "It can use different apis",
       test: async () => {
-        log(await context.viem().getBalance({address: BALTATHAR_ADDRESS}));
-        expect(await context.api("viem").getBalance({address: BALTATHAR_ADDRESS})).toBeGreaterThan(
-          0n
-        );
+        log(await context.viem().getBalance({ address: BALTATHAR_ADDRESS }));
+        expect(
+          await context.api("viem").getBalance({ address: BALTATHAR_ADDRESS })
+        ).toBeGreaterThan(0n);
       },
     });
 

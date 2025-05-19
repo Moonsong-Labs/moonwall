@@ -15,43 +15,42 @@ describeSuite({
     it({
       id: "T01",
       title: "This is a bool test case",
-      test: async() => {
-        await setTimeout(500)
+      test: async () => {
+        await setTimeout(500);
         expect(false).to.be.true;
       },
     });
     it({
       id: "T02",
       title: "This is a bool test case",
-      test: async() => {
+      test: async () => {
         const rand = Math.floor(Math.random() * 1000);
-        expect(rand).toBeGreaterThan(800)
+        expect(rand).toBeGreaterThan(800);
       },
     });
     it({
       id: "T03",
       title: "This is a bool test case",
-      test: async() => {
-        await setTimeout(500)
+      test: async () => {
+        await setTimeout(500);
         expect(false).to.be.true;
       },
     });
     it({
       id: "T04",
       title: "This is a bool test case",
-      test: async() => {
-        await setTimeout(500)
+      test: async () => {
+        await setTimeout(500);
         expect(false).to.be.true;
       },
     });
     it({
       id: "T05",
       title: "This is a bool test case",
-      test: async() => {
-        await setTimeout(500)
+      test: async () => {
+        await setTimeout(500);
         expect(false).to.be.true;
       },
     });
-
   },
 });

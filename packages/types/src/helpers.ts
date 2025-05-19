@@ -5,3 +5,7 @@ export type DeepPartial<T> = {
       ? ReadonlyArray<DeepPartial<U>>
       : DeepPartial<T[P]>;
 };
+
+export type Prettify<T> = {
+  [K in keyof T]: T[K];
+} & {};
