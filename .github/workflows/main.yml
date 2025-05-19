@@ -8,6 +8,31 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
+  cache_moonbeam:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set cache key
+        id: set-cache-key
+        run: echo "key=moonbeam-bin-v0.45" >> $GITHUB_OUTPUT
+      - uses: actions/checkout@v4
+      - uses: actions/cache/restore@v4
+        id: moonbeam-cache-restore
+        with:
+          path: test/tmp/moonbeam
+          key: moonbeam-bin-v0.45
+      - name: Download moonbeam binary if not cached
+        if: steps.moonbeam-cache-restore.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p test/tmp
+          cd test
+          bun moonwall download moonbeam 0.45 ./tmp
+      - uses: actions/cache/save@v4
+        if: steps.moonbeam-cache-restore.outputs.cache-hit != 'true'
+        with:
+          path: test/tmp/moonbeam
+          key: moonbeam-bin-v0.45
+
+
   build:
     runs-on: ubuntu-latest
     steps:
@@ -133,7 +158,7 @@ jobs:
 
   test_dev:
     runs-on: ubuntu-latest
-    needs: ["build"]
+    needs: ["build", "cache_moonbeam"]
     env:
       NODE_OPTIONS: "--no-deprecation"
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -154,6 +179,11 @@ jobs:
         with:
           node-version: 23
           cache: "pnpm"
+      - name: Restore moonbeam binary cache
+        uses: actions/cache@v4
+        with:
+          path: test/tmp/moonbeam
+          key: moonbeam-bin-v0.45
       - name: Build like before
         run: |
           pnpm install  
@@ -161,10 +191,6 @@ jobs:
       - uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
-      - name: Download moonbeam binary
-        run: |
-          cd test
-          bun moonwall download moonbeam latest ./tmp
       - name: Run ${{matrix.suite}} dev test
         run: |
           cd test
@@ -283,7 +309,7 @@ jobs:
 
   test_zombie:
     runs-on: ubuntu-latest
-    needs: ["build"]
+    needs: ["build", "cache_moonbeam"]
     strategy:
       fail-fast: false
       matrix:
@@ -300,15 +326,18 @@ jobs:
       - uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
+      - name: Restore moonbeam binary cache
+        uses: actions/cache@v4
+        with:
+          path: test/tmp/moonbeam
+          key: moonbeam-bin-v0.45
       - name: Build like before
         run: |
           pnpm install   
           pnpm run build
-      - name: Download binaries
+      - name: Download other binaries
         run: |
           cd test
-          bun moonwall download moonbeam 0.43 ./tmp
-
           bun moonwall download polkadot stable2409 ./tmp
           bun moonwall download polkadot-execute-worker stable2409 ./tmp
           bun moonwall download polkadot-prepare-worker stable2409 ./tmp
