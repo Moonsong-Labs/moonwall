@@ -13,7 +13,6 @@ import type {
   TransactionSerializable,
   Transport,
   WalletClient,
-
 } from "viem";
 import type { Chain } from "viem/chains";
 import type { Web3 } from "web3";
@@ -202,7 +201,9 @@ export interface UpgradePreferences {
  */
 export type ViemClient = WalletClient<Transport, Chain, Account> & PublicActions;
 
-export type ViemClientInterface = Prettify<ReturnType<typeof createWalletClient> & ReturnType<typeof createPublicClient>>
+export type ViemClientInterface = Prettify<
+  ReturnType<typeof createWalletClient> & ReturnType<typeof createPublicClient>
+>;
 
 /**
  * GenericContext - Interface that encapsulates all the common methods and properties needed for all tests.
