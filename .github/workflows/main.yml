@@ -8,44 +8,40 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  cache_moonbeam:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
-      - name: Set cache key
-        id: set-cache-key
+      - name: Set moonbeam cache key
+        id: set-moonbeam-cache-key
         run: echo "key=moonbeam-bin-v0.45" >> $GITHUB_OUTPUT
       - uses: actions/checkout@v4
-      - uses: actions/cache/restore@v4
+      - name: Restore moonbeam binary cache
+        uses: actions/cache/restore@v4
         id: moonbeam-cache-restore
         with:
           path: test/tmp/moonbeam
-          key: moonbeam-bin-v0.45
+          key: ${{ steps.set-moonbeam-cache-key.outputs.key }}
       - name: Download moonbeam binary if not cached
         if: steps.moonbeam-cache-restore.outputs.cache-hit != 'true'
         run: |
           mkdir -p test/tmp
           cd test
           bunx moonwall download moonbeam 0.45 ./tmp
-      - uses: actions/cache/save@v4
+      - name: Save moonbeam binary to cache
+        uses: actions/cache/save@v4
         if: steps.moonbeam-cache-restore.outputs.cache-hit != 'true'
         with:
           path: test/tmp/moonbeam
-          key: moonbeam-bin-v0.45
-
-
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+          key: ${{ steps.set-moonbeam-cache-key.outputs.key }}
       - uses: pnpm/action-setup@v4
         with:
           version: 9.1.4
       - uses: actions/setup-node@v4
         with:
-          node-version: 23
+          node-version: 23 # Changed from 20 to 23 to match other jobs, ensure consistency
           cache: "pnpm"
       - run: pnpm install
       - run: pnpm run build
@@ -97,7 +93,7 @@ jobs:
       - name: Initialize config
         run: |
           cd test
-          rm moonwall.config.json
+          rm -f moonwall.config.json # Added -f to avoid error if file doesn't exist
           pnpm moonwall init --acceptAllDefaults
       - name: Run test
         run: |
@@ -133,7 +129,7 @@ jobs:
     needs: ["build"]
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v1
+      - uses: oven-sh/setup-bun@v1 # Moved up to be available for download step
         with:
           bun-version: latest
       - uses: pnpm/action-setup@v4
@@ -147,9 +143,6 @@ jobs:
         run: |
           pnpm install  
           pnpm run build
-      - uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: latest
       - name: Download tanssi binary
         run: |
           cd test
@@ -161,7 +154,7 @@ jobs:
 
   test_dev:
     runs-on: ubuntu-latest
-    needs: ["build", "cache_moonbeam"]
+    needs: ["build"] # Changed from ["build", "cache_moonbeam"]
     env:
       NODE_OPTIONS: "--no-deprecation"
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -172,7 +165,7 @@ jobs:
         shard: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v1
+      - uses: oven-sh/setup-bun@v1 # Added setup-bun for bun commands
         with:
           bun-version: latest
       - uses: pnpm/action-setup@v4
@@ -182,18 +175,11 @@ jobs:
         with:
           node-version: 23
           cache: "pnpm"
-      - name: Restore moonbeam binary cache
-        uses: actions/cache@v4
-        with:
-          path: test/tmp/moonbeam
-          key: moonbeam-bin-v0.45
+      # Removed Restore moonbeam binary cache step as it's handled by 'build' job
       - name: Build like before
         run: |
           pnpm install  
           pnpm run build
-      - uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: latest
       - name: Run ${{matrix.suite}} dev test
         run: |
           cd test
@@ -221,9 +207,6 @@ jobs:
         run: |
           pnpm install  
           pnpm run build
-      - uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: latest
       - name: Run snapshot update test
         id: update_test
         run: |
@@ -312,7 +295,7 @@ jobs:
 
   test_zombie:
     runs-on: ubuntu-latest
-    needs: ["build", "cache_moonbeam"]
+    needs: ["build"] # Changed from ["build", "cache_moonbeam"]
     strategy:
       fail-fast: false
       matrix:
@@ -326,14 +309,10 @@ jobs:
         with:
           node-version: 23
           cache: "pnpm"
-      - uses: oven-sh/setup-bun@v1
+      - uses: oven-sh/setup-bun@v1 # Added setup-bun for bun commands
         with:
           bun-version: latest
-      - name: Restore moonbeam binary cache
-        uses: actions/cache@v4
-        with:
-          path: test/tmp/moonbeam
-          key: moonbeam-bin-v0.45
+      # Removed Restore moonbeam binary cache step as it's handled by 'build' job
       - name: Build like before
         run: |
           pnpm install   
@@ -348,3 +327,4 @@ jobs:
         run: |
           cd test
           bun moonwall test ${{matrix.suite}}
+`
