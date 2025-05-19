@@ -1,5 +1,16 @@
 # @moonwall/util
 
+## 5.12.0
+
+### Minor Changes
+
+- c3ac3d9: New Packages
+
+### Patch Changes
+
+- Updated dependencies [c3ac3d9]
+  - @moonwall/types@5.12.0
+
 ## 5.11.0
 
 ### Minor Changes
