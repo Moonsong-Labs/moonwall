@@ -24,7 +24,6 @@ jobs:
       - name: Set moonbeam cache key
         id: set-moonbeam-cache-key
         run: echo "key=moonbeam-bin-v0.45" >> $GITHUB_OUTPUT
-      - uses: actions/checkout@v4
       - name: Restore moonbeam binary cache
         uses: actions/cache/restore@v4
         id: moonbeam-cache-restore
