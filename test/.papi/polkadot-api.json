@@ -4,11 +4,13 @@
   "entries": {
     "dot": {
       "chain": "polkadot",
-      "metadata": ".papi/metadata/dot.scale"
+      "metadata": ".papi/metadata/dot.scale",
+      "genesis": "0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3"
     },
     "mb": {
       "wsUrl": "ws://127.0.0.1:9955",
-      "metadata": ".papi/metadata/mb.scale"
+      "metadata": ".papi/metadata/mb.scale",
+      "genesis": "0x4545454545454545454545454545454545454545454545454545454545454545"
     }
   }
 }

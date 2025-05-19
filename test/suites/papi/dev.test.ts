@@ -10,10 +10,10 @@ describeSuite({
     let papi: PolkadotClient;
     let api: TypedApi<typeof mb>;
 
-    beforeAll(async () => {
+    beforeAll( () => {
       log("Should be before all test cases");
       papi = context.papi();
-      api = await papi.getTypedApi(mb);
+      api = papi.getTypedApi(mb);
     });
 
     it({
