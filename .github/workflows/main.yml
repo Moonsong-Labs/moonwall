@@ -327,4 +327,3 @@ jobs:
         run: |
           cd test
           bun moonwall test ${{matrix.suite}}
-`
