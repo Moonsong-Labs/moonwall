@@ -1,5 +1,11 @@
 # @moonwall/types
 
+## 5.12.0
+
+### Minor Changes
+
+- c3ac3d9: New Packages
+
 ## 5.11.0
 
 ### Minor Changes
