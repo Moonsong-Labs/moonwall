@@ -6,11 +6,14 @@ import type { Wallet, TransactionRequest } from "ethers";
 import type {
   Abi,
   Account,
+  createPublicClient,
+  createWalletClient,
   Log,
   PublicActions,
   TransactionSerializable,
   Transport,
   WalletClient,
+
 } from "viem";
 import type { Chain } from "viem/chains";
 import type { Web3 } from "web3";
@@ -19,7 +22,7 @@ import type { BlockCreation, BlockCreationResponse, ChopsticksBlockCreation } fr
 import type { ContractDeploymentOptions } from "./contracts";
 import type { TransactionType } from "./eth";
 import type { CallType } from "./foundations";
-import type { DeepPartial } from "./helpers";
+import type { DeepPartial, Prettify } from "./helpers";
 import type { PolkadotClient } from "polkadot-api";
 
 /**
@@ -198,6 +201,8 @@ export interface UpgradePreferences {
  * ViemClient - Combined type that contains both Wallet and Public viem client actions
  */
 export type ViemClient = WalletClient<Transport, Chain, Account> & PublicActions;
+
+export type ViemClientInterface = Prettify<ReturnType<typeof createWalletClient> & ReturnType<typeof createPublicClient>>
 
 /**
  * GenericContext - Interface that encapsulates all the common methods and properties needed for all tests.

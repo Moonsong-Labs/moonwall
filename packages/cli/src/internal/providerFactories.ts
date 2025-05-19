@@ -114,7 +114,7 @@ export class ProviderFactory {
           account: privateKeyToAccount(this.privateKey as `0x${string}`),
           transport: http(this.url.replace("ws", "http")),
         }).extend(publicActions);
-        return client as ViemClient;
+        return client;
       },
     };
   }
