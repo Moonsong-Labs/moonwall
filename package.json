@@ -16,7 +16,7 @@
     "changeset:version": "changeset version",
     "clean-all": "rm -rf node_modules && pnpm -r --filter='./packages/**' run clean && pnpm store prune",
     "pristine-build": "pnpm clean-all && pnpm i && pnpm build && pnpm generate-types",
-    "start": "pnpm exec moonwall",
+    "start": "cd test && pnpm exec moonwall",
     "display-reports": "pnpm exec vite preview --base __vitest__ --outDir html",
     "test": "pnpm exec moonwall test 'basic chopsticks dev_seq chop_state_test'",
     "typecheck": "pnpm -r --filter='./packages/**' run typecheck"
