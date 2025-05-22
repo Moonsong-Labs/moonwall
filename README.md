@@ -3,6 +3,10 @@
 
 Moonwall is a comprehensive blockchain test framework for Substrate-based networks
 
+## Documentation
+
+- [Troubleshooting Guide](TROUBLESHOOTING.md) - Solutions for common issues and development workflows
+
 ## Installation
 
 ### NPM Installation
