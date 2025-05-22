@@ -15,7 +15,10 @@ export async function testCmd(envName: string, additionalArgs?: testRunArgs): Pr
   process.env.MOON_TEST_ENV = envName;
 
   if (!env) {
-    const envList = globalConfig.environments.map((env) => env.name);
+    const envList = globalConfig.environments
+      .map(env => env.name)
+      .sort()
+      .join(', ');
     throw new Error(
       `No environment found in config for: ${chalk.bgWhiteBright.blackBright(
         envName
