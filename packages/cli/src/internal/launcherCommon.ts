@@ -147,7 +147,6 @@ export async function executeScript(scriptCommand: string, args?: string) {
     console.log(`========== Executing script: ${chalk.bgGrey.greenBright(script)} ==========`);
 
     const argsString = args ? ` ${args}` : "";
-    
     switch (ext) {
       case ".js":
         execSync(`node ${scriptPath}${argsString}`, { stdio: "inherit" });
