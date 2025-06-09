@@ -47,7 +47,7 @@ import { promisify } from "node:util";
 import { withTimeout } from "../internal";
 import Docker from "dockerode";
 import invariant from "tiny-invariant";
-const logger = createLogger({ name: "global:context" });
+const logger = createLogger({ name: "context" });
 const debugSetup = logger.debug.bind(logger);
 
 export class MoonwallContext {

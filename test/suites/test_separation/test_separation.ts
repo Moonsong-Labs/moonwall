@@ -1,20 +1,14 @@
 import "@moonbeam-network/api-augment";
-import { describeSuite, expect, beforeAll, beforeEach } from "@moonwall/cli";
-import { CHARLETH_ADDRESS, ETHAN_ADDRESS, alith } from "@moonwall/util";
+import { describeSuite, expect } from "@moonwall/cli";
+import { alith } from "@moonwall/util";
 import { parseEther } from "ethers";
-import { ApiPromise } from "@polkadot/api";
 
 describeSuite({
   id: "D01",
   title: "Dev test suite",
   foundationMethods: "dev",
-  testCases: ({ it, context }) => {
-    // let api: ApiPromise;
+  testCases: ({ it, context, log }) => {
     const DUMMY_ACCOUNT = "0x11d88f59425cbc1867883fcf93614bf70e87E854";
-
-    beforeAll(() => {
-      // api = context.polkadotJs();
-    });
 
     it({
       id: "E01",
@@ -23,7 +17,7 @@ describeSuite({
         const balanceBefore = (await context.polkadotJs().query.system.account(DUMMY_ACCOUNT)).data
           .free;
         expect(balanceBefore.toString()).toEqual("0");
-
+        log("Test account balance before transfer:", balanceBefore.toString());
         await context
           .polkadotJs()
           .tx.balances.transferAllowDeath(DUMMY_ACCOUNT, parseEther("1"))

@@ -11,7 +11,7 @@ import Docker from "dockerode";
 import invariant from "tiny-invariant";
 
 const execAsync = util.promisify(exec);
-const logger = createLogger({ name: "global:localNode" });
+const logger = createLogger({ name: "localNode" });
 const debug = logger.debug.bind(logger);
 
 // TODO: Add multi-threading support

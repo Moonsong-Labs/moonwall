@@ -8,7 +8,7 @@ import { clearNodeLogs } from "../internal/cmdFunctions/tempLogs";
 import { commonChecks } from "../internal/launcherCommon";
 import { cacheConfig, importAsyncConfig, loadEnvVars } from "../lib/configReader";
 import { MoonwallContext, contextCreator, runNetworkOnly } from "../lib/globalContext";
-const logger = createLogger({ name: "global:runner" });
+const logger = createLogger({ name: "runner" });
 
 export async function testCmd(envName: string, additionalArgs?: testRunArgs): Promise<boolean> {
   await cacheConfig();
