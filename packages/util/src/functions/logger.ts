@@ -1,5 +1,6 @@
 import pino from "pino";
 import type { Logger } from "pino";
+import pinoPretty from "pino-pretty";
 
 export interface LoggerOptions {
   name: string;
@@ -9,19 +10,19 @@ export interface LoggerOptions {
 
 const logLevel = process.env.LOG_LEVEL || "info";
 
+// Create pretty stream for all contexts
+const prettyStream = pinoPretty({
+  colorize: true,
+  translateTime: "HH:MM:ss.l",
+  ignore: "pid,hostname",
+  sync: true, // Important for worker threads
+});
+
 const pinoOptions: pino.LoggerOptions = {
   level: logLevel,
   formatters: {
     level: (label) => {
       return { level: label };
-    },
-  },
-  transport: {
-    target: "pino-pretty",
-    options: {
-      colorize: true,
-      translateTime: "HH:MM:ss.l",
-      ignore: "pid,hostname",
     },
   },
 };
@@ -36,15 +37,18 @@ export function createLogger(options: LoggerOptions): Logger {
     return existingLogger;
   }
 
-  const logger = pino({
+  const loggerConfig: pino.LoggerOptions = {
     name,
     level,
     enabled,
     formatters: pinoOptions.formatters,
-    transport: pinoOptions.transport,
-  });
+  };
+
+  // Create logger with pretty stream
+  const logger = pino(loggerConfig, prettyStream);
 
   loggers.set(name, logger);
+
   return logger;
 }
 

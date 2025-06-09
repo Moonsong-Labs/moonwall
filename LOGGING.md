@@ -42,3 +42,11 @@ The project has migrated from the `debug` package to `pino`. The main difference
 - Environment variable changed from `DEBUG=*` to `LOG_LEVEL`
 - Logger output is always pretty-printed with colors and formatting
 - Log levels are now properly supported (debug only had on/off)
+
+## Multithread Support
+
+When running tests with `--threads` flag or in any worker process:
+- Pretty printing with colors and formatting works in all contexts (main thread, worker threads, forked processes)
+- The logger uses `pino-pretty` as a stream with `sync: true` to ensure proper output in worker contexts
+- All log levels (info, debug, error, warn, etc.) maintain consistent formatting across all execution contexts
+- This ensures beautiful, readable logs whether tests run in single-threaded or multi-threaded mode
