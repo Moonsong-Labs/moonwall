@@ -14,7 +14,7 @@ import type {
 } from "@moonwall/types";
 import type { ApiPromise } from "@polkadot/api";
 import Bottleneck from "bottleneck";
-import Debug from "debug";
+import { createLogger } from "@moonwall/util";
 import type { Wallet } from "ethers";
 import { afterAll, beforeAll, describe, it } from "vitest";
 import type { Web3 } from "web3";
@@ -182,14 +182,7 @@ export function describeSuite<T extends FoundationType>({
   });
 }
 
-const logger = () => {
-  process.env.DEBUG_COLORS = "1";
-  const debug = Debug(`test:${process.env.MOON_TEST_ENV}`);
-  debug.log = console.log.bind(process.stdout);
-  Debug.enable("test:*");
-
-  return debug;
-};
+const logger = createLogger({ name: `test:${process.env.MOON_TEST_ENV}` });
 
 const loadParams = (config?: ReadOnlyLaunchSpec) => {
   const defaultParams = { maxConcurrent: 5, minTime: 100 };

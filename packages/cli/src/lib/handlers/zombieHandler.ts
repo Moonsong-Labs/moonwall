@@ -112,6 +112,7 @@ export const zombieHandler: FoundationHandler<"zombie"> = ({
       },
     },
     it: testCase,
-    log: logger(),
+    log: logger.info.bind(logger),
+    logger,
   });
 };

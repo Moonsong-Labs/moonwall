@@ -1,8 +1,9 @@
 import child_process from "node:child_process";
 import { promisify } from "node:util";
-import Debug from "debug";
+import { createLogger } from "@moonwall/util";
 import type { ChildProcessWithoutNullStreams } from "node:child_process";
-const debug = Debug("actions:runner");
+const logger = createLogger({ name: "actions:runner" });
+const debug = logger.debug.bind(logger);
 const execAsync = promisify(child_process.exec);
 
 /**

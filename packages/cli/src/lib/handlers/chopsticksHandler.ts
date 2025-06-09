@@ -115,7 +115,8 @@ export const chopsticksHandler: FoundationHandler<"chopsticks"> = ({
   testCases({
     context: ctx,
     it: testCase,
-    log: logger(),
+    log: logger.info.bind(logger),
+    logger,
   });
 };
 

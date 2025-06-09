@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import WebSocket from "ws";
 import { checkAccess, checkExists } from "./fileCheckers";
-import Debug from "debug";
+import { createLogger } from "@moonwall/util";
 import { setTimeout as timer } from "node:timers/promises";
 import util from "node:util";
 import type { DevLaunchSpec } from "@moonwall/types";
@@ -11,7 +11,8 @@ import Docker from "dockerode";
 import invariant from "tiny-invariant";
 
 const execAsync = util.promisify(exec);
-const debug = Debug("global:localNode");
+const logger = createLogger({ name: "global:localNode" });
+const debug = logger.debug.bind(logger);
 
 // TODO: Add multi-threading support
 async function launchDockerContainer(

@@ -62,7 +62,7 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
   return new Promise<number>(async (resolve, reject) => {
     const log = (text: string) => {
       if (options.logger) {
-        return options.logger(text);
+        return options.logger.info(text);
       }
       return;
     };

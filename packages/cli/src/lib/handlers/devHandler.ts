@@ -196,6 +196,7 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
   testCases({
     context: ctx,
     it: testCase,
-    log: logger(),
+    log: logger.info.bind(logger),
+    logger,
   });
 };

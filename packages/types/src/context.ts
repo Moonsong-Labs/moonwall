@@ -5,7 +5,7 @@ import type { KeyringPair } from "@polkadot/keyring/types";
 import type { GenericExtrinsic } from "@polkadot/types";
 import type { EventRecord } from "@polkadot/types/interfaces";
 import type { AnyTuple, RegistryError } from "@polkadot/types/types";
-import type { Debugger } from "debug";
+import type { Logger } from "pino";
 import type { Wallet } from "ethers";
 import type { Web3 } from "web3";
 import type { FoundationType, ProviderType } from "./config";
@@ -102,7 +102,7 @@ export interface ChopsticksBlockCreation {
   to?: number;
   expectEvents?: AugmentedEvent<ApiTypes>[];
   allowFailures?: boolean;
-  logger?: Debugger;
+  logger?: Logger;
 }
 
 export interface BlockCreation {
@@ -110,7 +110,7 @@ export interface BlockCreation {
   finalize?: boolean;
   allowFailures?: boolean;
   expectEvents?: AugmentedEvent<ApiTypes>[];
-  logger?: Debugger;
+  logger?: Logger;
   signer?: { type: "ethereum" | "sr25519" | "ed25519"; privateKey: string } | KeyringPair;
 }
 

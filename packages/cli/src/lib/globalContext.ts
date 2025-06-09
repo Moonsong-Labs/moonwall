@@ -12,7 +12,7 @@ import type {
 } from "@moonwall/types";
 import type { ApiPromise } from "@polkadot/api";
 import zombie, { type Network } from "@zombienet/orchestrator";
-import Debug from "debug";
+import { createLogger } from "@moonwall/util";
 import fs from "node:fs";
 import net from "node:net";
 import readline from "node:readline";
@@ -47,7 +47,8 @@ import { promisify } from "node:util";
 import { withTimeout } from "../internal";
 import Docker from "dockerode";
 import invariant from "tiny-invariant";
-const debugSetup = Debug("global:context");
+const logger = createLogger({ name: "global:context" });
+const debugSetup = logger.debug.bind(logger);
 
 export class MoonwallContext {
   private static instance: MoonwallContext | undefined;
