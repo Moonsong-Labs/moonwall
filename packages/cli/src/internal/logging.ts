@@ -29,3 +29,5 @@ process.stderr.write = (
   if (cb) cb(null);
   return true;
 };
+
+export default function () {}
