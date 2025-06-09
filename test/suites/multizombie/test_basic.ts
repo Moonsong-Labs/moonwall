@@ -25,9 +25,9 @@ describeSuite({
 
         const network = para1Api.consts.system.version.specName.toString();
         log(network);
-        console.log((await para2Api.rpc.chain.getBlock()).block.header.number.toNumber());
+        log(`Para1 block number: ${(await para1Api.rpc.chain.getBlock()).block.header.number.toNumber()}`);
         await context.waitBlock(2, "para1");
-        console.log((await para2Api.rpc.chain.getBlock()).block.header.number.toNumber());
+        log(` Para1 block number after wait: ${(await para1Api.rpc.chain.getBlock()).block.header.number.toNumber()}`);
       },
     });
 

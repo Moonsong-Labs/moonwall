@@ -480,7 +480,7 @@
     {
       "name": "dev_multi",
       "testFileDir": ["suites/test_separation"],
-      "reporters": ["default", "html"],
+      "reporters": ["basic", "html"],
       "multiThreads": true,
       "foundation": {
         "type": "dev",

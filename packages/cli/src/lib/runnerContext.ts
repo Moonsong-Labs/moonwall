@@ -81,6 +81,7 @@ export function describeSuite<T extends FoundationType>({
     return;
   }
   let ctx: MoonwallContext | null = null;
+  const logger = createLogger({ name: suiteId });
 
   beforeAll(async () => {
     const env = getEnvironmentFromConfig();
@@ -181,8 +182,6 @@ export function describeSuite<T extends FoundationType>({
     });
   });
 }
-
-const logger = createLogger({ name: `test:${process.env.MOON_TEST_ENV}` });
 
 const loadParams = (config?: ReadOnlyLaunchSpec) => {
   const defaultParams = { maxConcurrent: 5, minTime: 100 };
