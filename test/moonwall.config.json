@@ -251,6 +251,7 @@
       "runScripts": [
         "compile-contracts.ts compile -p contracts/precompiles",
         "greeting.js timbo",
+	"test.sh",
         "shelley_prose.sh"
       ],
       "connections": []

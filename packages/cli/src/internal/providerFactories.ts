@@ -15,8 +15,9 @@ import { Web3 } from "web3";
 import { WebSocketProvider } from "web3-providers-ws";
 import { createClient, type PolkadotClient } from "polkadot-api";
 import { getWsProvider, WsEvent } from "polkadot-api/ws-provider/web";
-import Debug from "debug";
-const debug = Debug("global:providers");
+import { createLogger } from "@moonwall/util";
+const logger = createLogger({ name: "providers" });
+const debug = logger.debug.bind(logger);
 
 export class ProviderFactory {
   private url: string;

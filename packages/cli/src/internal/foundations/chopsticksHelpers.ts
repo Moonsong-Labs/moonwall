@@ -83,7 +83,7 @@ export async function createChopsticksBlock(
         .reduce((acc, curr) => acc || curr, false);
       if (!found) {
         options.logger
-          ? options.logger(
+          ? options.logger.error(
               `Event ${chalk.bgWhiteBright.blackBright(eEvt.meta.name)} not present in block`
             )
           : console.error(

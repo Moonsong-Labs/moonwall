@@ -15,8 +15,9 @@ import type {
 import type { Block, SignedBlock } from "@polkadot/types/interfaces/runtime/types";
 import type { FrameSystemEventRecord, SpWeightsWeightV2Weight } from "@polkadot/types/lookup";
 import Bottleneck from "bottleneck";
-import Debug from "debug";
-const debug = Debug("test:blocks");
+import { createLogger } from "./logger";
+const logger = createLogger({ name: "test:blocks" });
+const debug = logger.debug.bind(logger);
 
 export async function createAndFinalizeBlock(
   api: ApiPromise,

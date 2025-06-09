@@ -1,4 +1,4 @@
-endpoint: wss://rpc-polkadot.luckyfriday.io
+endpoint: wss://polkadot.api.onfinality.io/public-ws
 mock-signature-host: true
 block: 18867218
 port: 8002

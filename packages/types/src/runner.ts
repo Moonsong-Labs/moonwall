@@ -1,7 +1,7 @@
 import type { ApiPromise } from "@polkadot/api";
 import type { ApiTypes } from "@polkadot/api/types";
 import type { KeyringPair } from "@polkadot/keyring/types";
-import type { Debugger } from "debug";
+import type { Logger, LogFn } from "pino";
 import type { Wallet, TransactionRequest } from "ethers";
 import type {
   Abi,
@@ -70,7 +70,8 @@ export type TestContextMap = {
 export type TestCasesFn<T extends FoundationType> = (params: {
   context: GenericContext & FoundationContextMap[T];
   it: (params: ITestCase) => void;
-  log: Debugger;
+  log: LogFn;
+  logger: Logger;
 }) => void;
 
 // TODO: Extend to include skipIf() and runIf()
@@ -100,7 +101,7 @@ export type FoundationHandler<T extends FoundationType> = (params: {
   testCases: TestCasesFn<T>;
   context: GenericContext;
   testCase: (params: ITestCase) => void;
-  logger: () => Debugger;
+  logger: Logger;
   ctx?: any;
 }) => void;
 
@@ -127,7 +128,8 @@ export type ITestSuiteType<T extends FoundationMethod> = {
 interface ITestContext<T extends GenericContext> {
   context: T;
   it: CustomTest;
-  log: Debugger;
+  log: LogFn;
+  logger: Logger;
 }
 
 /**
@@ -135,7 +137,7 @@ interface ITestContext<T extends GenericContext> {
  * @description The context for tests running in development mode.
  * @property context - The context for the development mode.
  * @property it - The CustomTest function for the test.
- * @property log - The Debugger instance for logging.
+ * @property log - The Logger instance for logging.
  */
 export type DevTestContext = ITestContext<DevModeContext>;
 
@@ -144,7 +146,7 @@ export type DevTestContext = ITestContext<DevModeContext>;
  * @description The context for tests running in read-only mode.
  * @property context - The context for the read-only mode.
  * @property it - The CustomTest function for the test.
- * @property log - The Debugger instance for logging.
+ * @property log - The Logger instance for logging.
  */
 export type ReadOnlyTestContext = ITestContext<ReadOnlyContext>;
 
@@ -153,7 +155,7 @@ export type ReadOnlyTestContext = ITestContext<ReadOnlyContext>;
  * @description The context for tests running with chopsticks.
  * @property context - The context for the chopsticks mode.
  * @property it - The CustomTest function for the test.
- * @property log - The Debugger instance for logging.
+ * @property log - The Logger instance for logging.
  */
 export type ChopsticksTestContext = ITestContext<ChopsticksContext>;
 
@@ -162,7 +164,7 @@ export type ChopsticksTestContext = ITestContext<ChopsticksContext>;
 //  * @description The context for tests running with zombie.
 //  * @property context - The context for the zombie mode.
 //  * @property it - The CustomTest function for the test.
-//  * @property log - The Debugger instance for logging.
+//  * @property log - The Logger instance for logging.
 //  */
 export type ZombieTestContext = ITestContext<ZombieContext>;
 
@@ -171,7 +173,7 @@ export type ZombieTestContext = ITestContext<ZombieContext>;
  * @description The base test context for other contexts to extend, not to be used directly.
  * @property context - The base context for other contexts to extend, not to be used directly.
  * @property it - The CustomTest function for the test.
- * @property log - The Debugger instance for logging.
+ * @property log - The Logger instance for logging.
  */
 export type GenericTestContext = ITestContext<GenericContext>;
 
@@ -193,7 +195,7 @@ export interface UpgradePreferences {
   waitMigration?: boolean;
   upgradeMethod?: "Governance" | "WhiteListedCaller" | "Sudo";
   localPath?: string;
-  logger?: Debugger;
+  logger?: Logger;
 }
 
 /**

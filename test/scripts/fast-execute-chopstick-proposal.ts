@@ -1,10 +1,10 @@
 import "@moonbeam-network/api-augment";
 import yargs from "yargs";
 import chalk from "chalk";
-import { ALITH_PRIVATE_KEY } from "@moonwall/util";
+import { ALITH_PRIVATE_KEY, createLogger } from "@moonwall/util";
 import type { FrameSupportPreimagesBounded } from "@polkadot/types/lookup";
-import Debug from "debug";
-const debug = Debug("fast-executor");
+const logger = createLogger({ name: "fast-executor" });
+const debug = logger.debug.bind(logger);
 import { ApiPromise, Keyring, WsProvider } from "@polkadot/api";
 
 const argv = yargs(process.argv.slice(2))

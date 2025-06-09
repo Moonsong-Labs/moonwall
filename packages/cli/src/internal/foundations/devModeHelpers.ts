@@ -16,7 +16,7 @@ import type { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types";
 import type { RegistryError } from "@polkadot/types-codec/types/registry";
 import type { EventRecord } from "@polkadot/types/interfaces";
 import chalk from "chalk";
-import Debug from "debug";
+import { createLogger } from "@moonwall/util";
 import { setTimeout } from "node:timers/promises";
 import {
   getEnvironmentFromConfig,
@@ -26,7 +26,8 @@ import {
 import { extractError } from "../../lib/contextHelpers";
 import { MoonwallContext } from "../../lib/globalContext";
 import { vitestAutoUrl } from "../providerFactories";
-const debug = Debug("DevTest");
+const logger = createLogger({ name: "DevTest" });
+const debug = logger.debug.bind(logger);
 
 export async function getDevProviderPath() {
   const env = getEnvironmentFromConfig();
@@ -198,7 +199,7 @@ export async function createDevBlock<
         .reduce((acc, curr) => acc || curr, false);
       if (!found) {
         options.logger
-          ? options.logger(
+          ? options.logger.error(
               `Event ${chalk.bgWhiteBright.blackBright(eEvt.meta.name)} not present in block`
             )
           : console.error(

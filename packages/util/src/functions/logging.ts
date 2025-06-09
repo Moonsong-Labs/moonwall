@@ -1,15 +1,11 @@
 import "@moonbeam-network/api-augment";
 import type { ApiPromise } from "@polkadot/api";
 import { mapExtrinsics } from "./block";
-import Debug from "debug";
 import type { Extrinsic } from "@polkadot/types/interfaces";
+import { setupLogger as createTestLogger } from "./logger";
 
-export function setupLogger(name: string) {
-  const debug = Debug(`test:${name}`);
-  Debug.enable("test:*");
-  Debug.log = console.info.bind(console);
-  return debug;
-}
+// Re-export setupLogger from logger.ts for backward compatibility
+export const setupLogger = createTestLogger;
 
 export function log(...msg: any[]) {
   if (process.argv?.[2] && process.argv[2] === "--printlogs") {

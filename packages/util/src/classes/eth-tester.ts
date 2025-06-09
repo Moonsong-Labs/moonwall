@@ -1,6 +1,6 @@
 import type { Web3 } from "web3";
 import { type AccessListish, ContractFactory } from "ethers";
-import type { Debugger } from "debug";
+import type { Logger } from "pino";
 
 /**
  * @name TransactionOptions
@@ -64,7 +64,7 @@ export class EthTester {
   /**
    * @name logger: Logger to use
    */
-  private logger: Debugger;
+  private logger: Logger;
 
   /**
    * @name web3: Web3 instance
@@ -90,7 +90,7 @@ export class EthTester {
   constructor(
     web3: Web3,
     privateKey: string,
-    logger: Debugger,
+    logger: Logger,
     type: "Legacy" | "EIP2930" | "EIP1559" = "Legacy"
   ) {
     this.web3 = web3;
@@ -231,7 +231,7 @@ export class EthTester {
       rawTransaction = tx.rawTransaction;
     }
 
-    this.logger(
+    this.logger.debug(
       `Tx [${
         /:([0-9]+)$/.exec(((this.web3 as any).currentProvider as any).host)?.[1]
       }] from: ${`${data.from.substr(0, 5)}...${data.from.substr(data.from.length - 3)}`}, ${

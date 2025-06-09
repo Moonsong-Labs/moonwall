@@ -42,6 +42,7 @@ export const readOnlyHandler: FoundationHandler<"read_only"> = ({
       },
     },
     it: testCase,
-    log: logger(),
+    log: logger.info.bind(logger),
+    logger,
   });
 };

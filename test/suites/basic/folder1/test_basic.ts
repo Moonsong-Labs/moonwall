@@ -24,7 +24,7 @@ describeSuite({
       id: "T02",
       title: "This is a number test case",
       test: () => {
-        anotherLogger("Test case log");
+        anotherLogger.info("Test case log");
         expect(1_332_323_221).to.be.greaterThan(1000000);
       },
     });
