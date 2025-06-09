@@ -3,10 +3,12 @@ import chalk from "chalk";
 import path from "node:path";
 import type { UserConfig, Vitest } from "vitest/node";
 import { startVitest } from "vitest/node";
+import { createLogger } from "@moonwall/util";
 import { clearNodeLogs } from "../internal/cmdFunctions/tempLogs";
 import { commonChecks } from "../internal/launcherCommon";
 import { cacheConfig, importAsyncConfig, loadEnvVars } from "../lib/configReader";
 import { MoonwallContext, contextCreator, runNetworkOnly } from "../lib/globalContext";
+const logger = createLogger({ name: "global:runner" });
 
 export async function testCmd(envName: string, additionalArgs?: testRunArgs): Promise<boolean> {
   await cacheConfig();
@@ -46,10 +48,10 @@ export async function testCmd(envName: string, additionalArgs?: testRunArgs): Pr
     .filter((file) => file.result && file.result.state === "fail");
 
   if (failed.length === 0) {
-    console.log("✅ All tests passed");
+    logger.info("✅ All tests passed");
     return true;
   }
-  console.log("❌ Some tests failed");
+  logger.warn("❌ Some tests failed");
   return false;
 }
 
@@ -90,7 +92,7 @@ export async function executeTests(env: Environment, testRunArgs?: testRunArgs &
         process.env.MOON_RTVERSION = rtVersion;
         process.env.MOON_RTNAME = rtName;
       } catch (e) {
-        console.error(e);
+        logger.error(e);
       } finally {
         await MoonwallContext.destroy();
       }
@@ -147,11 +149,11 @@ export async function executeTests(env: Environment, testRunArgs?: testRunArgs &
       } satisfies UserConfig;
 
       if (env.printVitestOptions) {
-        console.log(`Options to use: ${JSON.stringify(optionsToUse, null, 2)}`);
+        logger.info(`Options to use: ${JSON.stringify(optionsToUse, null, 2)}`);
       }
       resolve((await startVitest("test", folders, optionsToUse)) as Vitest);
     } catch (e) {
-      console.error(e);
+      logger.error(e);
       reject(e);
     }
   });
@@ -187,7 +189,13 @@ class VitestOptionsBuilder {
   }
 
   setReporters(reporters: string[]): this {
-    this.options.reporters = reporters;
+    const modified: (string | [string, any])[] = reporters.includes("basic")
+      ? reporters.map((r) =>
+          r === "basic" ? (["default", { summary: false }] as [string, any]) : r
+        )
+      : reporters;
+
+    this.options.reporters = modified;
     return this;
   }
 
@@ -199,7 +207,7 @@ class VitestOptionsBuilder {
         }
   ): this {
     if (!file) {
-      console.log("No output file specified, skipping");
+      logger.info("No output file specified, skipping");
       return this;
     }
     this.options.outputFile = file;

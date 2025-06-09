@@ -31,8 +31,9 @@ const loggers = new Map<string, Logger>();
 export function createLogger(options: LoggerOptions): Logger {
   const { name, level = logLevel, enabled = true } = options;
 
-  if (loggers.has(name)) {
-    return loggers.get(name)!;
+  const existingLogger = loggers.get(name);
+  if (existingLogger) {
+    return existingLogger;
   }
 
   const logger = pino({
