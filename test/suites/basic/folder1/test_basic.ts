@@ -16,6 +16,7 @@ describeSuite({
       id: "T01",
       title: "This is a bool test case",
       test: () => {
+        log("Testing boolean assertion");
         expect(true).to.be.true;
       },
     });
@@ -33,6 +34,7 @@ describeSuite({
       id: "T03",
       title: "This is a string test case",
       test: () => {
+        log("Testing string contains assertion");
         expect("Home is where the heart is").to.contains("heart");
       },
     });
@@ -41,6 +43,7 @@ describeSuite({
       id: "T04",
       title: "This is a failing error test case",
       test: () => {
+        log("Testing error throwing assertion");
         expect(() => {
           throw new Error("ERROR THROWN");
         }).to.throw("ERROR THROWN");
