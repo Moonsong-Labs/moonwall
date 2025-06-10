@@ -20,6 +20,7 @@ describeSuite({
       id: "T01",
       title: "Check relaychain api correctly connected",
       test: async () => {
+        log("Testing relaychain API connection and version check");
         const rt = relayApi.consts.system.version.specVersion.toNumber();
         expect(rt).to.be.greaterThan(0);
 
@@ -32,6 +33,7 @@ describeSuite({
       id: "T02",
       title: "Check parachain api correctly connected",
       test: async () => {
+        log("Testing parachain API connection and spec validation");
         const network = paraApi.consts.system.version.specName.toString();
         expect(network).to.contain("moonbase");
 
@@ -45,6 +47,7 @@ describeSuite({
       title: "Check parachain api correctly connected (2)",
       timeout: 120000,
       test: async () => {
+        log("Testing parachain block progression - waiting for 2 blocks");
         await context.waitBlock(2, "parachain", "height");
       },
     });
@@ -101,6 +104,7 @@ describeSuite({
       title: "Restart a node from test script",
       timeout: 240000,
       test: async () => {
+        log("Testing node restart functionality - restarting alith node");
         const initialHeight = (
           await context.polkadotJs("parachain").rpc.chain.getHeader()
         ).number.toNumber();

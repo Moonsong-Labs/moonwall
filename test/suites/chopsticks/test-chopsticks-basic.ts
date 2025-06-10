@@ -36,6 +36,7 @@ describeSuite({
       test: async () => {
         const currentBalance = (await context.polkadotJs().query.system.account(ETHAN_ADDRESS)).data
           .free;
+        log(`Sending transaction to ${ETHAN_ADDRESS}, current balance: ${formatEther(currentBalance.toString())} GLMR`);
         await context
           .polkadotJs()
           .tx.balances.transferAllowDeath(ETHAN_ADDRESS, parseEther("10"))
@@ -44,6 +45,7 @@ describeSuite({
 
         const balanceAfter = (await context.polkadotJs().query.system.account(ETHAN_ADDRESS)).data
           .free;
+        log(`Balance after transaction: ${formatEther(balanceAfter.toString())} GLMR`);
         expect(currentBalance.lt(balanceAfter)).toBeTruthy();
       },
     });
@@ -54,8 +56,10 @@ describeSuite({
       timeout: 60000,
       test: async () => {
         const currentBlock = (await context.polkadotJs().rpc.chain.getHeader()).number.toNumber();
+        log(`Current block: ${currentBlock}, creating 3 blocks`);
         await context.createBlock({ count: 3 });
         const laterBlock = (await context.polkadotJs().rpc.chain.getHeader()).number.toNumber();
+        log(`Block after creation: ${laterBlock}, difference: ${laterBlock - currentBlock}`);
         expect(laterBlock - currentBlock).toBe(3);
       },
     });
@@ -126,6 +130,7 @@ describeSuite({
           // context.polkadotJs().events.authorFilter.EligibleUpdated
         ];
 
+        log(`Creating block with expected events for transfer to ${CHARLETH_ADDRESS}`);
         await context
           .polkadotJs()
           .tx.balances.transferAllowDeath(CHARLETH_ADDRESS, parseEther("3"))
@@ -139,6 +144,7 @@ describeSuite({
       title: "Create block, allow failures and check events",
       timeout: 60000,
       test: async () => {
+        log(`Testing force transfer with allowFailures - from ${BALTATHAR_ADDRESS} to ${CHARLETH_ADDRESS}`);
         await context
           .polkadotJs()
           .tx.balances.forceTransfer(BALTATHAR_ADDRESS, CHARLETH_ADDRESS, parseEther("3"))
@@ -148,8 +154,10 @@ describeSuite({
 
         const apiAt = await context.polkadotJs().at(result);
         const events = await apiAt.query.system.events();
+        const failedEvent = events.find((evt) => context.polkadotJs().events.system.ExtrinsicFailed.is(evt.event));
+        log(`Found ExtrinsicFailed event: ${failedEvent ? 'Yes' : 'No'}`);
         expect(
-          events.find((evt) => context.polkadotJs().events.system.ExtrinsicFailed.is(evt.event)),
+          failedEvent,
           "No Event found in block"
         ).toBeTruthy();
       },

@@ -18,10 +18,12 @@ describeSuite({
       id: "T01",
       title: "Check relaychain api correctly connected",
       test: async () => {
+        log("Testing relaychain API connection and spec validation");
         const rt = relayApi.consts.system.version.specVersion.toNumber();
         expect(rt).to.be.greaterThan(0);
 
         const network = relayApi.consts.system.version.specName.toString();
+        log(`Connected to network: ${network}, spec version: ${rt}`);
         expect(network).to.contain("rococo");
       },
     });

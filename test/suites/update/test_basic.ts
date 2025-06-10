@@ -16,6 +16,7 @@ describeSuite({
       id: "T01",
       title: "In-line snapshot",
       test: () => {
+        log(`Testing inline snapshot with random number: ${random}`);
         // biome-ignore lint/style/noUnusedTemplateLiteral: <explanation>
         expect(random).toMatchInlineSnapshot(`7`);
       },
@@ -25,6 +26,7 @@ describeSuite({
       id: "T02",
       title: "Normal snapshot",
       test: () => {
+        log(`Testing normal snapshot matching with random number: ${random}`);
         expect(random).toMatchSnapshot();
       },
     });
@@ -33,6 +35,7 @@ describeSuite({
       id: "T03",
       title: "File snapshot",
       test: () => {
+        log(`Testing file snapshot comparison against timbo.txt with random number: ${random}`);
         expect(random).toMatchFileSnapshot("./timbo.txt");
       },
     });
