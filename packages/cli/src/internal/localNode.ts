@@ -1,4 +1,4 @@
-import { exec, spawn, spawnSync } from "node:child_process";
+import { type ChildProcess, exec, spawn, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import WebSocket from "ws";
@@ -13,6 +13,21 @@ import invariant from "tiny-invariant";
 const execAsync = util.promisify(exec);
 const logger = createLogger({ name: "localNode" });
 const debug = logger.debug.bind(logger);
+
+/**
+ * Extended ChildProcess interface with Moonwall termination tracking
+ */
+export interface MoonwallProcess extends ChildProcess {
+  /**
+   * Flag indicating if this process is being terminated by Moonwall
+   */
+  isMoonwallTerminating?: boolean;
+
+  /**
+   * Reason for Moonwall-initiated termination
+   */
+  moonwallTerminationReason?: string;
+}
 
 // TODO: Add multi-threading support
 async function launchDockerContainer(
@@ -151,12 +166,12 @@ export async function launchNode(options: {
   runningNode.once("exit", (code, signal) => {
     const timestamp = new Date().toISOString();
     let message: string;
-    
+
     // Check if this termination was initiated by Moonwall
-    const moonwallNode = runningNode as any;
-    
+    const moonwallNode = runningNode as MoonwallProcess;
+
     if (moonwallNode.isMoonwallTerminating) {
-      message = `${timestamp} [moonwall] process killed. reason: ${moonwallNode.moonwallTerminationReason || 'unknown'}`;
+      message = `${timestamp} [moonwall] process killed. reason: ${moonwallNode.moonwallTerminationReason || "unknown"}`;
     } else if (code !== null) {
       message = `${timestamp} [moonwall] process exited with status code ${code}`;
     } else if (signal !== null) {
@@ -164,7 +179,7 @@ export async function launchNode(options: {
     } else {
       message = `${timestamp} [moonwall] process terminated unexpectedly`;
     }
-    
+
     // Write the message before closing the stream
     if (fsStream.writable) {
       fsStream.write(`${message}\n`, (err) => {
@@ -180,7 +195,7 @@ export async function launchNode(options: {
       }
       fsStream.end();
     }
-    
+
     runningNode.stderr?.removeListener("data", logHandler);
     runningNode.stdout?.removeListener("data", logHandler);
   });

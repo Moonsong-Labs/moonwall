@@ -251,7 +251,7 @@
       "runScripts": [
         "compile-contracts.ts compile -p contracts/precompiles",
         "greeting.js timbo",
-	"test.sh",
+        "test.sh",
         "shelley_prose.sh"
       ],
       "connections": []
@@ -1082,6 +1082,34 @@
           "endpoints": ["ws://127.0.0.1:9966"]
         }
       ]
+    },
+    {
+      "name": "exit_logging",
+      "description": "Test exit logging with actual dev node",
+      "testFileDir": ["./suites/exit_logging"],
+      "include": ["**/test_kill_process.spec.ts"],
+      "foundation": {
+        "type": "dev",
+        "launchSpec": [
+          {
+            "name": "moonbeam",
+            "running": false,
+            "newRpcBehaviour": true,
+            "retainAllLogs": true,
+            "binPath": "tmp/moonbeam",
+            "options": [
+              "--dev",
+              "--no-hardware-benchmarks",
+              "--no-telemetry",
+              "--reserved-only",
+              "--rpc-cors=all",
+              "--alice",
+              "--sealing=manual",
+              "--tmp"
+            ]
+          }
+        ]
+      }
     }
   ]
 }
