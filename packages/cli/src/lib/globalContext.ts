@@ -677,7 +677,7 @@ export class MoonwallContext {
     return MoonwallContext.instance;
   }
 
-  public static async destroy() {
+  public static async destroy(reason?: string) {
     const ctx = MoonwallContext.instance;
 
     invariant(ctx, "No context to destroy");
@@ -696,6 +696,10 @@ export class MoonwallContext {
         const pid = node.pid;
         invariant(pid, "No pid to destroy");
 
+        // Flag the process before killing it
+        (node as any).isMoonwallTerminating = true;
+        (node as any).moonwallTerminationReason = reason || "shutdown";
+
         node.kill("SIGINT");
         for (;;) {
           const isRunning = await isPidRunning(pid);
@@ -709,6 +713,19 @@ export class MoonwallContext {
 
       if (node instanceof Docker.Container) {
         console.log("🛑  Stopping container");
+        
+        // Try to append termination reason to Docker container log
+        const logLocation = process.env.MOON_LOG_LOCATION;
+        if (logLocation) {
+          const timestamp = new Date().toISOString();
+          const message = `${timestamp} [moonwall] container stopped. reason: ${reason || 'shutdown'}\n`;
+          try {
+            fs.appendFileSync(logLocation, message);
+          } catch (err) {
+            console.error(`Failed to append termination message to Docker log: ${err}`);
+          }
+        }
+        
         await node.stop();
         await node.remove();
         console.log("🛑  Container stopped and removed");

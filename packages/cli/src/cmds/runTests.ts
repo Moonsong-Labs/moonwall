@@ -49,9 +49,11 @@ export async function testCmd(envName: string, additionalArgs?: testRunArgs): Pr
 
   if (failed.length === 0) {
     logger.info("✅ All tests passed");
+    (global as any).MOONWALL_TERMINATION_REASON = "tests finished";
     return true;
   }
   logger.warn("❌ Some tests failed");
+  (global as any).MOONWALL_TERMINATION_REASON = "tests failed";
   return false;
 }
 
