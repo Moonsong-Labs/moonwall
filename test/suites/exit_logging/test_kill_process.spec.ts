@@ -1,5 +1,6 @@
 import { describeSuite, expect } from "@moonwall/cli";
 import { execSync } from "node:child_process";
+import assert from "node:assert";
 import fs from "node:fs";
 import { setTimeout as timer } from "node:timers/promises";
 
@@ -20,16 +21,14 @@ describeSuite({
         expect(logPath).to.exist;
         log(`Log file: ${logPath}`);
 
-        // Extract PID from log filename
-        // Format: binary_node_port_PID.log
-        const logFilename = logPath?.split("/").pop()!;
+        const logFilename = logPath?.split("/").pop();
+        assert(logFilename, "Log filename is undefined");
         const parts = logFilename.split("_");
         pid = Number.parseInt(parts[parts.length - 1].replace(".log", ""));
 
         expect(pid).to.be.greaterThan(0);
         log(`Process PID: ${pid}`);
 
-        // Verify process is running
         try {
           execSync(`ps -p ${pid}`, { stdio: "ignore" });
           log("✓ Process is running");
@@ -37,7 +36,6 @@ describeSuite({
           throw new Error("Process not found");
         }
 
-        // Create a block to ensure node is responsive
         await context.createBlock();
       },
     });
