@@ -1,5 +1,11 @@
 # @moonwall/tests
 
+## 5.13.1
+
+### Patch Changes
+
+- 0c9d3d2: Added exit reason to logging
+
 ## 5.13.0
 
 ### Minor Changes

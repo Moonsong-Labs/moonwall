@@ -1,5 +1,13 @@
 # @moonwall/cli
 
+## 5.13.1
+
+### Patch Changes
+
+- 0c9d3d2: Added exit reason to logging
+  - @moonwall/types@5.13.1
+  - @moonwall/util@5.13.1
+
 ## 5.13.0
 
 ### Minor Changes
