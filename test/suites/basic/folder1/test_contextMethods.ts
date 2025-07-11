@@ -4,11 +4,12 @@ describeSuite({
   id: "B03",
   title: "New Test Suite",
   foundationMethods: "read_only",
-  testCases: ({ it }) => {
+  testCases: ({ it, log }) => {
     it({
       id: "T01",
       title: "Passing Test",
       test: () => {
+        log("Testing context methods");
         expect(true).to.be.true;
       },
     });
@@ -18,6 +19,7 @@ describeSuite({
       title: "Skipped test",
       modifier: "skip",
       test: () => {
+        log("Testing skipped context method");
         expect(false).to.be.true;
       },
     });
