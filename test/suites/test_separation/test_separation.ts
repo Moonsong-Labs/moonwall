@@ -17,7 +17,7 @@ describeSuite({
         const balanceBefore = (await context.polkadotJs().query.system.account(DUMMY_ACCOUNT)).data
           .free;
         expect(balanceBefore.toString()).toEqual("0");
-        log("hello hello")
+        log("hello hello");
         log("Test account balance before transfer:", balanceBefore.toString());
         await context
           .polkadotJs()

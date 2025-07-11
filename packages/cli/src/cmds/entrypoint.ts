@@ -19,14 +19,22 @@ function handleCursor() {
     process.stdout.write(showCursor);
   });
 
-  process.on("SIGINT", () => {
+  process.on("SIGINT", async () => {
     process.stdout.write(showCursor);
-    process.exit(0);
+    (global as any).MOONWALL_TERMINATION_REASON = "cancelled by user";
+    // Import dynamically to avoid circular dependency
+    const { MoonwallContext } = await import("../lib/globalContext");
+    await MoonwallContext.destroy("cancelled by user");
+    process.exit(130); // Standard exit code for SIGINT
   });
 
-  process.on("SIGTERM", () => {
+  process.on("SIGTERM", async () => {
     process.stdout.write(showCursor);
-    process.exit(0);
+    (global as any).MOONWALL_TERMINATION_REASON = "terminated by system";
+    // Import dynamically to avoid circular dependency
+    const { MoonwallContext } = await import("../lib/globalContext");
+    await MoonwallContext.destroy("terminated by system");
+    process.exit(143); // Standard exit code for SIGTERM
   });
 }
 

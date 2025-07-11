@@ -29,7 +29,7 @@ import {
   checkZombieBins,
   getZombieConfig,
 } from "../internal/foundations/zombieHelpers";
-import { launchNode } from "../internal/localNode";
+import { launchNode, type MoonwallProcess } from "../internal/localNode";
 import {
   ProviderFactory,
   ProviderInterfaceFactory,
@@ -677,7 +677,7 @@ export class MoonwallContext {
     return MoonwallContext.instance;
   }
 
-  public static async destroy() {
+  public static async destroy(reason?: string) {
     const ctx = MoonwallContext.instance;
 
     invariant(ctx, "No context to destroy");
@@ -696,6 +696,11 @@ export class MoonwallContext {
         const pid = node.pid;
         invariant(pid, "No pid to destroy");
 
+        // Flag the process before killing it
+        const moonwallNode = node as MoonwallProcess;
+        moonwallNode.isMoonwallTerminating = true;
+        moonwallNode.moonwallTerminationReason = reason || "shutdown";
+
         node.kill("SIGINT");
         for (;;) {
           const isRunning = await isPidRunning(pid);
@@ -709,6 +714,19 @@ export class MoonwallContext {
 
       if (node instanceof Docker.Container) {
         console.log("🛑  Stopping container");
+
+        // Try to append termination reason to Docker container log
+        const logLocation = process.env.MOON_LOG_LOCATION;
+        if (logLocation) {
+          const timestamp = new Date().toISOString();
+          const message = `${timestamp} [moonwall] container stopped. reason: ${reason || "shutdown"}\n`;
+          try {
+            fs.appendFileSync(logLocation, message);
+          } catch (err) {
+            console.error(`Failed to append termination message to Docker log: ${err}`);
+          }
+        }
+
         await node.stop();
         await node.remove();
         console.log("🛑  Container stopped and removed");
@@ -717,10 +735,26 @@ export class MoonwallContext {
 
     if (ctx.zombieNetwork) {
       console.log("🪓  Killing zombie nodes");
+
+      // Log termination reason for zombie network processes
+      const zombieProcesses = Object.values((ctx.zombieNetwork.client as any).processMap).filter(
+        (item: any) => item.pid
+      );
+
+      for (const proc of zombieProcesses) {
+        if ((proc as any).logPath) {
+          const timestamp = new Date().toISOString();
+          const message = `${timestamp} [moonwall] zombie network stopped. reason: ${reason || "shutdown"}\n`;
+          try {
+            fs.appendFileSync((proc as any).logPath, message);
+          } catch (err) {
+            console.error(`Failed to append termination message to zombie log: ${err}`);
+          }
+        }
+      }
+
       await ctx.zombieNetwork.stop();
-      const processIds = Object.values((ctx.zombieNetwork.client as any).processMap)
-        .filter((item: any) => item.pid)
-        .map((process: any) => process.pid);
+      const processIds = zombieProcesses.map((process: any) => process.pid);
 
       try {
         execSync(`kill ${processIds.join(" ")}`, {});

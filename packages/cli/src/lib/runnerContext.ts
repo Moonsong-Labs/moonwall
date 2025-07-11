@@ -98,7 +98,10 @@ export function describeSuite<T extends FoundationType>({
   });
 
   afterAll(async () => {
-    await MoonwallContext.destroy();
+    // The termination reason will be set by the test runner or signal handlers
+    // Default to "tests finished" if not set explicitly
+    const reason = (global as any).MOONWALL_TERMINATION_REASON || "tests finished";
+    await MoonwallContext.destroy(reason);
     ctx = null;
   });
 
