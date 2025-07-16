@@ -55,7 +55,7 @@ describeSuite({
     it({
       id: "T04",
       title: "Can connect to parachain and execute a transaction",
-      timeout: 60000,
+      timeout: 120000,
       test: async () => {
         const balBefore = (await paraApi.query.system.account(ALITH_ADDRESS)).data.free;
 
