@@ -141,8 +141,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        suite: ["dev_test", "dev_multi", "dev_seq", "dev_smoke", "papi_dev", "fork_test", "dev_docker"]
-        shard: [1, 2, 3, 4]
+        suite: ["dev_test", "dev_multi", "dev_seq"]
+        shard: [1, 2]
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v1
@@ -177,8 +177,8 @@ jobs:
         run: |
           cd test
           bun papi generate
-          bun moonwall test ${{matrix.suite}}  --ts ${{ matrix.shard }}/4
-          
+          bun moonwall test ${{matrix.suite}}  --ts ${{ matrix.shard }}/2
+
   test_single:
     runs-on: ubuntu-latest
     needs: ["build"]
@@ -188,7 +188,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        suite: ["papi_dev", "fork_test", "dev_docker"]
+        suite: ["papi_dev", "fork_test", "dev_docker", "dev_smoke"]
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v1
