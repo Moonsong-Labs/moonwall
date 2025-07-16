@@ -40,6 +40,28 @@ export async function getWsFromConfig(providerName?: string): Promise<WsProvider
   return provider.ws();
 }
 
+export async function getWsUrlFromConfig(providerName?: string): Promise<string> {
+  // Import the environment config directly which has the connections property
+  const { getEnvironmentFromConfig } = await import("../../lib/configReader");
+  const env = getEnvironmentFromConfig();
+
+  if (providerName) {
+    const connection = env.connections?.find(({ name }) => name === providerName);
+    if (connection?.endpoints && connection.endpoints.length > 0) {
+      return connection.endpoints[0];
+    }
+  }
+
+  // Default to first polkadotJs connection
+  const connection = env.connections?.find(({ type }) => type === "polkadotJs");
+
+  if (!connection || !connection.endpoints || connection.endpoints.length === 0) {
+    throw new Error("No WebSocket endpoint found in configuration");
+  }
+
+  return connection.endpoints[0];
+}
+
 export async function sendNewBlockAndCheck(
   context: GenericContext,
   expectedEvents: AugmentedEvent<ApiTypes>[]

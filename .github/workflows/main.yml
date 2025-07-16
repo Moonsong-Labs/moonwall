@@ -132,7 +132,7 @@ jobs:
           cd test
           bun moonwall test dev_tanssi
 
-  test_dev:
+  test_sharded:
     runs-on: ubuntu-latest
     needs: ["build"]
     env:
@@ -178,6 +178,52 @@ jobs:
           cd test
           bun papi generate
           bun moonwall test ${{matrix.suite}}  --ts ${{ matrix.shard }}/4
+          
+  test_single:
+    runs-on: ubuntu-latest
+    needs: ["build"]
+    env:
+      NODE_OPTIONS: "--no-deprecation"
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: ["papi_dev", "fork_test", "dev_docker"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.1.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 23
+          cache: "pnpm"
+      - name: Build like before
+        run: |
+          pnpm install  
+          pnpm run build
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - name: Cache moonbeam binary
+        id: moonbeam-cache
+        uses: actions/cache@v4
+        with:
+          path: test/tmp
+          key: moonbeam-${{ env.MOONBEAM_VERSION }}-${{ runner.os }}
+      - name: Download moonbeam binary
+        if: steps.moonbeam-cache.outputs.cache-hit != 'true'
+        run: |
+          cd test
+          bun moonwall download moonbeam $MOONBEAM_VERSION ./tmp
+      - name: Run ${{matrix.suite}} dev test
+        run: |
+          cd test
+          bun papi generate
+          bun moonwall test ${{matrix.suite}}
 
   test_update:
     runs-on: ubuntu-latest
