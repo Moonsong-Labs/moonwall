@@ -50,7 +50,10 @@
     "fmt": "biome format src",
     "fmt:fix": "biome format src --write",
     "prepublish": "pnpm run build && pnpm run generate-types",
-    "schema": "typescript-json-schema --tsNodeRegister --esModuleInterop -o config_schema.json ./src/config.ts MoonwallConfig && pnpm biome format config_schema.json --write"
+    "schema": "typescript-json-schema --tsNodeRegister --esModuleInterop -o config_schema.json ./src/config.ts MoonwallConfig && pnpm biome format config_schema.json --write",
+    "typecheck": "pnpm exec tsc --noEmit",
+    "typecheck:wip": "pnpm exec tsc --noEmit -p tsconfig.wip.json",
+    "typecheck:watch": "pnpm exec tsc --noEmit --watch"
   },
   "dependencies": {
     "@polkadot/api": "^15.10.2",
@@ -62,6 +65,7 @@
     "@types/node": "^22.15.19",
     "@zombienet/utils": "^0.0.28",
     "bottleneck": "^2.19.5",
+    "effect": "^3.12.5",
     "ethers": "^6.14.1",
     "pino": "^9.7.0",
     "polkadot-api": "1.11.1",

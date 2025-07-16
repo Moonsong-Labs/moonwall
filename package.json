@@ -19,7 +19,9 @@
     "start": "cd test && pnpm exec moonwall",
     "display-reports": "pnpm exec vite preview --base __vitest__ --outDir html",
     "test": "cd test && pnpm moonwall test dev_multi",
-    "typecheck": "pnpm -r --filter='./packages/**' run typecheck"
+    "typecheck": "pnpm -r --filter='./packages/**' run typecheck",
+    "typecheck:wip": "pnpm -r --filter='./packages/**' run typecheck:wip",
+    "typecheck:watch": "pnpm -r --filter='./packages/**' run typecheck:watch"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
