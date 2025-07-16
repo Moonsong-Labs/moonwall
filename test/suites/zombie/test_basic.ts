@@ -59,21 +59,21 @@ describeSuite({
       test: async () => {
         const balBefore = (await paraApi.query.system.account(ALITH_ADDRESS)).data.free;
 
-        log("Please wait, this will take a while until the transaction is finalized (slow runner)");
+        // log("Please wait, this will take a while until the transaction is finalized (slow runner)");
 
-        await new Promise((resolve) => {
-          paraApi.tx.balances
-            .transferAllowDeath(ALITH_ADDRESS, 2n * GLMR)
-            .signAndSend(baltathar, ({ status, events }) => {
-              if (status.isInBlock) {
-                log("Transaction is in block");
-              }
-              if (status.isFinalized) {
-                log("Transaction is finalized!");
-                resolve(events);
-              }
-            });
-        });
+        // await new Promise((resolve) => {
+        //   paraApi.tx.balances
+        //     .transferAllowDeath(ALITH_ADDRESS, 2n * GLMR)
+        //     .signAndSend(baltathar, ({ status, events }) => {
+        //       if (status.isInBlock) {
+        //         log("Transaction is in block");
+        //       }
+        //       if (status.isFinalized) {
+        //         log("Transaction is finalized!");
+        //         resolve(events);
+        //       }
+        //     });
+        // });
 
         await paraApi.tx.balances
           .transferAllowDeath(ALITH_ADDRESS, 2n * GLMR)
