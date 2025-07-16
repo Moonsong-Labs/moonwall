@@ -374,10 +374,7 @@ export interface ChopsticksContext extends GenericContext {
    * @param {number} blocksToJump The number of ParachainStaking rounds to jump forward.
    * @returns {Promise<void>} A Promise that resolves after the operation is fully complete.
    */
-  jumpRounds?: (options: {
-    rounds: number;
-    providerName?: string;
-  }) => Promise<void>;
+  jumpRounds?: (options: { rounds: number; providerName?: string }) => Promise<void>;
 }
 
 /**
