@@ -6,7 +6,7 @@ import fs from "node:fs";
 import cfonts from "cfonts";
 import path from "node:path";
 import { SemVer, lt } from "semver";
-import pkg from "../../package.json" assert { type: "json" };
+import pkg from "../../package.json" with { type: "json" };
 import {
   createFolders,
   deriveTestIds,
