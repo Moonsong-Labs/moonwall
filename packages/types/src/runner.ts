@@ -195,7 +195,7 @@ export interface UpgradePreferences {
   waitMigration?: boolean;
   upgradeMethod?: "Governance" | "WhiteListedCaller" | "Sudo";
   localPath?: string;
-  logger?: Logger;
+  logger?: Logger | ((message: string) => void);
 }
 
 /**

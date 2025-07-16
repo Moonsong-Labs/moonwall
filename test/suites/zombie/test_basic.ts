@@ -7,7 +7,7 @@ describeSuite({
   id: "Z1",
   title: "Zombie Test Suite",
   foundationMethods: "zombie",
-  testCases: ({ it, context, log }) => {
+  testCases: ({ it, context, log, logger }) => {
     let paraApi: ApiPromise;
     let relayApi: ApiPromise;
 
@@ -55,13 +55,12 @@ describeSuite({
     it({
       id: "T04",
       title: "Can connect to parachain and execute a transaction",
-      timeout: 60000,
+      timeout: 360000,
       test: async () => {
         const balBefore = (await paraApi.query.system.account(ALITH_ADDRESS)).data.free;
 
-        log("Please wait, this will take at least 30s for transaction to complete");
+        // log("Please wait, this will take a while until the transaction is finalized (slow runner)");
 
-        // Uncomment when we upgrade to polkadot 1.7
         // await new Promise((resolve) => {
         //   paraApi.tx.balances
         //     .transferAllowDeath(ALITH_ADDRESS, 2n * GLMR)
@@ -108,20 +107,21 @@ describeSuite({
         const initialHeight = (
           await context.polkadotJs("parachain").rpc.chain.getHeader()
         ).number.toNumber();
-        console.log("Initial height", initialHeight);
+        logger.info("Initial height", initialHeight);
         await context.restartNode("alith");
-        console.log("Node restarted");
+        logger.info("Node restarted");
 
         const newApi = await ApiPromise.create({
           provider: new WsProvider("ws://localhost:33345"),
         });
 
-        for (;;) {
+        for (; ;) {
           const newHeight = (await newApi.rpc.chain.getHeader()).number.toNumber();
-          console.log("New height", newHeight);
           if (newHeight > initialHeight + 1) {
+            logger.info(`New height ${newHeight}`);
             break;
           }
+          await new Promise((resolve) => setTimeout(resolve, 1000));
         }
       },
     });

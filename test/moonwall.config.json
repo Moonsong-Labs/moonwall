@@ -198,7 +198,7 @@
       "reporters": ["default"],
       "foundation": {
         "type": "zombie",
-        "rtUpgradePath": "./tmp/moonbase-runtime-2401.wasm",
+        "rtUpgradePath": "./tmp/moonbase-runtime-3800.wasm",
         "zombieSpec": {
           "name": "zombienet",
           "additionalZombieConfig": {
