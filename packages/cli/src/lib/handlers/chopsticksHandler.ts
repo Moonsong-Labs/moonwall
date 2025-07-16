@@ -14,7 +14,7 @@ import { Keyring } from "@polkadot/api";
 import type { ApiPromise } from "@polkadot/api";
 import {
   createChopsticksBlock,
-  getWsFromConfig,
+  getWsUrlFromConfig,
   sendSetStorageRequest,
 } from "../../internal/foundations/chopsticksHelpers";
 import { MoonwallContext } from "../globalContext";
@@ -103,11 +103,9 @@ export const chopsticksHandler: FoundationHandler<"chopsticks"> = ({
         throw new Error("ParachainStaking pallet is not enabled");
       }
 
-      const ws = options.providerName
-        ? await getWsFromConfig(options.providerName)
-        : await getWsFromConfig();
-      // @ts-ignore - internal endpoints are not exposed
-      const port = Number.parseInt(ws.__internal__endpoints[0].split(":")[2].split("/")[0]);
+      const wsUrl = await getWsUrlFromConfig(options.providerName);
+      const url = new URL(wsUrl);
+      const port = Number.parseInt(url.port);
       await jumpRoundsChopsticks(api, port, options.rounds);
     },
   } satisfies ChopsticksContext;
