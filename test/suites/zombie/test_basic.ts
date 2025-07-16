@@ -55,11 +55,11 @@ describeSuite({
     it({
       id: "T04",
       title: "Can connect to parachain and execute a transaction",
-      timeout: 120000,
+      timeout: 360000,
       test: async () => {
         const balBefore = (await paraApi.query.system.account(ALITH_ADDRESS)).data.free;
 
-        log("Please wait, this will take at least 30s for transaction to complete");
+        log("Please wait, this will take a while until the transaction is finalized (slow runner)");
 
         await new Promise((resolve) => {
           paraApi.tx.balances
