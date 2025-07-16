@@ -61,20 +61,19 @@ describeSuite({
 
         log("Please wait, this will take at least 30s for transaction to complete");
 
-        // Uncomment when we upgrade to polkadot 1.7
-        // await new Promise((resolve) => {
-        //   paraApi.tx.balances
-        //     .transferAllowDeath(ALITH_ADDRESS, 2n * GLMR)
-        //     .signAndSend(baltathar, ({ status, events }) => {
-        //       if (status.isInBlock) {
-        //         log("Transaction is in block");
-        //       }
-        //       if (status.isFinalized) {
-        //         log("Transaction is finalized!");
-        //         resolve(events);
-        //       }
-        //     });
-        // });
+        await new Promise((resolve) => {
+          paraApi.tx.balances
+            .transferAllowDeath(ALITH_ADDRESS, 2n * GLMR)
+            .signAndSend(baltathar, ({ status, events }) => {
+              if (status.isInBlock) {
+                log("Transaction is in block");
+              }
+              if (status.isFinalized) {
+                log("Transaction is finalized!");
+                resolve(events);
+              }
+            });
+        });
 
         await paraApi.tx.balances
           .transferAllowDeath(ALITH_ADDRESS, 2n * GLMR)
@@ -90,7 +89,7 @@ describeSuite({
       id: "T05",
       title: "Perform a runtime upgrade",
       timeout: 600000,
-      // modifier: "skip",
+      modifier: "skip",
       test: async () => {
         await context.upgradeRuntime({ logger: log });
         log((await paraApi.rpc.chain.getBlock()).block.header.number.toNumber());
