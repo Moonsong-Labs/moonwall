@@ -62,7 +62,13 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
   return new Promise<number>(async (resolve, reject) => {
     const log = (text: string) => {
       if (options.logger) {
-        return options.logger.info(text);
+        // Check if logger is a function (backward compatibility) or an object with methods
+        if (typeof options.logger === "function") {
+          return options.logger(text);
+        }
+        if (typeof options.logger.info === "function") {
+          return options.logger.info(text);
+        }
       }
       return;
     };

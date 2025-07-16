@@ -7,7 +7,7 @@ describeSuite({
   id: "Z1",
   title: "Zombie Test Suite",
   foundationMethods: "zombie",
-  testCases: ({ it, context, log }) => {
+  testCases: ({ it, context, log, logger }) => {
     let paraApi: ApiPromise;
     let relayApi: ApiPromise;
 
@@ -90,7 +90,7 @@ describeSuite({
       id: "T05",
       title: "Perform a runtime upgrade",
       timeout: 600000,
-      modifier: "skip",
+      // modifier: "skip",
       test: async () => {
         await context.upgradeRuntime({ logger: log });
         log((await paraApi.rpc.chain.getBlock()).block.header.number.toNumber());
@@ -108,20 +108,21 @@ describeSuite({
         const initialHeight = (
           await context.polkadotJs("parachain").rpc.chain.getHeader()
         ).number.toNumber();
-        console.log("Initial height", initialHeight);
+        logger.info("Initial height", initialHeight);
         await context.restartNode("alith");
-        console.log("Node restarted");
+        logger.info("Node restarted");
 
         const newApi = await ApiPromise.create({
           provider: new WsProvider("ws://localhost:33345"),
         });
 
-        for (;;) {
+        for (; ;) {
           const newHeight = (await newApi.rpc.chain.getHeader()).number.toNumber();
-          console.log("New height", newHeight);
           if (newHeight > initialHeight + 1) {
+            logger.info(`New height ${newHeight}`);
             break;
           }
+          await new Promise((resolve) => setTimeout(resolve, 1000));
         }
       },
     });
