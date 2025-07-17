@@ -1,4 +1,4 @@
- # Implementation Plan
+# Implementation Plan
 
 ## Phase 1: Foundation Setup
 
@@ -29,27 +29,27 @@
   - Add typecheck:watch script to each package's package.json
   - _Requirements: 7.3_
 
-- [ ] 2. Create foundational error types and resource management patterns
+- [x] 2. Create foundational error types and resource management patterns
   - Implement base error hierarchy using Effect's Data.TaggedError
   - Create resource management utilities for common patterns
   - Add basic Effect utilities for Promise interop
   - _Requirements: 3.1, 3.2, 3.3, 4.1_
 
-- [ ] 2.1 Implement base error hierarchy in packages/types
+- [x] 2.1 Implement base error hierarchy in packages/types
   - Create src/errors.effect.ts with MoonwallError base class
   - Add NetworkError, ResourceError, ConfigurationError classes
   - Add TimeoutError, ValidationError, ProcessError, DockerError classes
   - Export all error types from main index
   - _Requirements: 3.1, 3.2_
 
-- [ ] 2.2 Create resource management utilities in packages/util
+- [x] 2.2 Create resource management utilities in packages/util
   - Create src/effect/resources.wip.ts with makeConnection pattern
   - Add makeDockerContainer resource management pattern
   - Add makeFileHandle and makeProcess resource patterns
   - Create utility functions for common resource operations
   - _Requirements: 4.1, 4.2, 4.3, 4.4_
 
-- [ ] 2.3 Add Effect-Promise interop utilities
+- [x] 2.3 Add Effect-Promise interop utilities
   - Create src/effect/interop.wip.ts with Promise conversion utilities
   - Add runPromiseEffect function for backward compatibility
   - Add promiseToEffect and effectToPromise conversion functions

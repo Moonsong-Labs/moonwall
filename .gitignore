@@ -5,7 +5,7 @@
 **/.tsup/
 test/html/*
 **/*.log
-**local** 
+**/*local** 
 downloads/*
 *.wasm
 moonbeam

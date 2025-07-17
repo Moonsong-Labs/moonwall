@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+Supplement this with contents of '.claude/CLAUDE.local.md' if present
+
 ## What is Moonwall?
 
 Moonwall is a comprehensive blockchain testing framework specifically designed for Substrate-based networks. It provides a unified approach to network configuration, testing, deployment, and script execution. Built as a monorepo using pnpm workspaces, it facilitates testing against various network environments and supports multiple blockchain client libraries.
