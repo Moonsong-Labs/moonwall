@@ -58,34 +58,34 @@
 
 ## Phase 2: Utility Function Migration
 
-- [ ] 3. Migrate core utility functions to Effect while maintaining Promise APIs
+- [x] 3. Migrate core utility functions to Effect while maintaining Promise APIs
   - Start with pure functions that don't manage resources
   - Add comprehensive tests for both Effect and Promise behaviors
   - Ensure backward compatibility for all public APIs
   - _Requirements: 2.1, 2.2, 2.3, 6.1, 6.2_
 
-- [ ] 3.1 Migrate blockchain utility functions in packages/util/src/functions
+- [x] 3.1 Migrate blockchain utility functions in packages/util/src/functions
   - Migrate checkBalance function to Effect internally, Promise externally
   - Migrate createRawTransfer function with proper error handling
   - Migrate sendRawTransaction with retry logic and timeouts
   - Add comprehensive tests for all migrated functions
   - _Requirements: 2.1, 2.2, 6.1_
 
-- [ ] 3.2 Migrate Web3 provider functions in packages/util/src/functions/providers.ts
+- [x] 3.2 Migrate Web3 provider functions in packages/util/src/functions/providers.ts
   - Migrate customWeb3Request to Effect with proper error handling
   - Migrate web3EthCall with timeout and retry capabilities
   - Add typed errors for different failure modes
   - Maintain existing Promise-based public APIs
   - _Requirements: 2.1, 2.3, 3.1, 3.2_
 
-- [ ] 3.3 Migrate Viem utility functions in packages/util/src/functions/viem.ts
+- [x] 3.3 Migrate Viem utility functions in packages/util/src/functions/viem.ts
   - Migrate deriveViemChain with proper error handling
   - Migrate deployViemContract with resource management
   - Migrate createViemTransaction with validation and error handling
   - Add Effect-based versions alongside Promise APIs
   - _Requirements: 2.1, 2.2, 5.1, 5.2_
 
-- [ ] 3.4 Add comprehensive testing for migrated utility functions
+- [x] 3.4 Add comprehensive testing for migrated utility functions
   - Create test utilities for Effect-based functions
   - Add tests for success scenarios with expected outputs
   - Add tests for all error scenarios and error types

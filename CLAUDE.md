@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Supplement this with contents of '.claude/CLAUDE.local.md' if present
+Supplement this with contents of @.claude/CLAUDE.local.md if present
 
 ## What is Moonwall?
 

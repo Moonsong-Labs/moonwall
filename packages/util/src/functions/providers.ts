@@ -2,31 +2,12 @@ import "@moonbeam-network/api-augment";
 import type { Web3 } from "web3";
 import { alith } from "../constants/accounts";
 import { MIN_GAS_PRICE } from "../constants/chain";
+import { runPromiseEffect } from "../effect/interop";
+import { customWeb3RequestEffect, web3EthCallEffect } from "../effect/providers.effect";
 
 export async function customWeb3Request(web3: Web3, method: string, params: any[]) {
-  return new Promise((resolve, reject) => {
-    ((web3.eth as any).currentProvider as any).send(
-      {
-        jsonrpc: "2.0",
-        id: 1,
-        method,
-        params,
-      },
-      (error: Error | null, result?: any) => {
-        if (error) {
-          reject(
-            `Failed to send custom request (${method} (${params
-              .map((p) => {
-                const str = p.toString();
-                return str.length > 128 ? `${str.slice(0, 96)}...${str.slice(-28)}` : str;
-              })
-              .join(",")})): ${error.message || error.toString()}`
-          );
-        }
-        resolve(result);
-      }
-    );
-  });
+  // Use Effect-based implementation internally
+  return runPromiseEffect(customWeb3RequestEffect(web3, method, params));
 }
 
 export interface Web3EthCallOptions {
@@ -42,16 +23,8 @@ export interface Web3EthCallOptions {
 }
 
 export async function web3EthCall(web3: Web3, options: Web3EthCallOptions) {
-  return await customWeb3Request(web3, "eth_call", [
-    {
-      from: options.from === undefined ? options.from : alith.address,
-      value: options.value,
-      gas: options.gas === undefined ? options.gas : 256000,
-      gasPrice: options.gas === undefined ? options.gas : `0x${MIN_GAS_PRICE}`,
-      to: options.to,
-      data: options.data,
-    },
-  ]);
+  // Use Effect-based implementation internally
+  return runPromiseEffect(web3EthCallEffect(web3, options));
 }
 
 // Extra type because web3 is not well typed
