@@ -54,6 +54,7 @@ Comprehensive Rust crate documentation analysis with offline caching capabilitie
   - Best for: Local development, private crates
   - Example: Cache your workspace project
 
+
 #### Discovery & Search
 - **`search_items_preview`** ⭐ (Recommended first step)
   - Returns minimal info (id, name, kind, path)

@@ -117,7 +117,7 @@ export const toMoonwallError = (error: unknown, message?: string): MoonwallError
   if (error instanceof MoonwallError) {
     return error;
   }
-  
+
   return new MoonwallError({
     message: message || (error instanceof Error ? error.message : "Unknown error"),
     cause: error,

@@ -19,6 +19,15 @@ import { privateKeyToAccount } from "viem/accounts";
 import type { Chain } from "viem/chains";
 import { ALITH_ADDRESS, ALITH_PRIVATE_KEY } from "../constants/accounts";
 import { directRpcRequest } from "./common";
+import { runPromiseEffect } from "../effect/interop";
+import {
+  checkBalanceEffect,
+  createRawTransferEffect,
+  sendRawTransactionEffect,
+  createViemTransactionEffect,
+  deriveViemChainEffect,
+  deployViemContractEffect,
+} from "../effect/viem.effect";
 
 /**
  * @name getDevChain
@@ -71,26 +80,8 @@ export async function getDevChain(url: string) {
  * const chain = await deriveViemChain('http://localhost:8545');
  */
 export async function deriveViemChain(endpoint: string) {
-  const httpEndpoint = endpoint.replace("ws", "http");
-  const block = { http: [httpEndpoint] };
-
-  const id = hexToNumber(await directRpcRequest(httpEndpoint, "eth_chainId"));
-  const name = await directRpcRequest(httpEndpoint, "system_chain");
-  const { tokenSymbol, tokenDecimals } = await directRpcRequest(httpEndpoint, "system_properties");
-
-  return {
-    id,
-    name,
-    nativeCurrency: {
-      decimals: tokenDecimals,
-      name: tokenSymbol,
-      symbol: tokenSymbol,
-    },
-    rpcUrls: {
-      public: block,
-      default: block,
-    },
-  } as const satisfies Chain;
+  // Use Effect-based implementation internally
+  return runPromiseEffect(deriveViemChainEffect(endpoint));
 }
 
 /**
@@ -118,66 +109,8 @@ export async function deployViemContract<TOptions extends ContractDeploymentOpti
   bytecode: `0x${string}`,
   options?: TOptions
 ) {
-  // Enable when Viem allows it
-  // const isLegacy = options?.txnType === "legacy" || options?.txnType === undefined;
-  // const isEIP1559 = options?.txnType === "eip1559";
-  // const isEIP2930 = options?.txnType === "eip2930";
-  // const url = context.viem().transport.url;
-  const url = context.viem().transport.url;
-
-  const { privateKey = ALITH_PRIVATE_KEY, ...rest } = options || ({} as any);
-  const blob = {
-    ...rest,
-    abi,
-    bytecode,
-    account: privateKeyToAccount(privateKey),
-  };
-
-  const account = privateKeyToAccount(ALITH_PRIVATE_KEY);
-  const client = createWalletClient({
-    transport: http(url),
-    account,
-    chain: await deriveViemChain(url),
-  });
-
-  // Enable when Viem allows it
-  // switch (true) {
-  //   case isLegacy:
-  //     blob["gasPrice"] = options?.gasPrice || 10_000_000_000n;
-  //     blob["gas"] = options?.gasLimit || 22318;
-  //     break;
-  //   case isEIP1559:
-  //     blob["accessList"] = options?.accessList || [];
-  //     blob["maxFeePerGas"] = options?.maxFeePerGas || 10_000_000_000n;
-  //     blob["maxPriorityFeePerGas"] = options?.maxPriorityFeePerGas || 0n;
-  //     blob["gasLimit"] = options?.gasLimit || 22318;
-  //     break;
-  //   case isEIP2930:
-  //     blob["gasPrice"] = options?.gasPrice || 10_000_000_000n;
-  //     blob["gasLimit"] = options?.gasLimit || 22318n;
-  //     blob["accessList"] = options?.accessList || [];
-  //     break;
-  //   default:
-  //     throw new Error("Invalid transaction type, undpate deployViemContract function");
-  // }
-
-  const hash = await client.deployContract(blob as DeployContractParameters);
-
-  await context.createBlock();
-
-  for (let i = 0; i < 5; i++) {
-    try {
-      const { contractAddress, status, logs } = await context
-        .viem()
-        .getTransactionReceipt({ hash });
-      return { contractAddress, status, logs, hash };
-    } catch (e: any) {
-      console.log(e.message);
-      console.log("Contract deployment query, retrying...");
-      await timer(100);
-    }
-  }
-  throw new Error("Contract deployment query failed after 5 retries");
+  // Use Effect-based implementation internally
+  return runPromiseEffect(deployViemContractEffect(context, abi, bytecode, options));
 }
 
 export type InputAmountFormats = number | bigint | string | `0x${string}`;
@@ -205,12 +138,8 @@ export async function createRawTransfer<TOptions extends TransferOptions>(
   value: InputAmountFormats,
   options?: TOptions
 ): Promise<`0x${string}`> {
-  const transferAmount = typeof value === "bigint" ? value : BigInt(value);
-  return await createViemTransaction(context, {
-    ...options,
-    to: to as any,
-    value: transferAmount,
-  });
+  // Use Effect-based implementation internally
+  return runPromiseEffect(createRawTransferEffect(context, to, value, options));
 }
 
 /**
@@ -226,65 +155,8 @@ export async function createViemTransaction<TOptions extends DeepPartial<ViemTra
   context: GenericContext,
   options: TOptions
 ): Promise<`0x${string}`> {
-  const type = !!options && !!options.txnType ? options.txnType : "eip1559";
-  const privateKey = !!options && !!options.privateKey ? options.privateKey : ALITH_PRIVATE_KEY;
-  const account = privateKeyToAccount(privateKey);
-  const value = options?.value ? options.value : 0n;
-  const to = options?.to ? options.to : "0x0000000000000000000000000000000000000000";
-  const chainId = await context.viem().getChainId();
-  const txnCount = await context.viem().getTransactionCount({ address: account.address });
-  const gasPrice = await context.viem().getGasPrice();
-  const data = options?.data ? options.data : "0x";
-
-  const estimatedGas =
-    options.skipEstimation || options.gas !== undefined
-      ? 1_500_000n
-      : await context.viem().estimateGas({ account: account.address, to, value, data });
-  const accessList = options?.accessList ? options.accessList : [];
-
-  const txnBlob =
-    type === "eip1559"
-      ? ({
-          to,
-          value,
-          maxFeePerGas: options.maxFeePerGas !== undefined ? options.maxFeePerGas : gasPrice,
-          maxPriorityFeePerGas:
-            options.maxPriorityFeePerGas !== undefined ? options.maxPriorityFeePerGas : gasPrice,
-          gas: options.gas !== undefined ? options.gas : estimatedGas,
-          nonce: options.nonce !== undefined ? options.nonce : txnCount,
-          data,
-          chainId,
-          type,
-        } satisfies TransactionSerializable)
-      : type === "legacy"
-        ? ({
-            to,
-            value,
-            gasPrice: options.gasPrice !== undefined ? options.gasPrice : gasPrice,
-            gas: options.gas !== undefined ? options.gas : estimatedGas,
-            nonce: options.nonce !== undefined ? options.nonce : txnCount,
-            data,
-          } satisfies TransactionSerializable)
-        : type === "eip2930"
-          ? ({
-              to,
-              value,
-              gasPrice: options.gasPrice !== undefined ? options.gasPrice : gasPrice,
-              gas: options.gas !== undefined ? options.gas : estimatedGas,
-              nonce: options.nonce !== undefined ? options.nonce : txnCount,
-              data,
-              chainId,
-              type,
-            } satisfies TransactionSerializable)
-          : {};
-
-  if (
-    (type === "eip1559" && accessList.length > 0) ||
-    (type === "eip2930" && accessList.length > 0)
-  ) {
-    (txnBlob as any).accessList = accessList;
-  }
-  return await account.signTransaction(txnBlob);
+  // Use Effect-based implementation internally
+  return runPromiseEffect(createViemTransactionEffect(context, options));
 }
 
 /**
@@ -300,11 +172,8 @@ export async function checkBalance(
   account: `0x${string}` = ALITH_ADDRESS,
   block: BlockTag | bigint = "latest"
 ): Promise<bigint> {
-  return typeof block === "string"
-    ? await context.viem().getBalance({ address: account, blockTag: block })
-    : typeof block === "bigint"
-      ? await context.viem().getBalance({ address: account, blockNumber: block })
-      : await context.viem().getBalance({ address: account });
+  // Use Effect-based implementation internally
+  return runPromiseEffect(checkBalanceEffect(context, account, block));
 }
 
 /**
@@ -320,5 +189,6 @@ export async function sendRawTransaction(
   context: GenericContext,
   rawTx: `0x${string}`
 ): Promise<`0x${string}`> {
-  return await context.viem().request({ method: "eth_sendRawTransaction", params: [rawTx] });
+  // Use Effect-based implementation internally
+  return runPromiseEffect(sendRawTransactionEffect(context, rawTx));
 }
