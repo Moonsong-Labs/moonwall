@@ -1,5 +1,12 @@
 # @moonwall/util
 
+## 5.13.2
+
+### Patch Changes
+
+- Updated dependencies [d550be7]
+  - @moonwall/types@5.13.2
+
 ## 5.13.1
 
 ### Patch Changes
