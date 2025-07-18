@@ -127,6 +127,7 @@ jobs:
         run: |
           cd test
           bun moonwall download tanssi-node latest ./tmp
+          sleep 5
       - name: Run standard dev test
         run: |
           cd test
@@ -219,6 +220,7 @@ jobs:
         run: |
           cd test
           bun moonwall download moonbeam $MOONBEAM_VERSION ./tmp
+          sleep 5
       - name: Run ${{matrix.suite}} dev test
         run: |
           cd test
@@ -371,12 +373,16 @@ jobs:
         run: |
           cd test
           bun moonwall download moonbeam $MOONBEAM_VERSION ./tmp
+          sleep 5
       - name: Download polkadot binaries
         run: |
           cd test
           bun moonwall download polkadot stable2412 ./tmp
+          sleep 5
           bun moonwall download polkadot-execute-worker stable2412 ./tmp
+          sleep 5
           bun moonwall download polkadot-prepare-worker stable2412 ./tmp
+          sleep 5
       - name: Run ${{matrix.suite}}
         run: |
           cd test
