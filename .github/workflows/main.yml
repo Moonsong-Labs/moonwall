@@ -374,9 +374,9 @@ jobs:
       - name: Download polkadot binaries
         run: |
           cd test
-          bun moonwall download polkadot stable2409 ./tmp
-          bun moonwall download polkadot-execute-worker stable2409 ./tmp
-          bun moonwall download polkadot-prepare-worker stable2409 ./tmp
+          bun moonwall download polkadot stable2412 ./tmp
+          bun moonwall download polkadot-execute-worker stable2412 ./tmp
+          bun moonwall download polkadot-prepare-worker stable2412 ./tmp
       - name: Run ${{matrix.suite}}
         run: |
           cd test
