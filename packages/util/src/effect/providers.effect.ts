@@ -45,7 +45,7 @@ export const customWeb3RequestEffect = (
                   return str.length > 128 ? `${str.slice(0, 96)}...${str.slice(-28)}` : str;
                 })
                 .join(",");
-              
+
               resume(
                 Effect.fail(
                   new NetworkError({
@@ -240,15 +240,13 @@ export const web3SubscribeEffect = <T>(
       Effect.try({
         try: () => {
           const sub = (web3.eth as any).subscribe(type, params || {});
-          
+
           sub.on("data", (data: T) => {
             Effect.runSync(Queue.offer(queue, data));
           });
 
           sub.on("error", (error: Error) => {
-            Effect.runSync(
-              Queue.shutdown(queue)
-            );
+            Effect.runSync(Queue.shutdown(queue));
           });
 
           return sub;
@@ -263,9 +261,7 @@ export const web3SubscribeEffect = <T>(
       }),
       (sub) =>
         Effect.gen(function* () {
-          yield* Effect.try(() => sub.unsubscribe()).pipe(
-            Effect.catchAll(() => Effect.void)
-          );
+          yield* Effect.try(() => sub.unsubscribe()).pipe(Effect.catchAll(() => Effect.void));
           yield* Queue.shutdown(queue);
         })
     );

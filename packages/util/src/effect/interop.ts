@@ -67,10 +67,11 @@ export const runPromiseExit = <A, E>(
  * @param mapError - Optional function to map errors
  * @returns Function that returns an Effect
  */
-export const wrapAsyncFunction = <Args extends readonly unknown[], A, E = MoonwallError>(
-  fn: (...args: Args) => Promise<A>,
-  mapError?: (error: unknown) => E
-) =>
+export const wrapAsyncFunction =
+  <Args extends readonly unknown[], A, E = MoonwallError>(
+    fn: (...args: Args) => Promise<A>,
+    mapError?: (error: unknown) => E
+  ) =>
   (...args: Args): Effect.Effect<A, E, never> =>
     promiseToEffect(fn(...args), mapError);
 
@@ -80,10 +81,11 @@ export const wrapAsyncFunction = <Args extends readonly unknown[], A, E = Moonwa
  * @param runtime - Optional runtime to use
  * @returns Function that returns a Promise
  */
-export const wrapEffectFunction = <Args extends readonly unknown[], A, E>(
-  fn: (...args: Args) => Effect.Effect<A, E, never>,
-  runtime: Runtime.Runtime<never> = defaultRuntime
-) =>
+export const wrapEffectFunction =
+  <Args extends readonly unknown[], A, E>(
+    fn: (...args: Args) => Effect.Effect<A, E, never>,
+    runtime: Runtime.Runtime<never> = defaultRuntime
+  ) =>
   (...args: Args): Promise<A> =>
     runPromiseEffect(fn(...args), runtime);
 
@@ -219,7 +221,10 @@ export const batchUtils = {
     promises: Promise<A>[],
     mapError?: (error: unknown) => E
   ): Effect.Effect<A[], E, never> =>
-    Effect.all(promises.map(p => promiseToEffect(p, mapError)), { concurrency: "unbounded" }),
+    Effect.all(
+      promises.map((p) => promiseToEffect(p, mapError)),
+      { concurrency: "unbounded" }
+    ),
 
   /**
    * Converts an array of Effects to a Promise that runs them all in parallel
@@ -230,8 +235,7 @@ export const batchUtils = {
   effectsToPromise: <A, E>(
     effects: Effect.Effect<A, E, never>[],
     runtime: Runtime.Runtime<never> = defaultRuntime
-  ): Promise<A[]> =>
-    runPromiseEffect(Effect.all(effects, { concurrency: "unbounded" }), runtime),
+  ): Promise<A[]> => runPromiseEffect(Effect.all(effects, { concurrency: "unbounded" }), runtime),
 
   /**
    * Runs Effects in sequence (one after another) and returns a Promise
@@ -242,6 +246,5 @@ export const batchUtils = {
   runSequential: <A, E>(
     effects: Effect.Effect<A, E, never>[],
     runtime: Runtime.Runtime<never> = defaultRuntime
-  ): Promise<A[]> =>
-    runPromiseEffect(Effect.all(effects, { concurrency: 1 }), runtime),
+  ): Promise<A[]> => runPromiseEffect(Effect.all(effects, { concurrency: 1 }), runtime),
 };

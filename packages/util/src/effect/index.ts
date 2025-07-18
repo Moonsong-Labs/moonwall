@@ -1,6 +1,6 @@
 /**
  * Effect-based utilities for Moonwall
- * 
+ *
  * This module provides Effect-based implementations of core Moonwall functionality
  * with enhanced error handling, retry logic, and resource management.
  */

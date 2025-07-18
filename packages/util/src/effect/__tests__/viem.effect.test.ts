@@ -154,7 +154,7 @@ describe("viem.effect", () => {
 
     it("should handle different value formats", async () => {
       const to = "0x1234567890123456789012345678901234567890";
-      
+
       // Mock dependencies
       mockViemClient.getChainId.mockResolvedValue(1);
       mockViemClient.getTransactionCount.mockResolvedValue(0);
@@ -164,7 +164,7 @@ describe("viem.effect", () => {
       // Test with string value
       const effect1 = createRawTransferEffect(mockContext as any, to as any, "1000");
       const exit1 = await Effect.runPromiseExit(effect1);
-      
+
       // Test with number value
       const effect2 = createRawTransferEffect(mockContext as any, to as any, 1000);
       const exit2 = await Effect.runPromiseExit(effect2);
@@ -177,9 +177,10 @@ describe("viem.effect", () => {
 
   describe("sendRawTransactionEffect", () => {
     it("should successfully send valid raw transaction", async () => {
-      const rawTx = "0xf86c0185010000000082520894123456789012345678901234567890123456789001808025a0c1e4f0c1e4f0c1e4f0c1e4f0c1e4f0c1e4f0c1e4f0c1e4f0c1e4f0c1e4f0c1e4a0c1e4f0c1e4f0c1e4f0c1e4f0c1e4f0c1e4f0c1e4f0c1e4f0c1e4f0c1e4f0c1e4";
+      const rawTx =
+        "0xf86c0185010000000082520894123456789012345678901234567890123456789001808025a0c1e4f0c1e4f0c1e4f0c1e4f0c1e4f0c1e4f0c1e4f0c1e4f0c1e4f0c1e4f0c1e4a0c1e4f0c1e4f0c1e4f0c1e4f0c1e4f0c1e4f0c1e4f0c1e4f0c1e4f0c1e4f0c1e4";
       const txHash = "0xtransactionhash";
-      
+
       mockViemClient.request.mockResolvedValue(txHash);
 
       const result = await testUtils.expectSuccess(
@@ -254,9 +255,7 @@ describe("viem.effect", () => {
         .mockResolvedValueOnce("Moonbeam") // chain name
         .mockResolvedValueOnce({ tokenSymbol: "GLMR", tokenDecimals: 18 }); // properties
 
-      const result = await testUtils.expectSuccess(
-        deriveViemChainEffect("ws://localhost:8545")
-      );
+      const result = await testUtils.expectSuccess(deriveViemChainEffect("ws://localhost:8545"));
 
       expect(result).toEqual({
         id: 1,
@@ -274,9 +273,7 @@ describe("viem.effect", () => {
     });
 
     it("should fail with ValidationError for invalid endpoint", async () => {
-      const error = await testUtils.expectFailure(
-        deriveViemChainEffect("")
-      );
+      const error = await testUtils.expectFailure(deriveViemChainEffect(""));
 
       expect(error).toBeInstanceOf(ValidationError);
       if (error instanceof ValidationError) {
@@ -342,7 +339,7 @@ describe("Effect-Promise interop", () => {
     // transparently with the Promise-based public APIs
     const effect = Effect.succeed(42);
     const promise = Effect.runPromise(effect);
-    
+
     await expect(promise).resolves.toBe(42);
   });
 
@@ -352,9 +349,9 @@ describe("Effect-Promise interop", () => {
       endpoint: "test",
       operation: "test",
     });
-    
+
     const effect = Effect.fail(error);
-    
+
     try {
       await Effect.runPromise(effect);
       expect(true).toBe(false); // Should not reach here

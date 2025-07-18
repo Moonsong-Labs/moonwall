@@ -55,11 +55,7 @@ describe("Integration: Promise APIs with Effect implementations", () => {
 
       expect(typeof balance).toBe("bigint");
       expect(balance).toBe(expectedBalance);
-      expect(checkBalanceEffect).toHaveBeenCalledWith(
-        mockContext,
-        ALITH_ADDRESS,
-        "latest"
-      );
+      expect(checkBalanceEffect).toHaveBeenCalledWith(mockContext, ALITH_ADDRESS, "latest");
     });
 
     it("createRawTransfer should return Promise<0x${string}>", async () => {
@@ -75,11 +71,7 @@ describe("Integration: Promise APIs with Effect implementations", () => {
         mockResult: expectedTx,
       });
 
-      const tx = await viemFunctions.createRawTransfer(
-        mockContext as any,
-        to as any,
-        value
-      );
+      const tx = await viemFunctions.createRawTransfer(mockContext as any, to as any, value);
 
       expect(typeof tx).toBe("string");
       expect(tx).toBe(expectedTx);
@@ -98,10 +90,7 @@ describe("Integration: Promise APIs with Effect implementations", () => {
         mockResult: expectedHash,
       });
 
-      const hash = await viemFunctions.sendRawTransaction(
-        mockContext as any,
-        rawTx as any
-      );
+      const hash = await viemFunctions.sendRawTransaction(mockContext as any, rawTx as any);
 
       expect(typeof hash).toBe("string");
       expect(hash).toBe(expectedHash);
@@ -181,18 +170,10 @@ describe("Integration: Promise APIs with Effect implementations", () => {
         mockResult: expectedResult,
       });
 
-      const result = await providerFunctions.customWeb3Request(
-        mockWeb3 as any,
-        method,
-        params
-      );
+      const result = await providerFunctions.customWeb3Request(mockWeb3 as any, method, params);
 
       expect(result).toBe(expectedResult);
-      expect(customWeb3RequestEffect).toHaveBeenCalledWith(
-        mockWeb3,
-        method,
-        params
-      );
+      expect(customWeb3RequestEffect).toHaveBeenCalledWith(mockWeb3, method, params);
     });
 
     it("web3EthCall should return Promise<any>", async () => {
@@ -210,10 +191,7 @@ describe("Integration: Promise APIs with Effect implementations", () => {
         mockResult: expectedResult,
       });
 
-      const result = await providerFunctions.web3EthCall(
-        mockWeb3 as any,
-        options
-      );
+      const result = await providerFunctions.web3EthCall(mockWeb3 as any, options);
 
       expect(result).toBe(expectedResult);
       expect(web3EthCallEffect).toHaveBeenCalledWith(mockWeb3, options);
@@ -231,9 +209,7 @@ describe("Integration: Promise APIs with Effect implementations", () => {
       const { runPromiseEffect } = await import("../interop");
       (runPromiseEffect as any).mockRejectedValue(error);
 
-      await expect(
-        viemFunctions.checkBalance(mockContext as any)
-      ).rejects.toThrow("Network error");
+      await expect(viemFunctions.checkBalance(mockContext as any)).rejects.toThrow("Network error");
     });
 
     it("should preserve error types through Promise rejection", async () => {
@@ -268,7 +244,7 @@ describe("Integration: Promise APIs with Effect implementations", () => {
       expect(typeof viemFunctions.createViemTransaction).toBe("function");
       expect(typeof viemFunctions.deriveViemChain).toBe("function");
       expect(typeof viemFunctions.deployViemContract).toBe("function");
-      
+
       expect(typeof providerFunctions.customWeb3Request).toBe("function");
       expect(typeof providerFunctions.web3EthCall).toBe("function");
     });
@@ -287,10 +263,8 @@ describe("Integration: Promise APIs with Effect implementations", () => {
       expect(balance).toBe(1000n);
 
       // Promise chaining should work
-      const balancePromise = viemFunctions
-        .checkBalance(mockContext as any)
-        .then((b) => b + 500n);
-      
+      const balancePromise = viemFunctions.checkBalance(mockContext as any).then((b) => b + 500n);
+
       await expect(balancePromise).resolves.toBe(1500n);
     });
 
@@ -309,18 +283,12 @@ describe("Integration: Promise APIs with Effect implementations", () => {
       let callIndex = 0;
       (runPromiseEffect as any).mockImplementation(() => {
         // Return different values based on call order
-        const values = [
-          BigInt("0x1111"),
-          BigInt("0x2222"),
-          BigInt("0x3333")
-        ];
+        const values = [BigInt("0x1111"), BigInt("0x2222"), BigInt("0x3333")];
         return Promise.resolve(values[callIndex++ % values.length]);
       });
 
       const balances = await Promise.all(
-        addresses.map((addr) =>
-          viemFunctions.checkBalance(mockContext as any, addr as any)
-        )
+        addresses.map((addr) => viemFunctions.checkBalance(mockContext as any, addr as any))
       );
 
       expect(balances).toHaveLength(3);
@@ -341,14 +309,14 @@ describe("Integration: Promise APIs with Effect implementations", () => {
       (runPromiseEffect as any).mockImplementation(() => Promise.resolve(1000n));
 
       const startTime = performance.now();
-      
+
       // Run multiple operations
       const promises = Array.from({ length: 100 }, () =>
         viemFunctions.checkBalance(mockContext as any)
       );
-      
+
       await Promise.all(promises);
-      
+
       const endTime = performance.now();
       const duration = endTime - startTime;
 

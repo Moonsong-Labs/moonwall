@@ -38,7 +38,7 @@ export const checkBalanceEffect = (
     }
 
     // Create the appropriate balance query based on block parameter
-    const balanceQuery = 
+    const balanceQuery =
       typeof block === "string"
         ? Effect.tryPromise({
             try: () => context.viem().getBalance({ address: account, blockTag: block }),
@@ -289,26 +289,23 @@ export const createViemTransactionEffect = <TOptions extends DeepPartial<ViemTra
     }).pipe(Effect.retry({ times: 2, schedule: Schedule.spaced(Duration.millis(100)) }));
 
     // Estimate gas if needed
-    const estimatedGas = yield* Effect.if(
-      options.skipEstimation || options.gas !== undefined,
-      {
-        onTrue: () => Effect.succeed(1_500_000n),
-        onFalse: () =>
-          Effect.tryPromise({
-            try: () => context.viem().estimateGas({ account: account.address, to, value, data }),
-            catch: (error) =>
-              new NetworkError({
-                message: "Failed to estimate gas",
-                endpoint: context.viem().transport.url || "unknown",
-                operation: "estimateGas",
-                cause: error,
-              }),
-          }).pipe(
-            Effect.retry({ times: 2, schedule: Schedule.spaced(Duration.millis(100)) }),
-            Effect.catchAll(() => Effect.succeed(1_500_000n)) // Fallback on estimation failure
-          ),
-      }
-    );
+    const estimatedGas = yield* Effect.if(options.skipEstimation || options.gas !== undefined, {
+      onTrue: () => Effect.succeed(1_500_000n),
+      onFalse: () =>
+        Effect.tryPromise({
+          try: () => context.viem().estimateGas({ account: account.address, to, value, data }),
+          catch: (error) =>
+            new NetworkError({
+              message: "Failed to estimate gas",
+              endpoint: context.viem().transport.url || "unknown",
+              operation: "estimateGas",
+              cause: error,
+            }),
+        }).pipe(
+          Effect.retry({ times: 2, schedule: Schedule.spaced(Duration.millis(100)) }),
+          Effect.catchAll(() => Effect.succeed(1_500_000n)) // Fallback on estimation failure
+        ),
+    });
 
     const accessList = options?.accessList || [];
 
@@ -460,7 +457,12 @@ export const deployViemContractEffect = <TOptions extends ContractDeploymentOpti
   bytecode: `0x${string}`,
   options?: TOptions
 ): Effect.Effect<
-  { contractAddress: `0x${string}` | null | undefined; status: "success" | "reverted"; logs: any[]; hash: `0x${string}` },
+  {
+    contractAddress: `0x${string}` | null | undefined;
+    status: "success" | "reverted";
+    logs: any[];
+    hash: `0x${string}`;
+  },
   NetworkError | ValidationError | ResourceError
 > =>
   Effect.gen(function* () {

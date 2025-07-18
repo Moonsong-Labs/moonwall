@@ -53,9 +53,7 @@ describe("providers.effect", () => {
     });
 
     it("should fail with NetworkError for invalid method", async () => {
-      const error = await testUtils.expectFailure(
-        customWeb3RequestEffect(mockWeb3 as any, "", [])
-      );
+      const error = await testUtils.expectFailure(customWeb3RequestEffect(mockWeb3 as any, "", []));
 
       expect(error).toBeInstanceOf(NetworkError);
       expect(error.message).toContain("Invalid RPC method name");
@@ -159,17 +157,13 @@ describe("providers.effect", () => {
         callback(null, expectedResult);
       });
 
-      const result = await testUtils.expectSuccess(
-        web3EthCallEffect(mockWeb3 as any, options)
-      );
+      const result = await testUtils.expectSuccess(web3EthCallEffect(mockWeb3 as any, options));
 
       expect(result).toBe(expectedResult);
     });
 
     it("should fail with ValidationError for missing to address", async () => {
-      const error = await testUtils.expectFailure(
-        web3EthCallEffect(mockWeb3 as any, {} as any)
-      );
+      const error = await testUtils.expectFailure(web3EthCallEffect(mockWeb3 as any, {} as any));
 
       expect(error).toBeInstanceOf(ValidationError);
       if (error instanceof ValidationError) {
@@ -235,9 +229,7 @@ describe("providers.effect", () => {
         callback(null, "0xresult");
       });
 
-      await testUtils.expectSuccess(
-        web3EthCallEffect(mockWeb3 as any, options)
-      );
+      await testUtils.expectSuccess(web3EthCallEffect(mockWeb3 as any, options));
     });
   });
 
@@ -264,9 +256,7 @@ describe("providers.effect", () => {
     });
 
     it("should fail with NetworkError for empty requests", async () => {
-      const error = await testUtils.expectFailure(
-        batchWeb3RequestsEffect(mockWeb3 as any, [])
-      );
+      const error = await testUtils.expectFailure(batchWeb3RequestsEffect(mockWeb3 as any, []));
 
       expect(error).toBeInstanceOf(NetworkError);
       expect(error.message).toContain("Invalid batch request");
@@ -304,13 +294,11 @@ describe("providers.effect", () => {
       const startTimes: number[] = [];
       mockProvider.send.mockImplementation(async (payload, callback) => {
         startTimes.push(Date.now());
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await new Promise((resolve) => setTimeout(resolve, 10));
         callback(null, `result_${payload.method}`);
       });
 
-      await testUtils.expectSuccess(
-        batchWeb3RequestsEffect(mockWeb3 as any, requests)
-      );
+      await testUtils.expectSuccess(batchWeb3RequestsEffect(mockWeb3 as any, requests));
 
       // Check that all requests started nearly simultaneously
       const timeDiffs = startTimes.slice(1).map((time, i) => time - startTimes[i]);
@@ -338,10 +326,10 @@ describe("providers.effect", () => {
         Effect.scoped(
           Effect.gen(function* () {
             const queue = yield* effect;
-            
+
             // Simulate receiving data
             const dataHandler = mockSubscription.on.mock.calls.find(
-              call => call[0] === "data"
+              (call) => call[0] === "data"
             )?.[1];
 
             expect(dataHandler).toBeDefined();
@@ -366,20 +354,12 @@ describe("providers.effect", () => {
 
       mockWeb3.eth.subscribe.mockReturnValue(mockSubscription);
 
-      const effect = web3SubscribeEffect(
-        mockWeb3 as any,
-        "logs",
-        { address: "0x123" }
-      );
+      const effect = web3SubscribeEffect(mockWeb3 as any, "logs", { address: "0x123" });
 
-      const queue = await Effect.runPromise(
-        Effect.scoped(effect)
-      );
+      const queue = await Effect.runPromise(Effect.scoped(effect));
 
       // Simulate an error
-      const errorHandler = mockSubscription.on.mock.calls.find(
-        call => call[0] === "error"
-      )?.[1];
+      const errorHandler = mockSubscription.on.mock.calls.find((call) => call[0] === "error")?.[1];
 
       errorHandler(new Error("Subscription error"));
 
@@ -394,14 +374,9 @@ describe("providers.effect", () => {
         throw new Error("Failed to create subscription");
       });
 
-      const effect = web3SubscribeEffect(
-        mockWeb3 as any,
-        "pendingTransactions"
-      );
+      const effect = web3SubscribeEffect(mockWeb3 as any, "pendingTransactions");
 
-      const exit = await Effect.runPromiseExit(
-        Effect.scoped(effect)
-      );
+      const exit = await Effect.runPromiseExit(Effect.scoped(effect));
 
       expect(Exit.isFailure(exit)).toBe(true);
       if (Exit.isFailure(exit)) {
@@ -472,7 +447,7 @@ describe("Effect patterns", () => {
     // This would require mocking Effect's timeout behavior
     // For now, we just verify the structure is correct
     const effect = customWeb3RequestEffect(mockWeb3 as any, "slow_method", []);
-    
+
     // The effect should have timeout applied (30 seconds as per implementation)
     expect(effect).toBeDefined();
   });

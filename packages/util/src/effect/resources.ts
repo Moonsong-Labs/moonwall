@@ -66,8 +66,18 @@ export interface DockerContainer {
 export interface FileHandle {
   readonly path: string;
   readonly fd: number;
-  read(buffer: Buffer, offset?: number, length?: number, position?: number): Promise<{ bytesRead: number; buffer: Buffer }>;
-  write(buffer: Buffer, offset?: number, length?: number, position?: number): Promise<{ bytesWritten: number; buffer: Buffer }>;
+  read(
+    buffer: Buffer,
+    offset?: number,
+    length?: number,
+    position?: number
+  ): Promise<{ bytesRead: number; buffer: Buffer }>;
+  write(
+    buffer: Buffer,
+    offset?: number,
+    length?: number,
+    position?: number
+  ): Promise<{ bytesWritten: number; buffer: Buffer }>;
   close(): Promise<void>;
 }
 
@@ -90,21 +100,23 @@ export const makeConnection = (config: ConnectionConfig) =>
         };
         return connection;
       },
-      catch: (error): NetworkError => new NetworkError({
-        message: `Failed to connect to ${config.endpoint}`,
-        endpoint: config.endpoint,
-        operation: "connect",
-        cause: error,
-      }),
+      catch: (error): NetworkError =>
+        new NetworkError({
+          message: `Failed to connect to ${config.endpoint}`,
+          endpoint: config.endpoint,
+          operation: "connect",
+          cause: error,
+        }),
     }),
     (connection) =>
       Effect.tryPromise({
         try: () => connection.disconnect(),
-        catch: () => new NetworkError({
-          message: `Failed to disconnect from ${connection.endpoint}`,
-          endpoint: connection.endpoint,
-          operation: "disconnect",
-        }),
+        catch: () =>
+          new NetworkError({
+            message: `Failed to disconnect from ${connection.endpoint}`,
+            endpoint: connection.endpoint,
+            operation: "disconnect",
+          }),
       }).pipe(Effect.orElse(() => Effect.void))
   );
 
@@ -134,22 +146,24 @@ export const makeDockerContainer = (config: ContainerConfig) =>
         };
         return container;
       },
-      catch: (error): DockerError => new DockerError({
-        message: `Failed to create container ${config.name}`,
-        container: config.name,
-        image: config.image,
-        operation: "create",
-        cause: error,
-      }),
+      catch: (error): DockerError =>
+        new DockerError({
+          message: `Failed to create container ${config.name}`,
+          container: config.name,
+          image: config.image,
+          operation: "create",
+          cause: error,
+        }),
     }),
     (container) =>
       Effect.tryPromise({
         try: () => container.remove({ force: true }),
-        catch: () => new DockerError({
-          message: `Failed to remove container ${container.name}`,
-          container: container.name,
-          operation: "remove",
-        }),
+        catch: () =>
+          new DockerError({
+            message: `Failed to remove container ${container.name}`,
+            container: container.name,
+            operation: "remove",
+          }),
       }).pipe(Effect.orElse(() => Effect.void))
   );
 
@@ -164,26 +178,30 @@ export const makeFileHandle = (path: string, flags: string = "r") =>
         return {
           path,
           fd: fileHandle.fd,
-          read: (buffer, offset, length, position) => fileHandle.read(buffer, offset, length, position),
-          write: (buffer, offset, length, position) => fileHandle.write(buffer, offset, length, position),
+          read: (buffer, offset, length, position) =>
+            fileHandle.read(buffer, offset, length, position),
+          write: (buffer, offset, length, position) =>
+            fileHandle.write(buffer, offset, length, position),
           close: () => fileHandle.close(),
         };
       },
-      catch: (error): ResourceError => new ResourceError({
-        message: `Failed to open file ${path}`,
-        resource: path,
-        operation: "acquire",
-        cause: error,
-      }),
+      catch: (error): ResourceError =>
+        new ResourceError({
+          message: `Failed to open file ${path}`,
+          resource: path,
+          operation: "acquire",
+          cause: error,
+        }),
     }),
     (fileHandle) =>
       Effect.tryPromise({
         try: () => fileHandle.close(),
-        catch: () => new ResourceError({
-          message: `Failed to close file ${fileHandle.path}`,
-          resource: fileHandle.path,
-          operation: "release",
-        }),
+        catch: () =>
+          new ResourceError({
+            message: `Failed to close file ${fileHandle.path}`,
+            resource: fileHandle.path,
+            operation: "release",
+          }),
       }).pipe(Effect.orElse(() => Effect.void))
   );
 
@@ -216,12 +234,13 @@ export const makeProcess = (config: ProcessConfig) =>
           }
         });
       },
-      catch: (error): ProcessError => new ProcessError({
-        message: `Failed to spawn process ${config.command}`,
-        process: config.command,
-        operation: "spawn",
-        cause: error,
-      }),
+      catch: (error): ProcessError =>
+        new ProcessError({
+          message: `Failed to spawn process ${config.command}`,
+          process: config.command,
+          operation: "spawn",
+          cause: error,
+        }),
     }),
     (process) =>
       Effect.sync(() => {
@@ -257,7 +276,10 @@ export const withRetry = <R, E, A>(
   maxRetries: number = 3,
   baseDelay: Duration.Duration = Duration.millis(100)
 ): Effect.Effect<A, E, R> =>
-  Effect.retry(resource, Schedule.exponential(baseDelay).pipe(Schedule.intersect(Schedule.recurs(maxRetries))));
+  Effect.retry(
+    resource,
+    Schedule.exponential(baseDelay).pipe(Schedule.intersect(Schedule.recurs(maxRetries)))
+  );
 
 /**
  * Utility function to add timeout to resource operations
@@ -265,7 +287,11 @@ export const withRetry = <R, E, A>(
 export const withTimeout = <R, E, A>(
   resource: Effect.Effect<A, E, R>,
   timeout: Duration.Duration
-): Effect.Effect<A, E | { _tag: "TimeoutError"; message: string; operation: string; timeout: number }, R> =>
+): Effect.Effect<
+  A,
+  E | { _tag: "TimeoutError"; message: string; operation: string; timeout: number },
+  R
+> =>
   Effect.timeout(resource, timeout).pipe(
     Effect.catchTag("TimeoutException", () =>
       Effect.fail({
