@@ -1,15 +1,15 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { NetworkError, ValidationError } from "@moonwall/types";
 import { Effect, Exit, Queue } from "effect";
-import { NetworkError, TimeoutError, ValidationError } from "@moonwall/types";
-import {
-  customWeb3RequestEffect,
-  web3EthCallEffect,
-  batchWeb3RequestsEffect,
-  web3SubscribeEffect,
-} from "../providers.effect";
-import { testUtils } from "../interop";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { alith } from "../../constants/accounts";
 import { MIN_GAS_PRICE } from "../../constants/chain";
+import { testUtils } from "../interop";
+import {
+  batchWeb3RequestsEffect,
+  customWeb3RequestEffect,
+  web3EthCallEffect,
+  web3SubscribeEffect,
+} from "../providers.effect";
 
 // Mock Web3 instance
 const mockProvider = {

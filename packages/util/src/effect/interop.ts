@@ -1,5 +1,5 @@
-import { Effect, Runtime, Exit } from "effect";
-import { MoonwallError, toMoonwallError } from "@moonwall/types";
+import { type MoonwallError, toMoonwallError } from "@moonwall/types";
+import { Effect, Exit, Runtime } from "effect";
 
 /**
  * Default runtime for running Effect programs

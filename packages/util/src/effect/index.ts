@@ -12,17 +12,17 @@ export * from "./interop";
 export {
   checkBalanceEffect,
   createRawTransferEffect,
-  sendRawTransactionEffect,
   createViemTransactionEffect,
-  deriveViemChainEffect,
   deployViemContractEffect,
+  deriveViemChainEffect,
+  sendRawTransactionEffect,
 } from "./viem.effect";
 
 // Re-export Provider Effect implementations
 export {
+  batchWeb3RequestsEffect,
   customWeb3RequestEffect,
   web3EthCallEffect,
-  batchWeb3RequestsEffect,
   web3SubscribeEffect,
 } from "./providers.effect";
 
@@ -30,5 +30,5 @@ export {
 export * from "./resources";
 
 // Re-export types
+export type { EnhancedWeb3, Web3EthCallOptions } from "../functions/providers";
 export type { InputAmountFormats, TransferOptions } from "../functions/viem";
-export type { Web3EthCallOptions, EnhancedWeb3 } from "../functions/providers";

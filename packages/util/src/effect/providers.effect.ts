@@ -9,11 +9,11 @@ import type { Web3EthCallOptions } from "../functions/providers";
  * Effect-based implementation of customWeb3Request
  * Sends a custom JSON-RPC request with proper error handling and retry logic
  */
-export const customWeb3RequestEffect = (
+export const customWeb3RequestEffect = <T = unknown>(
   web3: Web3,
   method: string,
-  params: any[]
-): Effect.Effect<any, NetworkError | TimeoutError> =>
+  params: unknown[]
+): Effect.Effect<T, NetworkError | TimeoutError> =>
   Effect.gen(function* () {
     // Validate method name
     if (!method || typeof method !== "string") {
@@ -28,8 +28,9 @@ export const customWeb3RequestEffect = (
     }
 
     // Create the RPC request
-    const rpcRequest = Effect.async<any, NetworkError>((resume) => {
+    const rpcRequest = Effect.async<T, NetworkError>((resume) => {
       try {
+        // biome-ignore lint/suspicious/noExplicitAny: web3js has bad typing
         ((web3.eth as any).currentProvider as any).send(
           {
             jsonrpc: "2.0",
@@ -37,7 +38,7 @@ export const customWeb3RequestEffect = (
             method,
             params,
           },
-          (error: Error | null, result?: any) => {
+          (error: Error | null, result?: T) => {
             if (error) {
               const paramStr = params
                 .map((p) => {
@@ -57,7 +58,7 @@ export const customWeb3RequestEffect = (
                 )
               );
             } else {
-              resume(Effect.succeed(result));
+              resume(Effect.succeed(result as T));
             }
           }
         );
@@ -83,7 +84,7 @@ export const customWeb3RequestEffect = (
         while: (error) => {
           // Don't retry on certain errors
           if (error.cause && typeof error.cause === "object" && "code" in error.cause) {
-            const code = (error.cause as any).code;
+            const code = (error.cause as { code?: number }).code;
             // Don't retry on method not found, invalid params, etc.
             if (code === -32601 || code === -32602 || code === -32700) {
               return false;
@@ -118,7 +119,7 @@ export const customWeb3RequestEffect = (
 export const web3EthCallEffect = (
   web3: Web3,
   options: Web3EthCallOptions
-): Effect.Effect<any, NetworkError | ValidationError | TimeoutError> =>
+): Effect.Effect<unknown, NetworkError | ValidationError | TimeoutError> =>
   Effect.gen(function* () {
     // Validate required 'to' address
     if (!options.to) {
@@ -181,12 +182,15 @@ export const web3EthCallEffect = (
     };
 
     // Remove undefined values to avoid sending them in the RPC call
-    const cleanParams = Object.entries(callParams).reduce((acc, [key, value]) => {
-      if (value !== undefined) {
-        acc[key] = value;
-      }
-      return acc;
-    }, {} as any);
+    const cleanParams = Object.entries(callParams).reduce(
+      (acc, [key, value]) => {
+        if (value !== undefined) {
+          acc[key] = value;
+        }
+        return acc;
+      },
+      {} as Record<string, string | number | bigint>
+    );
 
     // Use customWeb3RequestEffect for the actual call
     return yield* customWeb3RequestEffect(web3, "eth_call", [cleanParams, "latest"]);
@@ -196,10 +200,10 @@ export const web3EthCallEffect = (
  * Effect-based wrapper for batch Web3 requests
  * Allows sending multiple requests in parallel with proper error handling
  */
-export const batchWeb3RequestsEffect = <T extends readonly { method: string; params: any[] }[]>(
+export const batchWeb3RequestsEffect = <T extends readonly { method: string; params: unknown[] }[]>(
   web3: Web3,
   requests: T
-): Effect.Effect<{ [K in keyof T]: any }, NetworkError | TimeoutError> =>
+): Effect.Effect<{ [K in keyof T]: unknown }, NetworkError | TimeoutError> =>
   Effect.gen(function* () {
     // Validate requests array
     if (!Array.isArray(requests) || requests.length === 0) {
@@ -221,7 +225,7 @@ export const batchWeb3RequestsEffect = <T extends readonly { method: string; par
       batching: true,
     });
 
-    return results as any;
+    return results as { [K in keyof T]: unknown };
   });
 
 /**
@@ -231,7 +235,7 @@ export const batchWeb3RequestsEffect = <T extends readonly { method: string; par
 export const web3SubscribeEffect = <T>(
   web3: Web3,
   type: "newBlockHeaders" | "pendingTransactions" | "logs",
-  params?: any
+  params?: Record<string, unknown>
 ): Effect.Effect<Queue.Queue<T>, NetworkError, Scope.Scope> =>
   Effect.gen(function* () {
     const queue = yield* Queue.unbounded<T>();

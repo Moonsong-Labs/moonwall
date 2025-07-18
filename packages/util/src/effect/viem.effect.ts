@@ -7,7 +7,7 @@ import type {
   ContractDeploymentOptions,
 } from "@moonwall/types";
 import { NetworkError, ValidationError, TimeoutError, ResourceError } from "@moonwall/types";
-import type { BlockTag, TransactionSerializable, Abi, DeployContractParameters } from "viem";
+import type { BlockTag, TransactionSerializable, Abi, DeployContractParameters, Log } from "viem";
 import { createWalletClient, hexToNumber, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import type { Chain } from "viem/chains";
@@ -149,7 +149,7 @@ export const createRawTransferEffect = <TOptions extends TransferOptions>(
     // Delegate to createViemTransactionEffect
     return yield* createViemTransactionEffect(context, {
       ...options,
-      to: to as any,
+      to,
       value: transferAmount,
     });
   });
@@ -195,7 +195,7 @@ export const sendRawTransactionEffect = (
         while: (error) => {
           // Don't retry on certain errors
           if (error.cause && typeof error.cause === "object" && "code" in error.cause) {
-            const code = (error.cause as any).code;
+            const code = (error.cause as { code?: number }).code;
             // Don't retry on invalid nonce, insufficient funds, etc.
             if (code === -32000 || code === -32001 || code === -32002 || code === -32003) {
               return false;
@@ -460,7 +460,7 @@ export const deployViemContractEffect = <TOptions extends ContractDeploymentOpti
   {
     contractAddress: `0x${string}` | null | undefined;
     status: "success" | "reverted";
-    logs: any[];
+    logs: Log[];
     hash: `0x${string}`;
   },
   NetworkError | ValidationError | ResourceError
@@ -489,7 +489,7 @@ export const deployViemContractEffect = <TOptions extends ContractDeploymentOpti
       );
     }
 
-    const { privateKey = ALITH_PRIVATE_KEY, ...rest } = options || ({} as any);
+    const { privateKey = ALITH_PRIVATE_KEY, ...rest } = options || {};
 
     // Validate private key
     if (!privateKey.match(/^0x[a-fA-F0-9]{64}$/)) {
