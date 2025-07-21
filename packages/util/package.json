@@ -24,12 +24,13 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.ts",
-      "import": "./dist/index.js"
+      "types": "./dist/types/index.d.cts",
+      "import": "./dist/types/index.js",
+      "require": "./dist/types/index.cjs"
     }
   },
-  "module": "./dist/index.js",
-  "types": "./dist/types/index.d.ts",
+  "module": "./dist/types/index.js",
+  "types": "./dist/types/index.d.cts",
   "engines": {
     "node": ">=20",
     "pnpm": ">=7"
@@ -42,16 +43,17 @@
   ],
   "scripts": {
     "clean": "rm -rf dist && rm -rf node_modules",
-    "build": "pnpm exec rm -rf dist && tsup src --format esm --no-splitting --sourcemap && pnpm generate-types",
+    "build": "zshy",
+    "postbuild": "pnpm generate-types",
     "generate-types": "tsc",
     "lint": "pnpm biome lint ./src",
     "lint:fix": "pnpm biome lint ./src --apply",
     "fmt": "biome format .",
     "fmt:fix": "biome format . --write",
-    "watch": "tsup src --format esm --watch",
     "typecheck": "pnpm exec tsc --noEmit",
     "prepublish": "pnpm run build && pnpm run generate-types"
   },
+  "zshy": "./src/index.ts",
   "dependencies": {
     "@inquirer/prompts": "^7.6.0",
     "@moonbeam-network/api-augment": "0.3700.0",
@@ -87,10 +89,12 @@
     "@types/node": "^24.0.14",
     "@types/ws": "^8.18.1",
     "@types/yargs": "^17.0.33",
-    "tsup": "^8.5.0",
-    "typescript": "5.8.3"
+    "tslib": "^2.8.1",
+    "typescript": "5.8.3",
+    "zshy": "^0.2.5"
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "main": "./dist/types/index.cjs"
 }
