@@ -27,7 +27,7 @@ jobs:
           ref: ${{ github.event.inputs.branch }}
       - uses: pnpm/action-setup@v4
         with:
-          version: 9.1.4
+          version: 10.13.1
       - uses: actions/setup-node@v4
         with:
           node-version: 23
