@@ -6,6 +6,7 @@
   "description": "Testing framework for the Moon family of projects",
   "scripts": {
     "build": "pnpm -r --filter='./packages/**' run build",
+    "postbuild": "cd test && pnpm install",
     "generate-types": "pnpm -r --filter='./packages/**' run generate-types",
     "fmt": "biome format ./biome.json; pnpm -r --filter='./packages/**' run fmt",
     "fmt:fix": "biome format ./biome.json --write; pnpm -r --filter='./packages/**' run fmt:fix",

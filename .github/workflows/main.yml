@@ -67,6 +67,10 @@ jobs:
         run: |
           pnpm install   
           pnpm run build
+      - name: Update test directory links
+        run: |
+          cd test
+          pnpm install
       - name: Initialize config
         run: |
           cd test
@@ -96,6 +100,10 @@ jobs:
         run: |
           pnpm install   
           pnpm run build
+      - name: Update test directory links
+        run: |
+          cd test
+          pnpm install
       - name: Run standard dev test
         run: |
           cd test
@@ -123,6 +131,10 @@ jobs:
       - uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
+      - name: Update test directory links
+        run: |
+          cd test
+          pnpm install
       - name: Cache tanssi binary
         id: tanssi-cache
         uses: actions/cache@v4
@@ -169,6 +181,10 @@ jobs:
       - uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
+      - name: Update test directory links
+        run: |
+          cd test
+          pnpm install
       - name: Cache moonbeam binary
         id: moonbeam-cache
         uses: actions/cache@v4
@@ -215,6 +231,10 @@ jobs:
       - uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
+      - name: Update test directory links
+        run: |
+          cd test
+          pnpm install
       - name: Cache moonbeam binary
         id: moonbeam-cache
         uses: actions/cache@v4
@@ -256,6 +276,10 @@ jobs:
       - uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
+      - name: Update test directory links
+        run: |
+          cd test
+          pnpm install
       - name: Run snapshot update test
         id: update_test
         run: |
@@ -295,6 +319,10 @@ jobs:
       - uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
+      - name: Update test directory links
+        run: |
+          cd test
+          pnpm install
       - name: Run ${{matrix.suite}}
         run: |
           cd test
@@ -322,6 +350,7 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           version: 10.13.1
+          
       - uses: actions/setup-node@v4
         with:
           node-version: 23
@@ -333,6 +362,10 @@ jobs:
       - uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
+      - name: Update test directory links
+        run: |
+          cd test
+          pnpm install
       - name: Run standard ${{matrix.suite}}
         run: |
           cd test
@@ -363,6 +396,10 @@ jobs:
       - uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
+      - name: Update test directory links
+        run: |
+          cd test
+          pnpm install
       - name: Cache moonbeam binary
         id: moonbeam-cache
         uses: actions/cache@v4
