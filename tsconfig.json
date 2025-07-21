@@ -6,7 +6,7 @@
     "target": "esnext",
     "module": "esnext",
     "baseUrl": "./",
-
+    
     "moduleResolution": "Bundler",
     "resolvePackageJsonExports": false,
     "paths": {
@@ -16,7 +16,6 @@
     "incremental": true,
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
     "noEmit": true,
-    "allowImportingTsExtensions": true,
     "moduleDetection": "force",
     "importHelpers": true,
     "skipDefaultLibCheck": true,

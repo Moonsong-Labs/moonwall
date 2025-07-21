@@ -24,13 +24,13 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.cts",
-      "import": "./dist/types/index.js",
-      "require": "./dist/types/index.cjs"
+      "types": "./dist/index.d.cts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     }
   },
-  "module": "./dist/types/index.js",
-  "types": "./dist/types/index.d.cts",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.cts",
   "engines": {
     "node": ">=20",
     "pnpm": ">=7"
@@ -96,5 +96,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "./dist/types/index.cjs"
+  "main": "./dist/index.cjs"
 }

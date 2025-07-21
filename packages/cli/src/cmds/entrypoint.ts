@@ -1,4 +1,7 @@
+#!/usr/bin/env -S node --no-warnings --no-deprecation
+
 import "@moonbeam-network/api-augment";
+import "../internal/logging"
 import dotenv from "dotenv";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";

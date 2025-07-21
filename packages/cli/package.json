@@ -24,17 +24,13 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.cts",
-      "import": "./dist/types/index.js",
-      "require": "./dist/types/index.cjs"
+      "types": "./dist/index.d.cts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     }
   },
-  "module": "./dist/types/index.js",
-  "types": "./dist/types/index.d.cts",
-  "bin": {
-    "moonwall": "./moonwall.mjs",
-    "moondebug": "./moondebug.mjs"
-  },
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.cts",
   "engines": {
     "node": ">=20",
     "pnpm": ">=7"
@@ -57,7 +53,12 @@
     "typecheck": "pnpm exec tsc --noEmit",
     "prepublish": "pnpm run build && pnpm run generate-types"
   },
-  "zshy": "./src/index.ts",
+  "zshy": {
+    "exports": "./src/index.ts",
+    "bin": {
+      "moonwall": "./src/cmds/entrypoint.ts"
+    }
+  },
   "dependencies": {
     "@acala-network/chopsticks": "^1.2.0",
     "@inquirer/prompts": "^7.6.0",
@@ -121,5 +122,8 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "./dist/types/index.cjs"
+  "main": "./dist/index.cjs",
+  "bin": {
+    "moonwall": "./dist/cmds/entrypoint.cjs"
+  }
 }

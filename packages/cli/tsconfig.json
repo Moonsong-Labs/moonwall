@@ -1,9 +1,8 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "dist/types",
-    "allowImportingTsExtensions": false,
-    "noEmit": false,
+    "outDir": "dist",
+    "noEmit": true,
     "declaration": true,
     "jsx": "react-jsx"
   },
