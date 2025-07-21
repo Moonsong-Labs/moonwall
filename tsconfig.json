@@ -8,6 +8,10 @@
     "baseUrl": "./",
 
     "moduleResolution": "Bundler",
+    "resolvePackageJsonExports": false,
+    "paths": {
+      "ink": ["./packages/cli/node_modules/ink/build/index.d.ts"]
+    },
 
     "incremental": true,
     "tsBuildInfoFile": "./dist/.tsbuildinfo",

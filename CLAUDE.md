@@ -97,7 +97,6 @@ Moonwall is structured as a TypeScript monorepo managed with pnpm workspaces.
 
 *   **PNPM Workspaces**: Manages the monorepo structure and dependencies.
 *   **TypeScript**: The primary programming language, providing strong typing.
-*   **Tsup**: Used for bundling TypeScript code in the individual packages (`cli`, `types`, `util`).
 *   **Biome**: For code formatting and linting, ensuring consistent code style.
 *   **Vitest**: The testing framework used for running unit and integration tests.
     *   **`@vitest/ui`**: Provides a browser-based UI for viewing test results.

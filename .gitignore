@@ -2,7 +2,6 @@
 **dist**
 **coverage**
 **tmp**
-**/.tsup/
 test/html/*
 **/*.log
 **local** 
