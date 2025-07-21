@@ -10,6 +10,7 @@
     "moduleResolution": "Bundler",
 
     "incremental": true,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
     "noEmit": true,
     "allowImportingTsExtensions": true,
     "moduleDetection": "force",
