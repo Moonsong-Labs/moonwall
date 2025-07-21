@@ -1,5 +1,11 @@
 # @moonwall/tests
 
+## 5.13.2
+
+### Patch Changes
+
+- d550be7: Fix logging for zombie upgrades
+
 ## 5.13.1
 
 ### Patch Changes
