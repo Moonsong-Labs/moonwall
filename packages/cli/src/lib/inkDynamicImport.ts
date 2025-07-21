@@ -60,10 +60,10 @@ export async function createLogViewer(): Promise<{
 }> {
   // First import ink components
   const inkComponents = await getInkComponents();
-  
+
   // Then import LogViewer which uses these components
   // We need to pass ink components to avoid direct imports in LogViewer
   const { LogViewer } = await import("../cmds/components/LogViewer");
-  
+
   return { LogViewer, inkComponents };
 }

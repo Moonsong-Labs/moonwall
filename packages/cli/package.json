@@ -44,7 +44,7 @@
   "scripts": {
     "clean": "rm -rf dist && rm -rf node_modules",
     "build": "zshy",
-    "postbuild": "pnpm generate-types",
+    "postbuild": "pnpm generate-types && chmod +x dist/cmds/entrypoint.cjs",
     "lint": "pnpm biome lint ./src",
     "lint:fix": "pnpm biome lint ./src --apply",
     "fmt": "biome format .",
