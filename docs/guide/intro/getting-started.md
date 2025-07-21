@@ -56,7 +56,7 @@ yarn moonwall init
 ```
 
 ```sh [bun]
-bun moonwall init
+pnpm exec moonwall init
 ```
 
 ```sh [npm]
@@ -137,7 +137,7 @@ yarn moonwall
 ```
 
 ```sh [bun]
-bun moonwall
+pnpm exec moonwall
 ```
 
 ```sh [npm]
