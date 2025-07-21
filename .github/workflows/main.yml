@@ -123,11 +123,17 @@ jobs:
       - uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
+      - name: Cache tanssi binary
+        id: tanssi-cache
+        uses: actions/cache@v4
+        with:
+          path: test/tmp/tanssi-node
+          key: tanssi-node-latest-${{ runner.os }}
       - name: Download tanssi binary
+        if: steps.tanssi-cache.outputs.cache-hit != 'true'
         run: |
           cd test
           bun moonwall download tanssi-node latest ./tmp
-          sleep 5
       - name: Run standard dev test
         run: |
           cd test
@@ -220,7 +226,6 @@ jobs:
         run: |
           cd test
           bun moonwall download moonbeam $MOONBEAM_VERSION ./tmp
-          sleep 5
       - name: Run ${{matrix.suite}} dev test
         run: |
           cd test
@@ -373,16 +378,22 @@ jobs:
         run: |
           cd test
           bun moonwall download moonbeam $MOONBEAM_VERSION ./tmp
-          sleep 5
+      - name: Cache polkadot binaries
+        id: polkadot-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            test/tmp/polkadot
+            test/tmp/polkadot-execute-worker
+            test/tmp/polkadot-prepare-worker
+          key: polkadot-stable2412-${{ runner.os }}
       - name: Download polkadot binaries
+        if: steps.polkadot-cache.outputs.cache-hit != 'true'
         run: |
           cd test
           bun moonwall download polkadot stable2412 ./tmp
-          sleep 5
           bun moonwall download polkadot-execute-worker stable2412 ./tmp
-          sleep 5
           bun moonwall download polkadot-prepare-worker stable2412 ./tmp
-          sleep 5
       - name: Run ${{matrix.suite}}
         run: |
           cd test
