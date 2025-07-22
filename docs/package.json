@@ -13,7 +13,7 @@
     "vitepress": "1.6.3"
   },
   "dependencies": {
-    "@algolia/client-search": "^5.33.0",
+    "@algolia/client-search": "^5.34.0",
     "search-insights": "^2.13.0"
   }
 }

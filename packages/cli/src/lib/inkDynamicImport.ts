@@ -10,7 +10,7 @@ import type {
   Static as StaticType,
   Text as TextType,
   useApp as useAppType,
-  useInput as useInputType
+  useInput as useInputType,
 } from "ink";
 import type React from "react";
 
