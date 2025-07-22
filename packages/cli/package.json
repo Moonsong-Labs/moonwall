@@ -32,8 +32,7 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.cts",
   "engines": {
-    "node": ">=20",
-    "pnpm": ">=7"
+    "node": ">=22"
   },
   "files": [
     "dist",
@@ -44,14 +43,14 @@
   "scripts": {
     "clean": "rm -rf dist && rm -rf node_modules",
     "build": "zshy",
-    "postbuild": "pnpm generate-types",
-    "lint": "pnpm biome lint ./src",
-    "lint:fix": "pnpm biome lint ./src --apply",
+    "postbuild": "bun generate-types",
+    "lint": "bun biome lint ./src",
+    "lint:fix": "bun biome lint ./src --apply",
     "fmt": "biome format .",
     "fmt:fix": "biome format . --write",
     "generate-types": "tsc",
-    "typecheck": "pnpm exec tsc --noEmit",
-    "prepublish": "pnpm run build && pnpm run generate-types"
+    "typecheck": "bun tsc --noEmit",
+    "prepublish": "bun run build && bun run generate-types"
   },
   "zshy": {
     "exports": "./src/index.ts",

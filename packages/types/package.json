@@ -32,8 +32,7 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.cts",
   "engines": {
-    "node": ">=20",
-    "pnpm": ">=7"
+    "node": ">=22"
   },
   "files": [
     "dist",
@@ -44,14 +43,14 @@
   "scripts": {
     "clean": "rm -rf dist && rm -rf node_modules",
     "build": "zshy",
-    "postbuild": "pnpm generate-types",
-    "generate-types": "tsc && pnpm schema",
-    "lint": "pnpm biome lint ./src",
-    "lint:fix": "pnpm biome lint ./src --apply",
+    "postbuild": "bun generate-types",
+    "generate-types": "node node_modules/.bin/tsc && bun schema",
+    "lint": "bun biome lint ./src",
+    "lint:fix": "bun biome lint ./src --apply",
     "fmt": "biome format ./src",
     "fmt:fix": "biome format src --write",
-    "prepublish": "pnpm run build && pnpm run generate-types",
-    "schema": "typescript-json-schema --tsNodeRegister --esModuleInterop -o config_schema.json ./src/config.ts MoonwallConfig && pnpm biome format config_schema.json --write"
+    "prepublish": "bun run build && bun run generate-types",
+    "schema": "node node_modules/.bin/typescript-json-schema --project tsconfig.schema.json --esModuleInterop --noExtraProps --ignoreErrors -o config_schema.json ./src/config.ts MoonwallConfig && bun biome format config_schema.json --write"
   },
   "zshy": "./src/index.ts",
   "dependencies": {

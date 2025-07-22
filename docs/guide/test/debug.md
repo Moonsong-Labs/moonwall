@@ -14,7 +14,7 @@ Moonwall uses `pino` for logging throughout the project, providing rich structur
 
 Example:
 ```bash
-LOG_LEVEL=debug pnpm moonwall test dev_seq
+LOG_LEVEL=debug bun moonwall test dev_seq
 ```
 
 ### Pretty Printing
@@ -44,7 +44,7 @@ The following logger names are used throughout the codebase:
 For test files, the `--printlogs` command line argument will enable test loggers when present:
 
 ```bash
-pnpm moonwall test dev_seq --printlogs
+bun moonwall test dev_seq --printlogs
 ```
 
 ## Tailing the Logs

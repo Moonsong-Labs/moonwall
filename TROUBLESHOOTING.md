@@ -6,7 +6,7 @@ This guide provides solutions for common issues encountered when using Moonwall 
 
 - [Development Environment Issues](#development-environment-issues)
   - [Using Moonwall in Other Repositories](#using-moonwall-in-other-repositories)
-  - [Alternative to `pnpm link`](#alternative-to-pnpm-link)
+  - [Alternative to `bun link`](#alternative-to-bun-link)
   - [Debugging Moonwall Packages](#debugging-moonwall-packages)
 - [Runtime Errors](#runtime-errors)
   - [Network Connection Issues](#network-connection-issues)
@@ -26,13 +26,13 @@ This guide provides solutions for common issues encountered when using Moonwall 
 
 When integrating Moonwall into your project, you might encounter issues with development workflows, especially when trying to make changes to Moonwall itself while using it in your project.
 
-#### Issue: `pnpm link` Compatibility
+#### Issue: `bun link` Compatibility
 
-The standard approach of using `pnpm link` for local package development doesn't work well with Moonwall due to its monorepo structure and package interdependencies.
+The standard approach of using `bun link` for local package development doesn't work well with Moonwall due to its monorepo structure and package interdependencies.
 
 **Solution: Local Package Referencing**
 
-Instead of using `pnpm link`, reference the local Moonwall package directory directly in your project's `package.json`:
+Instead of using `bun link`, reference the local Moonwall package directory directly in your project's `package.json`:
 
 ```json
 {
@@ -44,9 +44,9 @@ Instead of using `pnpm link`, reference the local Moonwall package directory dir
 }
 ```
 
-Then run `pnpm install` to create the symlinks.
+Then run `bun install` to create the symlinks.
 
-### Alternative to `pnpm link`
+### Alternative to `bun link`
 
 For a more robust development workflow:
 
@@ -60,8 +60,8 @@ For a more robust development workflow:
 2. **Install Dependencies and Build**
 
    ```bash
-   pnpm i
-   pnpm build
+   bun install
+   bun run build
    ```
 
 3. **Add Your Repository as a Test Project**
@@ -70,15 +70,13 @@ For a more robust development workflow:
 
 4. **Use Moonwall Package Version Overrides**
 
-   If you need to use your project's existing repository with local Moonwall development, use pnpm's overrides feature in your project's `package.json`:
+   If you need to use your project's existing repository with local Moonwall development, use bun's overrides feature in your project's `package.json`:
 
    ```json
    {
-     "pnpm": {
-       "overrides": {
-         "@moonwall/cli": "file:/path/to/moonwall/packages/cli",
-         "@moonwall/util": "file:/path/to/moonwall/packages/util"
-       }
+     "overrides": {
+       "@moonwall/cli": "file:/path/to/moonwall/packages/cli",
+       "@moonwall/util": "file:/path/to/moonwall/packages/util"
      }
    }
    ```
@@ -90,7 +88,7 @@ When debugging issues between your project and Moonwall:
 1. **Enable Debug Logs**
 
    ```bash
-   DEBUG=moonwall* pnpm moonwall test <ENV_NAME>
+   DEBUG=moonwall* bun moonwall test <ENV_NAME>
    ```
 
 2. **Use Source Maps for Better Stack Traces**
@@ -152,7 +150,7 @@ When tests fail to execute:
 1. **Run Tests with Verbose Output**
 
    ```bash
-   pnpm moonwall test <ENV_NAME> --verbose
+   bun moonwall test <ENV_NAME> --verbose
    ```
 
 2. **Check Vitest Configuration**
