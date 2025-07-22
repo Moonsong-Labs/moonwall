@@ -197,7 +197,7 @@ export class MoonwallContext {
 
     await checkZombieBins(zombieConfig);
 
-    const { default: zombie } = await import("@zombienet/orchestrator");
+    const zombie = await import("@zombienet/orchestrator");
     const network = await zombie.start("", zombieConfig, { logType: "silent" });
     const ipcLogPath = path.join(network.tmpDir, "ipc-server.log");
     const ipcLogger = fs.createWriteStream(ipcLogPath, { flags: "a" });

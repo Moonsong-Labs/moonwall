@@ -15,7 +15,7 @@
     "changeset": "changeset",
     "changeset:release": "sleep 1 && pnpm changeset publish",
     "changeset:version": "changeset version",
-    "clean-all": "rm -rf node_modules && pnpm -r --filter='./packages/**' run clean && pnpm store prune",
+    "clean-all": "rm -rf node_modules test/node_modules && pnpm -r --filter='./packages/**' run clean && pnpm store prune",
     "pristine-build": "pnpm clean-all && pnpm i && pnpm build && pnpm generate-types",
     "start": "cd test && pnpm exec moonwall",
     "display-reports": "pnpm exec vite preview --base __vitest__ --outDir html",
