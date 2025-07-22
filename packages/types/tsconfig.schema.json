@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "types": ["node"],
+    "lib": ["ESNext"],
+    "target": "esnext",
+    "module": "esnext",
+    "baseUrl": "./",
+    "moduleResolution": "Bundler",
+    "resolvePackageJsonExports": false,
+    "skipLibCheck": true,
+    "outDir": "dist",
+    "allowImportingTsExtensions": false,
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": false,
+    "typeRoots": ["../../node_modules/@types/node"]
+  },
+  "include": ["./src/**/*.ts"],
+  "exclude": ["**/dist/**", "../../node_modules/@types/bun", "../../node_modules/.bun/**", "**/node_modules/.bun/**"]
+}

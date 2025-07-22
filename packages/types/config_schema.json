@@ -1,16 +1,21 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
   "definitions": {
     "Bottleneck.IORedisConnection": {
+      "additionalProperties": false,
       "type": "object"
     },
     "Bottleneck.RedisConnection": {
+      "additionalProperties": false,
       "type": "object"
     },
     "Bottleneck.Strategy": {
+      "additionalProperties": false,
       "type": "object"
     },
     "ChopsticksLaunchSpec": {
+      "additionalProperties": false,
       "description": "A launch specification object for the \"chopsticks\" foundation type.",
       "properties": {
         "address": {
@@ -66,6 +71,7 @@
       "type": "object"
     },
     "DevLaunchSpec": {
+      "additionalProperties": false,
       "description": "A launch specification object for the \"dev\" foundation type.",
       "properties": {
         "binPath": {
@@ -73,6 +79,7 @@
           "type": "string"
         },
         "defaultForkConfig": {
+          "additionalProperties": false,
           "description": "BETA: Default Fork options for the node (overriden by per-test fork options)",
           "properties": {
             "blockHash": {
@@ -99,6 +106,7 @@
           "type": "boolean"
         },
         "dockerConfig": {
+          "additionalProperties": false,
           "description": "Docker-specific configuration",
           "properties": {
             "containerName": {
@@ -108,6 +116,7 @@
             "exposePorts": {
               "description": "Port mappings from host to container",
               "items": {
+                "additionalProperties": false,
                 "properties": {
                   "hostPort": {
                     "type": "number"
@@ -150,6 +159,7 @@
           "type": "array"
         },
         "ports": {
+          "additionalProperties": false,
           "description": "Port configuration",
           "properties": {
             "p2pPort": {
@@ -185,6 +195,7 @@
     "IFoundation": {
       "anyOf": [
         {
+          "additionalProperties": false,
           "properties": {
             "launchSpec": {
               "items": {
@@ -200,6 +211,7 @@
           "type": "object"
         },
         {
+          "additionalProperties": false,
           "properties": {
             "launchSpec": {
               "items": {
@@ -218,6 +230,7 @@
           "type": "object"
         },
         {
+          "additionalProperties": false,
           "properties": {
             "rtUpgradePath": {
               "type": "string"
@@ -233,6 +246,7 @@
           "type": "object"
         },
         {
+          "additionalProperties": false,
           "properties": {
             "launchSpec": {
               "$ref": "#/definitions/ReadOnlyLaunchSpec"
@@ -255,6 +269,7 @@
       "type": "object"
     },
     "IRpcMethod": {
+      "additionalProperties": false,
       "description": "Interface for defining RPC methods.",
       "properties": {
         "description": {
@@ -280,6 +295,7 @@
       "type": "object"
     },
     "IRpcParam": {
+      "additionalProperties": false,
       "description": "Interface for defining RPC parameters.",
       "properties": {
         "isOptional": {
@@ -299,6 +315,7 @@
       "type": "string"
     },
     "OrcOptionsInterface": {
+      "additionalProperties": false,
       "properties": {
         "dir": {
           "type": "string"
@@ -316,6 +333,7 @@
           "type": "boolean"
         },
         "setGlobalNetwork": {
+          "additionalProperties": false,
           "type": "object"
         },
         "spawnConcurrency": {
@@ -325,6 +343,7 @@
       "type": "object"
     },
     "ProviderConfig": {
+      "additionalProperties": false,
       "description": "The configuration object for a provider.",
       "properties": {
         "additionalTypes": {
@@ -365,6 +384,7 @@
       "type": "string"
     },
     "ReadOnlyLaunchSpec": {
+      "additionalProperties": false,
       "description": "A launch specification object for the \"read_only\" foundation type.",
       "properties": {
         "disableRuntimeVersionCheck": {
@@ -495,9 +515,11 @@
       "type": "object"
     },
     "Record<string,any>": {
+      "additionalProperties": false,
       "type": "object"
     },
     "ZombieLaunchSpec": {
+      "additionalProperties": false,
       "description": "A launch specification object for the \"zombie\" foundation type.",
       "properties": {
         "additionalZombieConfig": {
@@ -551,10 +573,12 @@
     "additionalRepos": {
       "description": "Use this to specify additional repos to download binaries from.\nPolkadot, Tanssi and Moonbeam are available by default.",
       "items": {
+        "additionalProperties": false,
         "description": "`RepoSpec` type represents the configuration required to download binaries\nfrom a project's GitHub repository.",
         "properties": {
           "binaries": {
             "items": {
+              "additionalProperties": false,
               "description": "`Bin` type defines the binary configurations within a `RepoSpec`.",
               "properties": {
                 "defaultArgs": {
@@ -592,6 +616,7 @@
     "environments": {
       "description": "An array of Environment objects for testing.",
       "items": {
+        "additionalProperties": false,
         "description": "The environment configuration for testing.",
         "properties": {
           "connections": {
@@ -614,6 +639,7 @@
             "type": "boolean"
           },
           "defaultSigner": {
+            "additionalProperties": false,
             "description": "The privateKey with which to sign and send transactions in createBlock() function.",
             "properties": {
               "privateKey": {
@@ -702,6 +728,7 @@
           "skipTests": {
             "description": "A list of test to skip.",
             "items": {
+              "additionalProperties": false,
               "properties": {
                 "name": {
                   "description": "The name of the test to skip. Eg. S22C500",

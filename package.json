@@ -4,41 +4,32 @@
   "version": "0.3.0",
   "private": true,
   "description": "Testing framework for the Moon family of projects",
+  "workspaces": ["packages/*", "test", "docs"],
   "scripts": {
-    "build": "pnpm -r --filter='./packages/**' run build",
-    "postbuild": "cd test && pnpm install",
-    "generate-types": "pnpm -r --filter='./packages/**' run generate-types",
-    "fmt": "biome format ./biome.json; pnpm -r --filter='./packages/**' run fmt",
-    "fmt:fix": "biome format ./biome.json --write; pnpm -r --filter='./packages/**' run fmt:fix",
-    "lint": "pnpm -r --filter='./packages/**' run lint",
-    "lint:fix": "pnpm -r --filter='./packages/**' run lint:fix",
+    "build": "bun run --filter \"@moonwall/types\" build && bun run --filter \"@moonwall/util\" build && bun run --filter  \"@moonwall/cli\" build",
+    "postbuild": "cd test && bun install --linker=isolated   ",
+    "generate-types": "bun run --filter \"@moonwall/cli\" generate-types && bun run --filter \"@moonwall/types\" generate-types && bun run --filter \"@moonwall/util\" generate-types",
+    "fmt": "biome format ./biome.json; bun run --filter \"@moonwall/cli\" fmt && bun run --filter \"@moonwall/types\" fmt && bun run --filter \"@moonwall/util\" fmt",
+    "fmt:fix": "biome format ./biome.json --write; bun run --filter \"@moonwall/cli\" fmt:fix && bun run --filter \"@moonwall/types\" fmt:fix && bun run --filter \"@moonwall/util\" fmt:fix",
+    "lint": "bun run --filter \"@moonwall/cli\" lint && bun run --filter \"@moonwall/types\" lint && bun run --filter \"@moonwall/util\" lint",
+    "lint:fix": "bun run --filter \"@moonwall/cli\" lint:fix && bun run --filter \"@moonwall/types\" lint:fix && bun run --filter \"@moonwall/util\" lint:fix",
     "changeset": "changeset",
-    "changeset:release": "sleep 1 && pnpm changeset publish",
+    "changeset:release": "sleep 1 && bun changeset publish",
     "changeset:version": "changeset version",
-    "clean-all": "rm -rf node_modules test/node_modules && pnpm -r --filter='./packages/**' run clean && pnpm store prune",
-    "pristine-build": "pnpm clean-all && pnpm i && pnpm build && pnpm generate-types",
-    "start": "cd test && pnpm exec moonwall",
-    "display-reports": "pnpm exec vite preview --base __vitest__ --outDir html",
-    "test": "cd test && pnpm moonwall test dev_multi",
-    "typecheck": "pnpm -r --filter='./packages/**' run typecheck"
+    "clean-all": "rm -rf node_modules test/node_modules && bun run --filter \"@moonwall/cli\" clean && bun run --filter \"@moonwall/types\" clean && bun run --filter \"@moonwall/util\" clean",
+    "pristine-build": "bun clean-all && bun install --linker=isolated  && bun build && bun generate-types",
+    "start": "cd test && bun moonwall",
+    "display-reports": "bun vite preview --base __vitest__ --outDir html",
+    "test": "cd test && bun moonwall test dev_multi",
+    "typecheck": "bun run --filter \"@moonwall/cli\" typecheck && bun run --filter \"@moonwall/types\" typecheck && bun run --filter \"@moonwall/util\" typecheck"
   },
   "devDependencies": {
     "@biomejs/biome": "2.1.2",
     "@changesets/cli": "2.29.5",
+    "@types/bun": "^1.2.19",
     "@types/node": "24.0.15",
     "@types/react": "18.3.1",
     "typescript": "5.8.3"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@biomejs/biome",
-      "cpu-features",
-      "esbuild",
-      "protobufjs",
-      "sqlite3",
-      "ssh2",
-      "vue-demi"
-    ]
   },
   "dependencies": {
     "pino": "^9.7.0",

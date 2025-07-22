@@ -13,128 +13,137 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          version: 10.13.1
-      - uses: actions/setup-node@v4
+          bun-version: latest
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
         with:
-          node-version: 23
-          cache: "pnpm"
-      - run: pnpm install
-      - run: pnpm run build
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+      - run: bun install
+      - run: bun run build
 
   lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          version: 10.13.1
-      - uses: actions/setup-node@v4
+          bun-version: latest
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
         with:
-          node-version: 23
-          cache: "pnpm"
-      - run: pnpm install
-      - run: pnpm run lint
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+      - run: bun install
+      - run: bun run lint
 
   format:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          version: 10.13.1
-      - uses: actions/setup-node@v4
+          bun-version: latest
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
         with:
-          node-version: 23
-          cache: "pnpm"
-      - run: pnpm install
-      - run: pnpm run fmt
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+      - run: bun install
+      - run: bun run fmt
   
   test_init:
     runs-on: ubuntu-latest
     needs: ["build"]
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          version: 10.13.1
-      - uses: actions/setup-node@v4
+          bun-version: latest
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
         with:
-          node-version: 23
-          cache: "pnpm"
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
       - name: Build like before
         run: |
-          pnpm install   
-          pnpm run build
+          bun install   
+          bun run build
       - name: Update test directory links
         run: |
           cd test
-          pnpm install
+          bun install
       - name: Initialize config
         run: |
           cd test
           rm moonwall.config.json
-          pnpm moonwall init --acceptAllDefaults
+          bun moonwall init --acceptAllDefaults
       - name: Run test
         run: |
           cd test
-          pnpm moonwall test default_env
+          bun moonwall test default_env
 
   test_basic:
     runs-on: ubuntu-latest
     needs: ["build"]
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10.13.1
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 23
-          cache: "pnpm"
-      - uses: oven-sh/setup-bun@v1
+      - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
       - name: Build like before
         run: |
-          pnpm install   
-          pnpm run build
+          bun install   
+          bun run build
       - name: Update test directory links
         run: |
           cd test
-          pnpm install
+          bun install
       - name: Run standard dev test
         run: |
           cd test
-          pnpm exec moonwall test basic
+          bun moonwall test basic
 
   test_tanssi:
     runs-on: ubuntu-latest
     needs: ["build"]
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v1
+      - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-      - uses: pnpm/action-setup@v4
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
         with:
-          version: 10.13.1
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 23
-          cache: "pnpm"
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
       - name: Build like before
         run: |
-          pnpm install  
-          pnpm run build
-      - uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: latest
+          bun install  
+          bun run build
       - name: Update test directory links
         run: |
           cd test
-          pnpm install
+          bun install
       - name: Cache tanssi binary
         id: tanssi-cache
         uses: actions/cache@v4
@@ -145,11 +154,11 @@ jobs:
         if: steps.tanssi-cache.outputs.cache-hit != 'true'
         run: |
           cd test
-          pnpm exec moonwall download tanssi-node latest ./tmp
+          bun moonwall download tanssi-node latest ./tmp
       - name: Run standard dev test
         run: |
           cd test
-          pnpm exec moonwall test dev_tanssi
+          bun moonwall test dev_tanssi
 
   test_sharded:
     runs-on: ubuntu-latest
@@ -164,27 +173,24 @@ jobs:
         shard: [1, 2]
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v1
+      - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-      - uses: pnpm/action-setup@v4
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
         with:
-          version: 10.13.1
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 23
-          cache: "pnpm"
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
       - name: Build like before
         run: |
-          pnpm install  
-          pnpm run build
-      - uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: latest
+          bun install  
+          bun run build
       - name: Update test directory links
         run: |
           cd test
-          pnpm install
+          bun install
       - name: Cache moonbeam binary
         id: moonbeam-cache
         uses: actions/cache@v4
@@ -195,12 +201,12 @@ jobs:
         if: steps.moonbeam-cache.outputs.cache-hit != 'true'
         run: |
           cd test
-          pnpm exec moonwall download moonbeam $MOONBEAM_VERSION ./tmp
+          bun moonwall download moonbeam $MOONBEAM_VERSION ./tmp
       - name: Run ${{matrix.suite}} dev test
         run: |
           cd test
           bun papi generate
-          pnpm exec moonwall test ${{matrix.suite}}  --ts ${{ matrix.shard }}/2
+          bun moonwall test ${{matrix.suite}}  --ts ${{ matrix.shard }}/2
 
   test_single:
     runs-on: ubuntu-latest
@@ -214,27 +220,24 @@ jobs:
         suite: ["papi_dev", "fork_test", "dev_docker", "dev_smoke"]
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v1
+      - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-      - uses: pnpm/action-setup@v4
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
         with:
-          version: 10.13.1
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 23
-          cache: "pnpm"
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
       - name: Build like before
         run: |
-          pnpm install  
-          pnpm run build
-      - uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: latest
+          bun install  
+          bun run build
       - name: Update test directory links
         run: |
           cd test
-          pnpm install
+          bun install
       - name: Cache moonbeam binary
         id: moonbeam-cache
         uses: actions/cache@v4
@@ -245,12 +248,12 @@ jobs:
         if: steps.moonbeam-cache.outputs.cache-hit != 'true'
         run: |
           cd test
-          pnpm exec moonwall download moonbeam $MOONBEAM_VERSION ./tmp
+          bun moonwall download moonbeam $MOONBEAM_VERSION ./tmp
       - name: Run ${{matrix.suite}} dev test
         run: |
           cd test
           bun papi generate
-          pnpm exec moonwall test ${{matrix.suite}}
+          bun moonwall test ${{matrix.suite}}
 
   test_update:
     runs-on: ubuntu-latest
@@ -259,32 +262,29 @@ jobs:
       NO_COLOR: 1
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v1
+      - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-      - uses: pnpm/action-setup@v4
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
         with:
-          version: 10.13.1
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 23
-          cache: "pnpm"
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
       - name: Build like before
         run: |
-          pnpm install  
-          pnpm run build
-      - uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: latest
+          bun install  
+          bun run build
       - name: Update test directory links
         run: |
           cd test
-          pnpm install
+          bun install
       - name: Run snapshot update test
         id: update_test
         run: |
           cd test
-          pnpm exec moonwall test update_snapshot -u > snapshot_output.txt 2>&1
+          bun moonwall test update_snapshot -u > snapshot_output.txt 2>&1
       - name: Check if files were modified in the 2 minutes
         run: |
           cd test
@@ -305,28 +305,28 @@ jobs:
         suite: ["chopsticks", "multi_chopsticks", "chopsticks_round"]
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10.13.1
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 23
-          cache: "pnpm"
-      - name: Build like before
-        run: |
-          pnpm install   
-          pnpm run build
-      - uses: oven-sh/setup-bun@v1
+      - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+      - name: Build like before
+        run: |
+          bun install   
+          bun run build
       - name: Update test directory links
         run: |
           cd test
-          pnpm install
+          bun install
       - name: Run ${{matrix.suite}}
         run: |
           cd test
-          pnpm exec moonwall test ${{matrix.suite}}
+          bun moonwall test ${{matrix.suite}}
 
       # disabled until we have an available instance of moonscope running
       # - name: Use Send Report Action
@@ -347,33 +347,32 @@ jobs:
         suite: ["eth_test", "viem_test", "papi_readonly"]
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10.13.1
-          
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 23
-          cache: "pnpm"
-      - name: Build like before
-        run: |
-          pnpm install   
-          pnpm run build
-      - uses: oven-sh/setup-bun@v1
+      - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+      - name: Build like before
+        run: |
+          bun install   
+          bun run build
       - name: Update test directory links
         run: |
           cd test
-          pnpm install
+          bun install
       - name: Run standard ${{matrix.suite}}
         run: |
           cd test
           bun papi add dot -n polkadot
-          pnpm exec moonwall test ${{matrix.suite}}
+          bun moonwall test ${{matrix.suite}}
       #  disabled until web3.js fix their stuff
       # - name: Run standard web3 run
-      #   run: pnpm exec moonwall test web3_test
+      #   run: bun moonwall test web3_test
 
   test_zombie:
     runs-on: ubuntu-latest
@@ -386,20 +385,23 @@ jobs:
         suite: ["zombie_test", "zombie_multi_para", "zombie_noPara"]
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          version: 10.13.1
+          bun-version: latest
       - uses: actions/setup-node@v4
         with:
           node-version: 23
-          cache: "pnpm"
-      - uses: oven-sh/setup-bun@v1
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
         with:
-          bun-version: latest
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
       - name: Update test directory links
         run: |
           cd test
-          pnpm install
+          bun install
       - name: Cache moonbeam binary
         id: moonbeam-cache
         uses: actions/cache@v4
@@ -408,13 +410,13 @@ jobs:
           key: moonbeam-${{ env.MOONBEAM_VERSION }}-${{ runner.os }}
       - name: Build like before
         run: |
-          pnpm install   
-          pnpm run build
+          bun install   
+          bun run build
       - name: Download moonbeam binary
         if: steps.moonbeam-cache.outputs.cache-hit != 'true'
         run: |
           cd test
-          pnpm exec moonwall download moonbeam $MOONBEAM_VERSION ./tmp
+          bun moonwall download moonbeam $MOONBEAM_VERSION ./tmp
       - name: Cache polkadot binaries
         id: polkadot-cache
         uses: actions/cache@v4
@@ -430,13 +432,13 @@ jobs:
           ## Aggresive sleeps to not be rate-limited by GH
           cd test
           sleep 2
-          pnpm exec moonwall download polkadot stable2412 ./tmp
+          bun moonwall download polkadot stable2412 ./tmp
           sleep 10
-          pnpm exec moonwall download polkadot-execute-worker stable2412 ./tmp
+          bun moonwall download polkadot-execute-worker stable2412 ./tmp
           sleep 10
-          pnpm exec moonwall download polkadot-prepare-worker stable2412 ./tmp
+          bun moonwall download polkadot-prepare-worker stable2412 ./tmp
           sleep 10
       - name: Run ${{matrix.suite}}
         run: |
           cd test
-          pnpm exec moonwall test ${{matrix.suite}}
+          bun moonwall test ${{matrix.suite}}
