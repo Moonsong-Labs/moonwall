@@ -3,17 +3,25 @@
  * This allows the CommonJS build to load the ESM-only ink library
  */
 
-import type { render as RenderType } from "ink";
+import type {
+  Box as BoxType,
+  render as RenderType,
+  Spacer as SpacerType,
+  Static as StaticType,
+  Text as TextType,
+  useApp as useAppType,
+  useInput as useInputType
+} from "ink";
 import type React from "react";
 
 export interface InkComponents {
   render: typeof RenderType;
-  Box: any;
-  Text: any;
-  useInput: any;
-  useApp: any;
-  Static: any;
-  Spacer: any;
+  Box: typeof BoxType;
+  Text: typeof TextType;
+  useInput: typeof useInputType;
+  useApp: typeof useAppType;
+  Static: typeof StaticType;
+  Spacer: typeof SpacerType;
 }
 
 let inkCache: InkComponents | null = null;
@@ -55,7 +63,7 @@ export async function renderWithInk(
  * Creates a LogViewer component with dynamically imported ink dependencies
  */
 export async function createLogViewer(): Promise<{
-  LogViewer: any;
+  LogViewer: typeof import("../cmds/components/LogViewer").LogViewer;
   inkComponents: InkComponents;
 }> {
   // First import ink components
