@@ -152,7 +152,7 @@ export async function executeScript(scriptCommand: string, args?: string) {
         execSync(`node ${scriptPath}${argsString}`, { stdio: "inherit" });
         break;
       case ".ts":
-        execSync(`pnpm tsx ${scriptPath}${argsString}`, { stdio: "inherit" });
+        execSync(`node --import=tsx ${scriptPath}${argsString}`, { stdio: "inherit" });
         break;
       case ".sh":
         execSync(`${scriptPath}${argsString}`, { stdio: "inherit" });
