@@ -427,10 +427,15 @@ jobs:
       - name: Download polkadot binaries
         if: steps.polkadot-cache.outputs.cache-hit != 'true'
         run: |
+          ## Aggresive sleeps to not be rate-limited by GH
           cd test
+          sleep 2
           pnpm exec moonwall download polkadot stable2412 ./tmp
+          sleep 10
           pnpm exec moonwall download polkadot-execute-worker stable2412 ./tmp
+          sleep 10
           pnpm exec moonwall download polkadot-prepare-worker stable2412 ./tmp
+          sleep 10
       - name: Run ${{matrix.suite}}
         run: |
           cd test
