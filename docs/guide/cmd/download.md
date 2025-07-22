@@ -15,15 +15,15 @@ The download CLI command allows you to quick download any necessary artifacts.
 ### Downloading the Polkadot Client
 
 ```sh [moonwall]
-pnpm moonwall download polkadot v1.5.0
+bun moonwall download polkadot v1.5.0
 ```
 
 ::: tip
-If you have moonwall globally installed, you can omit pnpm from the command and simply use `moonwall download...`
+If you have moonwall globally installed, you can omit bun from the command and simply use `moonwall download...`
 :::
 
 ### Downloading the Latest Moonbeam Client
 
 ```sh [moonwall]
-pnpm moonwall download moonbeam latest
+bun moonwall download moonbeam latest
 ```

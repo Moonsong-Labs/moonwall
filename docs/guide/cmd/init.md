@@ -4,7 +4,7 @@ The `init` command guides you through a step-by-step process to create a configu
 
 When you run:
 
-`pnpm moonwall init`
+`bun moonwall init`
 
 ::: tip
 You can provide the option `--acceptAllDefaults` to YOLO the defaults and save a config file immediately.
