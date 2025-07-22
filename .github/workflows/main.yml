@@ -23,7 +23,7 @@ jobs:
           key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
           restore-keys: |
             ${{ runner.os }}-bun-
-      - run: bun install
+      - run: bun install --linker=isolated
       - run: bun run build
 
   lint:
@@ -40,7 +40,7 @@ jobs:
           key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
           restore-keys: |
             ${{ runner.os }}-bun-
-      - run: bun install
+      - run: bun install --linker=isolated
       - run: bun run lint
 
   format:
@@ -57,7 +57,7 @@ jobs:
           key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
           restore-keys: |
             ${{ runner.os }}-bun-
-      - run: bun install
+      - run: bun install --linker=isolated
       - run: bun run fmt
   
   test_init:
@@ -80,12 +80,8 @@ jobs:
             ${{ runner.os }}-bun-
       - name: Build like before
         run: |
-          bun install   
+          bun install --linker=isolated  
           bun run build
-      - name: Update test directory links
-        run: |
-          cd test
-          bun install
       - name: Initialize config
         run: |
           cd test
@@ -116,12 +112,8 @@ jobs:
             ${{ runner.os }}-bun-
       - name: Build like before
         run: |
-          bun install   
+          bun install --linker=isolated
           bun run build
-      - name: Update test directory links
-        run: |
-          cd test
-          bun install
       - name: Run standard dev test
         run: |
           cd test
@@ -147,12 +139,8 @@ jobs:
             ${{ runner.os }}-bun-
       - name: Build like before
         run: |
-          bun install  
+          bun install --linker=isolated 
           bun run build
-      - name: Update test directory links
-        run: |
-          cd test
-          bun install
       - name: Cache tanssi binary
         id: tanssi-cache
         uses: actions/cache@v4
@@ -197,12 +185,8 @@ jobs:
             ${{ runner.os }}-bun-
       - name: Build like before
         run: |
-          bun install  
+          bun install --linker=isolated 
           bun run build
-      - name: Update test directory links
-        run: |
-          cd test
-          bun install
       - name: Cache moonbeam binary
         id: moonbeam-cache
         uses: actions/cache@v4
@@ -247,12 +231,9 @@ jobs:
             ${{ runner.os }}-bun-
       - name: Build like before
         run: |
-          bun install  
+          bun install --linker=isolated 
           bun run build
-      - name: Update test directory links
-        run: |
-          cd test
-          bun install
+
       - name: Cache moonbeam binary
         id: moonbeam-cache
         uses: actions/cache@v4
@@ -292,12 +273,9 @@ jobs:
             ${{ runner.os }}-bun-
       - name: Build like before
         run: |
-          bun install  
+          bun install --linker=isolated 
           bun run build
-      - name: Update test directory links
-        run: |
-          cd test
-          bun install
+
       - name: Run snapshot update test
         id: update_test
         run: |
@@ -338,12 +316,9 @@ jobs:
             ${{ runner.os }}-bun-
       - name: Build like before
         run: |
-          bun install   
+          bun install --linker=isolated  
           bun run build
-      - name: Update test directory links
-        run: |
-          cd test
-          bun install
+
       - name: Run ${{matrix.suite}}
         run: |
           cd test
@@ -383,12 +358,9 @@ jobs:
             ${{ runner.os }}-bun-
       - name: Build like before
         run: |
-          bun install   
+          bun install --linker=isolated  
           bun run build
-      - name: Update test directory links
-        run: |
-          cd test
-          bun install
+
       - name: Run standard ${{matrix.suite}}
         run: |
           cd test
@@ -422,10 +394,6 @@ jobs:
           key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
           restore-keys: |
             ${{ runner.os }}-bun-
-      - name: Update test directory links
-        run: |
-          cd test
-          bun install
       - name: Cache moonbeam binary
         id: moonbeam-cache
         uses: actions/cache@v4
@@ -434,7 +402,7 @@ jobs:
           key: moonbeam-${{ env.MOONBEAM_VERSION }}-${{ runner.os }}
       - name: Build like before
         run: |
-          bun install   
+          bun install --linker=isolated  
           bun run build
       - name: Download moonbeam binary
         if: steps.moonbeam-cache.outputs.cache-hit != 'true'
