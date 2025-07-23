@@ -1,5 +1,14 @@
 # @moonwall/cli
 
+## 5.13.2-dev.0
+
+### Patch Changes
+
+- d550be7: Fix logging for zombie upgrades
+- Updated dependencies [d550be7]
+  - @moonwall/types@5.13.2-dev.0
+  - @moonwall/util@5.13.2-dev.0
+
 ## 5.13.1
 
 ### Patch Changes

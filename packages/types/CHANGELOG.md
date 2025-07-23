@@ -1,5 +1,11 @@
 # @moonwall/types
 
+## 5.13.2-dev.0
+
+### Patch Changes
+
+- d550be7: Fix logging for zombie upgrades
+
 ## 5.13.1
 
 ## 5.13.0
