@@ -6,7 +6,9 @@ import fs from "node:fs";
 import cfonts from "cfonts";
 import path from "node:path";
 import { SemVer, lt } from "semver";
-import pkg from "../../package.json" with { type: "json" };
+
+const pkg = JSON.parse(fs.readFileSync(new URL("../../package.json", import.meta.url), "utf-8"));
+
 import {
   createFolders,
   deriveTestIds,

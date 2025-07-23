@@ -2,8 +2,6 @@ import type { Environment } from "@moonwall/types";
 import chalk from "chalk";
 import clear from "clear";
 import { promises as fsPromises } from "node:fs";
-import { render } from "ink";
-import { LogViewer as LogStreamer } from "./components/LogViewer";
 import { parse } from "yaml";
 import { clearNodeLogs, reportLogLocation } from "../internal/cmdFunctions/tempLogs";
 import { commonChecks } from "../internal/launcherCommon";
@@ -326,7 +324,11 @@ const resolveTailChoice = async (env: Environment) => {
         throw new Error("No log file path resolved, this should not happen. Please raise defect");
       }
 
-      const { waitUntilExit } = render(
+      // Dynamically import ink and LogStreamer to support CommonJS builds
+      const { renderWithInk, createLogViewer } = await import("../lib/inkDynamicImport");
+      const { LogViewer: LogStreamer } = await createLogViewer();
+      
+      const { waitUntilExit } = await renderWithInk(
         <LogStreamer
           env={env}
           logFilePath={logFilePath}

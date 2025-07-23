@@ -24,15 +24,15 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.ts",
-      "import": "./dist/index.js"
+      "types": "./dist/index.d.cts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     }
   },
   "module": "./dist/index.js",
-  "types": "./dist/types/index.d.ts",
+  "types": "./dist/index.d.cts",
   "engines": {
-    "node": ">=20",
-    "pnpm": ">=7"
+    "node": ">=22"
   },
   "files": [
     "dist",
@@ -42,16 +42,17 @@
   ],
   "scripts": {
     "clean": "rm -rf dist && rm -rf node_modules",
-    "build": "rm -rf dist && tsup src --format esm --no-splitting --sourcemap && pnpm generate-types",
-    "generate-types": "tsc && pnpm schema",
-    "watch": "tsup src --format esm --watch",
-    "lint": "pnpm biome lint ./src",
-    "lint:fix": "pnpm biome lint ./src --apply",
+    "build": "zshy",
+    "postbuild": "bun generate-types",
+    "generate-types": "node node_modules/.bin/tsc && bun schema",
+    "lint": "bun biome lint ./src",
+    "lint:fix": "bun biome lint ./src --apply",
     "fmt": "biome format ./src",
     "fmt:fix": "biome format src --write",
-    "prepublish": "pnpm run build && pnpm run generate-types",
-    "schema": "typescript-json-schema --tsNodeRegister --esModuleInterop -o config_schema.json ./src/config.ts MoonwallConfig && pnpm biome format config_schema.json --write"
+    "prepublish": "bun run build && bun run generate-types",
+    "schema": "node node_modules/.bin/typescript-json-schema --project tsconfig.schema.json --esModuleInterop --noExtraProps --ignoreErrors -o config_schema.json ./src/config.ts MoonwallConfig && bun biome format config_schema.json --write"
   },
+  "zshy": "./src/index.ts",
   "dependencies": {
     "@polkadot/api": "^16.4.1",
     "@polkadot/api-base": "^16.4.1",
@@ -59,13 +60,13 @@
     "@polkadot/types": "^16.4.1",
     "@polkadot/util": "^13.5.3",
     "@polkadot/util-crypto": "^13.5.3",
-    "@types/node": "^24.0.14",
+    "@types/node": "^24.0.15",
     "@zombienet/utils": "^0.0.29",
     "bottleneck": "^2.19.5",
     "ethers": "^6.15.0",
     "pino": "^9.7.0",
-    "polkadot-api": "1.14.1",
-    "viem": "2.31.7",
+    "polkadot-api": "1.15.0",
+    "viem": "2.33.0",
     "vitest": "3.2.4",
     "web3": "^4.16.0"
   },
@@ -73,9 +74,11 @@
     "access": "public"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.1.1",
-    "tsup": "^8.5.0",
+    "@biomejs/biome": "^2.1.2",
+    "tslib": "^2.8.1",
     "typescript": "5.8.3",
-    "typescript-json-schema": "0.65.1"
-  }
+    "typescript-json-schema": "0.65.1",
+    "zshy": "^0.2.5"
+  },
+  "main": "./dist/index.cjs"
 }

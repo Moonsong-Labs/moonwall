@@ -1,4 +1,6 @@
-import "@moonbeam-network/api-augment";
+#!/usr/bin/env -S node --no-warnings --no-deprecation
+
+import "../internal/logging";
 import dotenv from "dotenv";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
@@ -159,7 +161,7 @@ yargs(hideBin(process.argv))
         }
       } else {
         console.log("❌ No environment specified");
-        console.log(`👉 Run 'pnpm moonwall --help' for more information`);
+        console.log(`👉 Run 'bun moonwall --help' for more information`);
         process.exitCode = 1;
       }
     }

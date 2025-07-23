@@ -11,7 +11,7 @@ import type {
   DevLaunchSpec,
 } from "@moonwall/types";
 import type { ApiPromise } from "@polkadot/api";
-import zombie, { type Network } from "@zombienet/orchestrator";
+import type { Network } from "@zombienet/orchestrator";
 import { createLogger } from "@moonwall/util";
 import fs from "node:fs";
 import net from "node:net";
@@ -197,6 +197,7 @@ export class MoonwallContext {
 
     await checkZombieBins(zombieConfig);
 
+    const zombie = await import("@zombienet/orchestrator");
     const network = await zombie.start("", zombieConfig, { logType: "silent" });
     const ipcLogPath = path.join(network.tmpDir, "ipc-server.log");
     const ipcLogger = fs.createWriteStream(ipcLogPath, { flags: "a" });
