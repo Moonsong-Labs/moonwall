@@ -447,7 +447,7 @@ export const maximizeConvictionVotingOf = async (
       .tx.convictionVoting.vote(refIndex, {
         Standard: {
           vote: { aye: true, conviction: "Locked6x" },
-          balance: (await context.polkadotJs().query.system.account(alith.address)).data.free,
+          balance: ((await context.polkadotJs().query.system.account(alith.address)) as any).data.free,
         },
       })
       .paymentInfo(alith)
@@ -462,7 +462,7 @@ export const maximizeConvictionVotingOf = async (
           Standard: {
             vote: { aye: true, conviction: "Locked6x" },
             balance: await (
-              await context.polkadotJs().query.system.account(voter.address)
+              (await context.polkadotJs().query.system.account(voter.address)) as any
             ).data.free.sub(fee),
           },
         })
@@ -651,7 +651,7 @@ export const executeOpenTechCommitteeProposal = async (api: ApiPromise, encodedH
 
   process.stdout.write("Voting on main referendum proposal...");
 
-  const bal = (await api.query.system.account(dorothy.address)).data.free.toBigInt();
+  const bal = ((await api.query.system.account(dorothy.address)) as any).data.free.toBigInt();
 
   if (bal <= GLMR) {
     throw new Error("Dorothy has no funds to vote with");

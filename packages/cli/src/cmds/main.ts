@@ -381,7 +381,7 @@ const chooseTestEnv = async (config: MoonwallConfig) => {
     message: "Select a environment to run",
     pageSize: 12,
     choices: envs,
-  });
+  }) as string;
 
   return { envName };
 };
@@ -417,7 +417,7 @@ const chooseRunEnv = async (config: MoonwallConfig) => {
     message: "Select a environment to run",
     pageSize: 12,
     choices,
-  });
+  }) as string;
 
   return { envName };
 };

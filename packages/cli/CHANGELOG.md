@@ -1,12 +1,21 @@
 # @moonwall/cli
 
-## 5.13.1
+## 5.13.5
+
+### Patch Changes
+
+- d550be7: Fix logging for zombie upgrades
+- Updated dependencies [d550be7]
+  - @moonwall/types@5.13.5
+  - @moonwall/util@5.13.5
+
+## 5.13.4
 
 ### Patch Changes
 
 - 0c9d3d2: Added exit reason to logging
-  - @moonwall/types@5.13.1
-  - @moonwall/util@5.13.1
+  - @moonwall/types@5.13.4
+  - @moonwall/util@5.13.4
 
 ## 5.13.0
 
