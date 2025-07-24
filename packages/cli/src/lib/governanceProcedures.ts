@@ -447,7 +447,8 @@ export const maximizeConvictionVotingOf = async (
       .tx.convictionVoting.vote(refIndex, {
         Standard: {
           vote: { aye: true, conviction: "Locked6x" },
-          balance: ((await context.polkadotJs().query.system.account(alith.address)) as any).data.free,
+          balance: ((await context.polkadotJs().query.system.account(alith.address)) as any).data
+            .free,
         },
       })
       .paymentInfo(alith)
