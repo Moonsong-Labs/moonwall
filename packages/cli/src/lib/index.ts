@@ -1,5 +1,5 @@
-export * from "./handlers";
-export * from "./repoDefinitions";
+export * from "./handlers/index";
+export * from "./repoDefinitions/index";
 export * from "./binariesHelpers";
 export * from "./configReader";
 export * from "./contextHelpers";
