@@ -1,7 +1,7 @@
 {
   "name": "@moonwall/tests",
   "type": "module",
-  "version": "5.13.2-dev.3",
+  "version": "5.13.2-dev.4",
   "private": true,
   "description": "Testing framework for the Moon family of projects",
   "scripts": {

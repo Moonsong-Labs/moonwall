@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - develop
 
 jobs:
   build:
@@ -24,12 +25,25 @@ jobs:
             ${{ runner.os }}-bun-
       - run: bun install 
       - run: bun run build
-      - name: Create Release Pull Request
+      
+      # Handle pre-release mode based on branch
+      - name: Exit pre-release mode for main branch
+        if: github.ref == 'refs/heads/main'
+        run: bunx changeset pre exit || echo "Not in pre-release mode"
+      
+      - name: Enter pre-release mode for develop branch
+        if: github.ref == 'refs/heads/develop'
+        run: bunx changeset pre enter dev || echo "Already in pre-release mode"
+      
+      - name: Create Release Pull Request or Publish
         id: changesets
         uses: changesets/action@v1
         with:
           version: bun changeset:version
-          publish: bun changeset:release
+          publish: ${{ github.ref == 'refs/heads/main' && 'bun run changeset:publish' || 'bun run changeset:publish:dev' }}
+          title: ${{ github.ref == 'refs/heads/main' && 'Release' || 'Pre-release' }}
+          commit: ${{ github.ref == 'refs/heads/main' && 'Version Packages' || 'Version Packages (dev)' }}
+          
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
