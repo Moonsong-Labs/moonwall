@@ -79,13 +79,12 @@ export async function deriveViemChain(endpoint: string, maxRetries: number = 3) 
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      const id = hexToNumber(await directRpcRequest(httpEndpoint, "eth_chainId", [], 5000));
-      const name = await directRpcRequest(httpEndpoint, "system_chain", [], 5000);
+      const id = hexToNumber(await directRpcRequest(httpEndpoint, "eth_chainId", []));
+      const name = await directRpcRequest(httpEndpoint, "system_chain", []);
       const { tokenSymbol, tokenDecimals } = await directRpcRequest(
         httpEndpoint,
         "system_properties",
-        [],
-        5000
+        []
       );
 
       return {

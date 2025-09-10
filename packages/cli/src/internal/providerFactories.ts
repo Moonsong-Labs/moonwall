@@ -114,7 +114,7 @@ export class ProviderFactory {
           debug(
             `🔌 Attempting to derive chain for viem provider ${this.providerConfig.name} from ${this.url}`
           );
-          const chain = await deriveViemChain(this.url, 3);
+          const chain = await deriveViemChain(this.url);
           const client = createWalletClient({
             chain,
             account: privateKeyToAccount(this.privateKey as `0x${string}`),
