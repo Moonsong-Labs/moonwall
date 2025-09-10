@@ -9,6 +9,7 @@ import util from "node:util";
 import type { DevLaunchSpec } from "@moonwall/types";
 import Docker from "dockerode";
 import invariant from "tiny-invariant";
+import { isEthereumDevConfig, isEthereumZombieConfig } from "../lib/configReader";
 
 const execAsync = util.promisify(exec);
 const logger = createLogger({ name: "localNode" });
@@ -91,7 +92,8 @@ async function launchDockerContainer(
     }
 
     for (let i = 0; i < 300; i++) {
-      if (await checkWebSocketJSONRPC(Number.parseInt(rpcPort))) {
+      const isReady = await checkWebSocketJSONRPC(Number.parseInt(rpcPort));
+      if (isReady) {
         break;
       }
       await timer(100);
@@ -229,8 +231,10 @@ export async function launchNode(options: {
       if (ports) {
         for (const port of ports) {
           try {
-            await checkWebSocketJSONRPC(port);
-            break probe;
+            const isReady = await checkWebSocketJSONRPC(port);
+            if (isReady) {
+              break probe;
+            }
           } catch {}
         }
       }
@@ -261,28 +265,65 @@ function isPidRunning(pid: number): Promise<boolean> {
 
 async function checkWebSocketJSONRPC(port: number): Promise<boolean> {
   try {
+    // Determine if this is an Ethereum-compatible chain from config
+    const isEthereumChain = isEthereumDevConfig() || isEthereumZombieConfig();
+
+    // First check WebSocket availability
     const ws = new WebSocket(`ws://localhost:${port}`);
 
-    const result: boolean = await new Promise((resolve) => {
-      ws.on("open", () => {
+    const checkWsMethod = async (method: string): Promise<boolean> => {
+      return new Promise((resolve) => {
+        const timeout = setTimeout(() => {
+          resolve(false);
+        }, 5000);
+
         ws.send(
           JSON.stringify({
             jsonrpc: "2.0",
-            id: 1,
-            method: "system_chain",
+            id: Math.floor(Math.random() * 10000),
+            method,
             params: [],
           })
         );
-      });
 
-      ws.on("message", (data) => {
-        try {
-          const response = JSON.parse(data.toString());
-          if (response.jsonrpc === "2.0" && response.id === 1) {
-            resolve(true);
-          } else {
-            resolve(false);
+        const messageHandler = (data: any) => {
+          try {
+            const response = JSON.parse(data.toString());
+            if (response.jsonrpc === "2.0" && !response.error) {
+              clearTimeout(timeout);
+              ws.removeListener("message", messageHandler);
+              resolve(true);
+            }
+          } catch (e) {
+            // Ignore parse errors
           }
+        };
+
+        ws.on("message", messageHandler);
+      });
+    };
+
+    const wsResult: boolean = await new Promise<boolean>((resolve) => {
+      ws.on("open", async () => {
+        try {
+          // Check system_chain first via WebSocket (works for all chains)
+          const systemChainAvailable = await checkWsMethod("system_chain");
+          if (!systemChainAvailable) {
+            resolve(false);
+            return;
+          }
+
+          // For Ethereum-compatible chains, also check eth_chainId via WebSocket
+          if (isEthereumChain) {
+            const ethChainIdAvailable = await checkWsMethod("eth_chainId");
+            if (!ethChainIdAvailable) {
+              resolve(false);
+              return;
+            }
+          }
+
+          // WebSocket checks passed
+          resolve(true);
         } catch (e) {
           resolve(false);
         }
@@ -294,7 +335,57 @@ async function checkWebSocketJSONRPC(port: number): Promise<boolean> {
     });
 
     ws?.close();
-    return result;
+
+    if (!wsResult) {
+      return false;
+    }
+
+    // Now also check HTTP service is ready
+    const httpUrl = `http://localhost:${port}`;
+
+    const checkHttpMethod = async (method: string): Promise<boolean> => {
+      try {
+        const response = await fetch(httpUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            jsonrpc: "2.0",
+            id: Math.floor(Math.random() * 10000),
+            method,
+            params: [],
+          }),
+        });
+
+        if (!response.ok) {
+          return false;
+        }
+
+        const data: any = await response.json();
+        return !data.error;
+      } catch (e) {
+        return false;
+      }
+    };
+
+    try {
+      // Always check system_chain via HTTP (works for all chains)
+      const systemChainAvailable = await checkHttpMethod("system_chain");
+      if (!systemChainAvailable) {
+        return false;
+      }
+
+      // For Ethereum chains, also verify eth_chainId is available via HTTP
+      if (isEthereumChain) {
+        const ethChainIdAvailable = await checkHttpMethod("eth_chainId");
+        return ethChainIdAvailable;
+      }
+
+      // For non-Ethereum chains, system_chain being available is enough
+      return true;
+    } catch (e) {
+      // HTTP service not ready yet
+      return false;
+    }
   } catch {
     return false;
   }

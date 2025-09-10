@@ -114,7 +114,8 @@ export function getObjectMethods(obj: any): string[] {
 export async function directRpcRequest(
   endpoint: string,
   method: string,
-  params: any[] = []
+  params: any[] = [],
+  timeoutMs: number = 10000 // Default 10 second timeout
 ): Promise<any> {
   const data = {
     jsonrpc: "2.0",
@@ -127,19 +128,36 @@ export async function directRpcRequest(
     console.log("you've passed a websocket to fetch, is this intended?");
   }
 
-  const response = await fetch(endpoint, {
-    method: "POST",
-    body: JSON.stringify(data),
-    headers: { "Content-Type": "application/json" },
-  });
+  // Create an AbortController for timeout
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-  const responseData = (await response.json()) as JsonRpcResponse;
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: { "Content-Type": "application/json" },
+      signal: controller.signal,
+    });
 
-  if (responseData.error) {
-    throw new Error(responseData.error.message);
+    clearTimeout(timeoutId);
+
+    const responseData = (await response.json()) as JsonRpcResponse;
+
+    if (responseData.error) {
+      throw new Error(responseData.error.message);
+    }
+
+    return responseData.result;
+  } catch (error: any) {
+    clearTimeout(timeoutId);
+    if (error.name === "AbortError") {
+      throw new Error(
+        `RPC request to ${endpoint} timed out after ${timeoutMs}ms (method: ${method})`
+      );
+    }
+    throw error;
   }
-
-  return responseData.result;
 }
 
 interface JsonRpcResponse {
