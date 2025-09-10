@@ -91,7 +91,10 @@ async function launchDockerContainer(
     }
 
     for (let i = 0; i < 300; i++) {
-      if (await checkWebSocketJSONRPC(Number.parseInt(rpcPort))) {
+      const isReady = await checkWebSocketJSONRPC(Number.parseInt(rpcPort));
+      if (isReady) {
+        // Give the node a bit more time to fully initialize all APIs
+        await timer(500);
         break;
       }
       await timer(100);
@@ -229,8 +232,12 @@ export async function launchNode(options: {
       if (ports) {
         for (const port of ports) {
           try {
-            await checkWebSocketJSONRPC(port);
-            break probe;
+            const isReady = await checkWebSocketJSONRPC(port);
+            if (isReady) {
+              // Give the node a bit more time to fully initialize all APIs
+              await timer(500);
+              break probe;
+            }
           } catch {}
         }
       }
@@ -263,26 +270,54 @@ async function checkWebSocketJSONRPC(port: number): Promise<boolean> {
   try {
     const ws = new WebSocket(`ws://localhost:${port}`);
 
-    const result: boolean = await new Promise((resolve) => {
-      ws.on("open", () => {
+    const checkMethod = async (method: string): Promise<boolean> => {
+      return new Promise((resolve) => {
+        const timeout = setTimeout(() => {
+          resolve(false);
+        }, 5000);
+
         ws.send(
           JSON.stringify({
             jsonrpc: "2.0",
-            id: 1,
-            method: "system_chain",
+            id: Math.floor(Math.random() * 10000),
+            method,
             params: [],
           })
         );
-      });
 
-      ws.on("message", (data) => {
-        try {
-          const response = JSON.parse(data.toString());
-          if (response.jsonrpc === "2.0" && response.id === 1) {
-            resolve(true);
-          } else {
-            resolve(false);
+        const messageHandler = (data: any) => {
+          try {
+            const response = JSON.parse(data.toString());
+            if (response.jsonrpc === "2.0" && !response.error) {
+              clearTimeout(timeout);
+              ws.removeListener("message", messageHandler);
+              resolve(true);
+            }
+          } catch (e) {
+            // Ignore parse errors
           }
+        };
+
+        ws.on("message", messageHandler);
+      });
+    };
+
+    const result: boolean = await new Promise((resolve) => {
+      ws.on("open", async () => {
+        try {
+          // Check system_chain first
+          const systemChainAvailable = await checkMethod("system_chain");
+          if (!systemChainAvailable) {
+            resolve(false);
+            return;
+          }
+
+          // For Ethereum-compatible chains, also check eth_chainId
+          const ethChainIdAvailable = await checkMethod("eth_chainId");
+
+          // If eth_chainId returns an error or doesn't exist, it might be a pure substrate chain
+          // So we consider it ready if system_chain works
+          resolve(true);
         } catch (e) {
           resolve(false);
         }
