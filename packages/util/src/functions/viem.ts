@@ -63,34 +63,58 @@ export async function getDevChain(url: string) {
  *
  * @export
  * @param endpoint The endpoint for the JSON RPC requests.
+ * @param maxRetries Maximum number of retry attempts (default: 3)
  * @returns A promise that resolves to an object satisfying the Chain interface, which includes
  * properties such as the chain id, chain name, network name, native currency information,
  * and RPC URLs.
- * @throws Will throw an error if the RPC request fails.
+ * @throws Will throw an error if the RPC request fails after all retries.
  * @example
  * const chain = await deriveViemChain('http://localhost:8545');
  */
-export async function deriveViemChain(endpoint: string) {
+export async function deriveViemChain(endpoint: string, maxRetries: number = 3) {
   const httpEndpoint = endpoint.replace("ws", "http");
   const block = { http: [httpEndpoint] };
 
-  const id = hexToNumber(await directRpcRequest(httpEndpoint, "eth_chainId"));
-  const name = await directRpcRequest(httpEndpoint, "system_chain");
-  const { tokenSymbol, tokenDecimals } = await directRpcRequest(httpEndpoint, "system_properties");
+  let lastError: Error | undefined;
 
-  return {
-    id,
-    name,
-    nativeCurrency: {
-      decimals: tokenDecimals,
-      name: tokenSymbol,
-      symbol: tokenSymbol,
-    },
-    rpcUrls: {
-      public: block,
-      default: block,
-    },
-  } as const satisfies Chain;
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const id = hexToNumber(await directRpcRequest(httpEndpoint, "eth_chainId", [], 5000));
+      const name = await directRpcRequest(httpEndpoint, "system_chain", [], 5000);
+      const { tokenSymbol, tokenDecimals } = await directRpcRequest(
+        httpEndpoint,
+        "system_properties",
+        [],
+        5000
+      );
+
+      return {
+        id,
+        name,
+        nativeCurrency: {
+          decimals: tokenDecimals,
+          name: tokenSymbol,
+          symbol: tokenSymbol,
+        },
+        rpcUrls: {
+          public: block,
+          default: block,
+        },
+      } as const satisfies Chain;
+    } catch (error: any) {
+      lastError = error;
+      if (attempt < maxRetries) {
+        console.warn(
+          `Failed to derive viem chain on attempt ${attempt}/${maxRetries}: ${error.message}. Retrying...`
+        );
+        await timer(1000 * attempt); // Linear backoff
+      }
+    }
+  }
+
+  throw new Error(
+    `Failed to derive viem chain after ${maxRetries} attempts: ${lastError?.message || "Unknown error"}`
+  );
 }
 
 /**

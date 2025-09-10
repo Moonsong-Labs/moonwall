@@ -110,12 +110,25 @@ export class ProviderFactory {
       name: this.providerConfig.name,
       type: this.providerConfig.type,
       connect: async () => {
-        const client = createWalletClient({
-          chain: await deriveViemChain(this.url),
-          account: privateKeyToAccount(this.privateKey as `0x${string}`),
-          transport: http(this.url.replace("ws", "http")),
-        }).extend(publicActions);
-        return client;
+        try {
+          debug(
+            `🔌 Attempting to derive chain for viem provider ${this.providerConfig.name} from ${this.url}`
+          );
+          const chain = await deriveViemChain(this.url, 3);
+          const client = createWalletClient({
+            chain,
+            account: privateKeyToAccount(this.privateKey as `0x${string}`),
+            transport: http(this.url.replace("ws", "http")),
+          }).extend(publicActions);
+          return client;
+        } catch (error: any) {
+          console.error(
+            `❌ Failed to create viem provider ${this.providerConfig.name}: ${error.message}`
+          );
+          throw new Error(
+            `Viem provider initialization failed for ${this.providerConfig.name}: ${error.message}`
+          );
+        }
       },
     };
   }
