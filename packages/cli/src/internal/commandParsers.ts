@@ -77,7 +77,7 @@ export class LaunchCommandParser {
     }
   }
 
-  withPorts() {
+  async withPorts() {
     if (this.launchSpec.ports) {
       const ports = this.launchSpec.ports;
       if (ports.p2pPort) {
@@ -90,32 +90,7 @@ export class LaunchCommandParser {
         this.overrideArg(`--rpc-port=${ports.rpcPort}`);
       }
     } else {
-      const freePort = getFreePort().toString();
-      process.env.MOONWALL_RPC_PORT = freePort;
-
-      if (this.launchSpec.newRpcBehaviour) {
-        this.overrideArg(`--rpc-port=${freePort}`);
-      } else {
-        this.overrideArg(`--ws-port=${freePort}`);
-      }
-    }
-    return this;
-  }
-
-  async withPortsAsync() {
-    if (this.launchSpec.ports) {
-      const ports = this.launchSpec.ports;
-      if (ports.p2pPort) {
-        this.overrideArg(`--port=${ports.p2pPort}`);
-      }
-      if (ports.wsPort) {
-        this.overrideArg(`--ws-port=${ports.wsPort}`);
-      }
-      if (ports.rpcPort) {
-        this.overrideArg(`--rpc-port=${ports.rpcPort}`);
-      }
-    } else {
-      const freePort = (await getFreePortAsync()).toString();
+      const freePort = (await getFreePort()).toString();
       process.env.MOONWALL_RPC_PORT = freePort;
 
       if (this.launchSpec.newRpcBehaviour) {
@@ -172,23 +147,7 @@ export class LaunchCommandParser {
     };
   }
 
-  static create(options: {
-    launchSpec: DevLaunchSpec;
-    additionalRepos?: RepoSpec[];
-    launchOverrides?: LaunchOverrides;
-    verbose?: boolean;
-  }) {
-    const parser = new LaunchCommandParser(options);
-    const parsed = parser.withPorts().withDefaultForkConfig().withLaunchOverrides();
-
-    if (options.verbose) {
-      parsed.print();
-    }
-
-    return parsed.build();
-  }
-
-  static async createAsync(options: {
+  static async create(options: {
     launchSpec: DevLaunchSpec;
     additionalRepos?: RepoSpec[];
     launchOverrides?: LaunchOverrides;
@@ -196,7 +155,7 @@ export class LaunchCommandParser {
   }) {
     const parser = new LaunchCommandParser(options);
     const parsed = await parser
-      .withPortsAsync()
+      .withPorts()
       .then((p) => p.withDefaultForkConfig().withLaunchOverrides());
 
     if (options.verbose) {
@@ -293,7 +252,11 @@ const getNextAvailablePort = async (startPort: number): Promise<number> => {
   throw new Error(`No available ports found starting from ${startPort}`);
 };
 
-export const getFreePort = () => {
+/**
+ * Get a free port with availability checking
+ * Uses async port allocation for better collision avoidance
+ */
+export const getFreePort = async (): Promise<number> => {
   // Parse shard information from environment variables if available
   let shardIndex = 0;
   let totalShards = 1;
@@ -321,22 +284,13 @@ export const getFreePort = () => {
   const calculatedPort = basePort + shardOffset + poolOffset + processOffset;
 
   // Ensure we stay within a reasonable port range
-  const finalPort = Math.min(calculatedPort, 60000 + shardIndex * 100 + poolId);
+  const startPort = Math.min(calculatedPort, 60000 + shardIndex * 100 + poolId);
 
   if (process.env.DEBUG_MOONWALL_PORTS) {
     console.log(
-      `[DEBUG] Port calculation: shard=${shardIndex + 1}/${totalShards}, pool=${poolId}, final=${finalPort}`
+      `[DEBUG] Port calculation: shard=${shardIndex + 1}/${totalShards}, pool=${poolId}, final=${startPort}`
     );
   }
 
-  return finalPort;
-};
-
-/**
- * Get a free port with availability checking (async version)
- * Use this when you need to ensure the port is actually available
- */
-export const getFreePortAsync = async (): Promise<number> => {
-  const startPort = getFreePort();
   return getNextAvailablePort(startPort);
 };
