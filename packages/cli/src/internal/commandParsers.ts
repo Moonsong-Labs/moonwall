@@ -227,11 +227,7 @@ export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
  * @deprecated Use getAtomicFreePort() instead for thread-safe port allocation
  */
 export const getFreePort = () => {
-  // Use shard-based pool ID for proper isolation in CI environments
-  const shardId = process.env.MOONWALL_SHARD_ID;
-  const vitestPoolId = process.env.VITEST_POOL_ID;
-  const poolId = shardId ? Number(shardId) : Number(vitestPoolId || 1);
-  const notionalPort = 10000 + poolId * 100;
+  const notionalPort = 10000 + Number(process.env.VITEST_POOL_ID || 1) * 100;
   return notionalPort;
 };
 
