@@ -8,6 +8,7 @@ import type {
 } from "@moonwall/types";
 import chalk from "chalk";
 import path from "node:path";
+import net from "node:net";
 import { standardRepos } from "../lib/repoDefinitions";
 import invariant from "tiny-invariant";
 
@@ -76,7 +77,7 @@ export class LaunchCommandParser {
     }
   }
 
-  withPorts() {
+  async withPorts() {
     if (this.launchSpec.ports) {
       const ports = this.launchSpec.ports;
       if (ports.p2pPort) {
@@ -89,7 +90,7 @@ export class LaunchCommandParser {
         this.overrideArg(`--rpc-port=${ports.rpcPort}`);
       }
     } else {
-      const freePort = getFreePort().toString();
+      const freePort = (await getFreePort()).toString();
       process.env.MOONWALL_RPC_PORT = freePort;
 
       if (this.launchSpec.newRpcBehaviour) {
@@ -146,14 +147,16 @@ export class LaunchCommandParser {
     };
   }
 
-  static create(options: {
+  static async create(options: {
     launchSpec: DevLaunchSpec;
     additionalRepos?: RepoSpec[];
     launchOverrides?: LaunchOverrides;
     verbose?: boolean;
   }) {
     const parser = new LaunchCommandParser(options);
-    const parsed = parser.withPorts().withDefaultForkConfig().withLaunchOverrides();
+    const parsed = await parser
+      .withPorts()
+      .then((p) => p.withDefaultForkConfig().withLaunchOverrides());
 
     if (options.verbose) {
       parsed.print();
@@ -221,7 +224,73 @@ export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
   };
 }
 
-export const getFreePort = () => {
-  const notionalPort = 10000 + Number(process.env.VITEST_POOL_ID || 1) * 100;
-  return notionalPort;
+/**
+ * Check if a port is available for use
+ */
+const isPortAvailable = async (port: number): Promise<boolean> => {
+  return new Promise((resolve) => {
+    const server = net.createServer();
+    server.listen(port, () => {
+      server.once("close", () => resolve(true));
+      server.close();
+    });
+    server.on("error", () => resolve(false));
+  });
+};
+
+/**
+ * Get the next available port starting from a given port
+ */
+const getNextAvailablePort = async (startPort: number): Promise<number> => {
+  let port = startPort;
+  while (port <= 65535) {
+    if (await isPortAvailable(port)) {
+      return port;
+    }
+    port++;
+  }
+  throw new Error(`No available ports found starting from ${startPort}`);
+};
+
+/**
+ * Get a free port with availability checking
+ * Uses async port allocation for better collision avoidance
+ */
+export const getFreePort = async (): Promise<number> => {
+  // Parse shard information from environment variables if available
+  let shardIndex = 0;
+  let totalShards = 1;
+
+  // Check for MOONWALL_TEST_SHARD environment variable (set from --ts parameter)
+  const testShard = process.env.MOONWALL_TEST_SHARD;
+  if (testShard?.includes("/")) {
+    const [current, total] = testShard.split("/");
+    shardIndex = parseInt(current, 10) - 1; // Convert to 0-based index
+    totalShards = parseInt(total, 10);
+  }
+
+  // Use VITEST_POOL_ID as additional offset if available
+  const poolId = parseInt(process.env.VITEST_POOL_ID || "0", 10);
+
+  // Calculate port with better isolation between shards
+  // Base port 10000 + (shard * 1000) + (pool * 100) + deterministic offset
+  const basePort = 10000;
+  const shardOffset = shardIndex * 1000;
+  const poolOffset = poolId * 100;
+
+  // Use a deterministic but unique offset based on environment
+  const processOffset = process.pid % 50;
+
+  const calculatedPort = basePort + shardOffset + poolOffset + processOffset;
+
+  // Ensure we stay within a reasonable port range
+  const startPort = Math.min(calculatedPort, 60000 + shardIndex * 100 + poolId);
+
+  if (process.env.DEBUG_MOONWALL_PORTS) {
+    console.log(
+      `[DEBUG] Port calculation: shard=${shardIndex + 1}/${totalShards}, pool=${poolId}, final=${startPort}`
+    );
+  }
+
+  return getNextAvailablePort(startPort);
 };

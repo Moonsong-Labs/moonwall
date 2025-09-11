@@ -16,6 +16,11 @@ export async function testCmd(envName: string, additionalArgs?: testRunArgs): Pr
   const env = globalConfig.environments.find(({ name }) => name === envName);
   process.env.MOON_TEST_ENV = envName;
 
+  // Set shard information for improved port allocation
+  if (additionalArgs?.shard) {
+    process.env.MOONWALL_TEST_SHARD = additionalArgs.shard;
+  }
+
   if (!env) {
     const envList = globalConfig.environments
       .map((env) => env.name)
