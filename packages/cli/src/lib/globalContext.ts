@@ -658,7 +658,10 @@ export class MoonwallContext {
     }
 
     // Reset port allocator for the current pool
-    const poolId = Number(process.env.VITEST_POOL_ID || 1);
+    // Use shard-based pool ID for proper isolation in CI environments
+    const shardId = process.env.MOONWALL_SHARD_ID;
+    const vitestPoolId = process.env.VITEST_POOL_ID;
+    const poolId = shardId ? Number(shardId) : Number(vitestPoolId || 1);
     await PortAllocator.getInstance().clearPool(poolId);
   }
 

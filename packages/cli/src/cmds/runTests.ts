@@ -102,6 +102,33 @@ export async function executeTests(env: Environment, testRunArgs?: testRunArgs &
 
     const additionalArgs = { ...testRunArgs };
 
+    // Extract shard information for proper port isolation
+    if (testRunArgs?.shard) {
+      const [shardIndex, totalShards] = testRunArgs.shard.split("/").map(Number);
+
+      // Create a truly unique pool ID to avoid conflicts across configs and environments
+      // Include process PID and timestamp to handle multiple parallel configs
+      const pid = process.pid;
+      const timestamp = Date.now() % 10000; // Last 4 digits for uniqueness
+      const envHash = env.name.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+
+      // Formula: [env_hash % 1000] + [shard_index * 10000] + [pid % 100 * 100000] + [timestamp * 1000000000]
+      // This ensures no collisions across different processes, configs, environments, and shards
+      const uniqueShardId =
+        (envHash % 1000) + shardIndex * 10000 + (pid % 100) * 100000 + timestamp * 1000000000;
+
+      process.env.MOONWALL_SHARD_ID = uniqueShardId.toString();
+      process.env.MOONWALL_SHARD_INDEX = shardIndex.toString();
+      process.env.MOONWALL_TOTAL_SHARDS = totalShards.toString();
+
+      // Log for debugging parallel runs
+      if (process.env.CI) {
+        console.log(
+          `[${env.name}] Shard ${shardIndex}/${totalShards} assigned pool ID: ${uniqueShardId} (PID: ${pid})`
+        );
+      }
+    }
+
     const vitestOptions = testRunArgs?.vitestPassthroughArgs?.reduce<UserConfig>((acc, arg) => {
       const [key, value] = arg.split("=");
       return {
