@@ -120,12 +120,22 @@ export class MoonwallContext {
   private async handleDev(env: Environment, config: MoonwallConfig) {
     invariant(env.foundation.type === "dev", "Foundation type must be 'dev'");
 
-    const { cmd, args, launch } = LaunchCommandParser.create({
-      launchSpec: env.foundation.launchSpec[0],
-      additionalRepos: config.additionalRepos,
-      launchOverrides: this.injectedOptions,
-      verbose: false,
-    });
+    // Use async port allocation when shard information is available for better collision avoidance
+    const useAsyncPortAllocation = !!process.env.MOONWALL_TEST_SHARD;
+
+    const { cmd, args, launch } = useAsyncPortAllocation
+      ? await LaunchCommandParser.createAsync({
+          launchSpec: env.foundation.launchSpec[0],
+          additionalRepos: config.additionalRepos,
+          launchOverrides: this.injectedOptions,
+          verbose: false,
+        })
+      : LaunchCommandParser.create({
+          launchSpec: env.foundation.launchSpec[0],
+          additionalRepos: config.additionalRepos,
+          launchOverrides: this.injectedOptions,
+          verbose: false,
+        });
 
     return {
       name: env.name,
