@@ -1,5 +1,17 @@
 # @moonwall/cli
 
+## 5.14.0
+
+### Minor Changes
+
+- e3abecf: Refines connection health checks to reduce test flakiness
+
+### Patch Changes
+
+- Updated dependencies [e3abecf]
+  - @moonwall/util@5.14.0
+  - @moonwall/types@5.14.0
+
 ## 5.13.5
 
 ### Patch Changes
