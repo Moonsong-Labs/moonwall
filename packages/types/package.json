@@ -43,7 +43,6 @@
   "scripts": {
     "clean": "rm -rf dist && rm -rf node_modules",
     "build": "rm -rf dist && tsup src --format esm --no-splitting --sourcemap && pnpm generate-types",
-    "prepare": "pnpm build",
     "generate-types": "tsc && pnpm schema",
     "watch": "tsup src --format esm --watch",
     "lint": "pnpm biome lint ./src",
