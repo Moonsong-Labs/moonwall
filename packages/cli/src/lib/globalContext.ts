@@ -23,7 +23,6 @@ import {
   parseChopsticksRunCmd,
   parseZombieCmd,
 } from "../internal/commandParsers";
-import { PortAllocator } from "../internal/portAllocator";
 import {
   type IPCRequestMessage,
   type IPCResponseMessage,
@@ -121,7 +120,7 @@ export class MoonwallContext {
   private async handleDev(env: Environment, config: MoonwallConfig) {
     invariant(env.foundation.type === "dev", "Foundation type must be 'dev'");
 
-    const { cmd, args, launch } = await LaunchCommandParser.create({
+    const { cmd, args, launch } = LaunchCommandParser.create({
       launchSpec: env.foundation.launchSpec[0],
       additionalRepos: config.additionalRepos,
       launchOverrides: this.injectedOptions,
@@ -656,10 +655,6 @@ export class MoonwallContext {
       await Promise.all(this.nodeCleanupHandlers.map((handler) => handler()));
       this.nodeCleanupHandlers = [];
     }
-
-    // Reset port allocator for the current pool
-    const poolId = Number(process.env.VITEST_POOL_ID || 1);
-    await PortAllocator.getInstance().clearPool(poolId);
   }
 
   public static async getContext(

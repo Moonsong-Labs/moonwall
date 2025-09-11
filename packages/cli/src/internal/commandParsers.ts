@@ -10,7 +10,6 @@ import chalk from "chalk";
 import path from "node:path";
 import { standardRepos } from "../lib/repoDefinitions";
 import invariant from "tiny-invariant";
-import { getAtomicFreePort } from "./portAllocator";
 
 export function parseZombieCmd(launchSpec: ZombieLaunchSpec) {
   if (launchSpec) {
@@ -77,7 +76,7 @@ export class LaunchCommandParser {
     }
   }
 
-  async withPorts() {
+  withPorts() {
     if (this.launchSpec.ports) {
       const ports = this.launchSpec.ports;
       if (ports.p2pPort) {
@@ -90,7 +89,7 @@ export class LaunchCommandParser {
         this.overrideArg(`--rpc-port=${ports.rpcPort}`);
       }
     } else {
-      const freePort = (await getAtomicFreePort()).toString();
+      const freePort = getFreePort().toString();
       process.env.MOONWALL_RPC_PORT = freePort;
 
       if (this.launchSpec.newRpcBehaviour) {
@@ -147,15 +146,14 @@ export class LaunchCommandParser {
     };
   }
 
-  static async create(options: {
+  static create(options: {
     launchSpec: DevLaunchSpec;
     additionalRepos?: RepoSpec[];
     launchOverrides?: LaunchOverrides;
     verbose?: boolean;
   }) {
     const parser = new LaunchCommandParser(options);
-    const parsed = await parser.withPorts();
-    parsed.withDefaultForkConfig().withLaunchOverrides();
+    const parsed = parser.withPorts().withDefaultForkConfig().withLaunchOverrides();
 
     if (options.verbose) {
       parsed.print();
@@ -223,18 +221,7 @@ export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
   };
 }
 
-/**
- * @deprecated Use getAtomicFreePort() instead for thread-safe port allocation
- */
 export const getFreePort = () => {
   const notionalPort = 10000 + Number(process.env.VITEST_POOL_ID || 1) * 100;
   return notionalPort;
-};
-
-/**
- * Get a free port using atomic allocation to prevent race conditions
- * This is the recommended way to allocate ports for parallel node spawning
- */
-export const getFreePortAsync = async () => {
-  return await getAtomicFreePort();
 };
