@@ -1,7 +1,7 @@
 import type { SubmittableExtrinsic } from "@polkadot/api/types";
 import type { ISubmittableResult } from "@polkadot/types/types";
 import type { KeyringPair } from "@polkadot/keyring/types";
-import { alith } from "../constants";
+import { alith } from "../constants/index.js";
 
 export const signAndSend = async (
   tx: SubmittableExtrinsic<"promise", ISubmittableResult>,

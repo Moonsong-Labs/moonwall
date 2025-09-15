@@ -13,7 +13,7 @@ import type {
 } from "@polkadot/types/interfaces";
 import type { Block, SignedBlock } from "@polkadot/types/interfaces/runtime/types";
 import Bottleneck from "bottleneck";
-import { createLogger } from "./logger";
+import { createLogger } from "./logger.js";
 const logger = createLogger({ name: "test:blocks" });
 const debug = logger.debug.bind(logger);
 
@@ -175,7 +175,7 @@ export const getBlockArray = async (
 };
 
 export function extractWeight(
-  weightV1OrV2: u64 | Option<u64> | {refTime:Option<any>} | Option<any>
+  weightV1OrV2: u64 | Option<u64> | { refTime: Option<any> } | Option<any>
 ) {
   if ("isSome" in weightV1OrV2) {
     const weight = weightV1OrV2.unwrap();
@@ -258,6 +258,6 @@ export async function checkTimeSliceForUpgrades(
   currentVersion: u32
 ) {
   const apiAt = await api.at(await api.rpc.chain.getBlockHash(blockNumbers[0]));
-  const onChainRt = (await apiAt.query.system.lastRuntimeUpgrade() as any).unwrap().specVersion;
+  const onChainRt = ((await apiAt.query.system.lastRuntimeUpgrade()) as any).unwrap().specVersion;
   return { result: !onChainRt.eq(currentVersion), specVersion: onChainRt };
 }

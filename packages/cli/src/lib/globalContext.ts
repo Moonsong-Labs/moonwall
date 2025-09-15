@@ -28,7 +28,7 @@ import {
   checkZombieBins,
   getZombieConfig,
 } from "../internal/foundations/zombieHelpers";
-import { launchNode, type MoonwallProcess } from "../internal/localNode";
+import { launchNode, type MoonwallProcess } from "../internal/localNode.js";
 import {
   ProviderFactory,
   ProviderInterfaceFactory,
@@ -43,7 +43,7 @@ import {
 } from "./configReader";
 import { ChildProcess, exec, execSync } from "node:child_process";
 import { promisify } from "node:util";
-import { withTimeout } from "../internal";
+import { withTimeout } from "../internal/index.js";
 import Docker from "dockerode";
 import invariant from "tiny-invariant";
 const logger = createLogger({ name: "context" });

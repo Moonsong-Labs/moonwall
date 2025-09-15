@@ -7,7 +7,7 @@
   "workspaces": ["packages/*", "test", "docs"],
   "scripts": {
     "build": "bun run --filter \"@moonwall/types\" build && bun run --filter \"@moonwall/util\" build && bun run --filter  \"@moonwall/cli\" build",
-    "postbuild": "cd test && bun install --linker=isolated   ",
+    "postbuild": "cd test && bun install --linker=node",
     "generate-types": "bun run --filter \"@moonwall/cli\" generate-types && bun run --filter \"@moonwall/types\" generate-types && bun run --filter \"@moonwall/util\" generate-types",
     "fmt": "biome format ./biome.json; bun run --filter \"@moonwall/cli\" fmt && bun run --filter \"@moonwall/types\" fmt && bun run --filter \"@moonwall/util\" fmt",
     "fmt:fix": "biome format ./biome.json --write; bun run --filter \"@moonwall/cli\" fmt:fix && bun run --filter \"@moonwall/types\" fmt:fix && bun run --filter \"@moonwall/util\" fmt:fix",
@@ -19,22 +19,22 @@
     "changeset:publish:dev": "changeset publish --tag dev",
     "changeset:version": "changeset version",
     "clean-all": "rm -rf node_modules test/node_modules && bun run --filter \"@moonwall/cli\" clean && bun run --filter \"@moonwall/types\" clean && bun run --filter \"@moonwall/util\" clean",
-    "pristine-build": "bun clean-all && bun install --linker=isolated  && bun build && bun generate-types",
+    "pristine-build": "bun clean-all && bun install --linker=isolated  && bun run build && bun generate-types",
     "start": "cd test && bun moonwall",
     "display-reports": "bun vite preview --base __vitest__ --outDir html",
     "test": "cd test && bun moonwall test dev_multi",
     "typecheck": "bun run --filter \"@moonwall/cli\" typecheck && bun run --filter \"@moonwall/types\" typecheck && bun run --filter \"@moonwall/util\" typecheck"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.1.4",
-    "@changesets/cli": "2.29.5",
-    "@types/bun": "^1.2.19",
-    "@types/node": "24.2.1",
-    "@types/react": "19.1.10",
+    "@biomejs/biome": "2.2.4",
+    "@changesets/cli": "2.29.7",
+    "@types/bun": "^1.2.22",
+    "@types/node": "24.4.0",
+    "@types/react": "19.1.13",
     "typescript": "5.9.2"
   },
   "dependencies": {
-    "pino": "^9.7.0",
+    "pino": "^9.9.5",
     "pino-pretty": "^13.0.0"
   }
 }

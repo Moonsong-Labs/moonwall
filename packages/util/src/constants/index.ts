@@ -1,3 +1,3 @@
-export * from "./accounts";
-export * from "./chain";
-export * from "./smartContract";
+export * from "./accounts.js";
+export * from "./chain.js";
+export * from "./smartContract.js";

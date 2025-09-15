@@ -5,7 +5,7 @@ import { blake2AsHex } from "@polkadot/util-crypto";
 import chalk from "chalk";
 import { sha256 } from "ethers";
 import fs, { existsSync, readFileSync } from "node:fs";
-import { getRuntimeWasm } from "./binariesHelpers";
+import { getRuntimeWasm } from "./binariesHelpers.js";
 import {
   cancelReferendaWithCouncil,
   executeOpenTechCommitteeProposal,

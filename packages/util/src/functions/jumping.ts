@@ -19,7 +19,7 @@ export async function jumpRoundsDev(
   count: number
 ): Promise<string | null> {
   // Calculate the number of blocks to create via arithmetic
-  const round = (await polkadotJsApi.query.parachainStaking.round() as any).current
+  const round = ((await polkadotJsApi.query.parachainStaking.round()) as any).current
     .addn(count.valueOf())
     .toNumber();
 
@@ -30,7 +30,9 @@ export async function jumpToRoundDev(polkadotJsApi: ApiPromise, round: number) {
   // Calculate the number of blocks to create via arithmetic
   let lastBlockHash = "";
   for (;;) {
-    const currentRound = (await polkadotJsApi.query.parachainStaking.round() as any).current.toNumber();
+    const currentRound = (
+      (await polkadotJsApi.query.parachainStaking.round()) as any
+    ).current.toNumber();
 
     if (currentRound === round) {
       return lastBlockHash;
@@ -48,7 +50,7 @@ export async function jumpToRoundDev(polkadotJsApi: ApiPromise, round: number) {
 //**************************
 
 async function calculateBlocks(polkadotJsApi: ApiPromise, targetRound: number) {
-  const roundInfo = (await polkadotJsApi.query.parachainStaking.round()) as any
+  const roundInfo = (await polkadotJsApi.query.parachainStaking.round()) as any;
 
   if (roundInfo.current.toNumber() >= targetRound) {
     return 0;
@@ -62,7 +64,7 @@ async function calculateBlocks(polkadotJsApi: ApiPromise, targetRound: number) {
 }
 
 export async function jumpRoundsChopsticks(polkadotJsApi: ApiPromise, port: number, count: number) {
-  const round = (await polkadotJsApi.query.parachainStaking.round() as any).current
+  const round = ((await polkadotJsApi.query.parachainStaking.round()) as any).current
     .addn(count.valueOf())
     .toNumber();
 

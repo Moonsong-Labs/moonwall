@@ -10,7 +10,7 @@
     "moduleResolution": "Bundler",
     "resolvePackageJsonExports": false,
     "paths": {
-      "ink": ["./packages/cli/node_modules/ink/build/index.d.ts"]
+      "ink": ["./node_modules/ink/build/index.d.ts"]
     },
 
     "incremental": true,

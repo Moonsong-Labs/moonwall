@@ -1,7 +1,7 @@
 import type { ApiPromise } from "@polkadot/api";
-import { mapExtrinsics } from "./block";
+import { mapExtrinsics } from "./block.js";
 import type { Extrinsic } from "@polkadot/types/interfaces";
-import { setupLogger as createTestLogger } from "./logger";
+import { setupLogger as createTestLogger } from "./logger.js";
 
 // Re-export setupLogger from logger.ts for backward compatibility
 export const setupLogger = createTestLogger;

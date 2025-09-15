@@ -1,5 +1,4 @@
 export type { KeyringPair } from "@polkadot/keyring/types";
-export * from "./classes/index";
-export * from "./constants/index";
-export * from "./functions/index";
-export * from "./helpers/api-casting";
+export * from "./classes/index.js";
+export * from "./constants/index.js";
+export * from "./functions/index.js";

@@ -17,12 +17,12 @@ import { createLogger } from "@moonwall/util";
 import type { Wallet } from "ethers";
 import { afterAll, beforeAll, describe, it } from "vitest";
 import type { Web3 } from "web3";
-import { getEnvironmentFromConfig, importAsyncConfig } from "./configReader";
-import { MoonwallContext, contextCreator } from "./globalContext";
-import { chopsticksHandler } from "./handlers/chopsticksHandler";
-import { devHandler } from "./handlers/devHandler";
-import { readOnlyHandler } from "./handlers/readOnlyHandler";
-import { zombieHandler } from "./handlers/zombieHandler";
+import { getEnvironmentFromConfig, importAsyncConfig } from "./configReader.js";
+import { MoonwallContext, contextCreator } from "./globalContext.js";
+import { chopsticksHandler } from "./handlers/chopsticksHandler.js";
+import { devHandler } from "./handlers/devHandler.js";
+import { readOnlyHandler } from "./handlers/readOnlyHandler.js";
+import { zombieHandler } from "./handlers/zombieHandler.js";
 import type { PolkadotClient } from "polkadot-api";
 
 const RT_VERSION = Number(process.env.MOON_RTVERSION);

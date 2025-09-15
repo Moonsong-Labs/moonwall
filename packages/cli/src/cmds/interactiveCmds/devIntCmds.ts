@@ -1,5 +1,5 @@
 import type { ApiPromise } from "@polkadot/api";
-import { MoonwallContext } from "../../lib/globalContext";
+import { MoonwallContext } from "../../lib/globalContext.js";
 import { jumpRoundsDev, jumpToRoundDev } from "@moonwall/util";
 import { Separator, rawlist, number } from "@inquirer/prompts";
 import assert from "node:assert";

@@ -1,6 +1,6 @@
 import type { Web3 } from "web3";
-import { alith } from "../constants/accounts";
-import { MIN_GAS_PRICE } from "../constants/chain";
+import { alith } from "../constants/accounts.js";
+import { MIN_GAS_PRICE } from "../constants/chain.js";
 
 export async function customWeb3Request(web3: Web3, method: string, params: any[]) {
   return new Promise((resolve, reject) => {

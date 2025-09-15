@@ -1,5 +1,5 @@
-import { vitestAutoUrl } from "../internal/providerFactories";
-import { getEnvironmentFromConfig } from "./configReader";
+import { vitestAutoUrl } from "../internal/providerFactories.js";
+import { getEnvironmentFromConfig } from "./configReader.js";
 
 export async function customDevRpcRequest(method: string, params: any[] = []): Promise<any> {
   const env = getEnvironmentFromConfig();

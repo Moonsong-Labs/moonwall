@@ -17,8 +17,8 @@ import {
   getWsUrlFromConfig,
   sendSetStorageRequest,
 } from "../../internal/foundations/chopsticksHelpers";
-import { MoonwallContext } from "../globalContext";
-import { upgradeRuntimeChopsticks } from "../upgradeProcedures";
+import { MoonwallContext } from "../globalContext.js";
+import { upgradeRuntimeChopsticks } from "../upgradeProcedures.js";
 
 export const chopsticksHandler: FoundationHandler<"chopsticks"> = ({
   testCases,

@@ -2,7 +2,7 @@ import { type ChildProcess, exec, spawn, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import WebSocket from "ws";
-import { checkAccess, checkExists } from "./fileCheckers";
+import { checkAccess, checkExists } from "./fileCheckers.js";
 import { createLogger } from "@moonwall/util";
 import { setTimeout as timer } from "node:timers/promises";
 import util from "node:util";

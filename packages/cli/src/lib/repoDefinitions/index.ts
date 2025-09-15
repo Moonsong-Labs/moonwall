@@ -1,8 +1,8 @@
 import type { RepoSpec } from "@moonwall/types";
-import mb from "./moonbeam";
-import pd from "./polkadot";
-import ts from "./tanssi";
-import { importAsyncConfig, importJsonConfig } from "../configReader";
+import mb from "./moonbeam.js";
+import pd from "./polkadot.js";
+import ts from "./tanssi.js";
+import { importAsyncConfig, importJsonConfig } from "../configReader.js";
 
 export function allRepos() {
   const defaultRepos: RepoSpec[] = [mb, pd, ts];

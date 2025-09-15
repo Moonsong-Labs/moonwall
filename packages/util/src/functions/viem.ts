@@ -17,8 +17,8 @@ import {
 import { setTimeout as timer } from "node:timers/promises";
 import { privateKeyToAccount } from "viem/accounts";
 import type { Chain } from "viem/chains";
-import { ALITH_ADDRESS, ALITH_PRIVATE_KEY } from "../constants/accounts";
-import { directRpcRequest } from "./common";
+import { ALITH_ADDRESS, ALITH_PRIVATE_KEY } from "../constants/accounts.js";
+import { directRpcRequest } from "./common.js";
 
 /**
  * @name getDevChain

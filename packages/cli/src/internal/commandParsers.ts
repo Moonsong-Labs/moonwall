@@ -8,7 +8,7 @@ import type {
 } from "@moonwall/types";
 import chalk from "chalk";
 import path from "node:path";
-import { standardRepos } from "../lib/repoDefinitions";
+import { standardRepos } from "../lib/repoDefinitions/index.js";
 import invariant from "tiny-invariant";
 
 export function parseZombieCmd(launchSpec: ZombieLaunchSpec) {

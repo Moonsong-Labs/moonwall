@@ -1,0 +1,10 @@
+[install]
+# Trust these packages to compile native code
+trustedDependencies = [
+  "ssh2",
+  "cpu-features"
+]
+
+[install.scopes]
+# You can also trust all packages from specific scopes
+# "@mycompany" = { trustedDependencies = ["*"] }

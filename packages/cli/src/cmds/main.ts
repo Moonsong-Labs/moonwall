@@ -17,10 +17,10 @@ import {
   generateConfig,
   getVersions,
 } from "../internal";
-import { configExists, importAsyncConfig } from "../lib/configReader";
-import { allReposAsync, standardRepos } from "../lib/repoDefinitions";
-import { runNetworkCmd } from "./runNetwork";
-import { testCmd } from "./runTests";
+import { configExists, importAsyncConfig } from "../lib/configReader.js";
+import { allReposAsync, standardRepos } from "../lib/repoDefinitions/index.js";
+import { runNetworkCmd } from "./runNetwork.js";
+import { testCmd } from "./runTests.js";
 import { Octokit } from "@octokit/rest";
 import { checkbox, confirm, input, select, Separator } from "@inquirer/prompts";
 

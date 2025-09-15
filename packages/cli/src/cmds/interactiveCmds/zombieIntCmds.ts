@@ -1,4 +1,4 @@
-import { type CmdCodes, sendIpcMessage } from "../../internal/foundations/zombieHelpers";
+import { type CmdCodes, sendIpcMessage } from "../../internal/foundations/zombieHelpers.js";
 import { input, select, Separator } from "@inquirer/prompts";
 
 export async function resolveZombieInteractiveCmdChoice() {

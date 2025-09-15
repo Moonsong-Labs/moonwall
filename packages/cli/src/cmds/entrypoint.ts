@@ -4,11 +4,16 @@ import "../internal/logging";
 import dotenv from "dotenv";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
-import { fetchArtifact, deriveTestIds, generateConfig, type fetchArtifactArgs } from "../internal";
-import { main } from "./main";
-import { runNetworkCmd } from "./runNetwork";
-import { testCmd } from "./runTests";
-import { configSetup } from "../lib/configReader";
+import {
+  fetchArtifact,
+  deriveTestIds,
+  generateConfig,
+  type fetchArtifactArgs,
+} from "../internal/index.js";
+import { main } from "./main.js";
+import { runNetworkCmd } from "./runNetwork.js";
+import { testCmd } from "./runTests.js";
+import { configSetup } from "../lib/configReader.js";
 dotenv.config();
 
 function handleCursor() {

@@ -22,9 +22,9 @@ import {
   importAsyncConfig,
   isEthereumDevConfig,
 } from "../../lib/configReader";
-import { extractError } from "../../lib/contextHelpers";
-import { MoonwallContext } from "../../lib/globalContext";
-import { vitestAutoUrl } from "../providerFactories";
+import { extractError } from "../../lib/contextHelpers.js";
+import { MoonwallContext } from "../../lib/globalContext.js";
+import { vitestAutoUrl } from "../providerFactories.js";
 const logger = createLogger({ name: "DevTest" });
 const debug = logger.debug.bind(logger);
 

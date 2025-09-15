@@ -3,7 +3,7 @@ import type { WsProvider } from "@polkadot/api";
 import type { ApiTypes, AugmentedEvent } from "@polkadot/api/types";
 import chalk from "chalk";
 import { setTimeout } from "node:timers/promises";
-import { MoonwallContext } from "../../lib/globalContext";
+import { MoonwallContext } from "../../lib/globalContext.js";
 
 export async function getWsFromConfig(providerName?: string): Promise<WsProvider> {
   if (providerName) {

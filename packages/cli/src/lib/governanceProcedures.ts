@@ -84,8 +84,9 @@ export const whiteListTrackNoSend = async <
   const proposalHash =
     typeof proposal === "string" ? proposal : await notePreimage(context, proposal);
 
-  const proposalLen = ((await context.pjsApi.query.preimage.requestStatusFor(proposalHash)) as any).unwrap()
-    .asUnrequested.len;
+  const proposalLen = (
+    (await context.pjsApi.query.preimage.requestStatusFor(proposalHash)) as any
+  ).unwrap().asUnrequested.len;
   const dispatchWLCall = context.pjsApi.tx.whitelist.dispatchWhitelistedCall(
     proposalHash,
     proposalLen,
@@ -147,8 +148,9 @@ export const whiteListedTrack = async <
     typeof proposal === "string" ? proposal : await notePreimage(context, proposal);
 
   // Construct dispatchWhiteListed call
-  const proposalLen = ((await context.pjsApi.query.preimage.requestStatusFor(proposalHash)) as any).unwrap()
-    .asUnrequested.len;
+  const proposalLen = (
+    (await context.pjsApi.query.preimage.requestStatusFor(proposalHash)) as any
+  ).unwrap().asUnrequested.len;
   const dispatchWLCall = context.pjsApi.tx.whitelist.dispatchWhitelistedCall(
     proposalHash,
     proposalLen,
@@ -249,7 +251,9 @@ export const execOpenTechCommitteeProposal = async <
 
   // Vote on it
   for (const voter of voters) {
-    const nonce = ((await context.pjsApi.query.system.account(voter.address)) as any).nonce.toNumber();
+    const nonce = (
+      (await context.pjsApi.query.system.account(voter.address)) as any
+    ).nonce.toNumber();
     const vote = context.pjsApi.tx.openTechCommitteeCollective
       .vote(openTechProposal, openTechProposalIndex, true)
       .signAsync(voter, { nonce });
@@ -447,7 +451,8 @@ export const maximizeConvictionVotingOf = async (
       .tx.convictionVoting.vote(refIndex, {
         Standard: {
           vote: { aye: true, conviction: "Locked6x" },
-          balance: ((await context.polkadotJs().query.system.account(alith.address)) as any).data.free,
+          balance: ((await context.polkadotJs().query.system.account(alith.address)) as any).data
+            .free,
         },
       })
       .paymentInfo(alith)
@@ -461,9 +466,9 @@ export const maximizeConvictionVotingOf = async (
         .tx.convictionVoting.vote(refIndex, {
           Standard: {
             vote: { aye: true, conviction: "Locked6x" },
-            balance: (await (
-              await context.polkadotJs().query.system.account(voter.address)
-            ) as any).data.free.sub(fee),
+            balance: (
+              (await await context.polkadotJs().query.system.account(voter.address)) as any
+            ).data.free.sub(fee),
           },
         })
         .signAsync(voter)
@@ -541,7 +546,7 @@ export const execTechnicalCommitteeProposal = async <
 
 export const executeOpenTechCommitteeProposal = async (api: ApiPromise, encodedHash: string) => {
   console.log("Executing OpenTechCommittee proposal");
-  const queryPreimage = (await api.query.preimage.requestStatusFor(encodedHash) as any)
+  const queryPreimage = (await api.query.preimage.requestStatusFor(encodedHash)) as any;
   if (queryPreimage.isNone) {
     throw new Error("Preimage not found");
   }
@@ -560,7 +565,9 @@ export const executeOpenTechCommitteeProposal = async (api: ApiPromise, encodedH
 
   await signAndSend(api.tx.preimage.notePreimage(dispatchCallHex), charleth);
 
-  const queryDispatchPreimage = (await api.query.preimage.requestStatusFor(dispatchCallPreimageHash) as any)
+  const queryDispatchPreimage = (await api.query.preimage.requestStatusFor(
+    dispatchCallPreimageHash
+  )) as any;
 
   if (queryDispatchPreimage.isNone) {
     throw new Error("Dispatch preimage not found");
@@ -608,13 +615,16 @@ export const executeOpenTechCommitteeProposal = async (api: ApiPromise, encodedH
     api.tx.openTechCommitteeCollective.propose(2, api.tx.whitelist.whitelistCall(encodedHash), 100)
   );
 
-  const openTechProposal = ((await api.query.openTechCommitteeCollective.proposals()) as any).at(-1);
+  const openTechProposal = ((await api.query.openTechCommitteeCollective.proposals()) as any).at(
+    -1
+  );
 
   if (!openTechProposal || openTechProposal?.isEmpty) {
     throw new Error("OpenTechProposal not found");
   }
 
-  const index = ((await api.query.openTechCommitteeCollective.proposalCount()) as any).toNumber() - 1;
+  const index =
+    ((await api.query.openTechCommitteeCollective.proposalCount()) as any).toNumber() - 1;
 
   if (index < 0) {
     throw new Error("OpenTechProposal index not found");
