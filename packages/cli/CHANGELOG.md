@@ -1,5 +1,17 @@
 # @moonwall/cli
 
+## 5.15.0
+
+### Minor Changes
+
+- c18fb54: Improves port allocation by taking into consideration test shard number and performing port scanning.
+
+### Patch Changes
+
+- Updated dependencies [c18fb54]
+  - @moonwall/util@5.15.0
+  - @moonwall/types@5.15.0
+
 ## 5.14.0
 
 ### Minor Changes
