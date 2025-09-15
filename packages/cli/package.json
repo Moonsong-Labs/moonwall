@@ -55,7 +55,8 @@
     "generate-types": "tsc",
     "watch": "tsup src --format esm --watch",
     "typecheck": "pnpm exec tsc --noEmit",
-    "prepublish": "pnpm run build && pnpm run generate-types"
+    "prepublish": "pnpm run build && pnpm run generate-types",
+    "prepare": "pnpm run build"
   },
   "dependencies": {
     "@acala-network/chopsticks": "^1.2.0",

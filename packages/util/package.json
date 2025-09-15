@@ -50,7 +50,8 @@
     "fmt:fix": "biome format . --write",
     "watch": "tsup src --format esm --watch",
     "typecheck": "pnpm exec tsc --noEmit",
-    "prepublish": "pnpm run build && pnpm run generate-types"
+    "prepublish": "pnpm run build && pnpm run generate-types",
+    "prepare": "pnpm run build"
   },
   "dependencies": {
     "@inquirer/prompts": "^7.6.0",
