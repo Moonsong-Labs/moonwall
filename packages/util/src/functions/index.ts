@@ -1,10 +1,10 @@
-export * from "./block";
-export * from "./common";
-export * from "./contextHelpers";
-export * from "./contracts";
-export * from "./ethers";
-export * from "./extrinsics";
-export * from "./jumping";
+export * from "./block.js";
+export * from "./common.js";
+export * from "./contextHelpers.js";
+export * from "./contracts.js";
+export * from "./ethers.js";
+export * from "./extrinsics.js";
+export * from "./jumping.js";
 export {
   createLogger,
   getLogger,
@@ -12,7 +12,7 @@ export {
   setLoggerEnabled,
   type Logger,
   type LoggerOptions,
-} from "./logger";
-export * from "./logging";
-export * from "./providers";
-export * from "./viem";
+} from "./logger.js";
+export * from "./logging.js";
+export * from "./providers.js";
+export * from "./viem.js";

@@ -23,8 +23,12 @@ import {
 } from "@moonwall/util";
 import { Keyring } from "@polkadot/api";
 import type { ApiTypes } from "@polkadot/api/types";
-import { createDevBlock } from "../../internal/foundations/devModeHelpers";
-import { getEnvironmentFromConfig, importJsonConfig, isEthereumDevConfig } from "../configReader";
+import { createDevBlock } from "../../internal/foundations/devModeHelpers.js";
+import {
+  getEnvironmentFromConfig,
+  importJsonConfig,
+  isEthereumDevConfig,
+} from "../configReader.js";
 import {
   deployCreateCompiledContract,
   interactWithContract,

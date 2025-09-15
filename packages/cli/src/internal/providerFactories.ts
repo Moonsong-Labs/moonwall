@@ -297,14 +297,15 @@ export class ProviderInterfaceFactory {
       api,
       type: "polkadotJs",
       greet: async () => {
+        const version = api.consts.system.version as any;
         debug(
           `👋  Provider ${this.name} is connected to chain` +
-            ` ${api.consts.system.version.specName.toString()} ` +
-            `RT${api.consts.system.version.specVersion.toNumber()}`
+            ` ${version.specName.toString()} ` +
+            `RT${version.specVersion.toNumber()}`
         );
         return {
-          rtVersion: api.consts.system.version.specVersion.toNumber(),
-          rtName: api.consts.system.version.specName.toString(),
+          rtVersion: version.specVersion.toNumber(),
+          rtName: version.specName.toString(),
         };
       },
       disconnect: async () => api.disconnect(),

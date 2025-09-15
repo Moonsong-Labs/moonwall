@@ -7,7 +7,7 @@ import {
   type Provider,
 } from "ethers";
 import type { TransactionType } from "@moonwall/types";
-import { ALITH_ADDRESS } from "../constants/accounts";
+import { ALITH_ADDRESS } from "../constants/accounts.js";
 
 type TransactionHandler = (blob: TransactionBlob, params: TransactionRequest) => void;
 

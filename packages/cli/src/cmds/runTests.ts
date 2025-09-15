@@ -4,10 +4,10 @@ import path from "node:path";
 import type { UserConfig, Vitest } from "vitest/node";
 import { startVitest } from "vitest/node";
 import { createLogger } from "@moonwall/util";
-import { clearNodeLogs } from "../internal/cmdFunctions/tempLogs";
-import { commonChecks } from "../internal/launcherCommon";
-import { cacheConfig, importAsyncConfig, loadEnvVars } from "../lib/configReader";
-import { MoonwallContext, contextCreator, runNetworkOnly } from "../lib/globalContext";
+import { clearNodeLogs } from "../internal/cmdFunctions/tempLogs.js";
+import { commonChecks } from "../internal/launcherCommon.js";
+import { cacheConfig, importAsyncConfig, loadEnvVars } from "../lib/configReader.js";
+import { MoonwallContext, contextCreator, runNetworkOnly } from "../lib/globalContext.js";
 const logger = createLogger({ name: "runner" });
 
 export async function testCmd(envName: string, additionalArgs?: testRunArgs): Promise<boolean> {

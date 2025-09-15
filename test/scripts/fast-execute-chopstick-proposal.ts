@@ -1,4 +1,3 @@
-import "@moonbeam-network/api-augment";
 import yargs from "yargs";
 import chalk from "chalk";
 import { ALITH_PRIVATE_KEY, createLogger } from "@moonwall/util";

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Box, Text, useInput, useApp, Static, Spacer } from "ink";
 import chalk from "chalk";
 import fs from "node:fs";
-import { executeTests, testRunArgs } from "../runTests";
+import { executeTests, testRunArgs } from "../runTests.js";
 import { UserConfig } from "vitest/dist/node.js";
 import tmp from 'tmp';
 import { JsonTestResults } from "vitest/reporters"

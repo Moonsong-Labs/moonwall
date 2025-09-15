@@ -1,1 +1,1 @@
-export * from "./eth-tester";
+export * from "./eth-tester.js";

@@ -2,7 +2,7 @@ import type { LaunchConfig } from "@zombienet/orchestrator";
 import chalk from "chalk";
 import fs from "node:fs";
 import invariant from "tiny-invariant";
-import { checkAccess, checkExists } from "../fileCheckers";
+import { checkAccess, checkExists } from "../fileCheckers.js";
 import { setTimeout as timer } from "node:timers/promises";
 import net from "node:net";
 

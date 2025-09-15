@@ -20,7 +20,7 @@ import path from "node:path";
 import type { Abi } from "viem";
 import { type Log, decodeFunctionResult, encodeFunctionData, toHex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { importJsonConfig } from "./configReader";
+import { importJsonConfig } from "./configReader.js";
 
 function getCompiledPath(contractName: string) {
   const config = importJsonConfig();

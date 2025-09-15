@@ -1,3 +1,3 @@
-export * from "./chopsticksIntCmds";
-export * from "./devIntCmds";
-export * from "./zombieIntCmds";
+export * from "./chopsticksIntCmds.js";
+export * from "./devIntCmds.js";
+export * from "./zombieIntCmds.js";

@@ -3,22 +3,24 @@ import chalk from "chalk";
 import clear from "clear";
 import { promises as fsPromises } from "node:fs";
 import { parse } from "yaml";
-import { clearNodeLogs, reportLogLocation } from "../internal/cmdFunctions/tempLogs";
-import { commonChecks } from "../internal/launcherCommon";
+import { clearNodeLogs, reportLogLocation } from "../internal/cmdFunctions/tempLogs.js";
+import { commonChecks } from "../internal/launcherCommon.js";
+import { render } from "ink";
+import { LogViewer as LogStreamer } from "./components/LogViewer.js";
 import {
   cacheConfig,
   getEnvironmentFromConfig,
   importAsyncConfig,
   loadEnvVars,
 } from "../lib/configReader";
-import { MoonwallContext, runNetworkOnly } from "../lib/globalContext";
+import { MoonwallContext, runNetworkOnly } from "../lib/globalContext.js";
 import {
   resolveChopsticksInteractiveCmdChoice,
   resolveDevInteractiveCmdChoice,
   resolveZombieInteractiveCmdChoice,
 } from "./interactiveCmds";
-import { executeTests } from "./runTests";
-import type { RunCommandArgs } from "./entrypoint";
+import { executeTests } from "./runTests.js";
+import type { RunCommandArgs } from "./entrypoint.js";
 import { confirm, input, select, Separator } from "@inquirer/prompts";
 
 let lastSelected = 0;
@@ -324,11 +326,7 @@ const resolveTailChoice = async (env: Environment) => {
         throw new Error("No log file path resolved, this should not happen. Please raise defect");
       }
 
-      // Dynamically import ink and LogStreamer to support CommonJS builds
-      const { renderWithInk, createLogViewer } = await import("../lib/inkDynamicImport");
-      const { LogViewer: LogStreamer } = await createLogViewer();
-      
-      const { waitUntilExit } = await renderWithInk(
+      const { waitUntilExit } = render(
         <LogStreamer
           env={env}
           logFilePath={logFilePath}

@@ -2,12 +2,12 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import semver from "semver";
 import chalk from "chalk";
-import { runTask } from "../processHelpers";
+import { runTask } from "../processHelpers.js";
 import { minimatch } from "minimatch";
-import { downloader } from "./downloader";
-import { allReposAsync, standardRepos } from "../../lib/repoDefinitions";
+import { downloader } from "./downloader.js";
+import { allReposAsync, standardRepos } from "../../lib/repoDefinitions/index.js";
 import { execSync } from "node:child_process";
-import { configExists } from "../../lib/configReader";
+import { configExists } from "../../lib/configReader.js";
 import { Octokit } from "@octokit/rest";
 import { confirm } from "@inquirer/prompts";
 

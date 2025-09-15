@@ -1,7 +1,7 @@
 import { promises as fsPromises } from "node:fs";
 import { parse } from "yaml";
-import { getEnvironmentFromConfig } from "../../lib/configReader";
-import { MoonwallContext } from "../../lib/globalContext";
+import { getEnvironmentFromConfig } from "../../lib/configReader.js";
+import { MoonwallContext } from "../../lib/globalContext.js";
 import type { ApiPromise } from "@polkadot/api";
 import { jumpBlocksChopsticks, jumpRoundsChopsticks, jumpToRoundChopsticks } from "@moonwall/util";
 import { number, select, Separator } from "@inquirer/prompts";

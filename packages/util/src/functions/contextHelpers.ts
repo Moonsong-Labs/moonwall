@@ -1,4 +1,3 @@
-import "@moonbeam-network/api-augment";
 import type { u128 } from "@polkadot/types-codec";
 import type {
   AccountId20,

@@ -1,3 +1,3 @@
-export * from "./chopsticksHelpers";
-export * from "./devModeHelpers";
-export * from "./zombieHelpers";
+export * from "./chopsticksHelpers.js";
+export * from "./devModeHelpers.js";
+export * from "./zombieHelpers.js";
