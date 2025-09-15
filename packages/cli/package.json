@@ -55,14 +55,15 @@
     "generate-types": "tsc",
     "watch": "tsup src --format esm --watch",
     "typecheck": "pnpm exec tsc --noEmit",
-    "prepublish": "pnpm run build && pnpm run generate-types"
+    "prepublish": "pnpm run build && pnpm run generate-types",
+    "prepare": "pnpm run build"
   },
   "dependencies": {
     "@acala-network/chopsticks": "^1.2.0",
     "@inquirer/prompts": "^7.6.0",
     "@moonbeam-network/api-augment": "0.3700.0",
-    "@moonwall/types": "workspace:*",
-    "@moonwall/util": "workspace:*",
+    "@moonwall/types": "file:../types",
+    "@moonwall/util": "file:../util",
     "@octokit/rest": "22.0.0",
     "@polkadot/api": "^16.4.1",
     "@polkadot/api-derive": "^16.4.1",

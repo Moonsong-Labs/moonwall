@@ -56,11 +56,11 @@ importers:
         specifier: 0.3700.0
         version: 0.3700.0(postcss@8.5.6)(yaml@2.8.0)
       '@moonwall/types':
-        specifier: workspace:*
+        specifier: file:../types
         version: link:../types
       '@moonwall/util':
-        specifier: workspace:*
-        version: link:../util
+        specifier: file:../util
+        version: file:packages/util(@types/node@24.0.14)(chokidar@3.6.0)(encoding@0.1.13)(jsdom@23.2.0)(postcss@8.5.6)(rxjs@7.8.2)(tsx@4.20.3)(typescript@5.8.3)(yaml@2.8.0)(zod@3.25.76)
       '@octokit/rest':
         specifier: 22.0.0
         version: 22.0.0
@@ -283,8 +283,8 @@ importers:
         specifier: 0.3700.0
         version: 0.3700.0(postcss@8.5.6)(yaml@2.8.0)
       '@moonwall/types':
-        specifier: workspace:*
-        version: link:../types
+        specifier: file:../types
+        version: file:packages/types(@vitest/ui@3.2.4(vitest@3.2.4))(chokidar@3.6.0)(encoding@0.1.13)(jsdom@23.2.0)(postcss@8.5.6)(rxjs@7.8.2)(tsx@4.20.3)(typescript@5.8.3)(yaml@2.8.0)(zod@3.25.76)
       '@polkadot/api':
         specifier: ^16.4.1
         version: 16.4.1
@@ -1435,6 +1435,14 @@ packages:
 
   '@moonbeam-network/types-bundle@1.0.2':
     resolution: {integrity: sha512-qVyy8x2tEZQoUqqU0ILZhp4vLazl10kQwTk8mdUYkQ8Nd/6RncSe/xzfWkl6pUHmPfK5RZlNDDI8Jao3+2xsiw==}
+
+  '@moonwall/types@file:packages/types':
+    resolution: {directory: packages/types, type: directory}
+    engines: {node: '>=20', pnpm: '>=7'}
+
+  '@moonwall/util@file:packages/util':
+    resolution: {directory: packages/util, type: directory}
+    engines: {node: '>=20', pnpm: '>=7'}
 
   '@noble/ciphers@1.3.0':
     resolution: {integrity: sha512-2I0gnIVPtfnMw9ee9h1dJG7tp81+8Ob3OJb3Mv37rx5L40/b0i7djjCVvGOVqc9AEIQyvyu1i6ypKdFw8R8gQw==}
@@ -6594,6 +6602,115 @@ snapshots:
       - tsx
       - utf-8-validate
       - yaml
+
+  '@moonwall/types@file:packages/types(@vitest/ui@3.2.4(vitest@3.2.4))(chokidar@3.6.0)(encoding@0.1.13)(jsdom@23.2.0)(postcss@8.5.6)(rxjs@7.8.2)(tsx@4.20.3)(typescript@5.8.3)(yaml@2.8.0)(zod@3.25.76)':
+    dependencies:
+      '@polkadot/api': 16.4.1
+      '@polkadot/api-base': 16.4.1
+      '@polkadot/keyring': 13.5.3(@polkadot/util-crypto@13.5.3(@polkadot/util@13.5.3))(@polkadot/util@13.5.3)
+      '@polkadot/types': 16.4.1
+      '@polkadot/util': 13.5.3
+      '@polkadot/util-crypto': 13.5.3(@polkadot/util@13.5.3)
+      '@types/node': 24.0.14
+      '@zombienet/utils': 0.0.29(@types/node@24.0.14)(chokidar@3.6.0)(typescript@5.8.3)
+      bottleneck: 2.19.5
+      ethers: 6.15.0
+      polkadot-api: 1.14.1(postcss@8.5.6)(rxjs@7.8.2)(tsx@4.20.3)(yaml@2.8.0)
+      viem: 2.31.7(typescript@5.8.3)(zod@3.25.76)
+      vitest: 3.2.4(@types/node@24.0.14)(@vitest/ui@3.2.4)(jsdom@23.2.0)(tsx@4.20.3)(yaml@2.8.0)
+      web3: 4.16.0(encoding@0.1.13)(typescript@5.8.3)(zod@3.25.76)
+    transitivePeerDependencies:
+      - '@edge-runtime/vm'
+      - '@microsoft/api-extractor'
+      - '@swc/core'
+      - '@swc/wasm'
+      - '@types/debug'
+      - '@vitest/browser'
+      - '@vitest/ui'
+      - bufferutil
+      - chokidar
+      - encoding
+      - happy-dom
+      - jiti
+      - jsdom
+      - less
+      - lightningcss
+      - msw
+      - postcss
+      - rxjs
+      - sass
+      - sass-embedded
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+      - tsx
+      - typescript
+      - utf-8-validate
+      - yaml
+      - zod
+
+  '@moonwall/util@file:packages/util(@types/node@24.0.14)(chokidar@3.6.0)(encoding@0.1.13)(jsdom@23.2.0)(postcss@8.5.6)(rxjs@7.8.2)(tsx@4.20.3)(typescript@5.8.3)(yaml@2.8.0)(zod@3.25.76)':
+    dependencies:
+      '@inquirer/prompts': 7.6.0(@types/node@24.0.14)
+      '@moonbeam-network/api-augment': 0.3700.0(postcss@8.5.6)(yaml@2.8.0)
+      '@moonwall/types': file:packages/types(@vitest/ui@3.2.4(vitest@3.2.4))(chokidar@3.6.0)(encoding@0.1.13)(jsdom@23.2.0)(postcss@8.5.6)(rxjs@7.8.2)(tsx@4.20.3)(typescript@5.8.3)(yaml@2.8.0)(zod@3.25.76)
+      '@polkadot/api': 16.4.1
+      '@polkadot/api-derive': 16.4.1
+      '@polkadot/keyring': 13.5.3(@polkadot/util-crypto@13.5.3(@polkadot/util@13.5.3))(@polkadot/util@13.5.3)
+      '@polkadot/rpc-provider': 16.4.1
+      '@polkadot/types': 16.4.1
+      '@polkadot/types-codec': 16.4.1
+      '@polkadot/util': 13.5.3
+      '@polkadot/util-crypto': 13.5.3(@polkadot/util@13.5.3)
+      '@vitest/ui': 3.2.4(vitest@3.2.4)
+      bottleneck: 2.19.5
+      chalk: 5.4.1
+      clear: 0.1.0
+      colors: 1.4.0
+      dotenv: 17.2.0
+      ethers: 6.15.0
+      pino: 9.7.0
+      pino-pretty: 13.0.0
+      rlp: 3.0.0
+      semver: 7.7.2
+      tiny-invariant: 1.3.3
+      viem: 2.31.7(typescript@5.8.3)(zod@3.25.76)
+      vitest: 3.2.4(@types/node@24.0.14)(@vitest/ui@3.2.4)(jsdom@23.2.0)(tsx@4.20.3)(yaml@2.8.0)
+      web3: 4.16.0(encoding@0.1.13)(typescript@5.8.3)(zod@3.25.76)
+      ws: 8.18.3
+      yargs: 18.0.0
+    transitivePeerDependencies:
+      - '@edge-runtime/vm'
+      - '@microsoft/api-extractor'
+      - '@swc/core'
+      - '@swc/wasm'
+      - '@types/debug'
+      - '@types/node'
+      - '@vitest/browser'
+      - bufferutil
+      - chokidar
+      - debug
+      - encoding
+      - happy-dom
+      - jiti
+      - jsdom
+      - less
+      - lightningcss
+      - msw
+      - postcss
+      - rxjs
+      - sass
+      - sass-embedded
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+      - tsx
+      - typescript
+      - utf-8-validate
+      - yaml
+      - zod
 
   '@noble/ciphers@1.3.0': {}
 
