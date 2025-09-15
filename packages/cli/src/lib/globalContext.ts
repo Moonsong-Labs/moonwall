@@ -120,7 +120,8 @@ export class MoonwallContext {
   private async handleDev(env: Environment, config: MoonwallConfig) {
     invariant(env.foundation.type === "dev", "Foundation type must be 'dev'");
 
-    const { cmd, args, launch } = LaunchCommandParser.create({
+    // Always use async port allocation for better collision avoidance
+    const { cmd, args, launch } = await LaunchCommandParser.create({
       launchSpec: env.foundation.launchSpec[0],
       additionalRepos: config.additionalRepos,
       launchOverrides: this.injectedOptions,
