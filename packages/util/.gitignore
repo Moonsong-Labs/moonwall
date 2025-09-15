@@ -1,4 +1,4 @@
 node_modules/
-# dist/ - allowing dist folder for GitHub dependencies support
+dist/
 *.log
 .DS_Store

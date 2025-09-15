@@ -1,7 +1,5 @@
 **node_modules**
-# **dist** - allowing dist folders for GitHub dependencies support
-test/dist
-docs/dist
+**dist**
 **coverage**
 **tmp**
 **/.tsup/
