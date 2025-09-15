@@ -1,4 +1,3 @@
-import "@moonbeam-network/api-augment";
 import type { MoonwallConfig, Environment } from "@moonwall/types";
 import { readFile, access } from "node:fs/promises";
 import { readFileSync, existsSync, constants } from "node:fs";

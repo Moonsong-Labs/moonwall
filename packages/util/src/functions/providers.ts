@@ -1,4 +1,3 @@
-import "@moonbeam-network/api-augment";
 import type { Web3 } from "web3";
 import { alith } from "../constants/accounts";
 import { MIN_GAS_PRICE } from "../constants/chain";

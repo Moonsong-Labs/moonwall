@@ -1,4 +1,3 @@
-import "@moonbeam-network/api-augment";
 import type { ChopsticksContext, UpgradePreferences } from "@moonwall/types";
 import type { ApiPromise } from "@polkadot/api";
 import type { WeightV2 } from "@polkadot/types/interfaces";
@@ -107,7 +106,7 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
         );
       }
 
-      let nonce = (await api.rpc.system.accountNextIndex(options.from.address)).toNumber();
+      let nonce = ((await api.rpc.system.accountNextIndex(options.from.address)) as any).toNumber();
 
       switch (options.upgradeMethod) {
         case "Sudo": {
@@ -136,7 +135,7 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
           log("Using governance...");
           // TODO: remove support for old style after all chains upgraded to 2400+
           const proposal =
-            api.consts.system.version.specVersion.toNumber() >= 2400
+            (api.consts.system.version as any).specVersion.toNumber() >= 2400
               ? api.tx.parachainSystem.authorizeUpgrade(blake2AsHex(code), true)
               : (api.tx.parachainSystem as any).authorizeUpgrade(blake2AsHex(code));
           const encodedProposal = proposal.method.toHex();
@@ -203,7 +202,7 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
           await executeProposalWithCouncil(api, encodedHash);
 
           // Needs to retrieve nonce after those governance calls
-          nonce = (await api.rpc.system.accountNextIndex(options.from.address)).toNumber();
+          nonce = ((await api.rpc.system.accountNextIndex(options.from.address)) as any).toNumber();
           log("Enacting authorized upgrade...");
           await api.tx.parachainSystem
             .enactAuthorizedUpgrade(code)
@@ -222,7 +221,7 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
           const preImageExists =
             api.query.preimage && (await api.query.preimage.statusFor(encodedHash));
 
-          if (preImageExists.isSome && preImageExists.unwrap().isRequested) {
+          if ((preImageExists as any).isSome && (preImageExists as any).unwrap().isRequested) {
             log(`Preimage ${encodedHash} already exists !\n`);
           } else {
             log(

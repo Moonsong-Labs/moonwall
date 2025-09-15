@@ -1,4 +1,3 @@
-import "@moonbeam-network/api-augment";
 import { BN } from "@polkadot/util";
 
 // Sort dict by key

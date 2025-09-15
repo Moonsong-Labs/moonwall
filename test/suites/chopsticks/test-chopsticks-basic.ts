@@ -1,4 +1,3 @@
-import "@moonbeam-network/api-augment";
 import { describeSuite, expect, beforeAll, MoonwallContext } from "@moonwall/cli";
 import { BALTATHAR_ADDRESS, CHARLETH_ADDRESS, ETHAN_ADDRESS, alith } from "@moonwall/util";
 import { parseEther, formatEther } from "ethers";

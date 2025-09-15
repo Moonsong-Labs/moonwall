@@ -1,4 +1,3 @@
-import "@moonbeam-network/api-augment";
 import type {
   BlockCreation,
   DevModeContext,

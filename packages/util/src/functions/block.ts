@@ -1,4 +1,3 @@
-import "@moonbeam-network/api-augment";
 import type { ApiPromise } from "@polkadot/api";
 import type { TxWithEvent } from "@polkadot/api-derive/types";
 import type { Option, u32, u64 } from "@polkadot/types";
@@ -13,7 +12,6 @@ import type {
   RuntimeDispatchInfoV1,
 } from "@polkadot/types/interfaces";
 import type { Block, SignedBlock } from "@polkadot/types/interfaces/runtime/types";
-import type { FrameSystemEventRecord, SpWeightsWeightV2Weight } from "@polkadot/types/lookup";
 import Bottleneck from "bottleneck";
 import { createLogger } from "./logger";
 const logger = createLogger({ name: "test:blocks" });
@@ -29,7 +27,6 @@ export async function createAndFinalizeBlock(
   proofSize?: number;
 }> {
   const startTime: number = Date.now();
-  // TODO: any/raw rpc request can be removed once api-augment is updated
   const block: any = parentHash
     ? await api.rpc("engine_createBlock", true, finalize, parentHash)
     : await api.rpc("engine_createBlock", true, finalize);
@@ -37,7 +34,7 @@ export async function createAndFinalizeBlock(
   return {
     duration: Date.now() - startTime,
     hash: block.hash as string, // toString doesn't work for block hashes
-    proofSize: block.proof_size as number, // TODO: casting can be removed once api-augment is updated
+    proofSize: block.proof_size as number,
   };
 }
 
@@ -178,7 +175,7 @@ export const getBlockArray = async (
 };
 
 export function extractWeight(
-  weightV1OrV2: u64 | Option<u64> | SpWeightsWeightV2Weight | Option<any>
+  weightV1OrV2: u64 | Option<u64> | {refTime:Option<any>} | Option<any>
 ) {
   if ("isSome" in weightV1OrV2) {
     const weight = weightV1OrV2.unwrap();
@@ -224,7 +221,7 @@ export function extractPreimageDeposit(
 
 export function mapExtrinsics(
   extrinsics: Extrinsic[],
-  records: FrameSystemEventRecord[],
+  records: any[],
   fees?: RuntimeDispatchInfo[] | RuntimeDispatchInfoV1[]
 ): TxWithEventAndFee[] {
   return extrinsics.map((extrinsic, index): TxWithEventAndFee => {
@@ -261,6 +258,6 @@ export async function checkTimeSliceForUpgrades(
   currentVersion: u32
 ) {
   const apiAt = await api.at(await api.rpc.chain.getBlockHash(blockNumbers[0]));
-  const onChainRt = (await apiAt.query.system.lastRuntimeUpgrade()).unwrap().specVersion;
+  const onChainRt = (await apiAt.query.system.lastRuntimeUpgrade() as any).unwrap().specVersion;
   return { result: !onChainRt.eq(currentVersion), specVersion: onChainRt };
 }
