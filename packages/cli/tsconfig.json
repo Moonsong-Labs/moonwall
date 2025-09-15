@@ -1,11 +1,12 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "types": ["node"],
+    "types": ["node", "react"],
     "outDir": "dist",
     "noEmit": true,
     "declaration": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "resolvePackageJsonExports": true
   },
   "include": ["./src/**/*.ts", "./src/**/*.tsx"],
   "exclude": ["**/dist/**"]

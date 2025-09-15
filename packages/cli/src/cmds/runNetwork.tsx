@@ -5,6 +5,8 @@ import { promises as fsPromises } from "node:fs";
 import { parse } from "yaml";
 import { clearNodeLogs, reportLogLocation } from "../internal/cmdFunctions/tempLogs.js";
 import { commonChecks } from "../internal/launcherCommon.js";
+import { render } from "ink";
+import { LogViewer as LogStreamer } from "./components/LogViewer.js";
 import {
   cacheConfig,
   getEnvironmentFromConfig,
@@ -324,11 +326,7 @@ const resolveTailChoice = async (env: Environment) => {
         throw new Error("No log file path resolved, this should not happen. Please raise defect");
       }
 
-      // Dynamically import ink and LogStreamer to support CommonJS builds
-      const { renderWithInk, createLogViewer } = await import("../lib/inkDynamicImport");
-      const { LogViewer: LogStreamer } = await createLogViewer();
-      
-      const { waitUntilExit } = await renderWithInk(
+      const { waitUntilExit } = render(
         <LogStreamer
           env={env}
           logFilePath={logFilePath}

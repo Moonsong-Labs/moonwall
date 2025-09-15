@@ -9,10 +9,6 @@
     
     "moduleResolution": "Bundler",
     "resolvePackageJsonExports": false,
-    "paths": {
-      "ink": ["./node_modules/ink/build/index.d.ts"]
-    },
-
     "incremental": true,
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
     "noEmit": true,
