@@ -50,7 +50,6 @@
     "fmt": "biome format ./src",
     "fmt:fix": "biome format src --write",
     "prepublish": "pnpm run build && pnpm run generate-types",
-    "prepare": "pnpm run build",
     "schema": "typescript-json-schema --tsNodeRegister --esModuleInterop -o config_schema.json ./src/config.ts MoonwallConfig && pnpm biome format config_schema.json --write"
   },
   "dependencies": {
