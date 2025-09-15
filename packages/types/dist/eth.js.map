@@ -1,0 +1,1 @@
+{"version":3,"sources":["../src/eth.ts"],"sourcesContent":["export const TransactionTypes = [\"eip1559\", \"eip2930\", \"legacy\"] as const;\nexport type TransactionType = (typeof TransactionTypes)[number];\n"],"mappings":";AAAO,IAAM,mBAAmB,CAAC,WAAW,WAAW,QAAQ;","names":[]}
