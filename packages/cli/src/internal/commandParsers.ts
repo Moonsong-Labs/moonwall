@@ -261,9 +261,10 @@ export const getFreePort = async (): Promise<number> => {
   let shardIndex = 0;
   let totalShards = 1;
 
-  // Check for MOONWALL_TEST_SHARD environment variable (set from --ts parameter)
-  const testShard = process.env.MOONWALL_TEST_SHARD;
-  if (testShard?.includes("/")) {
+  // Check for MOONWALL_TEST_SHARD environment variable (set from --ts parameter in test command)
+  // For run command or when not set, we'll use default values (shard 1 of 1)
+  const testShard = process.env.MOONWALL_TEST_SHARD || "1/1";
+  if (testShard.includes("/")) {
     const [current, total] = testShard.split("/");
     shardIndex = parseInt(current, 10) - 1; // Convert to 0-based index
     totalShards = parseInt(total, 10);
