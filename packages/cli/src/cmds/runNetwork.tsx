@@ -39,13 +39,15 @@ export async function runNetworkCmd(args: RunCommandArgs) {
   const env = globalConfig.environments.find(({ name }) => name === args.envName);
 
   if (!env) {
-    console.error(chalk.red.bold('\n❌ Environment not found'));
-    console.error(chalk.yellow(`Environment "${args.envName || 'undefined'}" is not defined in your configuration.`));
-    console.error(chalk.cyan('\nAvailable environments:'));
-    globalConfig.environments.forEach(env => {
-      console.error(chalk.gray(`  • ${env.name}`));
-    });
-    process.exit(1);
+    const envList = globalConfig.environments
+      .map((env) => env.name)
+      .sort()
+      .join(", ");
+    throw new Error(
+      `No environment found in config for: ${chalk.bgWhiteBright.blackBright(
+        args.envName
+      )}\n Environments defined in config are: ${envList}\n`
+    );
   }
 
   loadEnvVars();
