@@ -31,6 +31,12 @@ export async function runNetworkCmd(args: RunCommandArgs) {
   if (args.subDirectory) {
     process.env.MOON_SUBDIR = args.subDirectory;
   }
+
+  // Set default shard information for consistent port allocation
+  // This ensures the run command uses the same port allocation logic as test command
+  if (!process.env.MOONWALL_TEST_SHARD) {
+    process.env.MOONWALL_TEST_SHARD = "1/1";
+  }
   const globalConfig = await importAsyncConfig();
   const env = globalConfig.environments.find(({ name }) => name === args.envName);
 
