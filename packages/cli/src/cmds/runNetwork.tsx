@@ -40,9 +40,9 @@ export async function runNetworkCmd(args: RunCommandArgs) {
 
   if (!env) {
     const envList = globalConfig.environments
-      .map((env) => env.name)
+      .map(env => env.name)
       .sort()
-      .join(", ");
+      .join(', ');
     throw new Error(
       `No environment found in config for: ${chalk.bgWhiteBright.blackBright(
         args.envName
