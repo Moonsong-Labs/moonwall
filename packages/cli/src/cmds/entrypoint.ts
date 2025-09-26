@@ -1,4 +1,5 @@
 import "@moonbeam-network/api-augment";
+import chalk from "chalk";
 import dotenv from "dotenv";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
@@ -170,7 +171,7 @@ yargs(hideBin(process.argv))
     (yargs) => {
       return yargs
         .positional("envName", {
-          describe: "Network environment to start",
+          describe: "Network environment to start. Must be defined in the global config file.",
         })
         .positional("GrepTest", {
           type: "string",
@@ -183,6 +184,11 @@ yargs(hideBin(process.argv))
         });
     },
     async (argv) => {
+      if (!argv.envName) {
+        console.error(chalk.red.bold("\n❌ Missing environment name"));
+        console.error(chalk.yellow("You must specify an environment to run."));
+        process.exit(1);
+      }
       process.env.MOON_RUN_SCRIPTS = "true";
       await runNetworkCmd(argv);
     }
