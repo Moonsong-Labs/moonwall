@@ -172,6 +172,7 @@ yargs(hideBin(process.argv))
       return yargs
         .positional("envName", {
           describe: "Network environment to start. Must be defined in the global config file.",
+          type: "string",
         })
         .positional("GrepTest", {
           type: "string",
@@ -184,11 +185,6 @@ yargs(hideBin(process.argv))
         });
     },
     async (argv) => {
-      if (!argv.envName) {
-        console.error(chalk.red.bold("\n❌ Missing environment name"));
-        console.error(chalk.yellow("You must specify an environment to run."));
-        process.exit(1);
-      }
       process.env.MOON_RUN_SCRIPTS = "true";
       await runNetworkCmd(argv);
     }
