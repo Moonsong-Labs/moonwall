@@ -8,6 +8,7 @@ import { clearNodeLogs } from "../internal/cmdFunctions/tempLogs";
 import { commonChecks } from "../internal/launcherCommon";
 import { cacheConfig, importAsyncConfig, loadEnvVars } from "../lib/configReader";
 import { MoonwallContext, contextCreator, runNetworkOnly } from "../lib/globalContext";
+import { shardManager } from "../lib/shardManager";
 const logger = createLogger({ name: "runner" });
 
 export async function testCmd(envName: string, additionalArgs?: testRunArgs): Promise<boolean> {
@@ -16,10 +17,8 @@ export async function testCmd(envName: string, additionalArgs?: testRunArgs): Pr
   const env = globalConfig.environments.find(({ name }) => name === envName);
   process.env.MOON_TEST_ENV = envName;
 
-  // Set shard information for improved port allocation
-  if (additionalArgs?.shard) {
-    process.env.MOONWALL_TEST_SHARD = additionalArgs.shard;
-  }
+  // Initialize sharding configuration
+  shardManager.initializeSharding(additionalArgs?.shard);
 
   if (!env) {
     const envList = globalConfig.environments
