@@ -14,6 +14,7 @@ import {
   loadEnvVars,
 } from "../lib/configReader";
 import { MoonwallContext, runNetworkOnly } from "../lib/globalContext";
+import { shardManager } from "../lib/shardManager";
 import {
   resolveChopsticksInteractiveCmdChoice,
   resolveDevInteractiveCmdChoice,
@@ -32,11 +33,8 @@ export async function runNetworkCmd(args: RunCommandArgs) {
     process.env.MOON_SUBDIR = args.subDirectory;
   }
 
-  // Set default shard information for consistent port allocation
-  // This ensures the run command uses the same port allocation logic as test command
-  if (!process.env.MOONWALL_TEST_SHARD) {
-    process.env.MOONWALL_TEST_SHARD = "1/1";
-  }
+  // Initialize shard configuration (defaults to no sharding for run command)
+  shardManager.initializeSharding();
   const globalConfig = await importAsyncConfig();
   const env = globalConfig.environments.find(({ name }) => name === args.envName);
 
