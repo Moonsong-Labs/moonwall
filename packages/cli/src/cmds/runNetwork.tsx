@@ -14,6 +14,7 @@ import {
   loadEnvVars,
 } from "../lib/configReader";
 import { MoonwallContext, runNetworkOnly } from "../lib/globalContext";
+import { shardManager } from "../lib/shardManager";
 import {
   resolveChopsticksInteractiveCmdChoice,
   resolveDevInteractiveCmdChoice,
@@ -31,6 +32,9 @@ export async function runNetworkCmd(args: RunCommandArgs) {
   if (args.subDirectory) {
     process.env.MOON_SUBDIR = args.subDirectory;
   }
+
+  // Initialize shard configuration (defaults to no sharding for run command)
+  shardManager.initializeSharding();
   const globalConfig = await importAsyncConfig();
   const env = globalConfig.environments.find(({ name }) => name === args.envName);
 
