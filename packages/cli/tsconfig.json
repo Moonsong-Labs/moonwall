@@ -5,7 +5,8 @@
     "allowImportingTsExtensions": false,
     "noEmit": false,
     "declaration": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "target": "ES2022"
   },
   "include": ["./src/**/*.ts", "./src/**/*.tsx"],
   "exclude": ["**/dist/**"]

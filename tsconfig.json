@@ -14,6 +14,7 @@
     "allowImportingTsExtensions": true,
     "moduleDetection": "force",
     "importHelpers": true,
+    "downlevelIteration": true,
     "skipDefaultLibCheck": true,
     "preserveConstEnums": true,
     "sourceMap": true,

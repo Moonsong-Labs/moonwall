@@ -139,17 +139,8 @@ export class MoonwallContext {
           launch,
         },
       ],
-      providers: env.connections
-        ? ProviderFactory.prepare(env.connections)
-        : isEthereumDevConfig()
-          ? ProviderFactory.prepareDefaultDev()
-          : ProviderFactory.prepare([
-              {
-                name: "node",
-                type: "polkadotJs",
-                endpoints: [vitestAutoUrl()],
-              },
-            ]),
+      // Providers will be prepared in connectEnvironment after MOONWALL_RPC_PORT is set
+      providers: [],
     } satisfies IGlobalContextFoundation;
   }
 
@@ -420,12 +411,16 @@ export class MoonwallContext {
     const ctx = await MoonwallContext.getContext();
 
     if (process.env.MOON_RECYCLE === "true") {
+      debugSetup("🔄 MOON_RECYCLE=true, skipping node launch");
       return ctx;
     }
 
     if (this.nodes.length > 0) {
+      debugSetup(`♻️  Reusing existing ${this.nodes.length} node(s) - skipping launch`);
       return ctx;
     }
+
+    debugSetup("🚀 No existing nodes found, launching new node...");
 
     const nodes = ctx.environment.nodes;
 
@@ -471,12 +466,30 @@ export class MoonwallContext {
   public async connectEnvironment(silent = false): Promise<MoonwallContext> {
     const env = getEnvironmentFromConfig();
 
+    // Prepare providers at connection time to ensure MOONWALL_RPC_PORT is set
     if (this.environment.foundationType === "zombie") {
       this.environment.providers = env.connections
         ? ProviderFactory.prepare(env.connections)
         : isEthereumZombieConfig()
           ? ProviderFactory.prepareDefaultZombie()
           : ProviderFactory.prepareNoEthDefaultZombie();
+    }
+
+    if (this.environment.foundationType === "dev") {
+      debugSetup(
+        `Dev foundation - env.connections: ${env.connections ? "YES" : "NO"}, isEthereumDevConfig: ${isEthereumDevConfig()}`
+      );
+      this.environment.providers = env.connections
+        ? ProviderFactory.prepare(env.connections)
+        : isEthereumDevConfig()
+          ? ProviderFactory.prepareDefaultDev()
+          : ProviderFactory.prepare([
+              {
+                name: "node",
+                type: "polkadotJs",
+                endpoints: [vitestAutoUrl()],
+              },
+            ]);
     }
 
     if (this.providers.length > 0) {
@@ -494,6 +507,11 @@ export class MoonwallContext {
     }) => {
       for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
+          // Log endpoint info for debugging
+          const connectInfo = provider.connect?.toString?.() || "unknown";
+          debugSetup(`Connecting ${provider.name} (type: ${provider.type}), attempt ${attempt}`);
+          debugSetup(`MOONWALL_RPC_PORT=${process.env.MOONWALL_RPC_PORT}`);
+
           debugSetup(`🔄 Connecting provider ${provider.name}, attempt ${attempt}`);
 
           const connectedProvider = await Promise.race([
@@ -630,12 +648,30 @@ export class MoonwallContext {
     if (this.nodes.length > 0) {
       for (const node of this.nodes) {
         if (node instanceof ChildProcess) {
-          try {
-            if (node.pid) {
-              process.kill(node.pid);
+          // Use Effect-based cleanup if available (automatic resource management)
+          const moonwallNode = node as any;
+          if (moonwallNode.effectCleanup) {
+            try {
+              await moonwallNode.effectCleanup();
+            } catch (e) {
+              // Fallback to manual kill if Effect cleanup fails
+              try {
+                if (node.pid) {
+                  process.kill(node.pid);
+                }
+              } catch (killError) {
+                // Ignore errors when killing processes
+              }
             }
-          } catch (e) {
-            // Ignore errors when killing processes
+          } else {
+            // Legacy manual cleanup for nodes without Effect
+            try {
+              if (node.pid) {
+                process.kill(node.pid);
+              }
+            } catch (e) {
+              // Ignore errors when killing processes
+            }
           }
         }
 

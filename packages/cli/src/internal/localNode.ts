@@ -10,6 +10,7 @@ import type { DevLaunchSpec } from "@moonwall/types";
 import Docker from "dockerode";
 import invariant from "tiny-invariant";
 import { isEthereumDevConfig, isEthereumZombieConfig } from "../lib/configReader";
+import { launchNodeEffect } from "./effect";
 
 const execAsync = util.promisify(exec);
 const logger = createLogger({ name: "localNode" });
@@ -28,6 +29,11 @@ export interface MoonwallProcess extends ChildProcess {
    * Reason for Moonwall-initiated termination
    */
   moonwallTerminationReason?: string;
+
+  /**
+   * Effect-based cleanup function for automatic resource management
+   */
+  effectCleanup?: () => Promise<void>;
 }
 
 // TODO: Add multi-threading support
@@ -126,129 +132,37 @@ export async function launchNode(options: {
     checkAccess(cmd);
   }
 
-  const port = args.find((a) => a.includes("port"))?.split("=")[1];
-  debug(`\x1b[36mStarting ${name} node on port ${port}...\x1b[0m`);
+  // Determine if this is an Ethereum chain based on args
+  const isEthereumChain = args.some(
+    (arg) => arg.includes("--ethapi") || arg.includes("--eth-rpc") || arg.includes("--enable-evm")
+  );
 
-  const dirPath = path.join(process.cwd(), "tmp", "node_logs");
-
-  const runningNode = spawn(cmd, args);
-
-  const logLocation = path
-    .join(
-      dirPath,
-      `${path.basename(cmd)}_node_${args.find((a) => a.includes("port"))?.split("=")[1]}_${
-        runningNode.pid
-      }.log`
-    )
-    .replaceAll("node_node_undefined", "chopsticks");
-
-  process.env.MOON_LOG_LOCATION = logLocation;
-
-  const fsStream = fs.createWriteStream(logLocation);
-
-  runningNode.on("error", (err) => {
-    if ((err as any).errno === "ENOENT") {
-      console.error(`\x1b[31mMissing Local binary at(${cmd}).\nPlease compile the project\x1b[0m`);
-    }
-    throw new Error(err.message);
+  const { result, cleanup } = await launchNodeEffect({
+    command: cmd,
+    args,
+    name,
+    launchSpec: config,
+    isEthereumChain,
   });
 
-  const logHandler = (chunk: any) => {
-    if (fsStream.writable) {
-      fsStream.write(chunk, (err) => {
-        if (err) console.error(err);
-        else fsStream.emit("drain");
-      });
-    }
-  };
+  logger.debug(
+    `✅ Node '${name}' started with PID ${result.runningNode.pid} on port ${result.port}`
+  );
+  process.env.MOON_LOG_LOCATION = result.logPath;
 
-  runningNode.stderr?.on("data", logHandler);
-  runningNode.stdout?.on("data", logHandler);
+  // CRITICAL: Set MOONWALL_RPC_PORT and WSS_URL so tests can connect
+  process.env.MOONWALL_RPC_PORT = result.port.toString();
+  process.env.WSS_URL = `ws://127.0.0.1:${result.port}`;
+  debug(`Set MOONWALL_RPC_PORT=${result.port}, WSS_URL=${process.env.WSS_URL}`);
 
-  runningNode.once("exit", (code, signal) => {
-    const timestamp = new Date().toISOString();
-    let message: string;
+  // Store cleanup function for later teardown
+  const moonwallNode = result.runningNode as MoonwallProcess;
+  moonwallNode.effectCleanup = cleanup;
 
-    // Check if this termination was initiated by Moonwall
-    const moonwallNode = runningNode as MoonwallProcess;
+  // Create a fake fsStream for backward compatibility
+  const fsStream = fs.createWriteStream(result.logPath, { flags: "a" });
 
-    if (moonwallNode.isMoonwallTerminating) {
-      message = `${timestamp} [moonwall] process killed. reason: ${moonwallNode.moonwallTerminationReason || "unknown"}`;
-    } else if (code !== null) {
-      message = `${timestamp} [moonwall] process exited with status code ${code}`;
-    } else if (signal !== null) {
-      message = `${timestamp} [moonwall] process terminated by signal ${signal}`;
-    } else {
-      message = `${timestamp} [moonwall] process terminated unexpectedly`;
-    }
-
-    // Write the message before closing the stream
-    if (fsStream.writable) {
-      fsStream.write(`${message}\n`, (err) => {
-        if (err) console.error(`Failed to write exit message to log: ${err}`);
-        fsStream.end();
-      });
-    } else {
-      // Fallback: append to file directly if stream is not writable
-      try {
-        fs.appendFileSync(logLocation, `${message}\n`);
-      } catch (err) {
-        console.error(`Failed to append exit message to log file: ${err}`);
-      }
-      fsStream.end();
-    }
-
-    runningNode.stderr?.removeListener("data", logHandler);
-    runningNode.stdout?.removeListener("data", logHandler);
-  });
-
-  if (!runningNode.pid) {
-    const errorMessage = "Failed to start child process";
-    console.error(errorMessage);
-    fs.appendFileSync(logLocation, `${errorMessage}\n`);
-    throw new Error(errorMessage);
-  }
-
-  // Check if the process exited immediately
-  if (runningNode.exitCode !== null) {
-    const errorMessage = `Child process exited immediately with code ${runningNode.exitCode}`;
-    console.error(errorMessage);
-    fs.appendFileSync(logLocation, `${errorMessage}\n`);
-    throw new Error(errorMessage);
-  }
-
-  const isRunning = await isPidRunning(runningNode.pid);
-
-  if (!isRunning) {
-    const errorMessage = `Process with PID ${runningNode.pid} is not running`;
-    spawnSync(cmd, args, { stdio: "inherit" });
-    throw new Error(errorMessage);
-  }
-
-  probe: for (let i = 0; ; i++) {
-    try {
-      const ports = await findPortsByPid(runningNode.pid);
-      if (ports) {
-        for (const port of ports) {
-          try {
-            const isReady = await checkWebSocketJSONRPC(port);
-            if (isReady) {
-              break probe;
-            }
-          } catch {}
-        }
-      }
-    } catch {
-      if (i === 300) {
-        throw new Error("Could not find ports for node after 30 seconds");
-      }
-      await timer(100);
-      continue;
-    }
-    await timer(100);
-  }
-
-  return { runningNode, fsStream };
+  return { runningNode: moonwallNode, fsStream };
 }
 
 function isPidRunning(pid: number): Promise<boolean> {
