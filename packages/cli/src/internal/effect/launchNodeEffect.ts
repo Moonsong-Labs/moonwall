@@ -5,11 +5,7 @@
 import { Effect, Layer } from "effect";
 import type { DevLaunchSpec } from "@moonwall/types";
 import type { ChildProcess } from "node:child_process";
-import {
-  ProcessManagerService,
-  ProcessManagerServiceLive,
-  type MoonwallProcess,
-} from "./ProcessManagerService.js";
+import { ProcessManagerService, ProcessManagerServiceLive } from "./ProcessManagerService.js";
 import { PortDiscoveryService, PortDiscoveryServiceLive } from "./PortDiscoveryService.js";
 import { NodeReadinessService, NodeReadinessServiceLive } from "./NodeReadinessService.js";
 import { ProcessError } from "./errors.js";
@@ -72,9 +68,10 @@ export async function launchNodeEffect(
     hasPort: config.args.some((arg) => arg.includes("--port")),
   };
 
-  const finalArgs = !nodeConfig.isChopsticks && !nodeConfig.hasRpcPort
-    ? [...config.args, "--rpc-port=0"] // Standard nodes use --rpc-port
-    : config.args; // Chopsticks uses YAML config, or port already configured
+  const finalArgs =
+    !nodeConfig.isChopsticks && !nodeConfig.hasRpcPort
+      ? [...config.args, "--rpc-port=0"] // Standard nodes use --rpc-port
+      : config.args; // Chopsticks uses YAML config, or port already configured
 
   debug(`Final args: ${JSON.stringify(finalArgs)}`);
 
@@ -97,7 +94,8 @@ export async function launchNodeEffect(
         )
       ).pipe(
         Effect.flatMap(() => {
-          if (processResult.process.pid === undefined) {
+          const pid = processResult.process.pid;
+          if (pid === undefined) {
             return Effect.fail(
               new ProcessError({
                 cause: new Error("Process PID is undefined after launch"),
@@ -109,16 +107,14 @@ export async function launchNodeEffect(
           return PortDiscoveryService.pipe(
             Effect.flatMap((portDiscovery) =>
               Effect.sync(() =>
-                logger.debug(
-                  `[T+${Date.now() - startTime}ms] Discovering port for PID ${processResult.process.pid}...`
-                )
-              ).pipe(Effect.flatMap(() => portDiscovery.discoverPort(processResult.process.pid!)))
+                logger.debug(`[T+${Date.now() - startTime}ms] Discovering port for PID ${pid}...`)
+              ).pipe(Effect.flatMap(() => portDiscovery.discoverPort(pid)))
             ),
             Effect.mapError(
               (error) =>
                 new ProcessError({
                   cause: error,
-                  pid: processResult.process.pid,
+                  pid,
                   operation: "check",
                 })
             ),
@@ -141,7 +137,7 @@ export async function launchNodeEffect(
                       logger.error(`Readiness check failed: ${error}`);
                       return new ProcessError({
                         cause: error,
-                        pid: processResult.process.pid,
+                        pid,
                         operation: "check",
                       });
                     }),

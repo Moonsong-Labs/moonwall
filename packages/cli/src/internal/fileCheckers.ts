@@ -158,7 +158,7 @@ export function checkAccess(path: string) {
   const binPath = path.split(" ")[0];
   try {
     fs.accessSync(binPath, fs.constants.X_OK);
-  } catch (err) {
+  } catch (_err) {
     console.error(`The file ${binPath} is not executable`);
     throw new Error(`The file at ${binPath} , lacks execute permissions.`);
   }
@@ -180,7 +180,7 @@ async function getBinaryArchitecture(filePath: string) {
       }
 
       const buffer = Buffer.alloc(20);
-      fs.read(fd, buffer, 0, 20, 0, (err, bytesRead, buffer) => {
+      fs.read(fd, buffer, 0, 20, 0, (err, _bytesRead, buffer) => {
         if (err) {
           reject(err);
           return;

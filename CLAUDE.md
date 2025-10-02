@@ -101,7 +101,6 @@ Moonwall is structured as a TypeScript monorepo managed with pnpm workspaces.
 *   **Biome**: For code formatting and linting, ensuring consistent code style.
 *   **Vitest**: The testing framework used for running unit and integration tests.
     *   **`@vitest/ui`**: Provides a browser-based UI for viewing test results.
-*   **Chai**: Assertion library used with Vitest.
 
 ### Project Structure
 

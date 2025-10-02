@@ -8,7 +8,6 @@ import type {
   MoonwallEnvironment,
   MoonwallProvider,
   ProviderType,
-  DevLaunchSpec,
 } from "@moonwall/types";
 import type { ApiPromise } from "@polkadot/api";
 import zombie, { type Network } from "@zombienet/orchestrator";
@@ -220,7 +219,7 @@ export class MoonwallContext {
             console.error(`Error killing process: ${error.message}`);
           }
         });
-      } catch (err) {
+      } catch (_error) {
         // console.log(err.message);
       }
     };
@@ -335,7 +334,7 @@ export class MoonwallContext {
               // await this.disconnect();
               const pid = (network.client as any).processMap[message.nodeName].pid;
               delete (network.client as any).processMap[message.nodeName];
-              const killResult = execSync(`kill ${pid}`, { stdio: "ignore" });
+              execSync(`kill ${pid}`, { stdio: "ignore" });
               // await this.connectEnvironment(true);
               writeToClient({
                 status: "success",
@@ -651,13 +650,13 @@ export class MoonwallContext {
           if (moonwallNode.effectCleanup) {
             try {
               await moonwallNode.effectCleanup();
-            } catch (e) {
+            } catch (_error) {
               // Fallback to manual kill if Effect cleanup fails
               try {
                 if (node.pid) {
                   process.kill(node.pid);
                 }
-              } catch (killError) {
+              } catch (_killError) {
                 // Ignore errors when killing processes
               }
             }
@@ -667,7 +666,7 @@ export class MoonwallContext {
               if (node.pid) {
                 process.kill(node.pid);
               }
-            } catch (e) {
+            } catch (_error) {
               // Ignore errors when killing processes
             }
           }
@@ -677,7 +676,7 @@ export class MoonwallContext {
           try {
             await node.stop();
             await node.remove();
-          } catch (e) {
+          } catch (_error) {
             // Ignore errors when stopping containers
           }
         }
@@ -841,7 +840,7 @@ async function isPidRunning(pid: number): Promise<boolean> {
   try {
     const { stdout } = await execAsync(`ps -p ${pid} -o pid=`);
     return stdout.trim() === pid.toString();
-  } catch (error) {
+  } catch (_error) {
     return false;
   }
 }

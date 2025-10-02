@@ -51,7 +51,7 @@ const attemptReadinessCheck = (
                 resolved = true;
                 try {
                   ws.close();
-                } catch (e) {
+                } catch (_e) {
                   // Ignore cleanup errors
                 }
               }

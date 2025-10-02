@@ -1,18 +1,16 @@
-import { type ChildProcess, exec, spawn, spawnSync } from "node:child_process";
+import type { ChildProcess } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import WebSocket from "ws";
 import { checkAccess, checkExists } from "./fileCheckers";
 import { createLogger } from "@moonwall/util";
 import { setTimeout as timer } from "node:timers/promises";
-import util from "node:util";
 import type { DevLaunchSpec } from "@moonwall/types";
 import Docker from "dockerode";
 import invariant from "tiny-invariant";
 import { isEthereumDevConfig, isEthereumZombieConfig } from "../lib/configReader";
 import { launchNodeEffect } from "./effect";
 
-const execAsync = util.promisify(exec);
 const logger = createLogger({ name: "localNode" });
 const debug = logger.debug.bind(logger);
 
@@ -165,18 +163,6 @@ export async function launchNode(options: {
   return { runningNode: moonwallNode, fsStream };
 }
 
-function isPidRunning(pid: number): Promise<boolean> {
-  return new Promise((resolve) => {
-    exec(`ps -p ${pid} -o pid=`, (error, stdout, stderr) => {
-      if (error) {
-        resolve(false);
-      } else {
-        resolve(stdout.trim() !== "");
-      }
-    });
-  });
-}
-
 async function checkWebSocketJSONRPC(port: number): Promise<boolean> {
   try {
     // Determine if this is an Ethereum-compatible chain from config
@@ -208,7 +194,7 @@ async function checkWebSocketJSONRPC(port: number): Promise<boolean> {
               ws.removeListener("message", messageHandler);
               resolve(true);
             }
-          } catch (e) {
+          } catch (_error) {
             // Ignore parse errors
           }
         };
@@ -238,7 +224,7 @@ async function checkWebSocketJSONRPC(port: number): Promise<boolean> {
 
           // WebSocket checks passed
           resolve(true);
-        } catch (e) {
+        } catch (_error) {
           resolve(false);
         }
       });
@@ -276,7 +262,7 @@ async function checkWebSocketJSONRPC(port: number): Promise<boolean> {
 
         const data: any = await response.json();
         return !data.error;
-      } catch (e) {
+      } catch (_error) {
         return false;
       }
     };
@@ -296,46 +282,13 @@ async function checkWebSocketJSONRPC(port: number): Promise<boolean> {
 
       // For non-Ethereum chains, system_chain being available is enough
       return true;
-    } catch (e) {
+    } catch (_error) {
       // HTTP service not ready yet
       return false;
     }
   } catch {
     return false;
   }
-}
-
-async function findPortsByPid(pid: number, retryCount = 600, retryDelay = 100): Promise<number[]> {
-  for (let i = 0; i < retryCount; i++) {
-    try {
-      const { stdout } = await execAsync(`lsof -p ${pid} -n -P | grep LISTEN`);
-      const ports: number[] = [];
-      const lines = stdout.split("\n");
-      for (const line of lines) {
-        // Example outputs:
-        // - lsof node      97796 romarq   26u  IPv6 0xb6c3e894a2247189      0t0  TCP *:8000 (LISTEN)
-        // - lsof node      97242 romarq   26u  IPv6 0x330c461cca8d2b63      0t0  TCP [::1]:8000 (LISTEN)
-        const regex = /(?:.+):(\d+)/;
-        const match = line.match(regex);
-        if (match) {
-          ports.push(Number(match[1]));
-        }
-      }
-
-      if (ports.length) {
-        return ports;
-      }
-      throw new Error("Could not find any ports");
-    } catch (error) {
-      if (i === retryCount - 1) {
-        throw error;
-      }
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, retryDelay));
-  }
-
-  return [];
 }
 
 async function pullImage(imageName: string, docker: Docker) {

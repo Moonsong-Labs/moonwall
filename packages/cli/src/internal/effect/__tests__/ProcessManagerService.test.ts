@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Effect, Exit } from "effect";
 import { ProcessManagerService, ProcessManagerServiceLive } from "../ProcessManagerService.js";
-import { NodeLaunchError, ProcessError } from "../errors.js";
+import { NodeLaunchError } from "../errors.js";
 import { spawn } from "node:child_process";
 import * as fs from "node:fs";
 

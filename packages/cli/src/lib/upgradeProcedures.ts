@@ -237,7 +237,7 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
           }
 
           const referendum = await api.query.referenda.referendumInfoFor.entries();
-          const referendaIndex = referendum
+          const _referendaIndex = referendum
             .filter(
               (ref: any) =>
                 ref[1].unwrap().isOngoing &&

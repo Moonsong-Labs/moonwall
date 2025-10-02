@@ -9,7 +9,7 @@ import { ALITH_PRIVATE_KEY, deriveViemChain } from "@moonwall/util";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import type { ApiOptions } from "@polkadot/api/types";
 import { Wallet, ethers } from "ethers";
-import { createWalletClient, http, publicActions, webSocket } from "viem";
+import { createWalletClient, http, publicActions } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { Web3 } from "web3";
 import { WebSocketProvider } from "web3-providers-ws";
@@ -51,7 +51,9 @@ export class ProviderFactory {
   }
 
   private createPolkadotJs(): MoonwallProvider {
-    debug(`🟢  PolkadotJs provider ${this.providerConfig.name} details prepared to connect to ${this.url}`);
+    debug(
+      `🟢  PolkadotJs provider ${this.providerConfig.name} details prepared to connect to ${this.url}`
+    );
     return {
       name: this.providerConfig.name,
       type: this.providerConfig.type,

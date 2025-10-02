@@ -94,13 +94,11 @@ export function isOptionSet(option: string): boolean {
 }
 
 export function isEthereumZombieConfig(): boolean {
-  const config = importJsonConfig();
   const env = getEnvironmentFromConfig();
   return env.foundation.type === "zombie" && !env.foundation.zombieSpec.disableDefaultEthProviders;
 }
 
 export function isEthereumDevConfig(): boolean {
-  const config = importJsonConfig();
   const env = getEnvironmentFromConfig();
   return env.foundation.type === "dev" && !env.foundation.launchSpec[0].disableDefaultEthProviders;
 }
@@ -221,7 +219,7 @@ function replaceEnvVars(value: any): any {
 function traverseConfig(configObj: any, option: string): any {
   if (typeof configObj !== "object" || !configObj) return undefined;
 
-  if (Object.prototype.hasOwnProperty.call(configObj, option)) {
+  if (Object.hasOwn(configObj, option)) {
     return configObj[option];
   }
 
