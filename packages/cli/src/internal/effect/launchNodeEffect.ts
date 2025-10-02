@@ -64,8 +64,20 @@ export async function launchNodeEffect(
 ): Promise<{ result: LaunchNodeResult; cleanup: () => Promise<void> }> {
   const startTime = Date.now();
   logger.debug(`[T+0ms] Starting with command: ${config.command}, name: ${config.name}`);
-  const rpcPortArg = config.args.find((arg) => arg.includes("--rpc-port"));
-  const finalArgs = rpcPortArg ? config.args : [...config.args, "--rpc-port=0"];
+
+  // Determine node type and port configuration (functional approach)
+  const nodeConfig = {
+    isChopsticks: config.args.some((arg) => arg.includes("chopsticks.cjs")),
+    hasRpcPort: config.args.some((arg) => arg.includes("--rpc-port")),
+    hasPort: config.args.some((arg) => arg.includes("--port")),
+  };
+
+  const finalArgs =
+    nodeConfig.isChopsticks && !nodeConfig.hasPort
+      ? [...config.args, "--port=0"] // Chopsticks uses --port
+      : !nodeConfig.isChopsticks && !nodeConfig.hasRpcPort
+        ? [...config.args, "--rpc-port=0"] // Standard nodes use --rpc-port
+        : config.args; // Port already configured
 
   debug(`Final args: ${JSON.stringify(finalArgs)}`);
 
