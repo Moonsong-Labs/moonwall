@@ -27,3 +27,4 @@ artifacts
 .idea
 db.sqlite*
 **/*.local*
+**/.github/instructions/*
