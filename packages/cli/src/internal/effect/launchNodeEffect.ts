@@ -72,12 +72,9 @@ export async function launchNodeEffect(
     hasPort: config.args.some((arg) => arg.includes("--port")),
   };
 
-  const finalArgs =
-    nodeConfig.isChopsticks && !nodeConfig.hasPort
-      ? [...config.args, "--port=0"] // Chopsticks uses --port
-      : !nodeConfig.isChopsticks && !nodeConfig.hasRpcPort
-        ? [...config.args, "--rpc-port=0"] // Standard nodes use --rpc-port
-        : config.args; // Port already configured
+  const finalArgs = !nodeConfig.isChopsticks && !nodeConfig.hasRpcPort
+    ? [...config.args, "--rpc-port=0"] // Standard nodes use --rpc-port
+    : config.args; // Chopsticks uses YAML config, or port already configured
 
   debug(`Final args: ${JSON.stringify(finalArgs)}`);
 

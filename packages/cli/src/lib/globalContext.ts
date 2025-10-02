@@ -507,8 +507,6 @@ export class MoonwallContext {
     }) => {
       for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
-          // Log endpoint info for debugging
-          const connectInfo = provider.connect?.toString?.() || "unknown";
           debugSetup(`Connecting ${provider.name} (type: ${provider.type}), attempt ${attempt}`);
           debugSetup(`MOONWALL_RPC_PORT=${process.env.MOONWALL_RPC_PORT}`);
 

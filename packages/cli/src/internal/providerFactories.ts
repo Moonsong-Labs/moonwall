@@ -51,12 +51,11 @@ export class ProviderFactory {
   }
 
   private createPolkadotJs(): MoonwallProvider {
-    debug(`🟢  PolkadotJs provider ${this.providerConfig.name} details prepared`);
+    debug(`🟢  PolkadotJs provider ${this.providerConfig.name} details prepared to connect to ${this.url}`);
     return {
       name: this.providerConfig.name,
       type: this.providerConfig.type,
       connect: async () => {
-        process.env.DEFAULT_TIMEOUT_MS = "30000";
         const options: ApiOptions = {
           provider: new WsProvider(this.url),
           initWasm: false,

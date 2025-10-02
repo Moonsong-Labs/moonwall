@@ -69,15 +69,22 @@ const attemptPortDiscovery = (pid: number): Effect.Effect<number, PortDiscoveryE
         );
       }
 
-      // Find RPC port - must be in range 9000-20000, excluding common p2p port 30333
-      // Prefer ports in this range as they are typically RPC ports
+      // Find RPC port with fallback logic:
+      // 1. Prefer ports in typical RPC range (9000-20000), excluding p2p port 30333
+      // 2. If only one port found, accept it (must be the RPC port)
+      // 3. Otherwise fail with informative error
       const rpcPort = ports.find((p) => p >= 9000 && p <= 20000 && p !== 30333);
 
       if (!rpcPort) {
+        // Fallback: if only one port, it must be the RPC port (e.g., Chopsticks ephemeral ports)
+        if (ports.length === 1) {
+          return Effect.succeed(ports[0]);
+        }
+
         return Effect.fail(
           new PortDiscoveryError({
             cause: new Error(
-              `No RPC port found in range 9000-20000 (found ports: ${ports.join(", ")})`
+              `No RPC port found in range 9000-20000 and multiple ports detected (found ports: ${ports.join(", ")})`
             ),
             pid,
             attempts: 1,
