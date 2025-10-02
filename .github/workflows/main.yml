@@ -359,7 +359,7 @@ jobs:
           pnpm install
           pnpm run build
       - name: Run Effect-TS tests
-        run: cd packages/cli && pnpm test:effect
+        run: cd packages/cli && pnpm test
 
   test_zombie:
     runs-on: ubuntu-latest
