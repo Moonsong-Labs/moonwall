@@ -41,15 +41,15 @@
   ],
   "scripts": {
     "clean": "rm -rf dist && rm -rf node_modules",
-    "build": "rm -rf dist && tsup src --format esm --no-splitting --sourcemap && bun run generate-types",
+    "build": "rm -rf dist && tsup src --format esm --no-splitting --sourcemap && pnpm run generate-types",
     "generate-types": "tsc && pnpm schema",
     "watch": "tsup src --format esm --watch",
     "lint": "biome lint ./src",
     "lint:fix": "biome lint ./src --apply",
     "fmt": "biome format ./src",
     "fmt:fix": "biome format src --write",
-    "prepublish": "bun run build && bun run generate-types",
-    "schema": "typescript-json-schema --tsNodeRegister --esModuleInterop -o config_schema.json ./src/config.ts MoonwallConfig && bun biome format config_schema.json --write"
+    "prepublish": "pnpm run build && pnpm run generate-types",
+    "schema": "typescript-json-schema --tsNodeRegister --esModuleInterop -o config_schema.json ./src/config.ts MoonwallConfig && pnpm biome format config_schema.json --write"
   },
   "dependencies": {
     "@polkadot/api": "^16.4.1",
