@@ -161,7 +161,7 @@ export async function directRpcRequest(
       error.message,
       error.cause
     );
-    throw error;
+    throw new Error(`RPC request to ${endpoint} failed (method: ${method}): ${error.message}`);
   }
 }
 

@@ -10,6 +10,7 @@ import chalk from "chalk";
 import path from "node:path";
 import net from "node:net";
 import { standardRepos } from "../lib/repoDefinitions";
+import { shardManager } from "../lib/shardManager";
 import invariant from "tiny-invariant";
 
 export function parseZombieCmd(launchSpec: ZombieLaunchSpec) {
@@ -257,17 +258,9 @@ const getNextAvailablePort = async (startPort: number): Promise<number> => {
  * Uses async port allocation for better collision avoidance
  */
 export const getFreePort = async (): Promise<number> => {
-  // Parse shard information from environment variables if available
-  let shardIndex = 0;
-  let totalShards = 1;
-
-  // Check for MOONWALL_TEST_SHARD environment variable (set from --ts parameter)
-  const testShard = process.env.MOONWALL_TEST_SHARD;
-  if (testShard?.includes("/")) {
-    const [current, total] = testShard.split("/");
-    shardIndex = parseInt(current, 10) - 1; // Convert to 0-based index
-    totalShards = parseInt(total, 10);
-  }
+  // Get shard information from centralized manager
+  const shardIndex = shardManager.getShardIndex();
+  const totalShards = shardManager.getTotalShards();
 
   // Use VITEST_POOL_ID as additional offset if available
   const poolId = parseInt(process.env.VITEST_POOL_ID || "0", 10);

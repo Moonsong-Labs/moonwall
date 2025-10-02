@@ -104,7 +104,7 @@ export async function deriveViemChain(endpoint: string, maxRetries: number = 3) 
       lastError = error;
       if (attempt < maxRetries) {
         console.warn(
-          `Failed to derive viem chain on attempt ${attempt}/${maxRetries}: ${error.message}. Retrying...`
+          `Failed to derive viem chain on attempt ${attempt}/${maxRetries} from ${httpEndpoint}: ${error.message}. Retrying...`
         );
         await timer(1000 * attempt); // Linear backoff
       }
@@ -112,7 +112,7 @@ export async function deriveViemChain(endpoint: string, maxRetries: number = 3) 
   }
 
   throw new Error(
-    `Failed to derive viem chain after ${maxRetries} attempts: ${lastError?.message || "Unknown error"}`
+    `Failed to derive viem chain after ${maxRetries} attempts from ${httpEndpoint}: ${lastError?.message || "Unknown error"}`
   );
 }
 

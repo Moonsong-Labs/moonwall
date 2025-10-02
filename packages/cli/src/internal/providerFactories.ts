@@ -130,10 +130,10 @@ export class ProviderFactory {
           return client;
         } catch (error: any) {
           console.error(
-            `❌ Failed to create viem provider ${this.providerConfig.name}: ${error.message}`
+            `❌ Failed to create viem provider ${this.providerConfig.name} at ${this.url}: ${error.message}`
           );
           throw new Error(
-            `Viem provider initialization failed for ${this.providerConfig.name}: ${error.message}`
+            `Viem provider initialization failed for ${this.providerConfig.name} at ${this.url}: ${error.message}`
           );
         }
       },

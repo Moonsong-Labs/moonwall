@@ -1,5 +1,20 @@
 # @moonwall/cli
 
+## 5.15.1
+
+### Patch Changes
+
+- ce9b112: Moonwall's run subcommand stopped working due to port mismatch introduced in #498.
+  This PR fixes the issue by accounting for shard offset within the run subcommand.
+
+  - Use singleton class instead of environment variable to manage sharding.
+  - Adds port information to error logs to allow checking for port mismatches.
+
+- bec24a7: Fix thread config: vitest has switched terminology to `forks` so config needs to be updated
+- Updated dependencies [ce9b112]
+  - @moonwall/util@5.15.1
+  - @moonwall/types@5.15.1
+
 ## 5.15.0
 
 ### Minor Changes
