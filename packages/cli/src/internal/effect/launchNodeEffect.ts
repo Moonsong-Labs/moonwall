@@ -64,9 +64,7 @@ export async function launchNodeEffect(
 ): Promise<{ result: LaunchNodeResult; cleanup: () => Promise<void> }> {
   const startTime = Date.now();
   logger.debug(`[T+0ms] Starting with command: ${config.command}, name: ${config.name}`);
-  // Extract expected RPC port from args, or use 0 if not specified
   const rpcPortArg = config.args.find((arg) => arg.includes("--rpc-port"));
-  const expectedRpcPort = rpcPortArg ? Number.parseInt(rpcPortArg.split("=")[1], 10) : 0;
   const finalArgs = rpcPortArg ? config.args : [...config.args, "--rpc-port=0"];
 
   debug(`Final args: ${JSON.stringify(finalArgs)}`);
@@ -84,78 +82,90 @@ export async function launchNodeEffect(
       )
     ),
     Effect.flatMap(({ result: processResult, cleanup: processCleanup }) =>
-      Effect.sync(() => logger.debug(`[T+${Date.now() - startTime}ms] Process launched with PID: ${processResult.process.pid}`)).pipe(
+      Effect.sync(() =>
+        logger.debug(
+          `[T+${Date.now() - startTime}ms] Process launched with PID: ${processResult.process.pid}`
+        )
+      ).pipe(
         Effect.flatMap(() => {
-      // Ensure PID is available
-      if (processResult.process.pid === undefined) {
-        return Effect.fail(
-          new ProcessError({
-            cause: new Error("Process PID is undefined after launch"),
-            operation: "check",
-          })
-        );
-      }
-
-      return PortDiscoveryService.pipe(
-        Effect.flatMap((portDiscovery) =>
-          Effect.sync(() => logger.debug(`[T+${Date.now() - startTime}ms] Discovering port for PID ${processResult.process.pid}...`)).pipe(
-            Effect.flatMap(() => portDiscovery.discoverPort(processResult.process.pid!))
-          )
-        ),
-        Effect.mapError(
-          (error) =>
-            new ProcessError({
-              cause: error,
-              pid: processResult.process.pid,
-              operation: "check",
-            })
-        ),
-        Effect.flatMap((port) =>
-          Effect.sync(() =>
-            logger.debug(`[T+${Date.now() - startTime}ms] Discovered port: ${port}, isEthereumChain: ${config.isEthereumChain}, checking readiness...`)
-          ).pipe(
-            Effect.flatMap(() =>
-              NodeReadinessService.pipe(
-            Effect.flatMap((readiness) =>
-              readiness.checkReady({
-                port,
-                isEthereumChain: config.isEthereumChain,
-                maxAttempts: 15,
+          if (processResult.process.pid === undefined) {
+            return Effect.fail(
+              new ProcessError({
+                cause: new Error("Process PID is undefined after launch"),
+                operation: "check",
               })
+            );
+          }
+
+          return PortDiscoveryService.pipe(
+            Effect.flatMap((portDiscovery) =>
+              Effect.sync(() =>
+                logger.debug(
+                  `[T+${Date.now() - startTime}ms] Discovering port for PID ${processResult.process.pid}...`
+                )
+              ).pipe(Effect.flatMap(() => portDiscovery.discoverPort(processResult.process.pid!)))
             ),
-                Effect.mapError((error) => {
-                  logger.error(`Readiness check failed: ${error}`);
-                  return new ProcessError({
-                    cause: error,
-                    pid: processResult.process.pid,
-                    operation: "check",
-                  });
-                }),
+            Effect.mapError(
+              (error) =>
+                new ProcessError({
+                  cause: error,
+                  pid: processResult.process.pid,
+                  operation: "check",
+                })
+            ),
+            Effect.flatMap((port) =>
+              Effect.sync(() =>
+                logger.debug(
+                  `[T+${Date.now() - startTime}ms] Discovered port: ${port}, isEthereumChain: ${config.isEthereumChain}, checking readiness...`
+                )
+              ).pipe(
                 Effect.flatMap(() =>
-                  Effect.sync(() =>
-                    logger.debug(`[T+${Date.now() - startTime}ms] Node ready! Returning result with manual cleanup function.`)
-                  ).pipe(
-                    Effect.map(() => ({
-                      processInfo: {
-                        process: processResult.process,
+                  NodeReadinessService.pipe(
+                    Effect.flatMap((readiness) =>
+                      readiness.checkReady({
                         port,
-                        logPath: processResult.logPath,
-                      },
-                      cleanup: processCleanup,
-                    }))
+                        isEthereumChain: config.isEthereumChain,
+                        maxAttempts: 15,
+                      })
+                    ),
+                    Effect.mapError((error) => {
+                      logger.error(`Readiness check failed: ${error}`);
+                      return new ProcessError({
+                        cause: error,
+                        pid: processResult.process.pid,
+                        operation: "check",
+                      });
+                    }),
+                    Effect.flatMap(() =>
+                      Effect.sync(() =>
+                        logger.debug(
+                          `[T+${Date.now() - startTime}ms] Node ready! Returning result with manual cleanup function.`
+                        )
+                      ).pipe(
+                        Effect.map(() => ({
+                          processInfo: {
+                            process: processResult.process,
+                            port,
+                            logPath: processResult.logPath,
+                          },
+                          cleanup: processCleanup,
+                        }))
+                      )
+                    )
                   )
                 )
               )
             )
-          )
-        )
-      );
+          );
         })
       )
     )
   ).pipe(Effect.provide(AllServicesLive));
 
   // Run without Scope - cleanup is returned as a function
+  // We can't simply use scopes because:
+  //   1) when this effect is run in beforeAll() hook, we want the node to persist during test
+  //   2) If we hoist scope to outside, we accidentally spawn it when describe block is processed during test collection
   return Effect.runPromise(
     Effect.map(program, ({ processInfo, cleanup }) => ({
       result: {

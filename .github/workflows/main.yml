@@ -342,6 +342,25 @@ jobs:
       # - name: Run standard web3 run
       #   run: bun moonwall test web3_test
 
+  test_effect:
+    runs-on: ubuntu-latest
+    needs: ["build"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.1.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 23
+          cache: "pnpm"
+      - name: Build like before
+        run: |
+          pnpm install
+          pnpm run build
+      - name: Run Effect-TS tests
+        run: cd packages/cli && pnpm test:effect
+
   test_zombie:
     runs-on: ubuntu-latest
     needs: ["build"]
