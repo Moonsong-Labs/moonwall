@@ -1,5 +1,24 @@
 # @moonwall/cli
 
+## 5.16.0
+
+### Minor Changes
+
+- 02d498c: Refactor node process management to Effect-TS:
+  - Migrate process spawning and lifecycle management to Effect
+  - Add Effect-based services: `ProcessManagerService`, `NodeReadinessService`, `PortDiscoveryService`, `RpcPortDiscoveryService`
+  - Replace exec-based node launching with @effect/platform Command
+  - Replace native WebSocket readiness checks with @effect/platform Socket
+  - Add legacy launch option for backward compatibility
+  - Improve port discovery and availability checking
+  - Add comprehensive test coverage for Effect services
+
+### Patch Changes
+
+- Updated dependencies [02d498c]
+  - @moonwall/types@5.16.0
+  - @moonwall/util@5.16.0
+
 ## 5.15.1
 
 ### Patch Changes
