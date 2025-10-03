@@ -1,12 +1,12 @@
-import { Socket } from "@effect/platform";
+import { Command, Socket, type CommandExecutor } from "@effect/platform";
+import * as NodeCommandExecutor from "@effect/platform-node/NodeCommandExecutor";
+import * as NodeContext from "@effect/platform-node/NodeContext";
+import * as NodeFileSystem from "@effect/platform-node/NodeFileSystem";
 import * as NodeSocket from "@effect/platform-node/NodeSocket";
 import { createLogger } from "@moonwall/util";
 import { Context, Deferred, Effect, Layer, Option, Schedule, type Scope } from "effect";
-import { exec } from "node:child_process";
-import { promisify } from "node:util";
 import { PortDiscoveryError } from "./errors.js";
 
-const execAsync = promisify(exec);
 const logger = createLogger({ name: "RpcPortDiscoveryService" });
 const debug = logger.debug.bind(logger);
 
@@ -43,17 +43,13 @@ const parsePortsFromLsof = (stdout: string): number[] => {
 /**
  * Get all listening ports for a process
  */
-const getAllPorts = (pid: number): Effect.Effect<number[], PortDiscoveryError> =>
-  Effect.tryPromise({
-    try: () => execAsync(`lsof -p ${pid} -n -P | grep LISTEN`),
-    catch: (cause) =>
-      new PortDiscoveryError({
-        cause,
-        pid,
-        attempts: 1,
-      }),
-  }).pipe(
-    Effect.map(({ stdout }) => parsePortsFromLsof(stdout)),
+const getAllPorts = (
+  pid: number
+): Effect.Effect<number[], PortDiscoveryError, CommandExecutor.CommandExecutor> =>
+  Command.make("lsof", "-p", `${pid}`, "-n", "-P").pipe(
+    Command.pipeTo(Command.make("grep", "LISTEN")),
+    Command.string,
+    Effect.map(parsePortsFromLsof),
     Effect.flatMap((ports) =>
       ports.length === 0
         ? Effect.fail(
@@ -64,6 +60,15 @@ const getAllPorts = (pid: number): Effect.Effect<number[], PortDiscoveryError> =
             })
           )
         : Effect.succeed(ports)
+    ),
+    Effect.catchAll((cause) =>
+      Effect.fail(
+        new PortDiscoveryError({
+          cause,
+          pid,
+          attempts: 1,
+        })
+      )
     )
   );
 
@@ -196,7 +201,6 @@ const discoverRpcPortWithRace = (config: {
     Effect.flatMap((allPorts) => {
       debug(`Discovered ports: ${allPorts.join(", ")}`);
 
-      // Filter to reasonable candidates (non-privileged ports, exclude p2p port)
       const candidatePorts = allPorts.filter(
         (p) => p >= 1024 && p <= 65535 && p !== 30333 && p !== 9615 // Exclude p2p & metrics port
       );
@@ -239,6 +243,12 @@ const discoverRpcPortWithRace = (config: {
           pid: config.pid,
           attempts: maxAttempts,
         })
+      )
+    ),
+    Effect.provide(
+      NodeCommandExecutor.layer.pipe(
+        Layer.provide(NodeContext.layer),
+        Layer.provide(NodeFileSystem.layer)
       )
     )
   );
