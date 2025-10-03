@@ -18,7 +18,7 @@ export async function deriveTestIds(params: DeriveTestIdsOptions) {
     await fs.promises.access(rootDir, fs.constants.R_OK);
   } catch (_error) {
     console.error(
-      `🔴 Error accessing directory ${chalk.bold(`/${rootDir}`)}, please sure this exists`
+      `🔴 Error accessing directory ${chalk.bold(`/${rootDir}`)}, please make sure this exists`
     );
     process.exitCode = 1;
     return;
