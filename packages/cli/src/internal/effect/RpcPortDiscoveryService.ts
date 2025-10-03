@@ -92,16 +92,18 @@ const testRpcMethod = (
 
         const handleMessages = socket.runRaw((data: string | Uint8Array) =>
           Effect.sync(() => {
+            const message = typeof data === "string" ? data : new TextDecoder().decode(data);
             try {
-              const message = typeof data === "string" ? data : new TextDecoder().decode(data);
               const response = JSON.parse(message);
-              if (response.jsonrpc === "2.0" && !response.error) {
-                Effect.runFork(Deferred.succeed(responseDeferred, true));
-              }
-            } catch (_e) {
-              // Ignore parse errors
+              return response.jsonrpc === "2.0" && !response.error;
+            } catch {
+              return false;
             }
-          })
+          }).pipe(
+            Effect.flatMap((shouldSucceed) =>
+              shouldSucceed ? Deferred.succeed(responseDeferred, true) : Effect.void
+            )
+          )
         );
 
         return Effect.all([
