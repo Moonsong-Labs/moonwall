@@ -30,6 +30,10 @@
           "description": "The path to the config file.",
           "type": "string"
         },
+        "legacy": {
+          "description": "Whether to use the legacy way of launching nodes (directly via ChildProcess) or the new way (using Effect)\nDefault: false (use Effect)\nNOTE: This is a temporary flag to ease the transition to Effect-based node management.\nIt will be removed in a future release. This does not affect read-only foundations.",
+          "type": "boolean"
+        },
         "name": {
           "description": "The name of the launch spec.",
           "type": "string"
@@ -133,6 +137,10 @@
             }
           },
           "type": "object"
+        },
+        "legacy": {
+          "description": "Whether to use the legacy way of launching nodes (directly via ChildProcess) or the new way (using Effect)\nDefault: false (use Effect)\nNOTE: This is a temporary flag to ease the transition to Effect-based node management.\nIt will be removed in a future release. This does not affect read-only foundations.",
+          "type": "boolean"
         },
         "name": {
           "description": "The name of the launch spec.",
@@ -371,6 +379,10 @@
           "description": "Disable runtime version check.\nRT Version check is enabled by default.",
           "type": "boolean"
         },
+        "legacy": {
+          "description": "Whether to use the legacy way of launching nodes (directly via ChildProcess) or the new way (using Effect)\nDefault: false (use Effect)\nNOTE: This is a temporary flag to ease the transition to Effect-based node management.\nIt will be removed in a future release. This does not affect read-only foundations.",
+          "type": "boolean"
+        },
         "name": {
           "description": "The name of the launch spec.",
           "type": "string"
@@ -514,6 +526,10 @@
         },
         "disableLogEavesdropping": {
           "description": "Specifies whether the framework should eavesdrop and log WARN, ERROR from the node logs.\nIf set to true, the eavesdropping on node logs is disabled.\nDefault behavior (when unset or set to false) is to listen to the logs.",
+          "type": "boolean"
+        },
+        "legacy": {
+          "description": "Whether to use the legacy way of launching nodes (directly via ChildProcess) or the new way (using Effect)\nDefault: false (use Effect)\nNOTE: This is a temporary flag to ease the transition to Effect-based node management.\nIt will be removed in a future release. This does not affect read-only foundations.",
           "type": "boolean"
         },
         "name": {

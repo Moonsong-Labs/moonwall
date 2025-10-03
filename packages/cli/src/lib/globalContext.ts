@@ -9,24 +9,29 @@ import type {
   MoonwallProvider,
   ProviderType,
 } from "@moonwall/types";
+import { createLogger } from "@moonwall/util";
 import type { ApiPromise } from "@polkadot/api";
 import zombie, { type Network } from "@zombienet/orchestrator";
-import { createLogger } from "@moonwall/util";
+import Docker from "dockerode";
+import { ChildProcess, exec, execSync } from "node:child_process";
 import fs from "node:fs";
 import net from "node:net";
+import path from "node:path";
 import readline from "node:readline";
 import { setTimeout as timer } from "node:timers/promises";
-import path from "node:path";
+import { promisify } from "node:util";
+import invariant from "tiny-invariant";
+import { launchNodeLegacy, withTimeout } from "../internal";
 import {
   LaunchCommandParser,
   parseChopsticksRunCmd,
   parseZombieCmd,
 } from "../internal/commandParsers";
 import {
-  type IPCRequestMessage,
-  type IPCResponseMessage,
   checkZombieBins,
   getZombieConfig,
+  type IPCRequestMessage,
+  type IPCResponseMessage,
 } from "../internal/foundations/zombieHelpers";
 import { launchNode, type MoonwallProcess } from "../internal/node";
 import {
@@ -41,11 +46,6 @@ import {
   isEthereumZombieConfig,
   isOptionSet,
 } from "./configReader";
-import { ChildProcess, exec, execSync } from "node:child_process";
-import { promisify } from "node:util";
-import { withTimeout } from "../internal";
-import Docker from "dockerode";
-import invariant from "tiny-invariant";
 const logger = createLogger({ name: "context" });
 const debugSetup = logger.debug.bind(logger);
 
@@ -437,12 +437,23 @@ export class MoonwallContext {
         nodes.map(async ({ cmd, args, name, launch }) => {
           if (launch) {
             try {
-              const result = await launchNode({
+              const options = {
                 command: cmd,
                 args,
                 name: name || "node",
                 launchSpec,
-              });
+              };
+
+              const isLegacy =
+                env.foundation.type === "dev"
+                  ? env.foundation.launchSpec[0].legacy
+                  : env.foundation.type === "chopsticks"
+                    ? env.foundation.launchSpec[0].legacy
+                    : env.foundation.type === "zombie"
+                      ? env.foundation.zombieSpec.legacy
+                      : false;
+
+              const result = isLegacy ? await launchNodeLegacy(options) : await launchNode(options);
               this.nodes.push(result.runningNode);
               if (result.runningNode instanceof ChildProcess) {
                 debugSetup(

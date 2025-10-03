@@ -1,34 +1,20 @@
-import { type ChildProcess, exec, spawn, spawnSync } from "node:child_process";
+import type { DevLaunchSpec } from "@moonwall/types";
+import { createLogger } from "@moonwall/util";
+import Docker from "dockerode";
+import { exec, spawn, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import WebSocket from "ws";
-import { checkAccess, checkExists } from "./fileCheckers";
-import { createLogger } from "@moonwall/util";
 import { setTimeout as timer } from "node:timers/promises";
 import util from "node:util";
-import type { DevLaunchSpec } from "@moonwall/types";
-import Docker from "dockerode";
 import invariant from "tiny-invariant";
+import WebSocket from "ws";
 import { isEthereumDevConfig, isEthereumZombieConfig } from "../lib/configReader";
+import { checkAccess, checkExists } from "./fileCheckers";
+import type { MoonwallProcess } from "./node";
 
 const execAsync = util.promisify(exec);
 const logger = createLogger({ name: "localNode" });
 const debug = logger.debug.bind(logger);
-
-/**
- * Extended ChildProcess interface with Moonwall termination tracking
- */
-export interface MoonwallProcess extends ChildProcess {
-  /**
-   * Flag indicating if this process is being terminated by Moonwall
-   */
-  isMoonwallTerminating?: boolean;
-
-  /**
-   * Reason for Moonwall-initiated termination
-   */
-  moonwallTerminationReason?: string;
-}
 
 // TODO: Add multi-threading support
 async function launchDockerContainer(
@@ -109,7 +95,7 @@ async function launchDockerContainer(
   }
 }
 
-export async function launchNode(options: {
+export async function launchNodeLegacy(options: {
   command: string;
   args: string[];
   name: string;
@@ -253,7 +239,7 @@ export async function launchNode(options: {
 
 function isPidRunning(pid: number): Promise<boolean> {
   return new Promise((resolve) => {
-    exec(`ps -p ${pid} -o pid=`, (error, stdout, stderr) => {
+    exec(`ps -p ${pid} -o pid=`, (error, stdout, _stderr) => {
       if (error) {
         resolve(false);
       } else {
@@ -294,7 +280,7 @@ async function checkWebSocketJSONRPC(port: number): Promise<boolean> {
               ws.removeListener("message", messageHandler);
               resolve(true);
             }
-          } catch (e) {
+          } catch (_e) {
             // Ignore parse errors
           }
         };
@@ -324,7 +310,7 @@ async function checkWebSocketJSONRPC(port: number): Promise<boolean> {
 
           // WebSocket checks passed
           resolve(true);
-        } catch (e) {
+        } catch (_e) {
           resolve(false);
         }
       });
@@ -362,7 +348,7 @@ async function checkWebSocketJSONRPC(port: number): Promise<boolean> {
 
         const data: any = await response.json();
         return !data.error;
-      } catch (e) {
+      } catch (_e) {
         return false;
       }
     };
@@ -382,7 +368,7 @@ async function checkWebSocketJSONRPC(port: number): Promise<boolean> {
 
       // For non-Ethereum chains, system_chain being available is enough
       return true;
-    } catch (e) {
+    } catch (_e) {
       // HTTP service not ready yet
       return false;
     }
