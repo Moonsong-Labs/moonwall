@@ -157,10 +157,7 @@ export async function launchNode(options: {
   const moonwallNode = result.runningNode as MoonwallProcess;
   moonwallNode.effectCleanup = cleanup;
 
-  // Create a fake fsStream for backward compatibility
-  const fsStream = fs.createWriteStream(result.logPath, { flags: "a" });
-
-  return { runningNode: moonwallNode, fsStream };
+  return { runningNode: moonwallNode };
 }
 
 async function checkWebSocketJSONRPC(port: number): Promise<boolean> {

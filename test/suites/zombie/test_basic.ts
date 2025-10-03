@@ -115,7 +115,7 @@ describeSuite({
           provider: new WsProvider("ws://localhost:33345"),
         });
 
-        for (; ;) {
+        for (;;) {
           const newHeight = (await newApi.rpc.chain.getHeader()).number.toNumber();
           if (newHeight > initialHeight + 1) {
             logger.info(`New height ${newHeight}`);

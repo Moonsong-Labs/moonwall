@@ -56,7 +56,6 @@ export async function launchNodeEffect(
   const startTime = Date.now();
   logger.debug(`[T+0ms] Starting with command: ${config.command}, name: ${config.name}`);
 
-  // Determine node type and port configuration (functional approach)
   const nodeConfig = {
     isChopsticks: config.args.some((arg) => arg.includes("chopsticks.cjs")),
     hasRpcPort: config.args.some((arg) => arg.includes("--rpc-port")),

@@ -55,6 +55,12 @@ importers:
       '@effect/experimental':
         specifier: ^0.56.0
         version: 0.56.0(@effect/platform@0.92.1(effect@3.18.1))(effect@3.18.1)
+      '@effect/platform':
+        specifier: ^0.92.1
+        version: 0.92.1(effect@3.18.1)
+      '@effect/platform-node':
+        specifier: ^0.98.3
+        version: 0.98.3(@effect/cluster@0.50.3(@effect/platform@0.92.1(effect@3.18.1))(@effect/rpc@0.71.0(@effect/platform@0.92.1(effect@3.18.1))(effect@3.18.1))(@effect/sql@0.46.0(@effect/experimental@0.56.0(@effect/platform@0.92.1(effect@3.18.1))(effect@3.18.1))(@effect/platform@0.92.1(effect@3.18.1))(effect@3.18.1))(@effect/workflow@0.11.3(@effect/platform@0.92.1(effect@3.18.1))(@effect/rpc@0.71.0(@effect/platform@0.92.1(effect@3.18.1))(effect@3.18.1))(effect@3.18.1))(effect@3.18.1))(@effect/platform@0.92.1(effect@3.18.1))(@effect/rpc@0.71.0(@effect/platform@0.92.1(effect@3.18.1))(effect@3.18.1))(@effect/sql@0.46.0(@effect/experimental@0.56.0(@effect/platform@0.92.1(effect@3.18.1))(effect@3.18.1))(@effect/platform@0.92.1(effect@3.18.1))(effect@3.18.1))(effect@3.18.1)
       '@effect/rpc':
         specifier: ^0.71.0
         version: 0.71.0(@effect/platform@0.92.1(effect@3.18.1))(effect@3.18.1)
@@ -203,12 +209,6 @@ importers:
       '@biomejs/biome':
         specifier: ^2.1.1
         version: 2.1.1
-      '@effect/platform':
-        specifier: ^0.92.1
-        version: 0.92.1(effect@3.18.1)
-      '@effect/platform-node':
-        specifier: ^0.98.3
-        version: 0.98.3(@effect/cluster@0.50.3(@effect/platform@0.92.1(effect@3.18.1))(@effect/rpc@0.71.0(@effect/platform@0.92.1(effect@3.18.1))(effect@3.18.1))(@effect/sql@0.46.0(@effect/experimental@0.56.0(@effect/platform@0.92.1(effect@3.18.1))(effect@3.18.1))(@effect/platform@0.92.1(effect@3.18.1))(effect@3.18.1))(@effect/workflow@0.11.3(@effect/platform@0.92.1(effect@3.18.1))(@effect/rpc@0.71.0(@effect/platform@0.92.1(effect@3.18.1))(effect@3.18.1))(effect@3.18.1))(effect@3.18.1))(@effect/platform@0.92.1(effect@3.18.1))(@effect/rpc@0.71.0(@effect/platform@0.92.1(effect@3.18.1))(effect@3.18.1))(@effect/sql@0.46.0(@effect/experimental@0.56.0(@effect/platform@0.92.1(effect@3.18.1))(effect@3.18.1))(@effect/platform@0.92.1(effect@3.18.1))(effect@3.18.1))(effect@3.18.1)
       '@types/clear':
         specifier: ^0.1.4
         version: 0.1.4

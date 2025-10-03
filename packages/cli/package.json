@@ -62,6 +62,8 @@
     "@acala-network/chopsticks": "^1.2.0",
     "@effect/cluster": "^0.50.3",
     "@effect/experimental": "^0.56.0",
+    "@effect/platform": "^0.92.1",
+    "@effect/platform-node": "^0.98.3",
     "@effect/rpc": "^0.71.0",
     "@effect/sql": "^0.46.0",
     "@effect/workflow": "^0.11.3",
@@ -113,8 +115,6 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.1.1",
-    "@effect/platform": "^0.92.1",
-    "@effect/platform-node": "^0.98.3",
     "@types/clear": "^0.1.4",
     "@types/cli-progress": "3.11.6",
     "@types/node": "^24.0.14",

@@ -36,7 +36,9 @@ describeSuite({
       test: async () => {
         const currentBalance = (await context.polkadotJs().query.system.account(ETHAN_ADDRESS)).data
           .free;
-        log(`Sending transaction to ${ETHAN_ADDRESS}, current balance: ${formatEther(currentBalance.toString())} GLMR`);
+        log(
+          `Sending transaction to ${ETHAN_ADDRESS}, current balance: ${formatEther(currentBalance.toString())} GLMR`
+        );
         await context
           .polkadotJs()
           .tx.balances.transferAllowDeath(ETHAN_ADDRESS, parseEther("10"))
@@ -144,7 +146,9 @@ describeSuite({
       title: "Create block, allow failures and check events",
       timeout: 60000,
       test: async () => {
-        log(`Testing force transfer with allowFailures - from ${BALTATHAR_ADDRESS} to ${CHARLETH_ADDRESS}`);
+        log(
+          `Testing force transfer with allowFailures - from ${BALTATHAR_ADDRESS} to ${CHARLETH_ADDRESS}`
+        );
         await context
           .polkadotJs()
           .tx.balances.forceTransfer(BALTATHAR_ADDRESS, CHARLETH_ADDRESS, parseEther("3"))
@@ -154,12 +158,11 @@ describeSuite({
 
         const apiAt = await context.polkadotJs().at(result);
         const events = await apiAt.query.system.events();
-        const failedEvent = events.find((evt) => context.polkadotJs().events.system.ExtrinsicFailed.is(evt.event));
-        log(`Found ExtrinsicFailed event: ${failedEvent ? 'Yes' : 'No'}`);
-        expect(
-          failedEvent,
-          "No Event found in block"
-        ).toBeTruthy();
+        const failedEvent = events.find((evt) =>
+          context.polkadotJs().events.system.ExtrinsicFailed.is(evt.event)
+        );
+        log(`Found ExtrinsicFailed event: ${failedEvent ? "Yes" : "No"}`);
+        expect(failedEvent, "No Event found in block").toBeTruthy();
       },
     });
   },
