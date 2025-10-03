@@ -24,7 +24,7 @@ import {
 import { Keyring } from "@polkadot/api";
 import type { ApiTypes } from "@polkadot/api/types";
 import { createDevBlock } from "../../internal/foundations/devModeHelpers";
-import { getEnvironmentFromConfig, importJsonConfig, isEthereumDevConfig } from "../configReader";
+import { getEnvironmentFromConfig, isEthereumDevConfig } from "../configReader";
 import {
   deployCreateCompiledContract,
   interactWithContract,

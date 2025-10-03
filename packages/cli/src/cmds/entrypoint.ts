@@ -1,5 +1,4 @@
 import "@moonbeam-network/api-augment";
-import chalk from "chalk";
 import dotenv from "dotenv";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";

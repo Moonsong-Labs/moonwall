@@ -31,8 +31,7 @@
   "module": "./dist/index.js",
   "types": "./dist/types/index.d.ts",
   "engines": {
-    "node": ">=20",
-    "pnpm": ">=7"
+    "node": ">=20"
   },
   "files": [
     "dist",
@@ -42,11 +41,11 @@
   ],
   "scripts": {
     "clean": "rm -rf dist && rm -rf node_modules",
-    "build": "rm -rf dist && tsup src --format esm --no-splitting --sourcemap && pnpm generate-types",
+    "build": "rm -rf dist && tsup src --format esm --no-splitting --sourcemap && pnpm run generate-types",
     "generate-types": "tsc && pnpm schema",
     "watch": "tsup src --format esm --watch",
-    "lint": "pnpm biome lint ./src",
-    "lint:fix": "pnpm biome lint ./src --apply",
+    "lint": "biome lint ./src",
+    "lint:fix": "biome lint ./src --apply",
     "fmt": "biome format ./src",
     "fmt:fix": "biome format src --write",
     "prepublish": "pnpm run build && pnpm run generate-types",

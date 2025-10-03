@@ -29,7 +29,7 @@ The following logger names are used throughout the codebase:
 
 - `context` - Global context operations (MoonwallContext)
 - `providers` - Provider-related operations and connections
-- `localNode` - Local node management and Docker operations
+- `node` - Local node management and Docker operations
 - `runner` - Test runner and Vitest configuration
 - `test:blocks` - Block-related utility functions
 - `test:<env-name>` - Test environment specific logging (dynamically created)

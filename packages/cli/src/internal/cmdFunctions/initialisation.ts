@@ -1,6 +1,6 @@
 import type { FoundationType, MoonwallConfig } from "@moonwall/types";
 import fs from "node:fs/promises";
-import { input, number, confirm, select } from "@inquirer/prompts";
+import { confirm, input, number } from "@inquirer/prompts";
 
 export async function createFolders() {
   await fs.mkdir("scripts").catch(() => "scripts folder already exists, skipping");

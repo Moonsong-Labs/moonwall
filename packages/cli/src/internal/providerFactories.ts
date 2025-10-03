@@ -27,6 +27,9 @@ export class ProviderFactory {
     this.url = providerConfig.endpoints.includes("ENV_VAR")
       ? process.env.WSS_URL || "error_missing_WSS_URL_env_var"
       : providerConfig.endpoints[0];
+    debug(
+      `Constructor - providerConfig.endpoints[0]: ${providerConfig.endpoints[0]}, this.url: ${this.url}`
+    );
     this.privateKey = process.env.MOON_PRIV_KEY || ALITH_PRIVATE_KEY;
   }
 
@@ -48,12 +51,13 @@ export class ProviderFactory {
   }
 
   private createPolkadotJs(): MoonwallProvider {
-    debug(`🟢  PolkadotJs provider ${this.providerConfig.name} details prepared`);
+    debug(
+      `🟢  PolkadotJs provider ${this.providerConfig.name} details prepared to connect to ${this.url}`
+    );
     return {
       name: this.providerConfig.name,
       type: this.providerConfig.type,
       connect: async () => {
-        process.env.DEFAULT_TIMEOUT_MS = "30000";
         const options: ApiOptions = {
           provider: new WsProvider(this.url),
           initWasm: false,
@@ -111,14 +115,22 @@ export class ProviderFactory {
       type: this.providerConfig.type,
       connect: async () => {
         try {
+          debug(`Original URL (this.url): ${this.url}`);
+          const httpUrl = this.url.startsWith("wss://")
+            ? this.url.replace("wss://", "https://")
+            : this.url.startsWith("ws://")
+              ? this.url.replace("ws://", "http://")
+              : this.url;
+          debug(`Converted HTTP URL: ${httpUrl} for provider ${this.providerConfig.name}`);
+
           debug(
-            `🔌 Attempting to derive chain for viem provider ${this.providerConfig.name} from ${this.url}`
+            `🔌 Attempting to derive chain for viem provider ${this.providerConfig.name} from ${httpUrl}`
           );
-          const chain = await deriveViemChain(this.url);
+          const chain = await deriveViemChain(httpUrl);
           const client = createWalletClient({
             chain,
             account: privateKeyToAccount(this.privateKey as `0x${string}`),
-            transport: http(this.url.replace("ws", "http")),
+            transport: http(httpUrl),
           }).extend(publicActions);
           return client;
         } catch (error: any) {
@@ -418,4 +430,10 @@ export class ProviderInterfaceFactory {
   }
 }
 
-export const vitestAutoUrl = () => `ws://127.0.0.1:${process.env.MOONWALL_RPC_PORT}`;
+export const vitestAutoUrl = () => {
+  const url = `ws://127.0.0.1:${process.env.MOONWALL_RPC_PORT}`;
+  debug(
+    `vitestAutoUrl - MOONWALL_RPC_PORT=${process.env.MOONWALL_RPC_PORT}, Generated URL: ${url}`
+  );
+  return url;
+};

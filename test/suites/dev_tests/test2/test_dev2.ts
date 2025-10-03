@@ -100,7 +100,7 @@ describeSuite({
           // polkadotJs.events.authorFilter.EligibleUpdated
         ];
 
-        log(`Expecting events: ${expectEvents.map(e => e.section + '.' + e.method).join(', ')}`);
+        log(`Expecting events: ${expectEvents.map((e) => e.section + "." + e.method).join(", ")}`);
         await context.createBlock(
           polkadotJs.tx.balances.transferAllowDeath(CHARLETH_ADDRESS, parseEther("3")),
           { expectEvents }

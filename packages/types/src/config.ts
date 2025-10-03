@@ -227,6 +227,14 @@ export interface GenericLaunchSpec {
    * An optional array of options for the launch spec.
    */
   options?: string[];
+
+  /**
+   * Whether to use the legacy way of launching nodes (directly via ChildProcess) or the new way (using Effect)
+   * Default: false (use Effect)
+   * NOTE: This is a temporary flag to ease the transition to Effect-based node management.
+   * It will be removed in a future release. This does not affect read-only foundations.
+   */
+  legacy?: boolean;
 }
 
 /**

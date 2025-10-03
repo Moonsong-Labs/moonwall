@@ -156,7 +156,11 @@ export async function directRpcRequest(
         `RPC request to ${endpoint} timed out after ${timeoutMs}ms (method: ${method})`
       );
     }
-    // Add context to fetch errors
+    console.error(
+      `[directRpcRequest] Error for ${endpoint} method ${method}:`,
+      error.message,
+      error.cause
+    );
     throw new Error(`RPC request to ${endpoint} failed (method: ${method}): ${error.message}`);
   }
 }

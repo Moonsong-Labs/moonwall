@@ -27,4 +27,9 @@ artifacts
 .idea
 db.sqlite*
 **/*.local*
-**/.github/instructions/*
+
+# Ignore kluster.ai Verify Code rules
+.github/instructions/kluster-code-verify.instructions.md
+
+
+.kluster

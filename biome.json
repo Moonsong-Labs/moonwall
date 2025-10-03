@@ -16,6 +16,13 @@
     ],
     "ignoreUnknown": true
   },
+  "assist": {
+    "enabled": true,
+    "includes": [],
+    "actions": {
+      "recommended": true
+    }
+  },
   "formatter": {
     "enabled": true,
     "indentStyle": "space"

@@ -18,7 +18,7 @@
     "pristine-build": "pnpm clean-all && pnpm i && pnpm build && pnpm generate-types",
     "start": "cd test && pnpm exec moonwall",
     "display-reports": "pnpm exec vite preview --base __vitest__ --outDir html",
-    "test": "cd test && pnpm moonwall test dev_multi",
+    "test": "cd packages/cli && pnpm test && cd ../../test && pnpm moonwall test dev_multi",
     "typecheck": "pnpm -r --filter='./packages/**' run typecheck"
   },
   "devDependencies": {
@@ -31,8 +31,10 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "@biomejs/biome",
+      "@parcel/watcher",
       "cpu-features",
       "esbuild",
+      "msgpackr-extract",
       "protobufjs",
       "sqlite3",
       "ssh2",
@@ -42,5 +44,10 @@
   "dependencies": {
     "pino": "^9.7.0",
     "pino-pretty": "^13.0.0"
-  }
+  },
+  "workspaces": [
+    "packages/*",
+    "docs",
+    "test"
+  ]
 }

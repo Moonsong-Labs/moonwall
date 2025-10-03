@@ -18,7 +18,7 @@ import { createLogger } from "@moonwall/util";
 import type { Wallet } from "ethers";
 import { afterAll, beforeAll, describe, it } from "vitest";
 import type { Web3 } from "web3";
-import { getEnvironmentFromConfig, importAsyncConfig } from "./configReader";
+import { getEnvironmentFromConfig } from "./configReader";
 import { MoonwallContext, contextCreator } from "./globalContext";
 import { chopsticksHandler } from "./handlers/chopsticksHandler";
 import { devHandler } from "./handlers/devHandler";
@@ -28,7 +28,7 @@ import type { PolkadotClient } from "polkadot-api";
 
 const RT_VERSION = Number(process.env.MOON_RTVERSION);
 const RT_NAME = process.env.MOON_RTNAME;
-let limiter: Bottleneck | undefined = undefined;
+let limiter: Bottleneck | undefined;
 
 // About: This has been designed in the handler pattern so that eventually we can integrate it to vitest
 // https://vitest.dev/advanced/runner.html

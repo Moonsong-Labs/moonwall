@@ -33,7 +33,7 @@ export function getCompiled<TAbi extends Abi>(contractPath: string): CompiledCon
   try {
     const json = fs.readFileSync(filePath, "utf8");
     return JSON.parse(json);
-  } catch (e) {
+  } catch (_error) {
     throw new Error(
       `Contract name ${contractPath} is not compiled. Please check compiled json exists`
     );

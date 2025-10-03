@@ -8,28 +8,32 @@ import type {
   MoonwallEnvironment,
   MoonwallProvider,
   ProviderType,
-  DevLaunchSpec,
 } from "@moonwall/types";
+import { createLogger } from "@moonwall/util";
 import type { ApiPromise } from "@polkadot/api";
 import zombie, { type Network } from "@zombienet/orchestrator";
-import { createLogger } from "@moonwall/util";
+import Docker from "dockerode";
+import { ChildProcess, exec, execSync } from "node:child_process";
 import fs from "node:fs";
 import net from "node:net";
+import path from "node:path";
 import readline from "node:readline";
 import { setTimeout as timer } from "node:timers/promises";
-import path from "node:path";
+import { promisify } from "node:util";
+import invariant from "tiny-invariant";
+import { launchNodeLegacy, withTimeout } from "../internal";
 import {
   LaunchCommandParser,
   parseChopsticksRunCmd,
   parseZombieCmd,
 } from "../internal/commandParsers";
 import {
-  type IPCRequestMessage,
-  type IPCResponseMessage,
   checkZombieBins,
   getZombieConfig,
+  type IPCRequestMessage,
+  type IPCResponseMessage,
 } from "../internal/foundations/zombieHelpers";
-import { launchNode, type MoonwallProcess } from "../internal/localNode";
+import { launchNode, type MoonwallProcess } from "../internal/node";
 import {
   ProviderFactory,
   ProviderInterfaceFactory,
@@ -42,11 +46,6 @@ import {
   isEthereumZombieConfig,
   isOptionSet,
 } from "./configReader";
-import { ChildProcess, exec, execSync } from "node:child_process";
-import { promisify } from "node:util";
-import { withTimeout } from "../internal";
-import Docker from "dockerode";
-import invariant from "tiny-invariant";
 const logger = createLogger({ name: "context" });
 const debugSetup = logger.debug.bind(logger);
 
@@ -139,17 +138,8 @@ export class MoonwallContext {
           launch,
         },
       ],
-      providers: env.connections
-        ? ProviderFactory.prepare(env.connections)
-        : isEthereumDevConfig()
-          ? ProviderFactory.prepareDefaultDev()
-          : ProviderFactory.prepare([
-              {
-                name: "node",
-                type: "polkadotJs",
-                endpoints: [vitestAutoUrl()],
-              },
-            ]),
+      // Providers will be prepared in connectEnvironment after MOONWALL_RPC_PORT is set
+      providers: [],
     } satisfies IGlobalContextFoundation;
   }
 
@@ -229,7 +219,7 @@ export class MoonwallContext {
             console.error(`Error killing process: ${error.message}`);
           }
         });
-      } catch (err) {
+      } catch (_error) {
         // console.log(err.message);
       }
     };
@@ -344,7 +334,7 @@ export class MoonwallContext {
               // await this.disconnect();
               const pid = (network.client as any).processMap[message.nodeName].pid;
               delete (network.client as any).processMap[message.nodeName];
-              const killResult = execSync(`kill ${pid}`, { stdio: "ignore" });
+              execSync(`kill ${pid}`, { stdio: "ignore" });
               // await this.connectEnvironment(true);
               writeToClient({
                 status: "success",
@@ -420,12 +410,16 @@ export class MoonwallContext {
     const ctx = await MoonwallContext.getContext();
 
     if (process.env.MOON_RECYCLE === "true") {
+      debugSetup("🔄 MOON_RECYCLE=true, skipping node launch");
       return ctx;
     }
 
     if (this.nodes.length > 0) {
+      debugSetup(`♻️  Reusing existing ${this.nodes.length} node(s) - skipping launch`);
       return ctx;
     }
+
+    debugSetup("🚀 No existing nodes found, launching new node...");
 
     const nodes = ctx.environment.nodes;
 
@@ -443,12 +437,23 @@ export class MoonwallContext {
         nodes.map(async ({ cmd, args, name, launch }) => {
           if (launch) {
             try {
-              const result = await launchNode({
+              const options = {
                 command: cmd,
                 args,
                 name: name || "node",
                 launchSpec,
-              });
+              };
+
+              const isLegacy =
+                env.foundation.type === "dev"
+                  ? env.foundation.launchSpec[0].legacy
+                  : env.foundation.type === "chopsticks"
+                    ? env.foundation.launchSpec[0].legacy
+                    : env.foundation.type === "zombie"
+                      ? env.foundation.zombieSpec.legacy
+                      : false;
+
+              const result = isLegacy ? await launchNodeLegacy(options) : await launchNode(options);
               this.nodes.push(result.runningNode);
               if (result.runningNode instanceof ChildProcess) {
                 debugSetup(
@@ -471,12 +476,30 @@ export class MoonwallContext {
   public async connectEnvironment(silent = false): Promise<MoonwallContext> {
     const env = getEnvironmentFromConfig();
 
+    // Prepare providers at connection time to ensure MOONWALL_RPC_PORT is set
     if (this.environment.foundationType === "zombie") {
       this.environment.providers = env.connections
         ? ProviderFactory.prepare(env.connections)
         : isEthereumZombieConfig()
           ? ProviderFactory.prepareDefaultZombie()
           : ProviderFactory.prepareNoEthDefaultZombie();
+    }
+
+    if (this.environment.foundationType === "dev") {
+      debugSetup(
+        `Dev foundation - env.connections: ${env.connections ? "YES" : "NO"}, isEthereumDevConfig: ${isEthereumDevConfig()}`
+      );
+      this.environment.providers = env.connections
+        ? ProviderFactory.prepare(env.connections)
+        : isEthereumDevConfig()
+          ? ProviderFactory.prepareDefaultDev()
+          : ProviderFactory.prepare([
+              {
+                name: "node",
+                type: "polkadotJs",
+                endpoints: [vitestAutoUrl()],
+              },
+            ]);
     }
 
     if (this.providers.length > 0) {
@@ -494,6 +517,9 @@ export class MoonwallContext {
     }) => {
       for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
+          debugSetup(`Connecting ${provider.name} (type: ${provider.type}), attempt ${attempt}`);
+          debugSetup(`MOONWALL_RPC_PORT=${process.env.MOONWALL_RPC_PORT}`);
+
           debugSetup(`🔄 Connecting provider ${provider.name}, attempt ${attempt}`);
 
           const connectedProvider = await Promise.race([
@@ -630,12 +656,30 @@ export class MoonwallContext {
     if (this.nodes.length > 0) {
       for (const node of this.nodes) {
         if (node instanceof ChildProcess) {
-          try {
-            if (node.pid) {
-              process.kill(node.pid);
+          // Use Effect-based cleanup if available (automatic resource management)
+          const moonwallNode = node as any;
+          if (moonwallNode.effectCleanup) {
+            try {
+              await moonwallNode.effectCleanup();
+            } catch (_error) {
+              // Fallback to manual kill if Effect cleanup fails
+              try {
+                if (node.pid) {
+                  process.kill(node.pid);
+                }
+              } catch (_killError) {
+                // Ignore errors when killing processes
+              }
             }
-          } catch (e) {
-            // Ignore errors when killing processes
+          } else {
+            // Legacy manual cleanup for nodes without Effect
+            try {
+              if (node.pid) {
+                process.kill(node.pid);
+              }
+            } catch (_error) {
+              // Ignore errors when killing processes
+            }
           }
         }
 
@@ -643,7 +687,7 @@ export class MoonwallContext {
           try {
             await node.stop();
             await node.remove();
-          } catch (e) {
+          } catch (_error) {
             // Ignore errors when stopping containers
           }
         }
@@ -807,7 +851,7 @@ async function isPidRunning(pid: number): Promise<boolean> {
   try {
     const { stdout } = await execAsync(`ps -p ${pid} -o pid=`);
     return stdout.trim() === pid.toString();
-  } catch (error) {
+  } catch (_error) {
     return false;
   }
 }

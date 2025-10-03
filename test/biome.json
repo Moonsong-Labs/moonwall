@@ -1,8 +1,6 @@
 {
   "extends": ["../biome.json"],
-  "files": {
-    "ignore": ["node_modules/", "contracts", "tmp", "html"]
-  },
+  "files": {},
   "linter": {
     "rules": {
       "recommended": true,
