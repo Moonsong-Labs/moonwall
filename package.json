@@ -18,7 +18,7 @@
     "pristine-build": "pnpm clean-all && pnpm i && pnpm build && pnpm generate-types",
     "start": "cd test && pnpm exec moonwall",
     "display-reports": "pnpm exec vite preview --base __vitest__ --outDir html",
-    "test": "cd packages/cli && pnpm test && cd ../test && pnpm moonwall test dev_multi",
+    "test": "cd packages/cli && pnpm test && cd ../../test && pnpm moonwall test dev_multi",
     "typecheck": "pnpm -r --filter='./packages/**' run typecheck"
   },
   "devDependencies": {
