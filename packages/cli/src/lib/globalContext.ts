@@ -28,7 +28,7 @@ import {
   checkZombieBins,
   getZombieConfig,
 } from "../internal/foundations/zombieHelpers";
-import { launchNode, type MoonwallProcess } from "../internal/localNode";
+import { launchNode, type MoonwallProcess } from "../internal/node";
 import {
   ProviderFactory,
   ProviderInterfaceFactory,
