@@ -1,8 +1,9 @@
+import { Socket } from "@effect/platform";
+import * as NodeSocket from "@effect/platform-node/NodeSocket";
+import { createLogger } from "@moonwall/util";
+import { Context, Deferred, Effect, Layer, Option, Schedule, type Scope } from "effect";
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
-import { createLogger } from "@moonwall/util";
-import { Context, Effect, Layer, Option, Schedule } from "effect";
-import { WebSocket } from "ws";
 import { PortDiscoveryError } from "./errors.js";
 
 const execAsync = promisify(exec);
@@ -67,138 +68,103 @@ const getAllPorts = (pid: number): Effect.Effect<number[], PortDiscoveryError> =
   );
 
 /**
- * Acquire a WebSocket connection as a managed resource
+ * Test a single RPC method on a socket
  */
-const acquireWebSocket = (port: number): Effect.Effect<WebSocket, PortDiscoveryError> =>
-  Effect.async<WebSocket, PortDiscoveryError>((resume) => {
-    const ws = new WebSocket(`ws://localhost:${port}`);
-
-    const handleOpen = () => {
-      ws.removeListener("error", handleError);
-      resume(Effect.succeed(ws));
-    };
-
-    const handleError = (error: Error) => {
-      ws.removeListener("open", handleOpen);
-      resume(
-        Effect.fail(
-          new PortDiscoveryError({
-            cause: error,
-            pid: 0,
-            attempts: 1,
+const testRpcMethod = (
+  method: string
+): Effect.Effect<boolean, PortDiscoveryError, Socket.Socket | Scope.Scope> =>
+  Effect.flatMap(Deferred.make<boolean, Error>(), (responseDeferred) =>
+    Effect.flatMap(Socket.Socket, (socket) =>
+      Effect.flatMap(socket.writer, (writer) => {
+        const request = new TextEncoder().encode(
+          JSON.stringify({
+            jsonrpc: "2.0",
+            id: Math.floor(Math.random() * 10000),
+            method,
+            params: [],
           })
-        )
-      );
-    };
+        );
 
-    ws.once("open", handleOpen);
-    ws.once("error", handleError);
+        const handleMessages = socket.runRaw((data: string | Uint8Array) =>
+          Effect.sync(() => {
+            try {
+              const message = typeof data === "string" ? data : new TextDecoder().decode(data);
+              const response = JSON.parse(message);
+              if (response.jsonrpc === "2.0" && !response.error) {
+                Effect.runFork(Deferred.succeed(responseDeferred, true));
+              }
+            } catch (_e) {
+              // Ignore parse errors
+            }
+          })
+        );
 
-    return Effect.sync(() => {
-      ws.removeListener("open", handleOpen);
-      ws.removeListener("error", handleError);
-      try {
-        ws.close();
-      } catch (_e) {
-        // Ignore cleanup errors
-      }
-    });
-  });
-
-/**
- * Test a single RPC method on an open WebSocket
- */
-const testRpcMethod = (ws: WebSocket, method: string): Effect.Effect<boolean> =>
-  Effect.async<boolean>((resume) => {
-    const handleMessage = (data: Buffer) => {
-      ws.removeListener("message", handleMessage);
-      try {
-        const response = JSON.parse(data.toString());
-        resume(Effect.succeed(response.jsonrpc === "2.0" && !response.error));
-      } catch (_e) {
-        resume(Effect.succeed(false));
-      }
-    };
-
-    ws.on("message", handleMessage);
-
-    try {
-      ws.send(
-        JSON.stringify({
-          jsonrpc: "2.0",
-          id: Math.floor(Math.random() * 10000),
-          method,
-          params: [],
-        })
-      );
-    } catch (_error) {
-      ws.removeListener("message", handleMessage);
-      resume(Effect.succeed(false));
-    }
-
-    return Effect.sync(() => {
-      ws.removeListener("message", handleMessage);
-    });
-  }).pipe(Effect.timeoutOption("3 seconds"), Effect.map(Option.getOrElse(() => false)));
+        return Effect.all([
+          Effect.fork(handleMessages),
+          Effect.flatMap(writer(request), () => Effect.void),
+          Deferred.await(responseDeferred).pipe(
+            Effect.timeoutOption("3 seconds"),
+            Effect.map((opt) => (opt._tag === "Some" ? opt.value : false))
+          ),
+        ]).pipe(
+          Effect.map(([_, __, result]) => result),
+          Effect.catchAll((cause) =>
+            Effect.fail(
+              new PortDiscoveryError({
+                cause,
+                pid: 0,
+                attempts: 1,
+              })
+            )
+          )
+        );
+      })
+    )
+  );
 
 /**
- * Test if a port responds to RPC calls using Effect primitives
+ * Test if a port responds to RPC calls using Effect Socket
  */
 const testRpcPort = (
   port: number,
   isEthereumChain: boolean
 ): Effect.Effect<number, PortDiscoveryError> =>
-  Effect.acquireUseRelease(
-    acquireWebSocket(port),
-    (ws) => {
-      const systemChainTest = testRpcMethod(ws, "system_chain").pipe(
-        Effect.flatMap((success) =>
-          success
-            ? Effect.sync(() => {
-                debug(`Port ${port} responded to system_chain`);
-                return port;
-              })
-            : Effect.fail(
-                new PortDiscoveryError({
-                  cause: new Error(`Port ${port} did not respond to system_chain`),
-                  pid: 0,
-                  attempts: 1,
-                })
-              )
-        )
-      );
-
-      if (!isEthereumChain) {
-        return systemChainTest;
-      }
-
-      const ethChainTest = testRpcMethod(ws, "eth_chainId").pipe(
-        Effect.flatMap((success) =>
-          success
-            ? Effect.sync(() => {
-                debug(`Port ${port} responded to eth_chainId`);
-                return port;
-              })
-            : Effect.fail(
-                new PortDiscoveryError({
-                  cause: new Error(`Port ${port} did not respond to eth_chainId`),
-                  pid: 0,
-                  attempts: 1,
-                })
-              )
-        )
-      );
-
-      return Effect.race(systemChainTest, ethChainTest);
-    },
-    (ws) =>
-      Effect.sync(() => {
-        try {
-          ws.close();
-        } catch (_e) {
-          // Ignore cleanup errors
+  Effect.scoped(
+    Effect.provide(
+      Effect.flatMap(testRpcMethod("system_chain"), (success) => {
+        if (success) {
+          debug(`Port ${port} responded to system_chain`);
+          return Effect.succeed(port);
         }
-      })
+
+        if (!isEthereumChain) {
+          return Effect.fail(
+            new PortDiscoveryError({
+              cause: new Error(`Port ${port} did not respond to system_chain`),
+              pid: 0,
+              attempts: 1,
+            })
+          );
+        }
+
+        // If Ethereum chain, try eth_chainId
+        return Effect.flatMap(testRpcMethod("eth_chainId"), (ethSuccess) => {
+          if (ethSuccess) {
+            debug(`Port ${port} responded to eth_chainId`);
+            return Effect.succeed(port);
+          }
+
+          return Effect.fail(
+            new PortDiscoveryError({
+              cause: new Error(`Port ${port} did not respond to eth_chainId`),
+              pid: 0,
+              attempts: 1,
+            })
+          );
+        });
+      }),
+      NodeSocket.layerWebSocket(`ws://localhost:${port}`)
+    )
   ).pipe(
     Effect.timeoutOption("7 seconds"),
     Effect.flatMap((opt) =>
