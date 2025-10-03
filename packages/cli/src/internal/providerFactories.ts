@@ -116,7 +116,11 @@ export class ProviderFactory {
       connect: async () => {
         try {
           debug(`Original URL (this.url): ${this.url}`);
-          const httpUrl = this.url.replace("ws", "http");
+          const httpUrl = this.url.startsWith("wss://")
+            ? this.url.replace("wss://", "https://")
+            : this.url.startsWith("ws://")
+              ? this.url.replace("ws://", "http://")
+              : this.url;
           debug(`Converted HTTP URL: ${httpUrl} for provider ${this.providerConfig.name}`);
 
           debug(
