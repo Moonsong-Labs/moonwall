@@ -36,10 +36,7 @@ export interface LaunchNodeResult {
 /**
  * Combined layer with all dependencies
  */
-const AllServicesLive = Layer.mergeAll(
-  ProcessManagerServiceLive,
-  RpcPortDiscoveryServiceLive
-);
+const AllServicesLive = Layer.mergeAll(ProcessManagerServiceLive, RpcPortDiscoveryServiceLive);
 
 /**
  * Launch a blockchain node with Effect-based lifecycle management
@@ -105,7 +102,9 @@ export async function launchNodeEffect(
           return RpcPortDiscoveryService.pipe(
             Effect.flatMap((rpcDiscovery) =>
               Effect.sync(() =>
-                logger.debug(`[T+${Date.now() - startTime}ms] Discovering RPC port for PID ${pid}...`)
+                logger.debug(
+                  `[T+${Date.now() - startTime}ms] Discovering RPC port for PID ${pid}...`
+                )
               ).pipe(
                 Effect.flatMap(() =>
                   rpcDiscovery.discoverRpcPort({

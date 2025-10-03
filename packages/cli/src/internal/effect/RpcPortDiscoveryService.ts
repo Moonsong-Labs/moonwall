@@ -1,7 +1,7 @@
-import { createLogger } from "@moonwall/util";
-import { Context, Effect, Layer, Schedule } from "effect";
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
+import { createLogger } from "@moonwall/util";
+import { Context, Effect, Layer, Option, Schedule } from "effect";
 import { WebSocket } from "ws";
 import { PortDiscoveryError } from "./errors.js";
 
@@ -32,18 +32,11 @@ export class RpcPortDiscoveryService extends Context.Tag("RpcPortDiscoveryServic
  * Parse ports from lsof output
  */
 const parsePortsFromLsof = (stdout: string): number[] => {
-  const ports: number[] = [];
-  const lines = stdout.split("\n");
-
-  for (const line of lines) {
-    const regex = /(?:.+):(\d+)/;
+  const regex = /(?:.+):(\d+)/;
+  return stdout.split("\n").flatMap((line) => {
     const match = line.match(regex);
-    if (match) {
-      ports.push(Number.parseInt(match[1], 10));
-    }
-  }
-
-  return ports;
+    return match ? [Number.parseInt(match[1], 10)] : [];
+  });
 };
 
 /**
@@ -74,169 +67,154 @@ const getAllPorts = (pid: number): Effect.Effect<number[], PortDiscoveryError> =
   );
 
 /**
- * Test if a port responds to RPC calls
- *
- * CRITICAL RESOURCE MANAGEMENT:
- * - Effect.async cleanup is ONLY invoked on interruption (Effect.raceAll cancellation)
- * - Normal completion (success/error) requires manual cleanup
- * - Separate cleanedUp flag prevents double cleanup
+ * Acquire a WebSocket connection as a managed resource
+ */
+const acquireWebSocket = (port: number): Effect.Effect<WebSocket, PortDiscoveryError> =>
+  Effect.async<WebSocket, PortDiscoveryError>((resume) => {
+    const ws = new WebSocket(`ws://localhost:${port}`);
+
+    const handleOpen = () => {
+      ws.removeListener("error", handleError);
+      resume(Effect.succeed(ws));
+    };
+
+    const handleError = (error: Error) => {
+      ws.removeListener("open", handleOpen);
+      resume(
+        Effect.fail(
+          new PortDiscoveryError({
+            cause: error,
+            pid: 0,
+            attempts: 1,
+          })
+        )
+      );
+    };
+
+    ws.once("open", handleOpen);
+    ws.once("error", handleError);
+
+    return Effect.sync(() => {
+      ws.removeListener("open", handleOpen);
+      ws.removeListener("error", handleError);
+      try {
+        ws.close();
+      } catch (_e) {
+        // Ignore cleanup errors
+      }
+    });
+  });
+
+/**
+ * Test a single RPC method on an open WebSocket
+ */
+const testRpcMethod = (ws: WebSocket, method: string): Effect.Effect<boolean> =>
+  Effect.async<boolean>((resume) => {
+    const handleMessage = (data: Buffer) => {
+      ws.removeListener("message", handleMessage);
+      try {
+        const response = JSON.parse(data.toString());
+        resume(Effect.succeed(response.jsonrpc === "2.0" && !response.error));
+      } catch (_e) {
+        resume(Effect.succeed(false));
+      }
+    };
+
+    ws.on("message", handleMessage);
+
+    try {
+      ws.send(
+        JSON.stringify({
+          jsonrpc: "2.0",
+          id: Math.floor(Math.random() * 10000),
+          method,
+          params: [],
+        })
+      );
+    } catch (_error) {
+      ws.removeListener("message", handleMessage);
+      resume(Effect.succeed(false));
+    }
+
+    return Effect.sync(() => {
+      ws.removeListener("message", handleMessage);
+    });
+  }).pipe(Effect.timeoutOption("3 seconds"), Effect.map(Option.getOrElse(() => false)));
+
+/**
+ * Test if a port responds to RPC calls using Effect primitives
  */
 const testRpcPort = (
   port: number,
   isEthereumChain: boolean
 ): Effect.Effect<number, PortDiscoveryError> =>
-  Effect.async<number, PortDiscoveryError>((resume) => {
-    const ws = new WebSocket(`ws://localhost:${port}`);
-    let resolved = false;
-    let cleanedUp = false;
+  Effect.acquireUseRelease(
+    acquireWebSocket(port),
+    (ws) => {
+      const systemChainTest = testRpcMethod(ws, "system_chain").pipe(
+        Effect.flatMap((success) =>
+          success
+            ? Effect.sync(() => {
+                debug(`Port ${port} responded to system_chain`);
+                return port;
+              })
+            : Effect.fail(
+                new PortDiscoveryError({
+                  cause: new Error(`Port ${port} did not respond to system_chain`),
+                  pid: 0,
+                  attempts: 1,
+                })
+              )
+        )
+      );
 
-    const cleanup = () => {
-      if (!cleanedUp) {
-        cleanedUp = true;
+      if (!isEthereumChain) {
+        return systemChainTest;
+      }
+
+      const ethChainTest = testRpcMethod(ws, "eth_chainId").pipe(
+        Effect.flatMap((success) =>
+          success
+            ? Effect.sync(() => {
+                debug(`Port ${port} responded to eth_chainId`);
+                return port;
+              })
+            : Effect.fail(
+                new PortDiscoveryError({
+                  cause: new Error(`Port ${port} did not respond to eth_chainId`),
+                  pid: 0,
+                  attempts: 1,
+                })
+              )
+        )
+      );
+
+      return Effect.race(systemChainTest, ethChainTest);
+    },
+    (ws) =>
+      Effect.sync(() => {
         try {
           ws.close();
         } catch (_e) {
           // Ignore cleanup errors
         }
-      }
-    };
-
-    const testMethod = (method: string): Promise<boolean> => {
-      return new Promise((resolve) => {
-        const timeout = setTimeout(() => {
-          ws.removeListener("message", messageHandler);
-          resolve(false);
-        }, 3000);
-
-        ws.send(
-          JSON.stringify({
-            jsonrpc: "2.0",
-            id: Math.floor(Math.random() * 10000),
-            method,
-            params: [],
-          })
-        );
-
-        const messageHandler = (data: Buffer) => {
-          try {
-            const response = JSON.parse(data.toString());
-            if (response.jsonrpc === "2.0" && !response.error) {
-              clearTimeout(timeout);
-              ws.removeListener("message", messageHandler);
-              resolve(true);
-            }
-          } catch (_e) {
-            clearTimeout(timeout);
-            ws.removeListener("message", messageHandler);
-            resolve(false);
-          }
-        };
-
-        ws.on("message", messageHandler);
-      });
-    };
-
-    ws.on("open", async () => {
-      try {
-        // Check if already cleaned up (Effect was cancelled)
-        if (cleanedUp) return;
-
-        // Test system_chain first (works for all chains)
-        const systemChainOk = await testMethod("system_chain");
-        if (cleanedUp) return; // Check again after async operation
-
-        if (systemChainOk && !resolved) {
-          resolved = true;
-          debug(`Port ${port} responded to system_chain`);
-          resume(Effect.succeed(port));
-          cleanup(); // Cleanup AFTER resume
-          return;
-        }
-
-        // If Ethereum chain, also try eth_chainId
-        if (isEthereumChain) {
-          if (cleanedUp) return; // Check before next async operation
-
-          const ethOk = await testMethod("eth_chainId");
-          if (cleanedUp) return; // Check again after async operation
-
-          if (ethOk && !resolved) {
-            resolved = true;
-            debug(`Port ${port} responded to eth_chainId`);
-            resume(Effect.succeed(port));
-            cleanup(); // Cleanup AFTER resume
-            return;
-          }
-        }
-
-        // No valid response
-        if (!resolved && !cleanedUp) {
-          resolved = true;
-          resume(
-            Effect.fail(
-              new PortDiscoveryError({
-                cause: new Error(`Port ${port} did not respond to RPC methods`),
-                pid: 0,
-                attempts: 1,
-              })
-            )
-          );
-          cleanup(); // Cleanup AFTER resume
-        }
-      } catch (error) {
-        if (!resolved && !cleanedUp) {
-          resolved = true;
-          resume(
-            Effect.fail(
-              new PortDiscoveryError({
-                cause: error,
-                pid: 0,
-                attempts: 1,
-              })
-            )
-          );
-          cleanup(); // Cleanup AFTER resume
-        }
-      }
-    });
-
-    ws.on("error", (error) => {
-      if (!resolved) {
-        resolved = true;
-        resume(
-          Effect.fail(
-            new PortDiscoveryError({
-              cause: error,
-              pid: 0,
-              attempts: 1,
-            })
-          )
-        );
-        cleanup(); // Cleanup AFTER resume
-      }
-    });
-
-    // Overall timeout (7s = 2×3s testMethod timeouts + 1s buffer)
-    setTimeout(() => {
-      if (!resolved) {
-        resolved = true;
-        resume(
+      })
+  ).pipe(
+    Effect.timeoutOption("7 seconds"),
+    Effect.flatMap((opt) =>
+      Option.match(opt, {
+        onNone: () =>
           Effect.fail(
             new PortDiscoveryError({
               cause: new Error(`Port ${port} connection timeout`),
               pid: 0,
               attempts: 1,
             })
-          )
-        );
-        cleanup(); // Cleanup AFTER resume
-      }
-    }, 7000);
-
-    // CRITICAL: Return cleanup for interruption path (Effect.raceAll cancellation)
-    // This ensures losing ports in the race are properly cleaned up
-    return Effect.sync(cleanup);
-  });
+          ),
+        onSome: (val) => Effect.succeed(val),
+      })
+    )
+  );
 
 /**
  * Discover RPC port by racing tests on all candidate ports
@@ -254,7 +232,7 @@ const discoverRpcPortWithRace = (config: {
 
       // Filter to reasonable candidates (non-privileged ports, exclude p2p port)
       const candidatePorts = allPorts.filter(
-        (p) => p >= 1024 && p <= 65535 && p !== 30333 // Exclude p2p port
+        (p) => p >= 1024 && p <= 65535 && p !== 30333 && p !== 9615 // Exclude p2p & metrics port
       );
 
       if (candidatePorts.length === 0) {
@@ -276,9 +254,7 @@ const discoverRpcPortWithRace = (config: {
         Effect.catchAll((_error) =>
           Effect.fail(
             new PortDiscoveryError({
-              cause: new Error(
-                `All candidate ports failed RPC test: ${candidatePorts.join(", ")}`
-              ),
+              cause: new Error(`All candidate ports failed RPC test: ${candidatePorts.join(", ")}`),
               pid: config.pid,
               attempts: 1,
             })
