@@ -28,7 +28,7 @@ export async function downloader(url: string, outputPath: string): Promise<void>
   }
 
   const readStream = Readable.fromWeb(response.body);
-  const contentLength = Number.parseInt(response.headers.get("Content-Length") || "0");
+  const contentLength = Number.parseInt(response.headers.get("Content-Length") || "0", 10);
 
   const progressBar = initializeProgressBar();
   progressBar.start(contentLength, 0);
