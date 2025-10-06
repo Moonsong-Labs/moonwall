@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { Effect, Exit, Layer } from "effect";
-import { FileSystem } from "@effect/platform";
+import { Effect, Exit } from "effect";
 import { ProcessManagerService, ProcessManagerServiceLive } from "../ProcessManagerService.js";
 import { NodeLaunchError } from "../errors.js";
 import { spawn } from "node:child_process";
@@ -17,18 +16,30 @@ vi.mock("node:child_process", async (importOriginal) => {
       mockProcess.pid = 12345;
       mockProcess.stdout = new EventEmitter() as any;
       mockProcess.stderr = new EventEmitter() as any;
-      mockProcess.kill = vi.fn();
-      setTimeout(() => mockProcess.emit("exit", 0), 100);
+      mockProcess.kill = vi.fn(() => {
+        // Simulate proper process termination
+        setTimeout(() => {
+          mockProcess.emit("close", 0, null);
+        }, 10);
+      });
       return mockProcess;
     }),
   };
 });
 
-// Mock fs.promises.mkdir/access
+// Mock fs to control createWriteStream and fs.promises
 vi.mock("node:fs", async (importOriginal) => {
   const actual = await importOriginal<typeof import("node:fs")>();
+  const { EventEmitter } = await import("node:events");
+
   return {
     ...actual,
+    createWriteStream: vi.fn(() => {
+      const mockStream = new EventEmitter() as any;
+      mockStream.write = vi.fn();
+      mockStream.end = vi.fn();
+      return mockStream;
+    }),
     promises: {
       ...actual.promises,
       access: vi.fn(() => Promise.resolve()),
@@ -36,42 +47,6 @@ vi.mock("node:fs", async (importOriginal) => {
     },
   };
 });
-
-// Create a mock FileSystem layer for testing
-const MockFileSystemLayer = Layer.succeed(
-  FileSystem.FileSystem,
-  FileSystem.FileSystem.of({
-    writeFileString: vi.fn(() => Effect.void),
-    access: vi.fn(() => Effect.void),
-    exists: vi.fn(() => Effect.succeed(true)),
-    readFileString: vi.fn(() => Effect.succeed("")),
-    readFile: vi.fn(() => Effect.succeed(new Uint8Array())),
-    writeFile: vi.fn(() => Effect.void),
-    remove: vi.fn(() => Effect.void),
-    truncate: vi.fn(() => Effect.void),
-    readDirectory: vi.fn(() => Effect.succeed([])),
-    stat: vi.fn(() => Effect.succeed({} as any)),
-    chmod: vi.fn(() => Effect.void),
-    chown: vi.fn(() => Effect.void),
-    copy: vi.fn(() => Effect.void),
-    copyFile: vi.fn(() => Effect.void),
-    link: vi.fn(() => Effect.void),
-    makeDirectory: vi.fn(() => Effect.void),
-    makeTempDirectory: vi.fn(() => Effect.succeed("/tmp/test")),
-    makeTempDirectoryScoped: vi.fn(() => Effect.succeed("/tmp/test")),
-    makeTempFile: vi.fn(() => Effect.succeed("/tmp/test.txt")),
-    makeTempFileScoped: vi.fn(() => Effect.succeed("/tmp/test.txt")),
-    open: vi.fn(() => Effect.succeed({} as any)),
-    readLink: vi.fn(() => Effect.succeed("/tmp/test")),
-    realPath: vi.fn(() => Effect.succeed("/tmp/test")),
-    rename: vi.fn(() => Effect.void),
-    sink: vi.fn(() => ({}) as any),
-    stream: vi.fn(() => ({}) as any),
-    symlink: vi.fn(() => Effect.void),
-    utimes: vi.fn(() => Effect.void),
-    watch: vi.fn(() => ({}) as any),
-  })
-);
 
 describe("ProcessManagerService", () => {
   beforeEach(() => {
@@ -95,6 +70,10 @@ describe("ProcessManagerService", () => {
               expect(result.process.pid).toBeDefined();
               expect(result.logPath).toContain(config.logDirectory);
               expect(spawn).toHaveBeenCalledWith(config.command, config.args);
+              expect(fs.createWriteStream).toHaveBeenCalledWith(
+                expect.stringContaining(config.logDirectory),
+                { flags: "a" }
+              );
             }).pipe(
               Effect.flatMap(() => cleanup),
               Effect.tap(() =>
@@ -106,8 +85,7 @@ describe("ProcessManagerService", () => {
           )
         )
       ),
-      Effect.provide(ProcessManagerServiceLive),
-      Effect.provide(MockFileSystemLayer)
+      Effect.provide(ProcessManagerServiceLive)
     );
 
     const exit = await Effect.runPromiseExit(program);
@@ -127,8 +105,7 @@ describe("ProcessManagerService", () => {
 
     const program = ProcessManagerService.pipe(
       Effect.flatMap((service) => service.launch(config)),
-      Effect.provide(ProcessManagerServiceLive),
-      Effect.provide(MockFileSystemLayer)
+      Effect.provide(ProcessManagerServiceLive)
     );
 
     const exit = await Effect.runPromiseExit(program);
@@ -156,8 +133,7 @@ describe("ProcessManagerService", () => {
 
     const program = ProcessManagerService.pipe(
       Effect.flatMap((service) => service.launch(config)),
-      Effect.provide(ProcessManagerServiceLive),
-      Effect.provide(MockFileSystemLayer)
+      Effect.provide(ProcessManagerServiceLive)
     );
 
     await Effect.runPromise(program);
