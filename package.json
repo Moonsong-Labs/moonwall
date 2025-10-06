@@ -22,11 +22,11 @@
     "typecheck": "pnpm -r --filter='./packages/**' run typecheck"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.1.1",
-    "@changesets/cli": "2.29.5",
-    "@types/node": "24.0.14",
-    "@types/react": "18.3.1",
-    "typescript": "5.8.3"
+    "@biomejs/biome": "2.2.5",
+    "@changesets/cli": "2.29.7",
+    "@types/node": "24.7.0",
+    "@types/react": "19.2.0",
+    "typescript": "5.9.3"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
@@ -42,8 +42,8 @@
     ]
   },
   "dependencies": {
-    "pino": "^9.7.0",
-    "pino-pretty": "^13.0.0"
+    "pino": "^10.0.0",
+    "pino-pretty": "^13.1.1"
   },
   "workspaces": [
     "packages/*",
