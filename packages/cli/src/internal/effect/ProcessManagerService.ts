@@ -1,8 +1,9 @@
-import { Context, Effect, Layer, Queue, Deferred, pipe } from "effect";
-import { FileSystem, Path } from "@effect/platform";
-import { NodeFileSystem, NodePath } from "@effect/platform-node";
+import { Context, Effect, Layer, pipe } from "effect";
+import { Path } from "@effect/platform";
+import { NodePath } from "@effect/platform-node";
 import { spawn, type ChildProcess } from "node:child_process";
 import * as fs from "node:fs";
+import type { WriteStream } from "node:fs";
 import { NodeLaunchError, ProcessError } from "./errors.js";
 import { createLogger } from "@moonwall/util";
 
@@ -123,80 +124,23 @@ const spawnProcess = (config: ProcessConfig): Effect.Effect<MoonwallProcess, Nod
       }),
   });
 
-/**
- * Create a log write queue for buffered, async-safe logging using Effect FileSystem
- */
-const createLogQueue = (
-  logPath: string
-): Effect.Effect<
-  {
-    readonly write: (data: string) => Effect.Effect<void>;
-    readonly close: () => Effect.Effect<void>;
-  },
-  ProcessError
-> =>
-  pipe(
-    Queue.bounded<string>(100),
-    Effect.flatMap((queue) =>
-      pipe(
-        FileSystem.FileSystem,
-        Effect.flatMap((fs) =>
-          pipe(
-            // Start the consumer fiber that writes to the file
-            pipe(
-              Queue.take(queue),
-              Effect.flatMap((data) => fs.writeFileString(logPath, data, { flag: "a" })),
-              Effect.forever,
-              Effect.catchAll((error) =>
-                Effect.sync(() => {
-                  logger.error(`Log write error: ${error}`);
-                })
-              ),
-              Effect.fork
-            ),
-            Effect.map((fiber) => ({
-              write: (data: string) =>
-                pipe(
-                  Queue.offer(queue, data),
-                  Effect.map(() => undefined)
-                ),
-              close: () =>
-                pipe(
-                  Queue.shutdown(queue),
-                  Effect.flatMap(() => fiber.await),
-                  Effect.timeout("2 seconds"),
-                  Effect.map(() => undefined),
-                  Effect.catchAll(() => Effect.void)
-                ),
-            }))
-          )
-        ),
-        Effect.provide(NodeFileSystem.layer)
-      )
-    ),
-    Effect.mapError(
-      (cause) =>
-        new ProcessError({
-          cause,
-          operation: "spawn",
-        })
-    )
-  );
+const createLogStream = (logPath: string): Effect.Effect<WriteStream, ProcessError> =>
+  Effect.try({
+    try: () => fs.createWriteStream(logPath, { flags: "a" }),
+    catch: (cause) =>
+      new ProcessError({
+        cause,
+        operation: "spawn",
+      }),
+  });
 
 /**
- * Setup log handlers for process stdout/stderr
+ * Setup log handlers for process stdout/stderr using native WriteStream
  */
-const setupLogHandlers = (
-  process: MoonwallProcess,
-  logQueue: { write: (data: string) => Effect.Effect<void>; close: () => Effect.Effect<void> }
-): Effect.Effect<void> =>
+const setupLogHandlers = (process: MoonwallProcess, logStream: WriteStream): Effect.Effect<void> =>
   Effect.sync(() => {
     const logHandler = (chunk: Buffer) => {
-      const data = chunk.toString();
-      // Fire and forget using Effect.runPromise
-      Effect.runPromise(logQueue.write(data)).catch((err) => {
-        logger.error(`Failed to queue log data: ${err}`);
-      });
+      logStream.write(chunk);
     };
 
     process.stdout?.on("data", logHandler);
@@ -204,49 +148,36 @@ const setupLogHandlers = (
   });
 
 /**
- * Setup exit handler using Deferred for synchronization
+ * Helper to construct exit message based on exit context
  */
-const setupExitHandler = (
+const constructExitMessage = (
   process: MoonwallProcess,
-  logQueue: { write: (data: string) => Effect.Effect<void>; close: () => Effect.Effect<void> },
-  logPath: string,
-  exitDeferred: Deferred.Deferred<void>
-): Effect.Effect<void> =>
+  code: number | null,
+  signal: string | null
+): string => {
+  const timestamp = new Date().toISOString();
+
+  if (process.isMoonwallTerminating) {
+    return `${timestamp} [moonwall] process killed. reason: ${process.moonwallTerminationReason || "unknown"}\n`;
+  }
+  if (code !== null) {
+    return `${timestamp} [moonwall] process closed with status code ${code}\n`;
+  }
+  if (signal !== null) {
+    return `${timestamp} [moonwall] process terminated by signal ${signal}\n`;
+  }
+  return `${timestamp} [moonwall] process closed unexpectedly\n`;
+};
+
+/**
+ * Setup exit handler using native WriteStream
+ * The stream naturally survives Effect runtime shutdown
+ */
+const setupExitHandler = (process: MoonwallProcess, logStream: WriteStream): Effect.Effect<void> =>
   Effect.sync(() => {
-    process.once("exit", (code, signal) => {
-      const timestamp = new Date().toISOString();
-      let message: string;
-
-      if (process.isMoonwallTerminating) {
-        message = `${timestamp} [moonwall] process killed. reason: ${process.moonwallTerminationReason || "unknown"}\n`;
-      } else if (code !== null) {
-        message = `${timestamp} [moonwall] process exited with status code ${code}\n`;
-      } else if (signal !== null) {
-        message = `${timestamp} [moonwall] process terminated by signal ${signal}\n`;
-      } else {
-        message = `${timestamp} [moonwall] process terminated unexpectedly\n`;
-      }
-
-      // Write exit message and close stream
-      const exitEffect = pipe(
-        logQueue.write(message),
-        Effect.flatMap(() => logQueue.close()),
-        Effect.flatMap(() => Deferred.succeed(exitDeferred, undefined)),
-        Effect.catchAll((error) =>
-          pipe(
-            FileSystem.FileSystem,
-            Effect.flatMap((fs) => fs.writeFileString(logPath, message, { flag: "a" })),
-            Effect.provide(NodeFileSystem.layer),
-            Effect.catchAll(() =>
-              Effect.sync(() => {
-                logger.error(`Failed to write exit message: ${error}`);
-              })
-            )
-          )
-        )
-      );
-
-      Effect.runPromise(exitEffect);
+    process.once("close", (code, signal) => {
+      const message = constructExitMessage(process, code, signal);
+      logStream.end(message);
     });
   });
 
@@ -255,8 +186,7 @@ const setupExitHandler = (
  */
 const killProcess = (
   process: MoonwallProcess,
-  logQueue: { write: (data: string) => Effect.Effect<void>; close: () => Effect.Effect<void> },
-  exitDeferred: Deferred.Deferred<void>,
+  logStream: WriteStream,
   reason: string
 ): Effect.Effect<void, ProcessError> =>
   Effect.sync(() => {
@@ -265,32 +195,20 @@ const killProcess = (
   }).pipe(
     Effect.flatMap(() =>
       process.pid
-        ? pipe(
-            Effect.try({
-              try: () => process.kill("SIGTERM"),
-              catch: (cause) =>
-                new ProcessError({
-                  cause,
-                  pid: process.pid,
-                  operation: "kill",
-                }),
-            }),
-            Effect.flatMap(() =>
-              pipe(
-                Deferred.await(exitDeferred),
-                Effect.timeout("5 seconds"),
-                Effect.catchAll(() =>
-                  pipe(
-                    Effect.sync(() => {
-                      logger.warn(`Process ${process.pid} exit handler timed out, force closing`);
-                    }),
-                    Effect.flatMap(() => logQueue.close())
-                  )
-                )
-              )
-            )
-          )
-        : logQueue.close()
+        ? Effect.try({
+            try: () => {
+              process.kill("SIGTERM");
+              // Give process time to exit and trigger close handler
+              // Close handler will write final message and close stream
+            },
+            catch: (cause) =>
+              new ProcessError({
+                cause,
+                pid: process.pid,
+                operation: "kill",
+              }),
+          })
+        : Effect.sync(() => logStream.end())
     )
   );
 
@@ -314,9 +232,9 @@ const launchProcess = (
       return pipe(
         ensureLogDirectory(dirPath),
         Effect.flatMap(() => spawnProcess(config)),
-        Effect.flatMap((process) => {
+        Effect.flatMap((childProcess) => {
           // Ensure PID is available before proceeding
-          if (process.pid === undefined) {
+          if (childProcess.pid === undefined) {
             return Effect.fail(
               new ProcessError({
                 cause: new Error("Process PID is undefined after spawn"),
@@ -326,44 +244,32 @@ const launchProcess = (
           }
 
           return pipe(
-            getLogPath(config, process.pid),
+            getLogPath(config, childProcess.pid),
             Effect.flatMap((logPath) =>
               pipe(
-                createLogQueue(logPath),
-                Effect.flatMap((logQueue) =>
+                createLogStream(logPath),
+                Effect.flatMap((logStream) =>
                   pipe(
-                    Deferred.make<void>(),
-                    Effect.flatMap((exitDeferred) =>
-                      pipe(
-                        setupLogHandlers(process, logQueue),
-                        Effect.flatMap(() =>
-                          setupExitHandler(process, logQueue, logPath, exitDeferred)
-                        ),
-                        Effect.map(() => {
-                          const processInfo: ProcessLaunchResult = {
-                            process,
-                            logPath,
-                          };
+                    setupLogHandlers(childProcess, logStream),
+                    Effect.flatMap(() => setupExitHandler(childProcess, logStream)),
+                    Effect.map(() => {
+                      const processInfo: ProcessLaunchResult = {
+                        process: childProcess,
+                        logPath,
+                      };
 
-                          // Create cleanup effect that can be called manually later
-                          const cleanup = pipe(
-                            killProcess(
-                              process,
-                              logQueue,
-                              exitDeferred,
-                              "Manual cleanup requested"
-                            ),
-                            Effect.catchAll((error) =>
-                              Effect.sync(() => {
-                                logger.error(`Failed to cleanly kill process: ${error}`);
-                              })
-                            )
-                          );
+                      // Create cleanup effect that can be called manually later
+                      const cleanup = pipe(
+                        killProcess(childProcess, logStream, "Manual cleanup requested"),
+                        Effect.catchAll((error) =>
+                          Effect.sync(() => {
+                            logger.error(`Failed to cleanly kill process: ${error}`);
+                          })
+                        )
+                      );
 
-                          return { result: processInfo, cleanup };
-                        })
-                      )
-                    )
+                      return { result: processInfo, cleanup };
+                    })
                   )
                 )
               )
