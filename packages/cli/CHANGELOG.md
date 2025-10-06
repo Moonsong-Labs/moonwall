@@ -1,5 +1,13 @@
 # @moonwall/cli
 
+## 5.16.2
+
+### Patch Changes
+
+- decebe2: Fix async logging
+  - @moonwall/types@5.16.2
+  - @moonwall/util@5.16.2
+
 ## 5.16.1
 
 ### Patch Changes
