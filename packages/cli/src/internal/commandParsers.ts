@@ -48,7 +48,6 @@ export class LaunchCommandParser {
   private cmd: string;
   private launch: boolean;
   private launchSpec: DevLaunchSpec;
-  private additionalRepos?: RepoSpec[];
   private launchOverrides?: LaunchOverrides;
 
   constructor(options: {
@@ -58,7 +57,6 @@ export class LaunchCommandParser {
   }) {
     const { launchSpec, additionalRepos, launchOverrides } = options;
     this.launchSpec = launchSpec;
-    this.additionalRepos = additionalRepos;
     this.launchOverrides = launchOverrides;
     this.launch = !launchSpec.running ? true : launchSpec.running;
     this.cmd = launchSpec.binPath;

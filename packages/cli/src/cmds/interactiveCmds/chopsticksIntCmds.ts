@@ -59,7 +59,7 @@ export async function resolveChopsticksInteractiveCmdChoice() {
         return (yaml.port as string) || "8000";
       })
   );
-  const port = Number.parseInt(ports[0]);
+  const port = Number.parseInt(ports[0], 10);
 
   const choices: (string | Separator)[] | (Separator | Choice<unknown>)[] = [
     { name: "🆗  Create Block", value: "createblock" },

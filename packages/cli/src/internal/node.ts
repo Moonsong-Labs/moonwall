@@ -96,7 +96,7 @@ async function launchDockerContainer(
     }
 
     for (let i = 0; i < 300; i++) {
-      const isReady = await checkWebSocketJSONRPC(Number.parseInt(rpcPort));
+      const isReady = await checkWebSocketJSONRPC(Number.parseInt(rpcPort, 10));
       if (isReady) {
         break;
       }

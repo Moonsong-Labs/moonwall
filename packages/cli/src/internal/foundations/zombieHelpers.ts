@@ -16,14 +16,14 @@ export async function checkZombieBins(config: LaunchConfig) {
   checkAccess(relayBinPath);
 
   if (config.parachains) {
-    const promises = config.parachains.map((para) => {
+    const promises = config.parachains.map(async (para) => {
       if (para.collator) {
         if (!para.collator.command) {
           throw new Error(
             "No command found for collator, please check your zombienet config file for collator command"
           );
         }
-        checkExists(para.collator.command);
+        await checkExists(para.collator.command);
         checkAccess(para.collator.command);
       }
 
@@ -34,7 +34,7 @@ export async function checkZombieBins(config: LaunchConfig) {
               "No command found for collators, please check your zombienet config file for collators command"
             );
           }
-          checkExists(coll.command);
+          await checkExists(coll.command);
           checkAccess(coll.command);
         }
         // para.collators.forEach((coll) => {

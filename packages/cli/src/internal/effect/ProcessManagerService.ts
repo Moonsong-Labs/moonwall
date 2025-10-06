@@ -158,14 +158,14 @@ const createLogQueue = (
               write: (data: string) =>
                 pipe(
                   Queue.offer(queue, data),
-                  Effect.map(() => void 0)
+                  Effect.map(() => undefined)
                 ),
               close: () =>
                 pipe(
                   Queue.shutdown(queue),
                   Effect.flatMap(() => fiber.await),
                   Effect.timeout("2 seconds"),
-                  Effect.map(() => void 0),
+                  Effect.map(() => undefined),
                   Effect.catchAll(() => Effect.void)
                 ),
             }))

@@ -105,7 +105,7 @@ export const chopsticksHandler: FoundationHandler<"chopsticks"> = ({
 
       const wsUrl = await getWsUrlFromConfig(options.providerName);
       const url = new URL(wsUrl);
-      const port = Number.parseInt(url.port);
+      const port = Number.parseInt(url.port, 10);
       await jumpRoundsChopsticks(api, port, options.rounds);
     },
   } satisfies ChopsticksContext;
