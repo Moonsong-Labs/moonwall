@@ -15,7 +15,7 @@ import { Web3 } from "web3";
 import { WebSocketProvider } from "web3-providers-ws";
 import { createClient, type PolkadotClient } from "polkadot-api";
 import { getWsProvider, WsEvent } from "polkadot-api/ws-provider/web";
-import { createLogger } from "@moonwall/util";
+import { createLogger, normalizeUrlToHttps } from "@moonwall/util";
 const logger = createLogger({ name: "providers" });
 const debug = logger.debug.bind(logger);
 
@@ -116,11 +116,7 @@ export class ProviderFactory {
       connect: async () => {
         try {
           debug(`Original URL (this.url): ${this.url}`);
-          const httpUrl = this.url.startsWith("wss://")
-            ? this.url.replace("wss://", "https://")
-            : this.url.startsWith("ws://")
-              ? this.url.replace("ws://", "http://")
-              : this.url;
+          const httpUrl = normalizeUrlToHttps(this.url);
           debug(`Converted HTTP URL: ${httpUrl} for provider ${this.providerConfig.name}`);
 
           debug(

@@ -18,7 +18,7 @@ import { setTimeout as timer } from "node:timers/promises";
 import { privateKeyToAccount } from "viem/accounts";
 import type { Chain } from "viem/chains";
 import { ALITH_ADDRESS, ALITH_PRIVATE_KEY } from "../constants/accounts";
-import { directRpcRequest } from "./common";
+import { normalizeUrlToHttps, directRpcRequest } from "./common";
 
 /**
  * @name getDevChain
@@ -40,7 +40,7 @@ import { directRpcRequest } from "./common";
  *      - default: The default HTTP URL(s) for the chain.
  */
 export async function getDevChain(url: string) {
-  const httpUrl = url.replace("ws", "http");
+  const httpUrl = normalizeUrlToHttps(url);
   const block = { http: [httpUrl] };
 
   return {
@@ -72,7 +72,7 @@ export async function getDevChain(url: string) {
  * const chain = await deriveViemChain('http://localhost:8545');
  */
 export async function deriveViemChain(endpoint: string, maxRetries: number = 3) {
-  const httpEndpoint = endpoint.replace("ws", "http");
+  const httpEndpoint = normalizeUrlToHttps(endpoint);
   const block = { http: [httpEndpoint] };
 
   let lastError: Error | undefined;

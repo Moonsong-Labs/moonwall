@@ -1,6 +1,10 @@
 import "@moonbeam-network/api-augment";
 import { BN } from "@polkadot/util";
 
+export function normalizeUrlToHttps(url: string): string {
+  return url.replace(/^ws(s)?:/, "http$1:");
+}
+
 // Sort dict by key
 export function sortObjectByKeys(obj: Record<string, any>): Record<string, any> {
   const sortedKeys = Object.keys(obj).sort();
