@@ -1,5 +1,12 @@
 # @moonwall/util
 
+## 5.16.3
+
+### Patch Changes
+
+- 2fcbc88: Fixes a bug, where urls like `wss://wss.api.moondev.network` were being converted to `https://https.api.moondev.network`, which was incorrect.
+  - @moonwall/types@5.16.3
+
 ## 5.16.2
 
 ### Patch Changes
