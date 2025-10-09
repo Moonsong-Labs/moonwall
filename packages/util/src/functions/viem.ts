@@ -40,7 +40,7 @@ import { directRpcRequest } from "./common";
  *      - default: The default HTTP URL(s) for the chain.
  */
 export async function getDevChain(url: string) {
-  const httpUrl = url.replace("ws", "http");
+  const httpUrl = url.replace(/^ws(s)?:/, 'http$1:');
   const block = { http: [httpUrl] };
 
   return {
