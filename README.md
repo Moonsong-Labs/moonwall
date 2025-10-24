@@ -1,64 +1,93 @@
 ## Description
 
 ```stl
-solid lowpoly_moon_octahedron
-  facet normal 0.577350 0.577350 0.577350
+solid wall_brick
+  facet normal 0 0 1
     outer loop
-      vertex 0 0 30
-      vertex 30 0 0
-      vertex 0 30 0
+      vertex 0 0 20
+      vertex 60 0 20
+      vertex 60 20 20
     endloop
   endfacet
-  facet normal -0.577350 0.577350 0.577350
+  facet normal 0 0 1
     outer loop
-      vertex 0 0 30
-      vertex 0 30 0
-      vertex -30 0 0
+      vertex 0 0 20
+      vertex 60 20 20
+      vertex 0 20 20
     endloop
   endfacet
-  facet normal -0.577350 -0.577350 0.577350
+  facet normal 0 0 -1
     outer loop
-      vertex 0 0 30
-      vertex -30 0 0
-      vertex 0 -30 0
+      vertex 0 0 0
+      vertex 60 20 0
+      vertex 60 0 0
     endloop
   endfacet
-  facet normal 0.577350 -0.577350 0.577350
+  facet normal 0 0 -1
     outer loop
-      vertex 0 0 30
-      vertex 0 -30 0
-      vertex 30 0 0
+      vertex 0 0 0
+      vertex 0 20 0
+      vertex 60 20 0
     endloop
   endfacet
-  facet normal 0.577350 0.577350 -0.577350
+  facet normal -1 0 0
     outer loop
-      vertex 0 0 -30
-      vertex 0 30 0
-      vertex 30 0 0
+      vertex 0 0 0
+      vertex 0 0 20
+      vertex 0 20 20
     endloop
   endfacet
-  facet normal -0.577350 0.577350 -0.577350
+  facet normal -1 0 0
     outer loop
-      vertex 0 0 -30
-      vertex -30 0 0
-      vertex 0 30 0
+      vertex 0 0 0
+      vertex 0 20 20
+      vertex 0 20 0
     endloop
   endfacet
-  facet normal -0.577350 -0.577350 -0.577350
+  facet normal 1 0 0
     outer loop
-      vertex 0 0 -30
-      vertex 0 -30 0
-      vertex -30 0 0
+      vertex 60 0 0
+      vertex 60 20 20
+      vertex 60 0 20
     endloop
   endfacet
-  facet normal 0.577350 -0.577350 -0.577350
+  facet normal 1 0 0
     outer loop
-      vertex 0 0 -30
-      vertex 30 0 0
-      vertex 0 -30 0
+      vertex 60 0 0
+      vertex 60 20 0
+      vertex 60 20 20
     endloop
   endfacet
-endsolid lowpoly_moon_octahedron
+  facet normal 0 1 0
+    outer loop
+      vertex 0 20 0
+      vertex 0 20 20
+      vertex 60 20 20
+    endloop
+  endfacet
+  facet normal 0 1 0
+    outer loop
+      vertex 0 20 0
+      vertex 60 20 20
+      vertex 60 20 0
+    endloop
+  endfacet
+  facet normal 0 -1 0
+    outer loop
+      vertex 0 0 0
+      vertex 60 0 0
+      vertex 60 0 20
+    endloop
+  endfacet
+  facet normal 0 -1 0
+    outer loop
+      vertex 0 0 0
+      vertex 60 0 20
+      vertex 0 0 20
+    endloop
+  endfacet
+endsolid wall_brick
+
 ```
 
 Moonwall is a comprehensive blockchain test framework for Substrate-based networks
