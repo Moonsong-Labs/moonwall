@@ -1,5 +1,65 @@
 ## Description
-![moonwall](docs/public/moonwall.webp)
+
+```stl
+solid lowpoly_moon_octahedron
+  facet normal 0.577350 0.577350 0.577350
+    outer loop
+      vertex 0 0 30
+      vertex 30 0 0
+      vertex 0 30 0
+    endloop
+  endfacet
+  facet normal -0.577350 0.577350 0.577350
+    outer loop
+      vertex 0 0 30
+      vertex 0 30 0
+      vertex -30 0 0
+    endloop
+  endfacet
+  facet normal -0.577350 -0.577350 0.577350
+    outer loop
+      vertex 0 0 30
+      vertex -30 0 0
+      vertex 0 -30 0
+    endloop
+  endfacet
+  facet normal 0.577350 -0.577350 0.577350
+    outer loop
+      vertex 0 0 30
+      vertex 0 -30 0
+      vertex 30 0 0
+    endloop
+  endfacet
+  facet normal 0.577350 0.577350 -0.577350
+    outer loop
+      vertex 0 0 -30
+      vertex 0 30 0
+      vertex 30 0 0
+    endloop
+  endfacet
+  facet normal -0.577350 0.577350 -0.577350
+    outer loop
+      vertex 0 0 -30
+      vertex -30 0 0
+      vertex 0 30 0
+    endloop
+  endfacet
+  facet normal -0.577350 -0.577350 -0.577350
+    outer loop
+      vertex 0 0 -30
+      vertex 0 -30 0
+      vertex -30 0 0
+    endloop
+  endfacet
+  facet normal 0.577350 -0.577350 -0.577350
+    outer loop
+      vertex 0 0 -30
+      vertex 30 0 0
+      vertex 0 -30 0
+    endloop
+  endfacet
+endsolid lowpoly_moon_octahedron
+```
 
 Moonwall is a comprehensive blockchain test framework for Substrate-based networks
 
