@@ -405,14 +405,14 @@ jobs:
             test/tmp/polkadot
             test/tmp/polkadot-execute-worker
             test/tmp/polkadot-prepare-worker
-          key: polkadot-stable2412-${{ runner.os }}
+          key: polkadot-stable2503-7-${{ runner.os }}
       - name: Download polkadot binaries
         if: steps.polkadot-cache.outputs.cache-hit != 'true'
         run: |
           cd test
-          bun moonwall download polkadot stable2412 ./tmp
-          bun moonwall download polkadot-execute-worker stable2412 ./tmp
-          bun moonwall download polkadot-prepare-worker stable2412 ./tmp
+          bun moonwall download polkadot stable2503-7 ./tmp
+          bun moonwall download polkadot-execute-worker stable2503-7 ./tmp
+          bun moonwall download polkadot-prepare-worker stable2503-7 ./tmp
       - name: Run ${{matrix.suite}}
         run: |
           cd test
