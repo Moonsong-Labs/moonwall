@@ -1,5 +1,11 @@
 # @moonwall/tests
 
+## 5.16.4
+
+### Patch Changes
+
+- 535d0c1: minor fix
+
 ## 5.16.3
 
 ## 5.16.2

@@ -1,5 +1,13 @@
 # @moonwall/cli
 
+## 5.16.4
+
+### Patch Changes
+
+- 535d0c1: minor fix
+  - @moonwall/types@5.16.4
+  - @moonwall/util@5.16.4
+
 ## 5.16.3
 
 ### Patch Changes
