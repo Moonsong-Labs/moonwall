@@ -1,4 +1,4 @@
-import "@moonbeam-network/api-augment";
+import "@polkadot/api-augment/polkadot";
 import type { DevModeContext } from "@moonwall/types";
 import {
   GLMR,

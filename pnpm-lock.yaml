@@ -73,9 +73,6 @@ importers:
       '@inquirer/prompts':
         specifier: ^7.8.6
         version: 7.8.6(@types/node@24.10.1)
-      '@moonbeam-network/api-augment':
-        specifier: 0.3900.0
-        version: 0.3900.0(postcss@8.5.6)(yaml@2.8.2)
       '@moonwall/types':
         specifier: workspace:*
         version: link:../types
@@ -86,6 +83,9 @@ importers:
         specifier: 22.0.1
         version: 22.0.1
       '@polkadot/api':
+        specifier: ^16.5.3
+        version: 16.5.3
+      '@polkadot/api-augment':
         specifier: ^16.5.3
         version: 16.5.3
       '@polkadot/api-derive':
@@ -300,13 +300,13 @@ importers:
       '@inquirer/prompts':
         specifier: ^7.8.6
         version: 7.8.6(@types/node@24.10.1)
-      '@moonbeam-network/api-augment':
-        specifier: 0.3900.0
-        version: 0.3900.0(postcss@8.5.6)(yaml@2.8.2)
       '@moonwall/types':
         specifier: workspace:*
         version: link:../types
       '@polkadot/api':
+        specifier: ^16.5.3
+        version: 16.5.3
+      '@polkadot/api-augment':
         specifier: ^16.5.3
         version: 16.5.3
       '@polkadot/api-derive':
@@ -6409,7 +6409,7 @@ snapshots:
       '@acala-network/chopsticks-db': 1.2.2(ts-node@10.9.2(@types/node@24.10.1)(typescript@5.9.3))
       '@pnpm/npm-conf': 3.0.0
       '@polkadot/api': 16.5.3
-      '@polkadot/api-augment': 16.4.8
+      '@polkadot/api-augment': 16.5.3
       '@polkadot/rpc-provider': 16.5.3
       '@polkadot/types': 16.5.3
       '@polkadot/util': 13.5.9
@@ -7488,8 +7488,8 @@ snapshots:
     dependencies:
       '@biomejs/biome': 2.3.8
       '@polkadot/api': 16.5.3
-      '@polkadot/api-base': 16.4.8
-      '@polkadot/rpc-core': 16.4.8
+      '@polkadot/api-base': 16.5.3
+      '@polkadot/rpc-core': 16.5.3
       '@polkadot/typegen': 16.4.8
       '@polkadot/types': 16.5.3
       '@polkadot/types-codec': 16.5.3

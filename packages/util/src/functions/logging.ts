@@ -1,4 +1,3 @@
-import "@moonbeam-network/api-augment";
 import type { ApiPromise } from "@polkadot/api";
 import { mapExtrinsics } from "./block";
 import type { Extrinsic } from "@polkadot/types/interfaces";

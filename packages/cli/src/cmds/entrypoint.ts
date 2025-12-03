@@ -1,4 +1,3 @@
-import "@moonbeam-network/api-augment";
 import dotenv from "dotenv";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";

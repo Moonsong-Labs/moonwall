@@ -1,4 +1,3 @@
-import "@moonbeam-network/api-augment";
 import type { ChopsticksContext, UpgradePreferences } from "@moonwall/types";
 import type { ApiPromise } from "@polkadot/api";
 import type { WeightV2 } from "@polkadot/types/interfaces";

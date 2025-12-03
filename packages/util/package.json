@@ -54,9 +54,9 @@
   },
   "dependencies": {
     "@inquirer/prompts": "^7.8.6",
-    "@moonbeam-network/api-augment": "0.3900.0",
     "@moonwall/types": "workspace:*",
     "@polkadot/api": "^16.5.3",
+    "@polkadot/api-augment": "^16.5.3",
     "@polkadot/api-derive": "^16.5.3",
     "@polkadot/keyring": "^13.5.9",
     "@polkadot/rpc-provider": "^16.5.3",
