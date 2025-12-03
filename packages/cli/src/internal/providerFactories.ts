@@ -320,12 +320,12 @@ export class ProviderInterfaceFactory {
       greet: async () => {
         debug(
           `👋  Provider ${this.name} is connected to chain` +
-            ` ${api.consts.system.version.specName.toString()} ` +
-            `RT${api.consts.system.version.specVersion.toNumber()}`
+            ` ${(api as any).consts.system.version.specName.toString()} ` +
+            `RT${(api as any).consts.system.version.specVersion.toNumber()}`
         );
         return {
-          rtVersion: api.consts.system.version.specVersion.toNumber(),
-          rtName: api.consts.system.version.specName.toString(),
+          rtVersion: (api as any).consts.system.version.specVersion.toNumber(),
+          rtName: (api as any).consts.system.version.specName.toString(),
         };
       },
       disconnect: async () => api.disconnect(),

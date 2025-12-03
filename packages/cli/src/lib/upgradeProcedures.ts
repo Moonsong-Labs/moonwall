@@ -136,7 +136,7 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
           log("Using governance...");
           // TODO: remove support for old style after all chains upgraded to 2400+
           const proposal =
-            api.consts.system.version.specVersion.toNumber() >= 2400
+            (api as any).consts.system.version.specVersion.toNumber() >= 2400
               ? api.tx.parachainSystem.authorizeUpgrade(blake2AsHex(code), true)
               : (api.tx.parachainSystem as any).authorizeUpgrade(blake2AsHex(code));
           const encodedProposal = proposal.method.toHex();
@@ -220,7 +220,7 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
 
           log("Checking if preimage already exists...");
           const preImageExists =
-            api.query.preimage && (await api.query.preimage.statusFor(encodedHash));
+            api.query.preimage && ((await api.query.preimage.statusFor(encodedHash)) as any);
 
           if (preImageExists.isSome && preImageExists.unwrap().isRequested) {
             log(`Preimage ${encodedHash} already exists !\n`);

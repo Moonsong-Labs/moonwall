@@ -261,6 +261,6 @@ export async function checkTimeSliceForUpgrades(
   currentVersion: u32
 ) {
   const apiAt = await api.at(await api.rpc.chain.getBlockHash(blockNumbers[0]));
-  const onChainRt = (await apiAt.query.system.lastRuntimeUpgrade()).unwrap().specVersion;
+  const onChainRt = ((await apiAt.query.system.lastRuntimeUpgrade()) as any).unwrap().specVersion;
   return { result: !onChainRt.eq(currentVersion), specVersion: onChainRt };
 }
