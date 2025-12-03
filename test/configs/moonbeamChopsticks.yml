@@ -1,4 +1,4 @@
-endpoint: wss://wss.api.moonbeam.network
+endpoint:  ${env.MOONBEAM_ENDPOINT}
 mock-signature-host: true
 port: 10000
 db: ./tmp/db_mb.sqlite

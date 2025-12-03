@@ -278,6 +278,7 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       POLKADOT_ASSET_HUB_ENDPOINT: ${{ secrets.POLKADOT_ASSET_HUB_ENDPOINT}}
+      MOONBEAM_ENDPOINT: ${{ secrets.MOONBEAM_ENDPOINT}}
     strategy:
       fail-fast: false
       matrix:
