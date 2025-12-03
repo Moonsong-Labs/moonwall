@@ -155,10 +155,7 @@ export class ProviderFactory {
         // the default 40s websocket heartbeat in polkadot-api can trigger false
         // disconnects. Relax the heartbeat so the connection remains up while the
         // test orchestrator drives block production.
-        const provider = withPolkadotSdkCompat(
-          getWsProvider(this.url, {
-          })
-        );
+        const provider = withPolkadotSdkCompat(getWsProvider(this.url, {}));
         return createClient(provider);
       },
     };
