@@ -1,5 +1,17 @@
 # @moonwall/util
 
+## 5.17.0
+
+### Minor Changes
+
+- 6d054eb: Updated Dependencies
+  - Fixed ports for `run` mode
+
+### Patch Changes
+
+- Updated dependencies [6d054eb]
+  - @moonwall/types@5.17.0
+
 ## 5.16.4
 
 ### Patch Changes
