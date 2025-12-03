@@ -142,7 +142,7 @@ export const whiteListedTrack = async <
 >(
   context: DevModeContext,
   proposal: string | Call
-) => {
+): Promise<boolean> => {
   const proposalHash =
     typeof proposal === "string" ? proposal : await notePreimage(context, proposal);
 
@@ -200,9 +200,50 @@ export const whiteListedTrack = async <
   await maximizeConvictionVotingOf(context, [ethan], proposalId);
   await context.createBlock();
 
+  const checkCompletion = async (): Promise<boolean> => {
+    const authorized = await context.pjsApi.query.system.authorizedUpgrade();
+    if (!authorized.isNone) {
+      return true;
+    }
+
+    const events = await context.pjsApi.query.system.events();
+    return events.some(({ event }) => {
+      const section = event.section.toString();
+      const method = event.method.toString();
+      return section === "whitelist" && method === "WhitelistedCallDispatched";
+    });
+  };
+
   await fastFowardToNextEvent(context); // ⏩️ until preparation done
+  if (await checkCompletion()) {
+    return true;
+  }
   await fastFowardToNextEvent(context); // ⏩️ until proposal confirmed
+  if (await checkCompletion()) {
+    return true;
+  }
   await fastFowardToNextEvent(context); // ⏩️ until proposal enacted
+  if (await checkCompletion()) {
+    return true;
+  }
+
+  // Some runtimes enqueue extra agenda items before the whitelist dispatch completes.
+  // Keep fast-forwarding until the authorized upgrade is populated or the agenda is empty.
+  for (let attempt = 0; attempt < 5; attempt++) {
+    if (await checkCompletion()) {
+      break;
+    }
+    try {
+      await fastFowardToNextEvent(context);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("No items in scheduler.agenda")) {
+        break;
+      }
+      throw error;
+    }
+  }
+
+  return await checkCompletion();
 };
 
 // Creates a OpenTechCommitteeProposal and attempts to execute it

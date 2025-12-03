@@ -147,7 +147,7 @@
         {
           "name": "viem",
           "type": "viem",
-          "endpoints": ["wss://rpc.api.moonbeam.network"]
+          "endpoints": ["https://rpc.api.moonbeam.network"]
         }
       ]
     },
@@ -385,7 +385,7 @@
         {
           "name": "MB",
           "type": "polkadotJs",
-          "endpoints": ["wss://moonbeam.api.onfinality.io/public-ws"]
+          "endpoints": ["wss://moonbeam.public.curie.radiumblock.co/ws"]
         }
       ]
     },
@@ -635,7 +635,7 @@
         {
           "name": "w3",
           "type": "web3",
-          "endpoints": ["wss://moonbeam.api.onfinality.io/public-ws"]
+          "endpoints": ["wss://moonbeam.public.curie.radiumblock.co/ws"]
         },
         {
           "name": "mb",
@@ -696,12 +696,12 @@
         {
           "name": "w3",
           "type": "web3",
-          "endpoints": ["wss://rpc.api.moonbeam.network"]
+          "endpoints": ["wss://moonbeam.api.onfinality.io/public-ws"]
         },
         {
           "name": "MB",
           "type": "polkadotJs",
-          "endpoints": ["wss://rpc.api.moonbeam.network"]
+          "endpoints": ["wss://moonbeam.api.onfinality.io/public-ws"]
         }
       ]
     },
@@ -723,12 +723,12 @@
         {
           "name": "para",
           "type": "polkadotJs",
-          "endpoints": ["wss://moonbeam-rpc.dwellir.com"]
+          "endpoints": ["wss://moonbeam.public.curie.radiumblock.co/ws"]
         },
         {
           "name": "eth",
           "type": "ethers",
-          "endpoints": ["wss://moonbeam-rpc.dwellir.com"]
+          "endpoints": ["https://rpc.api.moonbeam.network"]
         }
       ]
     },
@@ -750,12 +750,12 @@
         {
           "name": "eth",
           "type": "ethers",
-          "endpoints": ["wss://rpc.api.moonbeam.network"]
+          "endpoints": ["https://rpc.api.moonbeam.network"]
         },
         {
           "name": "para",
           "type": "polkadotJs",
-          "endpoints": ["wss://rpc.api.moonbeam.network"]
+          "endpoints": ["wss://moonbeam.public.curie.radiumblock.co/ws"]
         }
       ]
     },
@@ -866,7 +866,7 @@
         {
           "name": "para",
           "type": "polkadotJs",
-          "endpoints": ["wss://moonbeam-rpc.dwellir.com"]
+          "endpoints": ["wss://moonbeam.public.curie.radiumblock.co/ws"]
         }
       ],
       "testFileDir": ["/suites/smoke"],

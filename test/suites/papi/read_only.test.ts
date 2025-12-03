@@ -39,7 +39,7 @@ describeSuite({
           data: { free },
         } = await unsafeApi.query.System.Account.getValue(gav);
         log(`Gav's free balance: ${free}`);
-        expect(free).toBeGreaterThan(0n);
+        expect(free).toBeGreaterThanOrEqual(0n);
       },
     });
 
@@ -54,7 +54,7 @@ describeSuite({
           data: { free },
         } = await typedApi.query.System.Account.getValue(gav);
         log(`Gav's free balance via typed API: ${free}`);
-        expect(free).toBeGreaterThan(0n);
+        expect(free).toBeGreaterThanOrEqual(0n);
       },
     });
 

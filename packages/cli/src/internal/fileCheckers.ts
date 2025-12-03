@@ -106,7 +106,7 @@ export function checkAlreadyRunning(binaryName: string): number[] {
   try {
     console.log(`Checking if ${chalk.bgWhiteBright.blackBright(binaryName)} is already running...`);
     // pgrep only supports 15 characters
-    const stdout = execSync(`pgrep ${[binaryName.slice(0, 14)]}`, {
+    const stdout = execSync(`pgrep -x ${[binaryName.slice(0, 14)]}`, {
       encoding: "utf8",
       timeout: 2000,
     });
