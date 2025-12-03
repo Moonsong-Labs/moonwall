@@ -1,4 +1,4 @@
-import { describeSuite, expect, beforeAll, afterAll, customDevRpcRequest } from "@moonwall/cli";
+import { describeSuite, expect, beforeAll, customDevRpcRequest } from "@moonwall/cli";
 import type { PolkadotClient, TypedApi } from "polkadot-api";
 import { mb } from "@polkadot-api/descriptors";
 
@@ -12,14 +12,13 @@ describeSuite({
 
     beforeAll(async () => {
       log("Should be before all test cases");
-
+      papi = context.papi();
+      api =  papi.getTypedApi(mb);
       // The dev node uses manual sealing, so polkadot-api waits for the first
       // block before exposing APIs. Kick off an initial block to avoid
       // heartbeat-induced hangs during setup.
       await customDevRpcRequest("engine_createBlock", [true, true]);
-
-      papi = context.papi();
-      api =  papi.getTypedApi(mb);
+      log("PAPI and Typed API initialized");
     });
 
     it({
@@ -27,6 +26,7 @@ describeSuite({
       title: "Can connect to dev node",
       test: async () => {
         log("Testing PAPI connection to dev node and spec validation");
+        console.log(api.constants)
         const { spec_name } = await api.constants.System.Version();
         log(`Connected to spec: ${spec_name}`);
         expect(spec_name.toString()).toBe("moonbase");

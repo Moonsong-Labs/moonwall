@@ -157,7 +157,6 @@ export class ProviderFactory {
         // test orchestrator drives block production.
         const provider = withPolkadotSdkCompat(
           getWsProvider(this.url, {
-            heartbeatTimeout: Number.POSITIVE_INFINITY,
           })
         );
         return createClient(provider);

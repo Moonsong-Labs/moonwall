@@ -62,7 +62,7 @@
     "@zombienet/utils": "^0.0.29",
     "bottleneck": "^2.19.5",
     "ethers": "^6.15.0",
-    "polkadot-api": "1.22.0",
+    "polkadot-api": "1.19.2",
     "viem": "2.37.13",
     "vitest": "3.2.4",
     "web3": "^4.16.0"

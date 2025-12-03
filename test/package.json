@@ -44,7 +44,7 @@
   },
   "dependencies": {
     "@polkadot-api/descriptors": "file:.papi/descriptors",
-    "polkadot-api": "1.22.0",
+    "polkadot-api": "1.19.2",
     "reflect-metadata": "^0.2.0"
   }
 }
