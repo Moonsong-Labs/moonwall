@@ -5,17 +5,22 @@ import type {
   ProviderType,
   ViemClient,
 } from "@moonwall/types";
-import { ALITH_PRIVATE_KEY, deriveViemChain } from "@moonwall/util";
+import {
+  ALITH_PRIVATE_KEY,
+  createLogger,
+  deriveViemChain,
+  normalizeUrlToHttps,
+} from "@moonwall/util";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import type { ApiOptions } from "@polkadot/api/types";
 import { Wallet, ethers } from "ethers";
+import { createClient, type PolkadotClient } from "polkadot-api";
+import { getWsProvider } from "polkadot-api/ws-provider";
 import { createWalletClient, http, publicActions } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { Web3 } from "web3";
 import { WebSocketProvider } from "web3-providers-ws";
-import { createClient, type PolkadotClient } from "polkadot-api";
-import { getWsProvider, WsEvent } from "polkadot-api/ws-provider/web";
-import { createLogger, normalizeUrlToHttps } from "@moonwall/util";
+import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat";
 const logger = createLogger({ name: "providers" });
 const debug = logger.debug.bind(logger);
 
@@ -140,29 +145,17 @@ export class ProviderFactory {
       },
     };
   }
-
   private createPapi(): MoonwallProvider {
     debug(`🟢  Papi provider ${this.providerConfig.name} details prepared`);
     return {
       name: this.providerConfig.name,
       type: this.providerConfig.type,
       connect: () => {
-        const provider = getWsProvider(this.url, (status) => {
-          switch (status.type) {
-            case WsEvent.CONNECTING:
-              console.log("Connecting... 🔌");
-              break;
-            case WsEvent.CONNECTED:
-              console.log("Connected! ⚡");
-              break;
-            case WsEvent.ERROR:
-              console.log("Errored... 😢");
-              break;
-            case WsEvent.CLOSE:
-              console.log("Closed 🚪");
-              break;
-          }
-        });
+        // Dev nodes in moonwall often sit idle between manual block builds, which means
+        // the default 40s websocket heartbeat in polkadot-api can trigger false
+        // disconnects. Relax the heartbeat so the connection remains up while the
+        // test orchestrator drives block production.
+        const provider = withPolkadotSdkCompat(getWsProvider(this.url, {}));
         return createClient(provider);
       },
     };
@@ -320,12 +313,12 @@ export class ProviderInterfaceFactory {
       greet: async () => {
         debug(
           `👋  Provider ${this.name} is connected to chain` +
-            ` ${api.consts.system.version.specName.toString()} ` +
-            `RT${api.consts.system.version.specVersion.toNumber()}`
+            ` ${(api as any).consts.system.version.specName.toString()} ` +
+            `RT${(api as any).consts.system.version.specVersion.toNumber()}`
         );
         return {
-          rtVersion: api.consts.system.version.specVersion.toNumber(),
-          rtName: api.consts.system.version.specName.toString(),
+          rtVersion: (api as any).consts.system.version.specVersion.toNumber(),
+          rtName: (api as any).consts.system.version.specName.toString(),
         };
       },
       disconnect: async () => api.disconnect(),

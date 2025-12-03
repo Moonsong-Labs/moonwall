@@ -90,13 +90,9 @@ export class LaunchCommandParser {
       }
     } else {
       const freePort = (await getFreePort()).toString();
+      // Always pin the rpc port so the provider endpoint matches exactly the spawned node.
       process.env.MOONWALL_RPC_PORT = freePort;
-
-      if (this.launchSpec.newRpcBehaviour) {
-        this.overrideArg(`--rpc-port=${freePort}`);
-      } else {
-        this.overrideArg(`--ws-port=${freePort}`);
-      }
+      this.overrideArg(`--rpc-port=${freePort}`);
     }
     return this;
   }

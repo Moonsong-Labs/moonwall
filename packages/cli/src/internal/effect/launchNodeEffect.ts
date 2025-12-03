@@ -64,7 +64,13 @@ export async function launchNodeEffect(
 
   const finalArgs =
     !nodeConfig.isChopsticks && !nodeConfig.hasRpcPort
-      ? [...config.args, "--rpc-port=0"] // Standard nodes use --rpc-port
+      ? [
+          ...config.args,
+          // If MOONWALL_RPC_PORT was pre-allocated by LaunchCommandParser, respect it; otherwise fall back to 0.
+          process.env.MOONWALL_RPC_PORT
+            ? `--rpc-port=${process.env.MOONWALL_RPC_PORT}`
+            : "--rpc-port=0",
+        ]
       : config.args; // Chopsticks uses YAML config, or port already configured
 
   debug(`Final args: ${JSON.stringify(finalArgs)}`);

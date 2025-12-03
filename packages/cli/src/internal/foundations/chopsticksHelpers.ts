@@ -1,4 +1,3 @@
-import "@moonbeam-network/api-augment";
 import type { ChopsticksBlockCreation, GenericContext } from "@moonwall/types";
 import type { WsProvider } from "@polkadot/api";
 import type { ApiTypes, AugmentedEvent } from "@polkadot/api/types";

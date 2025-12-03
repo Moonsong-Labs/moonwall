@@ -1,4 +1,4 @@
-import "@moonbeam-network/api-augment";
+import "@polkadot/api-augment/polkadot";
 import type { ApiPromise } from "@polkadot/api";
 import type { TxWithEvent } from "@polkadot/api-derive/types";
 import type { Option, u32, u64 } from "@polkadot/types";
@@ -261,6 +261,6 @@ export async function checkTimeSliceForUpgrades(
   currentVersion: u32
 ) {
   const apiAt = await api.at(await api.rpc.chain.getBlockHash(blockNumbers[0]));
-  const onChainRt = (await apiAt.query.system.lastRuntimeUpgrade()).unwrap().specVersion;
+  const onChainRt = ((await apiAt.query.system.lastRuntimeUpgrade()) as any).unwrap().specVersion;
   return { result: !onChainRt.eq(currentVersion), specVersion: onChainRt };
 }

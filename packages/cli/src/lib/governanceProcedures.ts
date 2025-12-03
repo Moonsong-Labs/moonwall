@@ -1,4 +1,4 @@
-import "@moonbeam-network/api-augment";
+import "@polkadot/api-augment/polkadot";
 import type { DevModeContext } from "@moonwall/types";
 import {
   GLMR,
@@ -84,8 +84,9 @@ export const whiteListTrackNoSend = async <
   const proposalHash =
     typeof proposal === "string" ? proposal : await notePreimage(context, proposal);
 
-  const proposalLen = (await context.pjsApi.query.preimage.requestStatusFor(proposalHash)).unwrap()
-    .asUnrequested.len;
+  const proposalLen = (
+    (await context.pjsApi.query.preimage.requestStatusFor(proposalHash)) as any
+  ).unwrap().asUnrequested.len;
   const dispatchWLCall = context.pjsApi.tx.whitelist.dispatchWhitelistedCall(
     proposalHash,
     proposalLen,
@@ -147,8 +148,9 @@ export const whiteListedTrack = async <
     typeof proposal === "string" ? proposal : await notePreimage(context, proposal);
 
   // Construct dispatchWhiteListed call
-  const proposalLen = (await context.pjsApi.query.preimage.requestStatusFor(proposalHash)).unwrap()
-    .asUnrequested.len;
+  const proposalLen = (
+    (await context.pjsApi.query.preimage.requestStatusFor(proposalHash)) as any
+  ).unwrap().asUnrequested.len;
   const dispatchWLCall = context.pjsApi.tx.whitelist.dispatchWhitelistedCall(
     proposalHash,
     proposalLen,
@@ -201,12 +203,12 @@ export const whiteListedTrack = async <
   await context.createBlock();
 
   const checkCompletion = async (): Promise<boolean> => {
-    const authorized = await context.pjsApi.query.system.authorizedUpgrade();
+    const authorized = (await context.pjsApi.query.system.authorizedUpgrade()) as any;
     if (!authorized.isNone) {
       return true;
     }
 
-    const events = await context.pjsApi.query.system.events();
+    const events = (await context.pjsApi.query.system.events()) as any;
     return events.some(({ event }) => {
       const section = event.section.toString();
       const method = event.method.toString();
@@ -290,7 +292,9 @@ export const execOpenTechCommitteeProposal = async <
 
   // Vote on it
   for (const voter of voters) {
-    const nonce = (await context.pjsApi.query.system.account(voter.address)).nonce.toNumber();
+    const nonce = (
+      (await context.pjsApi.query.system.account(voter.address)) as any
+    ).nonce.toNumber();
     const vote = context.pjsApi.tx.openTechCommitteeCollective
       .vote(openTechProposal, openTechProposalIndex, true)
       .signAsync(voter, { nonce });
@@ -583,7 +587,7 @@ export const execTechnicalCommitteeProposal = async <
 
 export const executeOpenTechCommitteeProposal = async (api: ApiPromise, encodedHash: string) => {
   console.log("Executing OpenTechCommittee proposal");
-  const queryPreimage = await api.query.preimage.requestStatusFor(encodedHash);
+  const queryPreimage = (await api.query.preimage.requestStatusFor(encodedHash)) as any;
   if (queryPreimage.isNone) {
     throw new Error("Preimage not found");
   }
@@ -602,7 +606,9 @@ export const executeOpenTechCommitteeProposal = async (api: ApiPromise, encodedH
 
   await signAndSend(api.tx.preimage.notePreimage(dispatchCallHex), charleth);
 
-  const queryDispatchPreimage = await api.query.preimage.requestStatusFor(dispatchCallPreimageHash);
+  const queryDispatchPreimage = (await api.query.preimage.requestStatusFor(
+    dispatchCallPreimageHash
+  )) as any;
 
   if (queryDispatchPreimage.isNone) {
     throw new Error("Dispatch preimage not found");
@@ -636,7 +642,7 @@ export const executeOpenTechCommitteeProposal = async (api: ApiPromise, encodedH
   //   )
   //   .signAsync(charleth);
 
-  const proposalId = (await api.query.referenda.referendumCount()).toNumber() - 1;
+  const proposalId = ((await api.query.referenda.referendumCount()) as any).toNumber() - 1;
 
   if (proposalId < 0) {
     throw new Error("Proposal id not found");
@@ -650,13 +656,16 @@ export const executeOpenTechCommitteeProposal = async (api: ApiPromise, encodedH
     api.tx.openTechCommitteeCollective.propose(2, api.tx.whitelist.whitelistCall(encodedHash), 100)
   );
 
-  const openTechProposal = (await api.query.openTechCommitteeCollective.proposals()).at(-1);
+  const openTechProposal = ((await api.query.openTechCommitteeCollective.proposals()) as any).at(
+    -1
+  );
 
   if (!openTechProposal || openTechProposal?.isEmpty) {
     throw new Error("OpenTechProposal not found");
   }
 
-  const index = (await api.query.openTechCommitteeCollective.proposalCount()).toNumber() - 1;
+  const index =
+    ((await api.query.openTechCommitteeCollective.proposalCount()) as any).toNumber() - 1;
 
   if (index < 0) {
     throw new Error("OpenTechProposal index not found");
@@ -716,9 +725,9 @@ export const executeOpenTechCommitteeProposal = async (api: ApiPromise, encodedH
   let referendaInfo: PalletReferendaReferendumInfo | undefined;
   for (;;) {
     try {
-      referendaInfo = (await api.query.referenda.referendumInfoFor(proposalId)).unwrap();
+      referendaInfo = ((await api.query.referenda.referendumInfoFor(proposalId)) as any).unwrap();
 
-      if (!referendaInfo.isOngoing) {
+      if (!referendaInfo?.isOngoing) {
         process.stdout.write("✅\n");
         break;
       }
@@ -730,8 +739,8 @@ export const executeOpenTechCommitteeProposal = async (api: ApiPromise, encodedH
     }
   }
 
-  process.stdout.write(`${referendaInfo.isApproved ? "✅" : "❌"} \n`);
-  if (!referendaInfo.isApproved) {
+  process.stdout.write(`${referendaInfo?.isApproved ? "✅" : "❌"} \n`);
+  if (!referendaInfo?.isApproved) {
     throw new Error("Finished Referendum was not approved");
   }
 };

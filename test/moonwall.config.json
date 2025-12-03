@@ -963,6 +963,7 @@
           {
             "name": "moonbeam",
             "running": true,
+            "newRpcBehaviour": true,
             "binPath": "./tmp/moonbeam",
             "ports": {
               "rpcPort": 9955

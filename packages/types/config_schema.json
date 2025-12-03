@@ -748,7 +748,7 @@
             "type": "number"
           },
           "vitestArgs": {
-            "$ref": "#/definitions/Record<string,any>",
+            "$ref": "#/definitions/Record%3Cstring%2Cany%3E",
             "description": "An optional object to add extra arguments to the Vitest test runner.\n Use with caution as this will override the default arguments, which\nmay cause unexpected behaviour.\n\nVisit https://vitest.dev/config/ for more info"
           }
         },
