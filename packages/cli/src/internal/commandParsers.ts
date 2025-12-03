@@ -77,6 +77,15 @@ export class LaunchCommandParser {
   }
 
   async withPorts() {
+    // In RECYCLE mode, the node is already running
+    if (process.env.MOON_RECYCLE === "true") {
+      const existingPort = process.env.MOONWALL_RPC_PORT;
+      if (existingPort) {
+        this.overrideArg(`--rpc-port=${existingPort}`);
+      }
+      return this;
+    }
+
     if (this.launchSpec.ports) {
       const ports = this.launchSpec.ports;
       if (ports.p2pPort) {
