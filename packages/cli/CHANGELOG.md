@@ -1,5 +1,13 @@
 # @moonwall/cli
 
+## 5.17.1
+
+### Patch Changes
+
+- 4386c3a: fix run
+  - @moonwall/types@5.17.1
+  - @moonwall/util@5.17.1
+
 ## 5.17.0
 
 ### Minor Changes
