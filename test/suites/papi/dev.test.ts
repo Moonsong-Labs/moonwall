@@ -10,10 +10,16 @@ describeSuite({
     let papi: PolkadotClient;
     let api: TypedApi<typeof mb>;
 
-    beforeAll(() => {
+    beforeAll(async () => {
       log("Should be before all test cases");
+
+      // The dev node uses manual sealing, so polkadot-api waits for the first
+      // block before exposing APIs. Kick off an initial block to avoid
+      // heartbeat-induced hangs during setup.
+      await customDevRpcRequest("engine_createBlock", [true, true]);
+
       papi = context.papi();
-      api = papi.getTypedApi(mb);
+      api =  papi.getTypedApi(mb);
     });
 
     it({
