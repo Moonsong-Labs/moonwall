@@ -61,9 +61,9 @@
     "@types/node": "^24.10.1",
     "@zombienet/utils": "^0.0.30",
     "bottleneck": "^2.19.5",
-    "ethers": "^6.15.0",
+    "ethers": "^6.16.0",
     "polkadot-api": "1.19.2",
-    "viem": "2.37.13",
+    "viem": "2.41.2",
     "vitest": "3.2.4",
     "web3": "^4.16.0"
   },
