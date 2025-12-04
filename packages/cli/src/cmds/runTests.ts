@@ -9,7 +9,32 @@ import { commonChecks } from "../internal/launcherCommon";
 import { cacheConfig, importAsyncConfig, loadEnvVars } from "../lib/configReader";
 import { MoonwallContext, contextCreator, runNetworkOnly } from "../lib/globalContext";
 import { shardManager } from "../lib/shardManager";
+import { findTestFilesMatchingPattern } from "../internal/testIdParser";
 const logger = createLogger({ name: "runner" });
+
+/**
+ * Pre-filters test files by scanning for suite/test IDs matching the pattern.
+ * Uses ast-grep's parallel file search for efficient parsing.
+ * Returns matching file paths, or undefined if no pattern (let vitest handle all).
+ */
+async function filterTestFilesByPattern(
+  testDirs: string[],
+  includePatterns: string[],
+  pattern?: string
+): Promise<string[] | undefined> {
+  if (!pattern) return undefined;
+
+  const patternRegex = new RegExp(pattern, "i");
+  const matches = await findTestFilesMatchingPattern(testDirs, includePatterns, patternRegex);
+
+  if (matches.length === 0) {
+    throw new Error(
+      `No test files found matching pattern "${pattern}". ` +
+        `Check that the suite/test ID exists (e.g., D01, D01E01).`
+    );
+  }
+  return matches;
+}
 
 export async function testCmd(envName: string, additionalArgs?: testRunArgs): Promise<boolean> {
   await cacheConfig();
@@ -148,16 +173,29 @@ export async function executeTests(env: Environment, testRunArgs?: testRunArgs &
           : env.testFileDir;
 
       const folders = testFileDir.map((folder) => path.join(".", folder, "/"));
+      const includePatterns = env.include || ["**/*{test,spec,test_,test-}*{ts,mts,cts}"];
+
+      // Pre-filter test files by scanning for suite IDs matching the pattern
+      // This avoids loading all files in vitest just to discover which ones match
+      const filteredFiles = await filterTestFilesByPattern(
+        folders,
+        includePatterns,
+        additionalArgs?.testNamePattern
+      );
+
       const optionsToUse = {
         ...options,
         ...additionalArgs,
         ...vitestOptions,
+        ...(filteredFiles ? { include: filteredFiles.map((f) => path.resolve(f)) } : {}),
       } satisfies UserConfig;
 
       if (env.printVitestOptions) {
         logger.info(`Options to use: ${JSON.stringify(optionsToUse, null, 2)}`);
       }
-      resolve((await startVitest("test", folders, optionsToUse)) as Vitest);
+
+      const foldersToUse = filteredFiles ? ["."] : folders;
+      resolve((await startVitest("test", foldersToUse, optionsToUse)) as Vitest);
     } catch (e) {
       logger.error(e);
       reject(e);

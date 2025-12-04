@@ -1,4 +1,3 @@
-import "@polkadot/api-augment/polkadot";
 import type { DevModeContext } from "@moonwall/types";
 import {
   GLMR,
@@ -14,7 +13,7 @@ import {
 import type { ApiPromise } from "@polkadot/api";
 import type { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types";
 import type { KeyringPair } from "@polkadot/keyring/types";
-import type { PalletReferendaReferendumInfo } from "@polkadot/types/lookup";
+import type { Codec } from "@polkadot/types-codec/types";
 import { blake2AsHex } from "@polkadot/util-crypto";
 
 export const COUNCIL_MEMBERS: KeyringPair[] = [baltathar, charleth, dorothy];
@@ -722,7 +721,7 @@ export const executeOpenTechCommitteeProposal = async (api: ApiPromise, encodedH
 
   // Waiting one million years for the referendum to be enacted
   process.stdout.write(`Waiting for referendum [${proposalId}] to be no longer ongoing...`);
-  let referendaInfo: PalletReferendaReferendumInfo | undefined;
+  let referendaInfo: (Codec & { isOngoing?: boolean; isApproved?: boolean }) | undefined;
   for (;;) {
     try {
       referendaInfo = ((await api.query.referenda.referendumInfoFor(proposalId)) as any).unwrap();

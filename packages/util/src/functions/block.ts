@@ -1,19 +1,18 @@
-import "@polkadot/api-augment/polkadot";
 import type { ApiPromise } from "@polkadot/api";
 import type { TxWithEvent } from "@polkadot/api-derive/types";
 import type { Option, u32, u64 } from "@polkadot/types";
-import type { ITuple } from "@polkadot/types-codec/types";
+import type { Codec, ITuple } from "@polkadot/types-codec/types";
 import type {
   BlockHash,
   DispatchError,
   DispatchInfo,
   Event,
+  EventRecord,
   Extrinsic,
   RuntimeDispatchInfo,
   RuntimeDispatchInfoV1,
 } from "@polkadot/types/interfaces";
 import type { Block, SignedBlock } from "@polkadot/types/interfaces/runtime/types";
-import type { FrameSystemEventRecord, SpWeightsWeightV2Weight } from "@polkadot/types/lookup";
 import Bottleneck from "bottleneck";
 import { createLogger } from "./logger";
 const logger = createLogger({ name: "test:blocks" });
@@ -177,18 +176,16 @@ export const getBlockArray = async (
   return Array.from({ length }, (_, i) => firstBlockNumber + i);
 };
 
-export function extractWeight(
-  weightV1OrV2: u64 | Option<u64> | SpWeightsWeightV2Weight | Option<any>
-) {
+export function extractWeight(weightV1OrV2: u64 | Option<u64> | Codec | Option<any>) {
   if ("isSome" in weightV1OrV2) {
     const weight = weightV1OrV2.unwrap();
     if ("refTime" in weight) {
-      return weight.refTime.unwrap();
+      return (weight as any).refTime.unwrap();
     }
     return weight;
   }
   if ("refTime" in weightV1OrV2) {
-    return weightV1OrV2.refTime.unwrap();
+    return (weightV1OrV2 as any).refTime.unwrap();
   }
   return weightV1OrV2;
 }
@@ -224,7 +221,7 @@ export function extractPreimageDeposit(
 
 export function mapExtrinsics(
   extrinsics: Extrinsic[],
-  records: FrameSystemEventRecord[],
+  records: EventRecord[],
   fees?: RuntimeDispatchInfo[] | RuntimeDispatchInfoV1[]
 ): TxWithEventAndFee[] {
   return extrinsics.map((extrinsic, index): TxWithEventAndFee => {
