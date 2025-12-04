@@ -1,14 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Box, Text, useInput, useApp, Static, Spacer } from "ink";
-import chalk from "chalk";
+import { Box, Text, useInput, useApp } from "ink";
 import fs from "node:fs";
-import { executeTests, testRunArgs } from "../runTests";
-import { UserConfig } from "vitest/dist/node.js";
-import tmp from 'tmp';
-import { JsonTestResults } from "vitest/reporters"
+import type { Environment } from "@moonwall/types";
+import { executeTests } from "../runTests";
 
 interface LogViewerProps {
-  env: any;
+  env: Environment;
   logFilePath: string;
   onExit: () => void;
   onNextLog?: () => void;
@@ -20,6 +17,11 @@ interface LogViewerProps {
   };
 }
 
+interface TestRun {
+  pattern?: string;
+  done: boolean;
+}
+
 export const LogViewer: React.FC<LogViewerProps> = ({
   env,
   logFilePath,
@@ -28,174 +30,157 @@ export const LogViewer: React.FC<LogViewerProps> = ({
   onPrevLog,
   zombieInfo,
 }) => {
-  const [logs, setLogs] = useState<string[]>([]);
+  const [lines, setLines] = useState<string[]>([]);
+  const [paused, setPaused] = useState(false);
+  const [scrollOffset, setScrollOffset] = useState(0);
+  const [testing, setTesting] = useState(false);
+  const [grepMode, setGrepMode] = useState(false);
+  const [grepInput, setGrepInput] = useState(process.env.MOON_GREP ?? "");
   const [testOutput, setTestOutput] = useState<string[]>([]);
-  const [parsedOutput, setParsedOutput] = useState<JsonTestResults>();
-  const [tailing, setTailing] = useState(true);
-  const [isExecutingCommand, setIsExecutingCommand] = useState(false);
-  const [isGrepMode, setIsGrepMode] = useState(false);
-  const [grepInput, setGrepInput] = useState(process.env.MOON_GREP || "D01T01");
-  const [showCursor, setShowCursor] = useState(true);
-  const [tmpFile] = useState(() => {
-    const tmpobj = tmp.fileSync({ prefix: 'moonwall-test-', postfix: '.json' });
-    return tmpobj.name;
-  });
-  const [testScrollOffset, setTestScrollOffset] = useState(0);
-  const maxVisibleLines = process.stdout.rows - 6;
+  const [testRun, setTestRun] = useState<TestRun | null>(null);
   const { exit } = useApp();
 
+  const terminalRows = process.stdout.rows ?? 24;
+  const terminalCols = process.stdout.columns ?? 80;
+
+  const showTestPanel = testing || testOutput.length > 0 || testRun !== null;
+  const testPanelHeight = showTestPanel ? Math.min(10, Math.max(5, Math.floor(terminalRows / 3))) : 0;
+  const logPanelHeight = terminalRows - testPanelHeight - (grepMode ? 5 : 4);
+  const visibleLines = Math.max(3, logPanelHeight);
+  const testOutputLines = Math.max(1, testPanelHeight - 3);
+
+  const readLogFile = useCallback(() => {
+    if (paused || !fs.existsSync(logFilePath)) return;
+    try {
+      const content = fs.readFileSync(logFilePath, "utf-8");
+      setLines(content.split("\n").filter((l) => l.trim()));
+    } catch {
+      // File may be temporarily unavailable
+    }
+  }, [logFilePath, paused]);
+
   useEffect(() => {
-    const hideCursor = () => {
-      process.stdout.write('\x1B[?25l');
-    };
+    readLogFile();
+    if (paused) return;
 
-    hideCursor();
-    setupWatcher()
-
-    const cursorCheck = setInterval(hideCursor, 100);
-
+    fs.watchFile(logFilePath, { interval: 100 }, readLogFile);
     return () => {
-      clearInterval(cursorCheck);
-      process.stdout.write('\x1B[?25h');
+      fs.unwatchFile(logFilePath);
+    };
+  }, [logFilePath, paused, readLogFile]);
+
+  // Hide cursor
+  useEffect(() => {
+    process.stdout.write("\x1B[?25l");
+    return () => {
+      process.stdout.write("\x1B[?25h");
     };
   }, []);
 
-  const readLog = useCallback(() => {
-    if (!tailing || !fs.existsSync(logFilePath)) return;
-
-    try {
-      const fileContent = fs.readFileSync(logFilePath, 'utf-8');
-      const lines = fileContent.split("\n")
-        .filter(line => line.trim())
-        .map(line => line.trimEnd());
-
-      setLogs(lines);
-    } catch (error) {
-      console.error("Error in readLog:", error);
-    }
-  }, [tailing, logFilePath]);
-
-  const setupWatcher = useCallback(() => {
-    readLog();
-    fs.watchFile(logFilePath, { interval: 100 }, (curr, prev) => {
-      if (curr.size !== prev.size) {
-        readLog();
+  const runTests = useCallback(
+    async (pattern?: string) => {
+      if (testing) return;
+      setTesting(true);
+      setTestOutput([]);
+      setTestRun({ pattern, done: false });
+      process.env.MOON_RECYCLE = "true";
+      if (pattern) {
+        process.env.MOON_GREP = pattern;
       }
-    });
-  }, [logFilePath, readLog]);
 
-  const removeWatcher = useCallback(() => {
-    fs.unwatchFile(logFilePath);
-  }, [logFilePath]);
-
-  const handleGrepSubmit = useCallback(async () => {
-    setTestOutput([]);
-    setParsedOutput(undefined);
-    process.env.MOON_RECYCLE = "true";
-    process.env.MOON_GREP = grepInput;
-    const opts: testRunArgs & UserConfig = {
-      testNamePattern: grepInput,
-      silent: false,
-      subDirectory: process.env.MOON_SUBDIR,
-      outputFile: tmpFile,
-      reporters: ['dot', 'json'],
-      onConsoleLog: (log) => {
-        if (!log.includes("has multiple versions, ensure that there is only one installed.")) {
-          setTestOutput(prev => [...prev, log]);
-        }
-        return false;
+      try {
+        await executeTests(env, {
+          testNamePattern: pattern,
+          silent: true,
+          subDirectory: process.env.MOON_SUBDIR,
+          reporters: ["dot"],
+          onConsoleLog: (log) => {
+            if (log.includes("has multiple versions")) return false;
+            setTestOutput((prev) => [...prev.slice(-50), log]);
+            return false;
+          },
+        });
+      } catch {
+        // Test failures are expected
+      } finally {
+        setTesting(false);
+        setTestRun((prev) => (prev ? { ...prev, done: true } : null));
       }
-    };
-
-    setIsExecutingCommand(true);
-
-    try {
-      await executeTests(env, opts);
-      const jsonOutput = JSON.parse(fs.readFileSync(tmpFile, 'utf-8'));
-      setParsedOutput(jsonOutput);
-    } catch (error: any) {
-      setTestOutput(prev => [...prev, `Error: ${error.message}`]);
-    } finally {
-      setIsExecutingCommand(false);
-      setIsGrepMode(false);
-      if (tailing) {
-        setupWatcher();
-      }
-    }
-  }, [grepInput, env, tailing]);
-
-  const handleTest = useCallback(async () => {
-    setTestOutput([]);
-    setParsedOutput(undefined);
-    process.env.MOON_RECYCLE = "true";
-    const opts: testRunArgs & UserConfig = {
-      silent: false,
-      subDirectory: process.env.MOON_SUBDIR,
-      outputFile: tmpFile,
-      reporters: ['dot', 'json'],
-      onConsoleLog: (log) => {
-        if (!log.includes("has multiple versions, ensure that there is only one installed.")) {
-          setTestOutput(prev => [...prev, log]);
-        }
-        return false;
-      }
-    };
-
-    setIsExecutingCommand(true);
-
-    try {
-      await executeTests(env, opts);
-      const jsonOutput = JSON.parse(fs.readFileSync(tmpFile, 'utf-8'));
-
-      setParsedOutput(jsonOutput);
-
-    } catch (error: any) {
-      setTestOutput(prev => [...prev, `Error: ${error.message}`]);
-    } finally {
-      setIsExecutingCommand(false);
-      if (tailing) {
-        setupWatcher();
-      }
-    }
-  }, [env, tailing, setupWatcher]);
+    },
+    [env, testing]
+  );
 
   useInput((input, key) => {
-    if (isGrepMode) {
+    // Grep mode input handling
+    if (grepMode) {
+      if (key.escape) {
+        setGrepMode(false);
+        return;
+      }
       if (key.return) {
-        handleGrepSubmit();
-      } else if (key.escape) {
-        setIsGrepMode(false);
-      } else if (key.backspace || key.delete) {
-        setGrepInput(prev => prev.slice(0, -1));
-      } else if (input && !key.ctrl && !key.meta) {
-        setGrepInput(prev => prev + input);
+        const pattern = grepInput.trim();
+        if (pattern) {
+          setGrepMode(false);
+          runTests(pattern);
+        }
+        return;
+      }
+      if (key.backspace || key.delete) {
+        setGrepInput((prev) => prev.slice(0, -1));
+        return;
+      }
+      if (input && !key.ctrl && !key.meta) {
+        setGrepInput((prev) => prev + input);
       }
       return;
     }
 
+    // Normal mode
     if (input === "q") {
       fs.unwatchFile(logFilePath);
       onExit();
       exit();
+      return;
     }
 
     if (input === "p") {
-      setTailing(false);
-      removeWatcher();
+      setPaused(true);
     }
 
     if (input === "r") {
-      setTailing(true);
-      setupWatcher();
-      readLog();
+      setPaused(false);
+      setScrollOffset(0);
     }
 
-    if (input === "t") {
-      handleTest();
+    if (input === "t" && !testing) {
+      runTests();
+    }
+
+    if (input === "T" && !testing) {
+      setGrepMode(true);
+    }
+
+    if (input === "c") {
+      setTestOutput([]);
+      setTestRun(null);
+    }
+
+    const maxOffset = Math.max(0, lines.length - visibleLines);
+
+    if (key.pageUp) {
+      setScrollOffset((prev) => Math.min(prev + visibleLines, maxOffset));
+    }
+
+    if (key.pageDown) {
+      setScrollOffset((prev) => Math.max(prev - visibleLines, 0));
     }
 
     if (input === "g") {
-      setIsGrepMode(true);
+      setScrollOffset(maxOffset);
+    }
+
+    if (input === "G") {
+      setScrollOffset(0);
     }
 
     if (input === "," && onNextLog) {
@@ -209,141 +194,106 @@ export const LogViewer: React.FC<LogViewerProps> = ({
       onPrevLog();
       exit();
     }
-
-    if (key.upArrow && testOutput.length > 0) {
-      setTestScrollOffset(prev => Math.min(prev + 1, Math.max(0, testOutput.length - maxVisibleLines)));
-    }
-    if (key.downArrow && testOutput.length > 0) {
-      setTestScrollOffset(prev => Math.max(0, prev - 1));
-    }
-    if (input === 'g') {
-      setTestScrollOffset(0);
-    }
   });
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setShowCursor(prev => !prev);
-    }, 500);
+  const startIndex = Math.max(0, lines.length - visibleLines - scrollOffset);
+  const visible = lines.slice(startIndex, startIndex + visibleLines);
+  const shortPath = logFilePath.split("/").slice(-2).join("/");
+  const visibleTestOutput = testOutput.slice(-testOutputLines);
 
-    return () => {
-      clearInterval(timer);
-    };
-  }, [isGrepMode]);
+  const getLineColor = (line: string): string => {
+    if (/error|panic|fail/i.test(line)) return "red";
+    if (/warn/i.test(line)) return "yellow";
+    return "white";
+  };
 
-  useEffect(() => {
-    const stream = fs.createReadStream(logFilePath);
-    let content = "";
-
-    stream.on("data", (chunk) => {
-      content += chunk.toString();
-    });
-
-    stream.on("end", () => {
-      const lines = content.split("\n").filter(line => line.trim());
-      setLogs(lines);
-    });
-
-    if (tailing) {
-      setupWatcher();
-    }
-
-    return () => {
-      removeWatcher();
-    };
-  }, [logFilePath, tailing]);
-
-  useEffect(() => {
-    setTestScrollOffset(0);
-  }, [testOutput.length]);
+  const truncate = (text: string, maxLen: number): string => {
+    return text.length > maxLen ? `${text.slice(0, maxLen - 1)}…` : text;
+  };
 
   return (
-    <Box flexDirection="column" height={process.stdout.rows - 1}>
-      <Box flexDirection="row" flexGrow={1}>
-        {/* Logs Section */}
-        <Box
-          flexDirection="column"
-          width={testOutput.length > 0 ? "60%" : "100%"}
-          borderStyle="round"
-          borderColor="blue"
-          height={process.stdout.rows - 3}
-        >
-
-          <Box paddingX={1}>
-            <Text backgroundColor="blue" color="black" bold>
-              {" " + logFilePath.split("/").slice(-2).join("/") + " "}
+    <Box flexDirection="column" height={terminalRows}>
+      {/* Log Panel */}
+      <Box borderStyle="single" borderColor={paused ? "yellow" : "green"} paddingX={1}>
+        <Text color={paused ? "yellow" : "green"} bold>
+          {paused ? "PAUSED" : "LIVE"}
+        </Text>
+        <Text> </Text>
+        <Text dimColor>{shortPath}</Text>
+        <Text> </Text>
+        <Text dimColor>({lines.length} lines)</Text>
+        {zombieInfo && (
+          <>
+            <Text> </Text>
+            <Text color="cyan">
+              [{zombieInfo.currentNode} {zombieInfo.position}/{zombieInfo.total}]
             </Text>
-          </Box>
-
-          <Box flexGrow={1} flexDirection="column" padding={1}>
-            {logs.slice(-Math.max(1, maxVisibleLines)).map((line, i) => (
-              <Text key={i} wrap="wrap">{line}</Text>
-            ))}
-          </Box>
-        </Box>
-
-        {/* Test Output Section - Only show if there's output */}
-        {testOutput.length > 0 && (
-          <Box
-            flexDirection="column"
-            width="40%"
-            borderStyle="round"
-            borderColor="yellow"
-            height={process.stdout.rows - 3}
-          >
-            <Box paddingX={1}>
-              <Text backgroundColor="yellow" color="black" bold>
-                {" Test Output "}
-              </Text>
-            </Box>
-
-            <Box flexDirection="column" padding={1} height={process.stdout.rows - 5}>
-              <Box flexGrow={1} flexDirection="column" overflow="hidden">
-                {testOutput.map((line, i) => (
-                  <Text key={i} wrap="wrap">{line}</Text>
-                )).slice(testScrollOffset, testScrollOffset + maxVisibleLines)}
-              </Box>
-              {testOutput.length > maxVisibleLines && (
-                <Text color="gray">
-                  {`[${Math.round((testScrollOffset / Math.max(1, testOutput.length - maxVisibleLines)) * 100)}% scroll, use ↑/↓ to scroll]`}
-                </Text>
-              )}
-              {parsedOutput && (
-                <Box 
-                  borderStyle="singleDouble" 
-                  borderColor={!parsedOutput.success ? "red" : "green"} 
-                  flexDirection="column" 
-                  minHeight={4}
-                >
-                  <Text>
-                    {`${parsedOutput.numPassedTests}/${parsedOutput.numTotalTests - parsedOutput.numPendingTests} tests passed`}
-                    {parsedOutput.numFailedTests > 0 ? ` (${parsedOutput.numFailedTests} failed)` : ""}
-                  </Text>
-                </Box>
-              )}
-            </Box>
-          </Box>
+          </>
+        )}
+        {scrollOffset > 0 && (
+          <>
+            <Text> </Text>
+            <Text color="yellow">↑{scrollOffset}</Text>
+          </>
         )}
       </Box>
 
-      {/* Bottom Bar */}
-      {!isExecutingCommand && !isGrepMode && (
-        <Box flexDirection="column" margin={0} padding={0}>
-          <Text>
-            {`📜 Tailing Logs, commands: ${chalk.bgWhite.black("[q]")} Quit, ${chalk.bgWhite.black("[t]")} Test, ${chalk.bgWhite.black("[g]")} Grep test`}
-            {`, ${chalk.bgWhite.black("[p]")} Pause tail`}
-            {`, ${chalk.bgWhite.black("[r]")} Resume tail`}
-            {zombieInfo
-              ? `, ${chalk.bgWhite.black("[,]")} Next Log, ${chalk.bgWhite.black("[.]")} Previous Log  | CurrentLog: ${chalk.bgWhite.black(`${zombieInfo.currentNode} (${zombieInfo.position}/${zombieInfo.total})`)}`
-              : ""}
-            {testOutput.length > maxVisibleLines && ", use ↑/↓ to scroll test output"}
+      <Box flexDirection="column" height={visibleLines} paddingX={1}>
+        {visible.map((line, i) => (
+          <Text key={startIndex + i} color={getLineColor(line)} wrap="truncate">
+            {truncate(line, terminalCols - 4)}
           </Text>
+        ))}
+        {visible.length === 0 && <Text dimColor>Waiting for logs...</Text>}
+      </Box>
+
+      {/* Test Panel */}
+      {showTestPanel && (
+        <Box flexDirection="column" borderStyle="single" borderColor={testing ? "magenta" : "blue"}>
+          <Box paddingX={1}>
+            <Text color={testing ? "magenta" : "blue"} bold>
+              {testing ? "TESTING..." : "TESTS"}
+            </Text>
+            {testRun && (
+              <>
+                {testRun.done && (
+                  <>
+                    <Text> </Text>
+                    <Text color="green">done</Text>
+                  </>
+                )}
+                {testRun.pattern && (
+                  <>
+                    <Text> </Text>
+                    <Text dimColor>({testRun.pattern})</Text>
+                  </>
+                )}
+              </>
+            )}
+          </Box>
+          <Box flexDirection="column" height={testOutputLines} paddingX={1} overflow="hidden">
+            {visibleTestOutput.map((line, i) => (
+              <Text key={i} wrap="truncate" dimColor>
+                {truncate(line, terminalCols - 4)}
+              </Text>
+            ))}
+          </Box>
         </Box>
       )}
-      {!isExecutingCommand && isGrepMode && (
-        <Box flexDirection="column" margin={0} padding={0}>
-          <Text>
-            Pattern to filter (ID/Title) [Enter to submit, Esc to cancel]: <Text color="green">{grepInput}</Text><Text color="green">{showCursor ? "▋" : " "}</Text>
+
+      {/* Footer */}
+      {grepMode ? (
+        <Box paddingX={1} borderStyle="single" borderColor="cyan">
+          <Text color="cyan">Grep pattern: </Text>
+          <Text>{grepInput}</Text>
+          <Text color="cyan">▋</Text>
+          <Text dimColor> (Enter=run, Esc=cancel)</Text>
+        </Box>
+      ) : (
+        <Box paddingX={1}>
+          <Text dimColor>
+            q:quit t:test T:grep{showTestPanel && " c:clear"} p:pause r:resume g:top G:bottom PgUp/PgDn
+            {onNextLog && " ,/.:node"}
           </Text>
         </Box>
       )}

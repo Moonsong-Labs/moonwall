@@ -330,6 +330,12 @@ const resolveTailChoice = async (env: Environment) => {
         throw new Error("No log file path resolved, this should not happen. Please raise defect");
       }
 
+      // Resume stdin before rendering with ink - @inquirer/prompts pauses stdin
+      // after completing, which prevents ink's useInput from receiving keyboard events
+      if (process.stdin.isPaused()) {
+        process.stdin.resume();
+      }
+
       const { waitUntilExit } = render(
         <LogStreamer
           env={env}
