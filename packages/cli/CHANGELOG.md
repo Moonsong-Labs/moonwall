@@ -1,5 +1,14 @@
 # @moonwall/cli
 
+## 5.17.3
+
+### Patch Changes
+
+- 5a67d40: Added globbing for greptest
+- Updated dependencies [5a67d40]
+  - @moonwall/types@5.17.3
+  - @moonwall/util@5.17.3
+
 ## 5.17.2
 
 ### Patch Changes
