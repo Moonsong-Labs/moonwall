@@ -1,6 +1,5 @@
 import type { Environment } from "@moonwall/types";
 import chalk from "chalk";
-import fs from "node:fs";
 import path from "node:path";
 import type { UserConfig, Vitest } from "vitest/node";
 import { startVitest } from "vitest/node";
@@ -10,12 +9,12 @@ import { commonChecks } from "../internal/launcherCommon";
 import { cacheConfig, importAsyncConfig, loadEnvVars } from "../lib/configReader";
 import { MoonwallContext, contextCreator, runNetworkOnly } from "../lib/globalContext";
 import { shardManager } from "../lib/shardManager";
-import picomatch from "picomatch";
-import { regex } from "arkregex";
+import { findTestFilesMatchingPattern } from "../internal/testIdParser";
 const logger = createLogger({ name: "runner" });
 
 /**
  * Pre-filters test files by scanning for suite/test IDs matching the pattern.
+ * Uses ast-grep's parallel file search for efficient parsing.
  * Returns matching file paths, or undefined if no pattern (let vitest handle all).
  */
 async function filterTestFilesByPattern(
@@ -25,41 +24,8 @@ async function filterTestFilesByPattern(
 ): Promise<string[] | undefined> {
   if (!pattern) return undefined;
 
-  const isMatch = picomatch(includePatterns);
   const patternRegex = new RegExp(pattern, "i");
-  // Type-safe regex for extracting suite/test IDs from Moonwall test files
-  const suiteIdRegex = regex.as<`describeSuite${string}`, { captures: [string] }>(
-    "describeSuite\\s*\\(\\s*\\{[^}]*?id\\s*:\\s*[\"']([^\"']+)[\"']"
-  );
-  const testIdRegex = regex.as<`it${string}`, { captures: [string] }>(
-    "it\\s*\\(\\s*\\{[^}]*?id\\s*:\\s*[\"']([^\"']+)[\"']",
-    "g"
-  );
-
-  async function* walk(dir: string): AsyncGenerator<string> {
-    for (const e of await fs.promises.readdir(dir, { withFileTypes: true })) {
-      const p = path.join(dir, e.name);
-      if (e.isDirectory()) yield* walk(p);
-      else yield p;
-    }
-  }
-
-  const matches: string[] = [];
-  for (const dir of testDirs) {
-    for await (const file of walk(dir)) {
-      if (!isMatch(path.relative(dir, file))) continue;
-      try {
-        const content = await fs.promises.readFile(file, "utf-8");
-        const suiteMatch = content.match(suiteIdRegex);
-        if (!suiteMatch) continue;
-        const suiteId = suiteMatch[1];
-        const ids = [suiteId, ...[...content.matchAll(testIdRegex)].map((m) => suiteId + m[1])];
-        if (ids.some((id) => patternRegex.test(id))) matches.push(file);
-      } catch {
-        // Skip unreadable files
-      }
-    }
-  }
+  const matches = await findTestFilesMatchingPattern(testDirs, includePatterns, patternRegex);
 
   if (matches.length === 0) {
     throw new Error(

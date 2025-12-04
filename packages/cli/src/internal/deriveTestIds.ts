@@ -2,6 +2,7 @@ import chalk from "chalk";
 import fs from "node:fs";
 import { confirm } from "@inquirer/prompts";
 import path from "node:path";
+import { hasSuiteDefinition, replaceSuiteId } from "./testIdParser";
 
 interface DeriveTestIdsOptions {
   rootDir: string;
@@ -121,13 +122,12 @@ function generateId(directory: string, rootDir: string, prefix: string): void {
       subDirCount++;
     } else {
       const fileContent = fs.readFileSync(fullPath, "utf-8");
-      if (fileContent.includes("describeSuite")) {
+      if (hasSuiteDefinition(fileContent)) {
         const newId = prefix + `0${fileCount}`.slice(-2);
-        const updatedContent = fileContent.replace(
-          /(describeSuite\s*?\(\s*?\{\s*?id\s*?:\s*?['"])[^'"]+(['"])/,
-          `$1${newId}$2`
-        );
-        fs.writeFileSync(fullPath, updatedContent);
+        const updatedContent = replaceSuiteId(fileContent, newId);
+        if (updatedContent) {
+          fs.writeFileSync(fullPath, updatedContent);
+        }
       }
       fileCount++;
     }
