@@ -1,5 +1,6 @@
 import type { Environment } from "@moonwall/types";
 import chalk from "chalk";
+import fs from "node:fs";
 import path from "node:path";
 import type { UserConfig, Vitest } from "vitest/node";
 import { startVitest } from "vitest/node";
@@ -9,7 +10,65 @@ import { commonChecks } from "../internal/launcherCommon";
 import { cacheConfig, importAsyncConfig, loadEnvVars } from "../lib/configReader";
 import { MoonwallContext, contextCreator, runNetworkOnly } from "../lib/globalContext";
 import { shardManager } from "../lib/shardManager";
+import picomatch from "picomatch";
+import { regex } from "arkregex";
 const logger = createLogger({ name: "runner" });
+
+/**
+ * Pre-filters test files by scanning for suite/test IDs matching the pattern.
+ * Returns matching file paths, or undefined if no pattern (let vitest handle all).
+ */
+async function filterTestFilesByPattern(
+  testDirs: string[],
+  includePatterns: string[],
+  pattern?: string
+): Promise<string[] | undefined> {
+  if (!pattern) return undefined;
+
+  const isMatch = picomatch(includePatterns);
+  const patternRegex = new RegExp(pattern, "i");
+  // Type-safe regex for extracting suite/test IDs from Moonwall test files
+  const suiteIdRegex = regex.as<`describeSuite${string}`, { captures: [string] }>(
+    "describeSuite\\s*\\(\\s*\\{[^}]*?id\\s*:\\s*[\"']([^\"']+)[\"']"
+  );
+  const testIdRegex = regex.as<`it${string}`, { captures: [string] }>(
+    "it\\s*\\(\\s*\\{[^}]*?id\\s*:\\s*[\"']([^\"']+)[\"']",
+    "g"
+  );
+
+  async function* walk(dir: string): AsyncGenerator<string> {
+    for (const e of await fs.promises.readdir(dir, { withFileTypes: true })) {
+      const p = path.join(dir, e.name);
+      if (e.isDirectory()) yield* walk(p);
+      else yield p;
+    }
+  }
+
+  const matches: string[] = [];
+  for (const dir of testDirs) {
+    for await (const file of walk(dir)) {
+      if (!isMatch(path.relative(dir, file))) continue;
+      try {
+        const content = await fs.promises.readFile(file, "utf-8");
+        const suiteMatch = content.match(suiteIdRegex);
+        if (!suiteMatch) continue;
+        const suiteId = suiteMatch[1];
+        const ids = [suiteId, ...[...content.matchAll(testIdRegex)].map((m) => suiteId + m[1])];
+        if (ids.some((id) => patternRegex.test(id))) matches.push(file);
+      } catch {
+        // Skip unreadable files
+      }
+    }
+  }
+
+  if (matches.length === 0) {
+    throw new Error(
+      `No test files found matching pattern "${pattern}". ` +
+        `Check that the suite/test ID exists (e.g., D01, D01E01).`
+    );
+  }
+  return matches;
+}
 
 export async function testCmd(envName: string, additionalArgs?: testRunArgs): Promise<boolean> {
   await cacheConfig();
@@ -148,16 +207,29 @@ export async function executeTests(env: Environment, testRunArgs?: testRunArgs &
           : env.testFileDir;
 
       const folders = testFileDir.map((folder) => path.join(".", folder, "/"));
+      const includePatterns = env.include || ["**/*{test,spec,test_,test-}*{ts,mts,cts}"];
+
+      // Pre-filter test files by scanning for suite IDs matching the pattern
+      // This avoids loading all files in vitest just to discover which ones match
+      const filteredFiles = await filterTestFilesByPattern(
+        folders,
+        includePatterns,
+        additionalArgs?.testNamePattern
+      );
+
       const optionsToUse = {
         ...options,
         ...additionalArgs,
         ...vitestOptions,
+        ...(filteredFiles ? { include: filteredFiles.map((f) => path.resolve(f)) } : {}),
       } satisfies UserConfig;
 
       if (env.printVitestOptions) {
         logger.info(`Options to use: ${JSON.stringify(optionsToUse, null, 2)}`);
       }
-      resolve((await startVitest("test", folders, optionsToUse)) as Vitest);
+
+      const foldersToUse = filteredFiles ? ["."] : folders;
+      resolve((await startVitest("test", foldersToUse, optionsToUse)) as Vitest);
     } catch (e) {
       logger.error(e);
       reject(e);

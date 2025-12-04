@@ -3,6 +3,7 @@ const originalWrite: typeof process.stderr.write = process.stderr.write.bind(pro
 const blockList: readonly string[] = [
   "has multiple versions, ensure that there is only one installed",
   "Unable to map [u8; 32] to a lookup index",
+  "Either remove and explicitly install matching versions or dedupe using your package manager.",
 ];
 
 process.stderr.write = (

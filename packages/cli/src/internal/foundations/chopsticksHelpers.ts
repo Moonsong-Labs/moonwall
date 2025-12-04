@@ -1,7 +1,7 @@
 import type { ChopsticksBlockCreation, GenericContext } from "@moonwall/types";
 import type { WsProvider } from "@polkadot/api";
 import type { ApiTypes, AugmentedEvent } from "@polkadot/api/types";
-import type { FrameSystemEventRecord } from "@polkadot/types/lookup";
+import type { EventRecord } from "@polkadot/types/interfaces";
 import chalk from "chalk";
 import { setTimeout } from "node:timers/promises";
 import { MoonwallContext } from "../../lib/globalContext";
@@ -66,7 +66,7 @@ export async function sendNewBlockAndCheck(
   expectedEvents: AugmentedEvent<ApiTypes>[]
 ): Promise<{
   match: boolean;
-  events: FrameSystemEventRecord[];
+  events: EventRecord[];
 }> {
   const newBlock = await sendNewBlockRequest();
   const api = context.polkadotJs();

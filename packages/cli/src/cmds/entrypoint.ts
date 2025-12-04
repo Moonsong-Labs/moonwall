@@ -6,7 +6,9 @@ import { main } from "./main";
 import { runNetworkCmd } from "./runNetwork";
 import { testCmd } from "./runTests";
 import { configSetup } from "../lib/configReader";
-dotenv.config();
+dotenv.config({
+  quiet: true,
+});
 
 function handleCursor() {
   const hideCursor = "\x1B[?25l";
