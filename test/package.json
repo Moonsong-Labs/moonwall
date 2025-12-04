@@ -1,7 +1,7 @@
 {
   "name": "@moonwall/tests",
   "type": "module",
-  "version": "5.17.1",
+  "version": "5.17.2",
   "private": true,
   "packageManager": "pnpm@9.1.4",
   "description": "Testing framework for the Moon family of projects",
