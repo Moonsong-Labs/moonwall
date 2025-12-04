@@ -1,5 +1,13 @@
 # @moonwall/cli
 
+## 5.17.2
+
+### Patch Changes
+
+- d0849fb: Fix tail log screen
+  - @moonwall/types@5.17.2
+  - @moonwall/util@5.17.2
+
 ## 5.17.1
 
 ### Patch Changes
