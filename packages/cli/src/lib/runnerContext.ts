@@ -84,12 +84,8 @@ export function describeSuite<T extends FoundationType>({
 
   beforeAll(async () => {
     const env = getEnvironmentFromConfig();
-    if (env.foundation.type === "dev") {
-      // Pass options to contextCreator if they exist
-      ctx = await contextCreator(options);
-    }
+    ctx = env.foundation.type === "dev" ? await contextCreator(options) : await contextCreator();
 
-    ctx = await contextCreator();
     if (env.foundation.type === "read_only") {
       const settings = loadParams(env.foundation.launchSpec);
       limiter = new Bottleneck(settings);
