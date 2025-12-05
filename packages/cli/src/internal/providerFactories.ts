@@ -27,12 +27,18 @@ const logger = createLogger({ name: "providers" });
 const debug = logger.debug.bind(logger);
 
 /**
+ * Get the metadata cache directory.
+ * Uses MOONWALL_CACHE_DIR if set (from startup caching), otherwise defaults to tmp/metadata-cache.
+ */
+const getMetadataCacheDir = (): string => {
+  return process.env.MOONWALL_CACHE_DIR || path.join(process.cwd(), "tmp", "metadata-cache");
+};
+
+/**
  * Load cached metadata if available, returns { genesisHash: metadataHex } or undefined
  */
 const loadCachedMetadata = (): Record<string, `0x${string}`> | undefined => {
-  const cacheDir = process.env.MOONWALL_CACHE_DIR;
-  if (!cacheDir) return undefined;
-
+  const cacheDir = getMetadataCacheDir();
   const metadataPath = path.join(cacheDir, "metadata-cache.json");
   try {
     const data = fs.readFileSync(metadataPath, "utf-8");
@@ -48,8 +54,14 @@ const loadCachedMetadata = (): Record<string, `0x${string}`> | undefined => {
  * Save metadata to cache for future connections
  */
 const saveCachedMetadata = (genesisHash: string, metadataHex: string): void => {
-  const cacheDir = process.env.MOONWALL_CACHE_DIR;
-  if (!cacheDir) return;
+  const cacheDir = getMetadataCacheDir();
+
+  // Ensure cache directory exists
+  try {
+    fs.mkdirSync(cacheDir, { recursive: true });
+  } catch {
+    // Directory might already exist or creation failed, try to continue
+  }
 
   const metadataPath = path.join(cacheDir, "metadata-cache.json");
   const lockPath = `${metadataPath}.lock`;
@@ -117,11 +129,13 @@ export class ProviderFactory {
     debug(
       `🟢  PolkadotJs provider ${this.providerConfig.name} details prepared to connect to ${this.url}`
     );
+    // Check if metadata caching is enabled (default: true)
+    const cacheEnabled = this.providerConfig.cacheMetadata !== false;
     return {
       name: this.providerConfig.name,
       type: this.providerConfig.type,
       connect: async () => {
-        const cachedMetadata = loadCachedMetadata();
+        const cachedMetadata = cacheEnabled ? loadCachedMetadata() : undefined;
         const startTime = Date.now();
 
         const options: ApiOptions = {
@@ -139,14 +153,16 @@ export class ProviderFactory {
         const api = await ApiPromise.create(options);
         await api.isReady;
 
-        // Cache metadata for future connections if not already cached
-        if (!cachedMetadata) {
+        // Cache metadata for future connections if caching is enabled and not already cached
+        if (cacheEnabled && !cachedMetadata) {
           const genesisHash = api.genesisHash.toHex();
           const metadataHex = api.runtimeMetadata.toHex();
           saveCachedMetadata(genesisHash, metadataHex);
           debug(`PolkadotJs connected in ${Date.now() - startTime}ms (metadata fetched & cached)`);
-        } else {
+        } else if (cachedMetadata) {
           debug(`PolkadotJs connected in ${Date.now() - startTime}ms (using cached metadata)`);
+        } else {
+          debug(`PolkadotJs connected in ${Date.now() - startTime}ms (caching disabled)`);
         }
 
         return api;

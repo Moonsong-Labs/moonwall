@@ -354,6 +354,11 @@
           "description": "An optional collection of additional types.",
           "type": "object"
         },
+        "cacheMetadata": {
+          "default": true,
+          "description": "Cache runtime metadata for faster PolkadotJS API connections.\nWhen enabled, metadata is cached after first connection and reused,\nsignificantly reducing connection time for subsequent runs.\n\nOnly applies to \"polkadotJs\" provider type.",
+          "type": "boolean"
+        },
         "endpoints": {
           "description": "An array of endpoint URLs.",
           "items": {

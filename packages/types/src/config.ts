@@ -486,6 +486,17 @@ export interface ProviderConfig {
    * An optional collection of additional types.
    */
   additionalTypes?: TypesBundle;
+
+  /**
+   * Cache runtime metadata for faster PolkadotJS API connections.
+   * When enabled, metadata is cached after first connection and reused,
+   * significantly reducing connection time for subsequent runs.
+   *
+   * Only applies to "polkadotJs" provider type.
+   *
+   * @default true
+   */
+  cacheMetadata?: boolean;
 }
 
 /**
