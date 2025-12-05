@@ -58,7 +58,11 @@ const findPrecompiledWasm = (dir: string): string | null => {
   }
 };
 
-const checkCache = async (cacheDir: string, hashPath: string, expectedHash: string): Promise<string | null> => {
+const checkCache = async (
+  cacheDir: string,
+  hashPath: string,
+  expectedHash: string
+): Promise<string | null> => {
   try {
     const savedHash = await fs.promises.readFile(hashPath, "utf-8");
     if (savedHash.trim() !== expectedHash) return null;
@@ -79,7 +83,10 @@ const acquireLock = async (lockPath: string, timeout = 120000): Promise<() => vo
 
   while (Date.now() - startTime < timeout) {
     try {
-      const fd = fs.openSync(lockPath, fs.constants.O_CREAT | fs.constants.O_EXCL | fs.constants.O_WRONLY);
+      const fd = fs.openSync(
+        lockPath,
+        fs.constants.O_CREAT | fs.constants.O_EXCL | fs.constants.O_WRONLY
+      );
       fs.writeSync(fd, `${process.pid}`);
       fs.closeSync(fd);
       logger.debug(`Acquired lock: ${lockPath}`);
@@ -101,7 +108,11 @@ const acquireLock = async (lockPath: string, timeout = 120000): Promise<() => vo
   throw new Error(`Lock timeout: ${lockPath}`);
 };
 
-const runPrecompile = (binPath: string, chainArg: string | undefined, outputDir: string): Promise<string> =>
+const runPrecompile = (
+  binPath: string,
+  chainArg: string | undefined,
+  outputDir: string
+): Promise<string> =>
   new Promise((resolve, reject) => {
     const args = ["precompile-wasm"];
     if (chainArg) args.push(chainArg);
@@ -130,7 +141,9 @@ const runPrecompile = (binPath: string, chainArg: string | undefined, outputDir:
     child.on("error", reject);
   });
 
-const getPrecompiledPath = (config: WasmPrecompileConfig): Effect.Effect<WasmPrecompileResult, WasmPrecompileError> =>
+const getPrecompiledPath = (
+  config: WasmPrecompileConfig
+): Effect.Effect<WasmPrecompileResult, WasmPrecompileError> =>
   Effect.gen(function* () {
     // Hash the binary
     const binaryHash = yield* Effect.tryPromise({
@@ -156,7 +169,7 @@ const getPrecompiledPath = (config: WasmPrecompileConfig): Effect.Effect<WasmPre
     });
 
     if (cached) {
-      logger.info(`Using cached precompiled WASM: ${cached}`);
+      logger.debug(`Using cached precompiled WASM: ${cached}`);
       return { precompiledPath: cached, fromCache: true };
     }
 
@@ -172,11 +185,11 @@ const getPrecompiledPath = (config: WasmPrecompileConfig): Effect.Effect<WasmPre
       });
 
       if (nowCached) {
-        logger.info(`Using cached precompiled WASM: ${nowCached}`);
+        logger.debug(`Using cached precompiled WASM: ${nowCached}`);
         return { precompiledPath: nowCached, fromCache: true };
       }
 
-      logger.info("Precompiling WASM (this may take a moment)...");
+      logger.debug("Precompiling WASM (this may take a moment)...");
       const wasmPath = yield* Effect.tryPromise({
         try: () => runPrecompile(config.binPath, config.chainArg, cacheSubDir),
         catch: (e) => new WasmPrecompileError(e, "precompile"),
@@ -187,7 +200,7 @@ const getPrecompiledPath = (config: WasmPrecompileConfig): Effect.Effect<WasmPre
         catch: (e) => new WasmPrecompileError(e, "cache"),
       });
 
-      logger.info(`Precompiled WASM created: ${wasmPath}`);
+      logger.debug(`Precompiled WASM created: ${wasmPath}`);
       return { precompiledPath: wasmPath, fromCache: false };
     } finally {
       releaseLock();

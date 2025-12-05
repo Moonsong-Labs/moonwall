@@ -6,7 +6,7 @@ import type {
   LaunchOverrides,
   ForkConfig,
 } from "@moonwall/types";
-import chalk from "chalk";
+import { createLogger } from "@moonwall/util";
 import path from "node:path";
 import net from "node:net";
 import { Effect } from "effect";
@@ -18,14 +18,14 @@ import {
   WasmPrecompileServiceLive,
 } from "./effect/WasmPrecompileService.js";
 
+const logger = createLogger({ name: "commandParsers" });
+
 export function parseZombieCmd(launchSpec: ZombieLaunchSpec) {
   if (launchSpec) {
     return { cmd: launchSpec.configPath };
   }
   throw new Error(
-    `No ZombieSpec found in config. \n Are you sure your ${chalk.bgWhiteBright.blackBright(
-      "moonwall.config.json"
-    )} file has the correct "configPath" in zombieSpec?`
+    "No ZombieSpec found in config. Are you sure your moonwall.config.json file has the correct 'configPath' in zombieSpec?"
   );
 }
 
@@ -127,8 +127,8 @@ export class LaunchCommandParser {
   }
 
   private print() {
-    console.log(chalk.cyan(`Command to run is: ${chalk.bold(this.cmd)}`));
-    console.log(chalk.cyan(`Arguments are: ${chalk.bold(this.args.join(" "))}`));
+    logger.debug(`Command to run: ${this.cmd}`);
+    logger.debug(`Arguments: ${this.args.join(" ")}`);
     return this;
   }
 
@@ -159,7 +159,7 @@ export class LaunchCommandParser {
 
     // Skip for Docker images
     if (this.launchSpec.useDocker) {
-      console.log(chalk.yellow("WASM precompilation is not supported for Docker images, skipping"));
+      logger.warn("WASM precompilation is not supported for Docker images, skipping");
       return this;
     }
 
@@ -185,16 +185,14 @@ export class LaunchCommandParser {
       // Get the directory containing the precompiled wasm
       const precompiledDir = path.dirname(result.precompiledPath);
       this.overrideArg(`--wasmtime-precompiled=${precompiledDir}`);
-      console.log(
-        chalk.green(
-          result.fromCache
-            ? `Using cached precompiled WASM: ${result.precompiledPath}`
-            : `Precompiled WASM created: ${result.precompiledPath}`
-        )
+      logger.debug(
+        result.fromCache
+          ? `Using cached precompiled WASM: ${result.precompiledPath}`
+          : `Precompiled WASM created: ${result.precompiledPath}`
       );
     } catch (error) {
       // Log warning but continue without precompilation
-      console.log(chalk.yellow(`WASM precompilation failed, continuing without: ${error}`));
+      logger.warn(`WASM precompilation failed, continuing without: ${error}`);
     }
 
     return this;
@@ -340,11 +338,9 @@ export const getFreePort = async (): Promise<number> => {
   // Ensure we stay within a reasonable port range
   const startPort = Math.min(calculatedPort, 60000 + shardIndex * 100 + poolId);
 
-  if (process.env.DEBUG_MOONWALL_PORTS) {
-    console.log(
-      `[DEBUG] Port calculation: shard=${shardIndex + 1}/${totalShards}, pool=${poolId}, final=${startPort}`
-    );
-  }
+  logger.debug(
+    `Port calculation: shard=${shardIndex + 1}/${totalShards}, pool=${poolId}, final=${startPort}`
+  );
 
   return getNextAvailablePort(startPort);
 };
