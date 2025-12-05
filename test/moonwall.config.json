@@ -490,7 +490,7 @@
             "running": true,
             "newRpcBehaviour": true,
             "binPath": "./tmp/moonbeam",
-            "precompileWasm": true
+            "cacheStartupArtifacts": true
           }
         ]
       }

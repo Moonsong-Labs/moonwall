@@ -15,6 +15,7 @@ const repo: RepoSpec = {
         "--no-grandpa",
         "--sealing=manual",
         "--force-authoring",
+        "--database=paritydb",
         "--no-prometheus",
         "--alice",
         "--chain=moonbase-dev",
