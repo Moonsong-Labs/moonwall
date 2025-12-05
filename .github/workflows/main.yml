@@ -145,6 +145,7 @@ jobs:
     env:
       NODE_OPTIONS: "--no-deprecation"
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      MOONBEAM_HTTP_ENDPOINT: ${{ secrets.MOONBEAM_HTTP_ENDPOINT }}
     strategy:
       fail-fast: false
       matrix:

@@ -1007,7 +1007,7 @@
               "--tmp"
             ],
             "defaultForkConfig": {
-              "url": "${MOONBEAM_ENDPOINT}",
+              "url": "${MOONBEAM_HTTP_ENDPOINT}",
               "stateOverridePath": "./configs/mbStateOverride.json",
               "verbose": true
             }
