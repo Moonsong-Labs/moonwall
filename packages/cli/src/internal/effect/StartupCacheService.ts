@@ -1,21 +1,12 @@
-import { Context, Effect, Layer } from "effect";
+import { Context, Effect, Layer, Option } from "effect";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import * as crypto from "node:crypto";
 import { spawn } from "node:child_process";
 import { createLogger } from "@moonwall/util";
+import { StartupCacheError } from "./errors.js";
 
 const logger = createLogger({ name: "StartupCacheService" });
-
-export class StartupCacheError extends Error {
-  readonly _tag = "StartupCacheError";
-  constructor(
-    readonly cause: unknown,
-    readonly operation: "hash" | "precompile" | "cache"
-  ) {
-    super(`Startup cache operation failed during ${operation}: ${cause}`);
-  }
-}
 
 export interface StartupCacheConfig {
   readonly binPath: string;
@@ -43,83 +34,134 @@ export class StartupCacheService extends Context.Tag("StartupCacheService")<
   }
 >() {}
 
-const hashFile = (filePath: string): Promise<string> =>
-  new Promise((resolve, reject) => {
+// =============================================================================
+// Effect-based helper functions with tracing
+// =============================================================================
+
+/**
+ * Hash a file using SHA256 streaming
+ */
+const hashFile = Effect.fn("StartupCache.hashFile")(function* (filePath: string) {
+  return yield* Effect.async<string, StartupCacheError>((resume) => {
     const hash = crypto.createHash("sha256");
     const stream = fs.createReadStream(filePath);
     stream.on("data", (data) => hash.update(data));
-    stream.on("end", () => resolve(hash.digest("hex")));
-    stream.on("error", reject);
-  });
-
-const findPrecompiledWasm = (dir: string): string | null => {
-  try {
-    const files = fs.readdirSync(dir);
-    const wasmFile = files.find(
-      (f) => f.startsWith("precompiled_wasm_") || f.endsWith(".cwasm") || f.endsWith(".wasm")
+    stream.on("end", () => resume(Effect.succeed(hash.digest("hex"))));
+    stream.on("error", (err) =>
+      resume(Effect.fail(new StartupCacheError({ cause: err, operation: "hash" })))
     );
-    return wasmFile ? path.join(dir, wasmFile) : null;
-  } catch {
-    return null;
-  }
-};
+  });
+});
 
-const checkCache = async (
+/**
+ * Find precompiled WASM file in a directory
+ */
+const findPrecompiledWasm = (dir: string): Effect.Effect<Option.Option<string>, never> =>
+  Effect.sync(() => {
+    try {
+      const files = fs.readdirSync(dir);
+      const wasmFile = files.find(
+        (f) => f.startsWith("precompiled_wasm_") || f.endsWith(".cwasm") || f.endsWith(".wasm")
+      );
+      return wasmFile ? Option.some(path.join(dir, wasmFile)) : Option.none<string>();
+    } catch {
+      return Option.none<string>();
+    }
+  }).pipe(Effect.withSpan("StartupCache.findPrecompiledWasm"));
+
+/**
+ * Check if cached artifacts exist and are valid
+ */
+const checkCache = (
   cacheDir: string,
   hashPath: string,
   expectedHash: string
-): Promise<string | null> => {
-  try {
-    const savedHash = await fs.promises.readFile(hashPath, "utf-8");
-    if (savedHash.trim() !== expectedHash) return null;
+): Effect.Effect<Option.Option<string>, never> =>
+  Effect.gen(function* () {
+    // Try to read saved hash (returns null on any error)
+    const savedHash = yield* Effect.tryPromise(() => fs.promises.readFile(hashPath, "utf-8")).pipe(
+      Effect.orElseSucceed(() => null)
+    );
 
-    const wasmPath = findPrecompiledWasm(cacheDir);
-    if (wasmPath) {
-      await fs.promises.access(wasmPath, fs.constants.R_OK);
-      return wasmPath;
+    if (!savedHash || savedHash.trim() !== expectedHash) {
+      return Option.none<string>();
     }
-  } catch {
-    // Cache miss
-  }
-  return null;
-};
 
-const acquireLock = async (lockPath: string, timeout = 120000): Promise<() => void> => {
+    // Check if WASM file exists
+    const wasmPath = yield* findPrecompiledWasm(cacheDir);
+    if (Option.isNone(wasmPath)) {
+      return Option.none<string>();
+    }
+
+    // Verify file is readable (returns false on any error)
+    const isReadable = yield* Effect.tryPromise(() =>
+      fs.promises.access(wasmPath.value, fs.constants.R_OK).then(() => true)
+    ).pipe(Effect.orElseSucceed(() => false));
+
+    return isReadable ? wasmPath : Option.none<string>();
+  }).pipe(Effect.withSpan("StartupCache.checkCache"));
+
+/**
+ * Acquire a file-based lock using O_EXCL for cross-process coordination
+ */
+const acquireLock = Effect.fn("StartupCache.acquireLock")(function* (
+  lockPath: string,
+  timeout = 120000
+) {
   const startTime = Date.now();
 
-  while (Date.now() - startTime < timeout) {
-    try {
-      const fd = fs.openSync(
-        lockPath,
-        fs.constants.O_CREAT | fs.constants.O_EXCL | fs.constants.O_WRONLY
-      );
-      fs.writeSync(fd, `${process.pid}`);
-      fs.closeSync(fd);
-      logger.debug(`Acquired lock: ${lockPath}`);
-      return () => {
-        try {
-          fs.unlinkSync(lockPath);
-        } catch {
-          /* ignore */
-        }
-      };
-    } catch (err: unknown) {
-      if ((err as NodeJS.ErrnoException).code === "EEXIST") {
-        await new Promise((r) => setTimeout(r, 500));
-        continue;
+  return yield* Effect.async<() => void, StartupCacheError>((resume) => {
+    const tryAcquire = () => {
+      if (Date.now() - startTime >= timeout) {
+        resume(Effect.fail(new StartupCacheError({ cause: "Lock timeout", operation: "lock" })));
+        return;
       }
-      throw err;
-    }
-  }
-  throw new Error(`Lock timeout: ${lockPath}`);
-};
 
-const runPrecompile = (
+      try {
+        const fd = fs.openSync(
+          lockPath,
+          fs.constants.O_CREAT | fs.constants.O_EXCL | fs.constants.O_WRONLY
+        );
+        fs.writeSync(fd, `${process.pid}`);
+        fs.closeSync(fd);
+        logger.debug(`Acquired lock: ${lockPath}`);
+
+        const release = () => {
+          try {
+            fs.unlinkSync(lockPath);
+          } catch {
+            /* ignore */
+          }
+        };
+        resume(Effect.succeed(release));
+      } catch (err: unknown) {
+        if ((err as NodeJS.ErrnoException).code === "EEXIST") {
+          setTimeout(tryAcquire, 500);
+        } else {
+          resume(Effect.fail(new StartupCacheError({ cause: err, operation: "lock" })));
+        }
+      }
+    };
+
+    tryAcquire();
+  });
+});
+
+/**
+ * Create a scoped lock resource using acquireRelease pattern
+ */
+const withLock = (lockPath: string) =>
+  Effect.acquireRelease(acquireLock(lockPath), (release) => Effect.sync(() => release()));
+
+/**
+ * Run the precompile-wasm command
+ */
+const runPrecompile = Effect.fn("StartupCache.runPrecompile")(function* (
   binPath: string,
   chainArg: string | undefined,
   outputDir: string
-): Promise<string> =>
-  new Promise((resolve, reject) => {
+) {
+  return yield* Effect.async<string, StartupCacheError>((resume) => {
     const args = ["precompile-wasm"];
     if (chainArg) args.push(chainArg);
     args.push(outputDir);
@@ -135,29 +177,42 @@ const runPrecompile = (
     });
 
     child.on("close", (code) => {
-      const wasmPath = findPrecompiledWasm(outputDir);
-      if (wasmPath) {
+      const files = fs.readdirSync(outputDir);
+      const wasmFile = files.find(
+        (f) => f.startsWith("precompiled_wasm_") || f.endsWith(".cwasm") || f.endsWith(".wasm")
+      );
+
+      if (wasmFile) {
+        const wasmPath = path.join(outputDir, wasmFile);
         logger.debug(`Precompiled in ${Date.now() - startTime}ms: ${wasmPath}`);
-        resolve(wasmPath);
+        resume(Effect.succeed(wasmPath));
       } else {
-        reject(new Error(`precompile-wasm failed (code ${code}): ${stderr}`));
+        resume(
+          Effect.fail(
+            new StartupCacheError({
+              cause: `precompile-wasm failed (code ${code}): ${stderr}`,
+              operation: "precompile",
+            })
+          )
+        );
       }
     });
 
-    child.on("error", reject);
+    child.on("error", (err) =>
+      resume(Effect.fail(new StartupCacheError({ cause: err, operation: "precompile" })))
+    );
   });
+});
 
 /**
- * Generate a raw chain spec for faster startup.
- * Raw chain specs skip the genesis WASM compilation, providing ~10x faster startup.
+ * Generate a raw chain spec for faster startup
  */
-const generateRawChainSpec = (
+const generateRawChainSpec = Effect.fn("StartupCache.generateRawChainSpec")(function* (
   binPath: string,
   chainName: string,
   outputPath: string
-): Promise<string> =>
-  new Promise((resolve, reject) => {
-    // Use --dev flag if chain name is "dev" or "default" (which means --dev was used)
+) {
+  return yield* Effect.async<string, StartupCacheError>((resume) => {
     const args =
       chainName === "dev" || chainName === "default"
         ? ["build-spec", "--dev", "--raw"]
@@ -183,140 +238,161 @@ const generateRawChainSpec = (
           .writeFile(outputPath, stdout, "utf-8")
           .then(() => {
             logger.debug(`Raw chain spec generated in ${Date.now() - startTime}ms: ${outputPath}`);
-            resolve(outputPath);
+            resume(Effect.succeed(outputPath));
           })
-          .catch(reject);
+          .catch((err) =>
+            resume(Effect.fail(new StartupCacheError({ cause: err, operation: "chainspec" })))
+          );
       } else {
-        reject(new Error(`build-spec failed (code ${code}): ${stderr}`));
+        resume(
+          Effect.fail(
+            new StartupCacheError({
+              cause: `build-spec failed (code ${code}): ${stderr}`,
+              operation: "chainspec",
+            })
+          )
+        );
       }
     });
 
-    child.on("error", reject);
+    child.on("error", (err) =>
+      resume(Effect.fail(new StartupCacheError({ cause: err, operation: "chainspec" })))
+    );
   });
+});
 
-const getCachedArtifacts = (
-  config: StartupCacheConfig
-): Effect.Effect<StartupCacheResult, StartupCacheError> =>
+/**
+ * Try to get or generate a raw chain spec (non-fatal on failure)
+ */
+const maybeGetRawChainSpec = (
+  binPath: string,
+  chainName: string,
+  cacheSubDir: string,
+  shouldGenerate: boolean
+): Effect.Effect<Option.Option<string>, never> =>
   Effect.gen(function* () {
-    // Hash the binary
-    const binaryHash = yield* Effect.tryPromise({
-      try: () => hashFile(config.binPath),
-      catch: (e) => new StartupCacheError(e, "hash"),
-    });
-
-    const shortHash = binaryHash.substring(0, 12);
-    // Use "dev" for dev mode, otherwise extract from --chain arg
-    const chainName = config.isDevMode
-      ? "dev"
-      : config.chainArg?.match(/--chain[=\s]?(\S+)/)?.[1] || "default";
-    const binName = path.basename(config.binPath);
-    const cacheSubDir = path.join(config.cacheDir, `${binName}-${chainName}-${shortHash}`);
-    const hashPath = path.join(cacheSubDir, "binary.hash");
-    const lockPath = path.join(config.cacheDir, `${binName}-${chainName}.lock`);
-
-    yield* Effect.tryPromise({
-      try: () => fs.promises.mkdir(cacheSubDir, { recursive: true }),
-      catch: (e) => new StartupCacheError(e, "cache"),
-    });
-
-    const cached = yield* Effect.tryPromise({
-      try: () => checkCache(cacheSubDir, hashPath, binaryHash),
-      catch: (e) => new StartupCacheError(e, "cache"),
-    });
-
-    if (cached) {
-      logger.debug(`Using cached precompiled WASM: ${cached}`);
-      // Check if raw chain spec also exists
-      const rawSpecPath = path.join(cacheSubDir, `${chainName}-raw.json`);
-      let rawChainSpecPath: string | undefined;
-      if (config.generateRawChainSpec) {
-        try {
-          fs.accessSync(rawSpecPath, fs.constants.R_OK);
-          rawChainSpecPath = rawSpecPath;
-          logger.debug(`Using cached raw chain spec: ${rawSpecPath}`);
-        } catch {
-          // Raw spec doesn't exist, generate it
-          try {
-            rawChainSpecPath = yield* Effect.tryPromise({
-              try: () => generateRawChainSpec(config.binPath, chainName, rawSpecPath),
-              catch: (e) => new StartupCacheError(e, "cache"),
-            });
-          } catch (e) {
-            logger.warn(`Failed to generate raw chain spec (non-fatal): ${e}`);
-          }
-        }
-      }
-      return { precompiledPath: cached, fromCache: true, rawChainSpecPath };
+    if (!shouldGenerate) {
+      return Option.none<string>();
     }
 
-    const releaseLock = yield* Effect.tryPromise({
-      try: () => acquireLock(lockPath),
-      catch: (e) => new StartupCacheError(e, "cache"),
-    });
+    const rawSpecPath = path.join(cacheSubDir, `${chainName}-raw.json`);
 
-    try {
-      const nowCached = yield* Effect.tryPromise({
-        try: () => checkCache(cacheSubDir, hashPath, binaryHash),
-        catch: (e) => new StartupCacheError(e, "cache"),
-      });
+    // Check if it already exists (returns false on any error)
+    const exists = yield* Effect.tryPromise(() =>
+      fs.promises.access(rawSpecPath, fs.constants.R_OK).then(() => true)
+    ).pipe(Effect.orElseSucceed(() => false));
 
-      if (nowCached) {
-        logger.debug(`Using cached precompiled WASM: ${nowCached}`);
-        // Check if raw chain spec also exists (another process may have created it)
-        const rawSpecPath = path.join(cacheSubDir, `${chainName}-raw.json`);
-        let rawChainSpecPath: string | undefined;
-        if (config.generateRawChainSpec) {
-          try {
-            fs.accessSync(rawSpecPath, fs.constants.R_OK);
-            rawChainSpecPath = rawSpecPath;
-            logger.debug(`Using cached raw chain spec: ${rawSpecPath}`);
-          } catch {
-            // Raw spec doesn't exist, generate it
-            try {
-              rawChainSpecPath = yield* Effect.tryPromise({
-                try: () => generateRawChainSpec(config.binPath, chainName, rawSpecPath),
-                catch: (e) => new StartupCacheError(e, "cache"),
-              });
-            } catch (e) {
-              logger.warn(`Failed to generate raw chain spec (non-fatal): ${e}`);
-            }
-          }
-        }
-        return { precompiledPath: nowCached, fromCache: true, rawChainSpecPath };
-      }
-
-      logger.debug("Precompiling WASM (this may take a moment)...");
-      const wasmPath = yield* Effect.tryPromise({
-        try: () => runPrecompile(config.binPath, config.chainArg, cacheSubDir),
-        catch: (e) => new StartupCacheError(e, "precompile"),
-      });
-
-      yield* Effect.tryPromise({
-        try: () => fs.promises.writeFile(hashPath, binaryHash, "utf-8"),
-        catch: (e) => new StartupCacheError(e, "cache"),
-      });
-
-      logger.debug(`Precompiled WASM created: ${wasmPath}`);
-
-      // Generate raw chain spec for faster startup if requested
-      let rawChainSpecPath: string | undefined;
-      if (config.generateRawChainSpec) {
-        const rawSpecPath = path.join(cacheSubDir, `${chainName}-raw.json`);
-        try {
-          rawChainSpecPath = yield* Effect.tryPromise({
-            try: () => generateRawChainSpec(config.binPath, chainName, rawSpecPath),
-            catch: (e) => new StartupCacheError(e, "cache"),
-          });
-        } catch (e) {
-          logger.warn(`Failed to generate raw chain spec (non-fatal): ${e}`);
-        }
-      }
-
-      return { precompiledPath: wasmPath, fromCache: false, rawChainSpecPath };
-    } finally {
-      releaseLock();
+    if (exists) {
+      logger.debug(`Using cached raw chain spec: ${rawSpecPath}`);
+      return Option.some(rawSpecPath);
     }
+
+    // Try to generate (non-fatal)
+    return yield* generateRawChainSpec(binPath, chainName, rawSpecPath).pipe(
+      Effect.map(Option.some<string>),
+      Effect.catchAll((e) => {
+        logger.warn(`Failed to generate raw chain spec (non-fatal): ${e.cause}`);
+        return Effect.succeed(Option.none<string>());
+      })
+    );
+  }).pipe(Effect.withSpan("StartupCache.maybeGetRawChainSpec"));
+
+// =============================================================================
+// Main service implementation
+// =============================================================================
+
+const getCachedArtifacts = Effect.fn("StartupCacheService.getCachedArtifacts")(function* (
+  config: StartupCacheConfig
+) {
+  // Hash the binary
+  const binaryHash = yield* hashFile(config.binPath);
+
+  const shortHash = binaryHash.substring(0, 12);
+  const chainName = config.isDevMode
+    ? "dev"
+    : config.chainArg?.match(/--chain[=\s]?(\S+)/)?.[1] || "default";
+  const binName = path.basename(config.binPath);
+  const cacheSubDir = path.join(config.cacheDir, `${binName}-${chainName}-${shortHash}`);
+  const hashPath = path.join(cacheSubDir, "binary.hash");
+  const lockPath = path.join(config.cacheDir, `${binName}-${chainName}.lock`);
+
+  // Ensure cache directory exists
+  yield* Effect.tryPromise({
+    try: () => fs.promises.mkdir(cacheSubDir, { recursive: true }),
+    catch: (e) => new StartupCacheError({ cause: e, operation: "cache" }),
   });
+
+  // Check if already cached (before acquiring lock)
+  const cached = yield* checkCache(cacheSubDir, hashPath, binaryHash);
+
+  if (Option.isSome(cached)) {
+    logger.debug(`Using cached precompiled WASM: ${cached.value}`);
+    const rawChainSpecPath = yield* maybeGetRawChainSpec(
+      config.binPath,
+      chainName,
+      cacheSubDir,
+      config.generateRawChainSpec ?? false
+    );
+    return {
+      precompiledPath: cached.value,
+      fromCache: true,
+      rawChainSpecPath: Option.getOrUndefined(rawChainSpecPath),
+    };
+  }
+
+  // Need to precompile - use scoped lock for guaranteed cleanup
+  return yield* Effect.scoped(
+    Effect.flatMap(withLock(lockPath), () =>
+      Effect.gen(function* () {
+        // Double-check after acquiring lock (another process may have created it)
+        const nowCached = yield* checkCache(cacheSubDir, hashPath, binaryHash);
+
+        if (Option.isSome(nowCached)) {
+          logger.debug(
+            `Using cached precompiled WASM (created by another process): ${nowCached.value}`
+          );
+          const rawChainSpecPath = yield* maybeGetRawChainSpec(
+            config.binPath,
+            chainName,
+            cacheSubDir,
+            config.generateRawChainSpec ?? false
+          );
+          return {
+            precompiledPath: nowCached.value,
+            fromCache: true,
+            rawChainSpecPath: Option.getOrUndefined(rawChainSpecPath),
+          };
+        }
+
+        // Actually precompile
+        logger.debug("Precompiling WASM (this may take a moment)...");
+        const wasmPath = yield* runPrecompile(config.binPath, config.chainArg, cacheSubDir);
+
+        // Save hash for future cache hits
+        yield* Effect.tryPromise({
+          try: () => fs.promises.writeFile(hashPath, binaryHash, "utf-8"),
+          catch: (e) => new StartupCacheError({ cause: e, operation: "cache" }),
+        });
+
+        logger.debug(`Precompiled WASM created: ${wasmPath}`);
+
+        // Generate raw chain spec if requested
+        const rawChainSpecPath = yield* maybeGetRawChainSpec(
+          config.binPath,
+          chainName,
+          cacheSubDir,
+          config.generateRawChainSpec ?? false
+        );
+
+        return {
+          precompiledPath: wasmPath,
+          fromCache: false,
+          rawChainSpecPath: Option.getOrUndefined(rawChainSpecPath),
+        };
+      })
+    )
+  );
+});
 
 export const StartupCacheServiceLive = Layer.succeed(StartupCacheService, {
   getCachedArtifacts,
