@@ -197,7 +197,7 @@ const discoverRpcPortWithRace = (config: {
   isEthereumChain: boolean;
   maxAttempts?: number;
 }): Effect.Effect<number, PortDiscoveryError> => {
-  const maxAttempts = config.maxAttempts || 600; // Match PortDiscoveryService: 600 attempts × 200ms = 120s
+  const maxAttempts = config.maxAttempts || 2400;
 
   return getAllPorts(config.pid).pipe(
     Effect.flatMap((allPorts) => {
@@ -236,7 +236,7 @@ const discoverRpcPortWithRace = (config: {
     }),
     // Retry the entire discovery process
     Effect.retry(
-      Schedule.fixed("200 millis").pipe(Schedule.compose(Schedule.recurs(maxAttempts - 1)))
+      Schedule.fixed("50 millis").pipe(Schedule.compose(Schedule.recurs(maxAttempts - 1)))
     ),
     Effect.catchAll((error) =>
       Effect.fail(

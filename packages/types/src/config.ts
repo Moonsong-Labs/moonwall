@@ -106,6 +106,13 @@ export type Environment = {
   multiThreads?: boolean | number | object;
 
   /**
+   * Enable Vitest's dependency optimizer to pre-bundle imports (viem, ethers).
+   * This can reduce test collection time by ~10% by caching bundled dependencies.
+   * @default false
+   */
+  cacheImports?: boolean;
+
+  /**
    * Path to directory containing smart contracts for testing against.
    */
   contracts?: string;
@@ -351,6 +358,27 @@ export interface DevLaunchSpec extends GenericLaunchSpec {
   binPath: string;
 
   /**
+   * Cache startup artifacts for faster node launch (~10x improvement).
+   * When enabled, Moonwall will:
+   * 1. Precompile the runtime WASM to native code using `precompile-wasm`
+   * 2. Generate a raw chain spec to skip genesis WASM compilation
+   *
+   * Both artifacts are cached by binary hash and reused on subsequent runs.
+   *
+   * - true: Enable caching (recommended for faster startup)
+   * - false: Disable caching (default)
+   *
+   * @default false
+   */
+  cacheStartupArtifacts?: boolean;
+
+  /**
+   * Directory to cache startup artifacts (precompiled WASM and raw chain spec).
+   * Defaults to "./tmp/startup-cache" relative to the config file.
+   */
+  startupCacheDir?: string;
+
+  /**
    * If true, binPath will be treated as a Docker image instead of a local binary
    */
   useDocker?: boolean;
@@ -458,6 +486,17 @@ export interface ProviderConfig {
    * An optional collection of additional types.
    */
   additionalTypes?: TypesBundle;
+
+  /**
+   * Cache runtime metadata for faster PolkadotJS API connections.
+   * When enabled, metadata is cached after first connection and reused,
+   * significantly reducing connection time for subsequent runs.
+   *
+   * Only applies to "polkadotJs" provider type.
+   *
+   * @default true
+   */
+  cacheMetadata?: boolean;
 }
 
 /**
