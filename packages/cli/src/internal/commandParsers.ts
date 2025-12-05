@@ -13,10 +13,7 @@ import { Effect } from "effect";
 import { standardRepos } from "../lib/repoDefinitions";
 import { shardManager } from "../lib/shardManager";
 import invariant from "tiny-invariant";
-import {
-  StartupCacheService,
-  StartupCacheServiceLive,
-} from "./effect/StartupCacheService.js";
+import { StartupCacheService, StartupCacheServiceLive } from "./effect/StartupCacheService.js";
 
 const logger = createLogger({ name: "commandParsers" });
 
@@ -224,6 +221,9 @@ export class LaunchCommandParser {
         }
         logger.debug(`Using raw chain spec for ~10x faster startup: ${result.rawChainSpecPath}`);
       }
+
+      // Set cache directory env var for metadata caching in provider factories
+      process.env.MOONWALL_CACHE_DIR = precompiledDir;
 
       logger.debug(
         result.fromCache

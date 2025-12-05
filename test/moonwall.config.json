@@ -482,6 +482,7 @@
       "testFileDir": ["suites/test_separation"],
       "reporters": ["basic", "html"],
       "multiThreads": true,
+      "cacheImports": true,
       "foundation": {
         "type": "dev",
         "launchSpec": [

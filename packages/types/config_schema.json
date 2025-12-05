@@ -619,6 +619,11 @@
       "items": {
         "description": "The environment configuration for testing.",
         "properties": {
+          "cacheImports": {
+            "default": false,
+            "description": "Enable Vitest's dependency optimizer to pre-bundle imports (viem, ethers).\nThis can reduce test collection time by ~10% by caching bundled dependencies.",
+            "type": "boolean"
+          },
           "connections": {
             "description": "An optional array of ProviderConfig objects.",
             "items": {

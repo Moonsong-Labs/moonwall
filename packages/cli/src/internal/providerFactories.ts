@@ -21,20 +21,78 @@ import { privateKeyToAccount } from "viem/accounts";
 import { Web3 } from "web3";
 import { WebSocketProvider } from "web3-providers-ws";
 import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat";
+import * as fs from "node:fs";
+import * as path from "node:path";
 const logger = createLogger({ name: "providers" });
 const debug = logger.debug.bind(logger);
+
+/**
+ * Load cached metadata if available, returns { genesisHash: metadataHex } or undefined
+ */
+const loadCachedMetadata = (): Record<string, `0x${string}`> | undefined => {
+  const cacheDir = process.env.MOONWALL_CACHE_DIR;
+  if (!cacheDir) return undefined;
+
+  const metadataPath = path.join(cacheDir, "metadata-cache.json");
+  try {
+    const data = fs.readFileSync(metadataPath, "utf-8");
+    const cached = JSON.parse(data) as Record<string, `0x${string}`>;
+    debug(`Loaded cached metadata for genesis: ${Object.keys(cached).join(", ")}`);
+    return cached;
+  } catch {
+    return undefined;
+  }
+};
+
+/**
+ * Save metadata to cache for future connections
+ */
+const saveCachedMetadata = (genesisHash: string, metadataHex: string): void => {
+  const cacheDir = process.env.MOONWALL_CACHE_DIR;
+  if (!cacheDir) return;
+
+  const metadataPath = path.join(cacheDir, "metadata-cache.json");
+  const lockPath = `${metadataPath}.lock`;
+
+  try {
+    // Simple lock to prevent concurrent writes
+    try {
+      fs.openSync(lockPath, fs.constants.O_CREAT | fs.constants.O_EXCL);
+    } catch {
+      // Another process is writing, skip
+      return;
+    }
+
+    const data = JSON.stringify({ [genesisHash]: metadataHex });
+    fs.writeFileSync(metadataPath, data, "utf-8");
+    debug(`Saved metadata cache for genesis: ${genesisHash}`);
+  } catch (e) {
+    debug(`Failed to save metadata cache: ${e}`);
+  } finally {
+    try {
+      fs.unlinkSync(lockPath);
+    } catch {
+      /* ignore */
+    }
+  }
+};
 
 export class ProviderFactory {
   private url: string;
   private privateKey: string;
 
   constructor(private providerConfig: ProviderConfig) {
-    this.url = providerConfig.endpoints.includes("ENV_VAR")
-      ? process.env.WSS_URL || "error_missing_WSS_URL_env_var"
-      : providerConfig.endpoints[0];
-    debug(
-      `Constructor - providerConfig.endpoints[0]: ${providerConfig.endpoints[0]}, this.url: ${this.url}`
-    );
+    const endpoint = providerConfig.endpoints[0];
+    // Support "AUTO" endpoint that uses dynamic MOONWALL_RPC_PORT
+    if (endpoint === "AUTO" || endpoint.includes("ENV_VAR")) {
+      this.url =
+        endpoint === "AUTO"
+          ? vitestAutoUrl()
+          : process.env.WSS_URL || "error_missing_WSS_URL_env_var";
+    } else {
+      this.url = endpoint;
+    }
+    debug(`Constructor - providerConfig.endpoints[0]: ${endpoint}, this.url: ${this.url}`);
     this.privateKey = process.env.MOON_PRIV_KEY || ALITH_PRIVATE_KEY;
   }
 
@@ -63,6 +121,9 @@ export class ProviderFactory {
       name: this.providerConfig.name,
       type: this.providerConfig.type,
       connect: async () => {
+        const cachedMetadata = loadCachedMetadata();
+        const startTime = Date.now();
+
         const options: ApiOptions = {
           provider: new WsProvider(this.url),
           initWasm: false,
@@ -72,10 +133,22 @@ export class ProviderFactory {
           typesBundle: this.providerConfig.additionalTypes
             ? this.providerConfig.additionalTypes
             : undefined,
+          metadata: cachedMetadata,
         };
 
         const api = await ApiPromise.create(options);
         await api.isReady;
+
+        // Cache metadata for future connections if not already cached
+        if (!cachedMetadata) {
+          const genesisHash = api.genesisHash.toHex();
+          const metadataHex = api.runtimeMetadata.toHex();
+          saveCachedMetadata(genesisHash, metadataHex);
+          debug(`PolkadotJs connected in ${Date.now() - startTime}ms (metadata fetched & cached)`);
+        } else {
+          debug(`PolkadotJs connected in ${Date.now() - startTime}ms (using cached metadata)`);
+        }
+
         return api;
       },
       ws: () => new WsProvider(this.url),

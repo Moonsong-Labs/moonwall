@@ -153,6 +153,7 @@ export async function executeTests(env: Environment, testRunArgs?: testRunArgs &
       .setTimeout(env.timeout || globalConfig.defaultTestTimeout)
       .setInclude(env.include || ["**/*{test,spec,test_,test-}*{ts,mts,cts}"])
       .addThreadConfig(env.multiThreads)
+      .setCacheImports(env.cacheImports)
       .addVitestPassthroughArgs(env.vitestArgs)
       .build();
 
@@ -308,6 +309,21 @@ class VitestOptionsBuilder {
       }
     }
 
+    return this;
+  }
+
+  setCacheImports(enabled?: boolean): this {
+    if (enabled) {
+      this.options.deps = {
+        optimizer: {
+          ssr: {
+            enabled: true,
+            include: ["viem", "ethers"],
+          },
+          web: { enabled: false },
+        },
+      };
+    }
     return this;
   }
 

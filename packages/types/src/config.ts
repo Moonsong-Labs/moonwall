@@ -106,6 +106,13 @@ export type Environment = {
   multiThreads?: boolean | number | object;
 
   /**
+   * Enable Vitest's dependency optimizer to pre-bundle imports (viem, ethers).
+   * This can reduce test collection time by ~10% by caching bundled dependencies.
+   * @default false
+   */
+  cacheImports?: boolean;
+
+  /**
    * Path to directory containing smart contracts for testing against.
    */
   contracts?: string;
