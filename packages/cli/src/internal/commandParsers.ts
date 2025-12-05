@@ -9,9 +9,14 @@ import type {
 import chalk from "chalk";
 import path from "node:path";
 import net from "node:net";
+import { Effect } from "effect";
 import { standardRepos } from "../lib/repoDefinitions";
 import { shardManager } from "../lib/shardManager";
 import invariant from "tiny-invariant";
+import {
+  WasmPrecompileService,
+  WasmPrecompileServiceLive,
+} from "./effect/WasmPrecompileService.js";
 
 export function parseZombieCmd(launchSpec: ZombieLaunchSpec) {
   if (launchSpec) {
@@ -143,6 +148,58 @@ export class LaunchCommandParser {
     }
   }
 
+  /**
+   * Run WASM precompilation if enabled in launchSpec.
+   * This uses an Effect-based service that caches precompiled artifacts by binary hash.
+   */
+  async withWasmPrecompile(): Promise<LaunchCommandParser> {
+    if (!this.launchSpec.precompileWasm) {
+      return this;
+    }
+
+    // Skip for Docker images
+    if (this.launchSpec.useDocker) {
+      console.log(chalk.yellow("WASM precompilation is not supported for Docker images, skipping"));
+      return this;
+    }
+
+    // Extract chain argument from existing args
+    const chainArg = this.args.find((arg) => arg.includes("--chain"));
+
+    const cacheDir = this.launchSpec.wasmCacheDir || path.join(process.cwd(), "tmp", "wasm-cache");
+
+    const program = WasmPrecompileService.pipe(
+      Effect.flatMap((service) =>
+        service.getPrecompiledPath({
+          binPath: this.launchSpec.binPath,
+          chainArg,
+          cacheDir,
+        })
+      ),
+      Effect.provide(WasmPrecompileServiceLive)
+    );
+
+    try {
+      const result = await Effect.runPromise(program);
+      // --wasmtime-precompiled expects a DIRECTORY, not a file path
+      // Get the directory containing the precompiled wasm
+      const precompiledDir = path.dirname(result.precompiledPath);
+      this.overrideArg(`--wasmtime-precompiled=${precompiledDir}`);
+      console.log(
+        chalk.green(
+          result.fromCache
+            ? `Using cached precompiled WASM: ${result.precompiledPath}`
+            : `Precompiled WASM created: ${result.precompiledPath}`
+        )
+      );
+    } catch (error) {
+      // Log warning but continue without precompilation
+      console.log(chalk.yellow(`WASM precompilation failed, continuing without: ${error}`));
+    }
+
+    return this;
+  }
+
   build(): { cmd: string; args: string[]; launch: boolean } {
     return {
       cmd: this.cmd,
@@ -160,7 +217,8 @@ export class LaunchCommandParser {
     const parser = new LaunchCommandParser(options);
     const parsed = await parser
       .withPorts()
-      .then((p) => p.withDefaultForkConfig().withLaunchOverrides());
+      .then((p) => p.withDefaultForkConfig().withLaunchOverrides())
+      .then((p) => p.withWasmPrecompile());
 
     if (options.verbose) {
       parsed.print();

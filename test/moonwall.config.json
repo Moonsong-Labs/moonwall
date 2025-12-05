@@ -489,7 +489,8 @@
             "name": "moonbeam",
             "running": true,
             "newRpcBehaviour": true,
-            "binPath": "./tmp/moonbeam"
+            "binPath": "./tmp/moonbeam",
+            "precompileWasm": true
           }
         ]
       }

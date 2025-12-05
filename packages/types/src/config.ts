@@ -351,6 +351,25 @@ export interface DevLaunchSpec extends GenericLaunchSpec {
   binPath: string;
 
   /**
+   * Enable WASM precompilation for faster node startup.
+   * When enabled, Moonwall will precompile the runtime WASM to native code
+   * before launching the node, using the `precompile-wasm` subcommand.
+   * The precompiled artifact is cached by binary hash and reused on subsequent runs.
+   *
+   * - true: Enable precompilation (recommended for faster startup)
+   * - false: Disable precompilation (default)
+   *
+   * @default false
+   */
+  precompileWasm?: boolean;
+
+  /**
+   * Directory to cache precompiled WASM artifacts.
+   * Defaults to "./tmp/wasm-cache" relative to the config file.
+   */
+  wasmCacheDir?: string;
+
+  /**
    * If true, binPath will be treated as a Docker image instead of a local binary
    */
   useDocker?: boolean;

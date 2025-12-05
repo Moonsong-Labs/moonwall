@@ -175,6 +175,11 @@
           },
           "type": "object"
         },
+        "precompileWasm": {
+          "default": false,
+          "description": "Enable WASM precompilation for faster node startup.\nWhen enabled, Moonwall will precompile the runtime WASM to native code\nbefore launching the node, using the `precompile-wasm` subcommand.\nThe precompiled artifact is cached by binary hash and reused on subsequent runs.\n\n- true: Enable precompilation (recommended for faster startup)\n- false: Disable precompilation (default)",
+          "type": "boolean"
+        },
         "retainAllLogs": {
           "description": "An optional flag to retain node logs from previous runs.",
           "type": "boolean"
@@ -186,6 +191,10 @@
         "useDocker": {
           "description": "If true, binPath will be treated as a Docker image instead of a local binary",
           "type": "boolean"
+        },
+        "wasmCacheDir": {
+          "description": "Directory to cache precompiled WASM artifacts.\nDefaults to \"./tmp/wasm-cache\" relative to the config file.",
+          "type": "string"
         }
       },
       "type": "object"
