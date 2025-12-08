@@ -208,8 +208,8 @@ export class LaunchCommandParser {
           this.args = this.args.filter((arg) => arg !== "--dev");
           this.overrideArg(`--chain=${result.rawChainSpecPath}`);
           // Add flags that --dev would normally set
-          this.args.push("--alice");
-          this.args.push("--force-authoring");
+          this.overrideArg("--alice");
+          this.overrideArg("--force-authoring");
           this.overrideArg("--rpc-cors=all");
           // Use a deterministic node key for consistency
           this.overrideArg(
