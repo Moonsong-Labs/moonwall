@@ -91,15 +91,12 @@ const testRpcMethod = (
         );
 
         const handleMessages = socket.runRaw((data: string | Uint8Array) =>
-          Effect.sync(() => {
+          Effect.try(() => {
             const message = typeof data === "string" ? data : new TextDecoder().decode(data);
-            try {
-              const response = JSON.parse(message);
-              return response.jsonrpc === "2.0" && !response.error;
-            } catch {
-              return false;
-            }
+            const response = JSON.parse(message);
+            return response.jsonrpc === "2.0" && !response.error;
           }).pipe(
+            Effect.orElseSucceed(() => false),
             Effect.flatMap((shouldSucceed) =>
               shouldSucceed ? Deferred.succeed(responseDeferred, true) : Effect.void
             )

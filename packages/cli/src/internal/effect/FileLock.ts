@@ -16,14 +16,11 @@ interface LockInfo {
   hostname: string;
 }
 
-const isProcessAlive = (pid: number) =>
-  Effect.try({
-    try: () => {
-      process.kill(pid, 0);
-      return true;
-    },
-    catch: () => false,
-  });
+const isProcessAlive = (pid: number): Effect.Effect<boolean> =>
+  Effect.try(() => {
+    process.kill(pid, 0);
+    return true;
+  }).pipe(Effect.orElseSucceed(() => false));
 
 const isLockStale = (info: LockInfo) =>
   Effect.gen(function* () {
