@@ -35,3 +35,19 @@ export class ProcessError extends Data.TaggedError("ProcessError")<{
   readonly pid?: number;
   readonly operation: "spawn" | "kill" | "check";
 }> {}
+
+/**
+ * Error thrown when startup cache operations fail
+ */
+export class StartupCacheError extends Data.TaggedError("StartupCacheError")<{
+  readonly cause: unknown;
+  readonly operation: "hash" | "precompile" | "cache" | "lock" | "chainspec";
+}> {}
+
+/**
+ * Error thrown when file lock operations fail
+ */
+export class FileLockError extends Data.TaggedError("FileLockError")<{
+  readonly reason: "timeout" | "acquisition_failed";
+  readonly lockPath: string;
+}> {}

@@ -101,11 +101,11 @@ const attemptPortDiscovery = (pid: number): Effect.Effect<number, PortDiscoveryE
  */
 const discoverPortWithRetry = (
   pid: number,
-  maxAttempts = 600 // 600 attempts × 100ms = 60 seconds (handles parallel startup contention)
+  maxAttempts = 1200
 ): Effect.Effect<number, PortDiscoveryError> =>
   attemptPortDiscovery(pid).pipe(
     Effect.retry(
-      Schedule.fixed("100 millis").pipe(Schedule.compose(Schedule.recurs(maxAttempts - 1)))
+      Schedule.fixed("50 millis").pipe(Schedule.compose(Schedule.recurs(maxAttempts - 1)))
     ),
     Effect.catchAll((error) =>
       Effect.fail(

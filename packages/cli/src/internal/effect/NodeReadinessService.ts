@@ -166,11 +166,11 @@ const attemptReadinessCheck = (
 const checkReadyWithRetryInternal = (
   config: ReadinessConfig
 ): Effect.Effect<boolean, NodeReadinessError, Socket.Socket> => {
-  const maxAttempts = config.maxAttempts || 30;
+  const maxAttempts = config.maxAttempts || 200;
 
   return attemptReadinessCheck(config).pipe(
     Effect.retry(
-      Schedule.fixed("200 millis").pipe(Schedule.compose(Schedule.recurs(maxAttempts - 1)))
+      Schedule.fixed("50 millis").pipe(Schedule.compose(Schedule.recurs(maxAttempts - 1)))
     ),
     Effect.catchAll((error) =>
       Effect.fail(

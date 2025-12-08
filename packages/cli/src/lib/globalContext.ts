@@ -505,8 +505,8 @@ export class MoonwallContext {
       return MoonwallContext.getContext();
     }
 
-    const maxRetries = 15;
-    const retryDelay = 1000; // 1 second
+    const maxRetries = 150;
+    const retryDelay = 100;
     const connectTimeout = 10000; // 10 seconds per attempt
 
     const connectWithRetry = async (provider: {

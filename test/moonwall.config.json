@@ -482,6 +482,7 @@
       "testFileDir": ["suites/test_separation"],
       "reporters": ["basic", "html"],
       "multiThreads": true,
+      "cacheImports": true,
       "foundation": {
         "type": "dev",
         "launchSpec": [
@@ -489,7 +490,8 @@
             "name": "moonbeam",
             "running": true,
             "newRpcBehaviour": true,
-            "binPath": "./tmp/moonbeam"
+            "binPath": "./tmp/moonbeam",
+            "cacheStartupArtifacts": true
           }
         ]
       }
@@ -1005,7 +1007,7 @@
               "--tmp"
             ],
             "defaultForkConfig": {
-              "url": "https://moonbeam.unitedbloc.com",
+              "url": "${MOONBEAM_HTTP_ENDPOINT}",
               "stateOverridePath": "./configs/mbStateOverride.json",
               "verbose": true
             }

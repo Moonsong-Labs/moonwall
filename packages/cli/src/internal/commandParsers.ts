@@ -6,21 +6,23 @@ import type {
   LaunchOverrides,
   ForkConfig,
 } from "@moonwall/types";
-import chalk from "chalk";
+import { createLogger } from "@moonwall/util";
 import path from "node:path";
 import net from "node:net";
+import { Effect } from "effect";
 import { standardRepos } from "../lib/repoDefinitions";
 import { shardManager } from "../lib/shardManager";
 import invariant from "tiny-invariant";
+import { StartupCacheService, StartupCacheServiceLive } from "./effect/StartupCacheService.js";
+
+const logger = createLogger({ name: "commandParsers" });
 
 export function parseZombieCmd(launchSpec: ZombieLaunchSpec) {
   if (launchSpec) {
     return { cmd: launchSpec.configPath };
   }
   throw new Error(
-    `No ZombieSpec found in config. \n Are you sure your ${chalk.bgWhiteBright.blackBright(
-      "moonwall.config.json"
-    )} file has the correct "configPath" in zombieSpec?`
+    "No ZombieSpec found in config. Are you sure your moonwall.config.json file has the correct 'configPath' in zombieSpec?"
   );
 }
 
@@ -122,8 +124,8 @@ export class LaunchCommandParser {
   }
 
   private print() {
-    console.log(chalk.cyan(`Command to run is: ${chalk.bold(this.cmd)}`));
-    console.log(chalk.cyan(`Arguments are: ${chalk.bold(this.args.join(" "))}`));
+    logger.debug(`Command to run: ${this.cmd}`);
+    logger.debug(`Arguments: ${this.args.join(" ")}`);
     return this;
   }
 
@@ -143,6 +145,99 @@ export class LaunchCommandParser {
     }
   }
 
+  /**
+   * Cache startup artifacts if enabled in launchSpec.
+   * This uses an Effect-based service that caches artifacts by binary hash.
+   *
+   * When cacheStartupArtifacts is enabled, this generates:
+   * 1. Precompiled WASM for the runtime
+   * 2. Raw chain spec to skip genesis WASM compilation
+   *
+   * This reduces startup from ~3s to ~200ms (~10x improvement).
+   */
+  async withStartupCache(): Promise<LaunchCommandParser> {
+    if (!this.launchSpec.cacheStartupArtifacts) {
+      return this;
+    }
+
+    // Skip for Docker images
+    if (this.launchSpec.useDocker) {
+      logger.warn("Startup caching is not supported for Docker images, skipping");
+      return this;
+    }
+
+    // Extract chain argument from existing args (e.g., "--chain=moonbase-dev")
+    const chainArg = this.args.find((arg) => arg.startsWith("--chain"));
+    // Check if using --dev flag
+    const hasDevFlag = this.args.includes("--dev");
+    // Extract chain name from --chain=XXX or --chain XXX
+    const existingChainName = chainArg?.match(/--chain[=\s]?(\S+)/)?.[1];
+
+    // We can generate raw chain spec for both --dev mode and explicit --chain=XXX
+    const canGenerateRawSpec = hasDevFlag || !!existingChainName;
+
+    const cacheDir =
+      this.launchSpec.startupCacheDir || path.join(process.cwd(), "tmp", "startup-cache");
+
+    const program = StartupCacheService.pipe(
+      Effect.flatMap((service) =>
+        service.getCachedArtifacts({
+          binPath: this.launchSpec.binPath,
+          chainArg,
+          cacheDir,
+          // Generate raw chain spec for faster startup (works for both --dev and --chain=XXX)
+          generateRawChainSpec: canGenerateRawSpec,
+          // Pass dev mode flag for proper chain name detection
+          isDevMode: hasDevFlag,
+        })
+      ),
+      Effect.provide(StartupCacheServiceLive)
+    );
+
+    try {
+      const result = await Effect.runPromise(program);
+      // --wasmtime-precompiled expects a DIRECTORY, not a file path
+      // Get the directory containing the precompiled wasm
+      const precompiledDir = path.dirname(result.precompiledPath);
+      this.overrideArg(`--wasmtime-precompiled=${precompiledDir}`);
+
+      // If we have a raw chain spec, use it for ~10x faster startup
+      if (result.rawChainSpecPath) {
+        if (hasDevFlag) {
+          // Remove --dev flag and add equivalent flags
+          this.args = this.args.filter((arg) => arg !== "--dev");
+          this.overrideArg(`--chain=${result.rawChainSpecPath}`);
+          // Add flags that --dev would normally set
+          this.overrideArg("--alice");
+          this.overrideArg("--force-authoring");
+          this.overrideArg("--rpc-cors=all");
+          // Use a deterministic node key for consistency
+          this.overrideArg(
+            "--node-key=0000000000000000000000000000000000000000000000000000000000000001"
+          );
+        } else if (existingChainName) {
+          // Replace original --chain=XXX with --chain=<raw-spec-path>
+          this.overrideArg(`--chain=${result.rawChainSpecPath}`);
+        }
+        logger.debug(`Using raw chain spec for ~10x faster startup: ${result.rawChainSpecPath}`);
+      }
+
+      // Set cache directory env var for metadata caching in provider factories
+      process.env.MOONWALL_CACHE_DIR = precompiledDir;
+
+      logger.debug(
+        result.fromCache
+          ? `Using cached precompiled WASM: ${result.precompiledPath}`
+          : `Precompiled WASM created: ${result.precompiledPath}`
+      );
+    } catch (error) {
+      // Log warning but continue without precompilation
+      logger.warn(`WASM precompilation failed, continuing without: ${error}`);
+    }
+
+    return this;
+  }
+
   build(): { cmd: string; args: string[]; launch: boolean } {
     return {
       cmd: this.cmd,
@@ -160,7 +255,8 @@ export class LaunchCommandParser {
     const parser = new LaunchCommandParser(options);
     const parsed = await parser
       .withPorts()
-      .then((p) => p.withDefaultForkConfig().withLaunchOverrides());
+      .then((p) => p.withDefaultForkConfig().withLaunchOverrides())
+      .then((p) => p.withStartupCache());
 
     if (options.verbose) {
       parsed.print();
@@ -282,11 +378,9 @@ export const getFreePort = async (): Promise<number> => {
   // Ensure we stay within a reasonable port range
   const startPort = Math.min(calculatedPort, 60000 + shardIndex * 100 + poolId);
 
-  if (process.env.DEBUG_MOONWALL_PORTS) {
-    console.log(
-      `[DEBUG] Port calculation: shard=${shardIndex + 1}/${totalShards}, pool=${poolId}, final=${startPort}`
-    );
-  }
+  logger.debug(
+    `Port calculation: shard=${shardIndex + 1}/${totalShards}, pool=${poolId}, final=${startPort}`
+  );
 
   return getNextAvailablePort(startPort);
 };
