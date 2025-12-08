@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { Effect, Exit } from "effect";
+import { Duration, Effect, Exit } from "effect";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import * as os from "node:os";
@@ -22,7 +22,9 @@ describe("FileLock", () => {
 
   describe("acquireFileLock", () => {
     it("should acquire lock by creating directory", async () => {
-      const program = acquireFileLock(lockPath, 5000).pipe(Effect.provide(NodeFileSystem.layer));
+      const program = acquireFileLock(lockPath, Duration.seconds(5)).pipe(
+        Effect.provide(NodeFileSystem.layer)
+      );
 
       const exit = await Effect.runPromiseExit(program);
       expect(Exit.isSuccess(exit)).toBe(true);
@@ -44,7 +46,9 @@ describe("FileLock", () => {
         JSON.stringify({ pid: process.pid, timestamp: Date.now(), hostname: os.hostname() })
       );
 
-      const program = acquireFileLock(lockPath, 1000).pipe(Effect.provide(NodeFileSystem.layer));
+      const program = acquireFileLock(lockPath, Duration.seconds(1)).pipe(
+        Effect.provide(NodeFileSystem.layer)
+      );
 
       const exit = await Effect.runPromiseExit(program);
       expect(Exit.isFailure(exit)).toBe(true);
@@ -83,7 +87,9 @@ describe("FileLock", () => {
         JSON.stringify({ pid: 999999, timestamp: Date.now(), hostname: os.hostname() })
       );
 
-      const program = acquireFileLock(lockPath, 5000).pipe(Effect.provide(NodeFileSystem.layer));
+      const program = acquireFileLock(lockPath, Duration.seconds(5)).pipe(
+        Effect.provide(NodeFileSystem.layer)
+      );
 
       const exit = await Effect.runPromiseExit(program);
       expect(Exit.isSuccess(exit)).toBe(true);
@@ -105,7 +111,9 @@ describe("FileLock", () => {
         })
       );
 
-      const program = acquireFileLock(lockPath, 5000).pipe(Effect.provide(NodeFileSystem.layer));
+      const program = acquireFileLock(lockPath, Duration.seconds(5)).pipe(
+        Effect.provide(NodeFileSystem.layer)
+      );
 
       const exit = await Effect.runPromiseExit(program);
       expect(Exit.isSuccess(exit)).toBe(true);
@@ -127,7 +135,9 @@ describe("FileLock", () => {
         })
       );
 
-      const program = acquireFileLock(lockPath, 1000).pipe(Effect.provide(NodeFileSystem.layer));
+      const program = acquireFileLock(lockPath, Duration.seconds(1)).pipe(
+        Effect.provide(NodeFileSystem.layer)
+      );
 
       // Should timeout because we can't verify the PID on a different host
       const exit = await Effect.runPromiseExit(program);
