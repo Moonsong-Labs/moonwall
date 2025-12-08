@@ -8,3 +8,5 @@ export * from "./PortDiscoveryService.js";
 export * from "./NodeReadinessService.js";
 export * from "./RpcPortDiscoveryService.js";
 export * from "./launchNodeEffect.js";
+export * from "./FileLock.js";
+export * from "./StartupCacheService.js";
