@@ -24,6 +24,7 @@ async function filterTestFilesByPattern(
 ): Promise<string[] | undefined> {
   if (!pattern) return undefined;
 
+  // Dynamic user-provided pattern - can't benefit from arkregex type inference
   const patternRegex = new RegExp(pattern, "i");
   const matches = await findTestFilesMatchingPattern(testDirs, includePatterns, patternRegex);
 

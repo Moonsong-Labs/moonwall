@@ -1,9 +1,11 @@
-import { Effect, Context, Layer, Schedule } from "effect";
+import { Effect, Context, Layer, Option, Array as Arr, Schedule } from "effect";
+import { regex } from "arkregex";
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
 import { PortDiscoveryError } from "./errors.js";
 
 const execAsync = promisify(exec);
+const lsofPortRegex = regex("(?:.+):(\\d+)");
 
 /**
  * Service for discovering ports used by a process
@@ -28,20 +30,13 @@ export class PortDiscoveryService extends Context.Tag("PortDiscoveryService")<
  * Parse ports from lsof output
  * Example lsof line: "node 97796 user 26u IPv6 0xb6c3e894a2247189 0t0 TCP *:8000 (LISTEN)"
  */
-const parsePortsFromLsof = (stdout: string): number[] => {
-  const ports: number[] = [];
-  const lines = stdout.split("\n");
-
-  for (const line of lines) {
-    const regex = /(?:.+):(\d+)/;
-    const match = line.match(regex);
-    if (match) {
-      ports.push(Number.parseInt(match[1], 10));
-    }
-  }
-
-  return ports;
-};
+const parsePortsFromLsof = (stdout: string): number[] =>
+  Arr.filterMap(stdout.split("\n"), (line) =>
+    Option.fromNullable(line.match(lsofPortRegex)).pipe(
+      Option.flatMapNullable((m) => m[1]),
+      Option.map((port) => Number.parseInt(port, 10))
+    )
+  );
 
 /**
  * Attempt to discover ports for a given PID
