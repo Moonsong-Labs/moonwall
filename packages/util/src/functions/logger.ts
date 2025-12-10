@@ -1,6 +1,9 @@
+import { regex } from "arkregex";
 import pino from "pino";
 import type { Logger } from "pino";
 import pinoPretty from "pino-pretty";
+
+const globWildcardRegex = regex("\\*", "g");
 
 export interface LoggerOptions {
   name: string;
@@ -62,10 +65,10 @@ export function clearLoggers(): void {
 
 // Helper function to enable/disable specific loggers
 export function setLoggerEnabled(pattern: string, enabled: boolean): void {
-  const regex = new RegExp(pattern.replace(/\*/g, ".*"));
+  const patternRegex = new RegExp(pattern.replace(globWildcardRegex, ".*"));
 
   loggers.forEach((logger, name) => {
-    if (regex.test(name)) {
+    if (patternRegex.test(name)) {
       logger.level = enabled ? logLevel : "silent";
     }
   });
