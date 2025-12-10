@@ -1,7 +1,7 @@
 endpoint: ${env.POLKADOT_ASSET_HUB_ENDPOINT}
 mock-signature-host: true
 block: ${env.POLKADOT_ASSET_HUB_BLOCK_NUMBER}
-db: ./tmp/db.sqlite
+db: ./tmp/assethub.sqlite
 port: 8001
 
 import-storage:
