@@ -4,6 +4,10 @@ import fs from "node:fs";
 import type { Environment } from "@moonwall/types";
 import { executeTests } from "../runTests";
 
+// Simple patterns for log level detection - no capture groups needed
+const errorRegex = /error|panic|fail/i;
+const warnRegex = /warn/i;
+
 interface LogViewerProps {
   env: Environment;
   logFilePath: string;
@@ -202,8 +206,8 @@ export const LogViewer: React.FC<LogViewerProps> = ({
   const visibleTestOutput = testOutput.slice(-testOutputLines);
 
   const getLineColor = (line: string): string => {
-    if (/error|panic|fail/i.test(line)) return "red";
-    if (/warn/i.test(line)) return "yellow";
+    if (errorRegex.test(line)) return "red";
+    if (warnRegex.test(line)) return "yellow";
     return "white";
   };
 

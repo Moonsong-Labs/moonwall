@@ -4,11 +4,23 @@ import * as NodeContext from "@effect/platform-node/NodeContext";
 import * as NodeFileSystem from "@effect/platform-node/NodeFileSystem";
 import * as NodeSocket from "@effect/platform-node/NodeSocket";
 import { createLogger } from "@moonwall/util";
-import { Context, Deferred, Effect, Layer, Option, Schedule, type Scope } from "effect";
+import { regex } from "arkregex";
+import {
+  Context,
+  Deferred,
+  Effect,
+  Layer,
+  Option,
+  Array as Arr,
+  Schedule,
+  type Scope,
+} from "effect";
 import { PortDiscoveryError } from "./errors.js";
 
 const logger = createLogger({ name: "RpcPortDiscoveryService" });
 const debug = logger.debug.bind(logger);
+
+const lsofPortRegex = regex("(?:.+):(\\d+)");
 
 /**
  * Service for discovering RPC ports by testing actual connectivity
@@ -32,13 +44,13 @@ export class RpcPortDiscoveryService extends Context.Tag("RpcPortDiscoveryServic
 /**
  * Parse ports from lsof output
  */
-const parsePortsFromLsof = (stdout: string): number[] => {
-  const regex = /(?:.+):(\d+)/;
-  return stdout.split("\n").flatMap((line) => {
-    const match = line.match(regex);
-    return match ? [Number.parseInt(match[1], 10)] : [];
-  });
-};
+const parsePortsFromLsof = (stdout: string): number[] =>
+  Arr.filterMap(stdout.split("\n"), (line) =>
+    Option.fromNullable(line.match(lsofPortRegex)).pipe(
+      Option.flatMapNullable((m) => m[1]),
+      Option.map((port) => Number.parseInt(port, 10))
+    )
+  );
 
 /**
  * Get all listening ports for a process

@@ -1,8 +1,12 @@
+import { regex } from "arkregex";
 import chalk from "chalk";
 import fs from "node:fs";
 import { confirm } from "@inquirer/prompts";
 import path from "node:path";
 import { hasSuiteDefinition, replaceSuiteId } from "./testIdParser";
+
+const sanitizeCharsRegex = regex("[-_ ]", "g");
+const specialCharsRegex = regex("[ \\t!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]+");
 
 interface DeriveTestIdsOptions {
   rootDir: string;
@@ -68,7 +72,7 @@ function getTopLevelDirs(rootDir: string): string[] {
 }
 
 function generatePrefix(directory: string, usedPrefixes: Set<string>, rootPrefix?: string): string {
-  const sanitizedDir = directory.replace(/[-_ ]/g, "").toUpperCase();
+  const sanitizedDir = directory.replace(sanitizeCharsRegex, "").toUpperCase();
   let prefix = rootPrefix ?? sanitizedDir[0];
 
   let additionalIndex = 1;
@@ -135,7 +139,7 @@ function generateId(directory: string, rootDir: string, prefix: string): void {
 }
 
 function hasSpecialCharacters(filename: string): boolean {
-  return /[ \t!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]+/.test(filename);
+  return specialCharsRegex.test(filename);
 }
 
 function customFileSort(a: string, b: string): number {

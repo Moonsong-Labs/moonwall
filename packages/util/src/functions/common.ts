@@ -1,7 +1,10 @@
 import { BN } from "@polkadot/util";
+import { regex } from "arkregex";
+
+const wsProtocolRegex = regex("^ws(s)?:");
 
 export function normalizeUrlToHttps(url: string): string {
-  return url.replace(/^ws(s)?:/, "http$1:");
+  return url.replace(wsProtocolRegex, "http$1:");
 }
 
 // Sort dict by key

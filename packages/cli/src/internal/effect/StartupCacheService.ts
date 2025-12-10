@@ -2,12 +2,20 @@ import { Command, type CommandExecutor, FileSystem, Path } from "@effect/platfor
 import { NodeContext } from "@effect/platform-node";
 import type { PlatformError } from "@effect/platform/Error";
 import { createLogger } from "@moonwall/util";
-import { Context, Duration, Effect, Layer, Option, Stream } from "effect";
+import { regex } from "arkregex";
+import { Context, Duration, Effect, Layer, Option, Stream, String as Str } from "effect";
 import * as crypto from "node:crypto";
 import { StartupCacheError, type FileLockError } from "./errors.js";
 import { withFileLock } from "./FileLock.js";
 
 const logger = createLogger({ name: "StartupCacheService" });
+const chainArgRegex = regex("--chain[=\\s]?(\\S+)");
+
+const extractChainName = (chainArg: string): string =>
+  Option.fromNullable(chainArg.match(chainArgRegex)).pipe(
+    Option.flatMapNullable((m) => m[1]),
+    Option.getOrElse(() => "default")
+  );
 
 export interface StartupCacheConfig {
   readonly binPath: string;
@@ -200,7 +208,9 @@ const getCachedArtifactsImpl = (
     const shortHash = binaryHash.substring(0, 12);
     const chainName = config.isDevMode
       ? "dev"
-      : config.chainArg?.match(/--chain[=\s]?(\S+)/)?.[1] || "default";
+      : config.chainArg
+        ? extractChainName(config.chainArg)
+        : "default";
     const binName = pathService.basename(config.binPath);
     const cacheSubDir = pathService.join(config.cacheDir, `${binName}-${chainName}-${shortHash}`);
     const hashPath = pathService.join(cacheSubDir, "binary.hash");

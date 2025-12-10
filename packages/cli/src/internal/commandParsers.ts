@@ -7,6 +7,7 @@ import type {
   ForkConfig,
 } from "@moonwall/types";
 import { createLogger } from "@moonwall/util";
+import { regex } from "arkregex";
 import path from "node:path";
 import net from "node:net";
 import { Effect } from "effect";
@@ -14,6 +15,8 @@ import { standardRepos } from "../lib/repoDefinitions";
 import { shardManager } from "../lib/shardManager";
 import invariant from "tiny-invariant";
 import { StartupCacheService, StartupCacheServiceLive } from "./effect/StartupCacheService.js";
+
+const chainArgRegex = regex("--chain[=\\s]?(\\S+)");
 
 const logger = createLogger({ name: "commandParsers" });
 
@@ -171,7 +174,7 @@ export class LaunchCommandParser {
     // Check if using --dev flag
     const hasDevFlag = this.args.includes("--dev");
     // Extract chain name from --chain=XXX or --chain XXX
-    const existingChainName = chainArg?.match(/--chain[=\s]?(\S+)/)?.[1];
+    const existingChainName = chainArg?.match(chainArgRegex)?.[1];
 
     // We can generate raw chain spec for both --dev mode and explicit --chain=XXX
     const canGenerateRawSpec = hasDevFlag || !!existingChainName;

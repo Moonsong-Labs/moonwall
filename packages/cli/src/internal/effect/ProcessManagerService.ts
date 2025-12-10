@@ -1,6 +1,7 @@
 import { Context, Effect, Layer, pipe } from "effect";
 import { Path } from "@effect/platform";
 import { NodePath } from "@effect/platform-node";
+import { regex } from "arkregex";
 import { spawn, type ChildProcess } from "node:child_process";
 import * as fs from "node:fs";
 import type { WriteStream } from "node:fs";
@@ -8,6 +9,7 @@ import { NodeLaunchError, ProcessError } from "./errors.js";
 import { createLogger } from "@moonwall/util";
 
 const logger = createLogger({ name: "ProcessManagerService" });
+const nodeUndefinedRegex = regex("node_node_undefined", "g");
 
 /**
  * Extended ChildProcess with Moonwall metadata
@@ -70,7 +72,7 @@ const getLogPath = (config: ProcessConfig, pid: number): Effect.Effect<string, P
 
       return pathService
         .join(dirPath, `${baseName}_node_${port}_${pid}.log`)
-        .replace(/node_node_undefined/g, "chopsticks");
+        .replace(nodeUndefinedRegex, "chopsticks");
     }),
     Effect.provide(NodePath.layer),
     Effect.mapError(
