@@ -54,6 +54,30 @@ const resolveEnvVars = (value: string): string => {
 };
 
 /**
+ * Recursively resolve environment variable references in any value.
+ * - Strings: resolves ${env.VAR_NAME} patterns
+ * - Arrays: recursively processes each element
+ * - Objects: recursively processes each value
+ * - Other types (numbers, booleans, null, undefined): returned as-is
+ */
+const resolveEnvVarsDeep = <T>(value: T): T => {
+  if (typeof value === "string") {
+    return resolveEnvVars(value) as T;
+  }
+  if (Array.isArray(value)) {
+    return value.map(resolveEnvVarsDeep) as T;
+  }
+  if (value !== null && typeof value === "object") {
+    const result: Record<string, unknown> = {};
+    for (const [key, val] of Object.entries(value as Record<string, unknown>)) {
+      result[key] = resolveEnvVarsDeep(val);
+    }
+    return result as T;
+  }
+  return value;
+};
+
+/**
  * Parse build block mode string to enum
  */
 const parseBuildBlockMode = (mode?: string): BuildBlockMode => {
@@ -66,6 +90,35 @@ const parseBuildBlockMode = (mode?: string): BuildBlockMode => {
     default:
       return BuildBlockModeValues.Manual;
   }
+};
+
+/**
+ * Parse the block field which can be a number, block hash string, or env var.
+ * Returns undefined if the value is empty or unset.
+ */
+const parseBlockField = (block: string | number | undefined): string | number | undefined => {
+  if (block === undefined || block === null) {
+    return undefined;
+  }
+
+  // Already a number, return as-is
+  if (typeof block === "number") {
+    return block;
+  }
+
+  // Empty string means env var wasn't set
+  if (block === "") {
+    return undefined;
+  }
+
+  // Try to convert to number (block number)
+  const blockNum = Number(block);
+  if (!Number.isNaN(blockNum)) {
+    return blockNum;
+  }
+
+  // It's a block hash (string like "0x...")
+  return block;
 };
 
 /**
@@ -96,7 +149,7 @@ export const parseChopsticksConfigFile = (
     });
 
     // Parse YAML
-    const rawConfig = yield* Effect.try({
+    const rawConfigUnresolved = yield* Effect.try({
       try: () => yaml.parse(fileContent) as RawChopsticksYamlConfig,
       catch: (cause) =>
         new ChopsticksSetupError({
@@ -105,20 +158,20 @@ export const parseChopsticksConfigFile = (
         }),
     });
 
-    // Resolve environment variables in endpoint
-    const rawEndpoint = rawConfig.endpoint ?? "";
-    const endpoint = resolveEnvVars(rawEndpoint);
+    // Resolve all environment variables throughout the config
+    const rawConfig = resolveEnvVarsDeep(rawConfigUnresolved);
 
     // Validate endpoint
+    const endpoint = rawConfig.endpoint ?? "";
     if (!endpoint) {
       return yield* Effect.fail(
         new ChopsticksSetupError({
           cause: new Error(
             `Endpoint is required but not configured. ` +
               `Check that the environment variable in your chopsticks config is set. ` +
-              `Raw value: "${rawEndpoint}"`
+              `Raw value: "${rawConfigUnresolved.endpoint ?? ""}"`
           ),
-          endpoint: rawEndpoint || "undefined",
+          endpoint: rawConfigUnresolved.endpoint || "undefined",
         })
       );
     }
@@ -134,6 +187,9 @@ export const parseChopsticksConfigFile = (
       );
     }
 
+    // Parse block field (handles number conversion)
+    const block = parseBlockField(rawConfig.block);
+
     logger.debug(`Parsed chopsticks config from ${configPath}`);
     logger.debug(`  endpoint: ${endpoint}`);
     logger.debug(`  port: ${overrides?.port ?? rawConfig.port ?? 8000}`);
@@ -141,7 +197,7 @@ export const parseChopsticksConfigFile = (
     // Build the config
     const config: ChopsticksConfig = {
       endpoint,
-      block: rawConfig.block,
+      block,
       port: overrides?.port ?? rawConfig.port ?? 8000,
       host: overrides?.host ?? "127.0.0.1",
       buildBlockMode:
