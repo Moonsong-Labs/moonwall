@@ -33,6 +33,7 @@ import {
   type IPCResponseMessage,
 } from "../internal/foundations/zombieHelpers";
 import { launchNode, type MoonwallProcess } from "../internal/node";
+import { launchChopsticksFromSpec } from "../internal/effect/launchChopsticksEffect.js";
 import {
   ProviderFactory,
   ProviderInterfaceFactory,
@@ -45,6 +46,7 @@ import {
   isEthereumZombieConfig,
   isOptionSet,
 } from "./configReader";
+
 const logger = createLogger({ name: "context" });
 const debugSetup = logger.debug.bind(logger);
 
@@ -428,6 +430,49 @@ export class MoonwallContext {
 
     const env = getEnvironmentFromConfig();
     const launchSpec = "launchSpec" in env.foundation ? env.foundation.launchSpec[0] : undefined;
+
+    // Use programmatic chopsticks API for non-legacy chopsticks foundation
+    if (
+      this.environment.foundationType === "chopsticks" &&
+      env.foundation.type === "chopsticks" &&
+      !env.foundation.launchSpec[0].legacy
+    ) {
+      debugSetup("🍴 Launching chopsticks via programmatic API...");
+
+      const maxStartupTimeout = 120000; // 2 minutes for chopsticks (needs to connect to remote endpoint)
+
+      await withTimeout(
+        Promise.all(
+          env.foundation.launchSpec.map(async (spec, index) => {
+            try {
+              const result = await launchChopsticksFromSpec(spec, {
+                timeout: maxStartupTimeout - 10000, // Leave 10s buffer for cleanup on timeout
+                chopsticksLogLevel: "silent", // Use moonwall logger instead of chopsticks' native logs
+              });
+
+              // Store cleanup handler for disconnect
+              this.nodeCleanupHandlers.push(result.cleanup);
+
+              // Set environment variables for test connections
+              // First chopsticks instance sets MOONWALL_RPC_PORT
+              if (index === 0) {
+                process.env.MOONWALL_RPC_PORT = result.port.toString();
+                process.env.WSS_URL = `ws://127.0.0.1:${result.port}`;
+                debugSetup(`Set MOONWALL_RPC_PORT=${result.port}, WSS_URL=${process.env.WSS_URL}`);
+              }
+
+              debugSetup(`✅ Chopsticks '${spec.configPath}' started at ${result.addr}`);
+            } catch (error: any) {
+              throw new Error(`Failed to start chopsticks '${spec.configPath}': ${error.message}`);
+            }
+          })
+        ),
+        maxStartupTimeout
+      );
+      debugSetup("✅ All chopsticks instances started successfully.");
+
+      return ctx;
+    }
 
     const maxStartupTimeout = launchSpec?.useDocker ? 300000 : 30000; // 5 minutes for Docker, 30s otherwise
 

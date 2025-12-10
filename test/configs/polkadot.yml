@@ -2,7 +2,7 @@ endpoint: wss://polkadot.api.onfinality.io/public-ws
 mock-signature-host: true
 block: 18867218
 port: 8002
-db: ./tmp/db.sqlite
+db: ./tmp/polkadot.sqlite
 # wasm-override: polkadot_runtime.compact.compressed.wasm
 
 import-storage:

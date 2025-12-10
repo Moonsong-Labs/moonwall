@@ -10,3 +10,7 @@ export * from "./RpcPortDiscoveryService.js";
 export * from "./launchNodeEffect.js";
 export * from "./FileLock.js";
 export * from "./StartupCacheService.js";
+export * from "./ChopsticksService.js";
+export * from "./launchChopsticksEffect.js";
+export * from "./ChopsticksMultiChain.js";
+export * from "./chopsticksConfigParser.js";
