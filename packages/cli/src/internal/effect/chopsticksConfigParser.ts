@@ -229,6 +229,7 @@ export const parseChopsticksConfigFile = (
       "allow-unresolved-imports":
         overrides?.allowUnresolvedImports ??
         (rawConfig["allow-unresolved-imports"] as boolean | undefined),
+      "rpc-timeout": rawConfig["rpc-timeout"] || undefined
     } as ChopsticksConfig;
 
     return config;
