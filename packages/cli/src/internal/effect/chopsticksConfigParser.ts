@@ -209,26 +209,22 @@ export const parseChopsticksConfigFile = (
           ? parseBuildBlockMode(rawBuildBlockMode)
           : BuildBlockModeValues.Manual;
 
+    const finalPort = overrides?.port ?? (rawConfig.port as number | undefined) ?? 8000;
+
     logger.debug(`Parsed chopsticks config from ${configPath}`);
     logger.debug(`  endpoint: ${endpoint}`);
-    logger.debug(`  port: ${overrides?.port ?? rawConfig.port ?? 8000}`);
+    logger.debug(`  port: ${finalPort}`);
 
-    // Build the config using chopsticks' native kebab-case format
-    // Start with rawConfig to preserve any fields we don't explicitly handle
     const config: ChopsticksConfig = {
-      // Spread the raw config to include all fields (like rpc-timeout, genesis, etc.)
       ...rawConfig,
-      // Override with explicit values
-      endpoint: rawConfig.endpoint as string | string[] | undefined,
       block,
-      port: overrides?.port ?? (rawConfig.port as number | undefined) ?? 8000,
-      host: overrides?.host ?? (rawConfig.host as string | undefined),
       "build-block-mode": buildBlockMode,
-      "wasm-override":
-        overrides?.wasmOverride ?? (rawConfig["wasm-override"] as string | undefined),
-      "allow-unresolved-imports":
-        overrides?.allowUnresolvedImports ??
-        (rawConfig["allow-unresolved-imports"] as boolean | undefined),
+      port: finalPort,
+      ...(overrides?.host !== undefined && { host: overrides.host }),
+      ...(overrides?.wasmOverride !== undefined && { "wasm-override": overrides.wasmOverride }),
+      ...(overrides?.allowUnresolvedImports !== undefined && {
+        "allow-unresolved-imports": overrides.allowUnresolvedImports,
+      }),
     } as ChopsticksConfig;
 
     return config;
