@@ -1,5 +1,13 @@
 # @moonwall/cli
 
+## 5.18.1
+
+### Patch Changes
+
+- a016492: Simplify chopsticks cfg
+  - @moonwall/types@5.18.1
+  - @moonwall/util@5.18.1
+
 ## 5.18.0
 
 ### Minor Changes
