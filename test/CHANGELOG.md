@@ -1,5 +1,15 @@
 # @moonwall/tests
 
+## 5.18.0
+
+### Minor Changes
+
+- 760dd82: ## Performance: Caching Improvements
+
+  - Add startup cache option for dev nodes (precompiled WASM + raw chainspec, shared metadata cache).
+  - Add `cacheImports` flag to prebundle viem/ethers in Vitest.
+  - Speed up readiness/port discovery and tweak moonbeam dev defaults (paritydb, env HTTP endpoint).
+
 ## 5.17.3
 
 ### Patch Changes
