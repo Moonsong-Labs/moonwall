@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { Effect, Layer } from "effect";
+import { BuildBlockMode } from "@acala-network/chopsticks";
 import {
   ChopsticksOrchestrationError,
   ChopsticksMultiChainService,
@@ -83,35 +84,38 @@ describe("ChopsticksMultiChain - Phase 4: Multi-chain XCM Support", () => {
   });
 
   describe("Configuration Types", () => {
-    it("should create valid RelayChainConfig", () => {
+    it("should create valid RelayChainConfig with kebab-case keys", () => {
       const config: RelayChainConfig = {
         type: "relay",
         endpoint: "wss://rpc.polkadot.io",
         port: 8000,
+        "build-block-mode": BuildBlockMode.Manual,
       };
 
       expect(config.type).toBe("relay");
       expect(config.endpoint).toBe("wss://rpc.polkadot.io");
     });
 
-    it("should create valid ParachainConfig", () => {
+    it("should create valid ParachainConfig with kebab-case keys", () => {
       const config: ParachainConfig = {
         type: "parachain",
         paraId: 2000,
         endpoint: "wss://moonbeam.rpc.io",
         port: 8001,
+        "build-block-mode": BuildBlockMode.Manual,
       };
 
       expect(config.type).toBe("parachain");
       expect(config.paraId).toBe(2000);
     });
 
-    it("should create valid MultiChainConfig", () => {
+    it("should create valid MultiChainConfig with kebab-case keys", () => {
       const config: MultiChainConfig = {
         relay: {
           type: "relay",
           endpoint: "wss://rpc.polkadot.io",
           port: 8000,
+          "build-block-mode": BuildBlockMode.Manual,
         },
         parachains: [
           {
@@ -119,12 +123,14 @@ describe("ChopsticksMultiChain - Phase 4: Multi-chain XCM Support", () => {
             paraId: 2000,
             endpoint: "wss://moonbeam.rpc.io",
             port: 8001,
+            "build-block-mode": BuildBlockMode.Manual,
           },
           {
             type: "parachain",
             paraId: 2001,
             endpoint: "wss://acala.rpc.io",
             port: 8002,
+            "build-block-mode": BuildBlockMode.Manual,
           },
         ],
       };
@@ -364,6 +370,7 @@ describe("ChopsticksMultiChain - Phase 4: Multi-chain XCM Support", () => {
           type: "relay",
           endpoint: "wss://test.io",
           port: 8000,
+          "build-block-mode": BuildBlockMode.Manual,
         },
         parachains: [
           {
@@ -371,6 +378,7 @@ describe("ChopsticksMultiChain - Phase 4: Multi-chain XCM Support", () => {
             paraId: 2000,
             endpoint: "wss://para.test.io",
             port: 8001,
+            "build-block-mode": BuildBlockMode.Manual,
           },
         ],
       };
@@ -389,6 +397,7 @@ describe("ChopsticksMultiChain - Phase 4: Multi-chain XCM Support", () => {
           type: "relay",
           endpoint: "wss://test.io",
           port: 8000,
+          "build-block-mode": BuildBlockMode.Manual,
         },
         parachains: [],
       };
@@ -444,6 +453,7 @@ describe.skip("ChopsticksMultiChain - Integration Tests", () => {
         type: "relay",
         endpoint: "wss://rpc.polkadot.io",
         port: 8000,
+        "build-block-mode": BuildBlockMode.Manual,
       },
       parachains: [
         {
@@ -451,6 +461,7 @@ describe.skip("ChopsticksMultiChain - Integration Tests", () => {
           paraId: 2004,
           endpoint: "wss://wss.api.moonbeam.network",
           port: 8001,
+          "build-block-mode": BuildBlockMode.Manual,
         },
       ],
     });

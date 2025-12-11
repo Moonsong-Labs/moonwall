@@ -261,20 +261,26 @@ export interface ChopsticksServiceImpl {
 // =============================================================================
 
 /**
- * Convert ChopsticksConfig to the format expected by setupWithServer
+ * Extract a single endpoint string from the config.
+ * The ChopsticksConfig endpoint can be a string, array of strings, or undefined.
  */
-const configToChopsticksArgs = (config: ChopsticksConfig) => ({
-  endpoint: config.endpoint,
-  block: config.block,
+const getEndpointString = (endpoint: string | string[] | undefined): string | undefined => {
+  if (typeof endpoint === "string") return endpoint;
+  if (Array.isArray(endpoint)) return endpoint[0];
+  return undefined;
+};
+
+/**
+ * Prepare ChopsticksConfig for setupWithServer by ensuring defaults.
+ *
+ * Since ChopsticksConfig is now the native chopsticks type (with kebab-case keys),
+ * we just need to ensure required defaults are set.
+ */
+const prepareConfigForSetup = (config: ChopsticksConfig): ChopsticksConfig => ({
+  ...config,
   port: config.port ?? 8000,
   host: config.host ?? "127.0.0.1",
-  "build-block-mode": (config.buildBlockMode ?? "Manual") as BuildBlockMode,
-  "wasm-override": config.wasmOverride,
-  "allow-unresolved-imports": config.allowUnresolvedImports,
-  "mock-signature-host": config.mockSignatureHost,
-  db: config.db,
-  "import-storage": config.importStorage,
-  "runtime-log-level": config.runtimeLogLevel,
+  "build-block-mode": config["build-block-mode"] ?? ("Manual" as BuildBlockMode),
 });
 
 /**
@@ -476,7 +482,7 @@ export async function launchChopsticksEffect(config: ChopsticksConfig): Promise<
     const chopsticksModules = yield* Effect.promise(() => getChopsticksModules("inherit"));
 
     // Convert config to chopsticks format
-    const args = configToChopsticksArgs(config);
+    const args = prepareConfigForSetup(config);
     logger.debug(`[T+${Date.now() - startTime}ms] Calling setupWithServer...`);
 
     // Setup chopsticks programmatically
@@ -485,7 +491,7 @@ export async function launchChopsticksEffect(config: ChopsticksConfig): Promise<
       catch: (cause) =>
         new ChopsticksSetupError({
           cause,
-          endpoint: config.endpoint,
+          endpoint: getEndpointString(config.endpoint),
           block: config.block ?? undefined,
         }),
     });
@@ -569,14 +575,14 @@ export const launchChopsticksEffectProgram = (
 > =>
   Effect.gen(function* () {
     const chopsticksModules = yield* Effect.promise(() => getChopsticksModules("silent"));
-    const args = configToChopsticksArgs(config);
+    const args = prepareConfigForSetup(config);
 
     const context = yield* Effect.tryPromise({
       try: () => chopsticksModules.setupWithServer(args),
       catch: (cause) =>
         new ChopsticksSetupError({
           cause,
-          endpoint: config.endpoint,
+          endpoint: getEndpointString(config.endpoint),
           block: config.block ?? undefined,
         }),
     });
@@ -632,11 +638,11 @@ const acquireChopsticks = (
     Effect.promise(() => getChopsticksModules("silent")).pipe(
       Effect.flatMap((modules) =>
         Effect.tryPromise({
-          try: () => modules.setupWithServer(configToChopsticksArgs(config)),
+          try: () => modules.setupWithServer(prepareConfigForSetup(config)),
           catch: (cause) =>
             new ChopsticksSetupError({
               cause,
-              endpoint: config.endpoint,
+              endpoint: getEndpointString(config.endpoint),
               block: config.block ?? undefined,
             }),
         })

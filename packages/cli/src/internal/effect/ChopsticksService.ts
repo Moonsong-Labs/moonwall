@@ -3,11 +3,23 @@
  *
  * This service provides a type-safe, Effect-based interface to @acala-network/chopsticks,
  * replacing the previous CLI-subprocess approach with direct programmatic control.
+ *
+ * The configuration type (ChopsticksConfig) is imported directly from @acala-network/chopsticks
+ * to ensure it stays in sync with upstream changes and supports all config options like rpc-timeout.
  */
 
 import { Context, Data, Effect } from "effect";
-import type { Blockchain, BuildBlockMode } from "@acala-network/chopsticks";
+import type { Blockchain, BuildBlockMode, fetchConfig } from "@acala-network/chopsticks";
 import type { HexString } from "@polkadot/util/types";
+
+/**
+ * The ChopsticksConfig type, derived from the fetchConfig return type.
+ *
+ * This ensures our type stays in sync with upstream chopsticks changes.
+ * The config uses kebab-case keys as defined by chopsticks (e.g., 'rpc-timeout',
+ * 'build-block-mode', 'mock-signature-host').
+ */
+export type ChopsticksConfig = Awaited<ReturnType<typeof fetchConfig>>;
 
 // =============================================================================
 // Error Types
@@ -79,34 +91,6 @@ export type ChopsticksError =
 // =============================================================================
 // Configuration Types
 // =============================================================================
-
-/**
- * Configuration for launching a chopsticks instance
- */
-export interface ChopsticksConfig {
-  /** WebSocket endpoint to fork from (e.g., "wss://rpc.polkadot.io") */
-  readonly endpoint: string;
-  /** Block number or hash to fork from (defaults to latest finalized) */
-  readonly block?: string | number | null;
-  /** Port to listen on (defaults to 8000) */
-  readonly port?: number;
-  /** Host to bind to (defaults to "127.0.0.1") */
-  readonly host?: string;
-  /** Block building mode: "batch" | "manual" | "instant" */
-  readonly buildBlockMode?: BuildBlockMode;
-  /** Path to WASM override file */
-  readonly wasmOverride?: string;
-  /** Whether to allow unresolved imports in WASM */
-  readonly allowUnresolvedImports?: boolean;
-  /** Whether to mock signature verification */
-  readonly mockSignatureHost?: boolean;
-  /** Path to SQLite database for caching */
-  readonly db?: string;
-  /** Storage overrides to apply */
-  readonly importStorage?: Record<string, Record<string, unknown>>;
-  /** Runtime log level (0-5) */
-  readonly runtimeLogLevel?: number;
-}
 
 /**
  * Result from creating a new block

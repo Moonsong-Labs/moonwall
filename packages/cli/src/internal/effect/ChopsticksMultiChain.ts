@@ -7,6 +7,7 @@
 
 import { Context, Data, Effect, Layer } from "effect";
 import type { HexString } from "@polkadot/util/types";
+import type { BuildBlockMode } from "@acala-network/chopsticks";
 import { createLogger } from "@moonwall/util";
 import {
   type ChopsticksConfig,
@@ -18,6 +19,16 @@ import {
 import { type ChopsticksServiceImpl, launchChopsticksEffect } from "./launchChopsticksEffect.js";
 
 const logger = createLogger({ name: "ChopsticksMultiChain" });
+
+/**
+ * Extract a single endpoint string from the config.
+ * The ChopsticksConfig endpoint can be a string, array of strings, or undefined.
+ */
+const getEndpointString = (endpoint: string | string[] | undefined): string | undefined => {
+  if (typeof endpoint === "string") return endpoint;
+  if (Array.isArray(endpoint)) return endpoint[0];
+  return undefined;
+};
 
 // =============================================================================
 // Error Types
@@ -352,7 +363,7 @@ export const ChopsticksMultiChainLayer = (
         catch: (cause) =>
           new ChopsticksSetupError({
             cause,
-            endpoint: config.relay.endpoint,
+            endpoint: getEndpointString(config.relay.endpoint),
           }),
       });
       cleanups.push(
@@ -370,7 +381,7 @@ export const ChopsticksMultiChainLayer = (
           catch: (cause) =>
             new ChopsticksSetupError({
               cause,
-              endpoint: paraConfig.endpoint,
+              endpoint: getEndpointString(paraConfig.endpoint),
             }),
         });
         cleanups.push(
@@ -412,6 +423,7 @@ export const createPolkadotMoonbeamConfig = (
     type: "relay",
     endpoint: "wss://rpc.polkadot.io",
     port: relayPort,
+    "build-block-mode": "Manual" as BuildBlockMode,
   },
   parachains: [
     {
@@ -419,6 +431,7 @@ export const createPolkadotMoonbeamConfig = (
       paraId: 2004, // Moonbeam on Polkadot
       endpoint: "wss://wss.api.moonbeam.network",
       port: moonbeamPort,
+      "build-block-mode": "Manual" as BuildBlockMode,
     },
   ],
 });
@@ -438,6 +451,7 @@ export const createKusamaMoonriverConfig = (
     type: "relay",
     endpoint: "wss://kusama-rpc.polkadot.io",
     port: relayPort,
+    "build-block-mode": "Manual" as BuildBlockMode,
   },
   parachains: [
     {
@@ -445,6 +459,7 @@ export const createKusamaMoonriverConfig = (
       paraId: 2023, // Moonriver on Kusama
       endpoint: "wss://wss.api.moonriver.moonbeam.network",
       port: moonriverPort,
+      "build-block-mode": "Manual" as BuildBlockMode,
     },
   ],
 });

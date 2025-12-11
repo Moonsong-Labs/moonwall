@@ -3,17 +3,19 @@
  *
  * Parses chopsticks YAML config files and resolves environment variables,
  * providing early validation before attempting to launch.
+ *
+ * This module uses the ChopsticksConfig type directly from @acala-network/chopsticks
+ * to ensure we stay in sync with upstream changes and support all config options.
  */
 
 import { Effect } from "effect";
 import * as fs from "node:fs";
 import * as yaml from "yaml";
 import { ChopsticksSetupError, type ChopsticksConfig } from "./ChopsticksService.js";
-// Import type only to avoid loading chopsticks module (which initializes loggers)
 import type { BuildBlockMode } from "@acala-network/chopsticks";
 import { createLogger } from "@moonwall/util";
 
-// Local values to avoid value import from chopsticks
+// Local values to avoid value import from chopsticks (which initializes loggers)
 const BuildBlockModeValues = {
   Batch: "Batch" as BuildBlockMode,
   Manual: "Manual" as BuildBlockMode,
@@ -21,22 +23,6 @@ const BuildBlockModeValues = {
 };
 
 const logger = createLogger({ name: "chopsticksConfigParser" });
-
-/**
- * Raw config as it appears in the YAML file
- */
-interface RawChopsticksYamlConfig {
-  endpoint?: string;
-  block?: string | number;
-  port?: number;
-  "mock-signature-host"?: boolean;
-  "wasm-override"?: string;
-  "allow-unresolved-imports"?: boolean;
-  "build-block-mode"?: string;
-  db?: string;
-  "import-storage"?: Record<string, Record<string, unknown>>;
-  "runtime-log-level"?: number;
-}
 
 /**
  * Resolve environment variable references in a string
@@ -96,9 +82,11 @@ const parseBuildBlockMode = (mode?: string): BuildBlockMode => {
  * Parse the block field which can be a number, block hash string, or env var.
  * Returns undefined if the value is empty or unset.
  */
-const parseBlockField = (block: string | number | undefined): string | number | undefined => {
+const parseBlockField = (
+  block: string | number | null | undefined
+): string | number | null | undefined => {
   if (block === undefined || block === null) {
-    return undefined;
+    return block;
   }
 
   // Already a number, return as-is
@@ -122,17 +110,32 @@ const parseBlockField = (block: string | number | undefined): string | number | 
 };
 
 /**
- * Parse a chopsticks YAML config file and return a validated ChopsticksConfig
+ * Overrides that can be applied to the parsed config.
+ * These use Moonwall's naming conventions from ChopsticksLaunchSpec.
+ */
+export interface ChopsticksConfigOverrides {
+  port?: number;
+  host?: string;
+  buildBlockMode?: "batch" | "manual" | "instant";
+  wasmOverride?: string;
+  allowUnresolvedImports?: boolean;
+}
+
+/**
+ * Parse a chopsticks YAML config file and return a validated ChopsticksConfig.
+ *
+ * This function:
+ * 1. Reads and parses the YAML file
+ * 2. Resolves environment variables (${env.VAR_NAME} syntax)
+ * 3. Validates required fields
+ * 4. Applies any overrides
+ * 5. Returns the config in chopsticks' native format (kebab-case keys)
+ *
+ * The returned config is compatible with chopsticks' setupWithServer function.
  */
 export const parseChopsticksConfigFile = (
   configPath: string,
-  overrides?: {
-    port?: number;
-    host?: string;
-    buildBlockMode?: "batch" | "manual" | "instant";
-    wasmOverride?: string;
-    allowUnresolvedImports?: boolean;
-  }
+  overrides?: ChopsticksConfigOverrides
 ): Effect.Effect<ChopsticksConfig, ChopsticksSetupError> =>
   Effect.gen(function* () {
     // Read the config file
@@ -148,9 +151,9 @@ export const parseChopsticksConfigFile = (
         }),
     });
 
-    // Parse YAML
+    // Parse YAML (raw, unprocessed)
     const rawConfigUnresolved = yield* Effect.try({
-      try: () => yaml.parse(fileContent) as RawChopsticksYamlConfig,
+      try: () => yaml.parse(fileContent) as Record<string, unknown>,
       catch: (cause) =>
         new ChopsticksSetupError({
           cause: new Error(`Failed to parse YAML config: ${cause}`),
@@ -161,8 +164,15 @@ export const parseChopsticksConfigFile = (
     // Resolve all environment variables throughout the config
     const rawConfig = resolveEnvVarsDeep(rawConfigUnresolved);
 
-    // Validate endpoint
-    const endpoint = rawConfig.endpoint ?? "";
+    // Extract endpoint for validation (may be string or array)
+    const rawEndpoint = rawConfig.endpoint;
+    const endpoint =
+      typeof rawEndpoint === "string"
+        ? rawEndpoint
+        : Array.isArray(rawEndpoint)
+          ? rawEndpoint[0]
+          : "";
+
     if (!endpoint) {
       return yield* Effect.fail(
         new ChopsticksSetupError({
@@ -171,7 +181,7 @@ export const parseChopsticksConfigFile = (
               `Check that the environment variable in your chopsticks config is set. ` +
               `Raw value: "${rawConfigUnresolved.endpoint ?? ""}"`
           ),
-          endpoint: rawConfigUnresolved.endpoint || "undefined",
+          endpoint: String(rawConfigUnresolved.endpoint) || "undefined",
         })
       );
     }
@@ -187,30 +197,39 @@ export const parseChopsticksConfigFile = (
       );
     }
 
-    // Parse block field (handles number conversion)
-    const block = parseBlockField(rawConfig.block);
+    // Parse block field
+    const block = parseBlockField(rawConfig.block as string | number | null | undefined);
+
+    // Determine build-block-mode
+    const rawBuildBlockMode = rawConfig["build-block-mode"] as string | undefined;
+    const buildBlockMode =
+      overrides?.buildBlockMode !== undefined
+        ? parseBuildBlockMode(overrides.buildBlockMode)
+        : rawBuildBlockMode !== undefined
+          ? parseBuildBlockMode(rawBuildBlockMode)
+          : BuildBlockModeValues.Manual;
 
     logger.debug(`Parsed chopsticks config from ${configPath}`);
     logger.debug(`  endpoint: ${endpoint}`);
     logger.debug(`  port: ${overrides?.port ?? rawConfig.port ?? 8000}`);
 
-    // Build the config
+    // Build the config using chopsticks' native kebab-case format
+    // Start with rawConfig to preserve any fields we don't explicitly handle
     const config: ChopsticksConfig = {
-      endpoint,
+      // Spread the raw config to include all fields (like rpc-timeout, genesis, etc.)
+      ...rawConfig,
+      // Override with explicit values
+      endpoint: rawConfig.endpoint as string | string[] | undefined,
       block,
-      port: overrides?.port ?? rawConfig.port ?? 8000,
-      host: overrides?.host ?? "127.0.0.1",
-      buildBlockMode:
-        parseBuildBlockMode(overrides?.buildBlockMode) ??
-        parseBuildBlockMode(rawConfig["build-block-mode"]),
-      wasmOverride: overrides?.wasmOverride ?? rawConfig["wasm-override"],
-      allowUnresolvedImports:
-        overrides?.allowUnresolvedImports ?? rawConfig["allow-unresolved-imports"],
-      mockSignatureHost: rawConfig["mock-signature-host"],
-      db: rawConfig.db,
-      importStorage: rawConfig["import-storage"],
-      runtimeLogLevel: rawConfig["runtime-log-level"],
-    };
+      port: overrides?.port ?? (rawConfig.port as number | undefined) ?? 8000,
+      host: overrides?.host ?? (rawConfig.host as string | undefined),
+      "build-block-mode": buildBlockMode,
+      "wasm-override":
+        overrides?.wasmOverride ?? (rawConfig["wasm-override"] as string | undefined),
+      "allow-unresolved-imports":
+        overrides?.allowUnresolvedImports ??
+        (rawConfig["allow-unresolved-imports"] as boolean | undefined),
+    } as ChopsticksConfig;
 
     return config;
   });
@@ -222,22 +241,30 @@ export const validateChopsticksConfig = (
   config: ChopsticksConfig
 ): Effect.Effect<ChopsticksConfig, ChopsticksSetupError> =>
   Effect.gen(function* () {
-    if (!config.endpoint) {
+    // Extract endpoint (may be string or array)
+    const endpoint =
+      typeof config.endpoint === "string"
+        ? config.endpoint
+        : Array.isArray(config.endpoint)
+          ? config.endpoint[0]
+          : undefined;
+
+    if (!endpoint) {
       return yield* Effect.fail(
         new ChopsticksSetupError({
           cause: new Error("Endpoint is required - check your environment variables"),
-          endpoint: config.endpoint ?? "undefined",
+          endpoint: "undefined",
         })
       );
     }
 
-    if (!config.endpoint.startsWith("ws://") && !config.endpoint.startsWith("wss://")) {
+    if (!endpoint.startsWith("ws://") && !endpoint.startsWith("wss://")) {
       return yield* Effect.fail(
         new ChopsticksSetupError({
           cause: new Error(
-            `Invalid endpoint format: "${config.endpoint}" - must start with ws:// or wss://`
+            `Invalid endpoint format: "${endpoint}" - must start with ws:// or wss://`
           ),
-          endpoint: config.endpoint,
+          endpoint,
         })
       );
     }
