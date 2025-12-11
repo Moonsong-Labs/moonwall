@@ -1,5 +1,12 @@
 # @moonwall/util
 
+## 5.18.0
+
+### Patch Changes
+
+- Updated dependencies [760dd82]
+  - @moonwall/types@5.18.0
+
 ## 5.17.3
 
 ### Patch Changes
