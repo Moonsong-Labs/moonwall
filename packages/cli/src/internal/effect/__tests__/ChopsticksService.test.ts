@@ -218,39 +218,46 @@ describe("ChopsticksService - Phase 1: Types and Errors", () => {
   });
 
   describe("Config Type Validation", () => {
-    it("should allow creating a valid ChopsticksConfig", () => {
+    it("should allow creating a valid ChopsticksConfig with kebab-case keys", () => {
+      // ChopsticksConfig uses kebab-case keys matching chopsticks' native format
       const config: ChopsticksConfig = {
         endpoint: "wss://rpc.polkadot.io",
         block: 12345,
         port: 8000,
         host: "127.0.0.1",
-        buildBlockMode: BuildBlockMode.Manual,
-        wasmOverride: "/path/to/wasm",
-        allowUnresolvedImports: true,
-        mockSignatureHost: true,
+        "build-block-mode": BuildBlockMode.Manual,
+        "wasm-override": "/path/to/wasm",
+        "allow-unresolved-imports": true,
+        "mock-signature-host": true,
         db: "./chopsticks.db",
-        runtimeLogLevel: 3,
+        "runtime-log-level": 3,
+        "rpc-timeout": 30000, // New field supported via chopsticks type
       };
 
       expect(config.endpoint).toBe("wss://rpc.polkadot.io");
       expect(config.block).toBe(12345);
       expect(config.port).toBe(8000);
+      expect(config["rpc-timeout"]).toBe(30000);
     });
 
-    it("should allow minimal ChopsticksConfig with only required fields", () => {
+    it("should allow ChopsticksConfig with required port and build-block-mode", () => {
+      // The chopsticks Config type has port and build-block-mode as required after parsing
       const config: ChopsticksConfig = {
         endpoint: "wss://rpc.polkadot.io",
+        port: 8000,
+        "build-block-mode": BuildBlockMode.Manual,
       };
 
       expect(config.endpoint).toBe("wss://rpc.polkadot.io");
-      expect(config.block).toBeUndefined();
-      expect(config.port).toBeUndefined();
+      expect(config.port).toBe(8000);
+      expect(config["build-block-mode"]).toBe(BuildBlockMode.Manual);
     });
 
     it("should allow providing ChopsticksConfig via Layer", async () => {
       const config: ChopsticksConfig = {
         endpoint: "wss://test.io",
         port: 9000,
+        "build-block-mode": BuildBlockMode.Manual,
       };
 
       const configLayer = Layer.succeed(ChopsticksConfigTag, config);

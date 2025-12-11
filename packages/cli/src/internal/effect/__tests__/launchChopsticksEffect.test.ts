@@ -177,47 +177,54 @@ describe("launchChopsticksEffect - Phase 2: Module Structure", () => {
     });
   });
 
-  describe("Config Conversion", () => {
-    it("should accept minimal config with only endpoint", () => {
+  describe("Config Conversion (kebab-case)", () => {
+    it("should accept config with required fields", () => {
+      // ChopsticksConfig now uses kebab-case keys and has port/build-block-mode as required
       const config: ChopsticksConfig = {
         endpoint: "wss://rpc.polkadot.io",
+        port: 8000,
+        "build-block-mode": BuildBlockMode.Manual,
       };
 
       expect(config.endpoint).toBe("wss://rpc.polkadot.io");
-      expect(config.port).toBeUndefined();
-      expect(config.host).toBeUndefined();
+      expect(config.port).toBe(8000);
+      expect(config["build-block-mode"]).toBe(BuildBlockMode.Manual);
     });
 
-    it("should accept full config with all options", () => {
+    it("should accept full config with all options using kebab-case", () => {
       const config: ChopsticksConfig = {
         endpoint: "wss://rpc.polkadot.io",
         block: 12345,
         port: 9000,
         host: "0.0.0.0",
-        buildBlockMode: BuildBlockMode.Manual,
-        wasmOverride: "/path/to/wasm",
-        allowUnresolvedImports: true,
-        mockSignatureHost: true,
+        "build-block-mode": BuildBlockMode.Manual,
+        "wasm-override": "/path/to/wasm",
+        "allow-unresolved-imports": true,
+        "mock-signature-host": true,
         db: "./chopsticks.db",
-        importStorage: { System: { Account: {} } },
-        runtimeLogLevel: 3,
+        "import-storage": { System: { Account: {} } },
+        "runtime-log-level": 3,
+        "rpc-timeout": 30000, // New field supported via chopsticks type
       };
 
       expect(config.endpoint).toBe("wss://rpc.polkadot.io");
       expect(config.block).toBe(12345);
       expect(config.port).toBe(9000);
       expect(config.host).toBe("0.0.0.0");
-      expect(config.buildBlockMode).toBe(BuildBlockMode.Manual);
-      expect(config.wasmOverride).toBe("/path/to/wasm");
-      expect(config.allowUnresolvedImports).toBe(true);
-      expect(config.mockSignatureHost).toBe(true);
+      expect(config["build-block-mode"]).toBe(BuildBlockMode.Manual);
+      expect(config["wasm-override"]).toBe("/path/to/wasm");
+      expect(config["allow-unresolved-imports"]).toBe(true);
+      expect(config["mock-signature-host"]).toBe(true);
       expect(config.db).toBe("./chopsticks.db");
-      expect(config.runtimeLogLevel).toBe(3);
+      expect(config["runtime-log-level"]).toBe(3);
+      expect(config["rpc-timeout"]).toBe(30000);
     });
 
     it("should accept config with block as hash string", () => {
       const config: ChopsticksConfig = {
         endpoint: "wss://rpc.polkadot.io",
+        port: 8000,
+        "build-block-mode": BuildBlockMode.Manual,
         block: "0x1234567890abcdef",
       };
 
@@ -227,6 +234,8 @@ describe("launchChopsticksEffect - Phase 2: Module Structure", () => {
     it("should accept config with block as null for latest", () => {
       const config: ChopsticksConfig = {
         endpoint: "wss://rpc.polkadot.io",
+        port: 8000,
+        "build-block-mode": BuildBlockMode.Manual,
         block: null,
       };
 
@@ -241,6 +250,7 @@ describe("launchChopsticksEffect - Phase 2: Module Structure", () => {
       const program = launchChopsticksEffectProgram({
         endpoint: "wss://test.io",
         port: 8000,
+        "build-block-mode": BuildBlockMode.Manual,
       });
 
       // Verify it's an Effect by checking it has common Effect methods
@@ -254,6 +264,7 @@ describe("launchChopsticksEffect - Phase 2: Module Structure", () => {
       const program = launchChopsticksEffectProgram({
         endpoint: "wss://nonexistent.invalid",
         port: 8000,
+        "build-block-mode": BuildBlockMode.Manual,
       }).pipe(
         Effect.catchTag("ChopsticksSetupError", (error) =>
           Effect.succeed({ caught: true, endpoint: error.endpoint })
@@ -324,6 +335,7 @@ describe("ChopsticksServiceLayer - Phase 3: Layer.scoped", () => {
       const layer = ChopsticksServiceLayer({
         endpoint: "wss://test.io",
         port: 8000,
+        "build-block-mode": BuildBlockMode.Manual,
       });
 
       // Verify it's a Layer by checking it has Layer-like structure
@@ -338,6 +350,7 @@ describe("ChopsticksServiceLayer - Phase 3: Layer.scoped", () => {
       const layer = ChopsticksServiceLayer({
         endpoint: "wss://test.io",
         port: 8000,
+        "build-block-mode": BuildBlockMode.Manual,
       });
 
       // Verify the Layer is typed to provide ChopsticksService
@@ -352,7 +365,7 @@ describe("ChopsticksServiceLayer - Phase 3: Layer.scoped", () => {
       expect(typeof providedProgram.pipe).toBe("function");
     });
 
-    it("should accept all config options", async () => {
+    it("should accept all config options using kebab-case", async () => {
       const { ChopsticksServiceLayer } = await import("../launchChopsticksEffect.js");
       const { BuildBlockMode } = await import("@acala-network/chopsticks");
 
@@ -361,12 +374,13 @@ describe("ChopsticksServiceLayer - Phase 3: Layer.scoped", () => {
         block: 12345,
         port: 9000,
         host: "0.0.0.0",
-        buildBlockMode: BuildBlockMode.Manual,
-        wasmOverride: "/path/to/wasm",
-        allowUnresolvedImports: true,
-        mockSignatureHost: true,
+        "build-block-mode": BuildBlockMode.Manual,
+        "wasm-override": "/path/to/wasm",
+        "allow-unresolved-imports": true,
+        "mock-signature-host": true,
         db: "./chopsticks.db",
-        runtimeLogLevel: 3,
+        "runtime-log-level": 3,
+        "rpc-timeout": 30000,
       });
 
       expect(layer).toBeDefined();
@@ -383,6 +397,7 @@ describe("ChopsticksServiceLayer - Phase 3: Layer.scoped", () => {
       const configLayer = Layer.succeed(ChopsticksConfigTag, {
         endpoint: "wss://test.io",
         port: 8000,
+        "build-block-mode": BuildBlockMode.Manual,
       });
 
       const program = Effect.gen(function* () {
@@ -406,6 +421,7 @@ describe("ChopsticksServiceLayer - Phase 3: Layer.scoped", () => {
       const configLayer = Layer.succeed(ChopsticksConfigTag, {
         endpoint: "wss://test.io",
         port: 8000,
+        "build-block-mode": BuildBlockMode.Manual,
       });
 
       // Compose with ChopsticksServiceLive
@@ -423,6 +439,7 @@ describe("ChopsticksServiceLayer - Phase 3: Layer.scoped", () => {
       const layer = ChopsticksServiceLayer({
         endpoint: "wss://nonexistent.invalid",
         port: 8000,
+        "build-block-mode": BuildBlockMode.Manual,
       });
 
       const program = Effect.gen(function* () {
@@ -447,6 +464,7 @@ describe("ChopsticksServiceLayer - Phase 3: Layer.scoped", () => {
       const configLayer = Layer.succeed(ChopsticksConfigTag, {
         endpoint: "wss://nonexistent.invalid",
         port: 8000,
+        "build-block-mode": BuildBlockMode.Manual,
       });
 
       const fullLayer = ChopsticksServiceLive.pipe(Layer.provide(configLayer));
@@ -473,6 +491,7 @@ describe("ChopsticksServiceLayer - Phase 3: Layer.scoped", () => {
       const layer = ChopsticksServiceLayer({
         endpoint: "wss://test.io",
         port: 8000,
+        "build-block-mode": BuildBlockMode.Manual,
       });
 
       // Effect.scoped can be used to manually control the scope
@@ -502,7 +521,7 @@ describe.skip("launchChopsticksEffect - Integration Tests", () => {
     const { result, cleanup } = await launchChopsticksEffect({
       endpoint: "wss://rpc.polkadot.io",
       port: 8000,
-      buildBlockMode: BuildBlockMode.Manual,
+      "build-block-mode": BuildBlockMode.Manual,
     });
 
     try {
@@ -520,7 +539,7 @@ describe.skip("launchChopsticksEffect - Integration Tests", () => {
     const { result, cleanup } = await launchChopsticksEffect({
       endpoint: "wss://rpc.polkadot.io",
       port: 8001,
-      buildBlockMode: BuildBlockMode.Manual,
+      "build-block-mode": BuildBlockMode.Manual,
     });
 
     try {
