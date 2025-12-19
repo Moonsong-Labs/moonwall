@@ -478,6 +478,11 @@ export interface ProviderConfig {
   endpoints: string[];
 
   /**
+   * RPC timeout (ms)
+   */
+  rpcTimeout?: number;
+
+  /**
    * An optional RPC bundle.
    */
   rpc?: IRpcBundle;

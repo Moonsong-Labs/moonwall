@@ -92,6 +92,7 @@ const saveCachedMetadata = (genesisHash: string, metadataHex: string): void => {
 export class ProviderFactory {
   private url: string;
   private privateKey: string;
+  private rpcTimeout: number;
 
   constructor(private providerConfig: ProviderConfig) {
     const endpoint = providerConfig.endpoints[0];
@@ -104,6 +105,7 @@ export class ProviderFactory {
     } else {
       this.url = endpoint;
     }
+    this.rpcTimeout = providerConfig.rpcTimeout || 60000; // Default to 60s
     debug(`Constructor - providerConfig.endpoints[0]: ${endpoint}, this.url: ${this.url}`);
     this.privateKey = process.env.MOON_PRIV_KEY || ALITH_PRIVATE_KEY;
   }
@@ -139,7 +141,7 @@ export class ProviderFactory {
         const startTime = Date.now();
 
         const options: ApiOptions = {
-          provider: new WsProvider(this.url),
+          provider: new WsProvider(this.url, undefined, undefined, this.rpcTimeout),
           initWasm: false,
           noInitWarn: true,
           isPedantic: false,
@@ -167,7 +169,7 @@ export class ProviderFactory {
 
         return api;
       },
-      ws: () => new WsProvider(this.url),
+      ws: () => new WsProvider(this.url, undefined, undefined, this.rpcTimeout),
     };
   }
 
