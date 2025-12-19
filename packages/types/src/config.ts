@@ -345,6 +345,13 @@ export interface ChopsticksLaunchSpec extends GenericLaunchSpec {
    * Added in: https://github.com/AcalaNetwork/chopsticks/pull/826
    */
   address?: string;
+
+  /**
+   * Optional timeout in milliseconds for new block operations.
+   * Defaults to 60000ms (60 seconds) if not specified.
+   * Increase this for chains with large storage migrations.
+   */
+  newBlockTimeout?: number;
 }
 
 /**

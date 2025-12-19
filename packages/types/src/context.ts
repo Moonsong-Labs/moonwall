@@ -46,7 +46,7 @@ export interface MoonwallProvider {
     | Promise<ViemClient>
     | PolkadotClient
     | null;
-  ws?: () => WsProvider;
+  ws?: (timeout?: number) => WsProvider;
 }
 
 /**
@@ -103,6 +103,8 @@ export interface ChopsticksBlockCreation {
   expectEvents?: AugmentedEvent<ApiTypes>[];
   allowFailures?: boolean;
   logger?: Logger;
+  /** Optional timeout in milliseconds for the new block RPC request */
+  timeout?: number;
 }
 
 export interface BlockCreation {

@@ -17,6 +17,7 @@ import {
   getWsUrlFromConfig,
   sendSetStorageRequest,
 } from "../../internal/foundations/chopsticksHelpers";
+import { getEnvironmentFromConfig } from "../configReader";
 import { MoonwallContext } from "../globalContext";
 import { upgradeRuntimeChopsticks } from "../upgradeProcedures";
 
@@ -79,8 +80,18 @@ export const chopsticksHandler: FoundationHandler<"chopsticks"> = ({
       return newKeyring();
     },
 
-    createBlock: async (options: ChopsticksBlockCreation = {}) =>
-      await createChopsticksBlock(context, options),
+    createBlock: async (options: ChopsticksBlockCreation = {}) => {
+      // Get newBlockTimeout from foundation config if not provided in options
+      const env = getEnvironmentFromConfig();
+      const launchSpec =
+        env.foundation.type === "chopsticks" ? env.foundation.launchSpec[0] : undefined;
+      const configTimeout = launchSpec?.newBlockTimeout;
+
+      return await createChopsticksBlock(context, {
+        ...options,
+        timeout: options.timeout ?? configTimeout,
+      });
+    },
     setStorage: async (params: {
       providerName?: string;
       module: string;
