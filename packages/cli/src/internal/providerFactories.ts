@@ -167,7 +167,7 @@ export class ProviderFactory {
 
         return api;
       },
-      ws: () => new WsProvider(this.url),
+      ws: (timeout?: number) => new WsProvider(this.url, 1000, {}, timeout),
     };
   }
 

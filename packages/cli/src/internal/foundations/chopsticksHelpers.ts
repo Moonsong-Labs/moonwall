@@ -6,7 +6,10 @@ import chalk from "chalk";
 import { setTimeout } from "node:timers/promises";
 import { MoonwallContext } from "../../lib/globalContext";
 
-export async function getWsFromConfig(providerName?: string): Promise<WsProvider> {
+export async function getWsFromConfig(
+  providerName?: string,
+  timeout?: number
+): Promise<WsProvider> {
   if (providerName) {
     const provider = (await MoonwallContext.getContext()).environment.providers.find(
       ({ name }) => name === providerName
@@ -20,7 +23,7 @@ export async function getWsFromConfig(providerName?: string): Promise<WsProvider
       throw new Error("Provider does not have an attached ws() property ");
     }
 
-    return provider.ws();
+    return provider.ws(timeout);
   }
   const provider = (await MoonwallContext.getContext()).environment.providers.find(
     ({ type }) => type === "polkadotJs"
@@ -36,7 +39,7 @@ export async function getWsFromConfig(providerName?: string): Promise<WsProvider
     throw new Error("Provider does not have an attached ws() property ");
   }
 
-  return provider.ws();
+  return provider.ws(timeout);
 }
 
 export async function getWsUrlFromConfig(providerName?: string): Promise<string> {
@@ -150,8 +153,11 @@ export async function sendNewBlockRequest(params?: {
   providerName?: string;
   count?: number;
   to?: number;
+  timeout?: number;
 }) {
-  const ws = params ? await getWsFromConfig(params.providerName) : await getWsFromConfig();
+  const ws = params
+    ? await getWsFromConfig(params.providerName, params.timeout)
+    : await getWsFromConfig();
 
   let result = "";
 

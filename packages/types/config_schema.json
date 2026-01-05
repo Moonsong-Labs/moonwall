@@ -38,6 +38,10 @@
           "description": "The name of the launch spec.",
           "type": "string"
         },
+        "newBlockTimeout": {
+          "description": "Optional timeout in milliseconds for new block operations.\nDefaults to 60000ms (60 seconds) if not specified.\nIncrease this for chains with large storage migrations.",
+          "type": "number"
+        },
         "options": {
           "description": "An optional array of options for the launch spec.",
           "items": {
