@@ -1,5 +1,14 @@
 # @moonwall/cli
 
+## 5.18.2
+
+### Patch Changes
+
+- 450c92e: Add chopsticks timeout
+- Updated dependencies [450c92e]
+  - @moonwall/types@5.18.2
+  - @moonwall/util@5.18.2
+
 ## 5.18.1
 
 ### Patch Changes

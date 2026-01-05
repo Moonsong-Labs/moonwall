@@ -1,5 +1,11 @@
 # @moonwall/types
 
+## 5.18.2
+
+### Patch Changes
+
+- 450c92e: Add chopsticks timeout
+
 ## 5.18.1
 
 ## 5.18.0
