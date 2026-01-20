@@ -704,3 +704,54 @@
 - `bun.lock` - Updated with new dependencies
 - `plans/prd.json` - Marked Feature 17 as complete
 
+---
+
+### Feature Completed: Effect migration - create Effect error types module (PRD Feature 18)
+
+**Changes Made:**
+1. Created `packages/cli/src/internal/effect/errors/foundation.ts` with 5 tagged error classes:
+   - `FoundationStartupError` - For when a foundation (dev, chopsticks, zombie, read_only) fails to start
+   - `FoundationShutdownError` - For when a foundation fails to shutdown cleanly
+   - `ProviderConnectionError` - For when a blockchain provider (polkadotJs, ethers, viem, web3, papi) fails to connect
+   - `FoundationHealthCheckError` - For when a foundation fails health checks
+   - `FoundationConfigError` - For invalid foundation configuration
+
+2. Created `packages/cli/src/internal/effect/errors/index.ts`:
+   - Exports all error types from foundation.ts
+   - Includes documentation about error hierarchy
+
+3. Updated `packages/cli/src/internal/effect/index.ts`:
+   - Added export for the new errors subdirectory
+   - Added comments distinguishing low-level (process) vs high-level (foundation) errors
+
+**Design Decisions:**
+- These are high-level errors that sit above existing low-level errors (ProcessError, NodeLaunchError, PortDiscoveryError)
+- Each error has typed fields for context (e.g., `foundationType`, `providerType`, `endpoint`)
+- Uses Effect's `Data.TaggedError` pattern for:
+  - Discriminated union support via string tags
+  - Type-safe error narrowing with `Effect.catchTag`
+  - Structural equality for testing
+- Errors include optional `cause` field to wrap underlying errors
+- Added two additional errors beyond PRD requirements (FoundationHealthCheckError, FoundationConfigError) as they are needed for complete foundation lifecycle management
+
+**Verification:**
+- `bun typecheck` - Passes with no errors
+- `bun test` - 309 pass, 12 skip, 16 fail, 2 errors (same baseline as Feature 17 - E2E tests require moonwall environment)
+
+**Notes for Next Developer:**
+1. Feature 19 (DevFoundationService interface) can now use these error types for its Effect return types.
+2. The existing low-level errors in `packages/cli/src/internal/effect/errors.ts` remain unchanged - they will be wrapped by these high-level errors.
+3. Example usage pattern:
+   ```ts
+   Effect.catchTag("FoundationStartupError", (error) => {
+     console.error(`${error.foundationType} failed: ${error.message}`);
+   })
+   ```
+4. The error types are now available via `import { FoundationStartupError } from "@moonwall/cli"` after build.
+
+**Files Changed:**
+- `packages/cli/src/internal/effect/errors/foundation.ts` - New file with 5 tagged error classes
+- `packages/cli/src/internal/effect/errors/index.ts` - New file exporting all error types
+- `packages/cli/src/internal/effect/index.ts` - Updated to export from errors subdirectory
+- `plans/prd.json` - Marked Feature 18 as complete
+

@@ -2,7 +2,10 @@
  * Effect-TS services for Moonwall node management
  */
 
+// Low-level errors (process, port discovery, node readiness)
 export * from "./errors.js";
+// High-level foundation errors
+export * from "./errors/index.js";
 export * from "./ProcessManagerService.js";
 export * from "./PortDiscoveryService.js";
 export * from "./NodeReadinessService.js";

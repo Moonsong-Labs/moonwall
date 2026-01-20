@@ -219,7 +219,8 @@
       "Define ProviderConnectionError using Data.TaggedError",
       "Export all error types from packages/cli/src/internal/effect/errors/index.ts"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: (1) Created packages/cli/src/internal/effect/errors/foundation.ts with 5 tagged error classes: FoundationStartupError, FoundationShutdownError, ProviderConnectionError, FoundationHealthCheckError, FoundationConfigError. (2) Created packages/cli/src/internal/effect/errors/index.ts exporting all error types. (3) Updated main packages/cli/src/internal/effect/index.ts to export from errors subdirectory. All errors use Data.TaggedError pattern with typed fields for discriminated union support. Typecheck passes. Test baseline unchanged: 309 pass, 12 skip, 16 fail, 2 errors (E2E tests requiring moonwall environment)."
   },
   {
     "category": "functional",
