@@ -11,21 +11,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          version: 9.1.4
+          bun-version: latest
       - uses: actions/setup-node@v4
         with:
           node-version: 23
-          cache: "pnpm"
-      - run: pnpm install 
-      - run: pnpm run build
+      - run: bun install
+      - run: bun run build
       - name: Create Release Pull Request
         id: changesets
         uses: changesets/action@v1
         with:
-          version: pnpm changeset:version
-          publish: pnpm changeset:release
+          version: bun changeset:version
+          publish: bun changeset:release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

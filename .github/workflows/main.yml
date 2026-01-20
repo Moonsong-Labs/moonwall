@@ -13,89 +13,81 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          version: 9.1.4
+          bun-version: latest
       - uses: actions/setup-node@v4
         with:
           node-version: 23
-          cache: "pnpm"
-      - run: pnpm install
-      - run: pnpm run build
+      - run: bun install
+      - run: bun run build
 
   lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          version: 9.1.4
+          bun-version: latest
       - uses: actions/setup-node@v4
         with:
           node-version: 23
-          cache: "pnpm"
-      - run: pnpm install
-      - run: pnpm run lint
+      - run: bun install
+      - run: bun run lint
 
   format:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          version: 9.1.4
+          bun-version: latest
       - uses: actions/setup-node@v4
         with:
           node-version: 23
-          cache: "pnpm"
-      - run: pnpm install
-      - run: pnpm run fmt
+      - run: bun install
+      - run: bun run fmt
 
   test_init:
     runs-on: ubuntu-latest
     needs: ["build"]
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          version: 9.1.4
+          bun-version: latest
       - uses: actions/setup-node@v4
         with:
           node-version: 23
-          cache: "pnpm"
       - name: Build like before
         run: |
-          pnpm install   
-          pnpm run build
+          bun install
+          bun run build
       - name: Initialize config
         run: |
           cd test
           rm moonwall.config.json
-          pnpm moonwall init --acceptAllDefaults
+          bunx moonwall init --acceptAllDefaults
       - name: Run test
         run: |
           cd test
-          pnpm moonwall test default_env
+          bunx moonwall test default_env
 
   test_basic:
     runs-on: ubuntu-latest
     needs: ["build"]
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          version: 9.1.4
+          bun-version: latest
       - uses: actions/setup-node@v4
         with:
           node-version: 23
-          cache: "pnpm"
-      - uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: latest
       - name: Build like before
         run: |
-          pnpm install   
-          pnpm run build
+          bun install
+          bun run build
       - name: Run standard dev test
         run: |
           cd test
@@ -106,23 +98,16 @@ jobs:
     needs: ["build"]
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v1
+      - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9.1.4
       - uses: actions/setup-node@v4
         with:
           node-version: 23
-          cache: "pnpm"
       - name: Build like before
         run: |
-          pnpm install  
-          pnpm run build
-      - uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: latest
+          bun install
+          bun run build
       - name: Cache tanssi binary
         id: tanssi-cache
         uses: actions/cache@v4
@@ -152,23 +137,16 @@ jobs:
         shard: [1, 2]
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v1
+      - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9.1.4
       - uses: actions/setup-node@v4
         with:
           node-version: 23
-          cache: "pnpm"
       - name: Build like before
         run: |
-          pnpm install  
-          pnpm run build
-      - uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: latest
+          bun install
+          bun run build
       - name: Cache moonbeam binary
         id: moonbeam-cache
         uses: actions/cache@v4
@@ -199,23 +177,16 @@ jobs:
         suite: ["papi_dev", "fork_test", "dev_docker", "dev_smoke"]
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v1
+      - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9.1.4
       - uses: actions/setup-node@v4
         with:
           node-version: 23
-          cache: "pnpm"
       - name: Build like before
         run: |
-          pnpm install  
-          pnpm run build
-      - uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: latest
+          bun install
+          bun run build
       - name: Cache moonbeam binary
         id: moonbeam-cache
         uses: actions/cache@v4
@@ -240,23 +211,16 @@ jobs:
       NO_COLOR: 1
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v1
+      - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9.1.4
       - uses: actions/setup-node@v4
         with:
           node-version: 23
-          cache: "pnpm"
       - name: Build like before
         run: |
-          pnpm install  
-          pnpm run build
-      - uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: latest
+          bun install
+          bun run build
       - name: Run snapshot update test
         id: update_test
         run: |
@@ -288,20 +252,16 @@ jobs:
         suite: ["chopsticks", "multi_chopsticks", "chopsticks_round"]
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          version: 9.1.4
+          bun-version: latest
       - uses: actions/setup-node@v4
         with:
           node-version: 23
-          cache: "pnpm"
       - name: Build like before
         run: |
-          pnpm install   
-          pnpm run build
-      - uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: latest
+          bun install
+          bun run build
       - name: Run ${{matrix.suite}}
         run: |
           cd test
@@ -326,20 +286,16 @@ jobs:
         suite: ["eth_test", "viem_test", "papi_readonly"]
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          version: 9.1.4
+          bun-version: latest
       - uses: actions/setup-node@v4
         with:
           node-version: 23
-          cache: "pnpm"
       - name: Build like before
         run: |
-          pnpm install   
-          pnpm run build
-      - uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: latest
+          bun install
+          bun run build
       - name: Run standard ${{matrix.suite}}
         run: |
           cd test
@@ -354,19 +310,18 @@ jobs:
     needs: ["build"]
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          version: 9.1.4
+          bun-version: latest
       - uses: actions/setup-node@v4
         with:
           node-version: 23
-          cache: "pnpm"
       - name: Build like before
         run: |
-          pnpm install
-          pnpm run build
+          bun install
+          bun run build
       - name: Run Effect-TS tests
-        run: cd packages/cli && pnpm test
+        run: cd packages/cli && bun test
 
   test_zombie:
     runs-on: ubuntu-latest
@@ -379,16 +334,12 @@ jobs:
         suite: ["zombie_test", "zombie_multi_para", "zombie_noPara"]
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          version: 9.1.4
+          bun-version: latest
       - uses: actions/setup-node@v4
         with:
           node-version: 23
-          cache: "pnpm"
-      - uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: latest
       - name: Cache moonbeam binary
         id: moonbeam-cache
         uses: actions/cache@v4
@@ -397,8 +348,8 @@ jobs:
           key: moonbeam-${{ env.MOONBEAM_VERSION }}-${{ runner.os }}
       - name: Build like before
         run: |
-          pnpm install   
-          pnpm run build
+          bun install
+          bun run build
       - name: Download moonbeam binary
         if: steps.moonbeam-cache.outputs.cache-hit != 'true'
         run: |

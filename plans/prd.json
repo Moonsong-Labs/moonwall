@@ -93,7 +93,8 @@
       "Replace 'pnpm run' with 'bun run' in CI workflows",
       "Update cache configuration for bun.lockb instead of pnpm-lock.yaml"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: Updated all 4 workflow files (main.yml, publish.yml, manual-publish.yml, deploy.yml). Replaced pnpm/action-setup@v4 with oven-sh/setup-bun@v2 in all jobs. Replaced all pnpm install/run commands with bun install/run. Updated changeset commands to use bun. Removed duplicate setup-bun steps that were previously added after pnpm setup. Removed pnpm cache config since bun handles its own caching. claude.yml unchanged as it doesn't use any package manager. Test baseline: 296 pass, 19 fail (same as Feature 7)."
   },
   {
     "category": "functional",

@@ -191,3 +191,55 @@
 
 **Files Changed:**
 - `plans/prd.json` - Marked Feature 7 as complete with notes
+
+---
+
+### Feature Completed: Replace pnpm with Bun - CI/CD configuration (PRD Feature 8)
+
+**Changes Made:**
+1. Updated `.github/workflows/main.yml`:
+   - Replaced `pnpm/action-setup@v4` with `oven-sh/setup-bun@v2` in all 12 jobs
+   - Removed `cache: "pnpm"` from `actions/setup-node@v4` (bun handles its own caching)
+   - Replaced all `pnpm install` with `bun install`
+   - Replaced all `pnpm run <cmd>` with `bun run <cmd>`
+   - Replaced `pnpm moonwall` and `pnpm test` with `bunx moonwall` and `bun test`
+   - Removed duplicate `oven-sh/setup-bun@v1` steps that were previously added after pnpm setup
+
+2. Updated `.github/workflows/publish.yml`:
+   - Replaced `pnpm/action-setup@v4` with `oven-sh/setup-bun@v2`
+   - Replaced `pnpm install` with `bun install`
+   - Replaced `pnpm run build` with `bun run build`
+   - Updated changeset commands: `pnpm changeset:version` → `bun changeset:version`, `pnpm changeset:release` → `bun changeset:release`
+
+3. Updated `.github/workflows/manual-publish.yml`:
+   - Replaced `pnpm/action-setup@v4` with `oven-sh/setup-bun@v2`
+   - Replaced `pnpm install` with `bun install`
+   - Replaced `pnpm run build` with `bun run build`
+
+4. Updated `.github/workflows/deploy.yml`:
+   - Replaced `pnpm/action-setup@v4` with `oven-sh/setup-bun@v2`
+   - Replaced `pnpm i` with `bun install`
+   - Replaced `pnpm docs:build` with `bun run docs:build`
+
+5. `claude.yml` - No changes needed (doesn't use any package manager commands)
+
+**Verification:**
+- `bun typecheck` - Passes with no errors
+- `bun test` - 296 pass, 12 skip, 19 fail (same baseline as Feature 7 - vi.mock incompatibilities)
+
+**Notes for Next Developer:**
+1. All CI/CD workflows now use Bun exclusively. The workflows should run correctly once pushed.
+2. Upgraded from `oven-sh/setup-bun@v1` to `oven-sh/setup-bun@v2` for the latest features and fixes.
+3. Removed the pnpm cache configuration since Bun manages its own dependency cache.
+4. Node.js is still installed (v23) for compatibility with packages that require Node APIs.
+5. Next high-priority features are:
+   - Feature 9: Documentation updates (README.md, CLAUDE.md)
+   - Feature 10: bunfig.toml configuration
+   - Features 11-16: Replace Vitest with Bun test runner (to fix the 19 failing tests)
+
+**Files Changed:**
+- `.github/workflows/main.yml` - Updated all jobs to use bun
+- `.github/workflows/publish.yml` - Updated to use bun
+- `.github/workflows/manual-publish.yml` - Updated to use bun
+- `.github/workflows/deploy.yml` - Updated to use bun
+- `plans/prd.json` - Marked Feature 8 as complete
