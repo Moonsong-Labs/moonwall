@@ -206,7 +206,8 @@
       "Run `bun install` in packages/util",
       "Verify Effect imports work with a simple test import"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: (1) Added effect ^3.19.8 and @effect/platform ^0.93.6 to packages/util dependencies. (2) Added bun-types ^1.3.6 to devDependencies and updated tsconfig.json with types: ['bun-types'] for bun:test support. (3) Created packages/util/src/__tests__/effect-imports.test.ts with 4 tests verifying Effect.succeed, Effect.map, Effect.flatMap, pipe, and @effect/platform FileSystem imports. (4) All 4 tests pass. bun typecheck passes. Full suite: 309 pass (up from 305), 12 skip, 16 fail (same E2E tests requiring moonwall environment). Note: This also partially addresses Feature 54 (Update TypeScript configuration for Bun) for packages/util."
   },
   {
     "category": "functional",

@@ -660,3 +660,47 @@
 - `packages/cli/src/internal/cmdFunctions/initialisation.ts` - Updated config template
 - `test/moonwall.config.json` - Updated example to use bunTestArgs
 - `plans/prd.json` - Marked Feature 16 as complete
+
+---
+
+### Feature Completed: Effect migration - add Effect to packages/util dependencies (PRD Feature 17)
+
+**Changes Made:**
+1. Updated `packages/util/package.json`:
+   - Added `effect` ^3.19.8 to dependencies
+   - Added `@effect/platform` ^0.93.6 to dependencies
+   - Added `bun-types` ^1.3.6 to devDependencies (for bun:test type support)
+
+2. Updated `packages/util/tsconfig.json`:
+   - Added `"types": ["bun-types"]` to compilerOptions for bun:test type declarations
+
+3. Created `packages/util/src/__tests__/effect-imports.test.ts`:
+   - Test for Effect core module imports (Effect.succeed, Effect.fail, Effect.map, Effect.flatMap)
+   - Test for running a simple Effect with Effect.runPromise
+   - Test for pipe with Effect combinators
+   - Test for @effect/platform FileSystem import
+
+**Verification:**
+- `bun install` - Successful (effect@3.19.8 and @effect/platform@0.93.6 installed)
+- `bun typecheck` - Passes with no errors
+- `bun test packages/util/src/__tests__/` - 4 pass, 0 fail
+- `bun test` (full suite) - 309 pass, 12 skip, 16 fail (same E2E failures as Feature 16)
+
+**Notes for Next Developer:**
+1. Effect is now available in packages/util for creating Effect-based utility functions.
+2. The @effect/platform package provides FileSystem, HttpClient, and other platform services.
+3. This also partially addresses Feature 54 (Update TypeScript configuration for Bun) - packages/util now has bun-types configured like packages/cli.
+4. Next high-priority features are:
+   - Feature 18: Create Effect error types module
+   - Feature 19: Create DevFoundationService interface
+   - Feature 54: Complete bun-types setup for packages/types
+5. The 16 failing tests are E2E tests in `test/suites/` that require running moonwall environments - not related to this change.
+6. The @polkadot/* package warnings about multiple versions are from transitive dependencies and don't affect functionality.
+
+**Files Changed:**
+- `packages/util/package.json` - Added effect, @effect/platform, and bun-types dependencies
+- `packages/util/tsconfig.json` - Added types: ['bun-types']
+- `packages/util/src/__tests__/effect-imports.test.ts` - New test file verifying Effect imports
+- `bun.lock` - Updated with new dependencies
+- `plans/prd.json` - Marked Feature 17 as complete
+

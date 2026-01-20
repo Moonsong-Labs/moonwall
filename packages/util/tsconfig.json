@@ -4,7 +4,8 @@
     "outDir": "dist/types",
     "allowImportingTsExtensions": false,
     "noEmit": false,
-    "declaration": true
+    "declaration": true,
+    "types": ["bun-types"]
   },
   "include": ["./src/**/*.ts"],
   "exclude": ["**/dist/**"]
