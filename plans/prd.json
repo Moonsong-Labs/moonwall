@@ -57,7 +57,8 @@
       "Run `bun run build` in packages/types and verify dist/ is generated",
       "Run `bun run schema` and verify config_schema.json is generated"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: Updated all scripts (build, generate-types, prepublish, schema) to use bun/bunx instead of pnpm. No engines constraint change needed (already only had node >= 20). Build generates dist/ correctly with tsup (8 entry files). Schema generation works with typescript-json-schema. Typecheck passes. Test results same as Feature 4 (296 pass, 19 fail due to vi.mock)."
   },
   {
     "category": "functional",

@@ -87,3 +87,34 @@
 **Files Changed:**
 - `packages/util/package.json` - Updated scripts and removed pnpm engine constraint
 - `plans/prd.json` - Marked Feature 4 as complete
+
+---
+
+### Feature Completed: Replace pnpm with Bun - packages/types package.json (PRD Feature 5)
+
+**Changes Made:**
+1. Updated `packages/types/package.json`:
+   - Updated `build` script: `pnpm run generate-types` → `bun run generate-types`
+   - Updated `generate-types` script: `pnpm schema` → `bun run schema`
+   - Updated `prepublish` script: `pnpm run build && pnpm run generate-types` → `bun run build && bun run generate-types`
+   - Updated `schema` script: `pnpm biome format` → `bunx biome format`
+   - Note: No `engines` constraint change needed (already only had `node >= 20`, no pnpm constraint)
+
+**Verification:**
+- `bun run build` (in packages/types) - Successfully generates dist/ with tsup (8 entry files: config, context, contracts, eth, foundations, helpers, index, runner)
+- `bun run schema` - Successfully generates config_schema.json (30KB) using typescript-json-schema
+- `bun typecheck` - Passes with no errors
+- `bun test` - 296 tests pass, 12 skip, 19 fail (same baseline as Feature 4 - expected vi.mock incompatibilities)
+
+**Notes for Next Developer:**
+1. All core packages (cli, util, types) are now migrated to Bun. The next features can proceed:
+   - Feature 6 (test/ package.json) - Update test package scripts
+   - Feature 7 (root monorepo scripts) - Already partially done in Feature 2
+   - Feature 8 (CI/CD configuration) - Update GitHub workflows
+   - Feature 9 (documentation updates) - Update README.md and CLAUDE.md
+2. The packages/types package uses `typescript-json-schema` for generating the moonwall.config.json schema, which works correctly with Bun.
+3. The vitest dependency in packages/types will be addressed in Features 11-16 when migrating to Bun test runner.
+
+**Files Changed:**
+- `packages/types/package.json` - Updated scripts to use bun/bunx instead of pnpm
+- `plans/prd.json` - Marked Feature 5 as complete
