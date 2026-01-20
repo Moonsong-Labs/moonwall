@@ -376,3 +376,44 @@
 **Files Changed:**
 - `bunfig.toml` - Created with install and test configuration
 - `plans/prd.json` - Marked Feature 10 as complete
+
+---
+
+### Feature Completed: Replace Vitest with Bun test runner - remove vitest dependencies (PRD Feature 11)
+
+**Changes Made:**
+1. Removed vitest dependencies from `packages/util/package.json`:
+   - Removed `vitest` (3.2.4) from dependencies
+   - Removed `@vitest/ui` (^3.2.4) from dependencies
+
+2. Removed vitest dependencies from `packages/types/package.json`:
+   - Removed `vitest` (3.2.4) from dependencies
+
+3. INTENTIONALLY KEPT vitest in `packages/cli/package.json`:
+   - `vitest` and `@vitest/ui` remain because `runTests.ts` uses `startVitest` from `vitest/node` to programmatically run tests
+   - This is a dependency for moonwall's test orchestration feature (e.g., `moonwall test <env>`)
+   - Will be removed when Feature 13 replaces `VitestOptionsBuilder` with `BunTestOptionsBuilder` using `Bun.spawn`
+
+**Verification:**
+- `bun install` - Successful (lockfile updated, workspace packages linked correctly)
+- `bun typecheck` - Passes with no errors
+- `bun test` - 296 pass, 12 skip, 19 fail, 8 errors (same baseline as Feature 10)
+- Confirmed vitest no longer in packages/util or packages/types dependencies
+
+**Notes for Next Developer:**
+1. packages/types and packages/util never actually imported from vitest - the dependency was vestigial.
+2. packages/cli MUST keep vitest until Feature 13 because:
+   - `packages/cli/src/cmds/runTests.ts` imports `{ startVitest } from "vitest/node"`
+   - `VitestOptionsBuilder` class builds `UserConfig` for vitest
+   - The `moonwall test <env>` command spawns vitest programmatically
+3. The 19 failing tests + 8 errors are all in `packages/cli/src/internal/effect/__tests__/` and use Vitest-specific APIs:
+   - `vi.mock()` - Feature 12 will convert to bun:test's `mock()` module mocking
+   - `importOriginal()` - Not available in bun:test, needs alternative approach
+4. Next high-priority feature is Feature 12: Convert CLI internal tests to bun:test.
+5. Feature 13 is critical - it will remove the last vitest dependency by replacing `startVitest` with `Bun.spawn`.
+
+**Files Changed:**
+- `packages/util/package.json` - Removed vitest and @vitest/ui dependencies
+- `packages/types/package.json` - Removed vitest dependency
+- `bun.lock` - Updated to remove vitest from util/types
+- `plans/prd.json` - Marked Feature 11 as complete with notes

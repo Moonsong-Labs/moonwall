@@ -58,7 +58,6 @@
     "ethers": "^6.16.0",
     "polkadot-api": "1.19.2",
     "viem": "2.41.2",
-    "vitest": "3.2.4",
     "web3": "^4.16.0"
   },
   "publishConfig": {
