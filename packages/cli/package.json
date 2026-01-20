@@ -36,8 +36,7 @@
     "moondebug": "./moondebug.mjs"
   },
   "engines": {
-    "node": ">=20",
-    "pnpm": ">=7"
+    "node": ">=20"
   },
   "files": [
     "dist",
@@ -47,16 +46,16 @@
   ],
   "scripts": {
     "clean": "rm -rf dist && rm -rf node_modules",
-    "build": "pnpm exec rm -rf dist && tsup src --format esm --no-splitting && pnpm generate-types",
-    "lint": "pnpm biome lint ./src",
-    "lint:fix": "pnpm biome lint ./src --apply",
+    "build": "rm -rf dist && tsup src --format esm --no-splitting && bun run generate-types",
+    "lint": "bunx biome lint ./src",
+    "lint:fix": "bunx biome lint ./src --apply",
     "fmt": "biome format .",
     "fmt:fix": "biome format . --write",
     "generate-types": "tsc",
     "watch": "tsup src --format esm --watch",
-    "typecheck": "pnpm exec tsc --noEmit",
-    "test": "vitest run src/internal/effect/__tests__/",
-    "prepublish": "pnpm run build && pnpm run generate-types"
+    "typecheck": "bunx tsc --noEmit",
+    "test": "bun test src/internal/effect/__tests__/",
+    "prepublish": "bun run build && bun run generate-types"
   },
   "dependencies": {
     "@acala-network/chopsticks": "^1.2.5",

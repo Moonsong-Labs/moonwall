@@ -33,7 +33,8 @@
       "Run `bun run build` in packages/cli and verify dist/ is generated",
       "Run `bun run typecheck` and verify no errors"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: Removed pnpm engine constraint, updated all scripts (build, lint, lint:fix, typecheck, test, prepublish) to use bun/bunx instead of pnpm. Build generates dist/ correctly, typecheck passes. Test failures are expected vi.mock incompatibilities (Feature 11-16)."
   },
   {
     "category": "functional",

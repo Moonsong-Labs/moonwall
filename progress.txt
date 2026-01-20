@@ -33,3 +33,30 @@
 - `pnpm-lock.yaml` - Deleted
 - `bun.lock` - Generated (Bun v1.3+ uses text format instead of binary bun.lockb)
 - `plans/prd.json` - Marked Feature 2 as complete
+
+---
+
+### Feature Completed: Replace pnpm with Bun - packages/cli package.json (PRD Feature 3)
+
+**Changes Made:**
+1. Updated `packages/cli/package.json`:
+   - Removed `pnpm` from `engines` constraint (kept `node >= 20`)
+   - Updated `build` script: `pnpm exec rm -rf dist` → `rm -rf dist`, `pnpm generate-types` → `bun run generate-types`
+   - Updated `lint`/`lint:fix` scripts: `pnpm biome` → `bunx biome`
+   - Updated `typecheck` script: `pnpm exec tsc` → `bunx tsc`
+   - Updated `test` script: `vitest run` → `bun test`
+   - Updated `prepublish` script: `pnpm run` → `bun run`
+
+**Verification:**
+- `bun run build` (in packages/cli) - Successfully generates dist/ with all expected outputs
+- `bun typecheck` - Passes with no errors
+- `bun test` - 296 tests pass, 12 skip, 19 fail (failures are expected vi.mock incompatibilities - Feature 11-16)
+
+**Notes for Next Developer:**
+1. The test script now uses `bun test` which is Bun's native test runner. Tests using `vi.mock` (Vitest-specific API) will fail until Feature 11-16 converts them.
+2. Next high-priority features are Feature 4 (packages/util) and Feature 5 (packages/types) to complete Bun migration across all core packages.
+3. The `bunx` command is Bun's equivalent of `npx`/`pnpm exec` for running binaries.
+
+**Files Changed:**
+- `packages/cli/package.json` - Updated scripts and removed pnpm engine constraint
+- `plans/prd.json` - Marked Feature 3 as complete
