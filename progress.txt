@@ -151,3 +151,43 @@
 **Files Changed:**
 - `test/package.json` - Updated scripts and removed pnpm-related config
 - `plans/prd.json` - Marked Feature 6 as complete
+
+---
+
+### Feature Completed: Replace pnpm with Bun - root monorepo scripts (PRD Feature 7)
+
+**Status:** Already completed as part of Feature 2, but not marked in PRD.
+
+**Verification Performed:**
+1. Reviewed `package.json` - All scripts already use `bun run --filter` instead of `pnpm -r`:
+   - `build`: `bun run --filter './packages/*' build`
+   - `generate-types`: `bun run --filter './packages/*' generate-types`
+   - `fmt`/`fmt:fix`: `biome format` + `bun run --filter`
+   - `lint`/`lint:fix`: `bun run --filter './packages/*' lint`
+   - `typecheck`: `bun run --filter './packages/*' typecheck`
+   - `clean-all`: Uses `rm -rf` and `bun run --filter`
+   - `pristine-build`: Uses `bun i` and `bun run`
+   - `changeset:release`: Uses `bun changeset publish`
+   - `display-reports`: Uses `bunx vite`
+   - `start`: Uses `bun run moonwall`
+   - `test`: Uses `bun test` and `bun run moonwall`
+
+2. Ran `bun run build` - All 3 packages build successfully:
+   - @moonwall/types: 8 entry files, schema generated
+   - @moonwall/util: 19 entry files
+   - @moonwall/cli: Full build with tsc
+
+3. Ran `bun typecheck` - Passes with no errors
+
+4. Ran `bun test` - 296 pass, 12 skip, 19 fail (expected vi.mock incompatibilities - Feature 11-16)
+
+**Notes for Next Developer:**
+1. Feature 7 was actually completed during Feature 2 but wasn't marked in the PRD - now marked as complete.
+2. Next high-priority features are:
+   - Feature 8: CI/CD configuration (GitHub workflows)
+   - Feature 9: Documentation updates (README.md, CLAUDE.md)
+   - Feature 10: bunfig.toml configuration
+3. The test failures are all related to Vitest-specific APIs (vi.mock, importOriginal) and will be addressed in Features 11-16.
+
+**Files Changed:**
+- `plans/prd.json` - Marked Feature 7 as complete with notes

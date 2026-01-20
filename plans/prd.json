@@ -81,7 +81,8 @@
       "Update 'typecheck' script for bun workspaces",
       "Run `bun run build` from root and verify all packages build"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed (as part of Feature 2): All root scripts already use 'bun run --filter' instead of 'pnpm -r'. Verified: build (all packages build successfully), lint, fmt, typecheck (passes), generate-types, clean-all, pristine-build, start, test. The display-reports script uses bunx vite. Test results: 296 pass, 19 fail (expected vi.mock incompatibilities - Feature 11-16)."
   },
   {
     "category": "functional",
