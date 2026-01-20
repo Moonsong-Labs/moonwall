@@ -3,7 +3,7 @@
     "category": "functional",
     "description": "Phase 0: Create branch and document migration baseline",
     "steps": [
-      "Run `git checkout -b refactor/effect-bun-migration` from main",
+      "Run `git checkout -b refactor/effect-bun-migration` from experiment/ralph-effect",
       "Run `pnpm test` and verify all existing tests pass",
       "Run `pnpm typecheck` and verify no type errors",
       "Document current test count and coverage in MIGRATION.md"
@@ -17,10 +17,11 @@
       "Update root package.json: change 'workspaces' array format if needed for Bun compatibility",
       "Remove pnpm-workspace.yaml if it exists",
       "Remove engines.pnpm constraint from root package.json",
-      "Run `bun install` and verify bun.lockb is generated",
+      "Run `bun install` and verify bun.lock is generated",
       "Verify all workspace packages are linked correctly with `bun pm ls`"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: Updated scripts to use bun instead of pnpm, removed pnpm-workspace.yaml, added toml override for zombienet compatibility, verified all workspace packages linked correctly. Note: bun.lock (text format) replaces bun.lockb (binary) in Bun v1.3+."
   },
   {
     "category": "functional",

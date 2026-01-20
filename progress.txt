@@ -1,0 +1,35 @@
+# Moonwall Migration Progress
+
+## Session: 2026-01-20
+
+### Feature Completed: Replace pnpm with Bun - root package.json workspaces config (PRD Feature 2)
+
+**Changes Made:**
+1. Updated root `package.json`:
+   - Converted all scripts from `pnpm -r --filter='./packages/**' run <cmd>` to `bun run --filter './packages/*' <cmd>`
+   - Replaced `pnpm exec` with `bunx`
+   - Replaced `pnpm` config block with `trustedDependencies` array for Bun
+   - Added `overrides` for `toml` package (v3.0.0) to resolve GitHub tarball compatibility issue with `@zombienet/utils`
+
+2. Removed `pnpm-workspace.yaml` (Bun uses `workspaces` in package.json directly)
+
+3. Removed `pnpm-lock.yaml` (replaced by `bun.lock`)
+
+**Verification:**
+- `bun install` - Successfully installed 2338 packages
+- `bun pm ls` - All 5 workspace packages linked correctly (@moonwall/cli, @moonwall/docs, @moonwall/tests, @moonwall/types, @moonwall/util)
+- `bun typecheck` - Passes with no errors
+- `bun test` - 296 tests pass (some failures expected due to Vitest-specific code like `vi.mock` - converting to Bun test runner is PRD Feature 11-16)
+
+**Notes for Next Developer:**
+1. The `cpu-features` native module fails to compile due to missing C++ headers on the system - this is a non-critical optional dependency and doesn't affect functionality
+2. There are duplicate @polkadot/* package warnings - these come from transitive dependencies and don't affect functionality
+3. The test failures related to `vi.mock` are expected - those tests use Vitest-specific APIs. Converting these is covered in PRD Features 11-16 (Replace Vitest with Bun test runner)
+4. Next high-priority feature should be Feature 3 (packages/cli), Feature 4 (packages/util), or Feature 5 (packages/types) to complete the Bun migration across all packages
+
+**Files Changed:**
+- `package.json` - Updated scripts for Bun
+- `pnpm-workspace.yaml` - Deleted
+- `pnpm-lock.yaml` - Deleted
+- `bun.lock` - Generated (Bun v1.3+ uses text format instead of binary bun.lockb)
+- `plans/prd.json` - Marked Feature 2 as complete

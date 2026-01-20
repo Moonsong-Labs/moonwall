@@ -11,7 +11,7 @@ for ((i=1; i<=$1; i++)); do
   echo "------------------------"
 
   tmp=$(mktemp)
-  claude --permission-mode bypassPermissions -p "@plans/web-prd.json @progress.txt \
+  claude --permission-mode bypassPermissions -p "@plans/prd.json @progress.txt \
 1.  Find the highest priority feature to work on and work only on that feature. \
 This should be the one you decide has the highest priority, not necessarily the 1st on the list. \
 2. Check that the types check via \`bun typecheck\` and that the tests pass via \`bun test\`. \
