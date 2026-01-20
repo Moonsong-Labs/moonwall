@@ -170,7 +170,8 @@
       "Update type exports for BunTestFunction types",
       "Run `bun run build` and verify exports are correct"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: (1) Updated packages/cli/src/index.ts to export {afterAll, afterEach, beforeAll, beforeEach, expect} from 'bun:test' instead of vitest. (2) Updated packages/cli/src/lib/runnerContext.ts to import {afterAll, beforeAll, describe, it} from 'bun:test'. (3) Fixed describe.skip() call to include empty callback function - bun:test requires fn argument unlike vitest. (4) Removed vitest and @vitest/ui from packages/cli/package.json dependencies - no longer needed. Typecheck passes. CLI internal tests pass (93 pass, 4 skip). Full suite: 305 pass, 12 skip, 16 fail (same baseline as Feature 13 - failures are E2E tests requiring moonwall environment)."
   },
   {
     "category": "functional",

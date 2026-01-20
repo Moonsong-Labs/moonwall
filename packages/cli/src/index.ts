@@ -1,5 +1,5 @@
 export * from "@moonwall/types";
-export { afterAll, afterEach, beforeAll, beforeEach, expect } from "vitest";
+export { afterAll, afterEach, beforeAll, beforeEach, expect } from "bun:test";
 export * from "./lib/binariesHelpers";
 export * from "./lib/configReader";
 export * from "./lib/contextHelpers";

@@ -537,3 +537,43 @@
 - `packages/cli/src/cmds/components/LogViewer.tsx` - Updated to use onOutputLine instead of onConsoleLog
 - `packages/cli/package.json` - Updated build script with --external bun:test
 - `plans/prd.json` - Marked Feature 13 as complete
+
+---
+
+### Feature Completed: Replace Vitest with Bun test runner - update CLI exports (PRD Feature 14)
+
+**Changes Made:**
+1. Updated `packages/cli/src/index.ts`:
+   - Changed `export { afterAll, afterEach, beforeAll, beforeEach, expect } from "vitest"` to `from "bun:test"`
+
+2. Updated `packages/cli/src/lib/runnerContext.ts`:
+   - Changed `import { afterAll, beforeAll, describe, it } from "vitest"` to `from "bun:test"`
+   - Fixed `describe.skip()` call to include empty callback function: `describe.skip(name, () => {})`
+   - Note: bun:test requires the callback function argument, unlike vitest which accepts just a string
+
+3. Removed vitest dependencies from `packages/cli/package.json`:
+   - Removed `vitest` (3.2.4) from dependencies
+   - Removed `@vitest/ui` (^3.2.4) from dependencies
+   - These are no longer needed since Feature 13 replaced programmatic vitest API with Bun.spawn
+
+**Verification:**
+- `bun install` - Successful (cpu-features optional dep failure expected - documented in Feature 2)
+- `bun typecheck` - Passes with no errors
+- `bun test packages/cli/src/internal/effect/__tests__/` - 93 pass, 4 skip, 0 fail
+- `bun test` (full suite) - 305 pass, 12 skip, 16 fail (same baseline as Feature 13 - failures are E2E tests requiring moonwall environment)
+
+**Notes for Next Developer:**
+1. Vitest is now completely removed from the entire monorepo! No packages depend on vitest anymore.
+2. The bun:test API is mostly compatible with vitest, but `describe.skip(name)` requires a callback function as the second argument whereas vitest allowed just a string.
+3. Next high-priority feature is Feature 15: Update describeSuite wrapper to use bun:test
+   - This will complete the test runner migration
+   - After Feature 15, the codebase will be fully using bun:test
+4. Feature 16 (config schema) can then update vitestArgs to bunTestArgs
+5. The @polkadot/* package warnings about multiple versions are from transitive dependencies and don't affect functionality.
+
+**Files Changed:**
+- `packages/cli/src/index.ts` - Changed vitest exports to bun:test
+- `packages/cli/src/lib/runnerContext.ts` - Changed vitest imports to bun:test, fixed describe.skip call
+- `packages/cli/package.json` - Removed vitest and @vitest/ui dependencies
+- `bun.lock` - Updated to remove vitest packages
+- `plans/prd.json` - Marked Feature 14 as complete

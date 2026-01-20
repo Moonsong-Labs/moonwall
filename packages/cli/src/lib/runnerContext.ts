@@ -15,7 +15,7 @@ import type { ApiPromise } from "@polkadot/api";
 import Bottleneck from "bottleneck";
 import { createLogger } from "@moonwall/util";
 import type { Wallet } from "ethers";
-import { afterAll, beforeAll, describe, it } from "vitest";
+import { afterAll, beforeAll, describe, it } from "bun:test";
 import type { Web3 } from "web3";
 import { getEnvironmentFromConfig } from "./configReader";
 import { MoonwallContext, contextCreator } from "./globalContext";
@@ -76,7 +76,7 @@ export function describeSuite<T extends FoundationType>({
     (chainType && chainType !== RT_NAME) ||
     (notChainType && notChainType === RT_NAME)
   ) {
-    describe.skip(`🗃️  ${suiteId} ${title}`);
+    describe.skip(`🗃️  ${suiteId} ${title}`, () => {});
     return;
   }
   let ctx: MoonwallContext | null = null;
