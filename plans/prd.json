@@ -1,0 +1,856 @@
+[
+  {
+    "category": "functional",
+    "description": "Phase 0: Create branch and document migration baseline",
+    "steps": [
+      "Run `git checkout -b refactor/effect-bun-migration` from main",
+      "Run `pnpm test` and verify all existing tests pass",
+      "Run `pnpm typecheck` and verify no type errors",
+      "Document current test count and coverage in MIGRATION.md"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Replace pnpm with Bun - root package.json workspaces config",
+    "steps": [
+      "Update root package.json: change 'workspaces' array format if needed for Bun compatibility",
+      "Remove pnpm-workspace.yaml if it exists",
+      "Remove engines.pnpm constraint from root package.json",
+      "Run `bun install` and verify bun.lockb is generated",
+      "Verify all workspace packages are linked correctly with `bun pm ls`"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Replace pnpm with Bun - packages/cli package.json",
+    "steps": [
+      "Remove 'engines.pnpm' from packages/cli/package.json",
+      "Update scripts to use 'bun' instead of 'pnpm exec'",
+      "Change 'pnpm run build' to 'bun run build' in scripts",
+      "Run `bun run build` in packages/cli and verify dist/ is generated",
+      "Run `bun run typecheck` and verify no errors"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Replace pnpm with Bun - packages/util package.json",
+    "steps": [
+      "Remove 'engines.pnpm' from packages/util/package.json",
+      "Update scripts to use 'bun' instead of 'pnpm exec'",
+      "Run `bun run build` in packages/util and verify dist/ is generated",
+      "Run `bun run typecheck` and verify no errors"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Replace pnpm with Bun - packages/types package.json",
+    "steps": [
+      "Remove 'engines' constraints from packages/types/package.json",
+      "Update scripts to use 'bun' instead of 'pnpm'",
+      "Run `bun run build` in packages/types and verify dist/ is generated",
+      "Run `bun run schema` and verify config_schema.json is generated"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Replace pnpm with Bun - test/ package.json",
+    "steps": [
+      "Update test/package.json scripts to use 'bun' instead of 'pnpm'",
+      "Run `bun install` in test/ directory",
+      "Verify test dependencies are installed correctly"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Replace pnpm with Bun - root monorepo scripts",
+    "steps": [
+      "Update root package.json scripts: replace 'pnpm -r' with 'bun run --filter'",
+      "Update 'build' script to use bun workspace commands",
+      "Update 'lint' and 'fmt' scripts for bun",
+      "Update 'typecheck' script for bun workspaces",
+      "Run `bun run build` from root and verify all packages build"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Replace pnpm with Bun - CI/CD configuration",
+    "steps": [
+      "Search for .github/workflows/*.yml files",
+      "Replace 'pnpm install' with 'bun install' in CI workflows",
+      "Replace 'pnpm run' with 'bun run' in CI workflows",
+      "Update cache configuration for bun.lockb instead of pnpm-lock.yaml"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Replace pnpm with Bun - documentation updates",
+    "steps": [
+      "Update README.md installation instructions from pnpm to bun",
+      "Update CLAUDE.md installation section",
+      "Search for 'pnpm' in docs/ directory and update to bun",
+      "Verify docs build correctly with `bun run docs:build` if applicable"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Create bunfig.toml configuration",
+    "steps": [
+      "Create bunfig.toml in root with [install] and [test] sections",
+      "Configure test.root = 'packages' for unit tests",
+      "Configure test.coverage = true",
+      "Configure test.coverageThreshold for 80% target",
+      "Run `bun test` and verify configuration is applied"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Replace Vitest with Bun test runner - remove vitest dependencies",
+    "steps": [
+      "Remove 'vitest' from packages/cli/package.json dependencies",
+      "Remove '@vitest/ui' from packages/cli/package.json dependencies",
+      "Remove 'vitest' from packages/util/package.json dependencies",
+      "Remove '@vitest/ui' from packages/util/package.json dependencies",
+      "Remove 'vitest' from packages/types/package.json dependencies",
+      "Run `bun install` and verify no vitest packages remain"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Replace Vitest with Bun test runner - convert CLI internal tests",
+    "steps": [
+      "Update imports in packages/cli/src/internal/effect/__tests__/*.ts from 'vitest' to 'bun:test'",
+      "Replace 'vi.mock' with 'mock' from bun:test",
+      "Replace 'vi.fn()' with 'mock(() => {})' from bun:test",
+      "Replace 'vi.spyOn' with 'spyOn' from bun:test",
+      "Run `bun test packages/cli/src/internal/effect/__tests__/` and verify all tests pass"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Replace Vitest with Bun test runner - update VitestOptionsBuilder",
+    "steps": [
+      "Rename VitestOptionsBuilder to BunTestOptionsBuilder in packages/cli/src/",
+      "Replace startVitest from 'vitest/node' with Bun.spawn for test execution",
+      "Map Vitest options to Bun test CLI flags (--timeout, --coverage, etc.)",
+      "Update runTests.ts to use new BunTestOptionsBuilder",
+      "Run a simple test environment to verify test execution works"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Replace Vitest with Bun test runner - update CLI exports",
+    "steps": [
+      "Update packages/cli/src/index.ts to export from 'bun:test' instead of vitest",
+      "Export describe, it, test, expect, beforeAll, beforeEach, afterAll, afterEach",
+      "Update type exports for BunTestFunction types",
+      "Run `bun run build` and verify exports are correct"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Replace Vitest with Bun test runner - update describeSuite wrapper",
+    "steps": [
+      "Update runnerContext.ts describeSuite to use bun:test internally",
+      "Ensure foundationMethods context injection still works",
+      "Update CustomTest type to use Bun test types",
+      "Run test suite with 'moonwall test basic' and verify context is available"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Replace Vitest with Bun test runner - update test configuration schema",
+    "steps": [
+      "Update packages/types/src/config.ts Environment type to remove vitestArgs",
+      "Add bunTestArgs field to Environment type",
+      "Regenerate config_schema.json with `bun run schema`",
+      "Update moonwall.config.json examples to use bunTestArgs"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Effect migration - add Effect to packages/util dependencies",
+    "steps": [
+      "Add 'effect' ^3.19.8 to packages/util/package.json dependencies",
+      "Add '@effect/platform' to packages/util/package.json dependencies",
+      "Run `bun install` in packages/util",
+      "Verify Effect imports work with a simple test import"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Effect migration - create Effect error types module",
+    "steps": [
+      "Create packages/cli/src/internal/effect/errors/foundation.ts",
+      "Define FoundationStartupError using Data.TaggedError",
+      "Define FoundationShutdownError using Data.TaggedError",
+      "Define ProviderConnectionError using Data.TaggedError",
+      "Export all error types from packages/cli/src/internal/effect/errors/index.ts"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Effect migration - create DevFoundationService interface",
+    "steps": [
+      "Create packages/cli/src/internal/effect/services/DevFoundationService.ts",
+      "Define DevFoundationService using Context.Tag",
+      "Define interface with start(), stop(), getStatus() methods returning Effect",
+      "Define DevFoundationConfig type for configuration",
+      "Export service tag and types"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Effect migration - implement DevFoundationService Layer",
+    "steps": [
+      "Create DevFoundationServiceLive Layer using Layer.effect",
+      "Implement start() using existing launchNodeEffect",
+      "Implement stop() using cleanup handlers",
+      "Implement getStatus() to check node readiness",
+      "Write unit test using Layer.succeed for mocking"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Effect migration - create ChopsticksFoundationService interface",
+    "steps": [
+      "Create packages/cli/src/internal/effect/services/ChopsticksFoundationService.ts",
+      "Define ChopsticksFoundationService using Context.Tag",
+      "Define interface with start(), stop(), createBlock(), setStorage() methods",
+      "Define ChopsticksFoundationConfig type",
+      "Export service tag and types"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Effect migration - implement ChopsticksFoundationService Layer",
+    "steps": [
+      "Create ChopsticksFoundationServiceLive Layer using Layer.scoped",
+      "Integrate with existing ChopsticksService from internal/effect/",
+      "Implement createBlock() using Effect.tryPromise wrapping chopsticks API",
+      "Implement setStorage() using Effect.tryPromise wrapping chopsticks API",
+      "Write unit test with mocked chopsticks instance"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Effect migration - create ZombieFoundationService interface",
+    "steps": [
+      "Create packages/cli/src/internal/effect/services/ZombieFoundationService.ts",
+      "Define ZombieFoundationService using Context.Tag",
+      "Define interface with start(), stop(), getNodes() methods",
+      "Define ZombieFoundationConfig type for network topology",
+      "Export service tag and types"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Effect migration - implement ZombieFoundationService Layer",
+    "steps": [
+      "Create ZombieFoundationServiceLive Layer",
+      "Wrap @zombienet/orchestrator start/stop with Effect.tryPromise",
+      "Implement getNodes() to return running node information",
+      "Handle multi-node cleanup in stop() using Effect.all",
+      "Write unit test with mocked orchestrator"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Effect migration - create ReadOnlyFoundationService interface",
+    "steps": [
+      "Create packages/cli/src/internal/effect/services/ReadOnlyFoundationService.ts",
+      "Define ReadOnlyFoundationService using Context.Tag",
+      "Define interface with connect(), disconnect(), healthCheck() methods",
+      "Define ReadOnlyFoundationConfig with endpoint URLs",
+      "Export service tag and types"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Effect migration - implement ReadOnlyFoundationService Layer",
+    "steps": [
+      "Create ReadOnlyFoundationServiceLive Layer",
+      "Implement connect() using existing provider connection logic",
+      "Implement healthCheck() using RPC system_health call",
+      "Implement disconnect() to cleanup provider connections",
+      "Write unit test with mocked RPC endpoint"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Effect migration - create unified FoundationService interface",
+    "steps": [
+      "Create packages/cli/src/internal/effect/services/FoundationService.ts",
+      "Define FoundationService as union type of all foundation services",
+      "Create FoundationServiceFactory that returns correct service based on config",
+      "Export factory and unified types",
+      "Write test for factory with different foundation types"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Effect migration - update foundation handlers to use Effect services",
+    "steps": [
+      "Update handleDev in packages/cli/src/lib/handlers/ to use DevFoundationService",
+      "Update handleChopsticks to use ChopsticksFoundationService",
+      "Update handleZombie to use ZombieFoundationService",
+      "Update handleReadOnly to use ReadOnlyFoundationService",
+      "Verify all handlers return cleanup Effects"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Effect migration - create ProviderService interface",
+    "steps": [
+      "Create packages/cli/src/internal/effect/services/ProviderService.ts",
+      "Define ProviderService using Context.Tag",
+      "Define interface with createProvider(), destroyProvider() methods",
+      "Define ProviderConfig for connection settings",
+      "Export service tag and types"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Effect migration - implement ProviderService for polkadotJs",
+    "steps": [
+      "Create PolkadotJsProviderServiceLive Layer",
+      "Wrap ApiPromise.create with Effect.tryPromise",
+      "Implement disconnect using Effect.tryPromise",
+      "Handle connection timeout with Effect.timeout",
+      "Write unit test with mocked WsProvider"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Effect migration - implement ProviderService for ethers",
+    "steps": [
+      "Create EthersProviderServiceLive Layer",
+      "Wrap JsonRpcProvider creation with Effect.try",
+      "Implement Wallet creation with Effect.try",
+      "Handle provider errors with proper Effect error types",
+      "Write unit test with mocked ethers provider"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Effect migration - implement ProviderService for viem",
+    "steps": [
+      "Create ViemProviderServiceLive Layer",
+      "Wrap createPublicClient with Effect.try",
+      "Wrap createWalletClient with Effect.try",
+      "Handle transport errors with Effect error types",
+      "Write unit test with mocked viem client"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Effect migration - implement ProviderService for web3",
+    "steps": [
+      "Create Web3ProviderServiceLive Layer",
+      "Wrap Web3 instantiation with Effect.try",
+      "Handle WebSocket connection with Effect.tryPromise",
+      "Implement disconnect with Effect",
+      "Write unit test with mocked Web3 instance"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Effect migration - implement ProviderService for papi",
+    "steps": [
+      "Create PapiProviderServiceLive Layer",
+      "Wrap polkadot-api client creation with Effect.tryPromise",
+      "Handle typed API creation with Effect",
+      "Implement disconnect with Effect",
+      "Write unit test with mocked papi client"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Effect migration - create ProviderFactoryService",
+    "steps": [
+      "Create packages/cli/src/internal/effect/services/ProviderFactoryService.ts",
+      "Define factory that creates appropriate provider based on connection config",
+      "Implement createProviders() that returns Effect with all configured providers",
+      "Handle provider creation errors with Effect.allSettled for partial success",
+      "Write integration test with multiple provider types"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Effect migration - update MoonwallContext to use Effect services",
+    "steps": [
+      "Refactor MoonwallContext.create() to use Effect internally",
+      "Replace Promise-based initialization with Effect.runPromise at boundary",
+      "Use Layer.provide for dependency injection",
+      "Maintain backwards-compatible API for test consumers",
+      "Verify existing tests still pass with new implementation"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Effect migration - create ConfigService for configuration loading",
+    "steps": [
+      "Create packages/cli/src/internal/effect/services/ConfigService.ts",
+      "Define ConfigService using Context.Tag",
+      "Implement loadConfig() using Effect and @effect/platform FileSystem",
+      "Implement validateConfig() using Effect schema validation",
+      "Write unit test with sample config files"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Effect migration - add @effect/schema for config validation",
+    "steps": [
+      "Add '@effect/schema' to packages/types/package.json",
+      "Create Schema definitions for MoonwallConfig",
+      "Create Schema definitions for Environment",
+      "Create Schema definitions for Foundation types",
+      "Replace typescript-json-schema with Effect Schema for validation"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Effect migration - create LoggerService using Effect",
+    "steps": [
+      "Create packages/cli/src/internal/effect/services/LoggerService.ts",
+      "Define LoggerService using Context.Tag",
+      "Wrap pino logger with Effect Layer",
+      "Implement log(), debug(), error(), warn() methods",
+      "Write unit test verifying log output"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Effect migration - update CLI commands to use Effect",
+    "steps": [
+      "Refactor packages/cli/src/cmds/runTests.ts to use Effect internally",
+      "Refactor packages/cli/src/cmds/runNetwork.ts to use Effect internally",
+      "Use Effect.runPromise at CLI entry boundary",
+      "Handle CLI errors with Effect.catchAll for user-friendly messages",
+      "Verify `moonwall test <env>` still works correctly"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Effect migration - create application Layer composition",
+    "steps": [
+      "Create packages/cli/src/internal/effect/AppLayer.ts",
+      "Compose all service Layers using Layer.mergeAll",
+      "Define AppLayer with all production services",
+      "Define TestAppLayer with mocked services for testing",
+      "Export both layers for use in CLI and tests"
+    ],
+    "passes": false
+  },
+  {
+    "category": "reliability",
+    "description": "Effect migration - add Effect.retry for network operations",
+    "steps": [
+      "Add Schedule.exponential retry to provider connection",
+      "Add Schedule.recurs limit to prevent infinite retries",
+      "Configure retry for WebSocket reconnection in NodeReadinessService",
+      "Add retry to RPC health checks",
+      "Write test verifying retry behavior with flaky mock"
+    ],
+    "passes": false
+  },
+  {
+    "category": "reliability",
+    "description": "Effect migration - add Effect.timeout for operations",
+    "steps": [
+      "Add Effect.timeout to foundation startup (configurable via config)",
+      "Add Effect.timeout to provider connection",
+      "Add Effect.timeout to block creation in chopsticks",
+      "Handle TimeoutException with user-friendly error messages",
+      "Write test verifying timeout behavior"
+    ],
+    "passes": false
+  },
+  {
+    "category": "reliability",
+    "description": "Effect migration - add Effect.acquireRelease for resource cleanup",
+    "steps": [
+      "Wrap node process spawning with Effect.acquireRelease",
+      "Ensure cleanup runs even on test failure with Layer.scoped",
+      "Add process cleanup to chopsticks service",
+      "Add provider disconnect to acquireRelease pattern",
+      "Write test verifying cleanup on error"
+    ],
+    "passes": false
+  },
+  {
+    "category": "observability",
+    "description": "Effect migration - add Effect tracing with spans",
+    "steps": [
+      "Add Effect.withSpan to foundation startup operations",
+      "Add Effect.withSpan to provider connection",
+      "Add Effect.withSpan to test execution",
+      "Configure span attributes for debugging (env name, provider type)",
+      "Write test verifying spans are created"
+    ],
+    "passes": false
+  },
+  {
+    "category": "observability",
+    "description": "Effect migration - add structured error logging",
+    "steps": [
+      "Use Cause.pretty for error logging in CLI",
+      "Log full error context including stack traces",
+      "Add error categorization (startup, connection, test, cleanup)",
+      "Ensure sensitive data is not logged",
+      "Verify error output is actionable for users"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Testing - create unit test structure for Effect services",
+    "steps": [
+      "Create packages/cli/src/internal/effect/__tests__/services/ directory",
+      "Create test file for each service (DevFoundationService.test.ts, etc.)",
+      "Set up Layer.succeed patterns for mocking dependencies",
+      "Create shared test fixtures for common mocks",
+      "Run `bun test packages/cli/src/internal/effect/__tests__/services/` and verify structure"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Testing - add unit tests for DevFoundationService",
+    "steps": [
+      "Test start() returns running node info on success",
+      "Test start() returns FoundationStartupError on spawn failure",
+      "Test stop() cleans up process correctly",
+      "Test getStatus() returns correct readiness state",
+      "Achieve 80%+ coverage for DevFoundationService"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Testing - add unit tests for ChopsticksFoundationService",
+    "steps": [
+      "Test start() initializes chopsticks instance correctly",
+      "Test createBlock() returns block info",
+      "Test setStorage() applies storage changes",
+      "Test stop() cleans up chopsticks process",
+      "Achieve 80%+ coverage for ChopsticksFoundationService"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Testing - add unit tests for ZombieFoundationService",
+    "steps": [
+      "Test start() launches zombienet network",
+      "Test getNodes() returns correct node information",
+      "Test stop() shuts down all nodes",
+      "Test error handling for orchestrator failures",
+      "Achieve 80%+ coverage for ZombieFoundationService"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Testing - add unit tests for ReadOnlyFoundationService",
+    "steps": [
+      "Test connect() establishes connection to endpoint",
+      "Test healthCheck() returns health status",
+      "Test disconnect() cleans up connections",
+      "Test error handling for unreachable endpoints",
+      "Achieve 80%+ coverage for ReadOnlyFoundationService"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Testing - add unit tests for ProviderServices",
+    "steps": [
+      "Test PolkadotJsProviderService creates ApiPromise correctly",
+      "Test EthersProviderService creates provider and wallet",
+      "Test ViemProviderService creates clients",
+      "Test Web3ProviderService creates Web3 instance",
+      "Test PapiProviderService creates typed client"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Testing - add unit tests for ConfigService",
+    "steps": [
+      "Test loadConfig() reads and parses moonwall.config.json",
+      "Test loadConfig() handles missing file with error",
+      "Test validateConfig() accepts valid config",
+      "Test validateConfig() rejects invalid config with details",
+      "Achieve 80%+ coverage for ConfigService"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Testing - add integration tests for foundation lifecycle",
+    "steps": [
+      "Create packages/cli/src/__tests__/integration/ directory",
+      "Test dev foundation start -> test -> stop cycle",
+      "Test chopsticks foundation start -> createBlock -> stop cycle",
+      "Test read_only foundation connect -> healthCheck -> disconnect cycle",
+      "Use real but lightweight test configurations"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Testing - add integration tests for provider connection",
+    "steps": [
+      "Test polkadotJs provider connects to dev node",
+      "Test ethers provider connects to EVM endpoint",
+      "Test viem provider connects to EVM endpoint",
+      "Test multiple providers connect in parallel",
+      "Test provider cleanup on foundation shutdown"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Testing - add integration tests for test runner",
+    "steps": [
+      "Test `moonwall test basic` runs and passes",
+      "Test test context injection works correctly",
+      "Test test timeout configuration is respected",
+      "Test test failure is reported correctly",
+      "Test coverage report is generated"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Testing - update existing e2e test suites for Bun",
+    "steps": [
+      "Update test/suites/basic/*.test.ts for bun:test if needed",
+      "Update test/suites/chopsticks/*.test.ts for bun:test",
+      "Update test/suites/dev_tests/*.test.ts for bun:test",
+      "Run `moonwall test basic` and verify all tests pass",
+      "Run `moonwall test chopsticks` and verify all tests pass"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Testing - add e2e tests for CLI commands",
+    "steps": [
+      "Create test/suites/cli_e2e/ directory",
+      "Test `moonwall` interactive menu launches",
+      "Test `moonwall test <env>` executes tests",
+      "Test `moonwall run <env>` starts network",
+      "Test `moonwall download` fetches artifacts"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Testing - verify 80% coverage target",
+    "steps": [
+      "Run `bun test --coverage` from packages/cli",
+      "Verify line coverage >= 80%",
+      "Verify function coverage >= 80%",
+      "Identify and document any intentionally uncovered code",
+      "Add coverage badge or reporting to CI"
+    ],
+    "passes": false
+  },
+  {
+    "category": "performance",
+    "description": "Optimize Effect service initialization",
+    "steps": [
+      "Use Layer.memoize for expensive service initialization",
+      "Parallelize independent provider connections with Effect.all",
+      "Add lazy initialization where possible with Effect.suspend",
+      "Benchmark startup time before and after optimization",
+      "Verify no regression in test execution time"
+    ],
+    "passes": false
+  },
+  {
+    "category": "performance",
+    "description": "Optimize Bun test runner configuration",
+    "steps": [
+      "Configure --max-concurrency for optimal test parallelism",
+      "Enable test file parallelism where foundations allow",
+      "Configure --preload for common test setup",
+      "Benchmark test suite execution time vs Vitest baseline",
+      "Document any performance improvements or regressions"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Add Effect to packages/util for helper functions",
+    "steps": [
+      "Identify Promise-based functions in packages/util/src/functions/",
+      "Convert block.ts helpers to return Effect where appropriate",
+      "Convert extrinsics.ts helpers to return Effect",
+      "Maintain backwards-compatible Promise wrappers",
+      "Write tests for converted functions"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Effect migration - convert logger.ts to Effect",
+    "steps": [
+      "Wrap pino logger creation in Effect.sync",
+      "Create LoggerLive Layer in packages/util",
+      "Export Effect-based logger alongside existing logger",
+      "Update packages/cli to use Effect logger",
+      "Write test for logger Effect"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Remove unused Effect ecosystem packages",
+    "steps": [
+      "Check if @effect/cluster is actually used, remove if not",
+      "Check if @effect/sql is actually used, remove if not",
+      "Check if @effect/workflow is actually used, remove if not",
+      "Check if @effect/rpc is actually used, remove if not",
+      "Run `bun install` and verify no dependency errors"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Update TypeScript configuration for Bun",
+    "steps": [
+      "Add 'bun-types' to devDependencies in each package",
+      "Update tsconfig.json compilerOptions.types to include 'bun-types'",
+      "Verify Bun globals are typed correctly",
+      "Run `bun run typecheck` and verify no errors",
+      "Remove any @types/node conflicts if present"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Final integration verification",
+    "steps": [
+      "Run `bun install` from root - verify clean install",
+      "Run `bun run build` from root - verify all packages build",
+      "Run `bun run typecheck` - verify no type errors",
+      "Run `bun run lint` - verify no lint errors",
+      "Run `bun run test` - verify all tests pass"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Run full e2e test suite",
+    "steps": [
+      "Run `moonwall test basic` - verify basic tests pass",
+      "Run `moonwall test dev_seq` - verify dev foundation works",
+      "Run `moonwall test chopsticks` - verify chopsticks foundation works",
+      "Run `moonwall test read_only` if network available",
+      "Document any test failures with root cause"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Update CHANGELOG and version",
+    "steps": [
+      "Create changeset with `bun changeset`",
+      "Document breaking changes (pnpm -> bun, vitest -> bun test)",
+      "Document new Effect-based architecture",
+      "Document new testing capabilities",
+      "Prepare for major version bump if breaking changes exist"
+    ],
+    "passes": false
+  },
+  {
+    "category": "security",
+    "description": "Verify no secrets or credentials in committed files",
+    "steps": [
+      "Search for API keys, passwords, tokens in codebase",
+      "Verify .env files are in .gitignore",
+      "Verify no hardcoded test credentials",
+      "Check bun.lockb doesn't contain sensitive registry tokens",
+      "Run git-secrets or similar if available"
+    ],
+    "passes": false
+  },
+  {
+    "category": "security",
+    "description": "Validate input handling in CLI commands",
+    "steps": [
+      "Verify config file paths are validated",
+      "Verify environment names are sanitized",
+      "Verify artifact download URLs are validated",
+      "Check for command injection in Bun.spawn calls",
+      "Review yargs argument parsing for injection risks"
+    ],
+    "passes": false
+  },
+  {
+    "category": "reliability",
+    "description": "Add graceful shutdown handling",
+    "steps": [
+      "Handle SIGINT in CLI for clean foundation shutdown",
+      "Handle SIGTERM in CLI for clean foundation shutdown",
+      "Ensure all child processes are killed on shutdown",
+      "Ensure all provider connections are closed",
+      "Write test verifying graceful shutdown"
+    ],
+    "passes": false
+  },
+  {
+    "category": "observability",
+    "description": "Add health check endpoint for long-running networks",
+    "steps": [
+      "Implement health check in `moonwall run` mode",
+      "Return foundation status (running, stopped, error)",
+      "Return connected provider count",
+      "Return node readiness status",
+      "Document health check usage"
+    ],
+    "passes": false
+  }
+]
