@@ -245,7 +245,8 @@
       "Implement getStatus() to check node readiness",
       "Write unit test using Layer.succeed for mocking"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: (1) Created DevFoundationServiceLive.ts with Layer.effect pattern using Ref for mutable state tracking. (2) Implemented start() using ProcessManagerService + RpcPortDiscoveryService to spawn process and discover RPC port, returns {info, stop} tuple. (3) Implemented stop() using the stored cleanup Effect from ProcessManagerService. (4) Implemented getStatus() returning DevFoundationStatus union type (Starting|Running|Stopped|Failed). (5) Implemented healthCheck() using NodeReadinessService for WebSocket-based RPC validation. (6) Created makeDevFoundationServiceLayer() factory for testing with custom dependencies. (7) Created comprehensive unit test suite with 9 tests using Layer.succeed for mocking lower-level services. All tests pass. Test count: 318 pass (up from 309), same 16 E2E failures requiring moonwall environment."
   },
   {
     "category": "functional",

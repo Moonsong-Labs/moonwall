@@ -12,6 +12,7 @@
  * - ReadOnlyFoundationService: Manages read-only connections (planned)
  */
 
+// DevFoundationService interface and types
 export {
   DevFoundationService,
   type DevFoundationConfig,
@@ -19,3 +20,9 @@ export {
   type DevFoundationStatus,
   type DevFoundationServiceType,
 } from "./DevFoundationService.js";
+
+// DevFoundationService Layer implementations
+export {
+  DevFoundationServiceLive,
+  makeDevFoundationServiceLayer,
+} from "./DevFoundationServiceLive.js";

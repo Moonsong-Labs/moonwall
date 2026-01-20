@@ -812,3 +812,70 @@
 - `packages/cli/src/internal/effect/index.ts` - Updated to export from services/
 - `plans/prd.json` - Marked Feature 19 as complete
 
+---
+
+### Feature Completed: Effect migration - implement DevFoundationService Layer (PRD Feature 20)
+
+**Changes Made:**
+1. Created `packages/cli/src/internal/effect/services/DevFoundationServiceLive.ts`:
+   - Implemented `DevFoundationServiceLive` Layer using `Layer.effect` pattern
+   - Uses `Ref` from Effect for mutable state tracking (status, runningInfo, cleanup)
+   - Composes lower-level services: `ProcessManagerService`, `RpcPortDiscoveryService`, `NodeReadinessService`
+
+2. Implemented all service methods:
+   - `start(config)`: Spawns node process, discovers RPC port, returns `{info, stop}` tuple
+   - `stop()`: Executes stored cleanup Effect, updates state to Stopped
+   - `getStatus()`: Returns current `DevFoundationStatus` (Starting|Running|Stopped|Failed)
+   - `healthCheck()`: Uses `NodeReadinessService` for WebSocket-based RPC validation
+
+3. Created `makeDevFoundationServiceLayer()` factory function:
+   - Allows injection of custom dependencies for testing
+   - Enables mocking lower-level services with `Layer.succeed`
+
+4. Updated `packages/cli/src/internal/effect/services/index.ts`:
+   - Added exports for `DevFoundationServiceLive` and `makeDevFoundationServiceLayer`
+
+5. Created comprehensive unit test suite:
+   - `packages/cli/src/internal/effect/__tests__/services/DevFoundationService.test.ts`
+   - 9 tests covering: start success, start failures (process launch, port discovery), stop, getStatus, healthCheck
+   - Uses `Layer.succeed` pattern for mocking dependencies
+   - All tests pass
+
+**Design Decisions:**
+- Used `Ref<DevFoundationState>` for state management - allows tracking status, process info, and cleanup across method calls
+- Composed lower-level services directly instead of wrapping `launchNodeEffect` - cleaner Effect composition
+- Health check uses shorter timeout (10 attempts × 50ms) vs startup (600 attempts × 200ms)
+- Both `start()` return value's `stop` Effect and the service's `stop()` method work correctly
+- Error mapping converts low-level errors (ProcessError, PortDiscoveryError) to high-level foundation errors
+
+**Verification:**
+- `bun typecheck` - Passes with no errors
+- `bun test packages/cli/src/internal/effect/__tests__/services/` - 9 pass, 0 fail
+- `bun test` (full suite) - 318 pass (up from 309), 12 skip, 16 fail, 2 errors (same E2E baseline)
+
+**Notes for Next Developer:**
+1. Feature 20 completes the DevFoundationService implementation. The service is now usable via:
+   ```ts
+   import { Effect } from "effect";
+   import { DevFoundationService, DevFoundationServiceLive } from "@moonwall/cli";
+
+   const program = Effect.gen(function* () {
+     const devFoundation = yield* DevFoundationService;
+     const { info, stop } = yield* devFoundation.start(config);
+     console.log(`Node running on port ${info.rpcPort}`);
+     yield* stop;
+   }).pipe(Effect.provide(DevFoundationServiceLive));
+   ```
+2. Next features to implement:
+   - Feature 21: ChopsticksFoundationService interface
+   - Feature 22: ChopsticksFoundationService Layer implementation
+   - Feature 23: ZombieFoundationService interface
+3. The `makeDevFoundationServiceLayer()` factory is useful for integration tests that need partial mocking.
+4. The 16 failing tests are E2E tests in `test/suites/` requiring moonwall environment - not related to this change.
+
+**Files Changed:**
+- `packages/cli/src/internal/effect/services/DevFoundationServiceLive.ts` - New Layer implementation
+- `packages/cli/src/internal/effect/services/index.ts` - Added exports for Live Layer
+- `packages/cli/src/internal/effect/__tests__/services/DevFoundationService.test.ts` - New test file (9 tests)
+- `plans/prd.json` - Marked Feature 20 as complete
+
