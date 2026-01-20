@@ -232,7 +232,8 @@
       "Define DevFoundationConfig type for configuration",
       "Export service tag and types"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: (1) Created packages/cli/src/internal/effect/services/ directory structure. (2) Created DevFoundationService.ts with Context.Tag-based service interface. (3) Defined methods: start() returns Effect<{info, stop}>, stop() returns Effect<void>, getStatus() returns Effect<DevFoundationStatus>, healthCheck() returns Effect<void>. (4) Defined DevFoundationConfig with command, args, name, launchSpec, isEthereumChain fields. (5) Defined DevFoundationStatus union type (Starting|Running|Stopped|Failed). (6) Defined DevFoundationRunningInfo with process, rpcPort, logPath, config. (7) Created services/index.ts exporting all types. (8) Updated main effect/index.ts to export from services/. Typecheck passes, test baseline unchanged (309 pass, 12 skip, 16 fail, 2 errors)."
   },
   {
     "category": "functional",

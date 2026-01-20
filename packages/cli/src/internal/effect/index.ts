@@ -6,13 +6,20 @@
 export * from "./errors.js";
 // High-level foundation errors
 export * from "./errors/index.js";
+
+// Low-level services (process, port, readiness)
 export * from "./ProcessManagerService.js";
 export * from "./PortDiscoveryService.js";
 export * from "./NodeReadinessService.js";
 export * from "./RpcPortDiscoveryService.js";
-export * from "./launchNodeEffect.js";
 export * from "./FileLock.js";
 export * from "./StartupCacheService.js";
+
+// High-level foundation services
+export * from "./services/index.js";
+
+// Effect-based launchers (bridge to existing code)
+export * from "./launchNodeEffect.js";
 export * from "./ChopsticksService.js";
 export * from "./launchChopsticksEffect.js";
 export * from "./ChopsticksMultiChain.js";

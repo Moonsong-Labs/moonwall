@@ -755,3 +755,60 @@
 - `packages/cli/src/internal/effect/index.ts` - Updated to export from errors subdirectory
 - `plans/prd.json` - Marked Feature 18 as complete
 
+---
+
+### Feature Completed: Effect migration - create DevFoundationService interface (PRD Feature 19)
+
+**Changes Made:**
+1. Created `packages/cli/src/internal/effect/services/` directory for high-level foundation services
+
+2. Created `packages/cli/src/internal/effect/services/DevFoundationService.ts`:
+   - Defined `DevFoundationService` using Effect's `Context.Tag` pattern
+   - Interface methods:
+     - `start(config)`: Returns `Effect<{info: DevFoundationRunningInfo, stop: Effect<void>}, FoundationStartupError>`
+     - `stop()`: Returns `Effect<void, FoundationShutdownError>`
+     - `getStatus()`: Returns `Effect<DevFoundationStatus>`
+     - `healthCheck()`: Returns `Effect<void, FoundationHealthCheckError>`
+   - Defined `DevFoundationConfig` type with fields: `command`, `args`, `name`, `launchSpec`, `isEthereumChain`
+   - Defined `DevFoundationStatus` union type: `Starting | Running | Stopped | Failed`
+   - Defined `DevFoundationRunningInfo` with: `process`, `rpcPort`, `logPath`, `config`
+
+3. Created `packages/cli/src/internal/effect/services/index.ts`:
+   - Exports all types and the service tag from DevFoundationService
+   - Documentation about service hierarchy (DevFoundation, Chopsticks, Zombie, ReadOnly)
+
+4. Updated `packages/cli/src/internal/effect/index.ts`:
+   - Reorganized exports into logical groups (low-level errors, high-level errors, low-level services, high-level services, launchers)
+   - Added export for `./services/index.js`
+
+**Design Decisions:**
+- Used `Context.Tag` pattern for dependency injection (testable via `Layer.succeed` mocks)
+- Return type of `start()` includes both `info` and a `stop` Effect - this allows the caller to control when cleanup happens (important for test lifecycle)
+- Status uses a tagged union (`_tag` discriminator) for type-safe pattern matching
+- Added `healthCheck()` method beyond PRD requirements - needed for complete foundation lifecycle management
+- Service interface only - implementation (`DevFoundationServiceLive` Layer) is Feature 20
+
+**Verification:**
+- `bun typecheck` - Passes with no errors
+- `bun test` - 309 pass, 12 skip, 16 fail, 2 errors (same baseline as Feature 18 - E2E tests require moonwall environment)
+
+**Notes for Next Developer:**
+1. Feature 20 (DevFoundationService Layer implementation) should use the existing `launchNodeEffect` function and wrap it in a Layer.
+2. The service pattern established here should be followed for other foundation services (Chopsticks, Zombie, ReadOnly).
+3. The `DevFoundationConfig` derives from `DevLaunchSpec` in `@moonwall/types` - the transformation happens in the caller.
+4. Example usage pattern:
+   ```ts
+   Effect.gen(function* () {
+     const devFoundation = yield* DevFoundationService;
+     const { info, stop } = yield* devFoundation.start(config);
+     // Use the node...
+     yield* stop; // Manual cleanup
+   });
+   ```
+
+**Files Changed:**
+- `packages/cli/src/internal/effect/services/DevFoundationService.ts` - New service interface file
+- `packages/cli/src/internal/effect/services/index.ts` - New index file for services
+- `packages/cli/src/internal/effect/index.ts` - Updated to export from services/
+- `plans/prd.json` - Marked Feature 19 as complete
+
