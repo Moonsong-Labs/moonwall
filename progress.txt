@@ -334,3 +334,45 @@
 - `packages/cli/src/internal/cmdFunctions/initialisation.ts` - Updated success message
 - `packages/cli/src/cmds/entrypoint.ts` - Updated help message
 - `plans/prd.json` - Marked Feature 9 as complete
+
+---
+
+### Feature Completed: Create bunfig.toml configuration (PRD Feature 10)
+
+**Changes Made:**
+1. Created `bunfig.toml` in project root with:
+   - `[install]` section:
+     - `exact = true` - Use exact versions for reproducible builds
+     - `optional = true` - Allow optional native modules to fail gracefully (e.g., cpu-features)
+   - `[test]` section:
+     - `root = "."` - Test discovery from monorepo root
+     - `coverage = true` - Enable coverage reporting by default
+     - `coverageThreshold = { lines = 0.8, functions = 0.8, statements = 0.8 }` - 80% target
+     - `coverageReporter = ["text", "lcov"]` - Console output + lcov for CI
+     - `coverageDir = "./coverage"` - Coverage output directory
+     - `coverageSkipTestFiles = true` - Exclude test files from coverage
+     - `coveragePathIgnorePatterns` - Exclude node_modules, dist, test files
+     - `timeout = 30000` - 30 second timeout for Effect-based async tests
+
+**Verification:**
+- `bun typecheck` - Passes with no errors
+- `bun test` - 296 pass, 12 skip, 19 fail, 8 errors (same baseline as Feature 9)
+- Coverage reports now generated with text table and lcov output
+- Current coverage: ~31% functions, ~50% lines (will improve after Features 11-16)
+
+**Notes for Next Developer:**
+1. The coverage threshold is set to 80% but currently not enforced (below threshold). This will be addressed when Features 11-16 migrate Vitest to Bun test runner.
+2. The 19 test failures and 8 errors are all from `vi.mock`/`importOriginal` (Vitest-specific APIs) in:
+   - ProcessManagerService.test.ts
+   - ChopsticksService.test.ts
+   - launchChopsticksEffect.test.ts
+   - FileLock.test.ts
+3. The @polkadot/* package warnings about multiple versions are from transitive dependencies and don't affect functionality.
+4. Next high-priority features are:
+   - Feature 11: Remove vitest dependencies
+   - Feature 12: Convert CLI internal tests to bun:test
+   - Features 13-16: Update VitestOptionsBuilder, CLI exports, describeSuite, config schema
+
+**Files Changed:**
+- `bunfig.toml` - Created with install and test configuration
+- `plans/prd.json` - Marked Feature 10 as complete

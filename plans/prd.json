@@ -118,7 +118,8 @@
       "Configure test.coverageThreshold for 80% target",
       "Run `bun test` and verify configuration is applied"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: Created bunfig.toml with [install] section (exact versions, optional native modules) and [test] section (coverage enabled, 80% threshold for lines/functions/statements, text+lcov reporters, 30s timeout). Coverage reports now generated during test runs. Test baseline unchanged: 296 pass, 12 skip, 19 fail, 8 errors (vi.mock incompatibilities - Feature 11-16). Coverage currently ~31% funcs, ~50% lines - will improve after Vitest migration."
   },
   {
     "category": "functional",

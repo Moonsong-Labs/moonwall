@@ -1,0 +1,42 @@
+# Bun configuration for Moonwall monorepo
+# See: https://bun.sh/docs/runtime/bunfig
+
+[install]
+# Use exact versions by default for reproducible builds
+exact = true
+
+# Allow optional native modules to fail gracefully
+# (e.g., cpu-features may fail on some systems)
+optional = true
+
+[test]
+# Test files are located in packages/cli/src/internal/effect/__tests__/
+# The root is set to the monorepo root since tests use workspace imports
+root = "."
+
+# Enable coverage reporting
+coverage = true
+
+# Coverage thresholds (80% target as per PRD)
+# Uses lowercase keys: lines, functions, statements
+coverageThreshold = { lines = 0.8, functions = 0.8, statements = 0.8 }
+
+# Report coverage to stdout and generate lcov for CI integration
+coverageReporter = ["text", "lcov"]
+
+# Output directory for coverage reports
+coverageDir = "./coverage"
+
+# Skip coverage for test files themselves
+coverageSkipTestFiles = true
+
+# Exclude node_modules and build artifacts from coverage
+coveragePathIgnorePatterns = [
+  "**/node_modules/**",
+  "**/dist/**",
+  "**/*.test.ts",
+  "**/test/**"
+]
+
+# Default timeout for tests (30 seconds - allows for Effect-based async tests)
+timeout = 30000
