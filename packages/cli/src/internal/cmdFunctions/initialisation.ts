@@ -84,7 +84,7 @@ export async function generateConfig(argv: { acceptAllDefaults?: boolean }) {
   await createSampleTest(answers.testDir);
   console.log("Test directory created at: ", answers.testDir);
   console.log(
-    `You can now add tests to this directory and run them with 'pnpm moonwall test ${answers.environmentName}'`
+    `You can now add tests to this directory and run them with 'bunx moonwall test ${answers.environmentName}'`
   );
   console.log("Goodbye! 👋");
 }

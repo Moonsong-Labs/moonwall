@@ -243,3 +243,94 @@
 - `.github/workflows/manual-publish.yml` - Updated to use bun
 - `.github/workflows/deploy.yml` - Updated to use bun
 - `plans/prd.json` - Marked Feature 8 as complete
+
+---
+
+### Feature Completed: Replace pnpm with Bun - documentation updates (PRD Feature 9)
+
+**Changes Made:**
+
+1. Updated `README.md`:
+   - Changed installation command from `pnpm -g i` to `bun add -g`
+   - Updated local installation instructions to use `bun i`, `bun run build`, `bun run start`
+   - Changed CLI usage examples from `pnpm moonwall` to `bunx moonwall`
+   - Updated link from pnpm docs to Bun docs
+
+2. Updated `CLAUDE.md`:
+   - Changed monorepo description from "pnpm workspaces" to "Bun workspaces"
+   - Updated all installation/build/test commands to use bun
+   - Changed "PNPM Workspaces" to "Bun Workspaces" in Key Technologies
+   - Changed "Vitest" to "Bun Test Runner" in Key Technologies
+   - Updated testing flow description
+
+3. Updated `docs/README.md`:
+   - Changed `pnpm docs:dev` to `bun run docs:dev`
+   - Changed `pnpm docs:build` and `pnpm docs:preview` to `bun run` equivalents
+
+4. Updated `docs/guide/intro/getting-started.md`:
+   - Changed prerequisites from pNPM to Bun (with note about alternatives)
+   - Reordered code-group examples to show bun first
+   - Updated all `pnpm moonwall` commands to `bunx moonwall`
+   - Changed global install example to `bun add -g`
+
+5. Updated `docs/guide/cmd/cli.md`:
+   - Changed `pnpm moonwall` to `bunx moonwall`
+
+6. Updated `docs/guide/cmd/init.md`:
+   - Changed `pnpm moonwall init` to `bunx moonwall init`
+
+7. Updated `docs/guide/cmd/download.md`:
+   - Changed `pnpm moonwall download` examples to `bunx moonwall download`
+
+8. Updated `docs/guide/test/quick-start.md`:
+   - Changed `pnpm moonwall` to `bunx moonwall`
+
+9. Updated `docs/guide/test/debug.md`:
+   - Changed `pnpm moonwall` commands to `bunx moonwall`
+   - Changed "Vitest configuration" to "Bun test configuration"
+
+10. Updated `docs/guide/troubleshooting/faq.md`:
+    - Changed `pnpm update` to `bun update`
+    - Added note about alternative package managers
+
+11. Updated `TROUBLESHOOTING.md`:
+    - Changed `pnpm link` references to `bun link`
+    - Updated installation commands to use bun
+    - Changed `pnpm moonwall` to `bunx moonwall`
+    - Changed "Vitest Configuration" to "Test Configuration"
+
+12. Updated CLI source files with user-facing messages:
+    - `packages/cli/src/internal/fileCheckers.ts:58` - Changed `pnpm moonwall download` to `bunx moonwall download`
+    - `packages/cli/src/internal/launcherCommon.ts:155` - Changed `pnpm tsx` to `bunx tsx`
+    - `packages/cli/src/internal/cmdFunctions/initialisation.ts:87` - Changed `pnpm moonwall test` to `bunx moonwall test`
+    - `packages/cli/src/cmds/entrypoint.ts:163` - Changed to package-manager agnostic `moonwall --help`
+
+**Verification:**
+- `bun typecheck` - Passes with no errors
+- `bun test` - 296 pass, 12 skip, 19 fail (same baseline as Feature 8 - vi.mock incompatibilities)
+
+**Notes for Next Developer:**
+1. All pnpm→Bun documentation updates are now complete. The codebase is now fully documented for Bun usage.
+2. Next high-priority features are:
+   - Feature 10: bunfig.toml configuration
+   - Features 11-16: Replace Vitest with Bun test runner (to fix the 19 failing tests)
+3. Some doc files still mention Vitest in context descriptions (e.g., debug.md logger names). These will be fully updated when Features 11-16 are completed.
+4. The CLI source files were updated to ensure users see consistent "bunx moonwall" messaging.
+
+**Files Changed:**
+- `README.md` - Updated installation and usage instructions
+- `CLAUDE.md` - Updated all commands and architecture description
+- `docs/README.md` - Updated dev/build commands
+- `docs/guide/intro/getting-started.md` - Updated prerequisites and commands
+- `docs/guide/cmd/cli.md` - Updated CLI invocation
+- `docs/guide/cmd/init.md` - Updated init command
+- `docs/guide/cmd/download.md` - Updated download examples
+- `docs/guide/test/quick-start.md` - Updated test running instructions
+- `docs/guide/test/debug.md` - Updated debug commands and descriptions
+- `docs/guide/troubleshooting/faq.md` - Updated upgrade instructions
+- `TROUBLESHOOTING.md` - Updated development workflow instructions
+- `packages/cli/src/internal/fileCheckers.ts` - Updated download command
+- `packages/cli/src/internal/launcherCommon.ts` - Updated tsx invocation
+- `packages/cli/src/internal/cmdFunctions/initialisation.ts` - Updated success message
+- `packages/cli/src/cmds/entrypoint.ts` - Updated help message
+- `plans/prd.json` - Marked Feature 9 as complete

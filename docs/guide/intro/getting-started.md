@@ -11,19 +11,11 @@ Skip to [Testing - Quick Start](../test/quick-start) for advice on running tests
 
 - [Node.js](https://nodejs.org/){target=_blank} version 20.10 or higher.
 - MacOS or Linux Operating system (WSL counts!)
-- [pNPM](https://pnpm.io/){target=_blank}, a fast and efficient package manager
+- [Bun](https://bun.sh/){target=_blank}, a fast JavaScript runtime and package manager (recommended), or npm/yarn/pnpm
 
 Moonwall should be installed as dependency to the project under test.
 
 ::: code-group
-
-```sh [pnpm]
-pnpm add -D @moonwall/cli
-```
-
-```sh [yarn]
-yarn add -D @moonwall/cli
-```
 
 ```sh [bun]
 bun add -D @moonwall/cli
@@ -33,12 +25,20 @@ bun add -D @moonwall/cli
 npm add -D @moonwall/cli
 ```
 
+```sh [yarn]
+yarn add -D @moonwall/cli
+```
+
+```sh [pnpm]
+pnpm add -D @moonwall/cli
+```
+
 :::
 
-You can install Moonwall globally with the following command: 
+You can install Moonwall globally with the following command:
 
 ```sh
-pnpm -g i @moonwall/cli
+bun add -g @moonwall/cli
 ```
 
 ## Initializing Moonwall
@@ -47,20 +47,20 @@ The first thing to do is to create a Moonwall config file. This can be initiated
 
 ::: code-group
 
-```sh [pnpm]
-pnpm moonwall init
+```sh [bun]
+bunx moonwall init
+```
+
+```sh [npm]
+npx moonwall init
 ```
 
 ```sh [yarn]
 yarn moonwall init
 ```
 
-```sh [bun]
-bun moonwall init
-```
-
-```sh [npm]
-npx moonwall init
+```sh [pnpm]
+pnpm moonwall init
 ```
 
 :::
@@ -68,8 +68,8 @@ npx moonwall init
 which should give you an output like:
 
 ```sh
-❯ pnpm moonwall init
-? Provide a label for the config file (moonwall_config) 
+❯ bunx moonwall init
+? Provide a label for the config file (moonwall_config)
 ```
 
 From here you can follow the questions in the wizard to build a stock moonwall config to start you off. For information, please see the [init command](/guide/cmd/init). 
@@ -128,20 +128,20 @@ Launch the app:
 
 ::: code-group
 
-```sh [pnpm]
-pnpm moonwall
+```sh [bun]
+bunx moonwall
+```
+
+```sh [npm]
+npx moonwall
 ```
 
 ```sh [yarn]
 yarn moonwall
 ```
 
-```sh [bun]
-bun moonwall
-```
-
-```sh [npm]
-npx moonwall
+```sh [pnpm]
+pnpm moonwall
 ```
 
 :::
@@ -149,7 +149,7 @@ npx moonwall
 ::: tip
 This process can be sped up by directly calling it via [CLI Commands](../cmd/cli).
 
-e.g. `pnpm moonwall download moonbeam latest .`
+e.g. `bunx moonwall download moonbeam latest .`
 :::
 
 The main menu will pop up with the following options:

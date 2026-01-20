@@ -11,18 +11,18 @@ Moonwall is a comprehensive blockchain test framework for Substrate-based networ
 
 ### NPM Installation
 ```
-pnpm -g i @moonwall/cli
+bun add -g @moonwall/cli
 ```
-> Or whichever way you prefer to install via your favourite package manager
+> Or whichever way you prefer to install via your favourite package manager (npm, yarn, pnpm, bun)
 
 ### Local Installation
 
-> Package manager `pnpm` is required for this repo. You can install it with `npm install -g pnpm` or otherwise following [their instructions](https://pnpm.io/installation).
+> Package manager `bun` is required for this repo. You can install it following [their instructions](https://bun.sh/docs/installation).
 
-1. `pnpm i` to install all dependencies.
-2. `pnpm build` to build the application locally.
-3. `pnpm start` to check that the application runs
-4. (In your project dir) `npm i <path_to_moonwall_repo>` to locally add moonwall to your other repo
+1. `bun i` to install all dependencies.
+2. `bun run build` to build the application locally.
+3. `bun run start` to check that the application runs
+4. (In your project dir) `bun add <path_to_moonwall_repo>` to locally add moonwall to your other repo
 
 From here you can import the items you need from moonwall packages in your code:
 ```
@@ -43,13 +43,13 @@ import { ALITH_ADDRESS } from "@moonwall/util";
 
 - `moonwall` : If you have globally installed moonwall, here is the most minimal entrypoint
 
-- `pnpm moonwall` : This can be used if locally installed, and will launch the main menu..
+- `bunx moonwall` : This can be used if locally installed, and will launch the main menu.
 
-- `pnpm moonwall run <ENV_NAME>` : Run a network specified in your config file.
+- `bunx moonwall run <ENV_NAME>` : Run a network specified in your config file.
 
-- `pnpm moonwall test <ENV_NAME>` : Start network and run tests against it.
+- `bunx moonwall test <ENV_NAME>` : Start network and run tests against it.
 
-- `pnpm moonwall download <ARTIFACT NAME> <VERSION> <PATH>` : Download an artifact directly from github.
+- `bunx moonwall download <ARTIFACT NAME> <VERSION> <PATH>` : Download an artifact directly from github.
 
 
-The combinations are endless, for more information you can see the pnpm docs [here](https://pnpm.io/cli/run).
+The combinations are endless, for more information you can see the [Bun docs](https://bun.sh/docs/cli/run).

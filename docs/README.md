@@ -8,7 +8,7 @@ Please consult their docs for syntax on how to format and use their templates.
 To run this docs site in dev mode (live updates) you only need to:
 
 ```sh
-pnpm docs:dev
+bun run docs:dev
 ```
 
 and then visit the link shown:
@@ -27,8 +27,8 @@ and then visit the link shown:
 Before publishing to prod you may want to check it can be built and served correctly. This can be done via:
 
 ```sh
-pnpm docs:build
-pnpm docs:preview
+bun run docs:build
+bun run docs:preview
 ```
 
 > [!IMPORTANT]\

@@ -9,7 +9,7 @@ If you're troubleshooting an error, it's always a good idea to check the [Releas
 You can upgrade Moonwall with the following command:
 
 ```bash
-pnpm update
+bun update
 ```
 
 Make sure that you specify the correct version of Moonwall that you'd like to use in your `package.json`. An example `package.json` is included below:
@@ -38,7 +38,7 @@ Make sure that you specify the correct version of Moonwall that you'd like to us
 }
 ```
 
-Then run `pnpm update` or `pnpm i` to update / install the necessary packages. 
+Then run `bun update` or `bun i` to update / install the necessary packages. You can also use npm, yarn, or pnpm if you prefer. 
 
 ![Moonwall init terminal screenshot](/moonwall-update.png)
 

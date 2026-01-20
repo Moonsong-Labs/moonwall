@@ -55,7 +55,7 @@ export async function downloadBinsIfMissing(binPath: string) {
       process.exit(0);
     } else {
       execSync(`mkdir -p ${binDir}`);
-      execSync(`pnpm moonwall download ${binName} latest ${binDir}`, {
+      execSync(`bunx moonwall download ${binName} latest ${binDir}`, {
         stdio: "inherit",
       });
     }

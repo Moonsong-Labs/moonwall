@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What is Moonwall?
 
-Moonwall is a comprehensive blockchain testing framework specifically designed for Substrate-based networks. It provides a unified approach to network configuration, testing, deployment, and script execution. Built as a monorepo using pnpm workspaces, it facilitates testing against various network environments and supports multiple blockchain client libraries.
+Moonwall is a comprehensive blockchain testing framework specifically designed for Substrate-based networks. It provides a unified approach to network configuration, testing, deployment, and script execution. Built as a monorepo using Bun workspaces, it facilitates testing against various network environments and supports multiple blockchain client libraries.
 
 ## Commands
 
@@ -12,44 +12,44 @@ Moonwall is a comprehensive blockchain testing framework specifically designed f
 
 ```bash
 # Install all dependencies for the monorepo (run from project root)
-pnpm i
+bun i
 
-# To install the CLI globally (optional, for using `moonwall` directly outside pnpm scripts)
-pnpm -g i @moonwall/cli
+# To install the CLI globally (optional, for using `moonwall` directly outside bun scripts)
+bun add -g @moonwall/cli
 ```
 
 ### Build and Development
 
 ```bash
 # Build all packages within the monorepo
-pnpm build
+bun run build
 
 # Generate TypeScript types for all packages
-pnpm generate-types
+bun run generate-types
 
 # Clean all build artifacts and node_modules, then reinstall and rebuild everything
-pnpm pristine-build
+bun run pristine-build
 
 # Start the Moonwall CLI (interactive mode)
-pnpm start # or pnpm moonwall
+bun run start # or bunx moonwall
 ```
 
 ### Testing
 
-Moonwall uses Vitest as its test runner.
+Moonwall uses Bun's built-in test runner.
 
 ```bash
 # Run a predefined set of tests (e.g., 'basic', 'chopsticks', 'dev_seq', 'chop_state_test')
-pnpm test
+bun test
 
 # Run tests for a specific environment defined in moonwall.config.json
-pnpm exec moonwall test <ENV_NAME>
+bunx moonwall test <ENV_NAME>
 
 # Run tests for a specific environment with a pattern
-pnpm exec moonwall test <ENV_NAME> --pattern "<PATTERN>"
+bunx moonwall test <ENV_NAME> --pattern "<PATTERN>"
 
 # View HTML test reports in browser (after tests have run and generated reports)
-pnpm display-reports
+bun run display-reports
 ```
 The `moonwall/test` directory contains example test suites and configurations. It also includes dependencies like `solc` and `@openzeppelin/contracts`, indicating support for compiling and testing Solidity smart contracts.
 
@@ -59,15 +59,15 @@ Moonwall uses Biome for formatting and linting.
 
 ```bash
 # Format code across the monorepo
-pnpm fmt
-pnpm fmt:fix
+bun run fmt
+bun run fmt:fix
 
 # Lint code across all packages
-pnpm lint
-pnpm lint:fix
+bun run lint
+bun run lint:fix
 
 # Perform type checking for all packages
-pnpm typecheck
+bun run typecheck
 ```
 
 ### Working with the Moonwall CLI
@@ -76,31 +76,30 @@ The CLI is the primary interface for interacting with Moonwall.
 
 ```bash
 # Launch Moonwall CLI (interactive main menu)
-pnpm moonwall
+bunx moonwall
 
 # Run a specific network environment (as defined in moonwall.config.json) without running tests
-pnpm moonwall run <ENV_NAME>
+bunx moonwall run <ENV_NAME>
 
 # Run tests against a specific network environment
-pnpm moonwall test <ENV_NAME> # Similar to `pnpm exec moonwall test <ENV_NAME>`
+bunx moonwall test <ENV_NAME>
 
 # Download blockchain artifacts (e.g., node binaries) from GitHub releases
-pnpm moonwall download <ARTIFACT_NAME> <VERSION> <PATH>
+bunx moonwall download <ARTIFACT_NAME> <VERSION> <PATH>
 ```
 The CLI uses `yargs` for argument parsing and `@inquirer/prompts` for interactive menus.
 
 ## Architecture Overview
 
-Moonwall is structured as a TypeScript monorepo managed with pnpm workspaces.
+Moonwall is structured as a TypeScript monorepo managed with Bun workspaces.
 
 ### Key Technologies
 
-*   **PNPM Workspaces**: Manages the monorepo structure and dependencies.
+*   **Bun Workspaces**: Manages the monorepo structure and dependencies.
 *   **TypeScript**: The primary programming language, providing strong typing.
 *   **Tsup**: Used for bundling TypeScript code in the individual packages (`cli`, `types`, `util`).
 *   **Biome**: For code formatting and linting, ensuring consistent code style.
-*   **Vitest**: The testing framework used for running unit and integration tests.
-    *   **`@vitest/ui`**: Provides a browser-based UI for viewing test results.
+*   **Bun Test Runner**: The testing framework used for running unit and integration tests.
 
 ### Project Structure
 
@@ -150,8 +149,8 @@ A typical Moonwall testing flow involves:
 
 1.  **Configuration**: Define network setups and test suites in `moonwall.config.json`.
 2.  **Network Initialization**: Moonwall starts the specified network(s) using the chosen `foundation` (e.g., launching a local dev node, spinning up a Chopsticks fork, or orchestrating a Zombienet deployment).
-3.  **Test Execution**: Vitest runs the test files, which use the provided context to interact with the network(s) via configured client libraries (Polkadot.js, Ethers.js, etc.).
+3.  **Test Execution**: Bun's test runner runs the test files, which use the provided context to interact with the network(s) via configured client libraries (Polkadot.js, Ethers.js, etc.).
 4.  **Network Teardown**: After tests complete (or on error), Moonwall tears down the networks it started.
-5.  **Reporting**: Test results are available in the console and can be viewed in a web UI using `pnpm display-reports`.
+5.  **Reporting**: Test results are available in the console and can be viewed in a web UI using `bun run display-reports`.
 
 The framework is designed to be flexible, allowing users to test various aspects of Substrate-based chains, including runtime logic, smart contracts (Solidity), and off-chain components.

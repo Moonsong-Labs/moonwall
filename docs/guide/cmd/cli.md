@@ -2,7 +2,7 @@
 
 ## Initial Setup
 
-You can interact with the Moonwall CLI by running `moonwall` if you've installed it globally. Otherwise, you can run `pnpm moonwall`. 
+You can interact with the Moonwall CLI by running `moonwall` if you've installed it globally. Otherwise, you can run `bunx moonwall`. 
 
 If you're running moonwall for the first time in a directory setting up a project, you'll see 3 options, namely: 
 

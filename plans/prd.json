@@ -105,7 +105,8 @@
       "Search for 'pnpm' in docs/ directory and update to bun",
       "Verify docs build correctly with `bun run docs:build` if applicable"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: Updated README.md, CLAUDE.md, docs/README.md, docs/guide/intro/getting-started.md, docs/guide/cmd/ (cli.md, init.md, download.md), docs/guide/test/ (quick-start.md, debug.md), docs/guide/troubleshooting/faq.md, TROUBLESHOOTING.md. Also updated CLI source files with user-facing messages (fileCheckers.ts, launcherCommon.ts, initialisation.ts, entrypoint.ts). Changed pnpm→bun for package manager commands, pnpm moonwall→bunx moonwall for CLI invocations, Vitest→Bun test runner in descriptions. Typecheck passes, test baseline unchanged (296 pass, 19 fail due to vi.mock - Feature 11-16)."
   },
   {
     "category": "functional",

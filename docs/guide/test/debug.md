@@ -14,7 +14,7 @@ Moonwall uses `pino` for logging throughout the project, providing rich structur
 
 Example:
 ```bash
-LOG_LEVEL=debug pnpm moonwall test dev_seq
+LOG_LEVEL=debug bunx moonwall test dev_seq
 ```
 
 ### Pretty Printing
@@ -30,7 +30,7 @@ The following logger names are used throughout the codebase:
 - `context` - Global context operations (MoonwallContext)
 - `providers` - Provider-related operations and connections
 - `node` - Local node management and Docker operations
-- `runner` - Test runner and Vitest configuration
+- `runner` - Test runner and Bun test configuration
 - `test:blocks` - Block-related utility functions
 - `test:<env-name>` - Test environment specific logging (dynamically created)
 - `DevTest` - Development mode test operations
@@ -44,7 +44,7 @@ The following logger names are used throughout the codebase:
 For test files, the `--printlogs` command line argument will enable test loggers when present:
 
 ```bash
-pnpm moonwall test dev_seq --printlogs
+bunx moonwall test dev_seq --printlogs
 ```
 
 ## Tailing the Logs
