@@ -158,7 +158,8 @@
       "Update runTests.ts to use new BunTestOptionsBuilder",
       "Run a simple test environment to verify test execution works"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: (1) Created BunTestOptionsBuilder class with builder pattern matching Bun test CLI flags (--timeout, --reporter, --test-name-pattern, --coverage, --max-concurrency, --bail, --update-snapshots, --pass-with-no-tests). (2) Replaced startVitest with Bun.spawn in runBunTests() function. (3) Updated executeTests() to return BunTestResult (success, exitCode, stdout, stderr) instead of Vitest object. (4) Updated testCmd() to check result.success instead of vitest.state.getFiles(). (5) Updated testRunArgs type to include silent and onOutputLine options for streaming output. (6) Updated LogViewer component to use new API (onOutputLine instead of onConsoleLog). (7) Updated build script to mark bun:test as external. All CLI internal tests pass (93 pass, 4 skip, 0 fail). Note: vitest dependency remains in packages/cli for index.ts and runnerContext.ts exports (to be removed in Features 14-15)."
   },
   {
     "category": "functional",

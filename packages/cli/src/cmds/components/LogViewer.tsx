@@ -93,11 +93,9 @@ export const LogViewer: React.FC<LogViewerProps> = ({
           testNamePattern: pattern,
           silent: true,
           subDirectory: process.env.MOON_SUBDIR,
-          reporters: ["dot"],
-          onConsoleLog: (log) => {
-            if (log.includes("has multiple versions")) return false;
-            setTestOutput((prev) => [...prev.slice(-50), log]);
-            return false;
+          onOutputLine: (line) => {
+            if (line.includes("has multiple versions")) return;
+            setTestOutput((prev) => [...prev.slice(-50), line]);
           },
         });
       } catch {

@@ -472,3 +472,68 @@
 - `packages/cli/tsconfig.json` - Added types: ['bun-types']
 - `bun.lock` - Updated with bun-types
 - `plans/prd.json` - Marked Feature 12 as complete
+
+---
+
+### Feature Completed: Replace Vitest with Bun test runner - update VitestOptionsBuilder (PRD Feature 13)
+
+**Changes Made:**
+1. Removed vitest imports from `packages/cli/src/cmds/runTests.ts`:
+   - Removed `import type { UserConfig, Vitest } from "vitest/node"`
+   - Removed `import { startVitest } from "vitest/node"`
+
+2. Created `BunTestOptionsBuilder` class with Bun test CLI flag mapping:
+   - `setTimeout(timeout)` → `--timeout=<ms>`
+   - `setReporter(reporter)` → `--reporter=junit|dots`
+   - `setOutputFile(file)` → `--reporter-outfile=<path>`
+   - `setTestNamePattern(pattern)` → `--test-name-pattern=<regex>`
+   - `setCoverage(enabled)` → `--coverage`
+   - `setMaxConcurrency(threads)` → `--max-concurrency=<n>`
+   - `setBail(count)` → `--bail=<n>`
+   - `setUpdateSnapshots(update)` → `--update-snapshots`
+   - `addPassthroughArgs(args)` → converts object to CLI flags
+
+3. Created `runBunTests()` function that uses `Bun.spawn`:
+   - Spawns `bun test` with CLI arguments
+   - Captures stdout/stderr via pipe
+   - Supports silent mode and streaming output via callback
+   - Returns `BunTestResult { success, exitCode, stdout, stderr }`
+
+4. Updated `executeTests()` function:
+   - Returns `Promise<BunTestResult>` instead of `Promise<Vitest>`
+   - Uses `BunTestOptionsBuilder` instead of `VitestOptionsBuilder`
+   - Simplified Promise handling (no longer wraps in `new Promise`)
+
+5. Updated `testCmd()` function:
+   - Changed `vitest.state.getFiles().filter(...)` to `result.success` check
+
+6. Updated `testRunArgs` type:
+   - Added `silent?: boolean` for suppressing output
+   - Added `onOutputLine?: (line: string) => void` for streaming output
+   - Deprecated `vitestPassthroughArgs` in favor of `bunTestPassthroughArgs`
+
+7. Updated `LogViewer.tsx` component:
+   - Changed from `onConsoleLog` (vitest-specific) to `onOutputLine` callback
+
+8. Updated `packages/cli/package.json` build script:
+   - Added `--external bun:test` to mark bun:test as external in tsup build
+
+**Verification:**
+- `bun typecheck` - Passes with no errors
+- `bun run build` - Successfully builds with bun:test marked as external
+- `bun test packages/cli/src/internal/effect/__tests__/` - 93 pass, 4 skip, 0 fail
+- Full test suite: 305 pass, 12 skip, 16 fail (failures are unrelated - require moonwall environment)
+
+**Notes for Next Developer:**
+1. The vitest dependency is still in packages/cli because `index.ts` and `runnerContext.ts` still export from vitest. These will be updated in:
+   - Feature 14: Update CLI exports to use bun:test
+   - Feature 15: Update describeSuite wrapper to use bun:test
+2. After Features 14-15 are complete, vitest can be fully removed from packages/cli.
+3. The 16 failing tests in the full suite are E2E tests under `test/suites/` that require a running moonwall environment and config - not related to this change.
+4. The `BunTestResult` type provides a simpler interface than Vitest's state object - just check `success` boolean.
+
+**Files Changed:**
+- `packages/cli/src/cmds/runTests.ts` - Complete rewrite: removed vitest imports, added BunTestOptionsBuilder, runBunTests(), updated executeTests() and testCmd()
+- `packages/cli/src/cmds/components/LogViewer.tsx` - Updated to use onOutputLine instead of onConsoleLog
+- `packages/cli/package.json` - Updated build script with --external bun:test
+- `plans/prd.json` - Marked Feature 13 as complete
