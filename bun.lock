@@ -222,7 +222,6 @@
         "chai": "6.2.1",
         "chalk": "^5.6.2",
         "ethers": "^6.16.0",
-        "pnpm": "^10.24.0",
         "solc": "0.8.31",
         "tsx": "^4.21.0",
         "typescript": "5.9.3",
@@ -1812,8 +1811,6 @@
     "pirates": ["pirates@4.0.7", "", {}, "sha512-TfySrs/5nm8fQJDcBDuUng3VOUKsd7S+zqvbOTiGXHfxX4wK31ard+hoNuvkicM/2YFzlpDgABOevKSsB4G/FA=="],
 
     "pkg-types": ["pkg-types@1.3.1", "", { "dependencies": { "confbox": "0.1.8", "mlly": "1.8.0", "pathe": "2.0.3" } }, "sha512-/Jm5M4RvtBFVkKWRu2BLUTNP8/M2a+UwuAX+ae4770q1qVGtfjG+WTCupoZixokjmHiry8uI+dlY8KXYV5HVVQ=="],
-
-    "pnpm": ["pnpm@10.24.0", "", { "bin": { "pnpm": "bin/pnpm.cjs", "pnpx": "bin/pnpx.cjs" } }, "sha512-Af+K5xtEGZA7ZcYPstydNM+LtuBtA73hEu8496NNaQTEJLpmvqXNzxKJAjC/OflYBHMUDtnJRv7zKLblI4o0Wg=="],
 
     "polkadot-api": ["polkadot-api@1.19.2", "", { "dependencies": { "@polkadot-api/cli": "0.15.2", "@polkadot-api/ink-contracts": "0.4.0", "@polkadot-api/json-rpc-provider": "0.0.4", "@polkadot-api/known-chains": "0.9.11", "@polkadot-api/logs-provider": "0.0.6", "@polkadot-api/metadata-builders": "0.13.5", "@polkadot-api/metadata-compatibility": "0.3.6", "@polkadot-api/observable-client": "0.15.1", "@polkadot-api/pjs-signer": "0.6.15", "@polkadot-api/polkadot-sdk-compat": "2.3.3", "@polkadot-api/polkadot-signer": "0.1.6", "@polkadot-api/signer": "0.2.9", "@polkadot-api/sm-provider": "0.1.11", "@polkadot-api/smoldot": "0.3.14", "@polkadot-api/substrate-bindings": "0.16.3", "@polkadot-api/substrate-client": "0.4.7", "@polkadot-api/utils": "0.2.0", "@polkadot-api/ws-provider": "0.6.2", "@rx-state/core": "0.1.4" }, "peerDependencies": { "rxjs": "7.8.2" }, "bin": { "papi": "bin/cli.mjs", "polkadot-api": "bin/cli.mjs" } }, "sha512-ZaE5GMZ7pd2bw5dPLWWEB2WjzbhsPdnQjBuJ9HstEUkxcfaQkNIqRy33vGv1QmJ6xyp1aiffSTa9r1DGbjuixQ=="],
 

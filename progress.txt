@@ -118,3 +118,36 @@
 **Files Changed:**
 - `packages/types/package.json` - Updated scripts to use bun/bunx instead of pnpm
 - `plans/prd.json` - Marked Feature 5 as complete
+
+---
+
+### Feature Completed: Replace pnpm with Bun - test/ package.json (PRD Feature 6)
+
+**Changes Made:**
+1. Updated `test/package.json`:
+   - Removed `packageManager` field (`pnpm@9.1.4`) - this corepack setting is no longer needed with Bun
+   - Updated `test-dev` script: `pnpm moonwall` → `bunx moonwall`
+   - Updated `test` script: `pnpm moonwall` → `bunx moonwall`
+   - Updated `lint` script: `pnpm biome` → `bunx biome`
+   - Updated `lint:fix` script: `pnpm biome` → `bunx biome`
+   - Removed explicit `pnpm` devDependency (was `^10.24.0`)
+
+**Verification:**
+- `bun install` - Successful (cpu-features optional dep failure expected per Note 1 from Feature 2)
+- `bun pm ls` - All 5 workspace packages linked correctly (@moonwall/cli, @moonwall/docs, @moonwall/tests, @moonwall/types, @moonwall/util)
+- `bun typecheck` - Passes with no errors
+- `bun test` - 296 tests pass, 12 skip, 19 fail (same baseline as Feature 5 - vi.mock incompatibilities)
+
+**Notes for Next Developer:**
+1. All package-level pnpm→Bun migrations are now complete (cli, util, types, tests).
+2. Next high-priority features are:
+   - Feature 7: Root monorepo scripts (partially done in Feature 2, may need verification)
+   - Feature 8: CI/CD configuration (GitHub workflows)
+   - Feature 9: Documentation updates (README.md, CLAUDE.md)
+   - Feature 10: bunfig.toml configuration
+3. The `fmt` and `fmt:fix` scripts already used plain `biome` (not pnpm biome) so they were already compatible.
+4. The `node_test` and `bun_test` scripts were already compatible (node and bun respectively).
+
+**Files Changed:**
+- `test/package.json` - Updated scripts and removed pnpm-related config
+- `plans/prd.json` - Marked Feature 6 as complete

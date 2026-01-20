@@ -68,7 +68,8 @@
       "Run `bun install` in test/ directory",
       "Verify test dependencies are installed correctly"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: Removed packageManager field (pnpm@9.1.4), updated scripts (test-dev, test, lint, lint:fix) to use bunx instead of pnpm, removed explicit pnpm devDependency. bun install successful (cpu-features optional dep failure expected per Note 1). bun typecheck passes. bun test: 296 pass, 19 fail (same baseline as Feature 5 - vi.mock incompatibilities)."
   },
   {
     "category": "functional",
