@@ -45,7 +45,8 @@
       "Run `bun run build` in packages/util and verify dist/ is generated",
       "Run `bun run typecheck` and verify no errors"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: Removed pnpm engine constraint (kept node >= 20), updated all scripts (build, lint, lint:fix, typecheck, prepublish) to use bun/bunx instead of pnpm. Build generates dist/ correctly with tsup. Typecheck passes. Test results same as Feature 3 (296 pass, 19 fail due to vi.mock)."
   },
   {
     "category": "functional",

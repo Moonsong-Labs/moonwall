@@ -31,8 +31,7 @@
   "module": "./dist/index.js",
   "types": "./dist/types/index.d.ts",
   "engines": {
-    "node": ">=20",
-    "pnpm": ">=7"
+    "node": ">=20"
   },
   "files": [
     "dist",
@@ -42,15 +41,15 @@
   ],
   "scripts": {
     "clean": "rm -rf dist && rm -rf node_modules",
-    "build": "pnpm exec rm -rf dist && tsup src --format esm --no-splitting --sourcemap && pnpm generate-types",
+    "build": "rm -rf dist && tsup src --format esm --no-splitting --sourcemap && bun run generate-types",
     "generate-types": "tsc",
-    "lint": "pnpm biome lint ./src",
-    "lint:fix": "pnpm biome lint ./src --apply",
+    "lint": "bunx biome lint ./src",
+    "lint:fix": "bunx biome lint ./src --apply",
     "fmt": "biome format .",
     "fmt:fix": "biome format . --write",
     "watch": "tsup src --format esm --watch",
-    "typecheck": "pnpm exec tsc --noEmit",
-    "prepublish": "pnpm run build && pnpm run generate-types"
+    "typecheck": "bunx tsc --noEmit",
+    "prepublish": "bun run build && bun run generate-types"
   },
   "dependencies": {
     "@inquirer/prompts": "^8.0.2",

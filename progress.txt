@@ -60,3 +60,30 @@
 **Files Changed:**
 - `packages/cli/package.json` - Updated scripts and removed pnpm engine constraint
 - `plans/prd.json` - Marked Feature 3 as complete
+
+---
+
+### Feature Completed: Replace pnpm with Bun - packages/util package.json (PRD Feature 4)
+
+**Changes Made:**
+1. Updated `packages/util/package.json`:
+   - Removed `pnpm` from `engines` constraint (kept `node >= 20`)
+   - Updated `build` script: `pnpm exec rm -rf dist` → `rm -rf dist`, `pnpm generate-types` → `bun run generate-types`
+   - Updated `lint`/`lint:fix` scripts: `pnpm biome` → `bunx biome`
+   - Updated `typecheck` script: `pnpm exec tsc` → `bunx tsc`
+   - Updated `prepublish` script: `pnpm run` → `bun run`
+
+**Verification:**
+- `bun run build` (in packages/util) - Successfully generates dist/ with tsup, all 19 entry files compile
+- `bun typecheck` - Passes with no errors
+- `bun test` - 296 tests pass, 12 skip, 19 fail (same as Feature 3 - expected vi.mock incompatibilities)
+
+**Notes for Next Developer:**
+1. Feature 5 (packages/types) is the next priority to complete Bun migration across all core packages.
+2. The packages/util package has no test script of its own - tests are run from the monorepo root.
+3. After packages/types is migrated, Feature 6 (test/) and Feature 7 (root monorepo scripts) can be addressed.
+4. The dependency on vitest/@vitest/ui in packages/util will be addressed in Features 11-16 when migrating to Bun test runner.
+
+**Files Changed:**
+- `packages/util/package.json` - Updated scripts and removed pnpm engine constraint
+- `plans/prd.json` - Marked Feature 4 as complete
