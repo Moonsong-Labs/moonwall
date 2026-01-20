@@ -39,7 +39,7 @@ import type { PolkadotClient } from "polkadot-api";
 export type CustomTest = (params: {
   id: string;
   title: string;
-  test: (vitestContext: any) => void;
+  test: () => void | Promise<void>;
   modifier?: "only" | "skip";
   minRtVersion?: number;
   chainType?: "moonriver" | "moonbeam" | "moonbase";
@@ -80,7 +80,7 @@ export type TestCaseModifier = "only" | "skip";
 export interface ITestCase {
   id: string;
   title: string;
-  test: (vitestContext: any) => void;
+  test: () => void | Promise<void>;
   modifier?: TestCaseModifier;
   minRtVersion?: number;
   chainType?: "moonbeam" | "moonriver" | "moonbase";

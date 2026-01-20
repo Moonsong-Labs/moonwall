@@ -29,8 +29,8 @@ const RT_VERSION = Number(process.env.MOON_RTVERSION);
 const RT_NAME = process.env.MOON_RTNAME;
 let limiter: Bottleneck | undefined;
 
-// About: This has been designed in the handler pattern so that eventually we can integrate it to vitest
-// https://vitest.dev/advanced/runner.html
+// About: This has been designed in the handler pattern so that eventually we can integrate it to bun:test
+// https://bun.sh/docs/cli/test
 
 /**
  *  * Defines a suite of tests based on provided parameters.
@@ -44,7 +44,7 @@ let limiter: Bottleneck | undefined;
  * @param {string} [params.chainType] - The required runtime name required for the test suite, otherwise will be skipped.
  * @param {string} [params.notChainType] - The runtime name to not run against this test suite, otherwise will not be skipped.
  *
- * @returns {void} - No explicit return value, this function results is wrapped and handled by the vitest instance.
+ * @returns {void} - No explicit return value, this function results is wrapped and handled by the bun:test runner.
  * @example
  *      describeSuite({
  *        id: "D01",

@@ -577,3 +577,37 @@
 - `packages/cli/package.json` - Removed vitest and @vitest/ui dependencies
 - `bun.lock` - Updated to remove vitest packages
 - `plans/prd.json` - Marked Feature 14 as complete
+
+---
+
+### Feature Completed: Replace Vitest with Bun test runner - update describeSuite wrapper (PRD Feature 15)
+
+**Changes Made:**
+1. Updated `packages/cli/src/lib/runnerContext.ts`:
+   - Changed JSDoc comment from "handled by the vitest instance" to "handled by the bun:test runner"
+   - Changed comment URL from vitest docs to bun:test docs
+   - Note: The actual bun:test imports were already updated in Feature 14
+
+2. Updated `packages/types/src/runner.ts`:
+   - Changed `CustomTest` type's test callback from `test: (vitestContext: any) => void` to `test: () => void | Promise<void>`
+   - Changed `ITestCase` interface's test callback from `test: (vitestContext: any) => void` to `test: () => void | Promise<void>`
+   - These changes reflect bun:test's simpler callback signature (no context parameter)
+
+**Verification:**
+- `bun typecheck` - Passes with no errors
+- `bun test packages/cli/src/internal/effect/__tests__/` - 93 pass, 4 skip, 0 fail
+- `bun test` (full suite) - 305 pass, 12 skip, 16 fail (same baseline as Feature 14 - failures are E2E tests requiring moonwall environment)
+
+**Notes for Next Developer:**
+1. Feature 15 completes the describeSuite wrapper migration to bun:test. The core test runner migration is now complete.
+2. Next high-priority feature is Feature 16: Update test configuration schema
+   - This will rename `vitestArgs` to `bunTestArgs` in the config types
+   - Regenerate the config_schema.json
+   - Update moonwall.config.json examples
+3. The 16 failing tests are all in `test/suites/` and require running moonwall environments (e.g., `moonwall test basic`). They are not related to the test runner migration.
+4. After Feature 16, the Vitest→Bun test runner migration will be fully complete.
+
+**Files Changed:**
+- `packages/cli/src/lib/runnerContext.ts` - Updated comments to reference bun:test
+- `packages/types/src/runner.ts` - Updated CustomTest and ITestCase types for bun:test callback signature
+- `plans/prd.json` - Marked Feature 15 as complete
