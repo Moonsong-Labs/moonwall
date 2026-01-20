@@ -59,9 +59,9 @@ export type Environment = {
   name: string;
 
   /**
-   * Print vitest options to the console.
+   * Print test runner CLI arguments to the console for debugging.
    */
-  printVitestOptions?: boolean;
+  printTestRunnerOptions?: boolean;
 
   /**
    * Description of the environment to display in menus.
@@ -99,16 +99,15 @@ export type Environment = {
   connections?: ProviderConfig[];
 
   /**
-   * An optional boolean to indicate if multi-threading is enabled.
-   * Optionally, you can specify your own threadPool spec using a PoolOptions config object.
-   * Visit https://vitest.dev/config/#pooloptions for more info
+   * Maximum concurrent tests to run.
+   * - true: Let Bun choose optimal concurrency
+   * - false: Run tests sequentially
+   * - number: Specific concurrency limit (e.g., 4 = max 4 concurrent tests)
    */
-  multiThreads?: boolean | number | object;
+  maxConcurrency?: boolean | number;
 
   /**
-   * Enable Vitest's dependency optimizer to pre-bundle imports (viem, ethers).
-   * This can reduce test collection time by ~10% by caching bundled dependencies.
-   * @default false
+   * @deprecated Bun handles dependency bundling automatically. This option is ignored.
    */
   cacheImports?: boolean;
 
@@ -152,13 +151,23 @@ export type Environment = {
   skipTests?: SkipTestSpec[];
 
   /**
-   * An optional object to add extra arguments to the Vitest test runner.
-   *  Use with caution as this will override the default arguments, which
+   * An optional object to add extra arguments to the Bun test runner.
+   * Use with caution as this will override the default arguments, which
    * may cause unexpected behaviour.
    *
-   * Visit https://vitest.dev/config/ for more info
+   * Visit https://bun.sh/docs/cli/test for more info on available options.
+   *
+   * @example
+   * ```json
+   * {
+   *   "bunTestArgs": {
+   *     "bail": 3,
+   *     "rerun-each": 2
+   *   }
+   * }
+   * ```
    */
-  vitestArgs?: Record<string, any>;
+  bunTestArgs?: Record<string, any>;
 };
 
 export type SkipTestSpec = {

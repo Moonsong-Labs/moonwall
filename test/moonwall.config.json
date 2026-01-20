@@ -99,9 +99,9 @@
           "disableRuntimeVersionCheck": true
         }
       },
-      "vitestArgs": {
+      "bunTestArgs": {
         "bail": 3,
-        "retry": 4
+        "rerun-each": 4
       },
       "connections": []
     },

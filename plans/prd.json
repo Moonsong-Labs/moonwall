@@ -194,7 +194,8 @@
       "Regenerate config_schema.json with `bun run schema`",
       "Update moonwall.config.json examples to use bunTestArgs"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: (1) Renamed vitestArgs to bunTestArgs with updated JSDoc referencing Bun docs. (2) Renamed multiThreads to maxConcurrency with simplified type (boolean | number instead of boolean | number | object since Bun doesn't support pool options). (3) Renamed printVitestOptions to printTestRunnerOptions. (4) Deprecated cacheImports field (Bun handles bundling automatically). (5) Updated runTests.ts to use new field names. (6) Updated initialisation.ts template to use maxConcurrency. (7) Regenerated config_schema.json. (8) Updated test/moonwall.config.json example (changed retry to rerun-each for Bun compatibility). Typecheck passes, tests: 305 pass, 16 fail (same baseline - E2E tests require moonwall environment). The Vitest→Bun test runner migration is now COMPLETE."
   },
   {
     "category": "functional",

@@ -127,7 +127,7 @@ export function createSampleConfig(options: {
       {
         name: options.environmentName,
         testFileDir: [options.testDir],
-        multiThreads: false,
+        maxConcurrency: false,
         foundation: {
           type: "dev",
           launchSpec: [

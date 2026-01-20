@@ -611,3 +611,52 @@
 - `packages/cli/src/lib/runnerContext.ts` - Updated comments to reference bun:test
 - `packages/types/src/runner.ts` - Updated CustomTest and ITestCase types for bun:test callback signature
 - `plans/prd.json` - Marked Feature 15 as complete
+
+---
+
+### Feature Completed: Replace Vitest with Bun test runner - update test configuration schema (PRD Feature 16)
+
+**Changes Made:**
+1. Updated `packages/types/src/config.ts`:
+   - Renamed `vitestArgs` → `bunTestArgs` with updated JSDoc referencing Bun test docs
+   - Renamed `multiThreads` → `maxConcurrency` with simplified type (`boolean | number` instead of `boolean | number | object`)
+   - Renamed `printVitestOptions` → `printTestRunnerOptions`
+   - Deprecated `cacheImports` field (Bun handles dependency bundling automatically)
+
+2. Updated `packages/cli/src/cmds/runTests.ts`:
+   - Changed `env.multiThreads` → `env.maxConcurrency`
+   - Changed `env.vitestArgs` → `env.bunTestArgs`
+   - Changed `env.printVitestOptions` → `env.printTestRunnerOptions`
+
+3. Updated `packages/cli/src/internal/cmdFunctions/initialisation.ts`:
+   - Changed `multiThreads: false` → `maxConcurrency: false` in the config template
+
+4. Regenerated `packages/types/config_schema.json`:
+   - Now reflects new field names: `bunTestArgs`, `maxConcurrency`, `printTestRunnerOptions`
+   - Old fields (`vitestArgs`, `multiThreads`, `printVitestOptions`) are no longer in schema
+
+5. Updated `test/moonwall.config.json`:
+   - Changed `vitestArgs` → `bunTestArgs`
+   - Changed `retry: 4` → `rerun-each: 4` (Bun uses `--rerun-each` flag, not `--retry`)
+
+**Verification:**
+- `bun typecheck` - Passes with no errors
+- `bun test` - 305 pass, 12 skip, 16 fail (same baseline as Feature 15 - E2E test failures require moonwall environment)
+
+**Notes for Next Developer:**
+1. **The Vitest→Bun test runner migration is now COMPLETE!** Features 11-16 have fully migrated the test runner.
+2. The old Vitest-related fields are intentionally removed (not deprecated with fallback) since this is a major version change.
+3. Next high-priority features are:
+   - Feature 17: Effect migration - add Effect to packages/util dependencies
+   - Feature 54: Update TypeScript configuration for Bun (partially done - packages/cli has bun-types)
+   - Feature 55: Final integration verification
+4. The 16 failing tests are E2E tests in `test/suites/` that require running moonwall environments - not related to this change.
+5. Breaking change for users: Config files using `vitestArgs`, `multiThreads`, or `printVitestOptions` need to be updated to `bunTestArgs`, `maxConcurrency`, and `printTestRunnerOptions` respectively.
+
+**Files Changed:**
+- `packages/types/src/config.ts` - Renamed vitest fields to bun equivalents
+- `packages/types/config_schema.json` - Regenerated with new field names
+- `packages/cli/src/cmds/runTests.ts` - Updated to use new config field names
+- `packages/cli/src/internal/cmdFunctions/initialisation.ts` - Updated config template
+- `test/moonwall.config.json` - Updated example to use bunTestArgs
+- `plans/prd.json` - Marked Feature 16 as complete

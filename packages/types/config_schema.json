@@ -628,9 +628,11 @@
       "items": {
         "description": "The environment configuration for testing.",
         "properties": {
+          "bunTestArgs": {
+            "$ref": "#/definitions/Record%3Cstring%2Cany%3E",
+            "description": "An optional object to add extra arguments to the Bun test runner.\nUse with caution as this will override the default arguments, which\nmay cause unexpected behaviour.\n\nVisit https://bun.sh/docs/cli/test for more info on available options."
+          },
           "cacheImports": {
-            "default": false,
-            "description": "Enable Vitest's dependency optimizer to pre-bundle imports (viem, ethers).\nThis can reduce test collection time by ~10% by caching bundled dependencies.",
             "type": "boolean"
           },
           "connections": {
@@ -689,25 +691,16 @@
             },
             "type": "array"
           },
-          "multiThreads": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "properties": {},
-                "type": "object"
-              },
-              {
-                "type": ["number", "boolean"]
-              }
-            ],
-            "description": "An optional boolean to indicate if multi-threading is enabled.\nOptionally, you can specify your own threadPool spec using a PoolOptions config object.\nVisit https://vitest.dev/config/#pooloptions for more info"
+          "maxConcurrency": {
+            "description": "Maximum concurrent tests to run.\n- true: Let Bun choose optimal concurrency\n- false: Run tests sequentially\n- number: Specific concurrency limit (e.g., 4 = max 4 concurrent tests)",
+            "type": ["number", "boolean"]
           },
           "name": {
             "description": "The name of the environment.",
             "type": "string"
           },
-          "printVitestOptions": {
-            "description": "Print vitest options to the console.",
+          "printTestRunnerOptions": {
+            "description": "Print test runner CLI arguments to the console for debugging.",
             "type": "boolean"
           },
           "reportFile": {
@@ -769,10 +762,6 @@
           "timeout": {
             "description": "The default timeout for tests and hooks",
             "type": "number"
-          },
-          "vitestArgs": {
-            "$ref": "#/definitions/Record%3Cstring%2Cany%3E",
-            "description": "An optional object to add extra arguments to the Vitest test runner.\n Use with caution as this will override the default arguments, which\nmay cause unexpected behaviour.\n\nVisit https://vitest.dev/config/ for more info"
           }
         },
         "type": "object"

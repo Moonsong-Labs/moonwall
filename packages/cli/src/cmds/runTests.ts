@@ -156,8 +156,8 @@ export async function executeTests(
     .setReporter(env.reporters?.[0])
     .setOutputFile(env.reportFile)
     .setTestNamePattern(additionalArgs.testNamePattern)
-    .setMaxConcurrency(env.multiThreads)
-    .addPassthroughArgs(env.vitestArgs)
+    .setMaxConcurrency(env.maxConcurrency)
+    .addPassthroughArgs(env.bunTestArgs)
     .build();
 
   // Handle zombie foundation: start network first
@@ -199,7 +199,7 @@ export async function executeTests(
   const testTargets = filteredFiles ? filteredFiles.map((f) => path.resolve(f)) : folders;
   cliArgs.push(...testTargets);
 
-  if (env.printVitestOptions) {
+  if (env.printTestRunnerOptions) {
     logger.info(`Bun test args: bun test ${cliArgs.join(" ")}`);
   }
 
