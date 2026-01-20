@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "bun:test";
 
 describe("launchNodeEffect", () => {
   it("should have proper argument handling tested via ProcessManagerService", () => {

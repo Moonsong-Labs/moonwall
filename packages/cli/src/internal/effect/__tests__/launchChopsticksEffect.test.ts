@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "bun:test";
 import { Effect, Layer } from "effect";
 import { BuildBlockMode } from "@acala-network/chopsticks";
 import type { ChopsticksServiceImpl } from "../launchChopsticksEffect.js";

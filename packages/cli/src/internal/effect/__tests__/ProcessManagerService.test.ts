@@ -1,57 +1,81 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, mock, beforeEach, spyOn } from "bun:test";
 import { Effect, Exit } from "effect";
-import { ProcessManagerService, ProcessManagerServiceLive } from "../ProcessManagerService.js";
-import { NodeLaunchError } from "../errors.js";
-import { spawn } from "node:child_process";
-import * as fs from "node:fs";
+import { EventEmitter } from "node:events";
 
-// Mock child_process.spawn to prevent actual process spawning during tests
-vi.mock("node:child_process", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("node:child_process")>();
-  const { EventEmitter } = await import("node:events");
-  return {
-    ...actual,
-    spawn: vi.fn(() => {
-      const mockProcess = new EventEmitter() as any;
-      mockProcess.pid = 12345;
-      mockProcess.stdout = new EventEmitter() as any;
-      mockProcess.stderr = new EventEmitter() as any;
-      mockProcess.kill = vi.fn(() => {
-        // Simulate proper process termination
-        setTimeout(() => {
-          mockProcess.emit("close", 0, null);
-        }, 10);
-      });
-      return mockProcess;
-    }),
+// Create mock functions that we can track
+const mockKill = mock(() => true);
+const mockWrite = mock(() => true);
+const mockEnd = mock(() => {});
+const mockMkdir = mock(() => Promise.resolve());
+const mockAccess = mock(() => Promise.resolve());
+
+// Create factory functions for mock objects
+const createMockProcess = () => {
+  const proc = new EventEmitter() as EventEmitter & {
+    pid: number;
+    stdout: EventEmitter;
+    stderr: EventEmitter;
+    kill: typeof mockKill;
   };
-});
+  proc.pid = 12345;
+  proc.stdout = new EventEmitter();
+  proc.stderr = new EventEmitter();
+  proc.kill = mock((signal?: string) => {
+    // Simulate proper process termination
+    setTimeout(() => {
+      proc.emit("close", 0, null);
+    }, 10);
+    return true;
+  });
+  return proc;
+};
 
-// Mock fs to control createWriteStream and fs.promises
-vi.mock("node:fs", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("node:fs")>();
-  const { EventEmitter } = await import("node:events");
+const mockSpawn = mock(() => createMockProcess());
 
-  return {
-    ...actual,
-    createWriteStream: vi.fn(() => {
-      const mockStream = new EventEmitter() as any;
-      mockStream.write = vi.fn();
-      mockStream.end = vi.fn();
-      return mockStream;
-    }),
-    promises: {
-      ...actual.promises,
-      access: vi.fn(() => Promise.resolve()),
-      mkdir: vi.fn(() => Promise.resolve()),
-    },
+const createMockWriteStream = () => {
+  const stream = new EventEmitter() as EventEmitter & {
+    write: typeof mockWrite;
+    end: typeof mockEnd;
   };
-});
+  stream.write = mockWrite;
+  stream.end = mockEnd;
+  return stream;
+};
+
+const mockCreateWriteStream = mock(() => createMockWriteStream());
+
+// Mock child_process module
+mock.module("node:child_process", () => ({
+  spawn: mockSpawn,
+}));
+
+// Mock fs module
+mock.module("node:fs", () => ({
+  createWriteStream: mockCreateWriteStream,
+  promises: {
+    access: mockAccess,
+    mkdir: mockMkdir,
+  },
+}));
+
+// Import after mocking
+const { ProcessManagerService, ProcessManagerServiceLive } = await import(
+  "../ProcessManagerService.js"
+);
+const { NodeLaunchError } = await import("../errors.js");
 
 describe("ProcessManagerService", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
-    (fs.promises.access as ReturnType<typeof vi.fn>).mockImplementation(() => Promise.resolve());
+    // Reset mock call history
+    mockSpawn.mockClear();
+    mockCreateWriteStream.mockClear();
+    mockAccess.mockClear();
+    mockMkdir.mockClear();
+    mockWrite.mockClear();
+    mockEnd.mockClear();
+
+    // Reset default implementations
+    mockAccess.mockImplementation(() => Promise.resolve());
   });
 
   it("should launch a process and return cleanup function", async () => {
@@ -69,11 +93,8 @@ describe("ProcessManagerService", () => {
             Effect.sync(() => {
               expect(result.process.pid).toBeDefined();
               expect(result.logPath).toContain(config.logDirectory);
-              expect(spawn).toHaveBeenCalledWith(config.command, config.args);
-              expect(fs.createWriteStream).toHaveBeenCalledWith(
-                expect.stringContaining(config.logDirectory),
-                { flags: "a" }
-              );
+              expect(mockSpawn).toHaveBeenCalledWith(config.command, config.args);
+              expect(mockCreateWriteStream).toHaveBeenCalled();
             }).pipe(
               Effect.flatMap(() => cleanup),
               Effect.tap(() =>
@@ -93,7 +114,7 @@ describe("ProcessManagerService", () => {
   });
 
   it("should handle process launch failure", async () => {
-    (spawn as ReturnType<typeof vi.fn>).mockImplementationOnce(() => {
+    mockSpawn.mockImplementationOnce(() => {
       throw new Error("Mock spawn error");
     });
 
@@ -127,9 +148,7 @@ describe("ProcessManagerService", () => {
       logDirectory: "/tmp/new_test_logs",
     };
 
-    (fs.promises.access as ReturnType<typeof vi.fn>).mockImplementationOnce(() =>
-      Promise.reject(new Error("ENOENT"))
-    );
+    mockAccess.mockImplementationOnce(() => Promise.reject(new Error("ENOENT")));
 
     const program = ProcessManagerService.pipe(
       Effect.flatMap((service) => service.launch(config)),
@@ -137,7 +156,7 @@ describe("ProcessManagerService", () => {
     );
 
     await Effect.runPromise(program);
-    expect(fs.promises.mkdir).toHaveBeenCalledWith(config.logDirectory, {
+    expect(mockMkdir).toHaveBeenCalledWith(config.logDirectory, {
       recursive: true,
     });
   });

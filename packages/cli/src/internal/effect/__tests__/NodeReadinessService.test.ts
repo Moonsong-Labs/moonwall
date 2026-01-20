@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { Effect, Exit, Layer } from "effect";
 import { Socket } from "@effect/platform";
 import { NodeReadinessService, makeNodeReadinessServiceTest } from "../NodeReadinessService.js";

@@ -417,3 +417,58 @@
 - `packages/types/package.json` - Removed vitest dependency
 - `bun.lock` - Updated to remove vitest from util/types
 - `plans/prd.json` - Marked Feature 11 as complete with notes
+
+---
+
+### Feature Completed: Replace Vitest with Bun test runner - convert CLI internal tests (PRD Feature 12)
+
+**Changes Made:**
+1. Converted all 8 test files in `packages/cli/src/internal/effect/__tests__/` from vitest to bun:test:
+   - `ChopsticksMultiChain.test.ts` - Changed import from 'vitest' to 'bun:test'
+   - `ChopsticksService.test.ts` - Changed import from 'vitest' to 'bun:test'
+   - `FileLock.test.ts` - Changed import from 'vitest' to 'bun:test'
+   - `launchChopsticksEffect.test.ts` - Changed import from 'vitest' to 'bun:test' (removed unused vi import)
+   - `launchNodeEffect.test.ts` - Changed import from 'vitest' to 'bun:test'
+   - `NodeReadinessService.test.ts` - Changed import from 'vitest' to 'bun:test'
+   - `PortDiscoveryService.test.ts` - Changed import from 'vitest' to 'bun:test'
+   - `ProcessManagerService.test.ts` - Complete rewrite to use bun:test module mocking
+
+2. Key migration patterns applied:
+   - `vi.mock()` with `importOriginal` → `mock.module()` (bun:test doesn't have importOriginal)
+   - `vi.fn()` → `mock()`
+   - `vi.clearAllMocks()` → `mockFn.mockClear()` on each mock function
+   - `vi.spyOn()` → `spyOn()` (same API in bun:test)
+
+3. Added TypeScript support for bun:test:
+   - Added `bun-types@1.3.6` to `packages/cli/package.json` devDependencies
+   - Updated `packages/cli/tsconfig.json` to include `"types": ["bun-types"]`
+
+**Verification:**
+- `bun test packages/cli/src/internal/effect/__tests__/` - 93 pass, 4 skip, 0 fail
+- `bun typecheck` - Passes with no errors
+- The 4 skipped tests are integration tests (marked with `describe.skip`) that require real network connections
+
+**Notes for Next Developer:**
+1. The previous 19 failing tests + 8 errors were all in the effect/__tests__/ directory using Vitest-specific APIs - now all pass.
+2. The `ProcessManagerService.test.ts` required the most significant rewrite because:
+   - Vitest's `vi.mock()` with `importOriginal` lets you extend the original module
+   - Bun's `mock.module()` replaces the entire module, so you must provide all needed exports
+   - Mock functions must be created before `mock.module()` calls, then dynamically imported after
+3. Next high-priority feature is Feature 13: Replace VitestOptionsBuilder with BunTestOptionsBuilder
+   - This will allow removing the last vitest dependency from packages/cli
+   - Requires replacing `startVitest` from 'vitest/node' with `Bun.spawn`
+4. The bun-types addition also partially addresses Feature 54 (Update TypeScript configuration for Bun)
+
+**Files Changed:**
+- `packages/cli/src/internal/effect/__tests__/ChopsticksMultiChain.test.ts` - vitest → bun:test
+- `packages/cli/src/internal/effect/__tests__/ChopsticksService.test.ts` - vitest → bun:test
+- `packages/cli/src/internal/effect/__tests__/FileLock.test.ts` - vitest → bun:test
+- `packages/cli/src/internal/effect/__tests__/launchChopsticksEffect.test.ts` - vitest → bun:test
+- `packages/cli/src/internal/effect/__tests__/launchNodeEffect.test.ts` - vitest → bun:test
+- `packages/cli/src/internal/effect/__tests__/NodeReadinessService.test.ts` - vitest → bun:test
+- `packages/cli/src/internal/effect/__tests__/PortDiscoveryService.test.ts` - vitest → bun:test
+- `packages/cli/src/internal/effect/__tests__/ProcessManagerService.test.ts` - Complete rewrite for bun:test
+- `packages/cli/package.json` - Added bun-types devDependency
+- `packages/cli/tsconfig.json` - Added types: ['bun-types']
+- `bun.lock` - Updated with bun-types
+- `plans/prd.json` - Marked Feature 12 as complete
