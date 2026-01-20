@@ -879,3 +879,53 @@
 - `packages/cli/src/internal/effect/__tests__/services/DevFoundationService.test.ts` - New test file (9 tests)
 - `plans/prd.json` - Marked Feature 20 as complete
 
+---
+
+### Feature Completed: Effect migration - create ChopsticksFoundationService interface (PRD Feature 21)
+
+**Changes Made:**
+1. Created `packages/cli/src/internal/effect/services/ChopsticksFoundationService.ts`:
+   - Defined `ChopsticksFoundationService` using Effect's `Context.Tag` pattern
+   - Interface methods:
+     - `start(config)`: Returns `Effect<{info: ChopsticksFoundationRunningInfo, stop: Effect<void>}, FoundationStartupError>`
+     - `stop()`: Returns `Effect<void, FoundationShutdownError>`
+     - `getStatus()`: Returns `Effect<ChopsticksFoundationStatus>`
+     - `healthCheck()`: Returns `Effect<void, FoundationHealthCheckError>`
+     - `createBlock(params?)`: Returns `Effect<BlockCreationResult, ChopsticksBlockError>`
+     - `setStorage(params)`: Returns `Effect<void, ChopsticksStorageError>`
+     - `getBlock(hashOrNumber?)`: Returns `Effect<{hash, number} | undefined, ChopsticksBlockError>`
+     - `setHead(hashOrNumber)`: Returns `Effect<void, ChopsticksBlockError>`
+   - Defined `ChopsticksFoundationConfig` type with fields: configPath, name, launchSpec, wsPort, type, wasmOverride, buildBlockMode, newBlockTimeout
+   - Defined `ChopsticksFoundationStatus` union type: `Starting | Running | Stopped | Failed`
+   - Defined `ChopsticksFoundationRunningInfo` with: wsPort, endpoint, logPath, config
+
+2. Updated `packages/cli/src/internal/effect/services/index.ts`:
+   - Added exports for ChopsticksFoundationService and all related types
+   - Updated service hierarchy comments
+
+**Design Decisions:**
+- Re-uses existing `ChopsticksBlockError` and `ChopsticksStorageError` from `ChopsticksService.ts` for method-level errors
+- Uses high-level foundation errors (`FoundationStartupError`, `FoundationShutdownError`, `FoundationHealthCheckError`) for lifecycle operations - consistent with DevFoundationService
+- Follows same pattern as DevFoundationService: `start()` returns `{info, stop}` tuple for manual cleanup control
+- Added chopsticks-specific methods (`createBlock`, `setStorage`, `getBlock`, `setHead`) that DevFoundationService doesn't have
+- Status type includes `endpoint` field instead of `rpcPort` since chopsticks exposes a WebSocket URL
+
+**Verification:**
+- `bun typecheck` - Passes with no errors
+- `bun test` - 318 pass, 12 skip, 16 fail, 2 errors (same baseline as Feature 20 - failures are E2E tests requiring moonwall environment)
+
+**Notes for Next Developer:**
+1. Feature 22 (ChopsticksFoundationService Layer implementation) should:
+   - Use `Layer.effect` or `Layer.scoped` pattern (like DevFoundationServiceLive)
+   - Integrate with existing `launchChopsticksEffect` function for spawning
+   - Compose with `ChopsticksService` for createBlock/setStorage/getBlock/setHead operations
+   - Use `Ref` for state management (status, runningInfo, cleanup)
+2. The existing `ChopsticksService` in `ChopsticksService.ts` is a low-level service exposing the Blockchain instance directly. The new `ChopsticksFoundationService` is a high-level lifecycle wrapper.
+3. Multi-chain XCM scenarios (relay + parachains) may need separate handling - the current interface is for single-chain mode. Feature 22 notes should address this.
+4. The 16 failing tests are E2E tests in `test/suites/` requiring moonwall environment - not related to this change.
+
+**Files Changed:**
+- `packages/cli/src/internal/effect/services/ChopsticksFoundationService.ts` - New service interface file
+- `packages/cli/src/internal/effect/services/index.ts` - Added exports for ChopsticksFoundationService types
+- `plans/prd.json` - Marked Feature 21 as complete
+

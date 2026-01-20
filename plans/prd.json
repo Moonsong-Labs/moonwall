@@ -258,7 +258,8 @@
       "Define ChopsticksFoundationConfig type",
       "Export service tag and types"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: (1) Created ChopsticksFoundationService.ts with Context.Tag-based service interface. (2) Defined methods: start() returns Effect<{info, stop}>, stop(), getStatus(), healthCheck(), createBlock(), setStorage(), getBlock(), setHead(). (3) Defined ChopsticksFoundationConfig with configPath, name, launchSpec, wsPort, type, wasmOverride, buildBlockMode, newBlockTimeout. (4) Defined ChopsticksFoundationStatus union type (Starting|Running|Stopped|Failed). (5) Defined ChopsticksFoundationRunningInfo with wsPort, endpoint, logPath, config. (6) Updated services/index.ts to export all types. (7) Re-uses ChopsticksBlockError and ChopsticksStorageError from existing ChopsticksService for method-level errors, while using FoundationStartupError/ShutdownError/HealthCheckError for lifecycle operations. Typecheck passes, test baseline unchanged (318 pass, 12 skip, 16 fail, 2 errors)."
   },
   {
     "category": "functional",
