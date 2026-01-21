@@ -9,7 +9,7 @@
  * - DevFoundationService: Manages dev/local Substrate nodes
  * - ChopsticksFoundationService: Manages Chopsticks fork instances
  * - ZombieFoundationService: Manages Zombienet multi-node networks
- * - ReadOnlyFoundationService: Manages read-only connections (planned)
+ * - ReadOnlyFoundationService: Manages read-only connections to existing networks
  */
 
 // DevFoundationService interface and types
@@ -59,3 +59,12 @@ export {
   ZombieFoundationServiceLive,
   makeZombieFoundationServiceLayer,
 } from "./ZombieFoundationServiceLive.js";
+
+// ReadOnlyFoundationService interface and types
+export {
+  ReadOnlyFoundationService,
+  type ReadOnlyFoundationConfig,
+  type ReadOnlyFoundationRunningInfo,
+  type ReadOnlyFoundationStatus,
+  type ReadOnlyFoundationServiceType,
+} from "./ReadOnlyFoundationService.js";

@@ -1148,3 +1148,55 @@
 - `packages/cli/src/internal/effect/__tests__/services/ZombieFoundationService.test.ts` - New test file (17 tests)
 - `plans/prd.json` - Marked Feature 24 as complete
 
+---
+
+### Feature Completed: Effect migration - create ReadOnlyFoundationService interface (PRD Feature 25)
+
+**Changes Made:**
+1. Created `packages/cli/src/internal/effect/services/ReadOnlyFoundationService.ts`:
+   - Defined `ReadOnlyFoundationService` using Effect's `Context.Tag` pattern
+   - Interface methods:
+     - `connect(config)`: Returns `Effect<{info: ReadOnlyFoundationRunningInfo, disconnect: Effect<void>}, FoundationStartupError | ProviderConnectionError>`
+     - `disconnect()`: Returns `Effect<void, FoundationShutdownError>`
+     - `getStatus()`: Returns `Effect<ReadOnlyFoundationStatus>`
+     - `healthCheck(endpoint?)`: Returns `Effect<void, FoundationHealthCheckError>`
+   - Defined `ReadOnlyFoundationConfig` with fields: name, launchSpec, connections (array of ProviderConfig), disableRuntimeVersionCheck
+   - Defined `ReadOnlyFoundationStatus` union type: `Connecting | Connected | Disconnected | Failed`
+   - Defined `ReadOnlyFoundationRunningInfo` with: connectedProviders count, endpoints array, config
+
+2. Updated `packages/cli/src/internal/effect/services/index.ts`:
+   - Added exports for ReadOnlyFoundationService and all related types
+   - Updated service hierarchy comment (ReadOnlyFoundationService no longer marked as "planned")
+
+**Design Decisions:**
+- **connect()/disconnect() instead of start()/stop()**: Unlike other foundation services (Dev, Chopsticks, Zombie), ReadOnlyFoundationService does not spawn any processes. It establishes connections to existing networks, so the naming reflects this semantic difference.
+- **ProviderConnectionError in connect()**: Added as a possible error type since the primary operation is connecting providers, which may fail independently of general startup failures.
+- **Optional endpoint in healthCheck()**: Allows checking a specific endpoint when multiple providers are connected (defaults to first connected provider).
+- **Status includes connection details**: The `Connected` status includes `connectedProviders` count and `endpoints` array to give visibility into connection state.
+- **Reuses existing types**: Uses `ReadOnlyLaunchSpec` from `@moonwall/types` and `ProviderConfig` for connection definitions.
+
+**Verification:**
+- `bun typecheck` - Passes with no errors
+- `bun test` - 351 pass, 12 skip, 16 fail, 2 errors (same baseline as Feature 24 - E2E tests require moonwall environment)
+
+**Notes for Next Developer:**
+1. Feature 26 (ReadOnlyFoundationService Layer implementation) should:
+   - Use `Layer.effect` pattern like other foundation services
+   - Implement `connect()` using the existing provider connection logic from `globalContext.ts` / provider handlers
+   - Use `Ref` for state management (status, connectedProviders, cleanup)
+   - Implement `healthCheck()` using `system_health` RPC call (or Ethereum equivalent for EVM chains)
+   - Create unit tests using `Layer.succeed` for mocking
+2. The existing read_only handler in `readOnlyHandler.ts` provides context about what operations are available:
+   - `waitBlock()` for watching block production
+   - Provider access via `MoonwallContext.getContext().providers`
+3. Rate limiting configuration from `ReadOnlyLaunchSpec.rateLimiter` should be respected when creating providers.
+4. Next features to implement:
+   - Feature 26: ReadOnlyFoundationService Layer implementation
+   - Feature 27: Unified FoundationService interface
+5. The 16 failing tests are E2E tests in `test/suites/` requiring moonwall environment - not related to this change.
+
+**Files Changed:**
+- `packages/cli/src/internal/effect/services/ReadOnlyFoundationService.ts` - New service interface file
+- `packages/cli/src/internal/effect/services/index.ts` - Added exports for ReadOnlyFoundationService types
+- `plans/prd.json` - Marked Feature 25 as complete
+

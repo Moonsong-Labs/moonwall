@@ -310,7 +310,8 @@
       "Define ReadOnlyFoundationConfig with endpoint URLs",
       "Export service tag and types"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: (1) Created ReadOnlyFoundationService.ts with Context.Tag-based service interface. (2) Defined methods: connect() returns Effect<{info, disconnect}>, disconnect(), getStatus(), healthCheck(). (3) Defined ReadOnlyFoundationConfig with name, launchSpec, connections array, disableRuntimeVersionCheck fields. (4) Defined ReadOnlyFoundationStatus union type (Connecting|Connected|Disconnected|Failed) with connectedProviders and endpoints info. (5) Defined ReadOnlyFoundationRunningInfo with connectedProviders count, endpoints array, config. (6) Updated services/index.ts to export all types. Key difference from other foundation services: ReadOnly uses connect()/disconnect() instead of start()/stop() since it doesn't spawn processes. Typecheck passes, test baseline unchanged (351 pass, 12 skip, 16 fail, 2 errors - same E2E tests requiring moonwall environment)."
   },
   {
     "category": "functional",
