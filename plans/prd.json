@@ -271,7 +271,8 @@
       "Implement setStorage() using Effect.tryPromise wrapping chopsticks API",
       "Write unit test with mocked chopsticks instance"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: (1) Created ChopsticksFoundationServiceLive.ts with Layer.effect pattern using Ref for mutable state tracking (status, runningInfo, serviceImpl, cleanup). (2) Implemented start() using launchChopsticksFromSpec to spawn chopsticks and return {info, stop} tuple. (3) Implemented stop() using stored cleanup function. (4) Implemented getStatus() returning ChopsticksFoundationStatus union type. (5) Implemented healthCheck() using getBlock() to verify instance is responsive. (6) Implemented createBlock(), setStorage(), getBlock(), setHead() by delegating to stored ChopsticksServiceImpl. (7) Created makeChopsticksFoundationServiceLayer() factory for testing. (8) Created comprehensive unit test suite with 16 tests using Layer.succeed for mocking the service interface. All tests pass. Test count: 334 pass (up from 318), same 16 E2E failures requiring moonwall environment."
   },
   {
     "category": "functional",

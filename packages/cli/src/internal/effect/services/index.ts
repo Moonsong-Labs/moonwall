@@ -35,3 +35,9 @@ export {
   type ChopsticksFoundationStatus,
   type ChopsticksFoundationServiceType,
 } from "./ChopsticksFoundationService.js";
+
+// ChopsticksFoundationService Layer implementations
+export {
+  ChopsticksFoundationServiceLive,
+  makeChopsticksFoundationServiceLayer,
+} from "./ChopsticksFoundationServiceLive.js";
