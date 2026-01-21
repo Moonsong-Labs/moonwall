@@ -193,60 +193,37 @@ const makeProviderService = Effect.gen(function* () {
         },
       }));
 
-      logger.debug(`Connecting ${lazyProviders.length} provider(s)`);
+      logger.debug(`Connecting ${lazyProviders.length} provider(s) in parallel`);
 
-      // Connect all providers in parallel
-      const connectedProviders: ConnectedProvider[] = [];
-      const connectedEndpoints: string[] = [];
-
-      for (const provider of lazyProviders) {
+      // Build connection effects for all providers
+      const connectionEffects = lazyProviders.map((provider) => {
         const providerConfig = config.providers.find((p) => p.name === provider.name);
         const endpoint = providerConfig?.endpoints[0] || "unknown";
+        return connectProviderWithRetry(provider, config, endpoint).pipe(
+          Effect.map((connected) => ({ connected, endpoint }))
+        );
+      });
 
-        try {
-          const connected = yield* connectProviderWithRetry(provider, config, endpoint);
-          connectedProviders.push(connected);
-          connectedEndpoints.push(endpoint);
-
-          // Update connecting status
-          yield* Ref.update(stateRef, (state) => ({
-            ...state,
-            status: {
-              _tag: "Connecting" as const,
-              totalProviders: lazyProviders.length,
-              connectedCount: connectedProviders.length,
-            },
-          }));
-        } catch (error) {
-          // Clean up already connected providers on failure
-          for (const connected of connectedProviders) {
-            yield* Effect.tryPromise({
-              try: async () => {
-                await Promise.resolve(connected.disconnect());
-              },
-              catch: () => new Error("Cleanup failed"),
-            }).pipe(Effect.catchAll(() => Effect.void));
-          }
-
-          // Update state to Failed
-          yield* Ref.update(stateRef, (state) => ({
+      // Connect all providers in parallel for faster startup
+      // Using Effect.all with concurrency: "unbounded" to maximize parallelism
+      const connectionResults = yield* Effect.all(connectionEffects, {
+        concurrency: "unbounded",
+      }).pipe(
+        Effect.catchAll((error) => {
+          // Update state to Failed on any connection error
+          Ref.update(stateRef, (state) => ({
             ...state,
             status: { _tag: "Failed" as const, error },
             connectedProviders: [],
-          }));
+          })).pipe(Effect.runSync);
 
-          return yield* Effect.fail(
-            error instanceof ProviderConnectionError
-              ? error
-              : new ProviderConnectionError({
-                  providerType: provider.type,
-                  endpoint,
-                  message: `Failed to connect provider "${provider.name}": ${error instanceof Error ? error.message : String(error)}`,
-                  cause: error,
-                })
-          );
-        }
-      }
+          return Effect.fail(error);
+        })
+      );
+
+      // Extract connected providers and endpoints from results
+      const connectedProviders = connectionResults.map((r) => r.connected);
+      const connectedEndpoints = connectionResults.map((r) => r.endpoint);
 
       // Build running info
       const runningInfo: ProviderServiceRunningInfo = {

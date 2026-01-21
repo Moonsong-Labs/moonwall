@@ -3946,3 +3946,119 @@ import { Effect, Layer } from "effect";
 - `packages/util/src/functions/index.ts` - Added loggerEffect export
 - `packages/util/src/__tests__/loggerEffect.test.ts` - 26 unit tests
 - `plans/prd.json` - Marked Feature 60 as complete
+
+---
+
+## Session: 2026-01-21
+
+### Feature Completed: Optimize Effect service initialization (PRD Feature 57)
+
+**Changes Made:**
+
+1. **Parallelized provider connections** in `packages/cli/src/internal/effect/services/ProviderServiceLive.ts`:
+   - Replaced sequential `for...of` loop with `Effect.all({concurrency: "unbounded"})`
+   - All providers now connect simultaneously instead of one-by-one
+   - Faster startup when multiple providers are configured
+
+2. **Added Layer.memoize for expensive initialization** in `packages/cli/src/internal/effect/AppLayer.ts`:
+   - `AppLayerMemoized` - memoized full production layer (requires Scope)
+   - `AppLayerTestMemoized` - memoized test layer with disabled logging
+   - `LowLevelServicesMemoized` - memoized low-level services (ProcessManager, PortDiscovery, etc.)
+   - Ensures initialization happens only once even when layers are composed multiple times
+
+3. **Added lazy foundation initialization** using `Layer.suspend`:
+   - `lazyDevFoundation()` - creates DevFoundationService only on first use
+   - `lazyChopsticksFoundation()` - creates ChopsticksFoundationService only on first use  
+   - `lazyZombieFoundation()` - creates ZombieFoundationService only on first use
+   - `lazyReadOnlyFoundation()` - creates ReadOnlyFoundationService only on first use
+   - Reduces startup time when not all foundation types are needed
+
+4. **Added ManagedRuntime factory**:
+   - `createManagedRuntime(layer)` - creates a pre-built runtime for long-running applications
+   - More efficient for CLIs/servers that run many effects against the same services
+
+5. **Updated AppLayer namespace** with new exports:
+   - `AppLayer.Memoized`, `AppLayer.TestMemoized`, `AppLayer.LowLevelMemoized`
+   - `AppLayer.lazyDev`, `AppLayer.lazyChopsticks`, `AppLayer.lazyZombie`, `AppLayer.lazyReadOnly`
+   - `AppLayer.createRuntime`
+
+6. **Added unit tests** in `packages/cli/src/internal/effect/__tests__/AppLayer.test.ts`:
+   - Tests for memoized layers (3 tests)
+   - Tests for lazy foundation layers (5 tests)
+   - Tests for ManagedRuntime (2 tests)
+   - Test for namespace exports (1 test)
+
+**★ Insight ─────────────────────────────────────**
+- `Effect.all({concurrency: "unbounded"})` runs effects in parallel, much faster than sequential loops
+- `Layer.memoize` returns an Effect requiring Scope - use `Effect.scoped()` to run it
+- `Layer.suspend(() => someLayer)` delays layer creation until the effect is actually run
+- `ManagedRuntime` pre-initializes services once, making subsequent `runPromise` calls faster
+- These optimizations are particularly valuable when only a subset of services are used
+**─────────────────────────────────────────────────**
+
+**Verification:**
+- `bun run typecheck` - Passes with no errors
+- `bun test` - 1768 pass (up from 1757), 12 skip, 16 fail, 2 errors
+  - +11 tests from new optimization feature tests in AppLayer.test.ts
+  - Same E2E failures as previous sessions (require moonwall environment with blockchain binaries)
+- `bun run lint` - Passes (only informational suggestions)
+- Test execution time: ~34 seconds (no regression from baseline)
+
+**Notes for Next Developer:**
+
+1. Usage examples for memoized layers:
+   ```ts
+   import { Effect } from "effect";
+   import { AppLayer, ConfigService } from "@moonwall/cli";
+
+   // Memoized layer ensures single initialization
+   const program = Effect.scoped(
+     Effect.gen(function* () {
+       const memoizedLayer = yield* AppLayer.Memoized;
+       // Run multiple effects with same initialized services
+       yield* Effect.provide(effect1, memoizedLayer);
+       yield* Effect.provide(effect2, memoizedLayer);
+     })
+   );
+   ```
+
+2. Usage for lazy foundation (only creates service when accessed):
+   ```ts
+   import { Effect } from "effect";
+   import { AppLayer, ChopsticksFoundationService } from "@moonwall/cli";
+
+   // Foundation only created when actually used
+   const lazyLayer = AppLayer.lazyChopsticks();
+   
+   const program = Effect.gen(function* () {
+     const chopsticks = yield* ChopsticksFoundationService;
+     yield* chopsticks.start(config);
+   }).pipe(Effect.provide(lazyLayer));
+   ```
+
+3. Usage for ManagedRuntime (efficient for long-running apps):
+   ```ts
+   import { AppLayer } from "@moonwall/cli";
+
+   // Create runtime once at app startup
+   const runtime = AppLayer.createRuntime(AppLayer.Live);
+
+   // Run many effects efficiently
+   await runtime.runPromise(effect1);
+   await runtime.runPromise(effect2);
+
+   // Cleanup at app shutdown
+   await runtime.dispose();
+   ```
+
+4. Remaining incomplete PRD features:
+   - Features 51-53, 55: Integration/E2E tests (require moonwall environment)
+   - Feature 56: Verify 80% coverage target
+   - Feature 58: Optimize Bun test runner configuration
+   - Feature 62: Run full e2e test suite
+
+**Files Changed:**
+- `packages/cli/src/internal/effect/services/ProviderServiceLive.ts` - Parallelized provider connections
+- `packages/cli/src/internal/effect/AppLayer.ts` - Added memoization, lazy init, ManagedRuntime
+- `packages/cli/src/internal/effect/__tests__/AppLayer.test.ts` - Added 11 new tests
+- `plans/prd.json` - Marked Feature 57 as complete

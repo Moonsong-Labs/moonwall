@@ -2,12 +2,20 @@
  * Unit tests for AppLayer - Application Layer composition.
  */
 import { describe, it, expect } from "bun:test";
-import { Effect, Layer } from "effect";
+import { Effect, Layer, Scope } from "effect";
 import {
   AppLayer,
   AppLayerLive,
   AppLayerTest,
   AppLayerMinimal,
+  AppLayerMemoized,
+  AppLayerTestMemoized,
+  LowLevelServicesMemoized,
+  lazyDevFoundation,
+  lazyChopsticksFoundation,
+  lazyZombieFoundation,
+  lazyReadOnlyFoundation,
+  createManagedRuntime,
   CoreServicesLive,
   CoreServicesTest,
   LowLevelServicesLive,
@@ -385,6 +393,153 @@ describe("AppLayer", () => {
       expect(NodeReadinessService).toBeDefined();
       expect(RpcPortDiscoveryService).toBeDefined();
       expect(StartupCacheService).toBeDefined();
+    });
+  });
+
+  // ==========================================================================
+  // Performance Optimization Tests
+  // ==========================================================================
+
+  describe("Memoized Layers (Performance Optimization)", () => {
+    it("should provide memoized production layer via Effect", async () => {
+      // AppLayerMemoized returns an Effect that needs Scope
+      const program = Effect.scoped(
+        Effect.gen(function* () {
+          const memoizedLayer = yield* AppLayerMemoized;
+          // Use the memoized layer
+          const innerProgram = Effect.gen(function* () {
+            const configService = yield* ConfigService;
+            return typeof configService.loadConfig === "function";
+          }).pipe(Effect.provide(memoizedLayer));
+
+          return yield* innerProgram;
+        })
+      );
+
+      const result = await Effect.runPromise(program);
+      expect(result).toBe(true);
+    });
+
+    it("should provide memoized test layer via Effect", async () => {
+      const program = Effect.scoped(
+        Effect.gen(function* () {
+          const memoizedLayer = yield* AppLayerTestMemoized;
+          const innerProgram = Effect.gen(function* () {
+            const loggerService = yield* LoggerService;
+            const status = yield* loggerService.getStatus();
+            return status._tag === "Disabled";
+          }).pipe(Effect.provide(memoizedLayer));
+
+          return yield* innerProgram;
+        })
+      );
+
+      const result = await Effect.runPromise(program);
+      expect(result).toBe(true);
+    });
+
+    it("should provide memoized low-level services layer", async () => {
+      const program = Effect.scoped(
+        Effect.gen(function* () {
+          const memoizedLayer = yield* LowLevelServicesMemoized;
+          const innerProgram = Effect.gen(function* () {
+            const processManager = yield* ProcessManagerService;
+            const portDiscovery = yield* PortDiscoveryService;
+            return (
+              typeof processManager.launch === "function" &&
+              typeof portDiscovery.discoverPort === "function"
+            );
+          }).pipe(Effect.provide(memoizedLayer));
+
+          return yield* innerProgram;
+        })
+      );
+
+      const result = await Effect.runPromise(program);
+      expect(result).toBe(true);
+    });
+
+    it("should expose memoized layers via AppLayer namespace", () => {
+      expect(AppLayer.Memoized).toBe(AppLayerMemoized);
+      expect(AppLayer.TestMemoized).toBe(AppLayerTestMemoized);
+      expect(AppLayer.LowLevelMemoized).toBe(LowLevelServicesMemoized);
+    });
+  });
+
+  describe("Lazy Foundation Layers", () => {
+    it("should create lazy Dev foundation layer", async () => {
+      const lazyLayer = lazyDevFoundation();
+      const program = Effect.gen(function* () {
+        const devFoundation = yield* DevFoundationService;
+        return typeof devFoundation.start === "function";
+      }).pipe(Effect.provide(lazyLayer));
+
+      const result = await Effect.runPromise(program);
+      expect(result).toBe(true);
+    });
+
+    it("should create lazy Chopsticks foundation layer", async () => {
+      const lazyLayer = lazyChopsticksFoundation();
+      const program = Effect.gen(function* () {
+        const chopsticks = yield* ChopsticksFoundationService;
+        return typeof chopsticks.createBlock === "function";
+      }).pipe(Effect.provide(lazyLayer));
+
+      const result = await Effect.runPromise(program);
+      expect(result).toBe(true);
+    });
+
+    it("should create lazy Zombie foundation layer", async () => {
+      const lazyLayer = lazyZombieFoundation();
+      const program = Effect.gen(function* () {
+        const zombie = yield* ZombieFoundationService;
+        return typeof zombie.getNodes === "function";
+      }).pipe(Effect.provide(lazyLayer));
+
+      const result = await Effect.runPromise(program);
+      expect(result).toBe(true);
+    });
+
+    it("should create lazy ReadOnly foundation layer", async () => {
+      const lazyLayer = lazyReadOnlyFoundation();
+      const program = Effect.gen(function* () {
+        const readOnly = yield* ReadOnlyFoundationService;
+        return typeof readOnly.connect === "function";
+      }).pipe(Effect.provide(lazyLayer));
+
+      const result = await Effect.runPromise(program);
+      expect(result).toBe(true);
+    });
+
+    it("should expose lazy foundation factories via AppLayer namespace", () => {
+      expect(typeof AppLayer.lazyDev).toBe("function");
+      expect(typeof AppLayer.lazyChopsticks).toBe("function");
+      expect(typeof AppLayer.lazyZombie).toBe("function");
+      expect(typeof AppLayer.lazyReadOnly).toBe("function");
+    });
+  });
+
+  describe("ManagedRuntime", () => {
+    it("should create a ManagedRuntime from a layer", async () => {
+      const runtime = createManagedRuntime(CoreServicesLive);
+      expect(runtime).toBeDefined();
+      expect(typeof runtime.runPromise).toBe("function");
+
+      // Test running an effect through the managed runtime
+      const result = await runtime.runPromise(
+        Effect.gen(function* () {
+          const configService = yield* ConfigService;
+          return typeof configService.loadConfig === "function";
+        })
+      );
+      expect(result).toBe(true);
+
+      // Cleanup
+      await runtime.dispose();
+    });
+
+    it("should expose createRuntime via AppLayer namespace", () => {
+      expect(AppLayer.createRuntime).toBe(createManagedRuntime);
     });
   });
 });

@@ -35,7 +35,7 @@
  * ```
  */
 
-import { Layer } from "effect";
+import { Effect, Layer, ManagedRuntime, Scope } from "effect";
 
 // Core infrastructure services
 import { ConfigService } from "./services/ConfigService.js";
@@ -257,6 +257,115 @@ export const AppLayerTest: Layer.Layer<AllServices> = Layer.mergeAll(
 export const AppLayerMinimal: Layer.Layer<CoreServices> = CoreServicesLive;
 
 // =============================================================================
+// Memoized Layers (Performance Optimization)
+// =============================================================================
+
+/**
+ * Memoized version of the full production layer.
+ *
+ * Memoization ensures that expensive service initialization (such as config loading,
+ * logger setup) happens only once, even when the layer is composed or used multiple times.
+ * This is particularly important for services with internal state that should be shared.
+ *
+ * @returns An Effect that resolves to a memoized Layer
+ *
+ * @example
+ * ```ts
+ * const program = Effect.gen(function* () {
+ *   const memoizedLayer = yield* AppLayerMemoized;
+ *   // Use the layer multiple times - initialization happens once
+ *   yield* Effect.provide(myEffect1, memoizedLayer);
+ *   yield* Effect.provide(myEffect2, memoizedLayer);
+ * });
+ * ```
+ */
+export const AppLayerMemoized: Effect.Effect<Layer.Layer<AllServices>, never, Scope.Scope> =
+  Layer.memoize(AppLayerLive);
+
+/**
+ * Memoized version of the test layer.
+ *
+ * @returns An Effect that resolves to a memoized Layer (requires Scope)
+ */
+export const AppLayerTestMemoized: Effect.Effect<Layer.Layer<AllServices>, never, Scope.Scope> =
+  Layer.memoize(AppLayerTest);
+
+/**
+ * Memoized version of low-level services.
+ *
+ * Useful when multiple foundation services need to share the same ProcessManager,
+ * PortDiscovery, and other low-level services without re-initialization.
+ *
+ * @returns An Effect that resolves to a memoized Layer (requires Scope)
+ */
+export const LowLevelServicesMemoized: Effect.Effect<
+  Layer.Layer<LowLevelServices>,
+  never,
+  Scope.Scope
+> = Layer.memoize(LowLevelServicesLive);
+
+// =============================================================================
+// Lazy Service Initialization
+// =============================================================================
+
+/**
+ * Create a lazily-initialized foundation service layer.
+ *
+ * Uses Layer.suspend to delay service creation until actually needed.
+ * This reduces startup time when not all foundation types are used.
+ *
+ * @example
+ * ```ts
+ * // Only creates ChopsticksFoundationService when actually used
+ * const lazyChopsticks = lazyChopsticksFoundation();
+ *
+ * const program = Effect.gen(function* () {
+ *   // Service created here on first access
+ *   const chopsticks = yield* ChopsticksFoundationService;
+ *   // ...
+ * }).pipe(Effect.provide(lazyChopsticks));
+ * ```
+ */
+export const lazyDevFoundation = (): Layer.Layer<DevFoundationService> =>
+  Layer.suspend(() => DevFoundationServiceLive);
+
+export const lazyChopsticksFoundation = (): Layer.Layer<ChopsticksFoundationService> =>
+  Layer.suspend(() => ChopsticksFoundationServiceLive);
+
+export const lazyZombieFoundation = (): Layer.Layer<ZombieFoundationService> =>
+  Layer.suspend(() => ZombieFoundationServiceLive);
+
+export const lazyReadOnlyFoundation = (): Layer.Layer<ReadOnlyFoundationService> =>
+  Layer.suspend(() => ReadOnlyFoundationServiceLive);
+
+/**
+ * Create a ManagedRuntime with memoized services for long-running applications.
+ *
+ * ManagedRuntime provides a pre-built runtime with services already initialized,
+ * which is more efficient for CLIs and servers that run many effects against
+ * the same services.
+ *
+ * @param layer - The layer to use for the runtime
+ * @returns A ManagedRuntime instance
+ *
+ * @example
+ * ```ts
+ * // Create runtime once at application startup
+ * const runtime = createManagedRuntime(AppLayer.Live);
+ *
+ * // Run effects efficiently without re-initializing services
+ * const result1 = await runtime.runPromise(effect1);
+ * const result2 = await runtime.runPromise(effect2);
+ *
+ * // Clean up when done
+ * await runtime.dispose();
+ * ```
+ */
+export const createManagedRuntime = <R, E>(
+  layer: Layer.Layer<R, E, never>
+): ManagedRuntime.ManagedRuntime<R, E> => ManagedRuntime.make(layer);
+
+// =============================================================================
 // AppLayer Namespace
 // =============================================================================
 
@@ -359,6 +468,49 @@ export const AppLayer = {
    * Provider services for blockchain connections.
    */
   Providers: ProviderServicesLive,
+
+  // Memoized layers for performance optimization
+  /**
+   * Memoized production layer - ensures single initialization.
+   */
+  Memoized: AppLayerMemoized,
+
+  /**
+   * Memoized test layer - ensures single initialization.
+   */
+  TestMemoized: AppLayerTestMemoized,
+
+  /**
+   * Memoized low-level services - shared across foundations.
+   */
+  LowLevelMemoized: LowLevelServicesMemoized,
+
+  // Lazy layer factories
+  /**
+   * Lazily-initialized Dev foundation (created on first use).
+   */
+  lazyDev: lazyDevFoundation,
+
+  /**
+   * Lazily-initialized Chopsticks foundation (created on first use).
+   */
+  lazyChopsticks: lazyChopsticksFoundation,
+
+  /**
+   * Lazily-initialized Zombie foundation (created on first use).
+   */
+  lazyZombie: lazyZombieFoundation,
+
+  /**
+   * Lazily-initialized ReadOnly foundation (created on first use).
+   */
+  lazyReadOnly: lazyReadOnlyFoundation,
+
+  // ManagedRuntime factory
+  /**
+   * Create a ManagedRuntime for long-running applications.
+   */
+  createRuntime: createManagedRuntime,
 } as const;
 
 // =============================================================================
