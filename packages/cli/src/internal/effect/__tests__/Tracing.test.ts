@@ -1,5 +1,5 @@
-import { describe, test, expect, beforeAll, afterAll, mock, spyOn } from "bun:test";
-import { Effect, FiberRef, Tracer } from "effect";
+import { describe, test, expect, afterAll, } from "bun:test";
+import { Effect, } from "effect";
 import {
   buildFoundationSpanName,
   buildProviderSpanName,
@@ -14,8 +14,6 @@ import {
   isTracingEnabled,
   withTracingIfEnabled,
   TracerDefaults,
-  type FoundationType,
-  type ProviderType,
   type FoundationSpanAttributes,
   type ProviderSpanAttributes,
   type TestSpanAttributes,

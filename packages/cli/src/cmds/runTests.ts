@@ -1,5 +1,5 @@
-import type { Environment, MoonwallConfig } from "@moonwall/types";
-import { Effect, Cause } from "effect";
+import type { Environment, } from "@moonwall/types";
+import { Effect, } from "effect";
 import chalk from "chalk";
 import path from "node:path";
 import { createLogger } from "@moonwall/util";
@@ -11,7 +11,6 @@ import { shardManager } from "../lib/shardManager";
 import { findTestFilesMatchingPattern } from "../internal/testIdParser";
 import {
   ConfigService,
-  EnvironmentNotFoundError,
 } from "../internal/effect/services/ConfigService.js";
 import { ConfigServiceLive } from "../internal/effect/services/ConfigServiceLive.js";
 import { TestCommandError, formatCliError } from "./runTestsEffect.js";
@@ -83,7 +82,7 @@ export async function testCmd(envName: string, additionalArgs?: testRunArgs): Pr
     throw error;
   });
 
-  const { config: globalConfig, env } = configResult;
+  const { env } = configResult;
   process.env.MOON_TEST_ENV = envName;
 
   // Initialize sharding configuration

@@ -7,8 +7,6 @@ import {
   ProviderDisconnectError,
   ProviderHealthCheckError,
   type ProviderServiceConfig,
-  type ProviderServiceRunningInfo,
-  type ProviderServiceStatus,
 } from "../../services/ProviderService.js";
 import { ProviderConnectionError } from "../../errors/foundation.js";
 import type { ConnectedProvider, ProviderConfig } from "@moonwall/types";

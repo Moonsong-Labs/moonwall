@@ -48,7 +48,7 @@
     "clean": "rm -rf dist && rm -rf node_modules",
     "build": "rm -rf dist && tsup src --format esm --no-splitting --external bun:test && bun run generate-types",
     "lint": "bunx biome lint ./src",
-    "lint:fix": "bunx biome lint ./src --apply",
+    "lint:fix": "bunx biome lint ./src --write",
     "fmt": "biome format .",
     "fmt:fix": "biome format . --write",
     "generate-types": "tsc",

@@ -6,7 +6,7 @@
  * Effect-based dependency injection and testing.
  */
 
-import { Context, Data, Effect } from "effect";
+import { Context, Data, type Effect } from "effect";
 
 /**
  * Log level type matching pino's standard levels.

@@ -1,4 +1,4 @@
-import { Context, Effect } from "effect";
+import { Context, type Effect } from "effect";
 import type { ProviderConfig, ProviderType, ConnectedProvider, ProviderApi } from "@moonwall/types";
 import type { ProviderConnectionError } from "../errors/foundation.js";
 

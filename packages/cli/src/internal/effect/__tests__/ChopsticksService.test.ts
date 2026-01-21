@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { Effect, Exit, Layer } from "effect";
+import { Effect, Layer } from "effect";
 import { BuildBlockMode } from "@acala-network/chopsticks";
 import {
   ChopsticksService,

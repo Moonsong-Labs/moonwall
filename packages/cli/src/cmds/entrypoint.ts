@@ -20,6 +20,7 @@ dotenv.config({
  * formatting errors from Effect-based code and other sources consistently.
  */
 function withErrorHandling<T>(
+  // biome-ignore lint/suspicious/noConfusingVoidType: void in union represents handlers with no return value
   handler: (args: T) => Promise<void | boolean>
 ): (args: T) => Promise<void> {
   return async (args: T) => {

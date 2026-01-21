@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, mock } from "bun:test";
-import { Effect, Exit, Ref, Scope } from "effect";
+import { describe, it, expect, } from "bun:test";
+import { Effect, Exit, } from "effect";
 
 // Import the module under test
 import {
@@ -12,7 +12,6 @@ import {
   combineCleanups,
   isCleanupError,
   type ManagedResource,
-  type AcquireOptions,
 } from "../ResourceManagement.js";
 
 describe("ResourceManagement", () => {

@@ -8,8 +8,8 @@
  * to ensure it stays in sync with upstream changes and supports all config options like rpc-timeout.
  */
 
-import { Context, Data, Effect } from "effect";
-import type { Blockchain, BuildBlockMode, fetchConfig } from "@acala-network/chopsticks";
+import { Context, Data, type Effect } from "effect";
+import type { Blockchain, fetchConfig } from "@acala-network/chopsticks";
 import type { HexString } from "@polkadot/util/types";
 
 /**

@@ -20,7 +20,6 @@ import {
   type LoggerConfig,
   type LoggerInstance,
   type LoggerServiceConfig,
-  type LoggerServiceStatus,
   type LogLevel,
 } from "./LoggerService.js";
 

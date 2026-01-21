@@ -9,7 +9,7 @@
  * @module ResourceManagement
  */
 
-import { Effect, Scope, Exit } from "effect";
+import { Effect, type Scope, Exit } from "effect";
 import { createLogger } from "@moonwall/util";
 
 const logger = createLogger({ name: "ResourceManagement" });

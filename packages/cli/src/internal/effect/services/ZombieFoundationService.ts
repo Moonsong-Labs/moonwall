@@ -1,4 +1,4 @@
-import { Context, Effect } from "effect";
+import { Context, type Effect } from "effect";
 import type { ZombieLaunchSpec, OrcOptionsInterface } from "@moonwall/types";
 import type {
   FoundationStartupError,

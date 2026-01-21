@@ -8,28 +8,23 @@
  * @module runTestsEffect
  */
 
-import { Effect, Cause, Data, Layer } from "effect";
+import { Effect, Data, } from "effect";
 import type { Environment, MoonwallConfig } from "@moonwall/types";
 import chalk from "chalk";
-import path from "node:path";
 import { createLogger } from "@moonwall/util";
 import {
   ConfigService,
-  ConfigLoadError,
   EnvironmentNotFoundError,
 } from "../internal/effect/services/ConfigService.js";
 import { ConfigServiceLive } from "../internal/effect/services/ConfigServiceLive.js";
-import { withTestSpan, withSpan } from "../internal/effect/Tracing.js";
+import { withTestSpan, } from "../internal/effect/Tracing.js";
 import {
   formatErrorForCli,
   logError,
-  logCause,
-  toStructuredError,
-  formatCausePretty,
   shouldIncludeStackTrace,
 } from "../internal/effect/ErrorLogging.js";
 
-const logger = createLogger({ name: "runner-effect" });
+const _logger = createLogger({ name: "runner-effect" });
 
 // ============================================================================
 // Error Types

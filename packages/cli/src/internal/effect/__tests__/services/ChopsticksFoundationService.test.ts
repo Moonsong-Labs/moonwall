@@ -1,4 +1,4 @@
-import { describe, it, expect, mock } from "bun:test";
+import { describe, it, expect, } from "bun:test";
 import { Effect, Exit, Layer } from "effect";
 import type { HexString } from "@polkadot/util/types";
 
@@ -9,7 +9,7 @@ import {
 } from "../../services/ChopsticksFoundationService.js";
 import {
   FoundationStartupError,
-  FoundationShutdownError,
+  type FoundationShutdownError,
   FoundationHealthCheckError,
 } from "../../errors/foundation.js";
 import {
@@ -82,7 +82,7 @@ const createMockChopsticksFoundationService = (options?: {
       const endpoint = `ws://127.0.0.1:${wsPort}`;
       status = { _tag: "Running", wsPort, endpoint };
 
-      const stopEffect = Effect.gen(function* () {
+      const stopEffect = Effect.sync(() => {
         cleanupCalled = true;
         status = { _tag: "Stopped" };
       });
@@ -99,7 +99,7 @@ const createMockChopsticksFoundationService = (options?: {
     },
 
     stop: () =>
-      Effect.gen(function* () {
+      Effect.sync(() => {
         if (status._tag !== "Running") {
           return;
         }
@@ -130,7 +130,7 @@ const createMockChopsticksFoundationService = (options?: {
       return Effect.void;
     },
 
-    createBlock: (params?: any) => {
+    createBlock: (_params?: any) => {
       if (status._tag !== "Running") {
         return Effect.fail(
           new ChopsticksBlockError({

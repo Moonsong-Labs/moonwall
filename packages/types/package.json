@@ -45,7 +45,7 @@
     "generate-types": "tsc && bun run schema",
     "watch": "tsup src --format esm --watch",
     "lint": "biome lint ./src",
-    "lint:fix": "biome lint ./src --apply",
+    "lint:fix": "biome lint ./src --write",
     "fmt": "biome format ./src",
     "fmt:fix": "biome format src --write",
     "prepublish": "bun run build && bun run generate-types",

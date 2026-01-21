@@ -1,5 +1,5 @@
 import { Effect, Layer, Ref, Schema, ParseResult } from "effect";
-import type { MoonwallConfig, Environment } from "@moonwall/types";
+import type { MoonwallConfig, } from "@moonwall/types";
 import { MoonwallConfigSchema } from "@moonwall/types";
 import { readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
@@ -86,7 +86,7 @@ function resolveConfigPath(configPath: string | undefined): string {
  * @param issue - The parse issue to extract path from
  * @returns Array of path segments
  */
-function extractIssuePath(issue: ParseResult.ParseIssue): string[] {
+function _extractIssuePath(issue: ParseResult.ParseIssue): string[] {
   const segments: string[] = [];
 
   // Helper to extract from single issue

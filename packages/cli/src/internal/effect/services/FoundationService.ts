@@ -1,41 +1,39 @@
-import { Effect, Layer } from "effect";
+import { Effect, type Layer } from "effect";
 import type { FoundationType } from "@moonwall/types";
 import type {
-  FoundationStartupError,
   FoundationShutdownError,
   FoundationHealthCheckError,
 } from "../errors/foundation.js";
-import { FoundationConfigError } from "../errors/foundation.js";
 
-import {
+import type {
   DevFoundationService,
-  type DevFoundationConfig,
-  type DevFoundationRunningInfo,
-  type DevFoundationStatus,
+  DevFoundationConfig,
+  DevFoundationRunningInfo,
+  DevFoundationStatus,
 } from "./DevFoundationService.js";
 import { DevFoundationServiceLive } from "./DevFoundationServiceLive.js";
 
-import {
+import type {
   ChopsticksFoundationService,
-  type ChopsticksFoundationConfig,
-  type ChopsticksFoundationRunningInfo,
-  type ChopsticksFoundationStatus,
+  ChopsticksFoundationConfig,
+  ChopsticksFoundationRunningInfo,
+  ChopsticksFoundationStatus,
 } from "./ChopsticksFoundationService.js";
 import { ChopsticksFoundationServiceLive } from "./ChopsticksFoundationServiceLive.js";
 
-import {
+import type {
   ZombieFoundationService,
-  type ZombieFoundationConfig,
-  type ZombieFoundationRunningInfo,
-  type ZombieFoundationStatus,
+  ZombieFoundationConfig,
+  ZombieFoundationRunningInfo,
+  ZombieFoundationStatus,
 } from "./ZombieFoundationService.js";
 import { ZombieFoundationServiceLive } from "./ZombieFoundationServiceLive.js";
 
-import {
+import type {
   ReadOnlyFoundationService,
-  type ReadOnlyFoundationConfig,
-  type ReadOnlyFoundationRunningInfo,
-  type ReadOnlyFoundationStatus,
+  ReadOnlyFoundationConfig,
+  ReadOnlyFoundationRunningInfo,
+  ReadOnlyFoundationStatus,
 } from "./ReadOnlyFoundationService.js";
 import { ReadOnlyFoundationServiceLive } from "./ReadOnlyFoundationServiceLive.js";
 
@@ -130,7 +128,7 @@ export interface FoundationStatusMap {
  * must implement. Note that ReadOnlyFoundation uses connect/disconnect
  * instead of start/stop, but the unified interface abstracts this.
  */
-export interface BaseFoundationLifecycle<TRunningInfo, TStatus> {
+export interface BaseFoundationLifecycle<_TRunningInfo, TStatus> {
   /**
    * Stop or disconnect the foundation.
    */

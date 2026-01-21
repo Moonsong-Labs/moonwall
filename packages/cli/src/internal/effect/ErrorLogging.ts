@@ -11,7 +11,7 @@
  * @module ErrorLogging
  */
 
-import { Cause, Effect, Data, Chunk } from "effect";
+import { Cause, Effect, Chunk } from "effect";
 import chalk from "chalk";
 
 // ============================================================================
@@ -511,7 +511,7 @@ export function logError(
     verbose?: boolean;
   } = {}
 ): void {
-  const { includeStackTrace = false, includeSuggestions = true, verbose = false } = options;
+  const { includeStackTrace = false, verbose = false } = options;
 
   const structured = toStructuredError(error);
 

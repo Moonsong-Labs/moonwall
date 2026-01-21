@@ -1,4 +1,4 @@
-import { Context, Effect } from "effect";
+import { Context, type Effect } from "effect";
 import type { ChopsticksLaunchSpec } from "@moonwall/types";
 import type { HexString } from "@polkadot/util/types";
 import type {

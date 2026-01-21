@@ -1,4 +1,4 @@
-import { describe, it, expect, mock, beforeEach, spyOn } from "bun:test";
+import { describe, it, expect, mock, beforeEach, } from "bun:test";
 import { Effect, Exit } from "effect";
 import { EventEmitter } from "node:events";
 
@@ -20,7 +20,7 @@ const createMockProcess = () => {
   proc.pid = 12345;
   proc.stdout = new EventEmitter();
   proc.stderr = new EventEmitter();
-  proc.kill = mock((signal?: string) => {
+  proc.kill = mock((_signal?: string) => {
     // Simulate proper process termination
     setTimeout(() => {
       proc.emit("close", 0, null);

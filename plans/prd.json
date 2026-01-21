@@ -833,7 +833,8 @@
       "Run `bun run lint` - verify no lint errors",
       "Run `bun run test` - verify all tests pass"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: (1) bun install - successful, 2338 packages installed (cpu-features optional native module fails due to missing C++ headers, non-critical). (2) bun run build - all 3 packages build successfully (@moonwall/types: 10 entries + schema, @moonwall/util: 19 entries, @moonwall/cli: 110 entries). (3) bun run typecheck - passes with no errors for all packages. (4) bun run lint - passes with no errors for all packages (fixed biome lint:fix flag --apply→--write, fixed unused imports/variables, fixed noConfusingVoidType, fixed useYield with Effect.sync, fixed noImplicitAnyLet). (5) bun test - 1449 tests pass, 12 skipped, 0 failures across 69 test files. Also updated packages/cli, packages/util, packages/types package.json lint:fix scripts to use correct --write flag."
   },
   {
     "category": "functional",

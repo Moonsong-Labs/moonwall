@@ -1,5 +1,5 @@
-import { Context, Effect, Layer, Ref } from "effect";
-import type { Network } from "@zombienet/orchestrator";
+import { type Context, Effect, Layer, Ref } from "effect";
+import type { Network, LaunchConfig } from "@zombienet/orchestrator";
 import zombie from "@zombienet/orchestrator";
 import { createLogger } from "@moonwall/util";
 import net from "node:net";
@@ -185,7 +185,7 @@ const makeZombieFoundationService = Effect.gen(function* () {
       logger.debug(`Starting zombie foundation: ${config.name} from config: ${config.configPath}`);
 
       // Load and validate zombienet configuration
-      let zombieConfig;
+      let zombieConfig: LaunchConfig;
       try {
         zombieConfig = getZombieConfig(config.configPath);
       } catch (error) {
@@ -494,10 +494,10 @@ const makeZombieFoundationService = Effect.gen(function* () {
         // Stop the zombie network
         yield* Effect.tryPromise({
           try: async () => {
-            await currentState.network!.stop();
+            await currentState.network?.stop();
 
             // Kill any remaining processes
-            const processMap = (currentState.network!.client as any).processMap;
+            const processMap = (currentState.network?.client as any).processMap;
             const processIds = Object.values(processMap)
               .filter((item: any) => item?.pid)
               .map((process: any) => process.pid);
@@ -570,10 +570,10 @@ const makeZombieFoundationService = Effect.gen(function* () {
       // Stop the zombie network
       yield* Effect.tryPromise({
         try: async () => {
-          await currentState.network!.stop();
+          await currentState.network?.stop();
 
           // Kill any remaining processes
-          const processMap = (currentState.network!.client as any).processMap;
+          const processMap = (currentState.network?.client as any).processMap;
           const processIds = Object.values(processMap)
             .filter((item: any) => item?.pid)
             .map((process: any) => process.pid);

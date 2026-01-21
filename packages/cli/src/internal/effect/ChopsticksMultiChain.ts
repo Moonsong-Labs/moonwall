@@ -14,7 +14,7 @@ import {
   type BlockCreationResult,
   ChopsticksSetupError,
   ChopsticksXcmError,
-  ChopsticksBlockError,
+  type ChopsticksBlockError,
 } from "./ChopsticksService.js";
 import { type ChopsticksServiceImpl, launchChopsticksEffect } from "./launchChopsticksEffect.js";
 

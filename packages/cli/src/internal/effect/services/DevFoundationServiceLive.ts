@@ -18,11 +18,10 @@ import {
   RpcPortDiscoveryServiceLive,
 } from "../RpcPortDiscoveryService.js";
 import { NodeReadinessService, NodeReadinessServiceLive } from "../NodeReadinessService.js";
-import { ProcessError } from "../errors.js";
+import type { ProcessError } from "../errors.js";
 import {
   withTimeout,
   foundationStartupTimeout,
-  foundationShutdownTimeout,
   healthCheckTimeout,
   TimeoutDefaults,
   type OperationTimeoutError,
@@ -382,7 +381,7 @@ const makeDevFoundationService = Effect.gen(function* () {
 });
 
 // Need to import Context for the type
-import { Context } from "effect";
+import type { Context } from "effect";
 
 /**
  * Combined layer with all lower-level service dependencies.

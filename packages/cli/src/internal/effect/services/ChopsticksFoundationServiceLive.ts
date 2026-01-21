@@ -1,4 +1,4 @@
-import { Context, Duration, Effect, Layer, Ref } from "effect";
+import { type Context, Duration, Effect, Layer, Ref } from "effect";
 import { createLogger } from "@moonwall/util";
 import {
   ChopsticksFoundationService,
@@ -26,7 +26,6 @@ import type { HexString } from "@polkadot/util/types";
 import {
   withTimeout,
   foundationStartupTimeout,
-  healthCheckTimeout,
   blockCreationTimeout,
   storageOperationTimeout,
   TimeoutDefaults,
@@ -162,15 +161,18 @@ const makeChopsticksFoundationService = Effect.gen(function* () {
 
         logger.debug(`Stopping chopsticks foundation "${config.name}"`);
 
-        yield* Effect.tryPromise({
-          try: () => currentState.cleanup!(),
-          catch: (error) =>
-            new FoundationShutdownError({
-              foundationType: "chopsticks",
-              message: `Failed to stop chopsticks "${config.name}": ${error instanceof Error ? error.message : String(error)}`,
-              cause: error,
-            }),
-        });
+        if (currentState.cleanup) {
+          const cleanup = currentState.cleanup;
+          yield* Effect.tryPromise({
+            try: () => cleanup(),
+            catch: (error) =>
+              new FoundationShutdownError({
+                foundationType: "chopsticks",
+                message: `Failed to stop chopsticks "${config.name}": ${error instanceof Error ? error.message : String(error)}`,
+                cause: error,
+              }),
+          });
+        }
 
         // Update state to Stopped
         yield* Ref.set(stateRef, {
@@ -237,18 +239,21 @@ const makeChopsticksFoundationService = Effect.gen(function* () {
 
       logger.debug(`Stopping chopsticks foundation "${instanceName}"`);
 
-      yield* Effect.tryPromise({
-        try: () => currentState.cleanup!(),
-        catch: (error) =>
-          new FoundationShutdownError({
-            foundationType: "chopsticks",
-            message: `Failed to stop chopsticks "${instanceName}": ${error instanceof Error ? error.message : String(error)}`,
-            cause: error,
-            failedResources: currentState.runningInfo?.endpoint
-              ? [currentState.runningInfo.endpoint]
-              : undefined,
-          }),
-      });
+      if (currentState.cleanup) {
+        const cleanup = currentState.cleanup;
+        yield* Effect.tryPromise({
+          try: () => cleanup(),
+          catch: (error) =>
+            new FoundationShutdownError({
+              foundationType: "chopsticks",
+              message: `Failed to stop chopsticks "${instanceName}": ${error instanceof Error ? error.message : String(error)}`,
+              cause: error,
+              failedResources: currentState.runningInfo?.endpoint
+                ? [currentState.runningInfo.endpoint]
+                : undefined,
+            }),
+        });
+      }
 
       // Update state to Stopped
       yield* Ref.set(stateRef, {

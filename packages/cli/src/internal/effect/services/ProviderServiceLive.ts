@@ -1,4 +1,4 @@
-import { Context, Effect, Layer, Ref } from "effect";
+import { type Context, Effect, Layer, Ref } from "effect";
 import { createLogger } from "@moonwall/util";
 import type { ConnectedProvider, MoonwallProvider } from "@moonwall/types";
 import {
@@ -46,7 +46,7 @@ const initialState: ProviderServiceState = {
  */
 const DEFAULT_CONNECTION_TIMEOUT = 10000; // 10 seconds
 const DEFAULT_RETRY_ATTEMPTS = 150; // Matches existing moonwall behavior
-const DEFAULT_RETRY_DELAY = 100; // 100ms between retries
+const _DEFAULT_RETRY_DELAY = 100; // 100ms between retries
 
 /**
  * Create the ProviderService implementation.

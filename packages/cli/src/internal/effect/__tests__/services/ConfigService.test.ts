@@ -1,15 +1,13 @@
-import { describe, it, expect, beforeEach, afterEach, mock } from "bun:test";
+import { describe, it, expect, beforeEach, afterEach, } from "bun:test";
 import { Effect, Layer, Exit } from "effect";
 import {
   ConfigService,
   ConfigLoadError,
   ConfigValidationError,
   EnvironmentNotFoundError,
-  type ConfigServiceConfig,
-  type ConfigServiceStatus,
 } from "../../services/ConfigService.js";
 import { ConfigServiceLive } from "../../services/ConfigServiceLive.js";
-import type { MoonwallConfig, Environment } from "@moonwall/types";
+import type { MoonwallConfig, } from "@moonwall/types";
 import path from "node:path";
 import { writeFileSync, mkdirSync, rmSync, existsSync } from "node:fs";
 
@@ -206,6 +204,7 @@ describe("ConfigService", () => {
 
       const configWithEnvVar = {
         ...validConfig,
+        // biome-ignore lint/suspicious/noTemplateCurlyInString: Intentional - testing env var replacement
         label: "Config with ${TEST_VAR}",
       };
       const envVarConfigPath = path.join(TEST_DIR, "envvar.config.json");

@@ -210,7 +210,7 @@ describe("ChopsticksMultiChain - Phase 4: Multi-chain XCM Support", () => {
         parachain: () => undefined,
         chains: new Map(),
         createBlocksAll: () => Effect.succeed(new Map()),
-        sendUmp: (paraId, messages) =>
+        sendUmp: (paraId, _messages) =>
           Effect.fail(
             new ChopsticksXcmError({
               cause: new Error("UMP failed"),
@@ -243,7 +243,7 @@ describe("ChopsticksMultiChain - Phase 4: Multi-chain XCM Support", () => {
         chains: new Map(),
         createBlocksAll: () => Effect.succeed(new Map()),
         sendUmp: () => Effect.void,
-        sendDmp: (paraId, messages) =>
+        sendDmp: (paraId, _messages) =>
           Effect.fail(
             new ChopsticksXcmError({
               cause: new Error("DMP failed"),
@@ -276,7 +276,7 @@ describe("ChopsticksMultiChain - Phase 4: Multi-chain XCM Support", () => {
         createBlocksAll: () => Effect.succeed(new Map()),
         sendUmp: () => Effect.void,
         sendDmp: () => Effect.void,
-        sendHrmp: (fromParaId, toParaId, messages) =>
+        sendHrmp: (_fromParaId, toParaId, _messages) =>
           Effect.fail(
             new ChopsticksXcmError({
               cause: new Error("HRMP failed"),

@@ -10,7 +10,7 @@ import {
 } from "../../services/ZombieFoundationService.js";
 import {
   FoundationStartupError,
-  FoundationShutdownError,
+  type FoundationShutdownError,
   FoundationHealthCheckError,
 } from "../../errors/foundation.js";
 import type { ZombieLaunchSpec } from "@moonwall/types";
@@ -103,7 +103,7 @@ const createMockZombieFoundationService = (options?: {
         nodeCount: defaultNodes.length,
       };
 
-      const stopEffect = Effect.gen(function* () {
+      const stopEffect = Effect.sync(() => {
         cleanupCalled = true;
         status = { _tag: "Stopped" };
       });
@@ -121,7 +121,7 @@ const createMockZombieFoundationService = (options?: {
     },
 
     stop: () =>
-      Effect.gen(function* () {
+      Effect.sync(() => {
         if (status._tag !== "Running") {
           return;
         }

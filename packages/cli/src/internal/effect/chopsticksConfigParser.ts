@@ -72,7 +72,6 @@ const parseBuildBlockMode = (mode?: string): BuildBlockMode => {
       return BuildBlockModeValues.Batch;
     case "instant":
       return BuildBlockModeValues.Instant;
-    case "manual":
     default:
       return BuildBlockModeValues.Manual;
   }

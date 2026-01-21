@@ -1,4 +1,4 @@
-import { Context, Effect } from "effect";
+import { Context, type Effect } from "effect";
 import type { DevLaunchSpec } from "@moonwall/types";
 import type { ChildProcess } from "node:child_process";
 import type {

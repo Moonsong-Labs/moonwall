@@ -45,8 +45,7 @@ export const RetryDefaults = {
  * Type alias for retry schedule - the output type varies based on composition
  * but Effect.retry only cares about the input error type.
  */
-// biome-ignore lint/suspicious/noExplicitAny: Schedule output varies, Effect.retry accepts any
-export type RetrySchedule<E = unknown> = Schedule.Schedule<any, E, never>;
+export type RetrySchedule<E = unknown> = Schedule.Schedule<unknown, E, never>;
 
 /**
  * Creates an exponential backoff schedule with jitter.

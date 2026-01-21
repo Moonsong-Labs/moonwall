@@ -2,8 +2,8 @@
  * Unit tests for LoggerService.
  */
 
-import { describe, it, expect, beforeEach, afterEach, mock } from "bun:test";
-import { Effect, Layer, Exit } from "effect";
+import { describe, it, expect, beforeEach, afterEach, } from "bun:test";
+import { Effect, Layer, } from "effect";
 import {
   LoggerService,
   LoggerServiceLive,
@@ -11,8 +11,6 @@ import {
   LoggerServiceDisabled,
   LoggerCreationError,
   type LoggerServiceType,
-  type LoggerInstance,
-  type LoggerServiceStatus,
 } from "../../services/index.js";
 import { clearLoggers } from "@moonwall/util";
 

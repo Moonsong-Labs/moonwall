@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, mock, spyOn } from "bun:test";
+import { describe, it, expect, beforeEach, afterEach, mock, } from "bun:test";
 import { Effect, Cause, Data, FiberId } from "effect";
 import {
   redactSensitiveData,
@@ -16,7 +16,6 @@ import {
   formatErrorForCli,
   shouldIncludeStackTrace,
   isStructuredError,
-  type ErrorCategory,
   type StructuredError,
 } from "../ErrorLogging.js";
 

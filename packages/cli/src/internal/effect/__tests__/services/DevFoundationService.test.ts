@@ -1,5 +1,5 @@
-import { describe, it, expect, mock, beforeEach } from "bun:test";
-import { Effect, Exit, Layer, Ref } from "effect";
+import { describe, it, expect, mock, } from "bun:test";
+import { Effect, Exit, Layer, } from "effect";
 import { EventEmitter } from "node:events";
 import type { ChildProcess } from "node:child_process";
 
@@ -12,10 +12,9 @@ import { makeDevFoundationServiceLayer } from "../../services/DevFoundationServi
 import { ProcessManagerService, type ProcessLaunchResult } from "../../ProcessManagerService.js";
 import { RpcPortDiscoveryService } from "../../RpcPortDiscoveryService.js";
 import { NodeReadinessService } from "../../NodeReadinessService.js";
-import { ProcessError, NodeLaunchError, PortDiscoveryError } from "../../errors.js";
+import { NodeLaunchError, PortDiscoveryError } from "../../errors.js";
 import {
   FoundationStartupError,
-  FoundationShutdownError,
   FoundationHealthCheckError,
 } from "../../errors/foundation.js";
 
@@ -32,7 +31,7 @@ const createMockProcess = (pid = 12345): ChildProcess => {
   proc.pid = pid;
   proc.stdout = new EventEmitter();
   proc.stderr = new EventEmitter();
-  proc.kill = mock((signal?: string) => {
+  proc.kill = mock((_signal?: string) => {
     setTimeout(() => proc.emit("close", 0, null), 10);
     return true;
   });
@@ -495,10 +494,10 @@ describe("DevFoundationService", () => {
       });
 
       // Node readiness fails for health check
-      let callCount = 0;
+      let _callCount = 0;
       const MockNodeReadiness = Layer.succeed(NodeReadinessService, {
         checkReady: () => {
-          callCount++;
+          _callCount++;
           // First call (during start) succeeds - actually start doesn't call checkReady
           // Only health check calls it, so we can fail it directly
           return Effect.succeed(false);

@@ -44,7 +44,7 @@
     "build": "rm -rf dist && tsup 'src/**/*.ts' '!src/**/__tests__/**' --format esm --no-splitting --sourcemap && bun run generate-types",
     "generate-types": "tsc",
     "lint": "bunx biome lint ./src",
-    "lint:fix": "bunx biome lint ./src --apply",
+    "lint:fix": "bunx biome lint ./src --write",
     "fmt": "biome format .",
     "fmt:fix": "biome format . --write",
     "watch": "tsup src --format esm --watch",

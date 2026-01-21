@@ -3,7 +3,6 @@ import { Effect, Layer } from "effect";
 import { BuildBlockMode } from "@acala-network/chopsticks";
 import type { ChopsticksServiceImpl } from "../launchChopsticksEffect.js";
 import {
-  ChopsticksSetupError,
   ChopsticksBlockError,
   ChopsticksStorageError,
   type ChopsticksConfig,
@@ -434,7 +433,7 @@ describe("ChopsticksServiceLayer - Phase 3: Layer.scoped", () => {
   describe("Layer Error Handling", () => {
     it("should produce ChopsticksSetupError on failure via ChopsticksServiceLayer", async () => {
       const { ChopsticksServiceLayer } = await import("../launchChopsticksEffect.js");
-      const { ChopsticksService, ChopsticksSetupError } = await import("../ChopsticksService.js");
+      const { ChopsticksService } = await import("../ChopsticksService.js");
 
       const layer = ChopsticksServiceLayer({
         endpoint: "wss://nonexistent.invalid",
