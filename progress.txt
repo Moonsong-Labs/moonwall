@@ -1200,3 +1200,79 @@
 - `packages/cli/src/internal/effect/services/index.ts` - Added exports for ReadOnlyFoundationService types
 - `plans/prd.json` - Marked Feature 25 as complete
 
+---
+
+### Feature Completed: Effect migration - implement ReadOnlyFoundationService Layer (PRD Feature 26)
+
+**Changes Made:**
+1. Created `packages/cli/src/internal/effect/services/ReadOnlyFoundationServiceLive.ts`:
+   - Implemented `ReadOnlyFoundationServiceLive` Layer using `Layer.effect` pattern
+   - Uses `Ref` for mutable state tracking (status, runningInfo, connectedProviders)
+   - Unlike other foundation services, does NOT spawn any processes - only manages client connections
+
+2. Implemented all service methods:
+   - `connect(config)`: Uses `ProviderFactory.prepare()` for lazy provider creation and `ProviderInterfaceFactory.populate()` for actual connection, returns `{info, disconnect}` tuple
+   - `disconnect()`: Iterates through connectedProviders and calls their `disconnect()` methods, uses `Effect.either` for error collection without short-circuiting
+   - `getStatus()`: Returns `ReadOnlyFoundationStatus` (Connecting|Connected|Disconnected|Failed) with provider count and endpoints
+   - `healthCheck(endpoint?)`: Uses the provider's `greet()` method to verify connectivity (queries runtime info)
+
+3. Created `makeReadOnlyFoundationServiceLayer()` factory function for testing
+
+4. Updated `packages/cli/src/internal/effect/services/index.ts`:
+   - Added exports for `ReadOnlyFoundationServiceLive` and `makeReadOnlyFoundationServiceLayer`
+
+5. Created comprehensive unit test suite:
+   - `packages/cli/src/internal/effect/__tests__/services/ReadOnlyFoundationService.test.ts`
+   - 16 tests covering: connect success, connect with multiple providers, connect failures (startup and provider errors), disconnect, getStatus, healthCheck, lifecycle integration
+   - Uses `Layer.succeed` pattern for mocking the service interface
+   - All tests pass
+
+**Design Decisions:**
+- **Different from other foundation services**: ReadOnlyFoundationService does NOT spawn processes - it only establishes client connections to existing networks. This is why it uses `connect()/disconnect()` instead of `start()/stop()`.
+- **Uses ProviderFactory/ProviderInterfaceFactory**: The existing provider infrastructure handles all the complexity of different provider types (polkadotJs, ethers, viem, web3, papi).
+- **Health check via greet()**: Uses the provider's `greet()` method which queries runtime information (chain name, spec version) - this verifies the connection is alive without requiring a separate RPC call.
+- **Error collection with Effect.either**: When disconnecting multiple providers, failures are collected rather than short-circuiting, ensuring all providers get a chance to clean up.
+
+**Verification:**
+- `bun typecheck` - Passes with no errors
+- `bun test packages/cli/src/internal/effect/__tests__/services/` - 58 pass, 0 fail (9 DevFoundation + 16 Chopsticks + 17 Zombie + 16 ReadOnly)
+- `bun test` (full suite) - 367 pass (up from 351), 12 skip, 16 fail, 2 errors (same E2E baseline)
+
+**Notes for Next Developer:**
+1. **All four foundation service implementations are now complete!** (Dev, Chopsticks, Zombie, ReadOnly)
+   - The Effect-based service layer provides consistent interfaces for all foundation types
+   - Each service follows the same pattern: `Context.Tag` for DI, `Ref` for state, `Layer.effect` for construction
+2. Next high-priority feature is **Feature 27: Unified FoundationService interface**
+   - This will create a factory that returns the appropriate foundation service based on config
+   - Should enable runtime polymorphism across foundation types
+3. Example usage of ReadOnlyFoundationService:
+   ```ts
+   import { Effect } from "effect";
+   import { ReadOnlyFoundationService, ReadOnlyFoundationServiceLive } from "@moonwall/cli";
+
+   const program = Effect.gen(function* () {
+     const readOnly = yield* ReadOnlyFoundationService;
+     const { info, disconnect } = yield* readOnly.connect({
+       name: "polkadot-mainnet",
+       launchSpec: spec,
+       connections: [
+         { name: "polkadot", type: "polkadotJs", endpoints: ["wss://rpc.polkadot.io"] }
+       ],
+     });
+     console.log(`Connected to ${info.connectedProviders} providers`);
+
+     // Check health
+     yield* readOnly.healthCheck();
+
+     // Disconnect when done
+     yield* disconnect;
+   }).pipe(Effect.provide(ReadOnlyFoundationServiceLive));
+   ```
+4. The 16 failing tests are E2E tests in `test/suites/` requiring moonwall environment - not related to this change.
+
+**Files Changed:**
+- `packages/cli/src/internal/effect/services/ReadOnlyFoundationServiceLive.ts` - New Layer implementation
+- `packages/cli/src/internal/effect/services/index.ts` - Added exports for Live Layer
+- `packages/cli/src/internal/effect/__tests__/services/ReadOnlyFoundationService.test.ts` - New test file (16 tests)
+- `plans/prd.json` - Marked Feature 26 as complete
+

@@ -68,3 +68,9 @@ export {
   type ReadOnlyFoundationStatus,
   type ReadOnlyFoundationServiceType,
 } from "./ReadOnlyFoundationService.js";
+
+// ReadOnlyFoundationService Layer implementations
+export {
+  ReadOnlyFoundationServiceLive,
+  makeReadOnlyFoundationServiceLayer,
+} from "./ReadOnlyFoundationServiceLive.js";
