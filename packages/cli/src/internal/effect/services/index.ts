@@ -117,3 +117,17 @@ export {
   isZombieFoundationStatus,
   isReadOnlyFoundationStatus,
 } from "./FoundationService.js";
+
+// ConfigService interface and types
+export {
+  ConfigService,
+  ConfigLoadError,
+  ConfigValidationError,
+  EnvironmentNotFoundError,
+  type ConfigServiceConfig,
+  type ConfigServiceStatus,
+  type ConfigServiceType,
+} from "./ConfigService.js";
+
+// ConfigService Layer implementations
+export { ConfigServiceLive, makeConfigServiceLayer } from "./ConfigServiceLive.js";

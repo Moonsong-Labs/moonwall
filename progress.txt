@@ -1589,3 +1589,90 @@ This feature was analyzed in depth and determined to require no code changes. He
 - `packages/cli/src/internal/effect/__tests__/services/ProviderServiceLive.test.ts` - New test file (26 tests)
 - `plans/prd.json` - Marked Feature 34 as complete
 
+---
+
+### Feature Completed: Effect migration - create ConfigService for configuration loading (PRD Feature 36)
+
+**Changes Made:**
+1. Created `packages/cli/src/internal/effect/services/ConfigService.ts`:
+   - Defined `ConfigService` using Effect's `Context.Tag` pattern
+   - Interface methods:
+     - `loadConfig(config?)`: Loads config from disk with caching, returns `Effect<MoonwallConfig, ConfigLoadError>`
+     - `getConfig()`: Returns cached config without loading
+     - `isLoaded()`: Checks if config has been loaded
+     - `getStatus()`: Returns `ConfigServiceStatus` (Unloaded|Loading|Loaded|Failed)
+     - `getEnvironment(name)`: Returns specific environment by name
+     - `getEnvironmentNames()`: Returns all environment names
+     - `validateConfig()`: Validates loaded config structure
+     - `clearCache()`: Clears cached config to force reload
+     - `getConfigPath()`: Returns path to loaded config file
+   - Created three tagged error classes:
+     - `ConfigLoadError`: File not found, parse errors
+     - `ConfigValidationError`: Validation failures with field info
+     - `EnvironmentNotFoundError`: Environment lookup failures with available names
+   - Defined `ConfigServiceConfig` with configPath field
+   - Defined `ConfigServiceStatus` union type
+
+2. Created `packages/cli/src/internal/effect/services/ConfigServiceLive.ts`:
+   - Implemented `ConfigServiceLive` Layer using `Layer.effect` pattern
+   - Uses `Ref` for mutable state tracking (status, config, configPath)
+   - Supports both JSON and JSONC (JSON with comments) config files
+   - Implements environment variable substitution via `${VAR_NAME}` syntax
+   - Implements structural validation (label, defaultTestTimeout, environments, etc.)
+   - Created `makeConfigServiceLayer()` factory for testing
+
+3. Updated `packages/cli/src/internal/effect/services/index.ts`:
+   - Added exports for ConfigService, ConfigServiceLive, error classes, and types
+
+4. Created comprehensive unit test suite:
+   - `packages/cli/src/internal/effect/__tests__/services/ConfigService.test.ts`
+   - 33 tests covering: loadConfig (valid JSON, JSONC, caching, errors), getConfig, isLoaded, getStatus (all states), getEnvironment (found, not found), getEnvironmentNames, validateConfig (all validation rules), clearCache, getConfigPath, error classes, Layer.succeed mocking
+   - All tests pass
+
+**Design Decisions:**
+- **Uses native fs/promises**: The PRD mentioned @effect/platform FileSystem, but native fs wrapped in Effect.tryPromise is simpler and sufficient for this use case
+- **Follows established patterns**: Same Context.Tag + Ref + Layer.effect pattern as other services
+- **Reuses existing logic**: Environment variable substitution matches existing configReader.ts behavior
+- **Validation is structural**: Validates required fields and types, not using @effect/schema (that's Feature 37)
+- **Error classes include context**: ConfigLoadError has configPath, ConfigValidationError has invalidField/invalidValue, EnvironmentNotFoundError has availableEnvironments list
+
+**Verification:**
+- `bun typecheck` - Passes with no errors
+- `bun test packages/cli/src/internal/effect/__tests__/services/ConfigService.test.ts` - 33 pass, 0 fail
+- `bun test` (full suite) - 475 pass (up from 442), 12 skip, 16 fail, 2 errors (same E2E baseline)
+
+**Notes for Next Developer:**
+1. Feature 36 completes the ConfigService implementation. The service is now usable via:
+   ```ts
+   import { Effect } from "effect";
+   import { ConfigService, ConfigServiceLive } from "@moonwall/cli";
+
+   const program = Effect.gen(function* () {
+     const configService = yield* ConfigService;
+
+     // Load configuration
+     const config = yield* configService.loadConfig();
+     console.log(`Loaded: ${config.label}`);
+
+     // Get a specific environment
+     const env = yield* configService.getEnvironment("dev_seq");
+     console.log(`Foundation: ${env.foundation.type}`);
+
+     // Validate the config
+     yield* configService.validateConfig();
+   }).pipe(Effect.provide(ConfigServiceLive));
+   ```
+2. Next high-priority features:
+   - Feature 37: Add @effect/schema for config validation (enhances ConfigService validation)
+   - Feature 38: Create LoggerService using Effect
+   - Feature 35: Update MoonwallContext to use Effect services (major integration)
+3. The ConfigService can be used to replace the existing `importJsonConfig()` / `importAsyncConfig()` functions in configReader.ts when Effect is integrated more broadly.
+4. The 16 failing tests are E2E tests in `test/suites/` requiring moonwall environment - not related to this change.
+
+**Files Changed:**
+- `packages/cli/src/internal/effect/services/ConfigService.ts` - New service interface file
+- `packages/cli/src/internal/effect/services/ConfigServiceLive.ts` - New Layer implementation
+- `packages/cli/src/internal/effect/services/index.ts` - Added exports for ConfigService types
+- `packages/cli/src/internal/effect/__tests__/services/ConfigService.test.ts` - New test file (33 tests)
+- `plans/prd.json` - Marked Feature 36 as complete
+
