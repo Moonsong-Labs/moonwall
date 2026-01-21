@@ -3189,3 +3189,69 @@ These 7 features (46-52) were already completed during the Effect migration (Fea
 - `packages/cli/src/internal/effect/services/ZombieFoundationServiceLive.ts` - Added type annotation
 - `packages/cli/src/internal/effect/services/ChopsticksFoundationServiceLive.ts` - Fixed Effect.tryPromise with nullable cleanup
 - `plans/prd.json` - Marked Feature 66 as complete
+
+### Feature Completed: Verify no secrets or credentials in committed files (PRD Feature 68)
+
+**Changes Made:**
+
+1. **Added .env files to .gitignore:**
+   - Added `.env`, `.env.*`, and `!.env.example` patterns to `.gitignore`
+   - This prevents accidental commits of environment files containing secrets
+
+2. **Created test/.env.example as a template:**
+   - Documents the expected `WSS_URL` environment variable
+   - Safe to commit as it only contains example values
+
+**Security Verification Performed:**
+
+1. **API keys, passwords, tokens search:**
+   - No matches for common patterns: `api_key`, `secret_key`, `password`, `token`, `bearer`, `auth_token`
+   - No Stripe keys (`sk_live`, `pk_live`)
+   - No GitHub PATs (`ghp_`, `gho_`, `github_pat_`)
+   - No AWS credentials (`AKIA...`)
+
+2. **Private keys in codebase:**
+   - Found `ALITH_PRIVATE_KEY`, `BALTATHAR_PRIVATE_KEY`, etc. in `packages/util/src/constants/accounts.ts`
+   - These are **well-known Moonbeam/Substrate development accounts** (similar to Hardhat's test accounts)
+   - Publicly documented, prefunded on local dev nodes only, safe to commit
+   - Used for local testing, not secrets
+
+3. **JWT tokens:**
+   - Found test JWT in `ErrorLogging.test.ts` - this is a well-known jwt.io example token
+   - Used only for testing the `redactSensitiveData` function
+
+4. **bun.lock registry tokens:**
+   - No `authToken`, `npm_token`, or similar registry credentials found
+
+5. **Existing .env file:**
+   - `test/.env` only contains `WSS_URL=ws://127.0.0.1:9955` (local WebSocket URL)
+   - Not a secret, but now protected by .gitignore for future changes
+
+**★ Insight ─────────────────────────────────────**
+The codebase already has excellent secret redaction support in `ErrorLogging.ts`:
+- Patterns for MOON_PRIV_KEY, ALITH_PRIVATE_KEY, JWTs, API keys, passwords
+- 64-char hex strings, base64 tokens automatically detected
+- All these patterns are properly redacted in error logs
+**─────────────────────────────────────────────────**
+
+**Notes for Next Developer:**
+
+1. The security audit is now complete. Key findings:
+   - No real secrets in the codebase
+   - Well-known dev accounts are safe (ALITH, BALTATHAR, etc.)
+   - .gitignore now properly excludes .env files
+   - ErrorLogging.ts provides runtime secret redaction
+
+2. If adding new sensitive patterns, update:
+   - `packages/cli/src/internal/effect/ErrorLogging.ts` - redactSensitiveData function
+   - `.gitignore` - for file patterns to exclude
+
+3. Next high-priority features:
+   - Feature 69: Validate input handling in CLI commands (more security)
+   - Feature 70: Add graceful shutdown handling (reliability)
+   - Feature 67: Update CHANGELOG and version (before release)
+
+**Files Changed:**
+- `.gitignore` - Added .env patterns
+- `test/.env.example` - Created as documentation template
+- `plans/prd.json` - Marked Feature 68 as complete

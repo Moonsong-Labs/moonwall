@@ -28,6 +28,11 @@ artifacts
 db.sqlite*
 **/*.local*
 
+# Environment files (prevent accidental secret commits)
+.env
+.env.*
+!.env.example
+
 # Ignore kluster.ai Verify Code rules
 .github/instructions/kluster-code-verify.instructions.md
 

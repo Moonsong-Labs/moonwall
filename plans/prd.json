@@ -867,10 +867,11 @@
       "Search for API keys, passwords, tokens in codebase",
       "Verify .env files are in .gitignore",
       "Verify no hardcoded test credentials",
-      "Check bun.lockb doesn't contain sensitive registry tokens",
+      "Check bun.lock doesn't contain sensitive registry tokens",
       "Run git-secrets or similar if available"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: (1) Searched for API keys, passwords, tokens, Stripe keys, GitHub PATs, AWS keys, JWTs - no real secrets found. (2) Added .env and .env.* to .gitignore (was missing), created test/.env.example as template. (3) Verified all 64-char hex keys in codebase are well-known Moonbeam dev accounts (ALITH, BALTATHAR, etc.) - publicly documented prefunded accounts for local development, safe to commit. (4) Verified bun.lock contains no registry tokens. (5) git-secrets/trufflehog/gitleaks not installed; performed comprehensive manual regex searches instead. Additional: The existing test/.env only contains local WebSocket URL (ws://127.0.0.1:9955), not secrets. ErrorLogging.ts already has redaction patterns for MOON_PRIV_KEY, ALITH_PRIVATE_KEY, JWTs, and other sensitive patterns."
   },
   {
     "category": "security",
