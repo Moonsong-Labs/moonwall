@@ -13,6 +13,9 @@ export * from "./RetryPolicy.js";
 // Timeout policies for Effect operations
 export * from "./TimeoutPolicy.js";
 
+// Resource management patterns (acquireRelease, scoped cleanup)
+export * from "./ResourceManagement.js";
+
 // Low-level services (process, port, readiness)
 export * from "./ProcessManagerService.js";
 export * from "./PortDiscoveryService.js";

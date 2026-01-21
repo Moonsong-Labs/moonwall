@@ -2468,3 +2468,151 @@ However, the actual implementation (completed in Feature 35 as ProviderServiceLi
 - `packages/cli/src/internal/effect/services/ChopsticksFoundationService.ts` - Added timeout config fields
 - `packages/cli/src/internal/effect/services/ChopsticksFoundationServiceLive.ts` - Applied timeouts to start/createBlock/setStorage
 - `plans/prd.json` - Marked Feature 42 as complete
+
+---
+
+### Feature Completed: Effect migration - add Effect.acquireRelease for resource cleanup (PRD Feature 43)
+
+**Changes Made:**
+
+1. **Created ResourceManagement.ts module** (`packages/cli/src/internal/effect/ResourceManagement.ts`):
+   - Comprehensive Effect resource patterns for guaranteed cleanup
+   - Core patterns: `withAcquireRelease`, `withEnsuredCleanup`, `useResource`
+   - Process patterns: `withScopedProcess`, `withProcess`
+   - Provider patterns: `withScopedProviders`, `withProviders`
+   - Foundation patterns: `withScopedFoundation`, `withFoundation`
+   - Utility functions: `combineCleanups`, `registerProcessExitCleanup`, `isCleanupError`
+
+2. **Key patterns implemented**:
+
+   - **withAcquireRelease**: Wraps acquire/release pair with `Effect.acquireRelease`.
+     The acquired resource is automatically cleaned up when the scope exits,
+     even if the operation fails or is interrupted.
+
+   - **withEnsuredCleanup**: Ensures cleanup runs after effect completes
+     regardless of success/failure, using `Effect.ensuring`. Useful for
+     operations that don't need scoped resource management.
+
+   - **useResource**: Primary pattern for test scenarios - acquire a resource,
+     use it, and guarantee cleanup regardless of outcome.
+
+   - **withProcess/withFoundation/withProviders**: Domain-specific wrappers
+     that handle the common moonwall patterns for process spawning, foundation
+     lifecycle, and provider connections.
+
+3. **Cleanup guarantees**:
+   - Cleanup runs on success, failure, and interruption
+   - Nested resources clean up in reverse acquisition order
+   - `combineCleanups` runs all cleanups in parallel, not short-circuiting on failure
+   - `suppressCleanupErrors` option allows graceful degradation
+
+4. **Signal handling**:
+   - `registerProcessExitCleanup` registers SIGINT/SIGTERM handlers
+   - Returns unregister function for proper cleanup
+
+**Design Decisions:**
+
+- **Pattern naming**: Used consistent verb-based naming (`withX`, `useX`) following
+  Effect conventions for scoped resources
+- **Type flexibility**: Generic types allow any resource/error combination
+- **Options pattern**: `AcquireOptions` centralizes configuration (resourceName,
+  suppressCleanupErrors, cleanupTimeoutMs)
+- **Logging integration**: Uses @moonwall/util createLogger for consistent output
+- **Error handling**: Cleanup errors are logged but don't fail the release by default
+  (best-effort cleanup)
+
+**★ Insight ─────────────────────────────────────**
+- Effect's `acquireRelease` differs from try/finally: cleanup runs even on
+  fiber interruption, not just exceptions
+- `Effect.scoped` creates a local scope - resources acquired within are
+  released when the scope closes
+- Nested `withAcquireRelease` calls release in LIFO order (stack semantics),
+  matching how resources typically depend on each other
+- The `suppressCleanupErrors` option is crucial for test teardown where you
+  want to report the actual test failure, not a secondary cleanup error
+**─────────────────────────────────────────────────**
+
+**Example Usage:**
+
+```typescript
+// Run tests with automatic foundation cleanup
+const testResult = yield* withFoundation(
+  devFoundation.start(config),
+  (info) => Effect.gen(function* () {
+    yield* runTestsOnPort(info.rpcPort);
+    return "tests passed";
+  }),
+  { foundationName: "dev-moonbeam" }
+);
+// Foundation is guaranteed to be stopped here, even if tests fail
+
+// Nested resources with guaranteed cleanup
+const result = yield* Effect.scoped(
+  Effect.gen(function* () {
+    const foundation = yield* withScopedFoundation(startFoundation, { foundationName: "dev" });
+    const providers = yield* withScopedProviders(connectProviders, { connectionName: "test" });
+    return yield* runTests(foundation, providers);
+  })
+);
+// Both providers disconnected, then foundation stopped (reverse order)
+```
+
+**Verification:**
+- `bun typecheck` - Passes with no errors
+- `bun test` - 970 pass (up from 947), 12 skip, 16 fail, 2 errors
+  - +23 tests from new ResourceManagement.test.ts
+  - Same E2E failures as previous sessions (require moonwall environment)
+- ResourceManagement.ts has 96.08% function coverage, 85.32% line coverage
+
+**Notes for Next Developer:**
+
+1. The ResourceManagement patterns coexist with the existing manual cleanup API.
+   Use these patterns when you want automatic cleanup (test scenarios, error handling);
+   use the manual `{info, stop}` tuple API when you need explicit control over
+   lifecycle (moonwall's test orchestration across multiple test files).
+
+2. To add resource management to a new service:
+   ```ts
+   import { withFoundation, withProviders } from "../ResourceManagement.js";
+
+   // Single resource
+   const result = yield* withFoundation(
+     myService.start(config),
+     (info) => doSomething(info),
+     { foundationName: "my-service" }
+   );
+
+   // Multiple resources (cleaned up in reverse order)
+   const result = yield* Effect.scoped(
+     Effect.gen(function* () {
+       const a = yield* withScopedFoundation(startA, { foundationName: "a" });
+       const b = yield* withScopedProviders(connectB, { connectionName: "b" });
+       return yield* useAandB(a, b);
+     })
+   );
+   ```
+
+3. For cleanup of multiple independent resources where you want to continue
+   even if some fail:
+   ```ts
+   yield* combineCleanups([
+     { name: "provider-1", cleanup: disconnect1 },
+     { name: "provider-2", cleanup: disconnect2 },
+     { name: "process", cleanup: killProcess },
+   ]);
+   // All three cleanup attempts are made regardless of failures
+   ```
+
+4. Next high-priority features:
+   - Feature 44: Add Effect tracing with spans (observability)
+   - Feature 45: Add structured error logging (observability)
+   - Feature 46-50: Testing features (unit tests, integration tests)
+
+5. The 16 failing tests are E2E tests in `test/suites/` requiring a running
+   moonwall environment - not related to this change.
+
+**Files Changed:**
+- `packages/cli/src/internal/effect/ResourceManagement.ts` - New resource management module
+- `packages/cli/src/internal/effect/__tests__/ResourceManagement.test.ts` - 23 unit tests
+- `packages/cli/src/internal/effect/index.ts` - Added ResourceManagement export
+- `plans/prd.json` - Marked Feature 43 as complete

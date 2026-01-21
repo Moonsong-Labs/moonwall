@@ -557,7 +557,8 @@
       "Add provider disconnect to acquireRelease pattern",
       "Write test verifying cleanup on error"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: (1) Created ResourceManagement.ts module with comprehensive Effect resource patterns. (2) Implemented withAcquireRelease() for scoped resource management with guaranteed cleanup on scope exit. (3) Implemented withEnsuredCleanup() for cleanup-on-completion pattern without requiring Scope. (4) Created withScopedProcess() and withProcess() for process spawning with guaranteed termination. (5) Created withScopedProviders() and withProviders() for provider connections with guaranteed disconnect. (6) Created withScopedFoundation() and withFoundation() for foundation lifecycle with guaranteed stop. (7) Implemented combineCleanups() for parallel cleanup of multiple resources, continuing even if some fail. (8) Implemented registerProcessExitCleanup() for SIGINT/SIGTERM signal handling. (9) Created useResource() as the primary pattern for acquire-use-release workflows. (10) All patterns support suppressCleanupErrors option for graceful degradation. (11) Created comprehensive test suite with 23 tests covering success/failure paths, nested resources, partial failure cleanup, and integration scenarios. Test count: 970 pass (up from 947), same 16 E2E failures requiring moonwall environment. Typecheck passes."
   },
   {
     "category": "observability",
