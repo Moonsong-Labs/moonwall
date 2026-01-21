@@ -131,3 +131,22 @@ export {
 
 // ConfigService Layer implementations
 export { ConfigServiceLive, makeConfigServiceLayer } from "./ConfigServiceLive.js";
+
+// LoggerService interface and types
+export {
+  LoggerService,
+  LoggerCreationError,
+  type LoggerConfig,
+  type LoggerServiceConfig,
+  type LoggerServiceStatus,
+  type LoggerServiceType,
+  type LoggerInstance,
+  type LogLevel,
+} from "./LoggerService.js";
+
+// LoggerService Layer implementations
+export {
+  LoggerServiceLive,
+  makeLoggerServiceLayer,
+  LoggerServiceDisabled,
+} from "./LoggerServiceLive.js";

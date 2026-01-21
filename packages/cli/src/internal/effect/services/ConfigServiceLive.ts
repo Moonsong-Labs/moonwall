@@ -136,7 +136,10 @@ function extractIssuePath(issue: ParseResult.ParseIssue): string[] {
  * @param error - The parse error from Schema.decodeUnknown
  * @returns A formatted error message and the path to the invalid field
  */
-function formatSchemaError(error: ParseResult.ParseError): { message: string; invalidField: string } {
+function formatSchemaError(error: ParseResult.ParseError): {
+  message: string;
+  invalidField: string;
+} {
   // Use TreeFormatter for readable error message
   const formattedMessage = ParseResult.TreeFormatter.formatErrorSync(error);
 

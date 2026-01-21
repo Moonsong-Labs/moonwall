@@ -1759,3 +1759,104 @@ This feature was analyzed in depth and determined to require no code changes. He
 - `packages/cli/src/internal/effect/__tests__/services/ConfigService.test.ts` - Updated test expectation
 - `plans/prd.json` - Marked Feature 37 as complete
 
+
+---
+
+### Feature Completed: Effect migration - create LoggerService using Effect (PRD Feature 38)
+
+**Changes Made:**
+1. Created `packages/cli/src/internal/effect/services/LoggerService.ts`:
+   - Defined `LoggerService` using Effect's `Context.Tag` pattern
+   - Interface methods:
+     - `getLogger(config)`: Creates or retrieves a named logger, returns `Effect<LoggerInstance, LoggerCreationError>`
+     - `debug(name, message, context?)`: Log at debug level
+     - `info(name, message, context?)`: Log at info level
+     - `warn(name, message, context?)`: Log at warn level
+     - `error(name, message, context?)`: Log at error level
+     - `getStatus()`: Returns `LoggerServiceStatus` (Active|Disabled)
+     - `setLoggerEnabled(pattern, enabled)`: Enable/disable loggers by glob pattern
+     - `clearLoggers()`: Clear all cached loggers
+     - `hasLogger(name)`: Check if a logger exists
+     - `getLoggerNames()`: Get names of all cached loggers
+   - Created `LoggerCreationError` tagged error class
+   - Defined `LoggerConfig` and `LoggerServiceConfig` types
+   - Defined `LoggerServiceStatus` union type: `Active | Disabled`
+   - Defined `LoggerInstance` interface for direct logging methods
+
+2. Created `packages/cli/src/internal/effect/services/LoggerServiceLive.ts`:
+   - Implemented `LoggerServiceLive` Layer using `Layer.effect` pattern
+   - Uses `Ref` for mutable state tracking (enabled, defaultLevel, loggerNames)
+   - Wraps existing `@moonwall/util` pino-based logging functions:
+     - `createLogger` for logger creation
+     - `getLogger` for logger retrieval
+     - `clearLoggers` for cache clearing
+     - `setLoggerEnabled` for pattern-based enable/disable
+   - Created `makeLoggerServiceLayer(config?)` factory for custom configuration
+   - Created `LoggerServiceDisabled` Layer for testing (no-op logging)
+
+3. Updated `packages/cli/src/internal/effect/services/index.ts`:
+   - Added exports for LoggerService, LoggerCreationError, and all related types
+   - Added exports for LoggerServiceLive, makeLoggerServiceLayer, LoggerServiceDisabled
+
+4. Created comprehensive unit test suite:
+   - `packages/cli/src/internal/effect/__tests__/services/LoggerService.test.ts`
+   - 18 tests covering: error class creation, getLogger (basic, caching), tracking logger names, status (Active), clearLoggers, logging at all levels, logging to non-existent logger, custom layer configuration, disabled layer, setLoggerEnabled, and Layer.succeed mocking pattern
+   - All tests pass
+
+**Design Decisions:**
+- **Wraps existing infrastructure**: LoggerServiceLive wraps the existing pino-based `createLogger`/`getLogger`/etc. functions from `@moonwall/util` rather than reimplementing logging, ensuring consistency with current moonwall behavior
+- **LoggerInstance for convenience**: The `getLogger` method returns a `LoggerInstance` object with direct debug/info/warn/error methods for ease of use within Effect code
+- **Service-level methods for coordination**: The service also exposes debug/info/warn/error methods that take a logger name, useful when you have the service but not a specific logger instance
+- **LoggerServiceDisabled for testing**: A pre-built disabled layer that returns no-op loggers, useful for tests that don't want log output
+- **Pattern-based enable/disable**: `setLoggerEnabled(pattern, enabled)` uses glob patterns (e.g., "test:*") to enable/disable groups of loggers, wrapping existing util functionality
+
+**Verification:**
+- `bun typecheck` - Passes with no errors
+- `bun test packages/cli/src/internal/effect/__tests__/services/LoggerService.test.ts` - 18 pass, 0 fail
+- `bun test` (full suite) - 493 pass (up from 475), 12 skip, 16 fail, 2 errors (same E2E baseline)
+
+**Notes for Next Developer:**
+1. Feature 38 completes the LoggerService implementation. The service is now usable via:
+   ```ts
+   import { Effect } from "effect";
+   import { LoggerService, LoggerServiceLive } from "@moonwall/cli";
+
+   const program = Effect.gen(function* () {
+     const loggerService = yield* LoggerService;
+
+     // Get a logger instance for direct use
+     const logger = yield* loggerService.getLogger({ name: "my-service" });
+     logger.info("Starting service...");
+     logger.debug("Debug info", { key: "value" });
+
+     // Or use service-level methods
+     yield* loggerService.warn("my-service", "Warning message");
+
+     // Check status
+     const status = yield* loggerService.getStatus();
+     if (status._tag === "Active") {
+       console.log(`${status.loggerCount} loggers active`);
+     }
+   }).pipe(Effect.provide(LoggerServiceLive));
+   ```
+
+2. For testing without log output, use `LoggerServiceDisabled`:
+   ```ts
+   const testProgram = myProgram.pipe(Effect.provide(LoggerServiceDisabled));
+   ```
+
+3. Next high-priority features:
+   - Feature 39: Update CLI commands to use Effect
+   - Feature 40: Create application Layer composition
+   - Feature 35: Update MoonwallContext to use Effect services (major integration)
+
+4. The 16 failing tests are E2E tests in `test/suites/` requiring moonwall environment - not related to this change.
+
+**Files Changed:**
+- `packages/cli/src/internal/effect/services/LoggerService.ts` - New service interface file
+- `packages/cli/src/internal/effect/services/LoggerServiceLive.ts` - New Layer implementation
+- `packages/cli/src/internal/effect/services/index.ts` - Added exports for LoggerService types
+- `packages/cli/src/internal/effect/__tests__/services/LoggerService.test.ts` - New test file (18 tests)
+- `plans/prd.json` - Marked Feature 38 as complete
+
+---
