@@ -19,6 +19,7 @@ import {
   EnvironmentNotFoundError,
 } from "../internal/effect/services/ConfigService.js";
 import { ConfigServiceLive } from "../internal/effect/services/ConfigServiceLive.js";
+import { withTestSpan, withSpan } from "../internal/effect/Tracing.js";
 
 const logger = createLogger({ name: "runner-effect" });
 
@@ -131,7 +132,10 @@ export const loadEnvironment = (envName: string) =>
     );
 
     return { config, env };
-  });
+  }).pipe(
+    // Add tracing span for environment loading
+    withTestSpan("setup", envName)
+  );
 
 /**
  * Format an EnvironmentNotFoundError into a user-friendly message.
@@ -173,7 +177,12 @@ export const testCmdEffect = (args: TestCmdEffectArgs) =>
       env,
       args,
     };
-  });
+  }).pipe(
+    // Add tracing span for the entire test command execution
+    withTestSpan("execution", args.envName, {
+      pattern: args.testNamePattern,
+    })
+  );
 
 /**
  * Format a TestCommandError for CLI display.

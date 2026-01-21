@@ -2616,3 +2616,147 @@ const result = yield* Effect.scoped(
 - `packages/cli/src/internal/effect/__tests__/ResourceManagement.test.ts` - 23 unit tests
 - `packages/cli/src/internal/effect/index.ts` - Added ResourceManagement export
 - `plans/prd.json` - Marked Feature 43 as complete
+
+---
+
+### Feature Completed: Effect migration - add Effect tracing with spans (PRD Feature 44)
+
+**Changes Made:**
+
+1. **Created Tracing.ts module** (`packages/cli/src/internal/effect/Tracing.ts`):
+   - Centralized tracing utilities using Effect's built-in `Effect.withSpan` API
+   - No external dependencies required (Effect 3.x includes tracing primitives)
+   - Can integrate with @effect/opentelemetry in production for export to observability backends
+
+2. **Span Name Builders**:
+   - `buildFoundationSpanName(type, operation, name?)`: Creates names like `moonwall.foundation.dev.startup[moonbeam]`
+   - `buildProviderSpanName(type, operation, name?)`: Creates names like `moonwall.provider.ethers.connect[eth-main]`
+   - `buildTestSpanName(operation, envName?)`: Creates names like `moonwall.test.execution[basic]`
+   - Consistent naming convention: `moonwall.<component>.<type>.<operation>[name]`
+
+3. **Span Annotation Helpers**:
+   - `annotateFoundationSpan(type, name, attributes?)`: Adds foundation-specific metadata
+   - `annotateProviderSpan(type, name, attributes?)`: Adds provider-specific metadata
+   - `annotateTestSpan(envName, attributes?)`: Adds test-specific metadata
+   - Uses `Effect.annotateCurrentSpan` to add key-value pairs to active span
+
+4. **Span Wrapper Functions**:
+   - `withFoundationSpan(type, operation, name, attributes?)`: Wraps effect with foundation span
+   - `withProviderSpan(type, operation, name, attributes?)`: Wraps effect with provider span
+   - `withTestSpan(operation, envName, attributes?)`: Wraps effect with test span
+   - `withSpan(spanName, attributes?)`: Generic span wrapper for custom operations
+   - All wrappers preserve the Effect type signature (`Effect<A, E, R>` -> `Effect<A, E, R>`)
+
+5. **Typed Span Attributes**:
+   - `FoundationSpanAttributes`: port, endpoint, pid, chainSpec, isEthereumChain
+   - `ProviderSpanAttributes`: endpoint, providerCount, timeoutMs, retryAttempts
+   - `TestSpanAttributes`: envName, testFileCount, pattern, timeoutMs, coverageEnabled
+   - `GenericSpanAttributes`: Record<string, string | number | boolean | undefined>
+
+6. **Environment-Based Tracing Control**:
+   - `isTracingEnabled()`: Checks MOONWALL_TRACING env var (accepts "1", "true", "enabled")
+   - `withTracingIfEnabled(spanName, attributes?)`: Conditional span wrapper for production use
+   - Allows adding tracing instrumentation without runtime overhead when disabled
+
+7. **Applied Tracing to Services**:
+   - **DevFoundationServiceLive**: start(), stop(), healthCheck() wrapped with foundation spans
+   - **ChopsticksFoundationServiceLive**: start(), stop(), healthCheck(), createBlock(), setStorage() wrapped
+   - **ProviderServiceLive**: connect(), disconnect(), healthCheck() wrapped with provider spans
+   - **runTestsEffect**: loadEnvironment(), testCmdEffect() wrapped with test spans
+
+8. **Created Comprehensive Test Suite** (`Tracing.test.ts`):
+   - 45 tests covering:
+     - Span name builders for all foundation/provider/test types
+     - Annotation helpers with minimal and full attributes
+     - Span wrappers preserving results and errors
+     - Nested span completion order
+     - Mixed span type nesting
+     - Error handling with spans
+     - Environment variable-based tracing control
+     - Effect type preservation
+     - TracerDefaults configuration
+
+**Design Decisions:**
+
+- **Built-in Effect tracing**: Uses `Effect.withSpan` from Effect 3.x, no external dependencies needed for basic usage
+- **Type-preserving wrappers**: Span wrappers return the same `Effect<A, E, R>` type as input
+- **Lazy annotation**: Span attributes are added via `Effect.tap` after the span is created
+- **Conditional tracing**: `withTracingIfEnabled` allows zero-overhead tracing when disabled
+- **Consistent naming**: All spans follow `moonwall.<component>.<type>.<operation>[name]` convention
+- **Production-ready**: Can integrate with `@effect/opentelemetry` for export to Jaeger, Zipkin, Honeycomb, etc.
+
+**★ Insight ─────────────────────────────────────**
+- Effect's `withSpan` is a no-cost abstraction when no tracer is configured
+- Spans are tree-structured: wrapping one span in another creates parent-child relationships
+- `Effect.annotateCurrentSpan` adds key-value metadata to the active span without changing the effect's type
+- Span names should follow a hierarchical naming convention for easier filtering in observability UIs
+- The conditional `withTracingIfEnabled` pattern allows instrumenting code without production overhead
+**─────────────────────────────────────────────────**
+
+**Verification:**
+- `bun typecheck` - Passes with no errors
+- `bun test` - 1015 pass (up from 970), 12 skip, 16 fail, 2 errors
+  - +45 tests from new Tracing.test.ts
+  - Same E2E failures as previous sessions (require moonwall environment)
+- Tracing.ts has 96.30% function coverage, 97.09% line coverage
+
+**Notes for Next Developer:**
+
+1. To enable tracing in production, set `MOONWALL_TRACING=1` or integrate with @effect/opentelemetry:
+   ```ts
+   import { NodeSdk } from "@effect/opentelemetry";
+   import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-base";
+   import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
+
+   const TracerLive = NodeSdk.layer(() => ({
+     resource: { serviceName: "moonwall" },
+     spanProcessor: new BatchSpanProcessor(new OTLPTraceExporter({ url: "http://localhost:4318" }))
+   }));
+
+   // Provide to your Effect program
+   const result = await Effect.runPromise(myProgram.pipe(Effect.provide(TracerLive)));
+   ```
+
+2. To add tracing to new operations:
+   ```ts
+   import { withFoundationSpan, withProviderSpan, withSpan } from "../Tracing.js";
+
+   // Foundation operation
+   const startEffect = myFoundation.start(config).pipe(
+     withFoundationSpan("dev", "startup", config.name, { port: config.port })
+   );
+
+   // Provider operation
+   const connectEffect = provider.connect().pipe(
+     withProviderSpan("ethers", "connect", "my-provider", { endpoint: config.endpoint })
+   );
+
+   // Generic operation
+   const customEffect = myOperation().pipe(
+     withSpan("moonwall.custom.operation", { key: "value" })
+   );
+   ```
+
+3. For conditional tracing (only when MOONWALL_TRACING is set):
+   ```ts
+   const effect = myOperation().pipe(
+     withTracingIfEnabled("moonwall.my.operation", { attribute: "value" })
+   );
+   ```
+
+4. Next high-priority features:
+   - Feature 45: Add structured error logging (observability)
+   - Feature 46-58: Testing features (unit tests, integration tests)
+
+5. The 16 failing tests are E2E tests in `test/suites/` requiring a running
+   moonwall environment - not related to this change.
+
+**Files Changed:**
+- `packages/cli/src/internal/effect/Tracing.ts` - New tracing utilities module
+- `packages/cli/src/internal/effect/__tests__/Tracing.test.ts` - 45 unit tests
+- `packages/cli/src/internal/effect/index.ts` - Added Tracing export
+- `packages/cli/src/internal/effect/services/DevFoundationServiceLive.ts` - Added tracing spans
+- `packages/cli/src/internal/effect/services/ChopsticksFoundationServiceLive.ts` - Added tracing spans
+- `packages/cli/src/internal/effect/services/ProviderServiceLive.ts` - Added tracing spans
+- `packages/cli/src/cmds/runTestsEffect.ts` - Added tracing spans
+- `plans/prd.json` - Marked Feature 44 as complete

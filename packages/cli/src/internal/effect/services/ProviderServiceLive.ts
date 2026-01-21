@@ -16,6 +16,7 @@ import {
   healthCheckRetryPolicy,
   makeRetryPolicy,
 } from "../RetryPolicy.js";
+import { withProviderSpan } from "../Tracing.js";
 
 const logger = createLogger({ name: "ProviderService" });
 
@@ -324,9 +325,17 @@ const makeProviderService = Effect.gen(function* () {
 
       return {
         info: runningInfo,
-        disconnect: disconnectEffect,
+        disconnect: disconnectEffect.pipe(
+          // Add tracing span for disconnect
+          withProviderSpan("all", "disconnect", "providers")
+        ),
       };
-    });
+    }).pipe(
+      // Add tracing span for connect operation
+      withProviderSpan("all", "connect", "providers", {
+        providerCount: config.providers?.length ?? 0,
+      })
+    );
 
   /**
    * Disconnect all connected providers.
@@ -388,7 +397,10 @@ const makeProviderService = Effect.gen(function* () {
       }
 
       logger.info("All providers disconnected");
-    });
+    }).pipe(
+      // Add tracing span for disconnect
+      withProviderSpan("all", "disconnect", "providers")
+    );
 
   /**
    * Get the current status of the ProviderService.
@@ -477,7 +489,10 @@ const makeProviderService = Effect.gen(function* () {
       }
 
       logger.debug("Health check passed for all providers");
-    });
+    }).pipe(
+      // Add tracing span for health check
+      withProviderSpan("all", "healthCheck", "providers")
+    );
 
   /**
    * Perform a health check on a specific provider.

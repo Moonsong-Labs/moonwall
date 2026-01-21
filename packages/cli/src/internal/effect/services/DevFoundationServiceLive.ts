@@ -27,6 +27,7 @@ import {
   TimeoutDefaults,
   type OperationTimeoutError,
 } from "../TimeoutPolicy.js";
+import { withFoundationSpan } from "../Tracing.js";
 
 const logger = createLogger({ name: "DevFoundationService" });
 
@@ -237,6 +238,10 @@ const makeDevFoundationService = Effect.gen(function* () {
           });
         }
         return error;
+      }),
+      // Add tracing span for observability
+      withFoundationSpan("dev", "startup", config.name, {
+        isEthereumChain: config.isEthereumChain,
       })
     );
   };
@@ -285,7 +290,10 @@ const makeDevFoundationService = Effect.gen(function* () {
       });
 
       logger.info(`Dev foundation "${nodeName}" stopped`);
-    });
+    }).pipe(
+      // Add tracing span for observability
+      withFoundationSpan("dev", "shutdown", "dev-foundation")
+    );
 
   /**
    * Get the current status of the dev foundation.
@@ -359,7 +367,9 @@ const makeDevFoundationService = Effect.gen(function* () {
           });
         }
         return error;
-      })
+      }),
+      // Add tracing span for observability
+      withFoundationSpan("dev", "healthCheck", "dev-foundation")
     );
   };
 

@@ -570,7 +570,8 @@
       "Configure span attributes for debugging (env name, provider type)",
       "Write test verifying spans are created"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: (1) Created Tracing.ts module with centralized tracing utilities using Effect's built-in withSpan API. (2) Created span name builders: buildFoundationSpanName(), buildProviderSpanName(), buildTestSpanName() with consistent naming convention 'moonwall.<component>.<type>.<operation>[name]'. (3) Created annotation helpers: annotateFoundationSpan(), annotateProviderSpan(), annotateTestSpan() for adding typed attributes to spans. (4) Created span wrappers: withFoundationSpan(), withProviderSpan(), withTestSpan(), withSpan() that preserve Effect types while adding tracing. (5) Added FoundationSpanAttributes (port, endpoint, pid, chainSpec, isEthereumChain), ProviderSpanAttributes (endpoint, providerCount, timeoutMs, retryAttempts), TestSpanAttributes (envName, testFileCount, pattern, timeoutMs, coverageEnabled). (6) Added MOONWALL_TRACING env var support with isTracingEnabled() and withTracingIfEnabled() for conditional tracing. (7) Applied tracing to DevFoundationServiceLive (start/stop/healthCheck), ChopsticksFoundationServiceLive (start/stop/healthCheck/createBlock/setStorage), ProviderServiceLive (connect/disconnect/healthCheck), and runTestsEffect (loadEnvironment/testCmdEffect). (8) Created 45 comprehensive unit tests covering all span builders, annotation helpers, wrappers, nesting, error handling, and type preservation. Test count: 1015 pass (up from 970), same 16 E2E failures requiring moonwall environment."
   },
   {
     "category": "observability",

@@ -32,6 +32,7 @@ import {
   TimeoutDefaults,
   type OperationTimeoutError,
 } from "../TimeoutPolicy.js";
+import { withFoundationSpan } from "../Tracing.js";
 
 const logger = createLogger({ name: "ChopsticksFoundationService" });
 
@@ -205,6 +206,10 @@ const makeChopsticksFoundationService = Effect.gen(function* () {
           });
         }
         return error;
+      }),
+      // Add tracing span for observability
+      withFoundationSpan("chopsticks", "startup", config.name, {
+        endpoint: `ws://localhost:${config.wsPort || 8000}`,
       })
     );
   };
@@ -254,7 +259,10 @@ const makeChopsticksFoundationService = Effect.gen(function* () {
       });
 
       logger.info(`Chopsticks foundation "${instanceName}" stopped`);
-    });
+    }).pipe(
+      // Add tracing span for observability
+      withFoundationSpan("chopsticks", "shutdown", "chopsticks-foundation")
+    );
 
   /**
    * Get the current status of the chopsticks foundation.
@@ -316,7 +324,11 @@ const makeChopsticksFoundationService = Effect.gen(function* () {
       }
 
       logger.debug(`Health check passed for ${endpoint} (head: #${getBlockResult.number})`);
-    }).pipe(Effect.asVoid);
+    }).pipe(
+      Effect.asVoid,
+      // Add tracing span for observability
+      withFoundationSpan("chopsticks", "healthCheck", "chopsticks-foundation")
+    );
 
   /**
    * Create one or more new blocks.
@@ -363,7 +375,9 @@ const makeChopsticksFoundationService = Effect.gen(function* () {
               });
             }
             return error;
-          })
+          }),
+          // Add tracing span for observability
+          withFoundationSpan("chopsticks", "createBlock", "chopsticks-foundation")
         )
       )
     );
@@ -411,7 +425,9 @@ const makeChopsticksFoundationService = Effect.gen(function* () {
           });
         }
         return error;
-      })
+      }),
+      // Add tracing span for observability
+      withFoundationSpan("chopsticks", "setStorage", "chopsticks-foundation")
     );
   };
 
