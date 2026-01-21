@@ -7,6 +7,9 @@ export * from "./errors.js";
 // High-level foundation errors
 export * from "./errors/index.js";
 
+// Retry policies for network operations
+export * from "./RetryPolicy.js";
+
 // Low-level services (process, port, readiness)
 export * from "./ProcessManagerService.js";
 export * from "./PortDiscoveryService.js";

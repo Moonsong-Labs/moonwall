@@ -1,7 +1,8 @@
-import { Effect, Context, Layer, Schedule } from "effect";
+import { Effect, Context, Layer } from "effect";
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
 import { PortDiscoveryError } from "./errors.js";
+import { portDiscoveryRetryPolicy, makeRetryPolicy } from "./RetryPolicy.js";
 
 const execAsync = promisify(exec);
 
@@ -97,16 +98,26 @@ const attemptPortDiscovery = (pid: number): Effect.Effect<number, PortDiscoveryE
   );
 
 /**
- * Discover port with fixed interval retry
+ * Discover port with exponential backoff retry.
+ *
+ * Uses fast initial retries with exponential backoff:
+ * 50ms -> 100ms -> 200ms -> 400ms -> 500ms (capped)
+ *
+ * This allows quick discovery when the node starts fast,
+ * while backing off to reduce system load during slow startups.
  */
 const discoverPortWithRetry = (
   pid: number,
   maxAttempts = 1200
-): Effect.Effect<number, PortDiscoveryError> =>
-  attemptPortDiscovery(pid).pipe(
-    Effect.retry(
-      Schedule.fixed("50 millis").pipe(Schedule.compose(Schedule.recurs(maxAttempts - 1)))
-    ),
+): Effect.Effect<number, PortDiscoveryError> => {
+  // Use default policy for 1200 attempts, custom policy otherwise
+  const retryPolicy =
+    maxAttempts === 1200
+      ? portDiscoveryRetryPolicy<PortDiscoveryError>()
+      : makeRetryPolicy<PortDiscoveryError>(maxAttempts, "50 millis", "500 millis");
+
+  return attemptPortDiscovery(pid).pipe(
+    Effect.retry(retryPolicy),
     Effect.catchAll((error) =>
       Effect.fail(
         new PortDiscoveryError({
@@ -117,6 +128,7 @@ const discoverPortWithRetry = (
       )
     )
   );
+};
 
 /**
  * Live implementation of PortDiscoveryService

@@ -531,7 +531,8 @@
       "Add retry to RPC health checks",
       "Write test verifying retry behavior with flaky mock"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: (1) Created RetryPolicy.ts module with centralized exponential backoff policies using Schedule.exponential + Schedule.union (for max delay cap) + Schedule.intersect (for max attempts) + Schedule.jittered (thundering herd prevention). (2) Defined 6 pre-configured policies: networkRetryPolicy (50ms-5s, 200 attempts), portDiscoveryRetryPolicy (50ms-500ms, 1200 attempts), healthCheckRetryPolicy (100ms-1s, 30 attempts), providerConnectionRetryPolicy (100ms-5s, 150 attempts), webSocketRetryPolicy (50ms-1s, 200 attempts), createExponentialRetryPolicy (configurable). (3) Updated NodeReadinessService to use webSocketRetryPolicy. (4) Updated PortDiscoveryService to use portDiscoveryRetryPolicy. (5) Updated RpcPortDiscoveryService to use networkRetryPolicy. (6) Refactored ProviderServiceLive.connectProviderWithRetry from manual for-loop to Effect.retry with providerConnectionRetryPolicy. (7) Added healthCheckRetryPolicy to ProviderServiceLive.healthCheck and healthCheckProvider methods. (8) Created comprehensive test suite with 21 tests covering all policies, flaky operation simulation, max attempts limit, and error transformation. Test count: 914 pass (up from 893), 12 skip, 16 fail, 2 errors (same E2E baseline requiring moonwall environment)."
   },
   {
     "category": "reliability",

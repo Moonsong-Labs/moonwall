@@ -4,8 +4,9 @@ import * as NodeContext from "@effect/platform-node/NodeContext";
 import * as NodeFileSystem from "@effect/platform-node/NodeFileSystem";
 import * as NodeSocket from "@effect/platform-node/NodeSocket";
 import { createLogger } from "@moonwall/util";
-import { Context, Deferred, Effect, Layer, Option, Schedule, type Scope } from "effect";
+import { Context, Deferred, Effect, Layer, Option, type Scope } from "effect";
 import { PortDiscoveryError } from "./errors.js";
+import { networkRetryPolicy, makeRetryPolicy } from "./RetryPolicy.js";
 
 const logger = createLogger({ name: "RpcPortDiscoveryService" });
 const debug = logger.debug.bind(logger);
@@ -187,7 +188,13 @@ const testRpcPort = (
   );
 
 /**
- * Discover RPC port by racing tests on all candidate ports
+ * Discover RPC port by racing tests on all candidate ports.
+ *
+ * Uses exponential backoff with jitter for retry:
+ * 50ms -> 100ms -> 200ms -> ... -> 5s (capped)
+ *
+ * This allows quick discovery when nodes start fast, while
+ * backing off gracefully during slower startups.
  */
 const discoverRpcPortWithRace = (config: {
   pid: number;
@@ -195,6 +202,13 @@ const discoverRpcPortWithRace = (config: {
   maxAttempts?: number;
 }): Effect.Effect<number, PortDiscoveryError> => {
   const maxAttempts = config.maxAttempts || 2400;
+
+  // Use network retry policy for RPC port discovery
+  // 2400 attempts is more than default 200, so use custom policy
+  const retryPolicy =
+    maxAttempts <= 200
+      ? networkRetryPolicy<PortDiscoveryError>()
+      : makeRetryPolicy<PortDiscoveryError>(maxAttempts, "50 millis", "5 seconds");
 
   return getAllPorts(config.pid).pipe(
     Effect.flatMap((allPorts) => {
@@ -231,10 +245,8 @@ const discoverRpcPortWithRace = (config: {
         )
       );
     }),
-    // Retry the entire discovery process
-    Effect.retry(
-      Schedule.fixed("50 millis").pipe(Schedule.compose(Schedule.recurs(maxAttempts - 1)))
-    ),
+    // Retry the entire discovery process with exponential backoff
+    Effect.retry(retryPolicy),
     Effect.catchAll((error) =>
       Effect.fail(
         new PortDiscoveryError({

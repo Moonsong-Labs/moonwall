@@ -344,7 +344,8 @@ describe("AppLayer", () => {
         loadConfig: () => Effect.succeed(mockConfig as any),
         getConfig: () => Effect.succeed(mockConfig as any),
         isLoaded: () => Effect.succeed(true),
-        getStatus: () => Effect.succeed({ _tag: "Loaded", configPath: "moonwall.config.json" } as const),
+        getStatus: () =>
+          Effect.succeed({ _tag: "Loaded", configPath: "moonwall.config.json" } as const),
         getEnvironment: () => Effect.fail({} as any),
         getEnvironmentNames: () => Effect.succeed([]),
         validateConfig: () => Effect.succeed(true),

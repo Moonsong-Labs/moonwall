@@ -11,6 +11,11 @@ import {
 } from "./ProviderService.js";
 import { ProviderConnectionError } from "../errors/foundation.js";
 import { ProviderFactory, ProviderInterfaceFactory } from "../../providerFactories.js";
+import {
+  providerConnectionRetryPolicy,
+  healthCheckRetryPolicy,
+  makeRetryPolicy,
+} from "../RetryPolicy.js";
 
 const logger = createLogger({ name: "ProviderService" });
 
@@ -54,71 +59,68 @@ const makeProviderService = Effect.gen(function* () {
   const stateRef = yield* Ref.make<ProviderServiceState>(initialState);
 
   /**
-   * Helper to wait/delay between retries
-   */
-  const delay = (ms: number) =>
-    Effect.promise(() => new Promise<void>((resolve) => setTimeout(resolve, ms)));
-
-  /**
-   * Connect a single provider with retry logic.
+   * Connect a single provider with exponential backoff retry.
+   *
+   * Uses exponential backoff with jitter to prevent thundering herd:
+   * 100ms -> 200ms -> 400ms -> 800ms -> 1.6s -> 3.2s -> 5s (capped)
+   *
+   * This is more efficient than fixed delays as it allows quick
+   * retries initially while backing off gracefully.
    */
   const connectProviderWithRetry = (
     provider: MoonwallProvider,
     config: ProviderServiceConfig,
     endpoint: string
-  ): Effect.Effect<ConnectedProvider, ProviderConnectionError> =>
-    Effect.gen(function* () {
-      const timeout = config.connectionTimeout ?? DEFAULT_CONNECTION_TIMEOUT;
-      const maxAttempts = config.retryAttempts ?? DEFAULT_RETRY_ATTEMPTS;
-      const retryDelay = config.retryDelay ?? DEFAULT_RETRY_DELAY;
+  ): Effect.Effect<ConnectedProvider, ProviderConnectionError> => {
+    const timeout = config.connectionTimeout ?? DEFAULT_CONNECTION_TIMEOUT;
+    const maxAttempts = config.retryAttempts ?? DEFAULT_RETRY_ATTEMPTS;
 
-      let lastError: unknown = null;
+    // Use default policy for 150 attempts, custom policy otherwise
+    const retryPolicy =
+      maxAttempts === DEFAULT_RETRY_ATTEMPTS
+        ? providerConnectionRetryPolicy<ProviderConnectionError>()
+        : makeRetryPolicy<ProviderConnectionError>(maxAttempts, "100 millis", "5 seconds");
 
-      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-        const connectAttempt = Effect.tryPromise({
-          try: async () => {
-            // Race connection against timeout
-            const connected = await Promise.race([
-              ProviderInterfaceFactory.populate(provider.name, provider.type, provider.connect),
-              new Promise<never>((_, reject) =>
-                setTimeout(
-                  () => reject(new Error(`Connection attempt timed out after ${timeout}ms`)),
-                  timeout
-                )
-              ),
-            ]);
-            return connected;
-          },
-          catch: (error) => error,
-        });
-
-        const result = yield* connectAttempt.pipe(Effect.either);
-
-        if (result._tag === "Right") {
-          logger.debug(`Provider "${provider.name}" connected on attempt ${attempt}`);
-          return result.right;
-        }
-
-        lastError = result.left;
-
-        if (attempt < maxAttempts) {
-          logger.debug(
-            `Provider "${provider.name}" connection attempt ${attempt}/${maxAttempts} failed, retrying...`
-          );
-          yield* delay(retryDelay);
-        }
-      }
-
-      // All retries exhausted
-      return yield* Effect.fail(
+    // Single connection attempt effect
+    const attemptConnection = Effect.tryPromise({
+      try: async () => {
+        // Race connection against timeout
+        const connected = await Promise.race([
+          ProviderInterfaceFactory.populate(provider.name, provider.type, provider.connect),
+          new Promise<never>((_, reject) =>
+            setTimeout(
+              () => reject(new Error(`Connection attempt timed out after ${timeout}ms`)),
+              timeout
+            )
+          ),
+        ]);
+        return connected;
+      },
+      catch: (error) =>
         new ProviderConnectionError({
           providerType: provider.type,
           endpoint,
-          message: `Failed to connect provider "${provider.name}" after ${maxAttempts} attempts: ${lastError instanceof Error ? lastError.message : String(lastError)}`,
-          cause: lastError,
-        })
-      );
+          message: `Connection failed: ${error instanceof Error ? error.message : String(error)}`,
+          cause: error,
+        }),
     });
+
+    // Wrap with retry policy and final error handling
+    return attemptConnection.pipe(
+      Effect.tap(() => logger.debug(`Provider "${provider.name}" connected`)),
+      Effect.retry(retryPolicy),
+      Effect.catchAll((error) =>
+        Effect.fail(
+          new ProviderConnectionError({
+            providerType: error.providerType,
+            endpoint: error.endpoint,
+            message: `Failed to connect provider "${provider.name}" after ${maxAttempts} attempts: ${error.message}`,
+            cause: error.cause,
+          })
+        )
+      )
+    );
+  };
 
   /**
    * Create lazy provider instances from configuration.
@@ -410,6 +412,9 @@ const makeProviderService = Effect.gen(function* () {
 
   /**
    * Perform a health check on all connected providers.
+   *
+   * Uses exponential backoff retry for transient network issues:
+   * 100ms -> 200ms -> 400ms -> 800ms -> 1s (capped), max 30 attempts
    */
   const healthCheck = (): Effect.Effect<void, ProviderHealthCheckError> =>
     Effect.gen(function* () {
@@ -440,6 +445,9 @@ const makeProviderService = Effect.gen(function* () {
       logger.debug(`Performing health check on ${state.connectedProviders.length} provider(s)`);
 
       for (const provider of state.connectedProviders) {
+        const endpoint = state.endpoints[state.connectedProviders.indexOf(provider)] || "unknown";
+
+        // Health check with exponential backoff retry
         yield* Effect.tryPromise({
           try: async () => {
             await provider.greet();
@@ -448,11 +456,24 @@ const makeProviderService = Effect.gen(function* () {
             new ProviderHealthCheckError({
               providerName: provider.name,
               providerType: provider.type,
-              endpoint: state.endpoints[state.connectedProviders.indexOf(provider)] || "unknown",
-              message: `Health check failed for provider "${provider.name}": ${error instanceof Error ? error.message : String(error)}`,
+              endpoint,
+              message: `Health check failed: ${error instanceof Error ? error.message : String(error)}`,
               cause: error,
             }),
-        });
+        }).pipe(
+          Effect.retry(healthCheckRetryPolicy<ProviderHealthCheckError>()),
+          Effect.catchAll((error) =>
+            Effect.fail(
+              new ProviderHealthCheckError({
+                providerName: provider.name,
+                providerType: provider.type,
+                endpoint,
+                message: `Health check failed for provider "${provider.name}" after retries: ${error.message}`,
+                cause: error,
+              })
+            )
+          )
+        );
       }
 
       logger.debug("Health check passed for all providers");
@@ -460,6 +481,9 @@ const makeProviderService = Effect.gen(function* () {
 
   /**
    * Perform a health check on a specific provider.
+   *
+   * Uses exponential backoff retry for transient network issues:
+   * 100ms -> 200ms -> 400ms -> 800ms -> 1s (capped), max 30 attempts
    */
   const healthCheckProvider = (name: string): Effect.Effect<void, ProviderHealthCheckError> =>
     Effect.gen(function* () {
@@ -482,6 +506,7 @@ const makeProviderService = Effect.gen(function* () {
 
       logger.debug(`Performing health check on provider "${name}"`);
 
+      // Health check with exponential backoff retry
       yield* Effect.tryPromise({
         try: async () => {
           await provider.greet();
@@ -491,10 +516,23 @@ const makeProviderService = Effect.gen(function* () {
             providerName: provider.name,
             providerType: provider.type,
             endpoint,
-            message: `Health check failed for provider "${provider.name}": ${error instanceof Error ? error.message : String(error)}`,
+            message: `Health check failed: ${error instanceof Error ? error.message : String(error)}`,
             cause: error,
           }),
-      });
+      }).pipe(
+        Effect.retry(healthCheckRetryPolicy<ProviderHealthCheckError>()),
+        Effect.catchAll((error) =>
+          Effect.fail(
+            new ProviderHealthCheckError({
+              providerName: provider.name,
+              providerType: provider.type,
+              endpoint,
+              message: `Health check failed for provider "${provider.name}" after retries: ${error.message}`,
+              cause: error,
+            })
+          )
+        )
+      );
 
       logger.debug(`Health check passed for provider "${name}"`);
     });

@@ -1,8 +1,9 @@
 import { Socket } from "@effect/platform";
 import * as NodeSocket from "@effect/platform-node/NodeSocket";
 import { createLogger } from "@moonwall/util";
-import { Context, Deferred, Effect, Fiber, Layer, Schedule, type Scope } from "effect";
+import { Context, Deferred, Effect, Fiber, Layer, type Scope } from "effect";
 import { NodeReadinessError } from "./errors.js";
+import { webSocketRetryPolicy, makeRetryPolicy } from "./RetryPolicy.js";
 
 const logger = createLogger({ name: "NodeReadinessService" });
 const debug = logger.debug.bind(logger);
@@ -162,16 +163,24 @@ const attemptReadinessCheck = (
 
 /**
  * Check node readiness with retry (internal, requires Socket.Socket)
+ *
+ * Uses exponential backoff with jitter to prevent thundering herd.
+ * Default: 200 attempts with 50ms -> 100ms -> 200ms -> ... -> 1s (capped) delays
  */
 const checkReadyWithRetryInternal = (
   config: ReadinessConfig
 ): Effect.Effect<boolean, NodeReadinessError, Socket.Socket> => {
   const maxAttempts = config.maxAttempts || 200;
 
+  // Use exponential backoff for WebSocket reconnection
+  // If custom maxAttempts specified, create a custom policy; otherwise use default
+  const retryPolicy =
+    maxAttempts === 200
+      ? webSocketRetryPolicy<NodeReadinessError>()
+      : makeRetryPolicy<NodeReadinessError>(maxAttempts, "50 millis", "1 second");
+
   return attemptReadinessCheck(config).pipe(
-    Effect.retry(
-      Schedule.fixed("50 millis").pipe(Schedule.compose(Schedule.recurs(maxAttempts - 1)))
-    ),
+    Effect.retry(retryPolicy),
     Effect.catchAll((error) =>
       Effect.fail(
         new NodeReadinessError({

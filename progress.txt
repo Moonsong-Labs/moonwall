@@ -2215,3 +2215,109 @@ However, the actual implementation (completed in Feature 35 as ProviderServiceLi
 - `packages/cli/src/internal/effect/__tests__/AppLayer.test.ts` - Unit tests for AppLayer
 - `packages/cli/src/internal/effect/index.ts` - Added AppLayer export
 - `plans/prd.json` - Marked Feature 40 as complete
+
+---
+
+## Session: 2026-01-21
+
+### Feature Completed: Effect migration - add Effect.retry for network operations (PRD Feature 41)
+
+**Changes Made:**
+
+1. **Created RetryPolicy.ts module** (`packages/cli/src/internal/effect/RetryPolicy.ts`):
+   - Centralized retry policies for network operations using Effect's Schedule API
+   - Uses `Schedule.exponential` for exponential backoff
+   - Uses `Schedule.union` with `Schedule.spaced` to cap maximum delay
+   - Uses `Schedule.intersect` with `Schedule.recurs` to limit maximum attempts
+   - Uses `Schedule.jittered` to prevent thundering herd problems
+   - Defined `RetryDefaults` with sensible defaults (200 attempts, 50ms base, 5s max, factor 2)
+   - Exported `RetryConfig` interface and `RetrySchedule` type alias
+
+2. **Pre-configured retry policies**:
+   - `networkRetryPolicy`: 50ms→5s, 200 attempts (general network operations)
+   - `portDiscoveryRetryPolicy`: 50ms→500ms, 1200 attempts (fast polling for node startup)
+   - `healthCheckRetryPolicy`: 100ms→1s, 30 attempts (health check operations)
+   - `providerConnectionRetryPolicy`: 100ms→5s, 150 attempts (matches existing moonwall behavior)
+   - `webSocketRetryPolicy`: 50ms→1s, 200 attempts (WebSocket reconnection)
+   - `createExponentialRetryPolicy`: Configurable via `RetryConfig`
+   - `makeRetryPolicy`: Factory function for custom policies
+
+3. **Updated NodeReadinessService.ts**:
+   - Replaced `Schedule.fixed` with `webSocketRetryPolicy`
+   - Uses `makeRetryPolicy` for custom `maxAttempts` values
+   - Exponential backoff improves efficiency during slow node startups
+
+4. **Updated PortDiscoveryService.ts**:
+   - Replaced `Schedule.fixed` with `portDiscoveryRetryPolicy`
+   - Fast initial retries (50ms) with 500ms cap for port discovery
+
+5. **Updated RpcPortDiscoveryService.ts**:
+   - Replaced `Schedule.fixed` with `networkRetryPolicy`
+   - Uses `makeRetryPolicy` for custom large attempt counts (2400)
+
+6. **Refactored ProviderServiceLive.ts**:
+   - Replaced manual for-loop with `Effect.retry(providerConnectionRetryPolicy)`
+   - Added `healthCheckRetryPolicy` to `healthCheck()` method
+   - Added `healthCheckRetryPolicy` to `healthCheckProvider()` method
+   - Exponential backoff handles transient network issues gracefully
+
+7. **Created comprehensive test suite** (`RetryPolicy.test.ts`):
+   - 21 tests covering all exported functions
+   - Tests for flaky operation simulation
+   - Tests for max attempts limit
+   - Tests for error transformation after retries
+   - Tests for different error types
+   - All tests use `Effect.suspend` for proper Effect error channel
+
+8. **Updated exports**:
+   - Added `RetryPolicy.js` export to `internal/effect/index.ts`
+
+**★ Insight ─────────────────────────────────────**
+- Effect's `Schedule` module is powerful but requires understanding composition:
+  - `Schedule.exponential(base, factor)` doubles delay each retry
+  - `Schedule.union` takes the smaller of two schedules (used for max delay cap)
+  - `Schedule.intersect` combines schedules (both must continue for retry)
+  - `Schedule.jittered` adds ±20% randomness to prevent thundering herd
+- Previous manual for-loop in `connectProviderWithRetry` was 40+ lines;
+  replaced with 15 lines using `Effect.retry(policy)`
+**─────────────────────────────────────────────────**
+
+**Verification:**
+- `bun typecheck` - Passes with no errors
+- `bun test` - 914 pass (up from 893), 12 skip, 16 fail, 2 errors
+  - +21 tests from new RetryPolicy.test.ts
+  - Same E2E failures as previous sessions (require moonwall environment)
+- RetryPolicy.ts has 100% test coverage
+
+**Notes for Next Developer:**
+
+1. The retry policies are centralized in `RetryPolicy.ts` for easy tuning.
+   To adjust retry behavior across all services, modify `RetryDefaults`.
+
+2. Each service can use custom policies via `makeRetryPolicy()`:
+   ```ts
+   const customPolicy = makeRetryPolicy(10, "200 millis", "2 seconds", 3);
+   yield* operation.pipe(Effect.retry(customPolicy));
+   ```
+
+3. Next high-priority features:
+   - Feature 42: Add Effect.timeout for operations (reliability)
+   - Feature 43: Add Effect.acquireRelease for resource cleanup (reliability)
+   - Features 44-45: Observability (tracing, structured logging)
+
+4. The 16 failing tests are E2E tests in `test/suites/` requiring a running
+   moonwall environment - not related to this change.
+
+5. The `RetrySchedule` type alias uses `any` for the output type because
+   Schedule composition results in complex tuple types that `Effect.retry`
+   doesn't care about - it only needs the error type for type safety.
+
+**Files Changed:**
+- `packages/cli/src/internal/effect/RetryPolicy.ts` - New centralized retry policies
+- `packages/cli/src/internal/effect/__tests__/RetryPolicy.test.ts` - 21 unit tests
+- `packages/cli/src/internal/effect/index.ts` - Added RetryPolicy export
+- `packages/cli/src/internal/effect/NodeReadinessService.ts` - Use webSocketRetryPolicy
+- `packages/cli/src/internal/effect/PortDiscoveryService.ts` - Use portDiscoveryRetryPolicy
+- `packages/cli/src/internal/effect/RpcPortDiscoveryService.ts` - Use networkRetryPolicy
+- `packages/cli/src/internal/effect/services/ProviderServiceLive.ts` - Use providerConnectionRetryPolicy + healthCheckRetryPolicy
+- `plans/prd.json` - Marked Feature 41 as complete
