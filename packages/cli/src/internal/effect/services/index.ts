@@ -87,6 +87,9 @@ export {
   type ProviderServiceType,
 } from "./ProviderService.js";
 
+// ProviderService Layer implementations
+export { ProviderServiceLive, makeProviderServiceLayer } from "./ProviderServiceLive.js";
+
 // Unified FoundationService types and factory
 export {
   FoundationServiceFactory,

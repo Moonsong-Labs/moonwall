@@ -1499,3 +1499,93 @@ This feature was analyzed in depth and determined to require no code changes. He
 - `packages/cli/src/internal/effect/__tests__/services/ProviderService.test.ts` - New test file (16 tests)
 - `plans/prd.json` - Marked Feature 29 as complete
 
+---
+
+### Feature Completed: Effect migration - create ProviderFactoryService (PRD Feature 34)
+
+**Changes Made:**
+1. Created `packages/cli/src/internal/effect/services/ProviderServiceLive.ts`:
+   - Implemented `ProviderServiceLive` Layer using `Layer.effect` pattern
+   - Uses `Ref` for mutable state tracking (status, config, lazyProviders, connectedProviders, endpoints)
+   - Wraps existing `ProviderFactory` for lazy provider creation and `ProviderInterfaceFactory` for establishing connections
+
+2. Implemented all service methods from the ProviderService interface:
+   - `createProviders(config)`: Creates lazy providers using `ProviderFactory.prepare()`, returns count
+   - `connect(config)`: Connects all providers with retry logic, returns `{info, disconnect}` tuple
+   - `disconnect()`: Gracefully disconnects all providers, collects errors without short-circuiting
+   - `getStatus()`: Returns `ProviderServiceStatus` (Idle|Connecting|Connected|Disconnected|Failed)
+   - `getProvider(name)`: Returns specific connected provider by name
+   - `getAllProviders()`: Returns all connected providers
+   - `healthCheck()`: Calls `greet()` on all providers
+   - `healthCheckProvider(name)`: Calls `greet()` on specific provider
+
+3. Connection retry logic:
+   - Default 10-second timeout per connection attempt (configurable via `connectionTimeout`)
+   - Default 150 retry attempts (configurable via `retryAttempts`)
+   - Default 100ms delay between retries (configurable via `retryDelay`)
+   - Matches existing moonwall behavior from `globalContext.ts`
+
+4. Created `makeProviderServiceLayer()` factory function for testing isolation
+
+5. Updated `packages/cli/src/internal/effect/services/index.ts`:
+   - Added exports for `ProviderServiceLive` and `makeProviderServiceLayer`
+
+6. Created comprehensive unit test suite:
+   - `packages/cli/src/internal/effect/__tests__/services/ProviderServiceLive.test.ts`
+   - 26 tests covering: connect (success, failures, empty config), disconnect, getStatus (all 5 states), getProvider, getAllProviders, healthCheck, healthCheckProvider, createProviders, lifecycle integration
+   - Uses `Layer.succeed` pattern for mocking the service interface
+   - All tests pass
+
+**Design Decisions:**
+- **Named ProviderServiceLive, not ProviderFactoryService**: Follows the established naming convention where interfaces are `*Service` and implementations are `*ServiceLive` (e.g., `DevFoundationService` → `DevFoundationServiceLive`)
+- **Wraps existing infrastructure**: Leverages existing `ProviderFactory` and `ProviderInterfaceFactory` classes rather than rewriting them, ensuring consistency with current moonwall behavior
+- **Sequential provider connection**: Connects providers one at a time (matching current behavior) rather than parallel, as some providers may depend on shared resources
+- **Error collection on disconnect**: Uses `Effect.either` to collect disconnect errors without short-circuiting, ensuring all providers get cleanup attempts
+
+**Verification:**
+- `bun typecheck` - Passes with no errors
+- `bun test packages/cli/src/internal/effect/__tests__/services/ProviderServiceLive.test.ts` - 26 pass, 0 fail
+- `bun test` (full suite) - 442 pass (up from 416), 12 skip, 16 fail, 2 errors (same E2E baseline)
+
+**Notes for Next Developer:**
+1. Feature 34 completes the ProviderServiceLive implementation. The service is now usable via:
+   ```ts
+   import { Effect } from "effect";
+   import { ProviderService, ProviderServiceLive } from "@moonwall/cli";
+
+   const program = Effect.gen(function* () {
+     const providerService = yield* ProviderService;
+
+     const { info, disconnect } = yield* providerService.connect({
+       providers: [
+         { name: "polkadot", type: "polkadotJs", endpoints: ["wss://rpc.polkadot.io"] },
+         { name: "ethereum", type: "ethers", endpoints: ["https://eth.llamarpc.com"] },
+       ],
+       connectionTimeout: 30000,
+       retryAttempts: 3,
+     });
+
+     console.log(`Connected ${info.connectedCount} providers`);
+
+     // Get a specific provider
+     const polkadotProvider = yield* providerService.getProvider("polkadot");
+
+     // Check health
+     yield* providerService.healthCheck();
+
+     // Disconnect when done
+     yield* disconnect;
+   }).pipe(Effect.provide(ProviderServiceLive));
+   ```
+2. Next high-priority features:
+   - Feature 35: Update MoonwallContext to use Effect services (major integration)
+   - Features 30-33: Individual provider service implementations (lower priority - ProviderServiceLive already handles all provider types via existing infrastructure)
+3. The 16 failing tests are E2E tests in `test/suites/` requiring moonwall environment - not related to this change.
+4. The @polkadot/* package warnings are from transitive dependencies and don't affect functionality.
+
+**Files Changed:**
+- `packages/cli/src/internal/effect/services/ProviderServiceLive.ts` - New Layer implementation
+- `packages/cli/src/internal/effect/services/index.ts` - Added exports for ProviderServiceLive
+- `packages/cli/src/internal/effect/__tests__/services/ProviderServiceLive.test.ts` - New test file (26 tests)
+- `plans/prd.json` - Marked Feature 34 as complete
+
