@@ -3734,3 +3734,91 @@ import { Effect, Layer } from "effect";
 - `test/suites/basic/folder2/vitest.suite.test.ts` - Changed vitest import to bun:test
 - `test/suites/derive/folder2/vitest.suite.test.ts` - Changed vitest import to bun:test
 - `plans/prd.json` - Marked Feature 54 as complete
+
+
+---
+
+### Feature Completed: Add Effect to packages/util for helper functions (PRD Feature 59)
+
+**Changes Made:**
+1. Created `packages/util/src/functions/blockEffect.ts` with Effect versions of block operations:
+   - `createAndFinalizeBlockEffect` - Creates and finalizes blocks
+   - `getBlockExtrinsicEffect` - Gets extrinsic from block by section/method
+   - `checkBlockFinalizedEffect` - Checks if block is finalized
+   - `fetchHistoricBlockNumEffect` - Binary search for historic block by timestamp
+   - `getBlockArrayEffect` - Gets array of blocks in time period
+   - `checkTimeSliceForUpgradesEffect` - Checks for runtime upgrades in block slice
+
+2. Created `packages/util/src/functions/extrinsicsEffect.ts` with Effect versions of extrinsic operations:
+   - `signAndSendEffect` - Signs and sends extrinsic, waits for finalization
+   - `signAndSendInBlockEffect` - Signs and sends, waits only for block inclusion
+   - `signAndSendWithTimeoutEffect` - Signs and sends with configurable timeout
+
+3. Created typed error classes for block operations:
+   - `BlockCreationError` - Block creation failures
+   - `BlockLookupError` - Block lookup failures
+   - `ExtrinsicLookupError` - Extrinsic search failures
+   - `BlockFinalizationError` - Finalization check failures
+   - `HistoricBlockError` - Historic block search failures
+   - `RuntimeUpgradeCheckError` - Runtime upgrade check failures
+
+4. Created typed error classes for extrinsic operations:
+   - `ExtrinsicSignError` - Signing failures
+   - `ExtrinsicSubmitError` - Submission failures
+   - `ExtrinsicExecutionError` - On-chain execution failures
+   - `ExtrinsicTimeoutError` - Timeout waiting for finalization
+
+5. Updated `packages/util/src/functions/index.ts` to export both new modules
+
+6. Created comprehensive test suites:
+   - `packages/util/src/__tests__/blockEffect.test.ts` (22 tests)
+   - `packages/util/src/__tests__/extrinsicsEffect.test.ts` (13 tests)
+
+**Design Decisions:**
+- **Effect.tryPromise pattern**: Wraps existing Promise-based operations with proper error typing
+- **Effect.async pattern**: Used for signAndSend which requires subscription-based callbacks
+- **Backwards compatibility**: Original Promise-based functions in block.ts and extrinsics.ts remain unchanged
+- **Type alignment**: Effect versions use same type patterns as originals (including `any` where needed for polkadot-js API compatibility)
+- **Composable errors**: All errors use Data.TaggedError for discriminated union support
+
+**Verification:**
+- `bun run typecheck` - Passes with no errors
+- `bun test` - 1731 pass (up from 1696), 12 skip, 16 fail (same E2E baseline)
+- New tests: 35 pass, 0 fail
+
+**Notes for Next Developer:**
+
+1. Effect functions are exported alongside Promise functions for gradual adoption:
+   ```ts
+   import { createAndFinalizeBlock } from "@moonwall/util"; // Promise
+   import { createAndFinalizeBlockEffect } from "@moonwall/util"; // Effect
+   ```
+
+2. Example Effect usage:
+   ```ts
+   const result = await Effect.runPromise(
+     createAndFinalizeBlockEffect(api, undefined, true)
+   );
+   ```
+
+3. Effect composition with error handling:
+   ```ts
+   const program = Effect.gen(function* () {
+     const block1 = yield* createAndFinalizeBlockEffect(api);
+     const block2 = yield* createAndFinalizeBlockEffect(api, block1.hash);
+     return { block1, block2 };
+   });
+   ```
+
+4. Remaining incomplete PRD features:
+   - Feature 60: Effect migration - convert logger.ts to Effect
+   - Features 51-53, 55, 62: Integration/E2E tests (require moonwall environment)
+   - Features 57-58: Performance optimization
+
+**Files Changed:**
+- `packages/util/src/functions/blockEffect.ts` - New Effect-based block operations
+- `packages/util/src/functions/extrinsicsEffect.ts` - New Effect-based extrinsic operations
+- `packages/util/src/functions/index.ts` - Export new modules
+- `packages/util/src/__tests__/blockEffect.test.ts` - New test suite (22 tests)
+- `packages/util/src/__tests__/extrinsicsEffect.test.ts` - New test suite (13 tests)
+- `plans/prd.json` - Marked Feature 59 as complete

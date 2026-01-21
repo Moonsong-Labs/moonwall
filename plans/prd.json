@@ -785,7 +785,8 @@
       "Maintain backwards-compatible Promise wrappers",
       "Write tests for converted functions"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: (1) Created packages/util/src/functions/blockEffect.ts with Effect versions of block operations: createAndFinalizeBlockEffect, getBlockExtrinsicEffect, checkBlockFinalizedEffect, fetchHistoricBlockNumEffect, getBlockArrayEffect, checkTimeSliceForUpgradesEffect. (2) Created packages/util/src/functions/extrinsicsEffect.ts with Effect versions of extrinsic operations: signAndSendEffect, signAndSendInBlockEffect, signAndSendWithTimeoutEffect. (3) Created typed error classes for each module: BlockCreationError, BlockLookupError, ExtrinsicLookupError, BlockFinalizationError, HistoricBlockError, RuntimeUpgradeCheckError, ExtrinsicSignError, ExtrinsicSubmitError, ExtrinsicExecutionError, ExtrinsicTimeoutError. (4) Original Promise-based functions in block.ts and extrinsics.ts remain unchanged for backwards compatibility. (5) Exported both modules from packages/util/src/functions/index.ts. (6) Created comprehensive test suites with 35 tests covering all Effect functions, error types, and Effect composition patterns. Test baseline: 1731 pass (up from 1696), 12 skip, 16 fail (same E2E tests requiring moonwall environment). Typecheck passes."
   },
   {
     "category": "functional",
