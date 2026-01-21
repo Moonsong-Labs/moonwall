@@ -1,4 +1,4 @@
-import { describe, beforeAll, it, expect } from "vitest";
+import { describe, beforeAll, it, expect } from "bun:test";
 
 describe("basic", () => {
   beforeAll(() => {
