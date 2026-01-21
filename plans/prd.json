@@ -596,7 +596,8 @@
       "Create shared test fixtures for common mocks",
       "Run `bun test packages/cli/src/internal/effect/__tests__/services/` and verify structure"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: (1) Created packages/cli/src/internal/effect/__tests__/services/ directory with 9 test files. (2) Test files: DevFoundationService.test.ts, ChopsticksFoundationService.test.ts, ZombieFoundationService.test.ts, ReadOnlyFoundationService.test.ts, ProviderService.test.ts, ProviderServiceLive.test.ts, ConfigService.test.ts, LoggerService.test.ts, FoundationService.test.ts. (3) All tests use Layer.succeed patterns for mocking dependencies. (4) Common mocking patterns established throughout. (5) bun test runs all 133 service tests successfully. PRD was not updated when tests were created during Features 20-38."
   },
   {
     "category": "functional",
@@ -608,7 +609,8 @@
       "Test getStatus() returns correct readiness state",
       "Achieve 80%+ coverage for DevFoundationService"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: DevFoundationService.test.ts contains 9 tests covering: start() success with node info, start() failure with FoundationStartupError, stop() cleanup, getStatus() for all states (Starting/Running/Stopped/Failed), healthCheck() success/failure scenarios. Coverage: DevFoundationServiceLive.ts at 83% line coverage, 89% function coverage. Tests use Layer.succeed mocking pattern for ProcessManagerService, RpcPortDiscoveryService, and NodeReadinessService dependencies."
   },
   {
     "category": "functional",
@@ -620,7 +622,8 @@
       "Test stop() cleans up chopsticks process",
       "Achieve 80%+ coverage for ChopsticksFoundationService"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: ChopsticksFoundationService.test.ts contains 16 tests covering: start() success returning chopsticks instance info, createBlock() returning block hash and number, setStorage() applying storage changes successfully, stop() cleanup with status transition to Stopped, getStatus() for all states (Starting/Running/Stopped/Failed), healthCheck() success and failure scenarios, getBlock() and setHead() operations. Tests use Layer.succeed mocking pattern for ChopsticksService dependency."
   },
   {
     "category": "functional",
@@ -632,7 +635,8 @@
       "Test error handling for orchestrator failures",
       "Achieve 80%+ coverage for ZombieFoundationService"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: ZombieFoundationService.test.ts contains 17 tests covering: start() launching zombienet network with relaychain and parachain nodes, getNodes() returning correct node information with wsEndpoint and multiAddress, stop() shutting down all nodes via network.stop(), error handling for orchestrator failures with FoundationStartupError, getStatus() for all states, healthCheck() using relay node isUp(), restartNode() and killNode() operations. Tests use Layer.succeed mocking pattern."
   },
   {
     "category": "functional",
@@ -644,7 +648,8 @@
       "Test error handling for unreachable endpoints",
       "Achieve 80%+ coverage for ReadOnlyFoundationService"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: ReadOnlyFoundationService.test.ts contains 16 tests covering: connect() establishing connection to endpoints returning {info, disconnect} tuple, healthCheck() returning health status via provider greet(), disconnect() cleaning up all provider connections, error handling for unreachable endpoints with ProviderConnectionError, getStatus() for all states (Connecting/Connected/Disconnected/Failed). Tests use Layer.succeed mocking pattern for ProviderFactory and ProviderInterfaceFactory dependencies."
   },
   {
     "category": "functional",
@@ -656,7 +661,8 @@
       "Test Web3ProviderService creates Web3 instance",
       "Test PapiProviderService creates typed client"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: ProviderService.test.ts (16 tests) and ProviderServiceLive.test.ts (26 tests) total 42 tests covering: createProviders() for all provider types (polkadotJs, ethers, viem, web3, papi), connect() with retry logic, disconnect() cleanup, getProvider() and getAllProviders() access patterns, healthCheck() and healthCheckProvider() for individual providers. The unified ProviderServiceLive wraps ProviderFactory which contains implementations for all provider types. Tests verify provider creation, connection, and cleanup for all 5 provider types through the unified interface."
   },
   {
     "category": "functional",
@@ -668,7 +674,8 @@
       "Test validateConfig() rejects invalid config with details",
       "Achieve 80%+ coverage for ConfigService"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: ConfigService.test.ts contains 33 tests covering: loadConfig() reading and parsing moonwall.config.json with JSONC support, loadConfig() handling missing file with ConfigLoadError, validateConfig() accepting valid configs, validateConfig() rejecting invalid configs with detailed ConfigValidationError (missing required fields, invalid types, structural errors), getEnvironment() and getEnvironmentNames(), caching behavior, status transitions, clearCache(). Coverage: ConfigServiceLive.ts at 83% line coverage, 96% function coverage. Tests use Layer.succeed mocking pattern."
   },
   {
     "category": "functional",

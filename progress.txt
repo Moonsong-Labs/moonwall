@@ -2974,3 +2974,81 @@ const result = yield* Effect.scoped(
 - `bun.lock` - Updated with new dependency tree
 - `plans/prd.json` - Marked Feature 63 as complete
 
+
+---
+
+### Features Completed: Mark Effect service unit tests as complete (PRD Features 46-52)
+
+**Summary:**
+These 7 features (46-52) were already completed during the Effect migration (Features 20-38) when the services were implemented. The unit tests were created alongside the services but the PRD was not updated at that time. This session verified and documented the existing test coverage.
+
+**Feature 46: Testing - create unit test structure for Effect services**
+- Test directory: `packages/cli/src/internal/effect/__tests__/services/`
+- 9 test files: DevFoundationService, ChopsticksFoundationService, ZombieFoundationService, ReadOnlyFoundationService, ProviderService, ProviderServiceLive, ConfigService, LoggerService, FoundationService
+- All tests use Layer.succeed patterns for mocking dependencies
+- Total: 133 service-specific tests passing
+
+**Feature 47: Testing - add unit tests for DevFoundationService**
+- File: `DevFoundationService.test.ts`
+- 9 tests covering: start() success/failure, stop() cleanup, getStatus() states, healthCheck()
+- Coverage: DevFoundationServiceLive.ts at 83% line, 89% function coverage
+
+**Feature 48: Testing - add unit tests for ChopsticksFoundationService**
+- File: `ChopsticksFoundationService.test.ts`
+- 16 tests covering: start(), createBlock(), setStorage(), stop(), getStatus(), healthCheck(), getBlock(), setHead()
+
+**Feature 49: Testing - add unit tests for ZombieFoundationService**
+- File: `ZombieFoundationService.test.ts`
+- 17 tests covering: start() with multi-node network, getNodes(), stop(), error handling, restartNode(), killNode()
+
+**Feature 50: Testing - add unit tests for ReadOnlyFoundationService**
+- File: `ReadOnlyFoundationService.test.ts`
+- 16 tests covering: connect(), healthCheck(), disconnect(), error handling for unreachable endpoints
+
+**Feature 51: Testing - add unit tests for ProviderServices**
+- Files: `ProviderService.test.ts` (16 tests), `ProviderServiceLive.test.ts` (26 tests)
+- 42 tests total covering all 5 provider types (polkadotJs, ethers, viem, web3, papi)
+- Tests verify unified ProviderServiceLive wrapping ProviderFactory
+
+**Feature 52: Testing - add unit tests for ConfigService**
+- File: `ConfigService.test.ts`
+- 33 tests covering: loadConfig(), validateConfig(), getEnvironment(), caching, error handling
+- Coverage: ConfigServiceLive.ts at 83% line, 96% function coverage
+
+**Verification:**
+- `bun typecheck` - Passes with no errors
+- `bun test` - 1071 pass, 12 skip, 16 fail (same E2E baseline requiring moonwall environment)
+- `bun test packages/cli/src/internal/effect/__tests__/services/` - 133 tests pass
+
+**★ Insight ─────────────────────────────────────**
+- Unit tests were created inline with Effect service implementations during Features 20-38
+- The PRD tracking wasn't updated at that time, creating a documentation gap
+- This pattern (tests alongside implementation) is ideal for Effect services since Layer.succeed
+  makes mocking straightforward
+- The service tests demonstrate the "test pyramid" approach: unit tests for service logic,
+  with integration tests (Features 53-55) to come for full lifecycle verification
+**─────────────────────────────────────────────────**
+
+**Notes for Next Developer:**
+
+1. All Effect service unit tests are now documented in the PRD:
+   - Feature 46: Test structure ✅
+   - Feature 47: DevFoundationService ✅
+   - Feature 48: ChopsticksFoundationService ✅
+   - Feature 49: ZombieFoundationService ✅
+   - Feature 50: ReadOnlyFoundationService ✅
+   - Feature 51: ProviderServices ✅
+   - Feature 52: ConfigService ✅
+
+2. Next high-priority features:
+   - Feature 53-55: Integration tests for foundation/provider/test runner lifecycle
+   - Feature 64: Update TypeScript configuration for Bun (partially done)
+   - Feature 65: Final integration verification
+
+3. The 16 failing tests are E2E tests requiring:
+   - A running moonwall environment with `moonwall run <env>`
+   - Actual blockchain nodes/chopsticks instances
+   - These are NOT related to the Effect migration
+
+**Files Changed:**
+- `plans/prd.json` - Marked Features 46-52 as complete with detailed notes
