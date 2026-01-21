@@ -41,7 +41,7 @@
   ],
   "scripts": {
     "clean": "rm -rf dist && rm -rf node_modules",
-    "build": "rm -rf dist && tsup src --format esm --no-splitting --sourcemap && bun run generate-types",
+    "build": "rm -rf dist && tsup 'src/**/*.ts' '!src/**/__tests__/**' --format esm --no-splitting --sourcemap && bun run generate-types",
     "generate-types": "tsc",
     "lint": "bunx biome lint ./src",
     "lint:fix": "bunx biome lint ./src --apply",

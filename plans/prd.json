@@ -505,7 +505,8 @@
       "Handle CLI errors with Effect.catchAll for user-friendly messages",
       "Verify `moonwall test <env>` still works correctly"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: (1) Created runTestsEffect.ts module with Effect-based error types (TestCommandError, TestExecutionError, NoTestFilesError) and loadEnvironment() Effect program using ConfigService. (2) Updated runTests.ts to use Effect internally for config loading - wraps ConfigService.loadConfig() and getEnvironment() with Effect.gen, runs via Effect.runPromise at boundary, converts errors to thrown exceptions for backwards compatibility. (3) Updated runNetwork.tsx with same Effect-based config loading pattern. (4) Added formatCliError() function for unified error formatting across all CLI commands. (5) Updated entrypoint.ts with withErrorHandling() wrapper that catches errors and formats them using formatCliError(). (6) Also fixed util package build script to exclude test files ('!src/**/__tests__/**' pattern) resolving pre-existing build issue. Typecheck passes, tests pass (865 pass, 16 fail - same E2E baseline requiring moonwall environment)."
   },
   {
     "category": "functional",

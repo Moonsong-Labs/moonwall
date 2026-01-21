@@ -6,9 +6,33 @@ import { main } from "./main";
 import { runNetworkCmd } from "./runNetwork";
 import { testCmd } from "./runTests";
 import { configSetup } from "../lib/configReader";
+import { formatCliError } from "./runTestsEffect.js";
+import chalk from "chalk";
+
 dotenv.config({
   quiet: true,
 });
+
+/**
+ * Wrap an async handler with user-friendly error formatting.
+ *
+ * This provides a unified error handling approach for CLI commands,
+ * formatting errors from Effect-based code and other sources consistently.
+ */
+function withErrorHandling<T>(
+  handler: (args: T) => Promise<void | boolean>
+): (args: T) => Promise<void> {
+  return async (args: T) => {
+    try {
+      await handler(args);
+    } catch (error) {
+      // Use Effect-aware error formatting
+      const message = formatCliError(error);
+      console.error(message);
+      process.exitCode = 1;
+    }
+  };
+}
 
 function handleCursor() {
   const hideCursor = "\x1B[?25l";
@@ -144,7 +168,7 @@ yargs(hideBin(process.argv))
           type: "string",
         });
     },
-    async (args) => {
+    withErrorHandling(async (args) => {
       if (args.envName) {
         process.env.MOON_RUN_SCRIPTS = "true";
         if (
@@ -159,11 +183,11 @@ yargs(hideBin(process.argv))
           process.exitCode = 1;
         }
       } else {
-        console.log("❌ No environment specified");
+        console.log(chalk.red("❌ No environment specified"));
         console.log(`👉 Run 'moonwall --help' for more information`);
         process.exitCode = 1;
       }
-    }
+    })
   )
   .command<RunCommandArgs>(
     "run <envName> [GrepTest]",
@@ -184,10 +208,10 @@ yargs(hideBin(process.argv))
           type: "string",
         });
     },
-    async (argv) => {
+    withErrorHandling(async (argv) => {
       process.env.MOON_RUN_SCRIPTS = "true";
       await runNetworkCmd(argv);
-    }
+    })
   )
   .command<{
     suitesRootDir: string;

@@ -2015,3 +2015,91 @@ However, the actual implementation (completed in Feature 35 as ProviderServiceLi
 - `packages/cli/src/lib/contextEffect.ts` - New bridge module for Effect-based foundation lifecycle
 - `packages/cli/src/index.ts` - Added exports for contextEffect and Effect services
 - `plans/prd.json` - Marked Feature 35 as complete
+
+---
+
+### Feature Completed: Effect migration - update CLI commands to use Effect (PRD Feature 39)
+
+**Changes Made:**
+
+1. Created `packages/cli/src/cmds/runTestsEffect.ts`:
+   - Effect-based error types: `TestCommandError`, `TestExecutionError`, `NoTestFilesError`
+   - `loadEnvironment()` Effect program using ConfigService for typed config loading
+   - `formatCliError()` function for unified error formatting across all CLI commands
+   - `testCmdEffect()` Effect program that can be composed with other Effects
+   - Exported types and functions for use in runTests.ts and entrypoint.ts
+
+2. Updated `packages/cli/src/cmds/runTests.ts`:
+   - Now uses Effect internally for configuration loading
+   - Wraps ConfigService.loadConfig() and getEnvironment() with Effect.gen
+   - Uses Effect.runPromise at the boundary to maintain backwards-compatible Promise API
+   - Converts Effect errors to thrown exceptions for backwards compatibility with existing error handling
+   - Still calls cacheConfig() for other parts of the system that use the old API
+
+3. Updated `packages/cli/src/cmds/runNetwork.tsx`:
+   - Same Effect-based config loading pattern as runTests.ts
+   - Uses ConfigService via Effect.gen for environment resolution
+   - Error handling via Effect.catchTag for EnvironmentNotFoundError
+
+4. Updated `packages/cli/src/cmds/entrypoint.ts`:
+   - Added `withErrorHandling()` wrapper function for CLI command handlers
+   - Wrapper catches all errors and formats them using `formatCliError()`
+   - Applied to both `test` and `run` command handlers
+   - Provides consistent, user-friendly error messages across the CLI
+
+5. Fixed `packages/util/package.json`:
+   - Updated build script to exclude test files: `'!src/**/__tests__/**'` pattern
+   - This resolves a pre-existing build issue where test files using bun:test were included in the bundle
+
+**Design Decisions:**
+
+- **Effect at boundaries only**: Effect programs are converted to Promises at the CLI entry boundary using Effect.runPromise, maintaining the existing Promise-based API for consumers
+- **ConfigService integration**: Uses the existing ConfigServiceLive Layer for config loading, providing typed error handling via Effect.catchTag
+- **Backwards compatibility**: Errors are converted to thrown exceptions at the boundary, so existing error handling in calling code continues to work
+- **Unified error formatting**: formatCliError() handles all error types (Effect errors, regular Errors, unknown) consistently
+
+**★ Insight ─────────────────────────────────────**
+- Effect's error channel provides typed errors that can be handled precisely with `catchTag`
+- `Effect.gen` allows imperative-style code with automatic error propagation
+- `Effect.runPromise` at boundaries converts Effect programs to standard Promises
+- The ConfigService Layer pattern allows dependency injection and testing
+**─────────────────────────────────────────────────**
+
+**Verification:**
+- `bun typecheck` - Passes with no errors
+- `bun test` - 865 pass, 12 skip, 16 fail, 2 errors (same baseline as before - E2E tests require moonwall environment)
+
+**Notes for Next Developer:**
+
+1. Feature 39 establishes the pattern for Effect-based CLI commands. The key insight is using Effect internally while maintaining Promise boundaries for backwards compatibility.
+
+2. To add Effect to another CLI command, follow this pattern:
+   ```ts
+   import { Effect } from "effect";
+   import { ConfigService } from "../internal/effect/services/ConfigService.js";
+   import { ConfigServiceLive } from "../internal/effect/services/ConfigServiceLive.js";
+   
+   const myEffect = Effect.gen(function* () {
+     const configService = yield* ConfigService;
+     const config = yield* configService.loadConfig();
+     // ... use config
+   }).pipe(Effect.provide(ConfigServiceLive));
+   
+   const result = await Effect.runPromise(myEffect);
+   ```
+
+3. The error formatting in formatCliError() can be extended to handle new error types as they're added.
+
+4. Next high-priority features:
+   - Feature 40: Create application Layer composition (AppLayer.ts)
+   - Features 41-45: Reliability features (retry, timeout, acquireRelease, tracing, logging)
+
+5. The 16 failing tests are E2E tests in `test/suites/` requiring moonwall environment - not related to this change.
+
+**Files Changed:**
+- `packages/cli/src/cmds/runTestsEffect.ts` - New Effect-based module for test command
+- `packages/cli/src/cmds/runTests.ts` - Uses Effect internally for config loading
+- `packages/cli/src/cmds/runNetwork.tsx` - Uses Effect internally for config loading
+- `packages/cli/src/cmds/entrypoint.ts` - Added withErrorHandling wrapper for CLI commands
+- `packages/util/package.json` - Fixed build script to exclude test files
+- `plans/prd.json` - Marked Feature 39 as complete

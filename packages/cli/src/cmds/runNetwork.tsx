@@ -1,4 +1,5 @@
 import type { Environment } from "@moonwall/types";
+import { Effect } from "effect";
 import chalk from "chalk";
 import clear from "clear";
 import { promises as fsPromises } from "node:fs";
@@ -23,33 +24,65 @@ import {
 import { executeTests } from "./runTests";
 import type { RunCommandArgs } from "./entrypoint";
 import { confirm, input, select, Separator } from "@inquirer/prompts";
+import { ConfigService } from "../internal/effect/services/ConfigService.js";
+import { ConfigServiceLive } from "../internal/effect/services/ConfigServiceLive.js";
+import { TestCommandError, formatCliError } from "./runTestsEffect.js";
 
 let lastSelected = 0;
 
 export async function runNetworkCmd(args: RunCommandArgs) {
-  await cacheConfig();
   process.env.MOON_TEST_ENV = args.envName;
   if (args.subDirectory) {
     process.env.MOON_SUBDIR = args.subDirectory;
   }
 
+  // Use Effect for configuration loading with structured error handling
+  const loadConfigEffect = Effect.gen(function* () {
+    const configService = yield* ConfigService;
+
+    // Load configuration
+    const config = yield* configService.loadConfig();
+
+    // Get the specific environment
+    const env = yield* configService.getEnvironment(args.envName).pipe(
+      Effect.catchTag("EnvironmentNotFoundError", (error) => {
+        const envList = error.availableEnvironments
+          ? [...error.availableEnvironments].sort().join(", ")
+          : "none";
+        return Effect.fail(
+          new TestCommandError({
+            message: `No environment found in config for: ${chalk.bgWhiteBright.blackBright(
+              args.envName
+            )}\n Environments defined in config are: ${envList}\n`,
+            environmentName: args.envName,
+          })
+        );
+      })
+    );
+
+    return { config, env };
+  }).pipe(Effect.provide(ConfigServiceLive));
+
+  // Run the Effect at the boundary and handle errors
+  const configResult = await Effect.runPromise(
+    loadConfigEffect.pipe(
+      Effect.catchAll((error) => {
+        // Convert Effect errors to thrown exceptions for backwards compatibility
+        const message = formatCliError(error);
+        return Effect.fail(new Error(message));
+      })
+    )
+  ).catch((error) => {
+    throw error;
+  });
+
+  const { config: globalConfig, env } = configResult;
+
   // Initialize shard configuration (defaults to no sharding for run command)
   shardManager.initializeSharding();
-  const globalConfig = await importAsyncConfig();
-  const env = globalConfig.environments.find(({ name }) => name === args.envName);
 
-  if (!env) {
-    const envList = globalConfig.environments
-      .map(env => env.name)
-      .sort()
-      .join(', ');
-    throw new Error(
-      `No environment found in config for: ${chalk.bgWhiteBright.blackBright(
-        args.envName
-      )}\n Environments defined in config are: ${envList}\n`
-    );
-  }
-
+  // Also cache config for other parts of the system that use the old API
+  await cacheConfig();
   loadEnvVars();
 
   await commonChecks(env);
