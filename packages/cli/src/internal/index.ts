@@ -9,3 +9,4 @@ export * from "./localNode";
 export * from "./node";
 export * from "./processHelpers";
 export * from "./providerFactories";
+export * from "./validation";

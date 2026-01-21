@@ -1,7 +1,16 @@
 import dotenv from "dotenv";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
-import { fetchArtifact, deriveTestIds, generateConfig, type fetchArtifactArgs } from "../internal";
+import {
+  fetchArtifact,
+  deriveTestIds,
+  generateConfig,
+  validateEnvironmentName,
+  validateBinaryName,
+  validateVersion,
+  validateOutputPath,
+  type fetchArtifactArgs,
+} from "../internal";
 import { main } from "./main";
 import { runNetworkCmd } from "./runNetwork";
 import { testCmd } from "./runTests";
@@ -131,6 +140,45 @@ yargs(hideBin(process.argv))
         });
     },
     async (argv) => {
+      // Validate binary name for security
+      if (argv.bin) {
+        try {
+          validateBinaryName(argv.bin);
+        } catch (error) {
+          console.log(
+            chalk.red(`❌ ${error instanceof Error ? error.message : "Invalid binary name"}`)
+          );
+          process.exitCode = 1;
+          return;
+        }
+      }
+
+      // Validate version for security
+      if (argv.ver) {
+        try {
+          validateVersion(argv.ver);
+        } catch (error) {
+          console.log(
+            chalk.red(`❌ ${error instanceof Error ? error.message : "Invalid version"}`)
+          );
+          process.exitCode = 1;
+          return;
+        }
+      }
+
+      // Validate output path for security (if provided)
+      if (argv.outputName) {
+        try {
+          validateOutputPath(argv.outputName);
+        } catch (error) {
+          console.log(
+            chalk.red(`❌ ${error instanceof Error ? error.message : "Invalid output path"}`)
+          );
+          process.exitCode = 1;
+          return;
+        }
+      }
+
       await fetchArtifact(argv);
     }
   )
@@ -171,9 +219,21 @@ yargs(hideBin(process.argv))
     },
     withErrorHandling(async (args) => {
       if (args.envName) {
+        // Validate environment name for security
+        const envName = args.envName.toString();
+        try {
+          validateEnvironmentName(envName);
+        } catch (error) {
+          console.log(
+            chalk.red(`❌ ${error instanceof Error ? error.message : "Invalid environment name"}`)
+          );
+          process.exitCode = 1;
+          return;
+        }
+
         process.env.MOON_RUN_SCRIPTS = "true";
         if (
-          !(await testCmd(args.envName.toString(), {
+          !(await testCmd(envName, {
             testNamePattern: args.GrepTest,
             subDirectory: args.subDirectory,
             shard: args.testShard,
@@ -210,6 +270,19 @@ yargs(hideBin(process.argv))
         });
     },
     withErrorHandling(async (argv) => {
+      // Validate environment name for security
+      if (argv.envName) {
+        try {
+          validateEnvironmentName(argv.envName);
+        } catch (error) {
+          console.log(
+            chalk.red(`❌ ${error instanceof Error ? error.message : "Invalid environment name"}`)
+          );
+          process.exitCode = 1;
+          return;
+        }
+      }
+
       process.env.MOON_RUN_SCRIPTS = "true";
       await runNetworkCmd(argv);
     })

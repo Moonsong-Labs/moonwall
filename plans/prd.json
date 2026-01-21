@@ -883,7 +883,8 @@
       "Check for command injection in Bun.spawn calls",
       "Review yargs argument parsing for injection risks"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: (1) Created packages/cli/src/internal/validation.ts with comprehensive input validation utilities: validateFilePath (prevents path traversal with null byte and directory escape checks), validateOutputPath (for download destinations), validateEnvironmentName (alphanumeric with length limits), validateBinaryName (no path separators or shell metacharacters), validateDownloadUrl (HTTPS-only GitHub domain whitelist), validateVersion (alphanumeric with length limit). (2) Updated configReader.ts:configSetup() to validate config file paths against traversal attacks - relative paths validated against cwd, absolute paths normalized. (3) Updated entrypoint.ts test and run commands to validate environment names before execution. (4) Updated entrypoint.ts download command to validate binary name, version, and output path. (5) Updated downloader.ts to validate download URLs against GitHub domain whitelist (github.com, raw.githubusercontent.com, objects.githubusercontent.com, etc.). (6) Verified Bun.spawn in runTests.ts uses array form (safe from command injection). (7) Created comprehensive test suite validation.test.ts with 40 tests covering all validation functions, path traversal, shell metacharacters, and edge cases. Test baseline: 1536 pass (up from 1496), 12 skip, 16 fail (same E2E tests requiring moonwall environment). Typecheck and lint pass."
   },
   {
     "category": "reliability",

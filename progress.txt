@@ -3344,3 +3344,102 @@ This ensures cleanup runs regardless of where the shutdown originates.
 **Files Changed:**
 - `packages/cli/src/internal/effect/__tests__/GracefulShutdown.test.ts` - Created (13 tests)
 - `plans/prd.json` - Marked Feature 70 as complete with detailed notes
+
+---
+
+### Feature Completed: Validate input handling in CLI commands (PRD Feature 69)
+
+**Changes Made:**
+
+1. **Created validation utilities module (`packages/cli/src/internal/validation.ts`):**
+   - `validateFilePath()` - Prevents path traversal attacks with null byte and directory escape checks
+   - `validateOutputPath()` - Validates download destination paths
+   - `validateEnvironmentName()` - Validates env names with alphanumeric pattern and 64-char limit
+   - `validateBinaryName()` - Validates binary names, rejects path separators and shell metacharacters
+   - `validateDownloadUrl()` - HTTPS-only validation with GitHub domain whitelist
+   - `validateVersion()` - Validates version strings with alphanumeric pattern and length limit
+
+2. **Updated `configReader.ts`:**
+   - Added path validation in `configSetup()` function
+   - Relative paths validated against cwd to prevent traversal
+   - Absolute paths normalized to resolve any `..` components
+
+3. **Updated `entrypoint.ts`:**
+   - Added environment name validation before `test` and `run` commands
+   - Added binary name, version, and output path validation for `download` command
+   - User-friendly error messages on validation failure
+
+4. **Updated `downloader.ts`:**
+   - Added URL validation against GitHub domain whitelist
+   - Only allows HTTPS URLs from trusted domains (github.com, raw.githubusercontent.com, objects.githubusercontent.com, etc.)
+
+5. **Verified Bun.spawn usage in `runTests.ts`:**
+   - Uses array form (`Bun.spawn(["bun", "test", ...args])`) which is safe from command injection
+   - Arguments constructed through `BunTestOptionsBuilder` class with proper escaping
+
+6. **Created comprehensive test suite (`validation.test.ts`):**
+   - 40 tests covering all validation functions
+   - Path traversal attack prevention tests
+   - Shell metacharacter rejection tests
+   - URL domain whitelist tests
+   - Edge cases (null bytes, empty input, long strings)
+
+**Security Improvements Summary:**
+
+| Validation Type | Protection |
+|-----------------|------------|
+| Config file paths | Path traversal prevention via directory escape checks |
+| Environment names | Shell metacharacter rejection, length limits |
+| Binary names | Path separator rejection, shell metacharacter rejection |
+| Download URLs | HTTPS-only, GitHub domain whitelist |
+| Versions | Alphanumeric validation, length limits |
+| Output paths | Relative path traversal prevention |
+
+**★ Insight ─────────────────────────────────────**
+The validation module follows defense-in-depth principles:
+1. Early validation at CLI entry points (entrypoint.ts)
+2. Deep validation at point-of-use (downloader.ts, configReader.ts)
+3. Pattern-based validation for structured inputs (env names, versions)
+4. Domain whitelisting for external resources (URLs)
+**─────────────────────────────────────────────────**
+
+**Verification:**
+- `bun run typecheck` - Passes with no errors
+- `bun run lint` - Passes with no errors
+- `bun test` - 1536 pass, 12 skip, 16 fail (same E2E baseline requiring moonwall environment)
+  - 40 new validation tests pass
+
+**Notes for Next Developer:**
+
+1. The validation module is exported from `packages/cli/src/internal/index.ts` for use across the CLI.
+
+2. Key files modified:
+   - `packages/cli/src/internal/validation.ts` - New validation utilities
+   - `packages/cli/src/lib/configReader.ts` - Config path validation
+   - `packages/cli/src/cmds/entrypoint.ts` - CLI argument validation
+   - `packages/cli/src/internal/cmdFunctions/downloader.ts` - URL validation
+
+3. The GitHub domain whitelist includes:
+   - `github.com`
+   - `raw.githubusercontent.com`
+   - `objects.githubusercontent.com`
+   - `github-releases.githubusercontent.com`
+   - `github-cloud.githubusercontent.com`
+   - `github-cloud.s3.amazonaws.com`
+   - `api.github.com`
+
+4. The 16 failing tests are E2E tests requiring running moonwall environment - not related to this change.
+
+5. Next high-priority features:
+   - Feature 71: Health check endpoint for long-running networks
+   - Features 53-58: Integration/E2E tests
+   - Feature 67: Update CHANGELOG and version
+
+**Files Changed:**
+- `packages/cli/src/internal/validation.ts` - Created (206 lines)
+- `packages/cli/src/internal/index.ts` - Added validation export
+- `packages/cli/src/lib/configReader.ts` - Added path validation
+- `packages/cli/src/cmds/entrypoint.ts` - Added CLI argument validation
+- `packages/cli/src/internal/cmdFunctions/downloader.ts` - Added URL validation
+- `packages/cli/src/internal/__tests__/validation.test.ts` - Created (40 tests)
+- `plans/prd.json` - Marked Feature 69 as complete

@@ -1,6 +1,7 @@
 import { SingleBar, Presets } from "cli-progress";
 import fs from "node:fs";
 import { Readable } from "node:stream";
+import { validateDownloadUrl } from "../validation";
 
 interface ProgressBarOptions {
   etaAsynchronousUpdate: boolean;
@@ -9,13 +10,12 @@ interface ProgressBarOptions {
 }
 
 export async function downloader(url: string, outputPath: string): Promise<void> {
+  // Validate URL is from a trusted domain
+  validateDownloadUrl(url);
+
   const tempPath = `${outputPath}.tmp`;
   const writeStream = fs.createWriteStream(tempPath);
   let transferredBytes = 0;
-
-  if (url.startsWith("ws")) {
-    console.log("You've passed a WebSocket URL to fetch. Is this intended?");
-  }
 
   const headers: any = {};
   if (process.env.GITHUB_TOKEN) {

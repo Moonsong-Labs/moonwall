@@ -3,6 +3,7 @@ import { readFile, access } from "node:fs/promises";
 import { readFileSync, existsSync, constants } from "node:fs";
 import JSONC from "jsonc-parser";
 import path, { extname } from "node:path";
+import { validateFilePath } from "../internal/validation";
 
 let cachedConfig: MoonwallConfig | undefined;
 
@@ -30,11 +31,32 @@ export function configSetup(args: string[]) {
 
     const configFile = process.argv[index + 1];
 
-    if (!existsSync(configFile)) {
-      throw new Error(`Config file not found at "${configFile}"`);
+    if (!configFile) {
+      throw new Error("Config file path is required after --configFile or -c");
     }
 
-    process.env.MOON_CONFIG_PATH = configFile;
+    // Validate path to prevent traversal attacks
+    // Allow absolute paths for explicit user intent, validate relative paths against cwd
+    let validatedPath: string;
+    try {
+      if (path.isAbsolute(configFile)) {
+        // For absolute paths, just normalize to resolve any .. components
+        validatedPath = path.resolve(configFile);
+      } else {
+        // For relative paths, validate against cwd to prevent traversal
+        validatedPath = validateFilePath(configFile, process.cwd());
+      }
+    } catch (error) {
+      throw new Error(
+        `Invalid config file path: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+
+    if (!existsSync(validatedPath)) {
+      throw new Error(`Config file not found at "${validatedPath}"`);
+    }
+
+    process.env.MOON_CONFIG_PATH = validatedPath;
   }
 
   if (!process.env.MOON_CONFIG_PATH) {
