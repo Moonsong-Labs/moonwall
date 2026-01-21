@@ -74,3 +74,31 @@ export {
   ReadOnlyFoundationServiceLive,
   makeReadOnlyFoundationServiceLayer,
 } from "./ReadOnlyFoundationServiceLive.js";
+
+// Unified FoundationService types and factory
+export {
+  FoundationServiceFactory,
+  // Unified types
+  type AnyFoundationConfig,
+  type AnyFoundationRunningInfo,
+  type AnyFoundationStatus,
+  type FoundationServiceMap,
+  type FoundationConfigMap,
+  type FoundationRunningInfoMap,
+  type FoundationStatusMap,
+  type BaseFoundationLifecycle,
+  type FoundationServiceResult,
+  type DevFoundationServiceResult,
+  type ChopsticksFoundationServiceResult,
+  type ZombieFoundationServiceResult,
+  type ReadOnlyFoundationServiceResult,
+  // Type guards
+  isDevFoundationConfig,
+  isChopsticksFoundationConfig,
+  isZombieFoundationConfig,
+  isReadOnlyFoundationConfig,
+  isDevFoundationStatus,
+  isChopsticksFoundationStatus,
+  isZombieFoundationStatus,
+  isReadOnlyFoundationStatus,
+} from "./FoundationService.js";

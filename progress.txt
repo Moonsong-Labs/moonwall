@@ -1276,3 +1276,81 @@
 - `packages/cli/src/internal/effect/__tests__/services/ReadOnlyFoundationService.test.ts` - New test file (16 tests)
 - `plans/prd.json` - Marked Feature 26 as complete
 
+---
+
+### Feature Completed: Effect migration - create unified FoundationService interface (PRD Feature 27)
+
+**Changes Made:**
+1. Created `packages/cli/src/internal/effect/services/FoundationService.ts`:
+   - Unified discriminated union types: `AnyFoundationConfig`, `AnyFoundationRunningInfo`, `AnyFoundationStatus`
+   - Each union uses `_type` discriminator field for type narrowing (e.g., `{ _type: "dev" } & DevFoundationConfig`)
+   - Type maps for type-safe foundation-specific access: `FoundationServiceMap`, `FoundationConfigMap`, `FoundationRunningInfoMap`, `FoundationStatusMap`
+   - `BaseFoundationLifecycle<TRunningInfo, TStatus>` interface defining common methods (stop, getStatus, healthCheck)
+   - Per-foundation result types: `DevFoundationServiceResult`, `ChopsticksFoundationServiceResult`, `ZombieFoundationServiceResult`, `ReadOnlyFoundationServiceResult`
+   - `FoundationServiceResult` discriminated union type
+
+2. Created `FoundationServiceFactory` object with methods:
+   - `getService(foundationType)`: Returns Effect with foundation type discriminator and Layer
+   - `getLayer(foundationType)`: Convenience method returning just the Layer
+   - `isSupported(foundationType)`: Type guard for supported foundation types
+   - `getSupportedTypes()`: Returns readonly array of all supported foundation types
+
+3. Created type guards for runtime narrowing:
+   - Config guards: `isDevFoundationConfig`, `isChopsticksFoundationConfig`, `isZombieFoundationConfig`, `isReadOnlyFoundationConfig`
+   - Status guards: `isDevFoundationStatus`, `isChopsticksFoundationStatus`, `isZombieFoundationStatus`, `isReadOnlyFoundationStatus`
+
+4. Updated `packages/cli/src/internal/effect/services/index.ts`:
+   - Added exports for all new unified types, factory, and type guards
+
+5. Created comprehensive unit test suite:
+   - `packages/cli/src/internal/effect/__tests__/services/FoundationService.test.ts`
+   - 33 tests covering: getService() for all 4 foundation types, getLayer() for all 4 types, isSupported() with valid/invalid types, getSupportedTypes(), all 8 type guards
+   - 100% code coverage for FoundationService.ts
+   - All tests pass
+
+**Design Decisions:**
+- **Discriminated unions with _type**: Uses TypeScript's discriminated union pattern for type-safe runtime narrowing without requiring instanceof checks
+- **Factory returns Effect, not Layer**: getService() returns Effect<FoundationServiceResult> to stay within Effect ecosystem and allow for potential async factory logic in the future
+- **Separate type maps**: Provides compile-time type safety when accessing foundation-specific types via foundationType key lookup
+- **Functions extracted from object**: TS doesn't allow function overloads in object literals, so factory functions are defined outside then referenced by the FoundationServiceFactory object
+
+**Verification:**
+- `bun typecheck` - Passes with no errors
+- `bun test packages/cli/src/internal/effect/__tests__/services/FoundationService.test.ts` - 33 pass, 0 fail
+- `bun test` (full suite) - 400 pass (up from 367), 12 skip, 16 fail, 2 errors (same E2E baseline)
+- Code coverage: 100% functions, 100% lines for FoundationService.ts
+
+**Notes for Next Developer:**
+1. Feature 27 completes the unified FoundationService interface. Usage example:
+   ```ts
+   import { Effect } from "effect";
+   import { FoundationServiceFactory, DevFoundationService } from "@moonwall/cli";
+
+   const program = Effect.gen(function* () {
+     const result = yield* FoundationServiceFactory.getService("dev");
+
+     // Type narrowing via discriminator
+     if (result.foundationType === "dev") {
+       const devProgram = Effect.gen(function* () {
+         const devService = yield* DevFoundationService;
+         const { info, stop } = yield* devService.start(config);
+         console.log(`Node on port ${info.rpcPort}`);
+         yield* stop;
+       }).pipe(Effect.provide(result.layer));
+
+       yield* devProgram;
+     }
+   });
+   ```
+2. Next high-priority feature is **Feature 28: Update foundation handlers to use Effect services**
+   - This will integrate the new Effect-based services into the existing moonwall handlers
+   - Handlers in packages/cli/src/lib/handlers/ should be updated to use the new service interfaces
+3. The factory pattern enables runtime polymorphism - useful for dynamically selecting foundation type based on config
+4. The 16 failing tests are E2E tests in `test/suites/` requiring moonwall environment - not related to this change
+
+**Files Changed:**
+- `packages/cli/src/internal/effect/services/FoundationService.ts` - New unified service types and factory
+- `packages/cli/src/internal/effect/services/index.ts` - Added exports for unified types
+- `packages/cli/src/internal/effect/__tests__/services/FoundationService.test.ts` - New test file (33 tests)
+- `plans/prd.json` - Marked Feature 27 as complete
+

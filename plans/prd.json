@@ -336,7 +336,8 @@
       "Export factory and unified types",
       "Write test for factory with different foundation types"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: (1) Created FoundationService.ts with unified types: AnyFoundationConfig, AnyFoundationRunningInfo, AnyFoundationStatus using discriminated unions with _type field. (2) Created type maps: FoundationServiceMap, FoundationConfigMap, FoundationRunningInfoMap, FoundationStatusMap for type-safe foundation-specific access. (3) Created BaseFoundationLifecycle interface defining common methods (stop, getStatus, healthCheck). (4) Created FoundationServiceResult discriminated union type with per-foundation result types (DevFoundationServiceResult, ChopsticksFoundationServiceResult, ZombieFoundationServiceResult, ReadOnlyFoundationServiceResult). (5) Created FoundationServiceFactory object with getService(), getLayer(), isSupported(), getSupportedTypes() methods. (6) Created type guards: isDevFoundationConfig, isChopsticksFoundationConfig, isZombieFoundationConfig, isReadOnlyFoundationConfig, isDevFoundationStatus, isChopsticksFoundationStatus, isZombieFoundationStatus, isReadOnlyFoundationStatus. (7) Updated services/index.ts to export all new types. (8) Created comprehensive unit tests (33 tests) covering factory methods and all type guards. All tests pass with 100% coverage for FoundationService.ts."
   },
   {
     "category": "functional",
