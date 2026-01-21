@@ -1,4 +1,4 @@
-import { Context, Effect, Layer, Ref } from "effect";
+import { Context, Duration, Effect, Layer, Ref } from "effect";
 import { createLogger } from "@moonwall/util";
 import {
   ChopsticksFoundationService,
@@ -23,6 +23,15 @@ import {
   type ChopsticksServiceImpl,
 } from "../launchChopsticksEffect.js";
 import type { HexString } from "@polkadot/util/types";
+import {
+  withTimeout,
+  foundationStartupTimeout,
+  healthCheckTimeout,
+  blockCreationTimeout,
+  storageOperationTimeout,
+  TimeoutDefaults,
+  type OperationTimeoutError,
+} from "../TimeoutPolicy.js";
 
 const logger = createLogger({ name: "ChopsticksFoundationService" });
 
@@ -58,6 +67,8 @@ const makeChopsticksFoundationService = Effect.gen(function* () {
 
   /**
    * Start a chopsticks foundation instance.
+   *
+   * The startup process is wrapped in a configurable timeout (default 2 minutes).
    */
   const start = (
     config: ChopsticksFoundationConfig
@@ -67,8 +78,9 @@ const makeChopsticksFoundationService = Effect.gen(function* () {
       readonly stop: Effect.Effect<void, FoundationShutdownError>;
     },
     FoundationStartupError
-  > =>
-    Effect.gen(function* () {
+  > => {
+    // Inner startup logic extracted for timeout wrapping
+    const startupEffect = Effect.gen(function* () {
       // Update status to Starting
       yield* Ref.set(stateRef, {
         status: { _tag: "Starting" },
@@ -175,6 +187,27 @@ const makeChopsticksFoundationService = Effect.gen(function* () {
         stop: stopEffect,
       };
     });
+
+    // Wrap with configurable timeout, default to 2 minutes
+    const timeoutDuration = config.startupTimeoutMs
+      ? Duration.millis(config.startupTimeoutMs)
+      : TimeoutDefaults.foundationStartup;
+
+    return startupEffect.pipe(
+      (effect) => withTimeout(effect, foundationStartupTimeout(config.name, timeoutDuration)),
+      // Convert timeout error to FoundationStartupError for consistent API
+      Effect.mapError((error) => {
+        if (error._tag === "OperationTimeoutError") {
+          return new FoundationStartupError({
+            foundationType: "chopsticks",
+            message: (error as OperationTimeoutError).userMessage,
+            cause: error,
+          });
+        }
+        return error;
+      })
+    );
+  };
 
   /**
    * Stop the running chopsticks foundation instance.
@@ -287,11 +320,13 @@ const makeChopsticksFoundationService = Effect.gen(function* () {
 
   /**
    * Create one or more new blocks.
+   *
+   * Includes a configurable timeout (default 30 seconds) to prevent hanging on slow block production.
    */
   const createBlock = (
     params?: BlockCreationParams
-  ): Effect.Effect<BlockCreationResult, ChopsticksBlockError> =>
-    Effect.gen(function* () {
+  ): Effect.Effect<BlockCreationResult, ChopsticksBlockError> => {
+    const blockCreationEffect = Effect.gen(function* () {
       const currentState = yield* Ref.get(stateRef);
 
       if (currentState.status._tag !== "Running" || currentState.serviceImpl === null) {
@@ -307,15 +342,44 @@ const makeChopsticksFoundationService = Effect.gen(function* () {
       return result;
     });
 
+    // Get timeout from config (stored in state) or use default
+    const getTimeoutDuration = Effect.gen(function* () {
+      const state = yield* Ref.get(stateRef);
+      const configTimeout = state.runningInfo?.config.blockCreationTimeoutMs;
+      return configTimeout ? Duration.millis(configTimeout) : TimeoutDefaults.blockCreation;
+    });
+
+    return getTimeoutDuration.pipe(
+      Effect.flatMap((timeoutDuration) =>
+        blockCreationEffect.pipe(
+          (effect) =>
+            withTimeout(effect, blockCreationTimeout(params?.count ?? 1, timeoutDuration)),
+          // Convert timeout error to ChopsticksBlockError for consistent API
+          Effect.mapError((error) => {
+            if (error._tag === "OperationTimeoutError") {
+              return new ChopsticksBlockError({
+                cause: new Error((error as OperationTimeoutError).userMessage),
+                operation: "newBlock",
+              });
+            }
+            return error;
+          })
+        )
+      )
+    );
+  };
+
   /**
    * Set storage values directly.
+   *
+   * Includes a 10-second timeout to prevent hanging on slow storage operations.
    */
   const setStorage = (params: {
     module: string;
     method: string;
     params: unknown[];
-  }): Effect.Effect<void, ChopsticksStorageError> =>
-    Effect.gen(function* () {
+  }): Effect.Effect<void, ChopsticksStorageError> => {
+    const setStorageEffect = Effect.gen(function* () {
       const currentState = yield* Ref.get(stateRef);
 
       if (currentState.status._tag !== "Running" || currentState.serviceImpl === null) {
@@ -330,6 +394,26 @@ const makeChopsticksFoundationService = Effect.gen(function* () {
 
       yield* currentState.serviceImpl.setStorage(params);
     });
+
+    return setStorageEffect.pipe(
+      (effect) =>
+        withTimeout(
+          effect,
+          storageOperationTimeout(`setStorage(${params.module}.${params.method})`)
+        ),
+      // Convert timeout error to ChopsticksStorageError for consistent API
+      Effect.mapError((error) => {
+        if (error._tag === "OperationTimeoutError") {
+          return new ChopsticksStorageError({
+            cause: new Error((error as OperationTimeoutError).userMessage),
+            module: params.module,
+            method: params.method,
+          });
+        }
+        return error;
+      })
+    );
+  };
 
   /**
    * Get a block by hash or number.

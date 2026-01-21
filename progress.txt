@@ -2321,3 +2321,150 @@ However, the actual implementation (completed in Feature 35 as ProviderServiceLi
 - `packages/cli/src/internal/effect/RpcPortDiscoveryService.ts` - Use networkRetryPolicy
 - `packages/cli/src/internal/effect/services/ProviderServiceLive.ts` - Use providerConnectionRetryPolicy + healthCheckRetryPolicy
 - `plans/prd.json` - Marked Feature 41 as complete
+
+---
+
+### Feature Completed: Effect migration - add Effect.timeout for operations (PRD Feature 42)
+
+**Changes Made:**
+
+1. **Created TimeoutPolicy.ts module** (`packages/cli/src/internal/effect/TimeoutPolicy.ts`):
+   - Centralized timeout configurations using Effect's `timeoutFail` API
+   - Created `OperationTimeoutError` tagged error class with:
+     - User-friendly messages including operation context
+     - Duration formatting (ms/s/m based on magnitude)
+     - Endpoint information when applicable
+     - Context map for debugging
+   - Created `TimeoutDefaults` with sensible defaults:
+     - Foundation startup: 2 minutes
+     - Foundation shutdown: 30 seconds
+     - Provider connection: 5 minutes
+     - Block creation: 30 seconds
+     - Storage operation: 10 seconds
+     - Health check: 30 seconds
+     - RPC call: 10 seconds
+     - WebSocket connection: 30 seconds
+     - Port discovery: 2 minutes
+     - Node readiness: 2 minutes
+
+2. **Created withTimeout() wrapper**:
+   - Converts `Effect.timeout` behavior (Option.none) to typed `OperationTimeoutError`
+   - Accepts `TimeoutConfig` with duration, operation type, description, and optional endpoint
+   - Preserves original error types when effect fails before timeout
+
+3. **Created timeout configuration factories**:
+   - `foundationStartupTimeout(name, timeout?, endpoint?)`
+   - `foundationShutdownTimeout(name, timeout?)`
+   - `providerConnectionTimeout(name, type, endpoint, timeout?)`
+   - `blockCreationTimeout(blockCount?, timeout?)`
+   - `storageOperationTimeout(operationType, timeout?)`
+   - `healthCheckTimeout(targetName, endpoint?, timeout?)`
+   - `rpcCallTimeout(method, endpoint?, timeout?)`
+   - `websocketConnectionTimeout(endpoint, timeout?)`
+   - `portDiscoveryTimeout(pid, timeout?)`
+   - `nodeReadinessTimeout(port, timeout?)`
+   - `customTimeout(duration, description, options?)`
+
+4. **Updated DevFoundationService**:
+   - Added `startupTimeoutMs` and `shutdownTimeoutMs` optional config fields
+   - Applied `withTimeout` to `start()` method with configurable timeout
+   - Applied `withTimeout` to `healthCheck()` method with 30-second default
+   - Maps `OperationTimeoutError` to `FoundationStartupError`/`FoundationHealthCheckError` for consistent API
+
+5. **Updated ChopsticksFoundationService**:
+   - Added `startupTimeoutMs` and `blockCreationTimeoutMs` optional config fields
+   - Applied `withTimeout` to `start()` method with configurable timeout
+   - Applied `withTimeout` to `createBlock()` method with configurable timeout
+   - Applied `withTimeout` to `setStorage()` method with 10-second default
+   - Maps `OperationTimeoutError` to appropriate chopsticks errors
+
+6. **Created helper functions**:
+   - `isOperationTimeoutError(error)`: Type guard for timeout errors
+   - `formatTimeoutError(error)`: Formats error with actionable suggestions per operation type
+
+7. **Created comprehensive test suite** (`TimeoutPolicy.test.ts`):
+   - 33 tests covering:
+     - TimeoutDefaults values
+     - OperationTimeoutError properties and user messages
+     - Duration formatting (ms, s, m)
+     - withTimeout success and timeout scenarios
+     - All timeout factory functions
+     - isOperationTimeoutError type guard
+     - formatTimeoutError with suggestions
+     - Effect integration (catchAll, map, parallel effects)
+
+8. **Exported from internal/effect/index.ts**
+
+**Design Decisions:**
+
+- **withTimeout vs direct Effect.timeout**: `withTimeout` provides typed errors with context vs `Effect.timeout`'s `Option.none` - better for CLI error messages
+- **Configurable vs default timeouts**: Foundation services accept optional timeout config, falling back to `TimeoutDefaults` for flexibility
+- **Error mapping pattern**: Timeout errors are mapped to service-specific errors (e.g., `FoundationStartupError`) for consistent API while preserving timeout context in `cause`
+- **Duration.millis() for config timeouts**: Using `Duration.millis(configTimeout)` instead of template strings ensures proper TypeScript type checking
+
+**★ Insight ─────────────────────────────────────**
+- Effect's `Effect.timeoutFail` combines timeout + error in one call, cleaner than separate `Effect.timeout` + `Effect.mapError`
+- Duration formatting based on magnitude (500ms, 5s, 2m) makes error messages more readable
+- Actionable suggestions in `formatTimeoutError()` help users troubleshoot (e.g., "Check that the node binary is available")
+- The timeout wrapping pattern (`effect.pipe(effect => withTimeout(effect, config))`) preserves Effect composition
+**─────────────────────────────────────────────────**
+
+**Verification:**
+- `bun typecheck` - Passes with no errors
+- `bun test` - 947 pass (up from 914), 12 skip, 16 fail, 2 errors
+  - +33 tests from new TimeoutPolicy.test.ts
+  - Same E2E failures as previous sessions (require moonwall environment)
+- TimeoutPolicy.ts has 94.44% function coverage, 100% line coverage
+
+**Notes for Next Developer:**
+
+1. The timeout policies are centralized in `TimeoutPolicy.ts` for easy tuning.
+   To adjust timeout behavior, modify `TimeoutDefaults`.
+
+2. To add timeouts to other services:
+   ```ts
+   import { withTimeout, customTimeout } from "../TimeoutPolicy.js";
+
+   const myOperation = myEffect.pipe(
+     (effect) => withTimeout(effect, customTimeout("30 seconds", "My operation", {
+       operation: "rpc_call",
+       endpoint: "ws://localhost:9944"
+     })),
+     Effect.mapError((error) => {
+       if (error._tag === "OperationTimeoutError") {
+         return new MyServiceError({ message: error.userMessage, cause: error });
+       }
+       return error;
+     })
+   );
+   ```
+
+3. User-configurable timeouts can be added to config interfaces:
+   ```ts
+   interface MyServiceConfig {
+     readonly myOperationTimeoutMs?: number;
+   }
+
+   // In service implementation:
+   const timeout = config.myOperationTimeoutMs
+     ? Duration.millis(config.myOperationTimeoutMs)
+     : TimeoutDefaults.rpcCall;
+   ```
+
+4. Next high-priority features:
+   - Feature 43: Add Effect.acquireRelease for resource cleanup (reliability)
+   - Feature 44: Add Effect tracing with spans (observability)
+   - Feature 45: Add structured error logging (observability)
+
+5. The 16 failing tests are E2E tests in `test/suites/` requiring a running
+   moonwall environment - not related to this change.
+
+**Files Changed:**
+- `packages/cli/src/internal/effect/TimeoutPolicy.ts` - New centralized timeout policies
+- `packages/cli/src/internal/effect/__tests__/TimeoutPolicy.test.ts` - 33 unit tests
+- `packages/cli/src/internal/effect/index.ts` - Added TimeoutPolicy export
+- `packages/cli/src/internal/effect/services/DevFoundationService.ts` - Added timeout config fields
+- `packages/cli/src/internal/effect/services/DevFoundationServiceLive.ts` - Applied timeouts to start/healthCheck
+- `packages/cli/src/internal/effect/services/ChopsticksFoundationService.ts` - Added timeout config fields
+- `packages/cli/src/internal/effect/services/ChopsticksFoundationServiceLive.ts` - Applied timeouts to start/createBlock/setStorage
+- `plans/prd.json` - Marked Feature 42 as complete

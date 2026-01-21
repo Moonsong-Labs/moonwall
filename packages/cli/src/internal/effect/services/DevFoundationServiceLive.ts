@@ -1,4 +1,4 @@
-import { Effect, Layer, Ref } from "effect";
+import { Duration, Effect, Layer, Ref } from "effect";
 import type { ChildProcess } from "node:child_process";
 import { createLogger } from "@moonwall/util";
 import {
@@ -19,6 +19,14 @@ import {
 } from "../RpcPortDiscoveryService.js";
 import { NodeReadinessService, NodeReadinessServiceLive } from "../NodeReadinessService.js";
 import { ProcessError } from "../errors.js";
+import {
+  withTimeout,
+  foundationStartupTimeout,
+  foundationShutdownTimeout,
+  healthCheckTimeout,
+  TimeoutDefaults,
+  type OperationTimeoutError,
+} from "../TimeoutPolicy.js";
 
 const logger = createLogger({ name: "DevFoundationService" });
 
@@ -57,6 +65,10 @@ const makeDevFoundationService = Effect.gen(function* () {
 
   /**
    * Start a dev foundation node.
+   *
+   * The entire startup process (launch + port discovery) is wrapped in a
+   * configurable timeout. On timeout, the process is cleaned up and a
+   * FoundationStartupError is returned.
    */
   const start = (
     config: DevFoundationConfig
@@ -66,8 +78,9 @@ const makeDevFoundationService = Effect.gen(function* () {
       readonly stop: Effect.Effect<void, FoundationShutdownError>;
     },
     FoundationStartupError
-  > =>
-    Effect.gen(function* () {
+  > => {
+    // Inner startup logic extracted for timeout wrapping
+    const startupEffect = Effect.gen(function* () {
       // Update status to Starting
       yield* Ref.set(stateRef, {
         status: { _tag: "Starting" },
@@ -207,6 +220,27 @@ const makeDevFoundationService = Effect.gen(function* () {
       };
     });
 
+    // Wrap with configurable timeout, default to 2 minutes
+    const timeoutDuration = config.startupTimeoutMs
+      ? Duration.millis(config.startupTimeoutMs)
+      : TimeoutDefaults.foundationStartup;
+
+    return startupEffect.pipe(
+      (effect) => withTimeout(effect, foundationStartupTimeout(config.name, timeoutDuration)),
+      // Convert timeout error to FoundationStartupError for consistent API
+      Effect.mapError((error) => {
+        if (error._tag === "OperationTimeoutError") {
+          return new FoundationStartupError({
+            foundationType: "dev",
+            message: (error as OperationTimeoutError).userMessage,
+            cause: error,
+          });
+        }
+        return error;
+      })
+    );
+  };
+
   /**
    * Stop the running dev foundation node.
    */
@@ -261,9 +295,11 @@ const makeDevFoundationService = Effect.gen(function* () {
 
   /**
    * Perform a health check on the running node.
+   *
+   * Includes a 30-second timeout to prevent hanging on unresponsive nodes.
    */
-  const healthCheck = (): Effect.Effect<void, FoundationHealthCheckError> =>
-    Effect.gen(function* () {
+  const healthCheck = (): Effect.Effect<void, FoundationHealthCheckError> => {
+    const healthCheckEffect = Effect.gen(function* () {
       const currentState = yield* Ref.get(stateRef);
 
       if (currentState.status._tag !== "Running") {
@@ -308,6 +344,24 @@ const makeDevFoundationService = Effect.gen(function* () {
 
       logger.debug(`Health check passed for port ${rpcPort}`);
     });
+
+    return healthCheckEffect.pipe(
+      (effect) => withTimeout(effect, healthCheckTimeout("dev foundation")),
+      // Convert timeout error to FoundationHealthCheckError for consistent API
+      Effect.mapError((error) => {
+        if (error._tag === "OperationTimeoutError") {
+          const timeoutError = error as OperationTimeoutError;
+          return new FoundationHealthCheckError({
+            foundationType: "dev",
+            message: timeoutError.userMessage,
+            endpoint: timeoutError.endpoint,
+            cause: error,
+          });
+        }
+        return error;
+      })
+    );
+  };
 
   return {
     start,

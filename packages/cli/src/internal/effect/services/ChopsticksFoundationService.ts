@@ -43,6 +43,18 @@ export interface ChopsticksFoundationConfig {
 
   /** Timeout for new block operations (ms) */
   readonly newBlockTimeout?: number;
+
+  /**
+   * Timeout for startup operations in milliseconds.
+   * If not specified, defaults to 2 minutes.
+   */
+  readonly startupTimeoutMs?: number;
+
+  /**
+   * Timeout for block creation operations in milliseconds.
+   * If not specified, defaults to 30 seconds.
+   */
+  readonly blockCreationTimeoutMs?: number;
 }
 
 /**

@@ -544,7 +544,8 @@
       "Handle TimeoutException with user-friendly error messages",
       "Write test verifying timeout behavior"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: (1) Created TimeoutPolicy.ts module with centralized timeout configurations using Effect.timeoutFail. (2) Created OperationTimeoutError tagged error class with user-friendly messages including operation context, duration formatting (ms/s/m), and endpoint info. (3) Created withTimeout() wrapper that converts Effect.timeout to typed OperationTimeoutError. (4) Created factory functions for all operation types: foundationStartupTimeout, foundationShutdownTimeout, providerConnectionTimeout, blockCreationTimeout, storageOperationTimeout, healthCheckTimeout, rpcCallTimeout, websocketConnectionTimeout, portDiscoveryTimeout, nodeReadinessTimeout, customTimeout. (5) Created TimeoutDefaults with sensible defaults (2min startup, 30s shutdown, 5min provider connection, 30s block creation, etc.). (6) Updated DevFoundationService config to include startupTimeoutMs and shutdownTimeoutMs options. (7) Updated ChopsticksFoundationService config to include startupTimeoutMs and blockCreationTimeoutMs options. (8) Applied withTimeout to DevFoundationServiceLive.start() and healthCheck() methods with error mapping to foundation errors. (9) Applied withTimeout to ChopsticksFoundationServiceLive.start(), createBlock(), and setStorage() methods with error mapping. (10) Created formatTimeoutError() with actionable suggestions per operation type. (11) Created isOperationTimeoutError() type guard. (12) Created 33 comprehensive tests covering all timeout factories, error formatting, Effect integration, and parallel effects. Test count: 947 pass (up from 914), 12 skip, 16 fail, 2 errors (same E2E baseline requiring moonwall environment)."
   },
   {
     "category": "reliability",

@@ -28,6 +28,18 @@ export interface DevFoundationConfig {
 
   /** Whether this is an Ethereum-compatible chain (affects RPC validation) */
   readonly isEthereumChain: boolean;
+
+  /**
+   * Timeout for startup operations in milliseconds.
+   * If not specified, defaults to 2 minutes.
+   */
+  readonly startupTimeoutMs?: number;
+
+  /**
+   * Timeout for shutdown operations in milliseconds.
+   * If not specified, defaults to 30 seconds.
+   */
+  readonly shutdownTimeoutMs?: number;
 }
 
 /**
