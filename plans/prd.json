@@ -895,7 +895,8 @@
       "Ensure all provider connections are closed",
       "Write test verifying graceful shutdown"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: Graceful shutdown was already fully implemented in the codebase. (1) SIGINT handler in entrypoint.ts:48-54 calls MoonwallContext.destroy('cancelled by user') and exits with code 130. (2) SIGTERM handler in entrypoint.ts:57-63 calls MoonwallContext.destroy('terminated by system') and exits with code 143. (3) MoonwallContext.destroy() (globalContext.ts:769-862) implements full cleanup: disconnects all providers, kills child processes with SIGINT and waits for termination, stops Docker containers, terminates zombie networks and closes IPC server. (4) disconnect() method (globalContext.ts:674-747) handles provider disconnection with parallel execution and individual error handling. (5) ResourceManagement.ts provides Effect-based cleanup patterns with registerProcessExitCleanup for signal handler registration. (6) Created comprehensive test suite GracefulShutdown.test.ts with 13 tests covering: signal handler registration/unregistration, cleanup order (LIFO), error handling during cleanup, timeout behavior, exit code verification, and process termination simulation. Test baseline: 1496 pass (up from 1449), 12 skip, 16 fail (E2E tests requiring moonwall environment)."
   },
   {
     "category": "observability",

@@ -3255,3 +3255,92 @@ The codebase already has excellent secret redaction support in `ErrorLogging.ts`
 - `.gitignore` - Added .env patterns
 - `test/.env.example` - Created as documentation template
 - `plans/prd.json` - Marked Feature 68 as complete
+
+---
+
+### Feature Completed: Add graceful shutdown handling (PRD Feature 70)
+
+**Analysis Summary:**
+
+Graceful shutdown handling was already fully implemented in the codebase. This feature verification confirmed all requirements are met and added comprehensive tests.
+
+**Existing Implementation Found:**
+
+1. **SIGINT Handler (entrypoint.ts:48-54):**
+   - Shows cursor on exit
+   - Sets global MOONWALL_TERMINATION_REASON = "cancelled by user"
+   - Calls MoonwallContext.destroy("cancelled by user")
+   - Exits with code 130 (standard SIGINT exit code: 128 + 2)
+
+2. **SIGTERM Handler (entrypoint.ts:57-63):**
+   - Shows cursor on exit
+   - Sets global MOONWALL_TERMINATION_REASON = "terminated by system"
+   - Calls MoonwallContext.destroy("terminated by system")
+   - Exits with code 143 (standard SIGTERM exit code: 128 + 15)
+
+3. **MoonwallContext.destroy() (globalContext.ts:769-862):**
+   - Step 1: Disconnects all providers via ctx.disconnect()
+   - Step 2: Kills child processes with SIGINT, waits for termination via isPidRunning loop
+   - Step 3: Stops and removes Docker containers with reason logging
+   - Step 4: Terminates zombie networks, kills process PIDs, closes IPC server
+
+4. **Provider disconnect (globalContext.ts:674-747):**
+   - Parallel disconnection with Promise.all
+   - Individual error handling (errors logged but don't block other disconnects)
+   - Two-tier process cleanup: Effect-based cleanup with fallback to manual kill
+   - Cleanup handlers for chopsticks/docker resources
+
+5. **Effect-based cleanup (ResourceManagement.ts):**
+   - registerProcessExitCleanup for SIGINT/SIGTERM handler registration
+   - combineCleanups for parallel cleanup with error tolerance
+   - withAcquireRelease, withEnsuredCleanup patterns
+
+**New Tests Added:**
+
+Created `GracefulShutdown.test.ts` with 13 comprehensive tests:
+- Signal handler registration and unregistration
+- Multiple cleanup registrations
+- Cleanup order verification (LIFO/reverse acquisition)
+- Error tolerance during cleanup (continues even if one fails)
+- Cleanup error handling without crashing
+- Timeout behavior for slow cleanups
+- Context destroy simulation (no-context case, full sequence)
+- Exit code verification (130 for SIGINT, 143 for SIGTERM)
+- Termination reason tracking in global scope
+- Process death waiting simulation
+- Process flagging before kill
+
+**Verification:**
+- `bun run typecheck` - Passes with no errors
+- `bun run lint` - Passes with no errors
+- `bun test` - 1496 pass, 12 skip, 16 fail (same E2E baseline requiring moonwall environment)
+  - 13 new graceful shutdown tests pass
+
+**★ Insight ─────────────────────────────────────**
+The graceful shutdown implementation uses a multi-layer approach:
+1. Signal handlers at CLI entry point (immediate response)
+2. MoonwallContext.destroy() for coordinated cleanup
+3. Effect-based ResourceManagement for composable cleanup patterns
+4. Per-resource cleanup handlers stored during startup
+
+This ensures cleanup runs regardless of where the shutdown originates.
+**─────────────────────────────────────────────────**
+
+**Notes for Next Developer:**
+
+1. Graceful shutdown is fully operational. Key files:
+   - `packages/cli/src/cmds/entrypoint.ts` - Signal handlers
+   - `packages/cli/src/lib/globalContext.ts` - MoonwallContext.destroy()
+   - `packages/cli/src/internal/effect/ResourceManagement.ts` - Effect patterns
+
+2. The 16 failing tests are E2E tests requiring running nodes (moonwall environment).
+
+3. Next high-priority features:
+   - Feature 71: Health check endpoint for long-running networks
+   - Feature 69: Validate input handling in CLI commands
+   - Feature 67: Update CHANGELOG and version
+   - Features 53-58: Integration/E2E tests
+
+**Files Changed:**
+- `packages/cli/src/internal/effect/__tests__/GracefulShutdown.test.ts` - Created (13 tests)
+- `plans/prd.json` - Marked Feature 70 as complete with detailed notes
