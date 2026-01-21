@@ -859,7 +859,8 @@
       "Document new testing capabilities",
       "Prepare for major version bump if breaking changes exist"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: (1) Created .changeset/effect-bun-migration.md with major version bump for all 3 packages (@moonwall/cli, @moonwall/types, @moonwall/util). (2) Documented breaking changes: package manager migration (pnpm→Bun with commands, lock file, workspace config), test runner migration (Vitest→Bun with imports, mocking, spies), config schema changes (vitestArgs→bunTestArgs, multiThreads→maxConcurrency, printVitestOptions→printTestRunnerOptions, cacheImports deprecated). (3) Documented new Effect-TS architecture: foundation services (Dev, Chopsticks, Zombie, ReadOnly), provider service, structured concurrency, retry policies, timeout handling, tracing. (4) Documented new features: health check endpoint, input validation, graceful shutdown. (5) Documented performance improvements: faster test execution, parallel provider connections, memoized services, lazy initialization. (6) Changeset validates with 'bun changeset status' showing major bump for all packages. Version will go from 5.18.2 to 6.0.0 upon release."
   },
   {
     "category": "security",

@@ -3627,3 +3627,65 @@ import { Effect, Layer } from "effect";
 - `MIGRATION.md` - New file documenting migration baseline and summary
 - `plans/prd.json` - Marked Feature 0 as complete
 
+
+---
+
+### Feature Completed: Update CHANGELOG and version (PRD Feature 58)
+
+**Changes Made:**
+1. Created `.changeset/effect-bun-migration.md` with comprehensive release documentation:
+   - **Major version bump**: All 3 packages (@moonwall/cli, @moonwall/types, @moonwall/util) marked for major version bump (5.18.2 → 6.0.0)
+   - **Breaking changes documented**:
+     - Package manager: pnpm → Bun (commands, lock file, workspace config)
+     - Test runner: Vitest → Bun test runner (imports, mocking, spies, context)
+     - Config schema: vitestArgs → bunTestArgs, multiThreads → maxConcurrency, printVitestOptions → printTestRunnerOptions, cacheImports deprecated
+     - Test suite exports: Now re-export from bun:test instead of vitest
+   - **New features documented**:
+     - Effect-TS service architecture (foundation services, provider service, structured concurrency, retry policies, timeouts, tracing)
+     - Health check endpoint (`--health-port` option)
+     - Input validation (path traversal prevention, URL whitelist)
+     - Graceful shutdown (SIGINT/SIGTERM handling)
+   - **Performance improvements documented**:
+     - Faster test execution with Bun's native runner
+     - Parallel provider connections with Effect.all
+     - Memoized service initialization
+     - Lazy initialization with Effect.suspend
+   - **Internal changes documented**: Effect dependencies, bun-types, Schema validation, structured error logging, resource management
+
+2. Verified changeset with `bun changeset status` - shows major bump for all packages
+
+**Design Decisions:**
+- **Major version bump (6.0.0)**: The migration involves significant breaking changes that affect how users install, run tests, and configure moonwall. A major version bump clearly communicates this.
+- **Comprehensive migration guide**: The changeset includes detailed before/after examples for all breaking changes to ease migration.
+- **Table format for config changes**: Makes it easy to see the mapping between old and new field names.
+
+**Verification:**
+- `bun run typecheck` - Passes with no errors
+- `bun test` - 1696 pass, 12 skip, 16 fail, 2 errors (same baseline as before)
+- `bun changeset status` - Correctly shows major bump for @moonwall/cli, @moonwall/types, @moonwall/util, @moonwall/tests, @moonwall/docs
+
+**Notes for Next Developer:**
+
+1. To release version 6.0.0:
+   ```bash
+   bun changeset version  # Updates package.json versions and generates CHANGELOG
+   bun changeset:release  # Publishes to npm
+   ```
+
+2. The changeset will be consumed when `bun changeset version` is run, which:
+   - Updates all package versions to 6.0.0
+   - Generates/updates CHANGELOG.md files in each package
+   - Removes the changeset file
+
+3. Remaining incomplete PRD features (all non-blocking for release):
+   - Features 47-52: Integration/E2E tests (require moonwall environment with blockchain binaries)
+   - Features 53-54: Performance optimization (nice-to-have)
+   - Features 55-56: Effect utilities in packages/util (nice-to-have)
+   - Feature 57: Run full E2E test suite (requires moonwall environment)
+
+4. The 16 failing tests are E2E tests in `test/suites/` requiring moonwall environment - not related to this change.
+
+**Files Changed:**
+- `.changeset/effect-bun-migration.md` - New changeset file documenting breaking changes
+- `plans/prd.json` - Marked Feature 58 as complete
+
