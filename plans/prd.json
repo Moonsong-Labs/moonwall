@@ -909,6 +909,7 @@
       "Return node readiness status",
       "Document health check usage"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: (1) Created HealthCheckService.ts with Effect-based HTTP server providing /health, /ready, and /live endpoints. (2) /health returns JSON with status (healthy/degraded/unhealthy), foundation type, uptime, timestamp, nodes array (name, port, status), providers array (name, type, connected), and endpoints array. (3) /ready returns ready boolean based on health status. (4) /live returns alive boolean (liveness probe). (5) Added --health-port/-hp option to 'moonwall run' command in entrypoint.ts. (6) Integrated health server into runNetwork.tsx - starts after network is up, stops before MoonwallContext.destroy(). (7) Health status logic: healthy = configured + (nodes running OR read_only) + providers; degraded = partial conditions; unhealthy = no context or unconfigured. (8) Created comprehensive test suite with 18 tests covering all endpoints, status conditions, and HTTP responses. (9) Exported HealthCheckService types and factory from services/index.ts. Usage: 'moonwall run dev_seq --health-port 9999' then 'curl http://127.0.0.1:9999/health'. Test count: 1554 pass (up from 1536), 12 skip, 16 fail (same E2E baseline requiring moonwall environment)."
   }
 ]

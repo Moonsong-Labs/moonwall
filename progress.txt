@@ -3443,3 +3443,130 @@ The validation module follows defense-in-depth principles:
 - `packages/cli/src/internal/cmdFunctions/downloader.ts` - Added URL validation
 - `packages/cli/src/internal/__tests__/validation.test.ts` - Created (40 tests)
 - `plans/prd.json` - Marked Feature 69 as complete
+
+---
+
+### Feature Completed: Add health check endpoint for long-running networks (PRD Feature 71)
+
+**Changes Made:**
+
+1. **Created HealthCheckService.ts** (`packages/cli/src/internal/effect/services/HealthCheckService.ts`):
+   - Effect-based service interface for health check HTTP server
+   - Provides three endpoints:
+     - `/health` (or `/`): Full health check with JSON response
+     - `/ready`: Kubernetes-style readiness probe
+     - `/live`: Kubernetes-style liveness probe
+   - Health status logic:
+     - `healthy`: configured + (nodes running OR read_only foundation) + providers connected
+     - `degraded`: partially meets health criteria
+     - `unhealthy`: no context or not configured
+   - Response includes: status, environment name, foundation type, uptime (seconds), timestamp, nodes array, providers array, endpoints array
+   - Uses `Layer.effect` pattern with `Ref` for server state management
+   - CORS headers enabled for browser access
+   - Custom error classes: `HealthCheckError`, `HealthCheckServerError`
+
+2. **Added --health-port option to run command** (`packages/cli/src/cmds/entrypoint.ts`):
+   - Added `healthPort` to `RunCommandArgs` type
+   - Added `--health-port/-hp` option to yargs configuration for `run` command
+   - Default is undefined (disabled); specify port to enable
+
+3. **Integrated health server into runNetwork.tsx**:
+   - Starts health check server after network is up (if port specified)
+   - Displays server URL in console
+   - Stops server gracefully before MoonwallContext.destroy()
+   - Handles startup failures gracefully with warning message
+
+4. **Exported from services/index.ts**:
+   - `HealthCheckService` (Context.Tag)
+   - `HealthCheckError`, `HealthCheckServerError` (error classes)
+   - `makeHealthCheckServiceLayer` (factory function)
+   - `defaultHealthCheckConfig` (default port 9999, host 127.0.0.1)
+   - Type exports: `HealthCheckConfig`, `HealthCheckResponse`, `HealthCheckServerStatus`, `ProviderHealth`, `NodeHealth`
+
+5. **Created comprehensive test suite** (`packages/cli/src/internal/effect/__tests__/services/HealthCheckService.test.ts`):
+   - 18 tests covering:
+     - `getHealth()`: unhealthy without context, healthy/degraded status logic, read_only foundation handling, port extraction from args, default values
+     - `getStatus()`: initial Stopped status
+     - `start()`/`stop()`: server lifecycle, status transitions
+     - HTTP endpoints: /health, /ready, /live, 404 for unknown paths, 503 for unhealthy
+   - Uses `makeHealthCheckServiceLayer` with mock context getter for testing
+
+**Usage:**
+
+```bash
+# Start network with health check endpoint on port 9999
+moonwall run dev_seq --health-port 9999
+
+# Check health (from another terminal)
+curl http://127.0.0.1:9999/health
+
+# Example response:
+{
+  "status": "healthy",
+  "environment": "dev_seq",
+  "foundation": "dev",
+  "uptime": 42,
+  "timestamp": "2026-01-21T12:00:00.000Z",
+  "nodes": [
+    { "name": "dev-node", "port": "9944", "status": "running" }
+  ],
+  "providers": [
+    { "name": "polkadotJs", "type": "polkadotJs", "connected": true }
+  ],
+  "endpoints": ["ws://127.0.0.1:9944"]
+}
+
+# Kubernetes-style probes
+curl http://127.0.0.1:9999/ready  # {"ready": true, "timestamp": "..."}
+curl http://127.0.0.1:9999/live   # {"alive": true, "timestamp": "..."}
+```
+
+**★ Insight ─────────────────────────────────────**
+The health check service follows the Effect pattern established in other services:
+- Uses `makeHealthCheckServiceLayer()` factory for testability (accepts context getter)
+- HTTP server created dynamically inside Effect.tryPromise for proper async handling
+- State managed via Effect `Ref` (server instance, status, start time)
+- Clean separation between health logic (getHealth) and HTTP serving (start/stop)
+**─────────────────────────────────────────────────**
+
+**Verification:**
+- `bun run typecheck` - Passes with no errors
+- `bun run lint` - Passes (1 info-level suggestion in unrelated file)
+- `bun test` - 1554 pass (up from 1536), 12 skip, 16 fail (same E2E baseline requiring moonwall environment)
+- 18 new health check service tests pass
+
+**Notes for Next Developer:**
+
+1. The health check is opt-in via `--health-port` flag. Without it, no server is started.
+
+2. The service is fully Effect-based and can be used programmatically:
+   ```ts
+   import { Effect } from "effect";
+   import { HealthCheckService, makeHealthCheckServiceLayer, MoonwallContext } from "@moonwall/cli";
+   
+   const layer = makeHealthCheckServiceLayer(() => MoonwallContext.getContext());
+   const health = await Effect.runPromise(
+     Effect.gen(function* () {
+       const service = yield* HealthCheckService;
+       return yield* service.getHealth();
+     }).pipe(Effect.provide(layer))
+   );
+   ```
+
+3. For Kubernetes deployments, configure:
+   - `livenessProbe.httpGet.path: /live`
+   - `readinessProbe.httpGet.path: /ready`
+   - `livenessProbe.httpGet.port: <health-port>`
+
+4. The 16 failing tests are E2E tests requiring running moonwall environment - not related to this change.
+
+5. Remaining PRD items are mostly integration/E2E tests (Features 53-58), performance optimization (60-61), and changelog (67).
+
+**Files Changed:**
+- `packages/cli/src/internal/effect/services/HealthCheckService.ts` - New (360 lines)
+- `packages/cli/src/internal/effect/services/index.ts` - Added exports
+- `packages/cli/src/cmds/entrypoint.ts` - Added healthPort option to run command
+- `packages/cli/src/cmds/runNetwork.tsx` - Integrated health server lifecycle
+- `packages/cli/src/internal/effect/__tests__/services/HealthCheckService.test.ts` - New (18 tests)
+- `plans/prd.json` - Marked Feature 71 as complete
+

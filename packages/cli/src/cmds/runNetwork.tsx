@@ -27,6 +27,10 @@ import { confirm, input, select, Separator } from "@inquirer/prompts";
 import { ConfigService } from "../internal/effect/services/ConfigService.js";
 import { ConfigServiceLive } from "../internal/effect/services/ConfigServiceLive.js";
 import { TestCommandError, formatCliError } from "./runTestsEffect.js";
+import {
+  HealthCheckService,
+  makeHealthCheckServiceLayer,
+} from "../internal/effect/services/HealthCheckService.js";
 
 let lastSelected = 0;
 
@@ -104,6 +108,42 @@ export async function runNetworkCmd(args: RunCommandArgs) {
 
   for (const { port } of portsList) {
     console.log(`  🖥️   https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0.0.1%3A${port}`);
+  }
+
+  // Start health check server if port is specified
+  let stopHealthServer: (() => Promise<void>) | undefined;
+  if (args.healthPort) {
+    try {
+      const healthCheckLayer = makeHealthCheckServiceLayer(async () => {
+        try {
+          return await MoonwallContext.getContext();
+        } catch {
+          return undefined;
+        }
+      });
+
+      const startHealthServer = Effect.gen(function* () {
+        const healthService = yield* HealthCheckService;
+        const { stop } = yield* healthService.start({
+          port: args.healthPort!,
+          host: "127.0.0.1",
+        });
+        return stop;
+      }).pipe(Effect.provide(healthCheckLayer));
+
+      const stopEffect = await Effect.runPromise(startHealthServer);
+      // Wrap the Effect-returning function in a Promise-returning function
+      stopHealthServer = () => Effect.runPromise(stopEffect().pipe(Effect.catchAll(() => Effect.void)));
+      console.log(
+        chalk.green(`  🏥  Health check server running at http://127.0.0.1:${args.healthPort}/health`)
+      );
+    } catch (error) {
+      console.log(
+        chalk.yellow(
+          `  ⚠️  Failed to start health check server: ${error instanceof Error ? error.message : "Unknown error"}`
+        )
+      );
+    }
   }
 
   if (process.env.MOON_SUBDIR) {
@@ -223,6 +263,16 @@ export async function runNetworkCmd(args: RunCommandArgs) {
       }
       default:
         throw new Error("invalid value");
+    }
+  }
+
+  // Stop health check server before destroying context
+  if (stopHealthServer) {
+    try {
+      await stopHealthServer();
+      console.log(chalk.dim("  🏥  Health check server stopped"));
+    } catch {
+      // Ignore errors stopping the health server
     }
   }
 

@@ -150,3 +150,17 @@ export {
   makeLoggerServiceLayer,
   LoggerServiceDisabled,
 } from "./LoggerServiceLive.js";
+
+// HealthCheckService interface and types
+export {
+  HealthCheckService,
+  HealthCheckError,
+  HealthCheckServerError,
+  makeHealthCheckServiceLayer,
+  defaultHealthCheckConfig,
+  type HealthCheckConfig,
+  type HealthCheckResponse,
+  type HealthCheckServerStatus,
+  type ProviderHealth,
+  type NodeHealth,
+} from "./HealthCheckService.js";

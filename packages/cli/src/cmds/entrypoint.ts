@@ -81,6 +81,7 @@ export type RunCommandArgs = {
   envName: string;
   GrepTest?: string;
   subDirectory?: string;
+  healthPort?: number;
 };
 
 yargs(hideBin(process.argv))
@@ -267,6 +268,12 @@ yargs(hideBin(process.argv))
           describe: "Additional sub-directory filter for test suites",
           alias: "d",
           type: "string",
+        })
+        .option("healthPort", {
+          describe: "Port for health check HTTP server (enables health endpoint at /health)",
+          alias: "hp",
+          type: "number",
+          default: undefined,
         });
     },
     withErrorHandling(async (argv) => {
