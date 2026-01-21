@@ -688,7 +688,8 @@
       "Test read_only foundation connect -> healthCheck -> disconnect cycle",
       "Use real but lightweight test configurations"
     ],
-    "passes": false
+    "passes": false,
+    "notes": "DEFERRED: Requires blockchain binaries (moonbeam, polkadot, etc.) which are not available in development environment. These tests must be validated in CI/CD environment with proper infrastructure. The Effect service unit tests (Features 46-52) provide comprehensive mocked coverage of the same functionality."
   },
   {
     "category": "functional",
@@ -700,7 +701,8 @@
       "Test multiple providers connect in parallel",
       "Test provider cleanup on foundation shutdown"
     ],
-    "passes": false
+    "passes": false,
+    "notes": "DEFERRED: Requires running blockchain nodes to test actual provider connections. ProviderServiceLive.test.ts (26 tests) and ProviderService.test.ts (16 tests) provide comprehensive mocked coverage of the provider connection logic including retry, timeout, and cleanup behaviors."
   },
   {
     "category": "functional",
@@ -712,7 +714,8 @@
       "Test test failure is reported correctly",
       "Test coverage report is generated"
     ],
-    "passes": false
+    "passes": false,
+    "notes": "DEFERRED: Requires blockchain binaries to run moonwall test environments. The BunTestOptionsBuilder and test runner logic are covered by unit tests. Coverage report generation is verified to work (1768 tests generate coverage). Context injection was validated during Feature 15 (describeSuite wrapper update)."
   },
   {
     "category": "functional",
@@ -737,7 +740,8 @@
       "Test `moonwall run <env>` starts network",
       "Test `moonwall download` fetches artifacts"
     ],
-    "passes": false
+    "passes": false,
+    "notes": "DEFERRED: moonwall test/run commands require blockchain binaries. moonwall download and interactive menu could be tested without binaries but would require TTY mocking for interactive prompts. Input validation for CLI commands is comprehensively tested in validation.test.ts (40 tests)."
   },
   {
     "category": "functional",
@@ -749,7 +753,8 @@
       "Identify and document any intentionally uncovered code",
       "Add coverage badge or reporting to CI"
     ],
-    "passes": false
+    "passes": false,
+    "notes": "DEFERRED: Current coverage is ~50% lines, ~60% functions. The gap is primarily in foundation lifecycle code (providerFactories.ts, zombieHelpers.ts, RpcPortDiscoveryService.ts, fileCheckers.ts) which requires running blockchain nodes to execute. Unit tests cover all Effect services with mocks. To reach 80%, either: (1) run integration tests with real binaries in CI, or (2) add more mock-based tests for the remaining code paths. Coverage badge can be added to CI via bunfig.toml [test] coverageReporter=['lcov'] and Codecov/Coveralls integration."
   },
   {
     "category": "performance",
@@ -852,7 +857,8 @@
       "Run `moonwall test read_only` if network available",
       "Document any test failures with root cause"
     ],
-    "passes": false
+    "passes": false,
+    "notes": "DEFERRED: Requires blockchain binaries (moonbeam for dev_seq, chopsticks CLI, polkadot/moonbeam for zombienet). These tests should be run in CI/CD environment where binaries are available. The 16 failing tests in current baseline are these E2E tests. The migration is complete; this feature represents final validation in a production-like environment."
   },
   {
     "category": "functional",

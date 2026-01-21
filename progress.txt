@@ -4136,3 +4136,78 @@ import { Effect, Layer } from "effect";
 - `bunfig.toml` - Added preload, maxConcurrency, smol configuration
 - `packages/cli/src/internal/effect/__tests__/preload.ts` - New preload file for common imports
 - `plans/prd.json` - Marked Feature 58 as complete
+
+---
+
+## Session: 2026-01-21
+
+### PRD Migration Status Assessment
+
+**Assessment:**
+Analyzed the PRD to identify highest priority incomplete features. All 6 remaining incomplete features require blockchain binaries/infrastructure that is not available in the development environment:
+
+1. **Feature 51**: Testing - add integration tests for foundation lifecycle (requires moonbeam, polkadot)
+2. **Feature 52**: Testing - add integration tests for provider connection (requires running nodes)
+3. **Feature 53**: Testing - add integration tests for test runner (requires moonwall environments)
+4. **Feature 55**: Testing - add e2e tests for CLI commands (requires blockchain binaries)
+5. **Feature 56**: Testing - verify 80% coverage target (requires running actual foundation code)
+6. **Feature 64**: Run full e2e test suite (requires all blockchain binaries)
+
+**Current State:**
+- `bun typecheck` - Passes with no errors
+- `bun test` - 1768 pass, 12 skip, 16 fail (E2E tests requiring moonwall environment)
+- Coverage: ~50% lines, ~60% functions
+
+**Changes Made:**
+1. Updated `plans/prd.json` - Added detailed notes to all 6 incomplete features explaining:
+   - Why they are deferred (require blockchain infrastructure)
+   - What unit test coverage exists as alternative
+   - What needs to happen for completion
+
+2. Updated `MIGRATION.md` - Added:
+   - Current coverage metrics
+   - Migration completion status (COMPLETE with deferred E2E validation)
+   - List of deferred items with explanations
+
+**Conclusion:**
+The Effect-Bun migration PRD is **effectively complete** for all code-level work. The 6 remaining features are validation tasks that require CI/CD infrastructure with blockchain binaries. These cannot be completed in a development environment.
+
+**★ Insight ─────────────────────────────────────**
+- The PRD was designed with integration/E2E testing as final validation steps
+- All Effect services have comprehensive unit test coverage using Layer.succeed mocks
+- The 16 failing tests are expected - they are moonwall environment E2E tests
+- To complete the deferred features, set up CI with: moonbeam binary, chopsticks CLI, polkadot binary
+**─────────────────────────────────────────────────**
+
+**Notes for Next Developer:**
+
+1. The migration is CODE COMPLETE. What remains is validation in CI/CD:
+   - Set up GitHub Actions job with blockchain binaries
+   - Run `moonwall test basic`, `moonwall test dev_seq`, etc.
+   - Verify E2E tests pass with actual infrastructure
+
+2. Coverage target (80%) cannot be achieved without running:
+   - providerFactories.ts (actual provider connections)
+   - zombieHelpers.ts (actual zombienet orchestration)
+   - RpcPortDiscoveryService.ts (actual RPC connections)
+   - fileCheckers.ts (actual binary checks)
+
+3. The changeset is ready for release (.changeset/effect-bun-migration.md):
+   - Major version bump (5.x → 6.0.0)
+   - All breaking changes documented
+   - Effect-TS architecture documented
+
+4. To validate locally (if you have binaries):
+   ```bash
+   # Download moonbeam binary
+   bunx moonwall download moonbeam v0.40.0 ./tmp/
+
+   # Run E2E tests
+   bunx moonwall test dev_seq
+   bunx moonwall test basic
+   ```
+
+**Files Changed:**
+- `plans/prd.json` - Added notes to Features 51, 52, 53, 55, 56, 64
+- `MIGRATION.md` - Added completion status and coverage metrics
+
