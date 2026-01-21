@@ -75,6 +75,18 @@ export {
   makeReadOnlyFoundationServiceLayer,
 } from "./ReadOnlyFoundationServiceLive.js";
 
+// ProviderService interface and types
+export {
+  ProviderService,
+  ProviderDisconnectError,
+  ProviderHealthCheckError,
+  type ProviderServiceConfig,
+  type ProviderServiceRunningInfo,
+  type ProviderServiceStatus,
+  type TypedConnectedProvider,
+  type ProviderServiceType,
+} from "./ProviderService.js";
+
 // Unified FoundationService types and factory
 export {
   FoundationServiceFactory,

@@ -1419,3 +1419,83 @@ This feature was analyzed in depth and determined to require no code changes. He
 **Files Changed:**
 - `plans/prd.json` - Marked Feature 28 as complete with architectural analysis notes
 
+---
+
+### Feature Completed: Effect migration - create ProviderService interface (PRD Feature 29)
+
+**Changes Made:**
+1. Created `packages/cli/src/internal/effect/services/ProviderService.ts`:
+   - Defined `ProviderService` using Effect's `Context.Tag` pattern
+   - Interface methods:
+     - `createProviders(config)`: Creates lazy provider instances, returns Effect<number>
+     - `connect(config)`: Returns `Effect<{info: ProviderServiceRunningInfo, disconnect: Effect<void>}, ProviderConnectionError>`
+     - `disconnect()`: Returns `Effect<void, ProviderDisconnectError>`
+     - `getStatus()`: Returns `Effect<ProviderServiceStatus>`
+     - `getProvider(name)`: Returns `Effect<ConnectedProvider | undefined>`
+     - `getAllProviders()`: Returns `Effect<ReadonlyArray<ConnectedProvider>>`
+     - `healthCheck()`: Returns `Effect<void, ProviderHealthCheckError>`
+     - `healthCheckProvider(name)`: Returns `Effect<void, ProviderHealthCheckError>`
+   - Defined `ProviderServiceConfig` with fields: providers, connectionTimeout, retryAttempts, retryDelay
+   - Defined `ProviderServiceStatus` union type: `Idle | Connecting | Connected | Disconnected | Failed`
+   - Defined `ProviderServiceRunningInfo` with: connectedProviders, connectedCount, endpoints, config
+
+2. Created new tagged error classes:
+   - `ProviderDisconnectError`: For when a provider fails to disconnect cleanly
+   - `ProviderHealthCheckError`: For when a provider health check fails
+
+3. Created `TypedConnectedProvider<T>` interface for type-safe provider access by type
+
+4. Updated `packages/cli/src/internal/effect/services/index.ts`:
+   - Added exports for ProviderService, error classes, and all related types
+
+5. Created comprehensive unit test suite:
+   - `packages/cli/src/internal/effect/__tests__/services/ProviderService.test.ts`
+   - 16 tests covering: connect success, connect failures, disconnect, getStatus variants (Idle, Connected, Connecting), getProvider, getAllProviders, healthCheck, healthCheckProvider, createProviders, and error class creation
+   - Uses `Layer.succeed` pattern for mocking the service interface
+   - All tests pass
+
+**Design Decisions:**
+- **Follows foundation service pattern**: Uses same `Context.Tag` + return `{info, disconnect}` tuple pattern as DevFoundationService, ChopsticksFoundationService, etc.
+- **Separate from existing ProviderFactory**: This is a high-level Effect service that will eventually wrap the existing ProviderFactory/ProviderInterfaceFactory infrastructure
+- **Configuration includes retry settings**: ProviderServiceConfig includes connectionTimeout, retryAttempts, retryDelay - these will map to Effect.retry/timeout when the Live implementation is created
+- **Health check at provider level**: Added both `healthCheck()` (all providers) and `healthCheckProvider(name)` (specific provider) for flexibility
+- **Uses existing ProviderConnectionError**: Reuses the error from foundation errors for connect failures; new ProviderDisconnectError and ProviderHealthCheckError for other operations
+- **TypedConnectedProvider<T>**: Enables type-safe access when you know the provider type at compile time
+
+**Verification:**
+- `bun typecheck` - Passes with no errors
+- `bun test packages/cli/src/internal/effect/__tests__/services/ProviderService.test.ts` - 16 pass, 0 fail
+- `bun test` (full suite) - 416 pass (up from 400), 12 skip, 16 fail, 2 errors (same E2E baseline)
+
+**Notes for Next Developer:**
+1. Feature 29 creates only the **interface** - the Live implementation is Feature 34 (ProviderFactoryService).
+2. Features 30-33 will implement type-specific provider services (PolkadotJs, Ethers, Viem, Web3, Papi).
+3. The ProviderService is designed to wrap the existing two-layer provider abstraction:
+   - Layer 1: `ProviderFactory` creates lazy `MoonwallProvider` objects
+   - Layer 2: `ProviderInterfaceFactory` connects them to get `ConnectedProvider` objects
+4. Example usage when Live implementation exists:
+   ```ts
+   import { Effect } from "effect";
+   import { ProviderService, ProviderServiceLive } from "@moonwall/cli";
+
+   const program = Effect.gen(function* () {
+     const providerService = yield* ProviderService;
+     const { info, disconnect } = yield* providerService.connect({
+       providers: [
+         { name: "polkadot", type: "polkadotJs", endpoints: ["wss://rpc.polkadot.io"] },
+       ],
+       connectionTimeout: 30000,
+       retryAttempts: 3,
+     });
+     console.log(`Connected ${info.connectedCount} providers`);
+     yield* disconnect;
+   }).pipe(Effect.provide(ProviderServiceLive));
+   ```
+5. The 16 failing tests are E2E tests in `test/suites/` requiring moonwall environment - not related to this change.
+
+**Files Changed:**
+- `packages/cli/src/internal/effect/services/ProviderService.ts` - New service interface file
+- `packages/cli/src/internal/effect/services/index.ts` - Added exports for ProviderService types
+- `packages/cli/src/internal/effect/__tests__/services/ProviderService.test.ts` - New test file (16 tests)
+- `plans/prd.json` - Marked Feature 29 as complete
+
