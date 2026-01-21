@@ -798,7 +798,8 @@
       "Update packages/cli to use Effect logger",
       "Write test for logger Effect"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: (1) Created packages/util/src/functions/loggerEffect.ts with Effect wrappers for pino logger operations. (2) Wrapped pino logger creation with Effect.try via createLoggerEffect() returning Effect<LoggerInstance, LoggerCreationError>. (3) Created LoggerServiceLive Layer in packages/util using Layer.effect with Ref for state management. (4) Created additional direct Effect wrappers: getLoggerEffect(), clearLoggersEffect(), setLoggerEnabledEffect(). (5) Created LoggerService Context.Tag for dependency injection. (6) Created LoggerServiceDisabled Layer for testing (no-op logging). (7) Created makeLoggerServiceLayer() factory for custom configuration. (8) Exported all from packages/util/src/functions/index.ts. (9) packages/cli already wraps util's logger via internal/effect/services/LoggerServiceLive.ts (completed in Feature 38). (10) Created comprehensive test suite with 26 tests covering direct Effect functions, Layer-based service, composition patterns, and error handling. Test count: 1757 pass (up from 1731), 12 skip, 16 fail (same E2E baseline requiring moonwall environment). Typecheck passes."
   },
   {
     "category": "functional",

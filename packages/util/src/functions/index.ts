@@ -15,6 +15,7 @@ export {
   type Logger,
   type LoggerOptions,
 } from "./logger";
+export * from "./loggerEffect";
 export * from "./logging";
 export * from "./providers";
 export * from "./viem";

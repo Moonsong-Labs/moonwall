@@ -3822,3 +3822,127 @@ import { Effect, Layer } from "effect";
 - `packages/util/src/__tests__/blockEffect.test.ts` - New test suite (22 tests)
 - `packages/util/src/__tests__/extrinsicsEffect.test.ts` - New test suite (13 tests)
 - `plans/prd.json` - Marked Feature 59 as complete
+
+---
+
+### Feature Completed: Effect migration - convert logger.ts to Effect (PRD Feature 60)
+
+**Changes Made:**
+
+1. **Created packages/util/src/functions/loggerEffect.ts** with Effect wrappers for pino logger:
+   - `createLoggerEffect(options)` - Returns `Effect<LoggerInstance, LoggerCreationError>`
+   - `getLoggerEffect(name)` - Returns `Effect<LoggerInstance | undefined>`
+   - `clearLoggersEffect()` - Returns `Effect<void>`
+   - `setLoggerEnabledEffect(pattern, enabled)` - Returns `Effect<void>`
+
+2. **Created typed error class**:
+   - `LoggerCreationError` - Tagged error for logger creation failures with `loggerName` and `cause` fields
+
+3. **Created LoggerInstance interface**:
+   - Typed wrapper around pino logger with `debug`, `info`, `warn`, `error`, `fatal`, `trace` methods
+   - Each method accepts optional `context` parameter for structured logging
+
+4. **Created LoggerService Context.Tag** for Effect dependency injection:
+   - `getLogger(options)` - Create or retrieve named logger
+   - `debug/info/warn/error(loggerName, message, context?)` - Log via service
+   - `getStatus()` - Returns Active or Disabled status
+   - `setLoggerEnabled(pattern, enabled)` - Enable/disable loggers
+   - `clearLoggers()` - Clear all cached loggers
+   - `hasLogger(name)` - Check if logger exists
+   - `getLoggerNames()` - Get all logger names
+
+5. **Created Layers**:
+   - `LoggerServiceLive` - Production implementation wrapping pino
+   - `LoggerServiceDisabled` - No-op logger for testing
+   - `makeLoggerServiceLayer(config?)` - Factory for custom configuration
+
+6. **Updated exports** in `packages/util/src/functions/index.ts`
+
+7. **Created comprehensive test suite** (`packages/util/src/__tests__/loggerEffect.test.ts`):
+   - 26 tests covering:
+     - Direct Effect function wrappers
+     - Logger caching behavior
+     - Level configuration
+     - Logging with and without context
+     - LoggerService via Layer
+     - Active/Disabled status
+     - Effect composition (pipe, flatMap, gen, all)
+     - Error handling with catchTag
+
+**Design Decisions:**
+
+- **Parallel to packages/cli implementation**: The packages/cli already has LoggerService wrapping the util logger (Feature 38). This feature adds Effect wrappers directly in packages/util for users who want Effect-based logging without depending on packages/cli.
+- **Backwards compatible**: Original Promise-free functions in logger.ts remain unchanged.
+- **Uses Effect.try for creation**: Wraps createLoggerSync with typed error handling.
+- **Uses Effect.sync for operations**: getLogger, clearLoggers, setLoggerEnabled are synchronous operations.
+- **State management via Ref**: LoggerServiceLive tracks logger names using Effect Ref.
+- **LoggerInstance interface**: Provides typed wrapper around pino with convenient logging methods.
+
+**★ Insight ─────────────────────────────────────**
+- Effect.try is preferred over Effect.tryPromise for synchronous operations that might throw
+- Effect.sync wraps synchronous side effects (logging, clearing state)
+- Layer.effect creates a Layer from an Effect, useful when initialization needs access to Ref.make
+- Context.Tag creates a unique identifier for dependency injection
+- Pino loggers are cached by name internally, so createLogger returns same instance for same name
+**─────────────────────────────────────────────────**
+
+**Verification:**
+- `bun run typecheck` - Passes with no errors
+- `bun test` - 1757 pass (up from 1731), 12 skip, 16 fail, 2 errors
+  - +26 tests from new loggerEffect.test.ts
+  - Same E2E failures as previous sessions (require moonwall environment)
+- loggerEffect.ts has 82.35% function coverage, 94.62% line coverage
+
+**Notes for Next Developer:**
+
+1. Usage examples for direct Effect functions:
+   ```ts
+   import { createLoggerEffect, clearLoggersEffect } from "@moonwall/util";
+
+   const program = Effect.gen(function* () {
+     const logger = yield* createLoggerEffect({ name: "myApp" });
+     logger.info("Application started");
+     logger.debug("Debug info", { version: "1.0.0" });
+   });
+
+   await Effect.runPromise(program);
+   ```
+
+2. Usage with LoggerService Layer:
+   ```ts
+   import { LoggerService, LoggerServiceLive } from "@moonwall/util";
+
+   const program = Effect.gen(function* () {
+     const service = yield* LoggerService;
+     const logger = yield* service.getLogger({ name: "myService" });
+     logger.info("Service initialized");
+     
+     // Or log directly via service
+     yield* service.info("myService", "Hello", { key: "value" });
+   });
+
+   await Effect.runPromise(
+     program.pipe(Effect.provide(LoggerServiceLive))
+   );
+   ```
+
+3. For testing with disabled logging:
+   ```ts
+   import { LoggerServiceDisabled } from "@moonwall/util";
+
+   const result = await Effect.runPromise(
+     program.pipe(Effect.provide(LoggerServiceDisabled))
+   );
+   ```
+
+4. Remaining incomplete PRD features:
+   - Features 51-53, 55-56, 62: Integration/E2E tests (require moonwall environment)
+   - Features 57-58: Performance optimization
+
+5. The 16 failing tests are E2E tests in `test/suites/` requiring moonwall environment - not related to this change.
+
+**Files Changed:**
+- `packages/util/src/functions/loggerEffect.ts` - New Effect-based logger module
+- `packages/util/src/functions/index.ts` - Added loggerEffect export
+- `packages/util/src/__tests__/loggerEffect.test.ts` - 26 unit tests
+- `plans/prd.json` - Marked Feature 60 as complete
