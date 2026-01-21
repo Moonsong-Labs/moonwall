@@ -14,10 +14,7 @@ import {
   EnvironmentNotFoundError,
 } from "../internal/effect/services/ConfigService.js";
 import { ConfigServiceLive } from "../internal/effect/services/ConfigServiceLive.js";
-import {
-  TestCommandError,
-  formatCliError,
-} from "./runTestsEffect.js";
+import { TestCommandError, formatCliError } from "./runTestsEffect.js";
 
 const logger = createLogger({ name: "runner" });
 

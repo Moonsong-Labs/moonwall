@@ -518,7 +518,8 @@
       "Define TestAppLayer with mocked services for testing",
       "Export both layers for use in CLI and tests"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: (1) Created AppLayer.ts with comprehensive Layer composition using Layer.mergeAll. (2) Defined layer types: CoreServices, ProviderServices, FoundationServices, LowLevelServices, AllServices. (3) Created sub-layers: CoreServicesLive (ConfigService + LoggerService), CoreServicesTest (with disabled logging), LowLevelServicesLive (ProcessManager, PortDiscovery, NodeReadiness, RpcPortDiscovery, StartupCache), FoundationServicesLive (Dev, Chopsticks, Zombie, ReadOnly), ProviderServicesLive. (4) Created AppLayer namespace with: Live (full production), Test (disabled logging), Minimal (core only), plus sub-layer access (Core, CoreTest, LowLevel, Foundations, Providers). (5) Re-exported all service tags for convenience. (6) Created comprehensive unit test suite with 28 tests covering layer composition, service access, custom composition, and mocking patterns. (7) Exported from internal/effect/index.ts. Test count: 893 pass (up from 865), 12 skip, 16 fail, 2 errors (same E2E baseline). Typecheck passes."
   },
   {
     "category": "reliability",

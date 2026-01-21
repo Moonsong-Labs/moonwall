@@ -2103,3 +2103,115 @@ However, the actual implementation (completed in Feature 35 as ProviderServiceLi
 - `packages/cli/src/cmds/entrypoint.ts` - Added withErrorHandling wrapper for CLI commands
 - `packages/util/package.json` - Fixed build script to exclude test files
 - `plans/prd.json` - Marked Feature 39 as complete
+
+---
+
+## Session: 2026-01-21
+
+### Feature Completed: Effect migration - create application Layer composition (PRD Feature 40)
+
+**Changes Made:**
+
+1. Created `packages/cli/src/internal/effect/AppLayer.ts`:
+   - Comprehensive Layer composition module for Moonwall's Effect-based services
+   - Defined type aliases: `CoreServices`, `ProviderServices`, `FoundationServices`, `LowLevelServices`, `AllServices`
+   - Created sub-layers using `Layer.mergeAll`:
+     - `CoreServicesLive`: ConfigService + LoggerService
+     - `CoreServicesTest`: ConfigService + LoggerServiceDisabled (for cleaner test output)
+     - `LowLevelServicesLive`: ProcessManager, PortDiscovery, NodeReadiness, RpcPortDiscovery, StartupCache
+     - `FoundationServicesLive`: Dev, Chopsticks, Zombie, ReadOnly foundation services
+     - `ProviderServicesLive`: Provider connection services
+   - Created `AppLayer` namespace with convenient accessors:
+     - `AppLayer.Live`: Full production layer with all services
+     - `AppLayer.Test`: Full layer with disabled logging
+     - `AppLayer.Minimal`: Core services only (ConfigService + LoggerService)
+     - Sub-layer access: `Core`, `CoreTest`, `LowLevel`, `Foundations`, `Providers`
+   - Re-exported all service tags for direct import convenience
+
+2. Created `packages/cli/src/internal/effect/__tests__/AppLayer.test.ts`:
+   - 28 comprehensive unit tests covering:
+     - AppLayer namespace structure
+     - CoreServicesLive/Test service provision
+     - LowLevelServicesLive service provision
+     - FoundationServicesLive service provision
+     - ProviderServicesLive service provision
+     - Full AppLayerLive composition
+     - AppLayerTest with disabled logging
+     - AppLayerMinimal core-only layer
+     - Custom layer composition patterns
+     - Service mocking with Layer.succeed
+
+3. Updated `packages/cli/src/internal/effect/index.ts`:
+   - Added export for AppLayer module
+
+**Design Decisions:**
+
+- **Namespace pattern**: AppLayer provides both direct layer exports (`AppLayerLive`) and a convenient namespace (`AppLayer.Live`) for flexibility
+- **Sub-layer exposure**: Individual sub-layers are exposed for custom composition scenarios where users don't need all services
+- **Test layer**: `AppLayerTest` disables logging via `LoggerServiceDisabled` while keeping all other services functional
+- **Service tag re-exports**: All service tags are re-exported from AppLayer for single-import convenience
+
+**★ Insight ─────────────────────────────────────**
+- Effect's `Layer.mergeAll` combines independent layers without introducing dependencies between them
+- Each foundation service layer already includes its internal dependencies via `Layer.provide`
+- The AppLayer pattern enables both convenience (pre-composed layers) and flexibility (sub-layer composition)
+- `Layer.succeed` pattern in tests allows type-safe service mocking without touching production code
+**─────────────────────────────────────────────────**
+
+**Verification:**
+- `bun typecheck` - Passes with no errors
+- `bun test` - 893 pass (up from 865), 12 skip, 16 fail, 2 errors (same E2E baseline requiring moonwall environment)
+- 28 new tests added for AppLayer module
+
+**Notes for Next Developer:**
+
+1. Feature 40 completes the Effect Layer composition infrastructure. Users can now easily access all services via pre-composed layers.
+
+2. To use AppLayer in Effect programs:
+   ```ts
+   import { Effect } from "effect";
+   import { AppLayer, ConfigService, DevFoundationService } from "@moonwall/cli";
+
+   const program = Effect.gen(function* () {
+     const config = yield* ConfigService;
+     const devFoundation = yield* DevFoundationService;
+     // ... use services
+   }).pipe(Effect.provide(AppLayer.Live));
+
+   await Effect.runPromise(program);
+   ```
+
+3. For custom composition (e.g., only dev foundation):
+   ```ts
+   import { Layer } from "effect";
+   import { CoreServicesLive, DevFoundationServiceLive, ProviderServicesLive } from "@moonwall/cli";
+
+   const CustomLayer = Layer.mergeAll(
+     CoreServicesLive,
+     DevFoundationServiceLive,
+     ProviderServicesLive
+   );
+   ```
+
+4. For testing with mocks:
+   ```ts
+   const MockConfigService = Layer.succeed(ConfigService, {
+     loadConfig: () => Effect.succeed(mockConfig),
+     // ... mock other methods
+   });
+   const TestLayer = Layer.merge(AppLayer.Test, MockConfigService);
+   ```
+
+5. Next high-priority features:
+   - Feature 41: Add Effect.retry for network operations (reliability)
+   - Feature 42: Add Effect.timeout for operations (reliability)
+   - Feature 43: Add Effect.acquireRelease for resource cleanup (reliability)
+   - Features 44-45: Observability (tracing, structured logging)
+
+6. The 16 failing tests are E2E tests in `test/suites/` requiring moonwall environment - not related to this change.
+
+**Files Changed:**
+- `packages/cli/src/internal/effect/AppLayer.ts` - New application Layer composition module
+- `packages/cli/src/internal/effect/__tests__/AppLayer.test.ts` - Unit tests for AppLayer
+- `packages/cli/src/internal/effect/index.ts` - Added AppLayer export
+- `plans/prd.json` - Marked Feature 40 as complete

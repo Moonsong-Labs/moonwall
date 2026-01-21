@@ -137,7 +137,9 @@ export const loadEnvironment = (envName: string) =>
  * Format an EnvironmentNotFoundError into a user-friendly message.
  */
 function formatEnvironmentNotFoundError(error: EnvironmentNotFoundError): string {
-  const envList = error.availableEnvironments ? [...error.availableEnvironments].sort().join(", ") : "none";
+  const envList = error.availableEnvironments
+    ? [...error.availableEnvironments].sort().join(", ")
+    : "none";
   return `No environment found in config for: ${chalk.bgWhiteBright.blackBright(
     error.environmentName
   )}\n Environments defined in config are: ${envList}\n`;

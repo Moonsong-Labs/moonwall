@@ -18,6 +18,9 @@ export * from "./StartupCacheService.js";
 // High-level foundation services
 export * from "./services/index.js";
 
+// Application Layer composition
+export * from "./AppLayer.js";
+
 // Effect-based launchers (bridge to existing code)
 export * from "./launchNodeEffect.js";
 export * from "./ChopsticksService.js";
