@@ -5,7 +5,8 @@
     "allowImportingTsExtensions": false,
     "noEmit": false,
     "declaration": true,
-    "emitDeclarationOnly": true
+    "emitDeclarationOnly": true,
+    "types": ["bun-types"]
   },
   "include": ["./src/**/*.ts"],
   "exclude": ["**/dist/**"]

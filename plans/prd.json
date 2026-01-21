@@ -820,7 +820,8 @@
       "Run `bun run typecheck` and verify no errors",
       "Remove any @types/node conflicts if present"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: All 3 packages now have bun-types configured. packages/cli and packages/util already had bun-types from Feature 12/17. Added bun-types ^1.3.6 to packages/types/package.json devDependencies and types: ['bun-types'] to packages/types/tsconfig.json. Verified: (1) bun install successful, (2) bun typecheck passes for all packages, (3) bun test baseline unchanged (1071 pass, 12 skip, 16 fail - same E2E tests requiring moonwall environment), (4) No @types/node conflicts since bun-types depends on @types/node internally. The root tsconfig.json has types: ['node'] which child configs override with types: ['bun-types']. Bun globals (Bun.spawn, etc.) are properly typed in runTests.ts."
   },
   {
     "category": "functional",

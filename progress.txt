@@ -3052,3 +3052,67 @@ These 7 features (46-52) were already completed during the Effect migration (Fea
 
 **Files Changed:**
 - `plans/prd.json` - Marked Features 46-52 as complete with detailed notes
+
+---
+
+### Feature Completed: Update TypeScript configuration for Bun (PRD Feature 64)
+
+**Changes Made:**
+
+1. **Updated packages/types/package.json:**
+   - Added `bun-types: "^1.3.6"` to devDependencies
+   - Now consistent with packages/cli and packages/util
+
+2. **Updated packages/types/tsconfig.json:**
+   - Added `types: ["bun-types"]` to compilerOptions
+   - Overrides root tsconfig.json's `types: ["node"]` to use Bun-specific types
+
+**Current bun-types Configuration Across Packages:**
+| Package | devDependencies | tsconfig.json types |
+|---------|-----------------|---------------------|
+| cli     | bun-types@1.3.6 | ["bun-types"] ✅    |
+| util    | bun-types@^1.3.6| ["bun-types"] ✅    |
+| types   | bun-types@^1.3.6| ["bun-types"] ✅    |
+
+**Verification:**
+- `bun install` - Successful (cpu-features optional dep failure expected per earlier notes)
+- `bun typecheck` - Passes for all packages (@moonwall/util, @moonwall/cli)
+- `bun test` - 1071 pass, 12 skip, 16 fail (same baseline as Feature 63)
+  - The 16 failing tests are E2E tests requiring moonwall environment
+- Bun globals (Bun.spawn in runTests.ts) properly typed via bun-types
+
+**Design Notes:**
+- bun-types internally depends on @types/node, so Node.js types remain available
+- No @types/node conflicts exist - bun-types is a superset that includes Node types
+- The root tsconfig.json has `types: ["node"]` which each package overrides
+- skipLibCheck handles external dependency type issues (chopsticks-core, etc.)
+
+**★ Insight ─────────────────────────────────────**
+- TypeScript's `types` compiler option replaces (not extends) the default auto-include behavior
+- When `types: ["bun-types"]` is set, only bun-types and its dependencies are included
+- bun-types provides: Bun global APIs + Node.js types + bun:test types
+- External deps with type issues are safely ignored via skipLibCheck in tsconfig.json
+**─────────────────────────────────────────────────**
+
+**Notes for Next Developer:**
+
+1. All packages now have consistent TypeScript configuration for Bun:
+   - bun-types in devDependencies
+   - types: ["bun-types"] in tsconfig.json
+
+2. Next high-priority features to consider:
+   - Feature 65: Final integration verification (build, typecheck, lint, test from root)
+   - Feature 53-55: Integration tests for foundation/provider/test runner lifecycle
+   - Feature 66: Run full e2e test suite
+   - Feature 67: Update CHANGELOG and version
+
+3. The 16 failing tests are E2E tests that require:
+   - A running moonwall environment with `moonwall run <env>`
+   - Actual blockchain nodes/chopsticks instances
+   - These are NOT related to the Bun migration
+
+**Files Changed:**
+- `packages/types/package.json` - Added bun-types to devDependencies
+- `packages/types/tsconfig.json` - Added types: ["bun-types"] to compilerOptions
+- `bun.lock` - Updated with new dependency tree
+- `plans/prd.json` - Marked Feature 64 as complete
