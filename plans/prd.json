@@ -297,7 +297,8 @@
       "Handle multi-node cleanup in stop() using Effect.all",
       "Write unit test with mocked orchestrator"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: (1) Created ZombieFoundationServiceLive.ts with Layer.effect pattern using Ref for mutable state tracking (status, runningInfo, network, ipcServer, ipcSocketPath). (2) Implemented start() which loads zombienet config, validates binaries, spawns multi-node network via @zombienet/orchestrator, sets up IPC server for node operations, returns {info, stop} tuple. (3) Implemented stop() to close IPC server and shutdown all nodes via network.stop() + process killing. (4) Implemented getStatus() returning ZombieFoundationStatus union type. (5) Implemented healthCheck() using relay node's isUp() method. (6) Implemented getNodes() returning node info from state. (7) Implemented restartNode() and killNode() via IPC messaging to the internal server. (8) Created sendIpcMessageEffect() helper to wrap IPC communication in Effect. (9) Created extractNodeInfo() to parse relay/parachain nodes from Network object. (10) Created makeZombieFoundationServiceLayer() factory for testing. (11) Created comprehensive unit test suite with 17 tests using Layer.succeed for mocking. All tests pass. Test count: 351 pass (up from 334), same 16 E2E failures requiring moonwall environment."
   },
   {
     "category": "functional",

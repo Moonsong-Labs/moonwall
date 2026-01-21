@@ -53,3 +53,9 @@ export {
   type ZombieNodeType,
   type ZombieFoundationServiceType,
 } from "./ZombieFoundationService.js";
+
+// ZombieFoundationService Layer implementations
+export {
+  ZombieFoundationServiceLive,
+  makeZombieFoundationServiceLayer,
+} from "./ZombieFoundationServiceLive.js";
