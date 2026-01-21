@@ -800,7 +800,8 @@
       "Check if @effect/rpc is actually used, remove if not",
       "Run `bun install` and verify no dependency errors"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: Removed @effect/cluster (^0.55.0), @effect/sql (^0.48.6), @effect/workflow (^0.15.1), and @effect/rpc (^0.72.2) from packages/cli/package.json. Verified none of these packages were imported anywhere in the codebase via grep search. bun install successful, typecheck passes, test baseline unchanged (1071 pass, 12 skip, 16 fail - same E2E failures requiring moonwall environment). Kept @effect/experimental, @effect/platform, and @effect/platform-node as they are used by the Effect services."
   },
   {
     "category": "functional",

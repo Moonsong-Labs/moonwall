@@ -2910,3 +2910,67 @@ const result = yield* Effect.scoped(
 - `packages/cli/src/internal/effect/index.ts` - Added ErrorLogging export
 - `packages/cli/src/cmds/runTestsEffect.ts` - Integrated structured error logging
 - `plans/prd.json` - Marked Feature 45 as complete
+
+---
+
+## Session: 2026-01-21
+
+### Feature Completed: Remove unused Effect ecosystem packages (PRD Feature 63)
+
+**Changes Made:**
+
+1. **Removed unused Effect packages from packages/cli/package.json:**
+   - `@effect/cluster` (^0.55.0) - Distributed systems/clustering functionality - NOT USED
+   - `@effect/sql` (^0.48.6) - Database access layer - NOT USED
+   - `@effect/workflow` (^0.15.1) - Workflow orchestration - NOT USED
+   - `@effect/rpc` (^0.72.2) - RPC client/server functionality - NOT USED
+
+2. **Kept the Effect packages that ARE used:**
+   - `effect` (^3.19.8) - Core Effect library - used extensively
+   - `@effect/experimental` (^0.57.10) - Used by services
+   - `@effect/platform` (^0.93.6) - Used by services
+   - `@effect/platform-node` (^0.103.0) - Used by services
+
+**Verification:**
+- `grep` search confirmed none of the removed packages were imported anywhere in the codebase
+- `bun install` - Successful (cpu-features optional dep failure expected)
+- `bun typecheck` - Passes with no errors
+- `bun test` - 1071 pass, 12 skip, 16 fail (same baseline as Feature 45)
+  - The 16 failing tests are E2E tests in `test/suites/` requiring a running moonwall environment
+
+**Impact:**
+- Reduced dependency count and install time
+- Reduced potential security surface area
+- Cleaner package.json focused on actually-used dependencies
+
+**★ Insight ─────────────────────────────────────**
+- Effect ecosystem packages were likely added speculatively during initial Effect migration planning
+- The core `effect` package with `@effect/platform` provides all functionality needed for the moonwall services
+- Clustering, SQL, workflows, and RPC are specialized features not needed for a testing framework
+- Regular dependency audits help keep the package clean and maintainable
+**─────────────────────────────────────────────────**
+
+**Notes for Next Developer:**
+
+1. The remaining Effect packages are all in active use:
+   - `effect` - Core Effect types, functions, and runtime
+   - `@effect/platform` - Platform-agnostic abstractions (FileSystem, HttpClient, etc.)
+   - `@effect/platform-node` - Node.js implementations of platform abstractions
+   - `@effect/experimental` - Experimental Effect features being trialed
+
+2. Next high-priority features to consider:
+   - Feature 64: Update TypeScript configuration for Bun (partially done - bun-types added to cli)
+   - Feature 46-52: Mark as complete (unit tests exist but PRD not updated)
+   - Feature 53-55: Integration tests for foundation/provider/test runner lifecycle
+   - Feature 65: Final integration verification
+
+3. The 16 failing tests are E2E tests that require:
+   - A running moonwall environment with `moonwall run <env>`
+   - Actual blockchain nodes/chopsticks instances
+   - These are NOT related to the Effect migration
+
+**Files Changed:**
+- `packages/cli/package.json` - Removed 4 unused @effect/* packages
+- `bun.lock` - Updated with new dependency tree
+- `plans/prd.json` - Marked Feature 63 as complete
+

@@ -37,13 +37,9 @@
       "dependencies": {
         "@acala-network/chopsticks": "^1.2.5",
         "@ast-grep/napi": "^0.40.0",
-        "@effect/cluster": "^0.55.0",
         "@effect/experimental": "^0.57.10",
         "@effect/platform": "^0.93.6",
         "@effect/platform-node": "^0.103.0",
-        "@effect/rpc": "^0.72.2",
-        "@effect/sql": "^0.48.6",
-        "@effect/workflow": "^0.15.1",
         "@inquirer/prompts": "^8.0.2",
         "@moonwall/types": "workspace:*",
         "@moonwall/util": "workspace:*",
