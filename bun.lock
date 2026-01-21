@@ -117,6 +117,7 @@
         "@types/node": "^24.10.1",
         "@zombienet/utils": "^0.0.30",
         "bottleneck": "^2.19.5",
+        "effect": "^3.19.8",
         "ethers": "^6.16.0",
         "polkadot-api": "1.19.2",
         "viem": "2.41.2",

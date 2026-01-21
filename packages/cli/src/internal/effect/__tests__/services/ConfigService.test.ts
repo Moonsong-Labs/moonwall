@@ -528,7 +528,8 @@ describe("ConfigService", () => {
       if (Exit.isFailure(exit)) {
         const error = exit.cause._tag === "Fail" ? exit.cause.error : null;
         expect(error).toBeInstanceOf(ConfigValidationError);
-        expect((error as ConfigValidationError).invalidField).toBe("environments[].name");
+        // Effect Schema provides the actual array index, which is more precise
+        expect((error as ConfigValidationError).invalidField).toBe("environments.[0].name");
       }
     });
 

@@ -1,5 +1,6 @@
-import { Effect, Layer, Ref } from "effect";
+import { Effect, Layer, Ref, Schema, ParseResult } from "effect";
 import type { MoonwallConfig, Environment } from "@moonwall/types";
+import { MoonwallConfigSchema } from "@moonwall/types";
 import { readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path, { extname } from "node:path";
@@ -78,24 +79,140 @@ function resolveConfigPath(configPath: string | undefined): string {
 }
 
 /**
- * Validate required fields in the configuration.
+ * Extract the path from a ParseResult issue.
+ *
+ * Recursively traverses the parse issue structure to find the path to the invalid field.
+ *
+ * @param issue - The parse issue to extract path from
+ * @returns Array of path segments
  */
-function validateRequiredFields(
+function extractIssuePath(issue: ParseResult.ParseIssue): string[] {
+  const segments: string[] = [];
+
+  // Helper to extract from single issue
+  function extractFromIssue(iss: ParseResult.ParseIssue): void {
+    const tag = iss._tag;
+
+    // Handle different issue types
+    if (tag === "Pointer") {
+      // Pointer contains path and actual
+      const pointer = iss as unknown as { path: ReadonlyArray<PropertyKey>; actual: unknown };
+      if (pointer.path) {
+        for (const key of pointer.path) {
+          segments.push(String(key));
+        }
+      }
+    } else if (tag === "Missing" || tag === "Unexpected") {
+      // These are typically at the current level
+    } else if (tag === "Composite") {
+      // Composite issues contain nested issues
+      const composite = iss as unknown as {
+        issues: ReadonlyArray<ParseResult.ParseIssue>;
+      };
+      if (composite.issues && composite.issues.length > 0) {
+        extractFromIssue(composite.issues[0]);
+      }
+    } else if (tag === "Refinement" || tag === "Transformation" || tag === "Type") {
+      // These may have path info in their structure
+      const typed = iss as unknown as { path?: ReadonlyArray<PropertyKey> };
+      if (typed.path) {
+        for (const key of typed.path) {
+          segments.push(String(key));
+        }
+      }
+    }
+  }
+
+  extractFromIssue(issue);
+  return segments;
+}
+
+/**
+ * Format Effect Schema parse error into a human-readable message.
+ *
+ * Uses ParseResult.TreeFormatter to create a detailed, tree-structured error message
+ * that shows exactly which fields failed validation.
+ *
+ * @param error - The parse error from Schema.decodeUnknown
+ * @returns A formatted error message and the path to the invalid field
+ */
+function formatSchemaError(error: ParseResult.ParseError): { message: string; invalidField: string } {
+  // Use TreeFormatter for readable error message
+  const formattedMessage = ParseResult.TreeFormatter.formatErrorSync(error);
+
+  // Try to extract field path from the formatted message
+  // Effect Schema format: '{ ... }' then paths like '└─ ["fieldName"]' or '├─ ["fieldName"]'
+  const pathMatches: string[] = [];
+  const lines = formattedMessage.split("\n");
+
+  for (const line of lines) {
+    // Match lines like '└─ ["label"]' or '├─ ["environments"]'
+    const match = line.match(/[├└]─\s*\["([^"]+)"\]/);
+    if (match) {
+      pathMatches.push(match[1]);
+    }
+    // Also match array index notation like '[0]'
+    const indexMatch = line.match(/[├└]─\s*\[(\d+)\]/);
+    if (indexMatch) {
+      pathMatches.push(`[${indexMatch[1]}]`);
+    }
+  }
+
+  // Build the field path
+  let invalidField = "root";
+  if (pathMatches.length > 0) {
+    invalidField = pathMatches.join(".");
+  }
+
+  // For simple missing field errors, extract the field name from "is missing" messages
+  if (invalidField === "root") {
+    const missingMatch = formattedMessage.match(/\["([^"]+)"\]\s*\n\s*└─\s*is missing/);
+    if (missingMatch) {
+      invalidField = missingMatch[1];
+    }
+  }
+
+  return {
+    message: `Configuration validation failed:\n${formattedMessage}`,
+    invalidField,
+  };
+}
+
+/**
+ * Validate configuration using Effect Schema.
+ *
+ * This provides comprehensive structural validation with detailed error messages
+ * that describe exactly which field failed validation and why.
+ */
+function validateWithSchema(
+  config: unknown,
+  configPath: string
+): Effect.Effect<MoonwallConfig, ConfigValidationError> {
+  return Schema.decodeUnknown(MoonwallConfigSchema)(config).pipe(
+    Effect.mapError((parseError) => {
+      const { message, invalidField } = formatSchemaError(parseError);
+      return new ConfigValidationError({
+        message,
+        invalidField,
+        configPath,
+      });
+    }),
+    Effect.map((result) => result as MoonwallConfig)
+  );
+}
+
+/**
+ * Validate required fields in the configuration.
+ *
+ * Performs additional semantic validation beyond what the schema can express,
+ * such as checking that defaultTestTimeout is positive and environments array is non-empty.
+ */
+function validateSemanticRules(
   config: MoonwallConfig,
   configPath: string
 ): Effect.Effect<void, ConfigValidationError> {
   return Effect.gen(function* () {
-    if (!config.label) {
-      return yield* Effect.fail(
-        new ConfigValidationError({
-          message: "Configuration is missing required field: label",
-          invalidField: "label",
-          configPath,
-        })
-      );
-    }
-
-    if (typeof config.defaultTestTimeout !== "number" || config.defaultTestTimeout <= 0) {
+    if (config.defaultTestTimeout <= 0) {
       return yield* Effect.fail(
         new ConfigValidationError({
           message: "Configuration requires a positive defaultTestTimeout",
@@ -106,7 +223,7 @@ function validateRequiredFields(
       );
     }
 
-    if (!Array.isArray(config.environments) || config.environments.length === 0) {
+    if (config.environments.length === 0) {
       return yield* Effect.fail(
         new ConfigValidationError({
           message: "Configuration requires at least one environment",
@@ -117,32 +234,12 @@ function validateRequiredFields(
       );
     }
 
-    // Validate each environment has required fields
+    // Validate each environment has non-empty testFileDir
     for (const env of config.environments) {
-      if (!env.name) {
+      if (env.testFileDir.length === 0) {
         return yield* Effect.fail(
           new ConfigValidationError({
-            message: "Environment is missing required field: name",
-            invalidField: "environments[].name",
-            configPath,
-          })
-        );
-      }
-
-      if (!env.foundation) {
-        return yield* Effect.fail(
-          new ConfigValidationError({
-            message: `Environment "${env.name}" is missing required field: foundation`,
-            invalidField: `environments[${env.name}].foundation`,
-            configPath,
-          })
-        );
-      }
-
-      if (!env.testFileDir || env.testFileDir.length === 0) {
-        return yield* Effect.fail(
-          new ConfigValidationError({
-            message: `Environment "${env.name}" is missing required field: testFileDir`,
+            message: `Environment "${env.name}" requires at least one testFileDir`,
             invalidField: `environments[${env.name}].testFileDir`,
             configPath,
           })
@@ -301,7 +398,11 @@ export const ConfigServiceLive: Layer.Layer<ConfigService> = Layer.effect(
             );
           }
 
-          yield* validateRequiredFields(state.config, state.configPath || "unknown");
+          // First validate structure with Effect Schema
+          yield* validateWithSchema(state.config, state.configPath || "unknown");
+
+          // Then validate semantic rules that schema can't express
+          yield* validateSemanticRules(state.config, state.configPath || "unknown");
         }),
 
       clearCache: () =>

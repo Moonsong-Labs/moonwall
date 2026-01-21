@@ -473,7 +473,8 @@
       "Create Schema definitions for Foundation types",
       "Replace typescript-json-schema with Effect Schema for validation"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: (1) Since Effect 3.10+, Schema is included in the main `effect` package - no separate @effect/schema needed. Added effect ^3.19.8 to packages/types dependencies. (2) Created packages/types/src/schemas/config.ts with comprehensive Effect Schema definitions for all config types: MoonwallConfigSchema, EnvironmentSchema, FoundationSchema (discriminated union), DevLaunchSpecSchema, ChopsticksLaunchSpecSchema, ZombieLaunchSpecSchema, ReadOnlyLaunchSpecSchema, ProviderConfigSchema, plus all supporting types (EthTransactionTypeSchema, ProviderTypeSchema, etc.). (3) Exported inferred types (MoonwallConfigFromSchema, EnvironmentFromSchema, etc.) for type-safe validated data handling. (4) Updated ConfigServiceLive.ts to use Schema.decodeUnknown() with ParseResult.TreeFormatter for detailed validation error messages. (5) Separated validation into two phases: schema validation (structural) and semantic validation (rules Schema can't express like positive timeout, non-empty arrays). (6) Note: typescript-json-schema is RETAINED for generating config_schema.json (IDE autocomplete/JSON Schema tooling) - Effect Schema provides runtime validation while JSON Schema provides static tooling support. Test baseline: 475 pass, 12 skip, 16 fail (same as Feature 36). Typecheck passes."
   },
   {
     "category": "functional",

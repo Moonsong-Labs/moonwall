@@ -1676,3 +1676,86 @@ This feature was analyzed in depth and determined to require no code changes. He
 - `packages/cli/src/internal/effect/__tests__/services/ConfigService.test.ts` - New test file (33 tests)
 - `plans/prd.json` - Marked Feature 36 as complete
 
+---
+
+## Session: 2026-01-21
+
+### Feature Completed: Effect migration - add @effect/schema for config validation (PRD Feature 37)
+
+**Changes Made:**
+
+1. Added `effect` dependency to `packages/types/package.json`:
+   - Effect 3.10+ includes Schema in the main package - no separate `@effect/schema` needed
+   - Import via `import { Schema } from "effect"`
+
+2. Created `packages/types/src/schemas/config.ts`:
+   - Comprehensive Effect Schema definitions for all config types
+   - Primitive schemas: `EthTransactionTypeSchema`, `ProviderTypeSchema`, `FoundationTypeSchema`, `ZombieNodeTypeSchema`, `ChopsticksChainTypeSchema`, `BuildBlockModeSchema`, `SignerTypeSchema`
+   - Helper type schemas: `GenericDataSchema`, `TypesBundleSchema`, `RpcParamSchema`, `RpcMethodSchema`, `RpcModuleSchema`, `RpcBundleSchema`, `BinSchema`, `RepoSpecSchema`, `SkipTestSpecSchema`, `ForkConfigSchema`, `DefaultSignerSchema`
+   - Provider schemas: `ProviderConfigSchema`, `DockerConfigSchema`, `PortsConfigSchema`
+   - Launch spec schemas: `ReadOnlyLaunchSpecSchema`, `DevLaunchSpecSchema`, `ZombieLaunchSpecSchema`, `ChopsticksLaunchSpecSchema`
+   - Foundation schemas (discriminated union): `DevFoundationSchema`, `ChopsticksFoundationSchema`, `ZombieFoundationSchema`, `ReadOnlyFoundationSchema`, `FoundationSchema`
+   - Main schemas: `EnvironmentSchema`, `MoonwallConfigSchema`
+   - Inferred type exports: `MoonwallConfigFromSchema`, `EnvironmentFromSchema`, `FoundationFromSchema`, etc.
+
+3. Created `packages/types/src/schemas/index.ts`:
+   - Exports all schemas from config.ts
+
+4. Updated `packages/types/src/index.ts`:
+   - Added `export * from "./schemas"` to expose schemas
+
+5. Updated `packages/cli/src/internal/effect/services/ConfigServiceLive.ts`:
+   - Added imports: `Schema`, `ParseResult` from "effect", `MoonwallConfigSchema` from "@moonwall/types"
+   - Added `extractIssuePath()` helper to traverse ParseResult.ParseIssue structure
+   - Added `formatSchemaError()` using `ParseResult.TreeFormatter.formatErrorSync()` for human-readable error messages
+   - Added `validateWithSchema()` function using `Schema.decodeUnknown()` with `.pipe()` pattern
+   - Renamed manual validation to `validateSemanticRules()` for checks Schema can't express (positive timeout, non-empty arrays, environment testFileDir requirements)
+   - Updated `validateConfig()` to call both schema validation and semantic validation
+
+6. Updated `packages/cli/src/internal/effect/__tests__/services/ConfigService.test.ts`:
+   - Changed field path expectation from "environments[].name" to "environments.[0].name" (Effect Schema provides actual array indices)
+
+**Design Decisions:**
+- **Schema in main effect package**: Since Effect 3.10, Schema is bundled in `effect` - no separate @effect/schema package needed
+- **Two-phase validation**: Schema handles structural validation (types, required fields). Semantic rules that Schema can't express (positive timeout > 0, non-empty arrays) are validated separately.
+- **typescript-json-schema retained**: JSON Schema generation via typescript-json-schema is kept for IDE autocomplete and tooling support. Effect Schema provides runtime validation.
+- **TreeFormatter for errors**: Uses Effect's ParseResult.TreeFormatter for detailed, tree-structured error messages that show exactly which fields failed validation
+- **Actual array indices**: Effect Schema error paths include actual indices like `environments.[0].name` rather than placeholder `environments[].name`
+
+**★ Insight ─────────────────────────────────────**
+- Effect Schema provides both runtime validation AND TypeScript type inference from schemas
+- The `Schema.decodeUnknown()` function validates unknown data and narrows the type
+- `ParseResult.TreeFormatter` creates human-readable error trees showing nested validation failures
+- Discriminated unions in Schema use `Schema.Union()` with `Schema.Literal()` for the discriminant field
+**─────────────────────────────────────────────────**
+
+**Verification:**
+- `bun run --filter @moonwall/types build` - Builds successfully
+- `bun typecheck` - Passes with no errors
+- `bun test` - 475 pass, 12 skip, 16 fail, 2 errors (same baseline as Feature 36)
+
+**Notes for Next Developer:**
+1. Feature 37 adds Effect Schema validation to the ConfigService. The validation is now more robust with detailed error messages.
+2. The schemas in `packages/types/src/schemas/config.ts` can be used anywhere you need to validate Moonwall config structures:
+   ```ts
+   import { Schema } from "effect";
+   import { MoonwallConfigSchema } from "@moonwall/types";
+
+   // Validate unknown data
+   const result = Schema.decodeUnknownSync(MoonwallConfigSchema)(unknownConfig);
+   ```
+3. Next high-priority features:
+   - Feature 38: Create LoggerService using Effect
+   - Feature 35: Update MoonwallContext to use Effect services (major integration)
+   - Features 30-34: Implement provider-specific services (polkadotJs, ethers, viem, web3, papi)
+4. The 16 failing tests are E2E tests in `test/suites/` requiring moonwall environment - not related to this change.
+
+**Files Changed:**
+- `packages/types/package.json` - Added effect ^3.19.8 dependency
+- `packages/types/src/schemas/config.ts` - New comprehensive Schema definitions
+- `packages/types/src/schemas/index.ts` - New export file
+- `packages/types/src/index.ts` - Added schemas export
+- `packages/cli/src/internal/effect/services/ConfigServiceLive.ts` - Integrated Schema validation
+- `packages/cli/src/internal/effect/__tests__/services/ConfigService.test.ts` - Updated test expectation
+- `plans/prd.json` - Marked Feature 37 as complete
+
