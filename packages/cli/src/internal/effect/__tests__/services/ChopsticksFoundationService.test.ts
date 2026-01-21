@@ -1,4 +1,4 @@
-import { describe, it, expect, } from "bun:test";
+import { describe, it, expect } from "bun:test";
 import { Effect, Exit, Layer } from "effect";
 import type { HexString } from "@polkadot/util/types";
 

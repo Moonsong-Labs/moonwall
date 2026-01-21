@@ -1,9 +1,6 @@
 import { Effect, type Layer } from "effect";
 import type { FoundationType } from "@moonwall/types";
-import type {
-  FoundationShutdownError,
-  FoundationHealthCheckError,
-} from "../errors/foundation.js";
+import type { FoundationShutdownError, FoundationHealthCheckError } from "../errors/foundation.js";
 
 import type {
   DevFoundationService,

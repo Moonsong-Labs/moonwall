@@ -1,5 +1,5 @@
-import { describe, test, expect, afterAll, } from "bun:test";
-import { Effect, } from "effect";
+import { describe, test, expect, afterAll } from "bun:test";
+import { Effect } from "effect";
 import {
   buildFoundationSpanName,
   buildProviderSpanName,

@@ -1,4 +1,4 @@
-import { describe, it, expect, mock, beforeEach, } from "bun:test";
+import { describe, it, expect, mock, beforeEach } from "bun:test";
 import { Effect, Exit } from "effect";
 import { EventEmitter } from "node:events";
 

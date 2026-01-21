@@ -8,7 +8,8 @@
       "Run `pnpm typecheck` and verify no type errors",
       "Document current test count and coverage in MIGRATION.md"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed (post-hoc): Migration work proceeded on branch experiment/ralph-effect. Created MIGRATION.md documenting: baseline test counts (1696 pass, 12 skip, 16 fail, 2 errors across 95 files), typecheck status (all passing), build status (all 3 packages build), and migration summary. The 16 failing tests and 2 errors are expected E2E tests requiring moonwall environment with blockchain binaries."
   },
   {
     "category": "functional",

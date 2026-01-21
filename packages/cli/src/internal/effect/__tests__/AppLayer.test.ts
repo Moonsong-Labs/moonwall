@@ -1,8 +1,8 @@
 /**
  * Unit tests for AppLayer - Application Layer composition.
  */
-import { describe, it, expect, } from "bun:test";
-import { Effect, Layer, } from "effect";
+import { describe, it, expect } from "bun:test";
+import { Effect, Layer } from "effect";
 import {
   AppLayer,
   AppLayerLive,

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, } from "bun:test";
+import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import { Effect, Layer, Exit } from "effect";
 import {
   ConfigService,
@@ -7,7 +7,7 @@ import {
   EnvironmentNotFoundError,
 } from "../../services/ConfigService.js";
 import { ConfigServiceLive } from "../../services/ConfigServiceLive.js";
-import type { MoonwallConfig, } from "@moonwall/types";
+import type { MoonwallConfig } from "@moonwall/types";
 import path from "node:path";
 import { writeFileSync, mkdirSync, rmSync, existsSync } from "node:fs";
 

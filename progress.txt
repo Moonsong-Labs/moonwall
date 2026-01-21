@@ -3570,3 +3570,60 @@ The health check service follows the Effect pattern established in other service
 - `packages/cli/src/internal/effect/__tests__/services/HealthCheckService.test.ts` - New (18 tests)
 - `plans/prd.json` - Marked Feature 71 as complete
 
+
+---
+
+## Session: 2026-01-21
+
+### Bugfix: HealthCheckService.test.ts Type Error
+
+**Issue:** TypeScript compilation failed due to missing `Layer` import in the test file.
+
+**Fix:** Added `Layer` to the Effect import statement:
+```ts
+import { Effect, Layer } from "effect";
+```
+
+**Files Changed:**
+- `packages/cli/src/internal/effect/__tests__/services/HealthCheckService.test.ts` - Added missing Layer import
+
+---
+
+### Feature Completed: Phase 0 - Document migration baseline (PRD Feature 0)
+
+**Changes Made:**
+1. Created `MIGRATION.md` documenting the migration baseline:
+   - Branch information (`experiment/ralph-effect`)
+   - Test counts: 1696 pass, 12 skip, 16 fail, 2 errors across 95 test files
+   - Typecheck status: All passing
+   - Build status: All 3 packages build successfully
+   - Migration summary covering all major changes
+   - Known issues (cpu-features native module, E2E tests require moonwall environment)
+   - Breaking changes list
+
+**Verification:**
+- `bun run typecheck` - Passes with no errors
+- `bun test` - 1696 pass, 12 skip, 16 fail, 2 errors (same baseline as before)
+
+**Notes for Next Developer:**
+
+1. The MIGRATION.md provides a comprehensive overview of the pnpm→Bun and Vitest→Bun test runner migration.
+
+2. The 16 failing tests and 2 errors are expected E2E tests that require:
+   - Moonwall environment to be running
+   - Blockchain node binaries to be available
+   - Network connectivity to test endpoints
+
+3. Remaining incomplete PRD features:
+   - Features 47-52: Testing (integration tests, E2E tests, coverage verification)
+   - Features 53-54: Performance optimization
+   - Features 55-56: Effect utilities in packages/util
+   - Feature 57: Run full E2E test suite
+   - Feature 58: Update CHANGELOG and version
+
+4. Highest priority next feature: Either Feature 57 (E2E test suite) to validate the migration, or Feature 58 (CHANGELOG) to prepare for release.
+
+**Files Changed:**
+- `MIGRATION.md` - New file documenting migration baseline and summary
+- `plans/prd.json` - Marked Feature 0 as complete
+

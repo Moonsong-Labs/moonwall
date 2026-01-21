@@ -2,8 +2,8 @@
  * Unit tests for LoggerService.
  */
 
-import { describe, it, expect, beforeEach, afterEach, } from "bun:test";
-import { Effect, Layer, } from "effect";
+import { describe, it, expect, beforeEach, afterEach } from "bun:test";
+import { Effect, Layer } from "effect";
 import {
   LoggerService,
   LoggerServiceLive,

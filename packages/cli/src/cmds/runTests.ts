@@ -1,5 +1,5 @@
-import type { Environment, } from "@moonwall/types";
-import { Effect, } from "effect";
+import type { Environment } from "@moonwall/types";
+import { Effect } from "effect";
 import chalk from "chalk";
 import path from "node:path";
 import { createLogger } from "@moonwall/util";
@@ -9,9 +9,7 @@ import { cacheConfig, importAsyncConfig, loadEnvVars } from "../lib/configReader
 import { MoonwallContext, contextCreator, runNetworkOnly } from "../lib/globalContext";
 import { shardManager } from "../lib/shardManager";
 import { findTestFilesMatchingPattern } from "../internal/testIdParser";
-import {
-  ConfigService,
-} from "../internal/effect/services/ConfigService.js";
+import { ConfigService } from "../internal/effect/services/ConfigService.js";
 import { ConfigServiceLive } from "../internal/effect/services/ConfigServiceLive.js";
 import { TestCommandError, formatCliError } from "./runTestsEffect.js";
 

@@ -249,7 +249,7 @@ export function validateVersion(version: string): string {
 
   // Version pattern: semver-like with optional v prefix and rc suffix
   // Examples: v1.0.0, 1.0.0, 1.0.0-rc1, runtime-2400
-  const VERSION_PATTERN = /^v?[a-zA-Z0-9][a-zA-Z0-9_.\-]*$/;
+  const VERSION_PATTERN = /^v?[a-zA-Z0-9][a-zA-Z0-9_.-]*$/;
 
   if (!VERSION_PATTERN.test(version)) {
     throw new Error(

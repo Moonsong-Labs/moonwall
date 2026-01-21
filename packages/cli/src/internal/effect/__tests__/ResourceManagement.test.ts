@@ -1,5 +1,5 @@
-import { describe, it, expect, } from "bun:test";
-import { Effect, Exit, } from "effect";
+import { describe, it, expect } from "bun:test";
+import { Effect, Exit } from "effect";
 
 // Import the module under test
 import {

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, mock, } from "bun:test";
+import { describe, it, expect, beforeEach, afterEach, mock } from "bun:test";
 import { Effect, Cause, Data, FiberId } from "effect";
 import {
   redactSensitiveData,

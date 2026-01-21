@@ -1,5 +1,5 @@
-import { describe, it, expect, mock, } from "bun:test";
-import { Effect, Exit, Layer, } from "effect";
+import { describe, it, expect, mock } from "bun:test";
+import { Effect, Exit, Layer } from "effect";
 import { EventEmitter } from "node:events";
 import type { ChildProcess } from "node:child_process";
 
@@ -13,10 +13,7 @@ import { ProcessManagerService, type ProcessLaunchResult } from "../../ProcessMa
 import { RpcPortDiscoveryService } from "../../RpcPortDiscoveryService.js";
 import { NodeReadinessService } from "../../NodeReadinessService.js";
 import { NodeLaunchError, PortDiscoveryError } from "../../errors.js";
-import {
-  FoundationStartupError,
-  FoundationHealthCheckError,
-} from "../../errors/foundation.js";
+import { FoundationStartupError, FoundationHealthCheckError } from "../../errors/foundation.js";
 
 /**
  * Create a mock child process for testing.

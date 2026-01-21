@@ -8,7 +8,7 @@
  * @module runTestsEffect
  */
 
-import { Effect, Data, } from "effect";
+import { Effect, Data } from "effect";
 import type { Environment, MoonwallConfig } from "@moonwall/types";
 import chalk from "chalk";
 import { createLogger } from "@moonwall/util";
@@ -17,7 +17,7 @@ import {
   EnvironmentNotFoundError,
 } from "../internal/effect/services/ConfigService.js";
 import { ConfigServiceLive } from "../internal/effect/services/ConfigServiceLive.js";
-import { withTestSpan, } from "../internal/effect/Tracing.js";
+import { withTestSpan } from "../internal/effect/Tracing.js";
 import {
   formatErrorForCli,
   logError,

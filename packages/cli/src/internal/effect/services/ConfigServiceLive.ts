@@ -1,5 +1,5 @@
 import { Effect, Layer, Ref, Schema, ParseResult } from "effect";
-import type { MoonwallConfig, } from "@moonwall/types";
+import type { MoonwallConfig } from "@moonwall/types";
 import { MoonwallConfigSchema } from "@moonwall/types";
 import { readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";

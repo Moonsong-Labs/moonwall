@@ -1,4 +1,4 @@
-import { describe, it, expect, mock, } from "bun:test";
+import { describe, it, expect, mock } from "bun:test";
 import { Effect, Exit, Layer } from "effect";
 
 // Import service interfaces and Live implementation
