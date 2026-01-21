@@ -583,7 +583,8 @@
       "Ensure sensitive data is not logged",
       "Verify error output is actionable for users"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: (1) Created ErrorLogging.ts module with comprehensive structured error logging using Effect's Cause.pretty. (2) Implemented error categorization with ErrorCategory type (startup, connection, test, cleanup, config, timeout, process, unknown) and categorizeError() function that maps tagged errors to categories based on _tag patterns. (3) Created redactSensitiveData() function with patterns for API keys, passwords, private keys, JWTs, MOON_PRIV_KEY, ALITH_PRIVATE_KEY, and other credential patterns - also detects secret-looking values (64-char hex strings, base64 tokens, JWTs) by pattern. (4) Created StructuredError interface with category, message, errorTag, details, suggestions, stackTrace, timestamp, context fields. (5) Implemented toStructuredError() to convert any error to structured format with automatic category detection and suggestion generation. (6) Implemented formatStructuredError() with colored category badges (STARTUP, CONNECTION, TEST, CLEANUP, CONFIG, TIMEOUT, PROCESS, ERROR), context display, and actionable suggestions. (7) Integrated Effect Cause support via formatCausePretty() using Cause.pretty with renderErrorCause:true, causeToStructuredErrors() for flattening Cause trees, causeSummary() for one-line summaries. (8) Created logError() and logCause() for console output with optional stack trace and verbose modes. (9) Created Effect integration helpers: logAndStructure(), logErrorEffect() for pipeline usage. (10) Updated runTestsEffect.ts to use new structured error logging. (11) Created 56 comprehensive unit tests covering redaction, categorization, formatting, Cause integration, and console output. Test count: 1071 pass (up from 1015), same 16 E2E failures requiring moonwall environment."
   },
   {
     "category": "functional",

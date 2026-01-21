@@ -19,6 +19,9 @@ export * from "./ResourceManagement.js";
 // Tracing utilities for observability
 export * from "./Tracing.js";
 
+// Structured error logging for CLI
+export * from "./ErrorLogging.js";
+
 // Low-level services (process, port, readiness)
 export * from "./ProcessManagerService.js";
 export * from "./PortDiscoveryService.js";

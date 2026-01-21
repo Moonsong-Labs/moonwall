@@ -20,6 +20,14 @@ import {
 } from "../internal/effect/services/ConfigService.js";
 import { ConfigServiceLive } from "../internal/effect/services/ConfigServiceLive.js";
 import { withTestSpan, withSpan } from "../internal/effect/Tracing.js";
+import {
+  formatErrorForCli,
+  logError,
+  logCause,
+  toStructuredError,
+  formatCausePretty,
+  shouldIncludeStackTrace,
+} from "../internal/effect/ErrorLogging.js";
 
 const logger = createLogger({ name: "runner-effect" });
 
@@ -199,21 +207,11 @@ export function formatTestCommandError(error: TestCommandError): string {
  * Format any error from the test command for CLI display.
  *
  * Handles all error types that can occur during test execution
- * and produces appropriate user-friendly messages.
+ * and produces appropriate user-friendly messages with structured
+ * error categorization and actionable suggestions.
  */
 export function formatCliError(error: unknown): string {
-  if (error instanceof TestCommandError) {
-    return formatTestCommandError(error);
-  }
-  if (error instanceof TestExecutionError) {
-    return `${chalk.red("❌ Tests failed:")} ${error.message} (exit code: ${error.exitCode})`;
-  }
-  if (error instanceof NoTestFilesError) {
-    return `${chalk.red("❌ No tests found:")} ${error.message}`;
-  }
-  if (error instanceof ConfigLoadError) {
-    return `${chalk.red("❌ Configuration error:")} ${error.message}`;
-  }
+  // Special handling for EnvironmentNotFoundError to include available envs
   if (error instanceof EnvironmentNotFoundError) {
     return formatTestCommandError(
       new TestCommandError({
@@ -222,10 +220,9 @@ export function formatCliError(error: unknown): string {
       })
     );
   }
-  if (error instanceof Error) {
-    return `${chalk.red("❌ Error:")} ${error.message}`;
-  }
-  return `${chalk.red("❌ Error:")} ${String(error)}`;
+
+  // Use the new structured error logging for comprehensive output
+  return formatErrorForCli(error);
 }
 
 /**
@@ -240,7 +237,7 @@ export const TestCmdLive = ConfigServiceLive;
  *
  * This is the entry point that converts the Effect to a Promise
  * at the CLI boundary. It handles all errors and produces
- * user-friendly messages.
+ * user-friendly messages with structured error logging.
  *
  * @param args - The test command arguments
  * @returns A promise that resolves to the loaded config and environment, or null on error
@@ -251,8 +248,11 @@ export async function runTestCmdEffect(
   const program = testCmdEffect(args).pipe(
     Effect.provide(TestCmdLive),
     Effect.catchAll((error) => {
-      // Log the user-friendly error message
-      logger.error(formatCliError(error));
+      // Log using structured error logging with categorization and suggestions
+      logError(error, {
+        includeStackTrace: shouldIncludeStackTrace(error),
+        includeSuggestions: true,
+      });
       return Effect.succeed(null);
     })
   );

@@ -2760,3 +2760,153 @@ const result = yield* Effect.scoped(
 - `packages/cli/src/internal/effect/services/ProviderServiceLive.ts` - Added tracing spans
 - `packages/cli/src/cmds/runTestsEffect.ts` - Added tracing spans
 - `plans/prd.json` - Marked Feature 44 as complete
+
+---
+
+### Feature Completed: Effect migration - add structured error logging (PRD Feature 45)
+
+**Changes Made:**
+
+1. **Created ErrorLogging.ts module** (`packages/cli/src/internal/effect/ErrorLogging.ts`):
+   - Comprehensive structured error logging using Effect's Cause.pretty
+   - Full error context with stack traces via `formatCausePretty()`
+   - No external dependencies (uses chalk for colors, same as existing code)
+
+2. **Error Categorization**:
+   - Created `ErrorCategory` type: startup, connection, test, cleanup, config, timeout, process, unknown
+   - Implemented `categorizeError()` function that maps tagged errors to categories based on `_tag` patterns:
+     - Startup: errors with "Startup", "Launch", "ConfigError", "ConfigLoad", "ConfigValidation" in tag
+     - Connection: errors with "Connection", "Provider", "HealthCheck" in tag
+     - Test: errors with "Test", "NoTestFiles" in tag
+     - Cleanup: errors with "Shutdown", "Disconnect", "Cleanup" in tag
+     - Config: errors with "Config" in tag
+     - Timeout: errors with "Timeout" in tag
+     - Process: errors with "Process", "NodeLaunch", "Port" in tag
+
+3. **Sensitive Data Filtering** (`redactSensitiveData()`):
+   - Key-based patterns: api_key, secret_key, password, private_key, priv_key, mnemonic, seed_phrase, MOON_PRIV_KEY, ALITH_PRIVATE_KEY, etc.
+   - Value-based patterns: 64-char hex strings (private keys), base64 tokens (40+ chars), JWT tokens
+   - Recursive handling for nested objects and arrays
+   - All sensitive values replaced with "[REDACTED]"
+
+4. **StructuredError Interface**:
+   - `category`: Error category for classification
+   - `message`: Primary error message (prefers userMessage over message)
+   - `errorTag`: Error tag/type (e.g., "FoundationStartupError")
+   - `details`: Detailed description from the error
+   - `suggestions`: Actionable suggestions for resolution
+   - `stackTrace`: Filtered stack trace
+   - `timestamp`: ISO timestamp when error occurred
+   - `context`: Additional context with sensitive data filtered
+
+5. **Error Formatting Functions**:
+   - `toStructuredError()`: Converts any error to StructuredError format
+   - `formatStructuredError()`: Colored console output with category badges
+   - `formatStructuredErrorJson()`: Machine-readable JSON format
+   - `formatErrorForCli()`: Enhanced formatCliError replacement
+
+6. **Category Badges** (colored for terminal):
+   - STARTUP (red background, white text)
+   - CONNECTION (yellow background, black text)
+   - TEST (magenta background, white text)
+   - CLEANUP (blue background, white text)
+   - CONFIG (cyan background, black text)
+   - TIMEOUT (yellow background, black text)
+   - PROCESS (red background, white text)
+   - ERROR (gray background, white text)
+
+7. **Actionable Suggestions Generator**:
+   - Startup errors: Check node binary, verify config, increase timeout
+   - Connection errors: Check endpoint reachability, verify RPC server, check firewall
+   - Test errors: Check test file patterns, verify test directory
+   - Cleanup errors: Check for orphaned processes, wait before restart
+   - Timeout errors: Increase timeout value, check system resources
+   - Process errors: Check permissions, verify ports available
+
+8. **Effect Cause Integration**:
+   - `formatCausePretty()`: Uses `Cause.pretty()` with `renderErrorCause: true`
+   - `causeToStructuredErrors()`: Flattens Cause tree to array of StructuredErrors
+   - `causeSummary()`: One-line summary for status displays
+   - Handles parallel and sequential failures
+   - Detects interrupts and defects
+
+9. **Console Logging Functions**:
+   - `logError(error, options)`: Main entry point for CLI error logging
+     - `includeStackTrace`: Show stack trace (default: false)
+     - `includeSuggestions`: Show suggestions (default: true)
+     - `verbose`: Show timestamp and category (default: false)
+   - `logCause(cause, options)`: Log Effect Cause
+     - `includePretty`: Include Cause.pretty output (default: true)
+     - `includeStructured`: Include structured breakdown (default: true)
+     - `verbose`: Show full details (default: false)
+
+10. **Effect Integration Helpers**:
+    - `logAndStructure()`: Effect that logs error and returns StructuredError
+    - `logErrorEffect()`: Tap function for Effect pipelines
+    - `shouldIncludeStackTrace()`: Determines if stack trace should be shown
+
+11. **Updated runTestsEffect.ts**:
+    - Integrated new `logError()` with structured formatting
+    - Uses `shouldIncludeStackTrace()` for conditional stack traces
+    - Replaced simple formatCliError calls with comprehensive logging
+
+**Design Decisions:**
+
+- **Prefer userMessage over message**: Timeout errors have both, userMessage is more user-friendly
+- **Recursive redaction with depth limit**: Prevents infinite loops on circular objects (max depth 10)
+- **Category-based suggestions**: Each error category has specific actionable suggestions
+- **No external dependencies**: Uses only Effect (Cause, Chunk) and chalk (already in project)
+- **Backwards compatible**: formatCliError still exported, just uses new implementation
+
+**★ Insight ─────────────────────────────────────**
+- Effect's `Cause.pretty()` with `renderErrorCause: true` provides complete error trees including nested causes
+- `Cause.failures()` returns a Chunk, not an array - use `Chunk.toReadonlyArray()` for iteration
+- Sensitive data filtering should check both key names AND value patterns to catch secrets in generic fields
+- Error categorization by tag pattern is more robust than instanceof checks for Effect errors
+- Category badges with colors make error scanning much faster in terminal output
+**─────────────────────────────────────────────────**
+
+**Verification:**
+- `bun typecheck` - Passes with no errors
+- `bun test` - 1071 pass (up from 1015), 12 skip, 16 fail, 2 errors
+  - +56 tests from new ErrorLogging.test.ts
+  - Same E2E failures as previous sessions (require moonwall environment)
+- ErrorLogging.ts has 100% function coverage, 90.06% line coverage
+
+**Notes for Next Developer:**
+
+1. To use structured error logging in new code:
+   ```ts
+   import { logError, logCause, formatErrorForCli } from "../internal/effect/ErrorLogging.js";
+
+   // Simple error logging
+   logError(error, { includeSuggestions: true });
+
+   // Effect Cause logging
+   Effect.catchAllCause((cause) => {
+     logCause(cause, { verbose: true });
+     return Effect.fail(new MyError());
+   });
+
+   // In Effect pipelines
+   myEffect.pipe(
+     Effect.tapError(logErrorEffect({ verbose: false }))
+   );
+   ```
+
+2. To add new error categories, update `categorizeError()` in ErrorLogging.ts with new tag patterns.
+
+3. To add new sensitive data patterns, update `SENSITIVE_PATTERNS` or `SECRET_VALUE_PATTERNS` arrays.
+
+4. The 16 failing tests are E2E tests in `test/suites/` requiring a running moonwall environment - not related to this change.
+
+5. Next high-priority features:
+   - Feature 46-58: Testing features (unit tests, integration tests)
+   - These involve creating comprehensive test coverage for Effect services
+
+**Files Changed:**
+- `packages/cli/src/internal/effect/ErrorLogging.ts` - New structured error logging module
+- `packages/cli/src/internal/effect/__tests__/ErrorLogging.test.ts` - 56 unit tests
+- `packages/cli/src/internal/effect/index.ts` - Added ErrorLogging export
+- `packages/cli/src/cmds/runTestsEffect.ts` - Integrated structured error logging
+- `plans/prd.json` - Marked Feature 45 as complete
