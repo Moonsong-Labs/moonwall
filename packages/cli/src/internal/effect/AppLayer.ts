@@ -279,16 +279,22 @@ export const AppLayerMinimal: Layer.Layer<CoreServices> = CoreServicesLive;
  * });
  * ```
  */
-export const AppLayerMemoized: Effect.Effect<Layer.Layer<AllServices>, never, Scope.Scope> =
-  Layer.memoize(AppLayerLive);
+export const AppLayerMemoized: Effect.Effect<
+  Layer.Layer<AllServices>,
+  never,
+  Scope.Scope
+> = Layer.memoize(AppLayerLive);
 
 /**
  * Memoized version of the test layer.
  *
  * @returns An Effect that resolves to a memoized Layer (requires Scope)
  */
-export const AppLayerTestMemoized: Effect.Effect<Layer.Layer<AllServices>, never, Scope.Scope> =
-  Layer.memoize(AppLayerTest);
+export const AppLayerTestMemoized: Effect.Effect<
+  Layer.Layer<AllServices>,
+  never,
+  Scope.Scope
+> = Layer.memoize(AppLayerTest);
 
 /**
  * Memoized version of low-level services.

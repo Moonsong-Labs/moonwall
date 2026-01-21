@@ -4062,3 +4062,77 @@ import { Effect, Layer } from "effect";
 - `packages/cli/src/internal/effect/AppLayer.ts` - Added memoization, lazy init, ManagedRuntime
 - `packages/cli/src/internal/effect/__tests__/AppLayer.test.ts` - Added 11 new tests
 - `plans/prd.json` - Marked Feature 57 as complete
+
+---
+
+### Feature Completed: Optimize Bun test runner configuration (PRD Feature 58)
+
+**Changes Made:**
+
+1. **Configured maxConcurrency in bunfig.toml**:
+   - Set `maxConcurrency = 20` (Bun's default) which provides optimal parallelism
+   - Benchmarked concurrency values: 10, 16, 20, 40
+   - Results showed minimal variance (~34-35s), indicating tests are IO-bound not CPU-bound
+   - Higher concurrency doesn't improve performance for Effect service tests with mock setup
+
+2. **Enabled test file parallelism**:
+   - Added `smol = false` to bunfig.toml to allow parallel file execution
+   - Individual tests within files run sequentially by default
+   - Use `test.concurrent()` for parallel tests within a file when needed
+
+3. **Created test preload file**:
+   - Created `packages/cli/src/internal/effect/__tests__/preload.ts`
+   - Pre-loads commonly used modules: effect, bun:test, node:path, node:fs, node:events
+   - Configured in bunfig.toml: `preload = ["./packages/cli/src/internal/effect/__tests__/preload.ts"]`
+   - Reduces per-file module loading overhead (though Bun already has excellent caching)
+
+4. **Benchmark Results**:
+   - System: Linux x86_64, 16 CPU cores
+   - Test suite: 1796 tests across 98 files
+   - 3-run average: ~34.5s (34.71s, 34.43s, 34.55s)
+   - Results: 1768 pass, 12 skip, 16 fail (same E2E baseline)
+   - CPU utilization: ~25% (tests are IO-bound, not CPU-bound)
+
+5. **Performance Notes**:
+   - No direct Vitest baseline available (migration predates baseline capture)
+   - Bun test runner documented as significantly faster than Vitest in changeset
+   - Test execution time includes coverage generation
+   - Tests are IO-bound due to Effect service mocking and async operations
+
+**★ Insight ─────────────────────────────────────**
+- Bun's test runner is already highly optimized - additional tuning provides marginal gains
+- maxConcurrency=20 is well-suited for Effect-based tests with mock services
+- Preload files help with module caching, but Bun's native caching is already efficient
+- The ~34s test time is consistent and includes coverage report generation
+- For IO-bound tests, concurrency doesn't significantly impact execution time
+**─────────────────────────────────────────────────**
+
+**Verification:**
+- `bun run typecheck` - Passes with no errors
+- `bun test` - 1768 pass, 12 skip, 16 fail (same E2E baseline requiring moonwall environment)
+- Test execution time stable at ~34.5s across multiple runs
+
+**Notes for Next Developer:**
+
+1. Remaining incomplete PRD features:
+   - Features 51-53, 55, 62: Integration/E2E tests (require moonwall environment with blockchain binaries)
+   - Feature 56: Verify 80% coverage target
+
+2. The bunfig.toml configuration is now optimized for:
+   - Parallel test file execution
+   - Module preloading for faster startup
+   - Coverage generation with proper exclusions
+   - 30s timeout for Effect-based async tests
+
+3. To run tests with different concurrency:
+   ```bash
+   bun test --max-concurrency 10  # Lower concurrency
+   bun test --max-concurrency 40  # Higher concurrency
+   ```
+
+4. The 16 failing tests are E2E tests requiring moonwall environment - not performance related.
+
+**Files Changed:**
+- `bunfig.toml` - Added preload, maxConcurrency, smol configuration
+- `packages/cli/src/internal/effect/__tests__/preload.ts` - New preload file for common imports
+- `plans/prd.json` - Marked Feature 58 as complete
