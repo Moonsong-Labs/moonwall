@@ -8,7 +8,7 @@
  * Service hierarchy:
  * - DevFoundationService: Manages dev/local Substrate nodes
  * - ChopsticksFoundationService: Manages Chopsticks fork instances
- * - ZombieFoundationService: Manages Zombienet networks (planned)
+ * - ZombieFoundationService: Manages Zombienet multi-node networks
  * - ReadOnlyFoundationService: Manages read-only connections (planned)
  */
 
@@ -41,3 +41,15 @@ export {
   ChopsticksFoundationServiceLive,
   makeChopsticksFoundationServiceLayer,
 } from "./ChopsticksFoundationServiceLive.js";
+
+// ZombieFoundationService interface and types
+export {
+  ZombieFoundationService,
+  ZombieNodeOperationError,
+  type ZombieFoundationConfig,
+  type ZombieFoundationRunningInfo,
+  type ZombieFoundationStatus,
+  type ZombieNodeInfo,
+  type ZombieNodeType,
+  type ZombieFoundationServiceType,
+} from "./ZombieFoundationService.js";

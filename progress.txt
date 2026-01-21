@@ -1007,3 +1007,59 @@
 - `packages/cli/src/internal/effect/__tests__/services/ChopsticksFoundationService.test.ts` - New test file (16 tests)
 - `plans/prd.json` - Marked Feature 22 as complete
 
+---
+
+### Feature Completed: Effect migration - create ZombieFoundationService interface (PRD Feature 23)
+
+**Changes Made:**
+1. Created `packages/cli/src/internal/effect/services/ZombieFoundationService.ts`:
+   - Defined `ZombieFoundationService` using Effect's `Context.Tag` pattern
+   - Interface methods:
+     - `start(config)`: Returns `Effect<{info: ZombieFoundationRunningInfo, stop: Effect<void>}, FoundationStartupError>`
+     - `stop()`: Returns `Effect<void, FoundationShutdownError>`
+     - `getStatus()`: Returns `Effect<ZombieFoundationStatus>`
+     - `healthCheck()`: Returns `Effect<void, FoundationHealthCheckError>`
+     - `getNodes()`: Returns `Effect<ReadonlyArray<ZombieNodeInfo>>`
+     - `restartNode(nodeName)`: Returns `Effect<void, ZombieNodeOperationError>`
+     - `killNode(nodeName)`: Returns `Effect<void, ZombieNodeOperationError>`
+   - Defined `ZombieFoundationConfig` type with fields: configPath, name, launchSpec, orchestratorOptions, disableDefaultEthProviders, disableLogEavesdropping, skipBlockCheck
+   - Defined `ZombieFoundationStatus` union type: `Starting | Running | Stopped | Failed`
+   - Defined `ZombieFoundationRunningInfo` with: relayWsEndpoint, paraWsEndpoint, tempDir, nodes, config
+   - Defined `ZombieNodeInfo` with: name, type (relaychain|parachain), wsEndpoint, multiAddress, parachainId
+   - Defined `ZombieNodeOperationError` class for node operation failures
+
+2. Updated `packages/cli/src/internal/effect/services/index.ts`:
+   - Added exports for ZombieFoundationService and all related types
+   - Updated service hierarchy comment (ZombieFoundationService no longer marked as "planned")
+
+**Design Decisions:**
+- **Multi-node focus**: Unlike DevFoundationService (single node) or ChopsticksFoundationService (single fork), ZombieFoundationService manages entire multi-node networks. The `getNodes()` method exposes node information for relay chain and parachains.
+- **Node management operations**: Added `restartNode()` and `killNode()` methods that were in the existing ZombieContext - these allow testing validator failure scenarios and network resilience.
+- **ZombieNodeOperationError**: Created a dedicated error class for node operations rather than reusing foundation errors, since these are ongoing operations rather than lifecycle events.
+- **Status includes node count**: The Running status includes `relayWsEndpoint`, `paraWsEndpoint`, and `nodeCount` to give a quick overview of network state.
+- **Re-uses high-level foundation errors**: For lifecycle operations (start, stop, healthCheck), uses the same FoundationStartupError/ShutdownError/HealthCheckError as other foundation services.
+- **Consistent with existing patterns**: Follows same interface pattern as DevFoundationService and ChopsticksFoundationService for consistency.
+
+**Verification:**
+- `bun typecheck` - Passes with no errors
+- `bun test` - 334 pass, 12 skip, 16 fail, 2 errors (same baseline as Feature 22 - E2E tests require moonwall environment)
+
+**Notes for Next Developer:**
+1. Feature 24 (ZombieFoundationService Layer implementation) should:
+   - Use `Layer.effect` pattern like DevFoundationServiceLive and ChopsticksFoundationServiceLive
+   - Wrap `@zombienet/orchestrator` start/stop with Effect.tryPromise
+   - Use `Ref` for state management (status, runningInfo, cleanup)
+   - Implement node operations by wrapping the IPC message system from `zombieHelpers.ts`
+   - Create unit tests using `Layer.succeed` for mocking
+2. The existing `globalContext.ts` contains the current zombie network implementation that should be wrapped:
+   - `startZombieNetwork()` method spawns the network
+   - IPC server handles node operations (restart, kill, pause, resume)
+   - Environment variables set: `MOON_RELAY_WSS`, `MOON_PARA_WSS`, `MOON_ZOMBIE_DIR`, `MOON_ZOMBIE_NODES`
+3. Multi-chain XCM scenarios need both relay and parachain coordination - the service interface supports this via `relayWsEndpoint` and `paraWsEndpoint` fields.
+4. The 16 failing tests are E2E tests in `test/suites/` requiring moonwall environment - not related to this change.
+
+**Files Changed:**
+- `packages/cli/src/internal/effect/services/ZombieFoundationService.ts` - New service interface file
+- `packages/cli/src/internal/effect/services/index.ts` - Added exports for ZombieFoundationService types
+- `plans/prd.json` - Marked Feature 23 as complete
+

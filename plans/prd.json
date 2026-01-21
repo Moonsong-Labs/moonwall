@@ -284,7 +284,8 @@
       "Define ZombieFoundationConfig type for network topology",
       "Export service tag and types"
     ],
-    "passes": false
+    "passes": true,
+    "notes": "Completed: (1) Created ZombieFoundationService.ts with Context.Tag-based service interface. (2) Defined methods: start() returns Effect<{info, stop}>, stop(), getStatus(), healthCheck(), getNodes(), restartNode(), killNode(). (3) Defined ZombieFoundationConfig with configPath, name, launchSpec, orchestratorOptions, disableDefaultEthProviders, disableLogEavesdropping, skipBlockCheck fields. (4) Defined ZombieFoundationStatus union type (Starting|Running|Stopped|Failed) with multi-node info (relayWsEndpoint, paraWsEndpoint, nodeCount). (5) Defined ZombieFoundationRunningInfo with relayWsEndpoint, paraWsEndpoint, tempDir, nodes array, config. (6) Defined ZombieNodeInfo with name, type (relaychain|parachain), wsEndpoint, multiAddress, parachainId. (7) Defined ZombieNodeOperationError for restartNode/killNode failures. (8) Updated services/index.ts to export all types. Typecheck passes, test baseline unchanged (334 pass, 12 skip, 16 fail, 2 errors - same E2E tests requiring moonwall environment)."
   },
   {
     "category": "functional",
