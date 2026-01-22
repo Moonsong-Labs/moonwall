@@ -35,7 +35,6 @@ const createMockSocket = (config: {
     },
 
     runRaw: <_, E = never, R = never>(
-      // biome-ignore lint/suspicious/noConfusingVoidType: Must match Socket.Socket interface signature
       handler: (_: string | Uint8Array) => void | Effect.Effect<_, E, R>,
       options?: {
         readonly onOpen?: Effect.Effect<void> | undefined;

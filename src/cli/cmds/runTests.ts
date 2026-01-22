@@ -134,7 +134,6 @@ export async function executeTests(env: Environment, testRunArgs?: testRunArgs &
     const vitestOptions = testRunArgs?.vitestPassthroughArgs?.reduce<UserConfig>((acc, arg) => {
       const [key, value] = arg.split("=");
       return {
-        // biome-ignore lint/performance/noAccumulatingSpread: this is fine
         ...acc,
         [key]: Number(value) || value,
       };

@@ -440,7 +440,9 @@ export interface DevModeContext extends GenericContext {
       | (EthersTransactionOptions & {
           libraryType: "ethers";
         }),
-  >(options: TOptions): Promise<`0x${string}`>;
+  >(
+    options: TOptions
+  ): Promise<`0x${string}`>;
 
   /**
    * Execute a non-state changing transaction to a precompiled contract address (i.e. read).

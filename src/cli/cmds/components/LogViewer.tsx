@@ -44,7 +44,9 @@ export const LogViewer: React.FC<LogViewerProps> = ({
   const terminalCols = process.stdout.columns ?? 80;
 
   const showTestPanel = testing || testOutput.length > 0 || testRun !== null;
-  const testPanelHeight = showTestPanel ? Math.min(10, Math.max(5, Math.floor(terminalRows / 3))) : 0;
+  const testPanelHeight = showTestPanel
+    ? Math.min(10, Math.max(5, Math.floor(terminalRows / 3)))
+    : 0;
   const logPanelHeight = terminalRows - testPanelHeight - (grepMode ? 5 : 4);
   const visibleLines = Math.max(3, logPanelHeight);
   const testOutputLines = Math.max(1, testPanelHeight - 3);
@@ -292,7 +294,8 @@ export const LogViewer: React.FC<LogViewerProps> = ({
       ) : (
         <Box paddingX={1}>
           <Text dimColor>
-            q:quit t:test T:grep{showTestPanel && " c:clear"} p:pause r:resume g:top G:bottom PgUp/PgDn
+            q:quit t:test T:grep{showTestPanel && " c:clear"} p:pause r:resume g:top G:bottom
+            PgUp/PgDn
             {onNextLog && " ,/.:node"}
           </Text>
         </Box>

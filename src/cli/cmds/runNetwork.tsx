@@ -40,9 +40,9 @@ export async function runNetworkCmd(args: RunCommandArgs) {
 
   if (!env) {
     const envList = globalConfig.environments
-      .map(env => env.name)
+      .map((env) => env.name)
       .sort()
-      .join(', ');
+      .join(", ");
     throw new Error(
       `No environment found in config for: ${chalk.bgWhiteBright.blackBright(
         args.envName
@@ -78,16 +78,14 @@ export async function runNetworkCmd(args: RunCommandArgs) {
   }
 
   if (!args.GrepTest) {
-
-    await input({ message: "✅  Press any key to continue...\n", })
+    await input({ message: "✅  Press any key to continue...\n" });
   } else {
     process.env.MOON_RECYCLE = "true";
     process.env.MOON_GREP = args.GrepTest;
     await executeTests(env, { testNamePattern: args.GrepTest, subDirectory: args.subDirectory });
   }
 
-  mainloop: for (; ;) {
-
+  mainloop: for (;;) {
     const menuChoice = await select({
       message: `Environment : ${chalk.bgGray.cyanBright(args.envName)}\nPlease select a choice: `,
       default: () => lastSelected,
@@ -108,8 +106,8 @@ export async function runNetworkCmd(args: RunCommandArgs) {
             foundation === "dev" || foundation === "chopsticks" || foundation === "zombie"
               ? `Command:   Run command on network (${chalk.bgGrey.cyanBright(foundation)})`
               : chalk.dim(
-                `Not applicable for foundation type (${chalk.bgGrey.cyanBright(foundation)})`
-              ),
+                  `Not applicable for foundation type (${chalk.bgGrey.cyanBright(foundation)})`
+                ),
           value: 3,
           short: "cmd",
           disabled: foundation !== "dev" && foundation !== "chopsticks" && foundation !== "zombie",
@@ -118,8 +116,8 @@ export async function runNetworkCmd(args: RunCommandArgs) {
           name:
             testFileDirs.length > 0
               ? `Test:      Execute tests registered for this environment   (${chalk.bgGrey.cyanBright(
-                testFileDirs
-              )})`
+                  testFileDirs
+                )})`
               : chalk.dim("Test:    NO TESTS SPECIFIED"),
           value: 4,
           disabled: !(testFileDirs.length > 0),
@@ -129,8 +127,8 @@ export async function runNetworkCmd(args: RunCommandArgs) {
           name:
             testFileDirs.length > 0
               ? `GrepTest:  Execute individual test(s) based on grepping the name / ID (${chalk.bgGrey.cyanBright(
-                testFileDirs
-              )})`
+                  testFileDirs
+                )})`
               : chalk.dim("Test:    NO TESTS SPECIFIED"),
           value: 5,
           disabled: !(testFileDirs.length > 0),
@@ -142,8 +140,8 @@ export async function runNetworkCmd(args: RunCommandArgs) {
           value: 6,
           short: "quit",
         },
-      ]
-    })
+      ],
+    });
     const env = globalConfig.environments.find(({ name }) => name === args.envName);
 
     if (!env) {
@@ -319,7 +317,7 @@ const resolveTailChoice = async (env: Environment) => {
     zombieNodes = process.env.MOON_ZOMBIE_NODES.split("|");
   }
 
-  for (; ;) {
+  for (;;) {
     switchNode = false;
     await new Promise<void>(async (resolve) => {
       const logFilePath = process.env.MOON_ZOMBIE_NODES
@@ -344,28 +342,29 @@ const resolveTailChoice = async (env: Environment) => {
           onNextLog={
             zombieNodes
               ? () => {
-                switchNode = true;
-                zombieNodePointer = (zombieNodePointer + 1) % zombieNodes!.length;
-                resolve();
-              }
+                  switchNode = true;
+                  zombieNodePointer = (zombieNodePointer + 1) % zombieNodes!.length;
+                  resolve();
+                }
               : undefined
           }
           onPrevLog={
             zombieNodes
               ? () => {
-                switchNode = true;
-                zombieNodePointer = (zombieNodePointer - 1 + zombieNodes!.length) % zombieNodes!.length;
-                resolve();
-              }
+                  switchNode = true;
+                  zombieNodePointer =
+                    (zombieNodePointer - 1 + zombieNodes!.length) % zombieNodes!.length;
+                  resolve();
+                }
               : undefined
           }
           zombieInfo={
             zombieNodes
               ? {
-                currentNode: zombieNodes[zombieNodePointer],
-                position: zombieNodePointer + 1,
-                total: zombieNodes.length,
-              }
+                  currentNode: zombieNodes[zombieNodePointer],
+                  position: zombieNodePointer + 1,
+                  total: zombieNodes.length,
+                }
               : undefined
           }
         />

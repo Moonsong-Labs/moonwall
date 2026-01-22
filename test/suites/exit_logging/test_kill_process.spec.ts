@@ -82,7 +82,6 @@ describeSuite({
         const lastLines = lines.slice(-10);
 
         log("\nLast 10 lines of log:");
-        // biome-ignore lint/suspicious/useIterableCallbackReturn: <its fine>
         lastLines.forEach((line) => log(`  ${line}`));
 
         // Check for exit message

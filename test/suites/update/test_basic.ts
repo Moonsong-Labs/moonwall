@@ -17,7 +17,6 @@ describeSuite({
       title: "In-line snapshot",
       test: () => {
         log(`Testing inline snapshot with random number: ${random}`);
-        // biome-ignore lint/style/noUnusedTemplateLiteral: <explanation>
         expect(random).toMatchInlineSnapshot(`7`);
       },
     });

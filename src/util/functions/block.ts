@@ -145,7 +145,7 @@ export const getBlockArray = async (
   timePeriod: number,
   bottleneck?: Bottleneck
 ) => {
-  /**  
+  /**
   @brief Returns an sequential array of block numbers from a given period of time in the past
   @param api Connected ApiPromise to perform queries on
   @param timePeriod Moment in the past to search until

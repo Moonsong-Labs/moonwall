@@ -388,9 +388,8 @@ describe("ChopsticksMultiChain - Phase 4: Multi-chain XCM Support", () => {
     });
 
     it("should be providable to programs using ChopsticksMultiChainService", async () => {
-      const { ChopsticksMultiChainLayer, ChopsticksMultiChainService } = await import(
-        "../ChopsticksMultiChain.js"
-      );
+      const { ChopsticksMultiChainLayer, ChopsticksMultiChainService } =
+        await import("../ChopsticksMultiChain.js");
 
       const config: MultiChainConfig = {
         relay: {
