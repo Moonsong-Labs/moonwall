@@ -17,7 +17,8 @@ typechain
 typechain-types
 target/
 
-cache
+**/cache
+!src/services/cache/
 artifacts
 **/tmp/*
 **/contracts/out/*
