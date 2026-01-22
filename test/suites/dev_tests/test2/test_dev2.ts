@@ -1,6 +1,6 @@
 import "@moonbeam-network/api-augment";
-import { describeSuite, expect, beforeAll } from "@moonwall/cli";
-import { CHARLETH_ADDRESS, BALTATHAR_ADDRESS, alith } from "@moonwall/util";
+import { describeSuite, expect, beforeAll } from "moonwall";
+import { CHARLETH_ADDRESS, BALTATHAR_ADDRESS, alith } from "moonwall";
 import { parseEther, type Wallet } from "ethers";
 import { BN } from "@polkadot/util";
 import type { ApiPromise } from "@polkadot/api";

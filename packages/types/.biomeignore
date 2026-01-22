@@ -1,8 +1,0 @@
-node_modules/
-dist/
-.next/
-build/
-coverage/
-tmp/
-*.min.js
-*.bundle.js

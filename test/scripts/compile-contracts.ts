@@ -1,4 +1,4 @@
-import { CompiledContract } from "@moonwall/cli";
+import { CompiledContract } from "moonwall";
 import chalk from "chalk";
 import fs from "fs/promises";
 import path from "node:path";

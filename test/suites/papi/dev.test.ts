@@ -1,4 +1,4 @@
-import { describeSuite, expect, beforeAll, customDevRpcRequest } from "@moonwall/cli";
+import { describeSuite, expect, beforeAll, customDevRpcRequest } from "moonwall";
 import type { PolkadotClient, TypedApi } from "polkadot-api";
 import { mb } from "@polkadot-api/descriptors";
 

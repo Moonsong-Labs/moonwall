@@ -1,4 +1,4 @@
-import { describeSuite, expect, beforeAll } from "@moonwall/cli";
+import { describeSuite, expect, beforeAll } from "moonwall";
 import type { ApiPromise } from "@polkadot/api";
 
 describeSuite({

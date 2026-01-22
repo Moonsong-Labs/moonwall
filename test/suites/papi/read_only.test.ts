@@ -1,4 +1,4 @@
-import { describeSuite, expect, beforeAll, afterAll } from "@moonwall/cli";
+import { describeSuite, expect, beforeAll, afterAll } from "moonwall";
 import type { PolkadotClient } from "polkadot-api";
 import { dot } from "@polkadot-api/descriptors";
 

@@ -1,6 +1,6 @@
 import "@moonbeam-network/api-augment";
-import { describeSuite, expect, beforeAll } from "@moonwall/cli";
-import { alith } from "@moonwall/util";
+import { describeSuite, expect, beforeAll } from "moonwall";
+import { alith } from "moonwall";
 import { parseEther } from "ethers";
 import type { ApiPromise } from "@polkadot/api";
 

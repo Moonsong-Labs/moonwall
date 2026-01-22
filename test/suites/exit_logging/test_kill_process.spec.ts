@@ -1,4 +1,4 @@
-import { describeSuite, expect } from "@moonwall/cli";
+import { describeSuite, expect } from "moonwall";
 import { execSync } from "node:child_process";
 import assert from "node:assert";
 import fs from "node:fs";
@@ -82,6 +82,7 @@ describeSuite({
         const lastLines = lines.slice(-10);
 
         log("\nLast 10 lines of log:");
+        // biome-ignore lint/suspicious/useIterableCallbackReturn: <its fine>
         lastLines.forEach((line) => log(`  ${line}`));
 
         // Check for exit message

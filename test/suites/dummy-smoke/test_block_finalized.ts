@@ -1,12 +1,7 @@
 import Bottleneck from "bottleneck";
 import semverLt from "semver/functions/lt";
-import { expect, describeSuite, type ApiPromise, beforeAll, type Web3 } from "@moonwall/cli";
-import {
-  checkBlockFinalized,
-  fetchHistoricBlockNum,
-  getBlockTime,
-  createLogger,
-} from "@moonwall/util";
+import { expect, describeSuite, type ApiPromise, beforeAll, type Web3 } from "moonwall";
+import { checkBlockFinalized, fetchHistoricBlockNum, getBlockTime, createLogger } from "moonwall";
 const logger = createLogger({ name: "smoke:block-finalized" });
 const debug = logger.debug.bind(logger);
 const timePeriod = process.env.TIME_PERIOD ? Number(process.env.TIME_PERIOD) : 60 * 1000;

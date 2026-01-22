@@ -5,7 +5,7 @@ import {
   expect,
   fetchCompiledContract,
   whiteListedTrack,
-} from "@moonwall/cli";
+} from "moonwall";
 import {
   ALITH_ADDRESS,
   ALITH_PRIVATE_KEY,
@@ -19,7 +19,7 @@ import {
   baltathar,
   createViemTransaction,
   deployViemContract,
-} from "@moonwall/util";
+} from "moonwall";
 import { BN } from "@polkadot/util";
 import { type Wallet, parseEther } from "ethers";
 import {

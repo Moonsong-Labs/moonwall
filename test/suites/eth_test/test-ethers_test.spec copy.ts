@@ -1,5 +1,5 @@
-import { describeSuite, expect, beforeAll, MoonwallContext } from "@moonwall/cli";
-import { xcAssetAbi } from "@moonwall/util";
+import { describeSuite, expect, beforeAll, MoonwallContext } from "moonwall";
+import { xcAssetAbi } from "moonwall";
 import { type Wallet, ethers } from "ethers";
 
 describeSuite({

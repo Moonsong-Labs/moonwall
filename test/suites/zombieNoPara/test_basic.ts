@@ -1,5 +1,5 @@
 import "@moonbeam-network/api-augment";
-import { beforeAll, describeSuite, expect } from "@moonwall/cli";
+import { beforeAll, describeSuite, expect } from "moonwall";
 import type { ApiPromise } from "@polkadot/api";
 
 describeSuite({
@@ -7,7 +7,6 @@ describeSuite({
   title: "Zombie Test Suite",
   foundationMethods: "zombie",
   testCases: ({ it, context, log }) => {
-    let paraApi: ApiPromise;
     let relayApi: ApiPromise;
 
     beforeAll(async () => {

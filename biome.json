@@ -12,6 +12,7 @@
       "**/*.json",
       "**/*.yml",
       "docs/**/*.md",
+       "!**/html",
       "content/**/*.md"
     ],
     "ignoreUnknown": true

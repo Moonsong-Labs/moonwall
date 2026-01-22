@@ -1,30 +1,26 @@
 {
   "compilerOptions": {
     "types": ["node"],
-
     "lib": ["ESNext"],
-    "target": "esnext",
-    "module": "esnext",
-    "baseUrl": "./",
-
+    "target": "ES2022",
+    "module": "ESNext",
     "moduleResolution": "Bundler",
-
-    "incremental": true,
-    "noEmit": true,
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "resolveJsonModule": true,
     "allowImportingTsExtensions": true,
     "moduleDetection": "force",
-    "importHelpers": true,
-    "downlevelIteration": true,
-    "skipDefaultLibCheck": true,
-    "preserveConstEnums": true,
-    "sourceMap": true,
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "declaration": true,
+    "declarationMap": true,
     "strict": true,
-    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
     "skipLibCheck": true,
-    "noImplicitAny": false
-
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": false,
+    "incremental": true
   },
-  "exclude": ["**/dist/**", "./packages/*/*.d.ts", "./packages/*/*.d.cts", "node_modules"]
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["dist", "node_modules", "test", "packages"]
 }
