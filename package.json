@@ -41,8 +41,9 @@
   ],
   "scripts": {
     "build": "zshy",
+    "postbuild": "pnpm install",
     "schema": "typescript-json-schema --tsNodeRegister --esModuleInterop -o config_schema.json ./src/types/config.ts MoonwallConfig && pnpm biome format config_schema.json --write",
-    "clean": "rm -rf dist && rm -rf node_modules",
+    "clean": "rm -rf dist && rm -rf node_modules && rm -rf test/node_modules ",
     "lint": "biome lint ./src",
     "lint:fix": "biome lint ./src --apply",
     "fmt": "biome format ./src",
