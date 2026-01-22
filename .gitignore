@@ -23,7 +23,7 @@ artifacts
 **/tmp/*
 **/contracts/out/*
 
-
+tsconfig.tsbuildinfo
 .idea
 db.sqlite*
 **/*.local*
