@@ -1,8 +1,11 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { Effect, Exit, Layer } from "effect";
 import { Socket } from "@effect/platform";
-import { NodeReadinessService, makeNodeReadinessServiceTest } from "../NodeReadinessService.js";
-import { NodeReadinessError } from "../errors.js";
+import {
+  NodeReadinessService,
+  makeNodeReadinessServiceTest,
+  NodeReadinessError,
+} from "../index.js";
 
 /**
  * Create a mock Socket implementation for testing

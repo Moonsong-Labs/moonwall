@@ -14,7 +14,7 @@ import {
   type BlockCreationParams,
   type BlockCreationResult,
   type DryRunResult,
-} from "../ChopsticksService.js";
+} from "../index.js";
 
 // =============================================================================
 // Phase 1 Tests: Error Types and Service Definition

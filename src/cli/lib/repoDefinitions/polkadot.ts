@@ -1,4 +1,4 @@
-import type { RepoSpec } from "../../../types/index.js";
+import type { RepoSpec } from "../../../api/types/index.js";
 
 const repo: RepoSpec = {
   name: "polkadot",

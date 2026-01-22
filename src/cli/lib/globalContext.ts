@@ -7,7 +7,7 @@ import type {
   MoonwallEnvironment,
   MoonwallProvider,
   ProviderType,
-} from "../../types/index.js";
+} from "../../api/types/index.js";
 import { createLogger } from "../../util/index.js";
 import type { ApiPromise } from "@polkadot/api";
 import zombie, { type Network } from "@zombienet/orchestrator";
@@ -31,9 +31,9 @@ import {
   getZombieConfig,
   type IPCRequestMessage,
   type IPCResponseMessage,
-} from "../internal/foundations/zombieHelpers.js";
+} from "../internal/foundations/index.js";
 import { launchNode, type MoonwallProcess } from "../internal/node.js";
-import { launchChopsticksFromSpec } from "../internal/effect/launchChopsticksEffect.js";
+import { launchChopsticksFromSpec } from "../internal/effect/index.js";
 import {
   ProviderFactory,
   ProviderInterfaceFactory,

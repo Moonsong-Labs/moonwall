@@ -6,11 +6,7 @@
   "relaychain": {
     "chain": "rococo-local",
     "default_command": "tmp/polkadot",
-    "default_args": [
-      "--no-hardware-benchmarks",
-      "-lparachain=debug",
-      "--database=paritydb"
-    ],
+    "default_args": ["--no-hardware-benchmarks", "-lparachain=debug", "--database=paritydb"],
     "nodes": [
       {
         "name": "charlie",
@@ -36,11 +32,7 @@
         }
       },
       "collator": {
-        "args": [
-          "--no-hardware-benchmarks",
-          "-lparachain=debug",
-          "--database=paritydb"
-        ],
+        "args": ["--no-hardware-benchmarks", "-lparachain=debug", "--database=paritydb"],
         "rpc_port": 33345,
         "command": "tmp/moonbeam",
         "name": "alith"
@@ -59,11 +51,7 @@
         }
       },
       "collator": {
-        "args": [
-          "--no-hardware-benchmarks",
-          "-lparachain=debug",
-          "--database=paritydb"
-        ],
+        "args": ["--no-hardware-benchmarks", "-lparachain=debug", "--database=paritydb"],
         "rpc_port": 22345,
         "command": "tmp/moonbeam",
         "name": "baltathar"

@@ -1,7 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { Effect, Exit } from "effect";
-import { PortDiscoveryService, PortDiscoveryServiceLive } from "../PortDiscoveryService.js";
-import { PortDiscoveryError } from "../errors.js";
+import { PortDiscoveryService, PortDiscoveryServiceLive, PortDiscoveryError } from "../index.js";
 
 describe("PortDiscoveryService", () => {
   it("should fail with PortDiscoveryError for invalid PID", async () => {

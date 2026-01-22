@@ -15,7 +15,6 @@ db: ./tmp/hydration.sqlite
 #           data:
 #             free: "133700000000000000000000000000000000"
 
-
 #   Tokens:
 #     Accounts:
 #       - - - 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY

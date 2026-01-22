@@ -1,4 +1,4 @@
-import type { Environment } from "../../types/index.js";
+import type { Environment } from "../../api/types/index.js";
 import chalk from "chalk";
 import clear from "clear";
 import { promises as fsPromises } from "node:fs";

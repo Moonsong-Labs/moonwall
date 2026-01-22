@@ -12,12 +12,7 @@
         {
           "name": "astar-collator*ubuntu-x86*",
           "type": "tar",
-          "defaultArgs": [
-            "--dev",
-            "--sealing=manual",
-            "--no-hardware-benchmarks",
-            "--no-telemetry"
-          ]
+          "defaultArgs": ["--dev", "--sealing=manual", "--no-hardware-benchmarks", "--no-telemetry"]
         }
       ]
     },
@@ -67,12 +62,7 @@
           {
             "binPath": "./tmp/astar-collator",
             "disableDefaultEthProviders": true,
-            "options": [
-              "--dev",
-              "--sealing=manual",
-              "--no-hardware-benchmarks",
-              "--no-telemetry"
-            ],
+            "options": ["--dev", "--sealing=manual", "--no-hardware-benchmarks", "--no-telemetry"],
             "newRpcBehaviour": true
           }
         ]

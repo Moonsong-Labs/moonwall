@@ -2,7 +2,6 @@ export * from "./handlers/index.js";
 export * from "./repoDefinitions/index.js";
 export * from "./binariesHelpers.js";
 export * from "./configReader.js";
-export * from "./contextHelpers.js";
 export * from "./contractFunctions.js";
 export * from "./globalContext.js";
 export * from "./governanceProcedures.js";

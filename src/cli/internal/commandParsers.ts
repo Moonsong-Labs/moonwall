@@ -5,7 +5,7 @@ import type {
   ZombieLaunchSpec,
   LaunchOverrides,
   ForkConfig,
-} from "../../types/index.js";
+} from "../../api/types/index.js";
 import { createLogger } from "../../util/index.js";
 import path from "node:path";
 import net from "node:net";
@@ -13,7 +13,7 @@ import { Effect } from "effect";
 import { standardRepos } from "../lib/repoDefinitions/index.js";
 import { shardManager } from "../lib/shardManager.js";
 import invariant from "tiny-invariant";
-import { StartupCacheService, StartupCacheServiceLive } from "./effect/StartupCacheService.js";
+import { StartupCacheService, StartupCacheServiceLive } from "./effect/index.js";
 
 const logger = createLogger({ name: "commandParsers" });
 

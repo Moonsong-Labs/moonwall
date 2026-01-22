@@ -1,4 +1,4 @@
-import type { MoonwallConfig, Environment } from "../../types/index.js";
+import type { MoonwallConfig, Environment } from "../../api/types/index.js";
 import { readFile, access } from "node:fs/promises";
 import { readFileSync, existsSync, constants } from "node:fs";
 import JSONC from "jsonc-parser";

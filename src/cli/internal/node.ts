@@ -5,7 +5,7 @@ import WebSocket from "ws";
 import { checkAccess, checkExists } from "./fileCheckers.js";
 import { createLogger } from "../../util/index.js";
 import { setTimeout as timer } from "node:timers/promises";
-import type { DevLaunchSpec } from "../../types/index.js";
+import type { DevLaunchSpec } from "../../api/types/index.js";
 import Docker from "dockerode";
 import invariant from "tiny-invariant";
 import { isEthereumDevConfig, isEthereumZombieConfig } from "../lib/configReader.js";

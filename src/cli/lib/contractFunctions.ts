@@ -5,7 +5,7 @@ import type {
   GenericContext,
   MoonwallContract,
   PrecompileCallOptions,
-} from "../../types/index.js";
+} from "../../api/types/index.js";
 import {
   ALITH_PRIVATE_KEY,
   PRECOMPILES,

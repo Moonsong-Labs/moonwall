@@ -8,11 +8,9 @@ db: ./tmp/polkadot.sqlite
 import-storage:
   System:
     Account:
-      -
-        -
-          - 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY
+      - - - 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY
         - providers: 1
           data:
-            free: '10000000000000000000'
+            free: "10000000000000000000"
   ParasDisputes:
-    $removePrefix: ['disputes'] # those can makes block building super slow
+    $removePrefix: ["disputes"] # those can makes block building super slow

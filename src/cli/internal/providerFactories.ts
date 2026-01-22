@@ -4,7 +4,7 @@ import type {
   ProviderMap,
   ProviderType,
   ViemClient,
-} from "../../types/index.js";
+} from "../../api/types/index.js";
 import {
   ALITH_PRIVATE_KEY,
   createLogger,

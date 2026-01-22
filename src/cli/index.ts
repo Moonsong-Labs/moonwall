@@ -1,4 +1,4 @@
-export * from "../types/index.js";
+export * from "../api/types/index.js";
 export { afterAll, afterEach, beforeAll, beforeEach, expect } from "vitest";
 export * from "../util/index.js";
 export * from "./lib/binariesHelpers.js";

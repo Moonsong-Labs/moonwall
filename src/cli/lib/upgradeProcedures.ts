@@ -1,4 +1,4 @@
-import type { ChopsticksContext, UpgradePreferences } from "../../types/index.js";
+import type { ChopsticksContext, UpgradePreferences } from "../../api/types/index.js";
 import type { ApiPromise } from "@polkadot/api";
 import type { WeightV2 } from "@polkadot/types/interfaces";
 import { blake2AsHex } from "@polkadot/util-crypto";

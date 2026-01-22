@@ -1,4 +1,4 @@
-import type { DevModeContext } from "../../types/index.js";
+import type { DevModeContext } from "../../api/types/index.js";
 import {
   GLMR,
   alith,

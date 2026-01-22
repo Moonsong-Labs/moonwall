@@ -1,4 +1,4 @@
-import type { FoundationType, MoonwallConfig } from "../../../types/index.js";
+import type { FoundationType, MoonwallConfig } from "../../../api/types/index.js";
 import fs from "node:fs/promises";
 import { confirm, input, number } from "@inquirer/prompts";
 

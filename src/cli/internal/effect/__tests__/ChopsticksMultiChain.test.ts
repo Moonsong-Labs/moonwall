@@ -10,8 +10,9 @@ import {
   type MultiChainService,
   createPolkadotMoonbeamConfig,
   createKusamaMoonriverConfig,
-} from "../ChopsticksMultiChain.js";
-import { ChopsticksXcmError, ChopsticksBlockError } from "../ChopsticksService.js";
+  ChopsticksXcmError,
+  ChopsticksBlockError,
+} from "../index.js";
 
 // =============================================================================
 // Phase 4 Tests: Multi-chain XCM Support
@@ -20,30 +21,30 @@ import { ChopsticksXcmError, ChopsticksBlockError } from "../ChopsticksService.j
 describe("ChopsticksMultiChain - Phase 4: Multi-chain XCM Support", () => {
   describe("Module Exports", () => {
     it("should export ChopsticksOrchestrationError", async () => {
-      const module = await import("../ChopsticksMultiChain.js");
+      const module = await import("../index.js");
       expect(module.ChopsticksOrchestrationError).toBeDefined();
     });
 
     it("should export ChopsticksMultiChainService tag", async () => {
-      const module = await import("../ChopsticksMultiChain.js");
+      const module = await import("../index.js");
       expect(module.ChopsticksMultiChainService).toBeDefined();
       expect(module.ChopsticksMultiChainService.key).toBe("ChopsticksMultiChainService");
     });
 
     it("should export launchMultiChainEffect function", async () => {
-      const module = await import("../ChopsticksMultiChain.js");
+      const module = await import("../index.js");
       expect(module.launchMultiChainEffect).toBeDefined();
       expect(typeof module.launchMultiChainEffect).toBe("function");
     });
 
     it("should export ChopsticksMultiChainLayer function", async () => {
-      const module = await import("../ChopsticksMultiChain.js");
+      const module = await import("../index.js");
       expect(module.ChopsticksMultiChainLayer).toBeDefined();
       expect(typeof module.ChopsticksMultiChainLayer).toBe("function");
     });
 
     it("should export helper config functions", async () => {
-      const module = await import("../ChopsticksMultiChain.js");
+      const module = await import("../index.js");
       expect(module.createPolkadotMoonbeamConfig).toBeDefined();
       expect(module.createKusamaMoonriverConfig).toBeDefined();
     });
@@ -363,7 +364,7 @@ describe("ChopsticksMultiChain - Phase 4: Multi-chain XCM Support", () => {
 
   describe("ChopsticksMultiChainLayer Type", () => {
     it("should create a Layer when called with config", async () => {
-      const { ChopsticksMultiChainLayer } = await import("../ChopsticksMultiChain.js");
+      const { ChopsticksMultiChainLayer } = await import("../index.js");
 
       const config: MultiChainConfig = {
         relay: {
@@ -389,7 +390,7 @@ describe("ChopsticksMultiChain - Phase 4: Multi-chain XCM Support", () => {
 
     it("should be providable to programs using ChopsticksMultiChainService", async () => {
       const { ChopsticksMultiChainLayer, ChopsticksMultiChainService } =
-        await import("../ChopsticksMultiChain.js");
+        await import("../index.js");
 
       const config: MultiChainConfig = {
         relay: {
@@ -445,7 +446,7 @@ describe("ChopsticksMultiChain - Phase 4: Multi-chain XCM Support", () => {
 
 describe.skip("ChopsticksMultiChain - Integration Tests", () => {
   it("should launch multi-chain setup with relay and parachains", async () => {
-    const { launchMultiChainEffect } = await import("../ChopsticksMultiChain.js");
+    const { launchMultiChainEffect } = await import("../index.js");
 
     const { service, cleanup } = await launchMultiChainEffect({
       relay: {
@@ -475,7 +476,7 @@ describe.skip("ChopsticksMultiChain - Integration Tests", () => {
   });
 
   it("should send UMP from parachain to relay", async () => {
-    const { launchMultiChainEffect } = await import("../ChopsticksMultiChain.js");
+    const { launchMultiChainEffect } = await import("../index.js");
 
     const { service, cleanup } = await launchMultiChainEffect(createPolkadotMoonbeamConfig());
 

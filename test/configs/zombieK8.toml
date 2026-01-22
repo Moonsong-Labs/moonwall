@@ -3,9 +3,7 @@ chain = "rococo-local"
 default_image = "docker.io/parity/polkadot:v1.8.0"
 
 [[relaychain.node_groups]]
-args = [
-    "-lparachain=debug",
-]
+args = ["-lparachain=debug"]
 count = 2
 name = "relay"
 

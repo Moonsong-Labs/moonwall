@@ -6,11 +6,7 @@
   "relaychain": {
     "chain": "rococo-local",
     "default_command": "tmp/polkadot",
-    "default_args": [
-      "--no-hardware-benchmarks",
-      "-lparachain=debug",
-      "--database=paritydb"
-    ],
+    "default_args": ["--no-hardware-benchmarks", "-lparachain=debug", "--database=paritydb"],
     "nodes": [
       {
         "name": "alice",
@@ -28,11 +24,7 @@
       "chain_spec_path": "tmp/moonbase-test-spec-plain.json",
       "id": 2000,
       "collator": {
-        "args": [
-          "--no-hardware-benchmarks",
-          "-lparachain=debug",
-          "--database=paritydb"
-        ],
+        "args": ["--no-hardware-benchmarks", "-lparachain=debug", "--database=paritydb"],
         "command": "tmp/moonbeam_2301",
         "name": "ethan"
       }

@@ -10,7 +10,7 @@ import type {
   ReadOnlyLaunchSpec,
   TestCasesFn,
   ViemClient,
-} from "../../types/index.js";
+} from "../../api/types/index.js";
 import type { ApiPromise } from "@polkadot/api";
 import Bottleneck from "bottleneck";
 import { createLogger } from "../../util/index.js";
@@ -19,10 +19,7 @@ import { afterAll, beforeAll, describe, it } from "vitest";
 import type { Web3 } from "web3";
 import { getEnvironmentFromConfig } from "./configReader.js";
 import { MoonwallContext, contextCreator } from "./globalContext.js";
-import { chopsticksHandler } from "./handlers/chopsticksHandler.js";
-import { devHandler } from "./handlers/devHandler.js";
-import { readOnlyHandler } from "./handlers/readOnlyHandler.js";
-import { zombieHandler } from "./handlers/zombieHandler.js";
+import { chopsticksHandler, devHandler, readOnlyHandler, zombieHandler } from "./handlers/index.js";
 import type { PolkadotClient } from "polkadot-api";
 
 const RT_VERSION = Number(process.env.MOON_RTVERSION);

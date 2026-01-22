@@ -3,8 +3,7 @@ import { Duration, Effect, Exit } from "effect";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import * as os from "node:os";
-import { acquireFileLock, releaseFileLock, withFileLock } from "../FileLock.js";
-import { FileLockError } from "../errors.js";
+import { acquireFileLock, releaseFileLock, withFileLock, FileLockError } from "../index.js";
 import { NodeFileSystem } from "@effect/platform-node";
 
 describe("FileLock", () => {

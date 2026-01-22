@@ -1,4 +1,4 @@
-import type { DevLaunchSpec } from "../../types/index.js";
+import type { DevLaunchSpec } from "../../api/types/index.js";
 import { createLogger } from "../../util/index.js";
 import Docker from "dockerode";
 import { exec, spawn, spawnSync } from "node:child_process";

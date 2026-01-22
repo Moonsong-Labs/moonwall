@@ -1,10 +1,9 @@
 {
   "name": "@moonwall/tests",
-  "type": "module",
   "version": "5.18.2",
   "private": true,
-  "packageManager": "pnpm@9.1.4",
   "description": "Testing framework for the Moon family of projects",
+  "type": "module",
   "scripts": {
     "clean": "rm -rf node_modules",
     "test-dev": "pnpm moonwall test 'dev_test dev_seq dev_mult'",
@@ -16,13 +15,15 @@
     "node_test": "node --no-warnings --loader tsx --test suites/node_test/*.ts",
     "bun_test": "bun test suites/bun_test/*"
   },
+  "dependencies": {
+    "@polkadot-api/descriptors": "file:.papi/descriptors",
+    "polkadot-api": "1.19.2",
+    "reflect-metadata": "^0.2.0"
+  },
   "devDependencies": {
     "@acala-network/chopsticks": "^1.2.5",
-    "oxfmt": "^0.26.0",
-    "oxlint": "^1.41.0",
     "@inquirer/prompts": "^8.0.2",
     "@moonbeam-network/api-augment": "0.3900.0",
-    "moonwall": "workspace:*",
     "@openzeppelin/contracts": "5.4.0",
     "@polkadot/api": "^16.5.1",
     "@polkadot/util": "^13.5.1",
@@ -32,6 +33,9 @@
     "chai": "6.2.1",
     "chalk": "^5.6.2",
     "ethers": "^6.16.0",
+    "moonwall": "workspace:*",
+    "oxfmt": "^0.26.0",
+    "oxlint": "^1.41.0",
     "pnpm": "^10.24.0",
     "solc": "0.8.31",
     "tsx": "^4.21.0",
@@ -41,9 +45,5 @@
     "web3": "*",
     "yargs": "^18.0.0"
   },
-  "dependencies": {
-    "@polkadot-api/descriptors": "file:.papi/descriptors",
-    "polkadot-api": "1.19.2",
-    "reflect-metadata": "^0.2.0"
-  }
+  "packageManager": "pnpm@9.1.4"
 }

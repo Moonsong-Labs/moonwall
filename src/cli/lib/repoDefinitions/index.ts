@@ -1,4 +1,4 @@
-import type { RepoSpec } from "../../../types/index.js";
+import type { RepoSpec } from "../../../api/types/index.js";
 import mb from "./moonbeam.js";
 import pd from "./polkadot.js";
 import ts from "./tanssi.js";

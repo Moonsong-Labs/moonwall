@@ -9,7 +9,6 @@
 ### Minor Changes
 
 - 760dd82: ## Performance: Caching Improvements
-
   - Add startup cache option for dev nodes (precompiled WASM + raw chainspec, shared metadata cache).
   - Add `cacheImports` flag to prebundle viem/ethers in Vitest.
   - Speed up readiness/port discovery and tweak moonbeam dev defaults (paritydb, env HTTP endpoint).
@@ -83,7 +82,6 @@
 ### Minor Changes
 
 - ad610ae: ## Migrate from debug to pino logger
-
   - Replace `debug` package with `pino` for improved logging capabilities
   - Add proper log levels support (fatal, error, warn, info, debug, trace, silent)
   - Environment variable changed from `DEBUG=*` to `LOG_LEVEL=<level>`
@@ -129,7 +127,6 @@
 ### Minor Changes
 
 - c792425: Added Fork config to dev foundations
-
   - BETA: Added ability to use moonbeam's fork API both via moonwall.config and also in a test
 
 ### Patch Changes
@@ -158,7 +155,6 @@
 ### Minor Changes
 
 - ec1eed4: Update chopsticks
-
   - Update chopsticks to version 0.16.1 and fixes issue when detecting port on running process
   - Fixes some dependency conflicts
 
@@ -167,7 +163,6 @@
 ### Minor Changes
 
 - df30d19: Package Updates
-
   - Package updates for ETH libs
   - Package updates for PolkadotJS
   - Package updates for tooling
@@ -251,7 +246,6 @@
 ### Major Changes
 
 - 8bd1877: ESM ONLY
-
   - This release moves to be an ESM only package!
 
 ## 4.7.9
@@ -425,7 +419,6 @@
 ### Minor Changes
 
 - 513d509: # September Update
-
   - [#258](https://github.com/Moonsong-Labs/moonwall/issues/258)
   - [#254](https://github.com/Moonsong-Labs/moonwall/issues/254)
   - [#251](https://github.com/Moonsong-Labs/moonwall/issues/251)
@@ -439,7 +432,6 @@
 ### Patch Changes
 
 - e4fe8e9: # Package Updates
-
   - Updated packages across the board
   - Latest Zombienet version now being used
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Box, Text, useInput, useApp } from "ink";
 import fs from "node:fs";
-import type { Environment } from "../../../types/index.js";
+import type { Environment } from "../../../api/types/index.js";
 import { executeTests } from "../runTests.js";
 
 interface LogViewerProps {

@@ -1,18 +1,42 @@
-// Re-export all types
-export * from "./types/index.js";
+/**
+ * Moonwall - Blockchain Testing Framework
+ *
+ * Public API exports for test consumers
+ */
 
-// Re-export vitest test utilities
+// =============================================================================
+// Type Definitions
+// =============================================================================
+export * from "./api/types/index.js";
+
+// =============================================================================
+// Vitest Re-exports
+// =============================================================================
 export { afterAll, afterEach, beforeAll, beforeEach, expect } from "vitest";
 
-// Re-export all utilities
+// =============================================================================
+// Testing Utilities
+// =============================================================================
+// Block creation, event filtering, contract helpers, etc.
 export * from "./util/index.js";
 
-// Re-export public CLI lib exports
-export * from "./cli/lib/binariesHelpers.js";
-export * from "./cli/lib/configReader.js";
-// Note: contextHelpers is exported from util, not cli (they were duplicated)
-export * from "./cli/lib/contractFunctions.js";
-export * from "./cli/lib/globalContext.js";
-export * from "./cli/lib/governanceProcedures.js";
-export * from "./cli/lib/rpcFunctions.js";
-export * from "./cli/lib/runnerContext.js";
+// =============================================================================
+// Test Runner
+// =============================================================================
+// describeSuite - Primary test suite creation function
+export { describeSuite } from "./cli/lib/runnerContext.js";
+
+// Configuration loading
+export {
+  getEnvironmentFromConfig,
+  importAsyncConfig,
+  importConfig,
+  isEthereumDevConfig,
+  isEthereumZombieConfig,
+} from "./cli/lib/configReader.js";
+
+// =============================================================================
+// Context (Advanced Use)
+// =============================================================================
+// For advanced users who need direct access to the Moonwall context
+export { MoonwallContext, contextCreator } from "./cli/lib/globalContext.js";

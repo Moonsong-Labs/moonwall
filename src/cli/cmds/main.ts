@@ -1,4 +1,4 @@
-import type { MoonwallConfig } from "../../types/index.js";
+import type { MoonwallConfig } from "../../api/types/index.js";
 import chalk from "chalk";
 import clear from "clear";
 import colors from "colors";
