@@ -40,3 +40,38 @@ export {
 // =============================================================================
 // For advanced users who need direct access to the Moonwall context
 export { MoonwallContext, contextCreator } from "./cli/lib/globalContext.js";
+
+// =============================================================================
+// RPC Utilities
+// =============================================================================
+export { customDevRpcRequest } from "./cli/lib/rpcFunctions.js";
+
+// =============================================================================
+// Contract Utilities
+// =============================================================================
+export {
+  fetchCompiledContract,
+  deployCreateCompiledContract,
+  interactWithContract,
+  interactWithPrecompileContract,
+} from "./cli/lib/contractFunctions.js";
+
+// =============================================================================
+// Governance Utilities
+// =============================================================================
+export {
+  whiteListedTrack,
+  notePreimage,
+  instantFastTrack,
+  execCouncilProposal,
+  execTechnicalCommitteeProposal,
+  execOpenTechCommitteeProposal,
+  proposeReferendaAndDeposit,
+  dispatchAsGeneralAdmin,
+} from "./cli/lib/governanceProcedures.js";
+
+// =============================================================================
+// Re-exports from Dependencies (for convenience)
+// =============================================================================
+export { ApiPromise } from "@polkadot/api";
+export { default as Web3 } from "web3";

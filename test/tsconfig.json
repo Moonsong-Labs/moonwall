@@ -1,8 +1,9 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "types": ["node"]
+    "types": ["node"],
+    "rootDir": "."
   },
-  // "exclude": ["**/dist/**", "./packages/*/*.d.ts", "./packages/*/*.d.cts", "node_modules"],
-  "exclude": ["node_modules", "suites"]
+  "include": ["suites/**/*.ts"],
+  "exclude": ["node_modules", "suites/bun_test"]
 }

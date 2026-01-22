@@ -12,6 +12,7 @@
     "lint:fix": "oxlint --fix ./suites",
     "fmt": "oxfmt --check .",
     "fmt:fix": "oxfmt --write .",
+    "typecheck": "tsc --noEmit",
     "node_test": "node --no-warnings --loader tsx --test suites/node_test/*.ts",
     "bun_test": "bun test suites/bun_test/*"
   },
