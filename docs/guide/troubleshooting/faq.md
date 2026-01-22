@@ -29,7 +29,7 @@ Make sure that you specify the correct version of Moonwall that you'd like to us
   "license": "ISC",
   "dependencies": {
     "@moonbeam-network/api-augment": "^0.2600.0",
-    "@moonwall/cli": "^4.7.5",
+    "moonwall": "^4.7.5",
     "@moonwall/util": "^4.7.5",
     "ethers":"^6.10.0",
     "@polkadot/api": "^10.11.2",

@@ -37,7 +37,7 @@ Instead of using `pnpm link`, reference the local Moonwall package directory dir
 ```json
 {
   "dependencies": {
-    "@moonwall/cli": "file:/path/to/moonwall/packages/cli",
+    "moonwall": "file:/path/to/moonwall/packages/cli",
     "@moonwall/util": "file:/path/to/moonwall/packages/util",
     "@moonwall/types": "file:/path/to/moonwall/packages/types"
   }
@@ -76,7 +76,7 @@ For a more robust development workflow:
    {
      "pnpm": {
        "overrides": {
-         "@moonwall/cli": "file:/path/to/moonwall/packages/cli",
+         "moonwall": "file:/path/to/moonwall/packages/cli",
          "@moonwall/util": "file:/path/to/moonwall/packages/util"
        }
      }

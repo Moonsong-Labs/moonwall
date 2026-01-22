@@ -149,7 +149,7 @@ async function createSampleTest(directory: string) {
   await fs.writeFile(`${directory}/sample.test.ts`, sampleTest, "utf-8");
 }
 
-const sampleTest = `import { describeSuite, expect } from "@moonwall/cli";
+const sampleTest = `import { describeSuite, expect } from "moonwall";
 
 describeSuite({
   id: "B01",

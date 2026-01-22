@@ -18,19 +18,19 @@ Moonwall should be installed as dependency to the project under test.
 ::: code-group
 
 ```sh [pnpm]
-pnpm add -D @moonwall/cli
+pnpm add -D moonwall
 ```
 
 ```sh [yarn]
-yarn add -D @moonwall/cli
+yarn add -D moonwall
 ```
 
 ```sh [bun]
-bun add -D @moonwall/cli
+bun add -D moonwall
 ```
 
 ```sh [npm]
-npm add -D @moonwall/cli
+npm add -D moonwall
 ```
 
 :::
@@ -38,7 +38,7 @@ npm add -D @moonwall/cli
 You can install Moonwall globally with the following command: 
 
 ```sh
-pnpm -g i @moonwall/cli
+pnpm -g i moonwall
 ```
 
 ## Initializing Moonwall

@@ -11,7 +11,7 @@ Moonwall is a comprehensive blockchain test framework for Substrate-based networ
 
 ### NPM Installation
 ```
-pnpm -g i @moonwall/cli
+pnpm -g i moonwall
 ```
 > Or whichever way you prefer to install via your favourite package manager
 
@@ -26,7 +26,7 @@ pnpm -g i @moonwall/cli
 
 From here you can import the items you need from moonwall packages in your code:
 ```
-import { describeSuite , beforeAll, expect, ALITH_ADDRESS } from "@moonwall/cli";
+import { describeSuite , beforeAll, expect, ALITH_ADDRESS } from "moonwall";
 import { ALITH_ADDRESS } from "@moonwall/util";
 ```
 

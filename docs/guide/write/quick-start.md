@@ -12,7 +12,7 @@ Moonwall utils is a utils package with helpful constants and various functions f
 We use `describeSuite` to define our test suite, similar to how you would use Mocha in Javascript. We also need to explicity import `expect` from moonwall, as we'll use this to check the validity of our test cases. `beforeAll` enables us to set up our test environment before any tests are executed.
 
 ```typescript
-import {describeSuite, beforeAll, expect } from "@moonwall/cli"
+import {describeSuite, beforeAll, expect } from "moonwall"
 import {alith, GLMR} from "@moonwall/util"
 ```
 
@@ -64,7 +64,7 @@ it ({id: "T1", title: "Demo test case", test: async()=> {
 Once all is said and done your simple test file should look like the below. Remember, this is a simple demo test case and it is not refined or comprehensive.
 
 ```typescript
-import {describeSuite, beforeAll, expect } from "@moonwall/cli";
+import {describeSuite, beforeAll, expect } from "moonwall";
 import {alith, GLMR} from "@moonwall/util";
 import { ethers } from "ethers";
 import { ApiPromise } from "@polkadot/api";

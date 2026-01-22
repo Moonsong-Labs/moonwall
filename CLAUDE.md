@@ -15,7 +15,7 @@ Moonwall is a comprehensive blockchain testing framework specifically designed f
 pnpm i
 
 # To install the CLI globally (optional, for using `moonwall` directly outside pnpm scripts)
-pnpm -g i @moonwall/cli
+pnpm -g i moonwall
 ```
 
 ### Build and Development

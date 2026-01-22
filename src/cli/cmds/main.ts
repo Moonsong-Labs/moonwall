@@ -446,7 +446,7 @@ const printIntro = async () => {
     const json = releases.data;
 
     remoteVersion =
-      json.find((a) => a.tag_name.includes("@moonwall/cli@"))?.tag_name.split("@")[2] || "unknown";
+      json.find((a) => a.tag_name.includes("moonwall@"))?.tag_name.split("@")[2] || "unknown";
   } catch (error) {
     remoteVersion = "unknown";
     console.error(`Fetch Error: ${error}`);
