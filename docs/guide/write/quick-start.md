@@ -5,15 +5,14 @@ Let's write a super simple test case that we'll run in the
 
 ### Moonwall Utils
 
-Moonwall utils is a utils package with helpful constants and various functions for Moonwall. In the test file you can refer to some pre-funded development accounts like ALITH and BALTATHAR which can be easily imported from ```@moonwall/util```. ALITH and BALTATHAR are EVM versions (20 byte Account20 types) of ALICE and BOB, the Substrate (32 byte AccountId32 types) predefined development accounts.
+Moonwall includes a suite of helpful constants and utility functions. In the test file you can refer to some pre-funded development accounts like ALITH and BALTATHAR which can be easily imported from `moonwall`. ALITH and BALTATHAR are EVM versions (20 byte Account20 types) of ALICE and BOB, the Substrate (32 byte AccountId32 types) predefined development accounts.
 
-[Moonwall Utils](https://github.com/Moonsong-Labs/moonwall/tree/main/packages/util){target=blank} contains tons of helpful constants, classes, functions, and helpers. For example, [`Chain.ts`](https://github.com/Moonsong-Labs/moonwall/blob/main/packages/util/src/constants/chain.ts){target=blank} includes weights, precompile addresses, gas constants, and more.
+The [constants directory](https://github.com/Moonsong-Labs/moonwall/tree/main/src/api/constants){target=blank} contains tons of helpful constants, classes, functions, and helpers. For example, [`chain.ts`](https://github.com/Moonsong-Labs/moonwall/blob/main/src/api/constants/chain.ts){target=blank} includes weights, precompile addresses, gas constants, and more.
 
 We use `describeSuite` to define our test suite, similar to how you would use Mocha in Javascript. We also need to explicity import `expect` from moonwall, as we'll use this to check the validity of our test cases. `beforeAll` enables us to set up our test environment before any tests are executed.
 
 ```typescript
-import {describeSuite, beforeAll, expect } from "moonwall"
-import {alith, GLMR} from "@moonwall/util"
+import { describeSuite, beforeAll, expect, alith, GLMR } from "moonwall"
 ```
 
 ### Additional Imports
@@ -64,8 +63,7 @@ it ({id: "T1", title: "Demo test case", test: async()=> {
 Once all is said and done your simple test file should look like the below. Remember, this is a simple demo test case and it is not refined or comprehensive.
 
 ```typescript
-import {describeSuite, beforeAll, expect } from "moonwall";
-import {alith, GLMR} from "@moonwall/util";
+import { describeSuite, beforeAll, expect, alith, GLMR } from "moonwall";
 import { ethers } from "ethers";
 import { ApiPromise } from "@polkadot/api";
 

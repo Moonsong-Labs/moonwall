@@ -40,7 +40,7 @@ Below is an example of the generated `moonwall.config.json`:
 
 ```json
 {
-  "$schema": "https://raw.githubusercontent.com/Moonsong-Labs/moonwall/main/packages/types/config_schema.json",
+  "$schema": "https://raw.githubusercontent.com/Moonsong-Labs/moonwall/main/config_schema.json",
   "label": "moonwall_config",
   "defaultTestTimeout": 30000,
   "environments": [

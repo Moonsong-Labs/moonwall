@@ -2,15 +2,7 @@
 
 ## Moonwall Utils
 
-Moonwall Utils is a utils package for Moonwall that includes a suite of constants, functions, classes, and types that are useful when writing tests with Moonwall. 
-
-### Installation
-
-Moonwall Utils can be installed with the following command:
-
-```bash
-npm i @moonwall/util
-```
+Moonwall includes a suite of constants, functions, classes, and types that are useful when writing tests. These utilities are bundled with the main `moonwall` package and can be imported directly.
 
 ### Moonwall Utils Reference
 
@@ -57,10 +49,10 @@ Artifact Downloader currently supports downloading artifacts for the following n
 - Polkadot
 - Tanssi
 
-Would you like to see other networks added here? You can add [your network configuration to `repoDefinitions`](https://github.com/Moonsong-Labs/moonwall/tree/main/packages/cli/src/lib/repoDefinitions){target=_blank}. `YOUR-NETWORK.ts` needs to specify the network's Github repo name, repo owner, and supported binaries. Here's an example of of the repo definition file for Tanssi: 
+Would you like to see other networks added here? You can add [your network configuration to `repoDefinitions`](https://github.com/Moonsong-Labs/moonwall/tree/main/src/cli/lib/repoDefinitions){target=_blank}. `YOUR-NETWORK.ts` needs to specify the network's Github repo name, repo owner, and supported binaries. Here's an example of of the repo definition file for Tanssi: 
 
 ```typescript
-import { RepoSpec } from "@moonwall/types";
+import type { RepoSpec } from "moonwall";
 
 const repo: RepoSpec = {
   name: "tanssi",

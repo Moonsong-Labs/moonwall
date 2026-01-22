@@ -4,14 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What is Moonwall?
 
-Moonwall is a comprehensive blockchain testing framework specifically designed for Substrate-based networks. It provides a unified approach to network configuration, testing, deployment, and script execution. Built as a monorepo using pnpm workspaces, it facilitates testing against various network environments and supports multiple blockchain client libraries.
+Moonwall is a comprehensive blockchain testing framework specifically designed for Substrate-based networks. It provides a unified approach to network configuration, testing, deployment, and script execution. It facilitates testing against various network environments and supports multiple blockchain client libraries.
 
 ## Commands
 
 ### Installation
 
 ```bash
-# Install all dependencies for the monorepo (run from project root)
+# Install all dependencies
 pnpm i
 
 # To install the CLI globally (optional, for using `moonwall` directly outside pnpm scripts)
@@ -21,10 +21,10 @@ pnpm -g i moonwall
 ### Build and Development
 
 ```bash
-# Build all packages within the monorepo
+# Build the package
 pnpm build
 
-# Generate TypeScript types for all packages
+# Generate TypeScript types
 pnpm generate-types
 
 # Clean all build artifacts and node_modules, then reinstall and rebuild everything
@@ -58,15 +58,15 @@ The `moonwall/test` directory contains example test suites and configurations. I
 Moonwall uses 0xfmt for formatting and linting.
 
 ```bash
-# Format code across the monorepo
+# Format code
 pnpm fmt
 pnpm fmt:fix
 
-# Lint code across all packages
+# Lint code
 pnpm lint
 pnpm lint:fix
 
-# Perform type checking for all packages
+# Perform type checking
 pnpm typecheck
 ```
 
@@ -91,27 +91,30 @@ The CLI uses `yargs` for argument parsing and `@inquirer/prompts` for interactiv
 
 ## Architecture Overview
 
-Moonwall is structured as a TypeScript monorepo managed with pnpm workspaces.
+Moonwall is structured as a single TypeScript package.
 
 ### Key Technologies
 
-*   **PNPM Workspaces**: Manages the monorepo structure and dependencies.
 *   **TypeScript**: The primary programming language, providing strong typing.
-*   **Tsup**: Used for bundling TypeScript code in the individual packages (`cli`, `types`, `util`).
+*   **zshy**: Used for bundling TypeScript code and generating ESM exports.
 *   **0xfmt/0xlint**: For code formatting and linting, ensuring consistent code style.
 *   **Vitest**: The testing framework used for running unit and integration tests.
     *   **`@vitest/ui`**: Provides a browser-based UI for viewing test results.
 
 ### Project Structure
 
-The monorepo is organized into several key directories:
+The package is organized into several key directories:
 
-*   `moonwall/packages/`: Contains the core logic of Moonwall, split into:
-    *   `cli`: Implements the command-line interface (`moonwall`). It handles command parsing, orchestrates test execution, and network management. Uses `yargs`, `@inquirer/prompts`, `@octokit/rest` (for artifact downloads), and `dockerode` (likely for Zombienet).
-    *   `types`: Defines shared TypeScript types and interfaces used across the project, including the structure for `moonwall.config.json`. It uses `typescript-json-schema` to generate a JSON schema for the configuration file.
-    *   `util`: Provides common utility functions and helpers shared by other packages.
-*   `moonwall/test/`: Contains example test configurations (`moonwall.config.json`, `configs/`), test suites (`suites/`), Solidity contracts (`contracts/`), and scripts (`scripts/`). This package demonstrates how to use Moonwall and also serves as an internal testing ground.
-*   `moonwall.config.json` (typically in a test project or user's project, example in `moonwall/test/moonwall.config.json`): The central configuration file for defining test environments, network settings, and global parameters.
+*   `src/`: Contains all source code, organized as:
+    *   `api/`: Public API exports including types, constants, and utilities. This includes:
+        *   `types/`: TypeScript types and interfaces, including the structure for `moonwall.config.json`. Uses `typescript-json-schema` to generate a JSON schema for the configuration file.
+        *   `constants/`: Pre-funded development accounts (Alith, Baltathar, etc.), token constants, and chain-specific values.
+        *   `internal/`: Internal utilities and helpers.
+    *   `cli/`: Implements the command-line interface (`moonwall`). It handles command parsing, orchestrates test execution, and network management. Uses `yargs`, `@inquirer/prompts`, `@octokit/rest` (for artifact downloads), and `dockerode` (for Zombienet).
+    *   `foundations/`: Foundation implementations for different network types (dev, chopsticks, zombie, read_only).
+    *   `services/`: Shared services used across the codebase.
+*   `test/`: Contains example test configurations (`moonwall.config.json`, `configs/`), test suites (`suites/`), Solidity contracts (`contracts/`), and scripts (`scripts/`). This directory demonstrates how to use Moonwall and also serves as an internal testing ground.
+*   `moonwall.config.json` (typically in a test project or user's project, example in `test/moonwall.config.json`): The central configuration file for defining test environments, network settings, and global parameters.
 
 ### Key Concepts
 
@@ -135,14 +138,14 @@ The monorepo is organized into several key directories:
     *   `viem`: A modern TypeScript interface for Ethereum.
     *   `papi`: The Polkadot API client (`polkadot-api`), a newer, lighter-weight alternative for Substrate interaction.
 
-4.  **Context System**: Each foundation type provides a dedicated "context" object to the tests. This context offers environment-specific functionalities and access to the configured client connections. Core types related to the runner and context are defined in `moonwall/packages/types/src/runner.ts`.
+4.  **Context System**: Each foundation type provides a dedicated "context" object to the tests. This context offers environment-specific functionalities and access to the configured client connections. Core types related to the runner and context are defined in `src/api/types/runner.ts`.
 
 5.  **Configuration (`moonwall.config.json`)**:
     *   This JSON file is central to Moonwall's operation.
     *   Defines global settings (e.g., default timeouts, script directories).
     *   Specifies repositories for artifact downloads (via `@octokit/rest`).
     *   Details each test `environment`, including its `foundation`, `connections`, test files, and specific settings.
-    *   A JSON schema for this configuration is generated using `typescript-json-schema` from types in `moonwall/packages/types/src/config.ts`, ensuring configuration validity. Example configurations can be found in `moonwall/test/configs/`.
+    *   A JSON schema for this configuration is generated using `typescript-json-schema` from types in `src/api/types/config.ts`, ensuring configuration validity. Example configurations can be found in `test/configs/`.
 
 ### Testing Flow
 

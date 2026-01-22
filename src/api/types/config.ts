@@ -7,7 +7,7 @@ import type { LogType } from "@zombienet/utils";
 export type MoonwallConfig = {
   /**
    * The schema for the config.
-   * By default should use: "https://raw.githubusercontent.com/Moonsong-Labs/moonwall/main/packages/types/config_schema.json"
+   * By default should use: "https://raw.githubusercontent.com/Moonsong-Labs/moonwall/main/config_schema.json"
    */
   $schema?: string;
 

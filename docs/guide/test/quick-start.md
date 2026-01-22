@@ -81,7 +81,7 @@ Putting it all together, our config file for testing on a local Moonbeam node us
 ```json
 {
    "label": "moonwall_config",
-   "$schema": "https://raw.githubusercontent.com/Moonsong-Labs/moonwall/main/packages/types/config_schema.json",
+   "$schema": "https://raw.githubusercontent.com/Moonsong-Labs/moonwall/main/config_schema.json",
    "defaultTestTimeout": 30000,
    "environments": [
       {

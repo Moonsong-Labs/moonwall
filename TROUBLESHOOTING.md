@@ -28,7 +28,7 @@ When integrating Moonwall into your project, you might encounter issues with dev
 
 #### Issue: `pnpm link` Compatibility
 
-The standard approach of using `pnpm link` for local package development doesn't work well with Moonwall due to its monorepo structure and package interdependencies.
+The standard approach of using `pnpm link` for local package development doesn't always work well with Moonwall.
 
 **Solution: Local Package Referencing**
 
@@ -37,9 +37,7 @@ Instead of using `pnpm link`, reference the local Moonwall package directory dir
 ```json
 {
   "dependencies": {
-    "moonwall": "file:/path/to/moonwall/packages/cli",
-    "@moonwall/util": "file:/path/to/moonwall/packages/util",
-    "@moonwall/types": "file:/path/to/moonwall/packages/types"
+    "moonwall": "file:/path/to/moonwall"
   }
 }
 ```
@@ -76,8 +74,7 @@ For a more robust development workflow:
    {
      "pnpm": {
        "overrides": {
-         "moonwall": "file:/path/to/moonwall/packages/cli",
-         "@moonwall/util": "file:/path/to/moonwall/packages/util"
+         "moonwall": "file:/path/to/moonwall"
        }
      }
    }
