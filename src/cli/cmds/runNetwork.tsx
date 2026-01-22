@@ -88,7 +88,7 @@ export async function runNetworkCmd(args: RunCommandArgs) {
   mainloop: for (;;) {
     const menuChoice = await select({
       message: `Environment : ${chalk.bgGray.cyanBright(args.envName)}\nPlease select a choice: `,
-      default: () => lastSelected,
+      default: lastSelected,
       pageSize: 10,
       choices: [
         {

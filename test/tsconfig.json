@@ -4,6 +4,6 @@
     "types": ["node"],
     "rootDir": "."
   },
-  "include": ["suites/**/*.ts"],
+  "include": ["suites/**/*.ts", "types/**/*.d.ts"],
   "exclude": ["node_modules", "suites/bun_test"]
 }

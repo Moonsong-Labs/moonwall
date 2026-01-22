@@ -71,14 +71,34 @@ export function setLoggerEnabled(pattern: string, enabled: boolean): void {
   });
 }
 
+/**
+ * Callable logger type - a function that logs at info level with access to the underlying pino Logger
+ */
+export interface CallableLogger {
+  (message: string): void;
+  /** Log at info level (alias for calling the logger directly) */
+  info: (message: string) => void;
+  /** The underlying pino Logger for advanced usage */
+  pino: pino.Logger;
+}
+
 // Compatibility layer for the existing setupLogger function
-export function setupLogger(name: string): pino.Logger {
+// Returns a callable function that logs at info level
+export function setupLogger(name: string): CallableLogger {
   const logger = createLogger({
     name: `test:${name}`,
     enabled: process.argv.includes("--printlogs"),
   });
 
-  return logger;
+  // Create a callable function that wraps logger.info
+  const logFn = (message: string) => logger.info(message);
+  const callableLogger = logFn as CallableLogger;
+
+  // Attach .info as alias and the underlying pino logger
+  callableLogger.info = logFn;
+  callableLogger.pino = logger;
+
+  return callableLogger;
 }
 
 // Re-export types

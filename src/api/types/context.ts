@@ -5,7 +5,7 @@ import type { KeyringPair } from "@polkadot/keyring/types";
 import type { GenericExtrinsic } from "@polkadot/types";
 import type { EventRecord } from "@polkadot/types/interfaces";
 import type { AnyTuple, RegistryError } from "@polkadot/types/types";
-import type { Logger } from "pino";
+import type { Logger, LogFn } from "pino";
 import type { Wallet } from "ethers";
 import type { Web3 } from "web3";
 import type { FoundationType, ProviderType } from "./config.js";
@@ -102,7 +102,7 @@ export interface ChopsticksBlockCreation {
   to?: number;
   expectEvents?: AugmentedEvent<ApiTypes>[];
   allowFailures?: boolean;
-  logger?: Logger;
+  logger?: Logger | LogFn;
   /** Optional timeout in milliseconds for the new block RPC request */
   timeout?: number;
 }
@@ -112,7 +112,7 @@ export interface BlockCreation {
   finalize?: boolean;
   allowFailures?: boolean;
   expectEvents?: AugmentedEvent<ApiTypes>[];
-  logger?: Logger;
+  logger?: Logger | LogFn;
   signer?: { type: "ethereum" | "sr25519" | "ed25519"; privateKey: string } | KeyringPair;
 }
 

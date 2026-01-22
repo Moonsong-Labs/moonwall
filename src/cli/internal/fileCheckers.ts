@@ -44,7 +44,7 @@ export async function downloadBinsIfMissing(binPath: string) {
       )} is missing from ${chalk.bgBlack.greenBright(
         path.join(process.cwd(), binDir)
       )}.\nWould you like to download it now?`,
-      default: 0,
+      default: true,
       choices: [
         { name: `Yes, download ${binName}`, value: true },
         { name: "No, quit program", value: false },
@@ -128,7 +128,7 @@ export async function promptAlreadyRunning(pids: number[]) {
         return `${binName} - pid: ${pid}, listenPorts: [${ports.join(", ")}]`;
       })
       .join("\n")}`,
-    default: 1,
+    default: "continue",
     choices: [
       { name: "🪓  Kill processes and continue", value: "kill" },
       { name: "➡️   Continue (and let processes live)", value: "continue" },

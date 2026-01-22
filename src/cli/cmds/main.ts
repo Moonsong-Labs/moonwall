@@ -108,7 +108,7 @@ async function mainMenu(config?: MoonwallConfig) {
 
   const menuChoice = await select({
     message: "Main Menu - Please select one of the following:",
-    default: 0,
+    default: "init",
     pageSize: 12,
     choices: !configPresent
       ? [

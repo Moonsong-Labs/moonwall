@@ -193,13 +193,17 @@ export async function createDevBlock<
         .map((aEvt) => eEvt.is(aEvt.event))
         .reduce((acc, curr) => acc || curr, false);
       if (!found) {
-        options.logger
-          ? options.logger.error(
-              `Event ${chalk.bgWhiteBright.blackBright(eEvt.meta.name)} not present in block`
-            )
-          : console.error(
-              `Event ${chalk.bgWhiteBright.blackBright(eEvt.meta.name)} not present in block`
-            );
+        const message = `Event ${chalk.bgWhiteBright.blackBright(eEvt.meta.name)} not present in block`;
+        if (options.logger) {
+          // Handle both pino Logger (has .error) and LogFn (callable)
+          if ("error" in options.logger) {
+            options.logger.error(message);
+          } else {
+            options.logger(message);
+          }
+        } else {
+          console.error(message);
+        }
       }
       return found;
     });

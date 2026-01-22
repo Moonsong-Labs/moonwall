@@ -12,7 +12,7 @@
     "lint:fix": "oxlint --fix ./suites",
     "fmt": "oxfmt --check .",
     "fmt:fix": "oxfmt --write .",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsgo --noEmit --diagnostics",
     "node_test": "node --no-warnings --loader tsx --test suites/node_test/*.ts",
     "bun_test": "bun test suites/bun_test/*"
   },
@@ -26,7 +26,7 @@
     "@inquirer/prompts": "^8.0.2",
     "@moonbeam-network/api-augment": "0.3900.0",
     "@openzeppelin/contracts": "5.4.0",
-    "@polkadot/api": "^16.5.1",
+    "@polkadot/api": "16.4.8",
     "@polkadot/util": "^13.5.1",
     "@types/node": "^24.10.1",
     "@types/yargs": "^17.0.35",
