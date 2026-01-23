@@ -28,10 +28,49 @@ In most cases, you'll want to use the [Basic Reporter](https://vitest.dev/guide/
 - **include?** *string[]*:  An optional array included files or directories.
 - **connections?** * ProviderConfig[]*: An optional array of ProviderConfig objects.
 - **multiThreads?** *boolean*, *number*, or *object* - Multi-threading configuration for test execution.
+
+  - `false` - Sequential execution (default, recommended for dev foundation)
+  - `true` - Enable parallel execution with default settings
+  - `number` - Enable parallel with specific maxWorkers count
+  - `object` - Full Vitest 4 pool configuration (see below)
+
 ::: tip
-You can provide a full pool configuration object with Vitest 4's format: `{ pool: "forks", maxWorkers: 2, isolate: false }`. See [Vitest pool config](https://vitest.dev/config/#pool){target=blank} for more info.
+You can provide a full pool configuration object with Vitest 4's format. See [Vitest pool config](https://vitest.dev/config/#pool){target=blank} for more info.
 :::
+
+**Pool Configuration Object:**
+```json
+{
+  "multiThreads": {
+    "pool": "threads",     // "threads" | "forks" | "vmThreads"
+    "maxWorkers": 4,       // Number of parallel workers
+    "isolate": true,       // Isolate environment per test file
+    "memoryLimit": 0.25    // Memory limit per worker (vmThreads only)
+  }
+}
+```
+
+- **cacheImports?** *boolean* - Enable Vitest's dependency optimizer to pre-bundle imports (viem, ethers). This can reduce test collection time by ~10% by caching bundled dependencies. Default: `false`.
 - **contracts?** *string*: Path to directory containing smart contracts for testing against.
 - **defaultSigner?** *{Substrate keyring type, privateKey}* Allows you to specify the kind of signer and the private key with which to sign and send transactions during the createBlock() function. The default signer can be of type *ethereum*, *sr25519*, or *ed25519* For more info about each, see [Polkadot Keyring docs](https://polkadot.js.org/docs/keyring/start/sign-verify/){target=blank}
 - **defaultAllowFailures?** *boolean*: Toggle whether createBlock() will throw when extrinsic errors inside.
 - **defaultFinalization?** *boolean*:Toggle whether createBlock() will finalize blocks by default or not.
+
+## Provider Connection Options
+
+When defining connections, you can configure additional options per provider:
+
+- **cacheMetadata?** *boolean* - Cache runtime metadata for faster PolkadotJS API connections. When enabled, metadata is cached after first connection and reused, significantly reducing connection time for subsequent runs. Only applies to `polkadotJs` provider type. Default: `true`.
+
+```json
+{
+  "connections": [
+    {
+      "name": "para",
+      "type": "polkadotJs",
+      "endpoints": ["wss://moonbeam.public.curie.radiumblock.co/ws"],
+      "cacheMetadata": true
+    }
+  ]
+}
+```

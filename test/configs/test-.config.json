@@ -1,5 +1,5 @@
 {
-  "$schema": "../packages/types/config_schema.json",
+  "$schema": "../../config_schema.json",
   "label": "Global Test Config 🐯",
   "defaultTestTimeout": 60000,
   "scriptsDir": "scripts/",

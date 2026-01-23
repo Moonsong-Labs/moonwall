@@ -48,8 +48,8 @@ You'll define a new connection for each type of connection that you'd like to ha
 - polkadotJs
 - ethers
 - web3
-- moon
 - viem
+- papi
 
 We've defined here our endpoint information and set up two connections, one that uses the polkadotJs provider and another that uses the Ethers provider. Of course, if you don't have a need for the Ethers connection, you don't need to include it. 
 
@@ -97,7 +97,7 @@ Putting it all together, our config file for testing on a local Moonbeam node us
               "running": true,
               "newRpcBehaviour": true,
               "binPath": "tmp/moonbeam",
-              "ports": {"wsPort": 1337}
+              "ports": {"rpcPort": 1337}
             }]
          },
             "connections":[{"name": "myconnection", "type": "polkadotJs", "endpoints": ["ws://127.0.0.1:1337"]},

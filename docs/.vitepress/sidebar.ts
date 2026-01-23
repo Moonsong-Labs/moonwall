@@ -9,9 +9,11 @@ export function sidebarGuide(): DefaultTheme.SidebarItem[] {
       items: [
         { text: "What is Moonwall?", link: "what-is-a-moonwall" },
         { text: "Getting Started", link: "getting-started" },
+        { text: "Architecture", link: "architecture" },
         { text: "Foundations", link: "foundations" },
         { text: "Providers Supported", link: "providers" },
         { text: "Networks Supported", link: "networks" },
+        { text: "Migration from v5", link: "migration-v1" },
       ],
     },
     {

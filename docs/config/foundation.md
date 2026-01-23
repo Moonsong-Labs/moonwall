@@ -26,6 +26,58 @@ Here are the parameters that you can configure in your Moonwall Config file when
 
 - **retainAllLogs** *boolean*: Optional. An optional flag to retain node logs from previous runs. The default behavior is to keep only the last run's logs. (e.g. default behavior is that logs are overwritten unless otherwise specified)
 
+#### Docker Support
+
+You can run dev nodes using Docker instead of local binaries by setting `useDocker: true`. When enabled, `binPath` should be a Docker image reference.
+
+- **useDocker** *boolean*: Optional. When true, `binPath` is treated as a Docker image (e.g., `moonbeamfoundation/moonbeam:latest`).
+- **dockerConfig** *object*: Optional. Docker-specific configuration:
+  - **containerName** *string*: Custom container name (auto-generated if omitted)
+  - **network** *string*: Docker network to connect to
+  - **runArgs** *string[]*: Additional `docker run` arguments
+  - **exposePorts** *array*: Port mappings from host to container
+    - **hostPort** *number*: Port on the host machine
+    - **internalPort** *number*: Port inside the container
+
+**Example Docker configuration:**
+```json
+{
+  "foundation": {
+    "type": "dev",
+    "launchSpec": [{
+      "name": "moonbeam-docker",
+      "binPath": "moonbeamfoundation/moonbeam:latest",
+      "useDocker": true,
+      "newRpcBehaviour": true,
+      "dockerConfig": {
+        "containerName": "moonwall-test",
+        "exposePorts": [
+          { "hostPort": 30333, "internalPort": 30333 }
+        ]
+      }
+    }]
+  }
+}
+```
+
+#### Startup Caching
+
+Speed up dev node startup (~10x improvement) by caching compiled artifacts:
+
+- **cacheStartupArtifacts** *boolean*: Optional. When true, Moonwall precompiles runtime WASM and generates raw chain specs, caching them by binary hash.
+- **startupCacheDir** *string*: Optional. Directory for cached artifacts. Defaults to `./tmp/startup-cache`.
+
+```json
+{
+  "launchSpec": [{
+    "name": "moonbeam",
+    "binPath": "./tmp/moonbeam",
+    "cacheStartupArtifacts": true,
+    "startupCacheDir": "./cache"
+  }]
+}
+```
+
 ### Read Only 
 
 - **rateLimiter** *boolean* or Bottleneck. ConstructorOptions: Optional. Rate limiter options, on by default. Can be set to false to disable.
