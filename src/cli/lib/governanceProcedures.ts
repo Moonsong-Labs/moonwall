@@ -73,68 +73,6 @@ export const instantFastTrack = async <
   return proposalHash;
 };
 
-export const whiteListTrackNoSend = async <
-  Call extends SubmittableExtrinsic<ApiType>,
-  ApiType extends ApiTypes,
->(
-  context: DevModeContext,
-  proposal: string | Call
-) => {
-  const proposalHash =
-    typeof proposal === "string" ? proposal : await notePreimage(context, proposal);
-
-  const proposalLen = (
-    (await context.pjsApi.query.preimage.requestStatusFor(proposalHash)) as any
-  ).unwrap().asUnrequested.len;
-  const dispatchWLCall = context.pjsApi.tx.whitelist.dispatchWhitelistedCall(
-    proposalHash,
-    proposalLen,
-    {
-      refTime: 2_000_000_000,
-      proofSize: 100_000,
-    }
-  );
-
-  const wLPreimage = await notePreimage(context, dispatchWLCall);
-  const wLPreimageLen = dispatchWLCall.encodedLength - 2;
-  console.log(
-    `📝 DispatchWhitelistedCall preimage noted: ${wLPreimage.slice(0, 6)}...${wLPreimage.slice(
-      -4
-    )}, len: ${wLPreimageLen}`
-  );
-
-  const openGovProposal = await context.pjsApi.tx.referenda
-    .submit(
-      {
-        Origins: { whitelistedcaller: "WhitelistedCaller" },
-      },
-      { Lookup: { hash: wLPreimage, len: wLPreimageLen } },
-      { After: { After: 0 } }
-    )
-    .signAsync(faith);
-  const { result } = await context.createBlock(openGovProposal);
-
-  if (!result?.events) {
-    throw new Error("No events in block");
-  }
-
-  let proposalId: number | undefined;
-  filterAndApply(result.events, "referenda", ["Submitted"], (found) => {
-    proposalId = (found.event as any).data.index.toNumber();
-  });
-
-  if (typeof proposalId === "undefined") {
-    throw new Error("No proposal id found");
-  }
-
-  console.log(`🏛️ Referendum submitted with proposal id: ${proposalId}`);
-  await context.createBlock(context.pjsApi.tx.referenda.placeDecisionDeposit(proposalId));
-
-  const whitelistCall = context.pjsApi.tx.whitelist.whitelistCall(proposalHash);
-  await execOpenTechCommitteeProposal(context, whitelistCall);
-  return { proposalHash, whitelistedHash: wLPreimage };
-};
-
 // Uses WhitelistedOrigin track to quickly execute a call
 export const whiteListedTrack = async <
   Call extends SubmittableExtrinsic<ApiType>,

@@ -53,36 +53,6 @@ export async function web3EthCall(web3: Web3, options: Web3EthCallOptions) {
   ]);
 }
 
-// Extra type because web3 is not well typed
-// export interface Subscription<T> extends Web3Subscription<T> {
-//   once: (
-//     type: "data" | "connected",
-//     handler: (data: T) => void
-//   ) => Subscription<T>;
-// }
-
-// Little helper to hack web3 that are not complete.
-// export function web3Subscribe(
-//   web3: Web3,
-//   type: "newBlockHeaders"
-// ): Subscription<BlockHeader>;
-// export function web3Subscribe(
-//   web3: Web3,
-//   type: "pendingTransactions"
-// ): Subscription<string>;
-// export function web3Subscribe(
-//   web3: Web3,
-//   type: "logs",
-//   params: {}
-// ): Subscription<Log>;
-// export function web3Subscribe(
-//   web3: Web3,
-//   type: "newBlockHeaders" | "pendingTransactions" | "logs",
-//   params?: any
-// ) {
-//   return (web3.eth as any).subscribe(...[].slice.call(arguments, 1));
-// }
-
 export type EnhancedWeb3 = Web3 & {
   customRequest: (method: string, params: any[]) => Promise<any>;
 };

@@ -1,10 +1,22 @@
-import type { MoonwallConfig, Environment } from "../../api/types/index.js";
+import type { MoonwallConfig } from "../../api/types/index.js";
 import { readFile, access } from "node:fs/promises";
 import { readFileSync, existsSync, constants } from "node:fs";
 import JSONC from "jsonc-parser";
 import path, { extname } from "node:path";
+import { getCachedConfig, setCachedConfig } from "../../services/config/index.js";
 
-let cachedConfig: MoonwallConfig | undefined;
+// Re-export from services/config for backwards compatibility
+export {
+  importJsonConfig,
+  cacheConfig,
+  getEnvironmentFromConfig,
+  isEthereumDevConfig,
+  isEthereumZombieConfig,
+  isOptionSet,
+  loadEnvVars,
+} from "../../services/config/index.js";
+
+// CLI-specific functions below
 
 export async function configExists() {
   try {
@@ -61,148 +73,11 @@ async function parseConfig(filePath: string) {
 
   return result;
 }
-function parseConfigSync(filePath: string) {
-  let result: any;
-
-  const file = readFileSync(filePath, "utf8");
-
-  switch (extname(filePath)) {
-    case ".json":
-      result = JSON.parse(file);
-      break;
-    case ".config":
-      result = JSONC.parse(file);
-      break;
-    default:
-      result = undefined;
-      break;
-  }
-
-  return result;
-}
-
-export async function importConfig(configPath: string): Promise<MoonwallConfig> {
-  return await import(configPath);
-}
-
-export function isOptionSet(option: string): boolean {
-  const env = getEnvironmentFromConfig();
-  const optionValue = traverseConfig(env, option);
-
-  return optionValue !== undefined;
-}
-
-export function isEthereumZombieConfig(): boolean {
-  const env = getEnvironmentFromConfig();
-  return env.foundation.type === "zombie" && !env.foundation.zombieSpec.disableDefaultEthProviders;
-}
-
-export function isEthereumDevConfig(): boolean {
-  const env = getEnvironmentFromConfig();
-  return env.foundation.type === "dev" && !env.foundation.launchSpec[0].disableDefaultEthProviders;
-}
-
-export async function cacheConfig() {
-  const configPath = process.env.MOON_CONFIG_PATH;
-
-  if (!configPath) {
-    throw new Error(`Environment ${process.env.MOON_TEST_ENV} not found in config`);
-  }
-  const filePath = path.isAbsolute(configPath) ? configPath : path.join(process.cwd(), configPath);
-  try {
-    const config = parseConfigSync(filePath);
-    const replacedConfig = replaceEnvVars(config);
-    cachedConfig = replacedConfig as MoonwallConfig;
-  } catch (e) {
-    console.error(e);
-    throw new Error(`Error import config at ${filePath}`);
-  }
-}
-
-export function getEnvironmentFromConfig(): Environment {
-  const globalConfig = importJsonConfig();
-  const config = globalConfig.environments.find(({ name }) => name === process.env.MOON_TEST_ENV);
-
-  if (!config) {
-    throw new Error(`Environment ${process.env.MOON_TEST_ENV} not found in config`);
-  }
-
-  return config;
-}
-
-export function importJsonConfig(): MoonwallConfig {
-  if (cachedConfig) {
-    return cachedConfig;
-  }
-
-  const configPath = process.env.MOON_CONFIG_PATH;
-
-  if (!configPath) {
-    throw new Error("No moonwall config path set. This is a defect, please raise it.");
-  }
-
-  const filePath = path.isAbsolute(configPath) ? configPath : path.join(process.cwd(), configPath);
-
-  try {
-    const config = parseConfigSync(filePath);
-    const replacedConfig = replaceEnvVars(config);
-    cachedConfig = replacedConfig as MoonwallConfig;
-    return cachedConfig;
-  } catch (e) {
-    console.error(e);
-    throw new Error(`Error import config at ${filePath}`);
-  }
-}
-
-export async function importAsyncConfig(): Promise<MoonwallConfig> {
-  if (cachedConfig) {
-    return cachedConfig;
-  }
-
-  const configPath = process.env.MOON_CONFIG_PATH;
-
-  if (!configPath) {
-    throw new Error("No moonwall config path set. This is a defect, please raise it.");
-  }
-
-  const filePath = path.isAbsolute(configPath) ? configPath : path.join(process.cwd(), configPath);
-
-  try {
-    const config = await parseConfig(filePath);
-    const replacedConfig = replaceEnvVars(config);
-
-    cachedConfig = replacedConfig as MoonwallConfig;
-    return cachedConfig;
-  } catch (e) {
-    console.error(e);
-    throw new Error(`Error import config at ${filePath}`);
-  }
-}
-
-export function loadEnvVars(): void {
-  const env = getEnvironmentFromConfig();
-
-  for (const envVar of env.envVars || []) {
-    const [key, value] = envVar.split("=");
-    process.env[key] = value;
-  }
-}
 
 function replaceEnvVars(value: any): any {
   if (typeof value === "string") {
     return value.replace(/\$\{([^}]+)\}/g, (match, group) => {
       const envVarValue = process.env[group];
-      // Disabled until we only process Environment Config associated with the current Environment
-
-      // if (envVarValue === undefined) {
-      //   throw new Error(
-      //     `❌ Moonwall config Environment Variable ${chalk.bgWhiteBright.redBright(
-      //       group
-      //     )} does not exist\n Please add ${chalk.bgWhiteBright.redBright(
-      //       group
-      //     )} to your .env file or change your config file.`
-      //   );
-      // }
       return envVarValue || match;
     });
   }
@@ -215,21 +90,33 @@ function replaceEnvVars(value: any): any {
   return value;
 }
 
-function traverseConfig(configObj: any, option: string): any {
-  if (typeof configObj !== "object" || !configObj) return undefined;
+export async function importConfig(configPath: string): Promise<MoonwallConfig> {
+  return await import(configPath);
+}
 
-  if (Object.hasOwn(configObj, option)) {
-    return configObj[option];
+export async function importAsyncConfig(): Promise<MoonwallConfig> {
+  const cached = getCachedConfig();
+  if (cached) {
+    return cached;
   }
 
-  for (const key in configObj) {
-    const result = traverseConfig(configObj[key], option);
-    if (result !== undefined) {
-      return result;
-    }
+  const configPath = process.env.MOON_CONFIG_PATH;
+
+  if (!configPath) {
+    throw new Error("No moonwall config path set. This is a defect, please raise it.");
   }
 
-  return undefined;
+  const filePath = path.isAbsolute(configPath) ? configPath : path.join(process.cwd(), configPath);
+
+  try {
+    const config = await parseConfig(filePath);
+    const replacedConfig = replaceEnvVars(config) as MoonwallConfig;
+    setCachedConfig(replacedConfig);
+    return replacedConfig;
+  } catch (e) {
+    console.error(e);
+    throw new Error(`Error import config at ${filePath}`, { cause: e });
+  }
 }
 
 export function parseZombieConfigForBins(zombieConfigPath: string) {

@@ -39,7 +39,6 @@ export async function createEthersTransaction<TOptions extends EthersTransaction
   context: GenericContext,
   params: TOptions
 ) {
-  // const nonce = await context.viem().getTransactionCount({ address: ALITH_ADDRESS });
   const nonce =
     "nonce" in params
       ? params.nonce

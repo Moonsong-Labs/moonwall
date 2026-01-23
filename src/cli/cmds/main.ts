@@ -47,64 +47,6 @@ export async function main() {
 
 async function mainMenu(config?: MoonwallConfig) {
   const configPresent = config !== undefined;
-  // const questionList = {
-  //   name: "MenuChoice",
-  //   type: "list",
-  //   message: "Main Menu - Please select one of the following:",
-  //   default: 0,
-  //   pageSize: 12,
-  //   choices: !configPresent
-  //     ? [
-  //         {
-  //           name: !configPresent
-  //             ? "1) Initialise:                         Generate a new Moonwall Config File"
-  //             : chalk.dim("1) Initialise:                       ✅  CONFIG ALREADY GENERATED"),
-  //           value: "init",
-  //         },
-  //         {
-  //           name: "2) Artifact Downloader:                Fetch artifacts (x86) from GitHub repos",
-  //           value: "download",
-  //         },
-  //         {
-  //           name: "3) Quit Application",
-  //           value: "quit",
-  //         },
-  //       ]
-  //     : [
-  //         {
-  //           name: "1) Execute Script:                     Run scripts placed in your config defined script directory",
-  //           value: "exec",
-  //         },
-  //         {
-  //           name: "2) Network Launcher & Toolbox:         Launch network, access tools: tail logs, interactive tests etc",
-  //           value: "run",
-  //         },
-  //         {
-  //           name: "3) Test Suite Execution:               Run automated tests, start network if needed",
-  //           value: "test",
-  //         },
-
-  //         {
-  //           name: "4) Artifact Downloader:                Fetch artifacts (x86) from GitHub repos",
-  //           value: "download",
-  //         },
-
-  //         {
-  //           name: "5) Rename TestIDs:                     Rename test id prefixes based on position in the directory tree",
-  //           value: "derive",
-  //         },
-
-  //         {
-  //           name: "6) Quit Application",
-  //           value: "quit",
-  //         },
-  //       ],
-  //   filter(val) {
-  //     return val;
-  //   },
-  // } as const;
-
-  // const answers = await inquirer.prompt(questionList);
 
   const menuChoice = await select({
     message: "Main Menu - Please select one of the following:",
@@ -190,14 +132,6 @@ async function mainMenu(config?: MoonwallConfig) {
             chosenTestEnv.envName
           )} has been completed. Press any key to continue...\n`,
         });
-        // await inquirer.prompt({
-        //   name: "test complete",
-        //   type: "press-to-continue",
-        //   anyKey: true,
-        //   pressToContinueMessage: `ℹ️  Test run for ${chalk.bgWhiteBright.black(
-        //     chosenTestEnv.envName
-        //   )} has been completed. Press any key to continue...\n`,
-        // });
       }
       return true;
     }

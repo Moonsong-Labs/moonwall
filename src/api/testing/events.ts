@@ -6,14 +6,6 @@ import type {
   EventRecord,
 } from "@polkadot/types/interfaces";
 
-// export interface ExtrinsicCreation {
-//   extrinsic: GenericExtrinsic<AnyTuple>;
-//   events: EventRecord[];
-//   error: RegistryError;
-//   successful: boolean;
-//   hash: string;
-// }
-
 export function filterAndApply<T>(
   events: EventRecord[],
   section: string,
@@ -40,10 +32,6 @@ function getDispatchInfo({ event: { data, method } }: EventRecord): DispatchInfo
 export function extractError(events: EventRecord[] = []): DispatchError | undefined {
   return filterAndApply(events, "system", ["ExtrinsicFailed"], getDispatchError)[0];
 }
-
-// export function extractFees(events: EventRecord[] = []): number {
-//   return filterAndApply(events, "balances", ["Transfer"], () => true).length;
-// }
 
 export function isExtrinsicSuccessful(events: EventRecord[] = []): boolean {
   return filterAndApply(events, "system", ["ExtrinsicSuccess"], () => true).length > 0;

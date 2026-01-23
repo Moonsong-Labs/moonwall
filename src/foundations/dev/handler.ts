@@ -24,12 +24,12 @@ import {
 import { Keyring } from "@polkadot/api";
 import type { ApiTypes } from "@polkadot/api/types";
 import { createDevBlock } from "./helpers.js";
-import { getEnvironmentFromConfig, isEthereumDevConfig } from "../../cli/lib/configReader.js";
+import { getEnvironmentFromConfig, isEthereumDevConfig } from "../../services/config/index.js";
 import {
   deployCreateCompiledContract,
   interactWithContract,
   interactWithPrecompileContract,
-} from "../../cli/lib/contractFunctions.js";
+} from "../../contracts/index.js";
 
 export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testCase, logger }) => {
   const env = getEnvironmentFromConfig();

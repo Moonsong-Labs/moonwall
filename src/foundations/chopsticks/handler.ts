@@ -13,7 +13,7 @@ import {
 import { Keyring } from "@polkadot/api";
 import type { ApiPromise } from "@polkadot/api";
 import { createChopsticksBlock, getWsUrlFromConfig, sendSetStorageRequest } from "./helpers.js";
-import { getEnvironmentFromConfig } from "../../cli/lib/configReader.js";
+import { getEnvironmentFromConfig } from "../../services/config/index.js";
 import { MoonwallContext } from "../../cli/lib/globalContext.js";
 import { upgradeRuntimeChopsticks } from "../../cli/lib/upgradeProcedures.js";
 

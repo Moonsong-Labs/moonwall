@@ -3,3 +3,4 @@ export * from "./process/index.js";
 export * from "./network/index.js";
 export * from "./chopsticks/index.js";
 export * from "./cache/index.js";
+export * from "./config/index.js";

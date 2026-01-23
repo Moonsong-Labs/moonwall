@@ -17,7 +17,7 @@ import type { EventRecord } from "@polkadot/types/interfaces";
 import chalk from "chalk";
 import { createLogger } from "../../util/index.js";
 import { setTimeout } from "node:timers/promises";
-import { getEnvironmentFromConfig, isEthereumDevConfig } from "../../cli/lib/configReader.js";
+import { getEnvironmentFromConfig, isEthereumDevConfig } from "../../services/config/index.js";
 import { extractError } from "../../api/testing/events.js";
 import { MoonwallContext } from "../../cli/lib/globalContext.js";
 import { vitestAutoUrl } from "../../cli/internal/providerFactories.js";

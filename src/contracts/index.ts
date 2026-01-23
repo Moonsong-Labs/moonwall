@@ -1,8 +1,7 @@
-// Re-export from contracts module for backwards compatibility
 export {
   fetchCompiledContract,
   recursiveSearch,
   interactWithPrecompileContract,
   interactWithContract,
   deployCreateCompiledContract,
-} from "../../contracts/index.js";
+} from "./contractInteraction.js";

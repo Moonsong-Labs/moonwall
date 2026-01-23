@@ -141,11 +141,6 @@ export async function deployViemContract<TOptions extends ContractDeploymentOpti
   bytecode: `0x${string}`,
   options?: TOptions
 ) {
-  // Enable when Viem allows it
-  // const isLegacy = options?.txnType === "legacy" || options?.txnType === undefined;
-  // const isEIP1559 = options?.txnType === "eip1559";
-  // const isEIP2930 = options?.txnType === "eip2930";
-  // const url = context.viem().transport.url;
   const url = context.viem().transport.url;
 
   const { privateKey = ALITH_PRIVATE_KEY, ...rest } = options || ({} as any);
@@ -162,27 +157,6 @@ export async function deployViemContract<TOptions extends ContractDeploymentOpti
     account,
     chain: await deriveViemChain(url),
   });
-
-  // Enable when Viem allows it
-  // switch (true) {
-  //   case isLegacy:
-  //     blob["gasPrice"] = options?.gasPrice || 10_000_000_000n;
-  //     blob["gas"] = options?.gasLimit || 22318;
-  //     break;
-  //   case isEIP1559:
-  //     blob["accessList"] = options?.accessList || [];
-  //     blob["maxFeePerGas"] = options?.maxFeePerGas || 10_000_000_000n;
-  //     blob["maxPriorityFeePerGas"] = options?.maxPriorityFeePerGas || 0n;
-  //     blob["gasLimit"] = options?.gasLimit || 22318;
-  //     break;
-  //   case isEIP2930:
-  //     blob["gasPrice"] = options?.gasPrice || 10_000_000_000n;
-  //     blob["gasLimit"] = options?.gasLimit || 22318n;
-  //     blob["accessList"] = options?.accessList || [];
-  //     break;
-  //   default:
-  //     throw new Error("Invalid transaction type, undpate deployViemContract function");
-  // }
 
   const hash = await client.deployContract(blob as DeployContractParameters);
 
