@@ -231,7 +231,9 @@ const reportServicePorts = async () => {
       }
 
       for (const paraId of Object.keys(zombieNetwork.paras)) {
-        for (const { wsUri, name } of zombieNetwork.paras[paraId].nodes) {
+        for (const { wsUri, name } of (
+          zombieNetwork.paras as Record<string, { nodes: { wsUri: string; name: string }[] }>
+        )[paraId].nodes) {
           portsList.push({ name, port: wsUri.split("ws://127.0.0.1:")[1] });
         }
       }

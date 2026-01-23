@@ -87,21 +87,24 @@ export const getBlockExtrinsic = async (
     (ext) => ext.method.section === section && ext.method.method === method
   );
   const extrinsic = extIndex > -1 ? block.extrinsics[extIndex] : null;
-  const events = (records as any)
-    .filter(({ phase }) => phase.isApplyExtrinsic && phase.asApplyExtrinsic.eq(extIndex))
-    .map(({ event }) => event);
+  const events = (records as unknown as EventRecord[])
+    .filter(
+      ({ phase }: EventRecord) => phase.isApplyExtrinsic && phase.asApplyExtrinsic.eq(extIndex)
+    )
+    .map(({ event }: EventRecord) => event);
   const resultEvent = events.find(
-    (event) =>
+    (event: Event) =>
       event.section === "system" &&
       (event.method === "ExtrinsicSuccess" || event.method === "ExtrinsicFailed")
   );
   return { block, extrinsic, events, resultEvent };
 };
 
-export const getBlockTime = (signedBlock: any) =>
-  signedBlock.block.extrinsics
-    .find((item) => item.method.section === "timestamp")
-    .method.args[0].toNumber();
+export const getBlockTime = (signedBlock: SignedBlock) =>
+  (
+    signedBlock.block.extrinsics.find((item: Extrinsic) => item.method.section === "timestamp")!
+      .method.args[0] as unknown as { toNumber(): number }
+  ).toNumber();
 
 export const checkBlockFinalized = async (api: ApiPromise, number: number) => {
   return {
@@ -123,7 +126,7 @@ export const fetchHistoricBlockNum = async (
   api: ApiPromise,
   blockNumber: number,
   targetTime: number
-) => {
+): Promise<number> => {
   if (blockNumber <= 1) {
     return 1;
   }

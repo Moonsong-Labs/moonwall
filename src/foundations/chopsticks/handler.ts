@@ -23,14 +23,16 @@ export const chopsticksHandler: FoundationHandler<"chopsticks"> = ({
   testCase,
   logger,
 }) => {
-  const accountTypeLookup = () => {
+  const accountTypeLookup = (): string => {
     const metadata = ctx.polkadotJs().runtimeMetadata.asLatest;
     const systemPalletIndex = metadata.pallets.findIndex(
-      (pallet) => pallet.name.toString() === "System"
+      (pallet: { name: { toString(): string } }) => pallet.name.toString() === "System"
     );
     const systemAccountStorageType = metadata.pallets[systemPalletIndex].storage
       .unwrap()
-      .items.find((storage) => storage.name.toString() === "Account")?.type;
+      .items.find(
+        (storage: { name: { toString(): string } }) => storage.name.toString() === "Account"
+      )?.type;
 
     if (!systemAccountStorageType) {
       throw new Error("System.Account storage not found");
@@ -60,12 +62,12 @@ export const chopsticksHandler: FoundationHandler<"chopsticks"> = ({
     };
   };
 
-  const ctx = {
+  const ctx: ChopsticksContext = {
     ...context,
-    get isEthereumChain() {
+    get isEthereumChain(): boolean {
       return accountTypeLookup() === "AccountId20";
     },
-    get isSubstrateChain() {
+    get isSubstrateChain(): boolean {
       return accountTypeLookup() === "AccountId32";
     },
     get pjsApi() {

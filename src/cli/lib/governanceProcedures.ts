@@ -208,11 +208,17 @@ export const whiteListedTrack = async <
     }
 
     const events = (await context.pjsApi.query.system.events()) as any;
-    return events.some(({ event }) => {
-      const section = event.section.toString();
-      const method = event.method.toString();
-      return section === "whitelist" && method === "WhitelistedCallDispatched";
-    });
+    return events.some(
+      ({
+        event,
+      }: {
+        event: { section: { toString(): string }; method: { toString(): string } };
+      }) => {
+        const section = event.section.toString();
+        const method = event.method.toString();
+        return section === "whitelist" && method === "WhitelistedCallDispatched";
+      }
+    );
   };
 
   await fastFowardToNextEvent(context); // ⏩️ until preparation done
@@ -407,7 +413,7 @@ export const proposeReferendaAndDeposit = async <
   context: DevModeContext,
   decisionDepositer: KeyringPair,
   proposal: string | Call,
-  origin
+  origin: unknown
 ): Promise<[number, string]> => {
   // Fetch proposal hash
   const proposalHash =
@@ -814,9 +820,9 @@ export const fastFowardToNextEvent = async (context: DevModeContext) => {
   if (key.isEmpty) {
     throw new Error("No items in scheduler.agenda");
   }
-  const decodedKey: object = key.toHuman() as any;
+  const decodedKey = key.toHuman() as unknown[];
 
-  const desiredHeight = Number((decodedKey[0].valueOf() as string).replaceAll(",", ""));
+  const desiredHeight = Number(((decodedKey[0] as string).valueOf() as string).replaceAll(",", ""));
   const currentHeight = (await context.pjsApi.rpc.chain.getHeader()).number.toNumber();
 
   console.log(

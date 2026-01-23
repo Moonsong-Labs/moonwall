@@ -166,7 +166,7 @@ export function checkAccess(path: string) {
 
 async function getBinaryArchitecture(filePath: string) {
   return new Promise((resolve, reject) => {
-    const architectureMap = {
+    const architectureMap: Record<number, string> = {
       0: "unknown",
       3: "x86",
       62: "x64",

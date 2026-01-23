@@ -35,14 +35,16 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
   const env = getEnvironmentFromConfig();
   const ethCompatible = isEthereumDevConfig();
 
-  const accountTypeLookup = () => {
+  const accountTypeLookup = (): string => {
     const metadata = ctx.polkadotJs().runtimeMetadata.asLatest;
     const systemPalletIndex = metadata.pallets.findIndex(
-      (pallet) => pallet.name.toString() === "System"
+      (pallet: { name: { toString(): string } }) => pallet.name.toString() === "System"
     );
     const systemAccountStorage = metadata.pallets[systemPalletIndex].storage
       .unwrap()
-      .items.find((storage) => storage.name.toString() === "Account");
+      .items.find(
+        (storage: { name: { toString(): string } }) => storage.name.toString() === "Account"
+      );
 
     if (!systemAccountStorage) {
       throw new Error("Account storage not found");
@@ -82,12 +84,12 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
     return systemPalletIndex !== -1;
   };
 
-  const ctx = {
+  const ctx: DevModeContext = {
     ...context,
-    get isEthereumChain() {
+    get isEthereumChain(): boolean {
       return accountTypeLookup() === "AccountId20";
     },
-    get isSubstrateChain() {
+    get isSubstrateChain(): boolean {
       return accountTypeLookup() === "AccountId32";
     },
     get pjsApi() {

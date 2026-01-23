@@ -75,19 +75,19 @@ export async function sendNewBlockAndCheck(
   const api = context.polkadotJs();
   const apiAt = await api.at(newBlock);
 
-  const actualEvents: any = await apiAt.query.system.events();
+  const actualEvents = (await apiAt.query.system.events()) as unknown as EventRecord[];
   const match = expectedEvents.every((eEvt) => {
     return actualEvents
       .map((aEvt) => {
         if (
           api.events.system.ExtrinsicSuccess.is(aEvt.event) &&
-          (aEvt.event.data as any).dispatchInfo.class.toString() !== "Normal"
+          (aEvt.event.data as any).dispatchInfo?.class?.toString() !== "Normal"
         ) {
           return false;
         }
         return eEvt.is(aEvt.event);
       })
-      .reduce((acc, curr) => acc || curr, false);
+      .reduce((acc: boolean, curr: boolean) => acc || curr, false);
   });
   return { match, events: actualEvents };
 }
@@ -102,9 +102,9 @@ export async function createChopsticksBlock(
 
   if (options?.expectEvents) {
     const match = options.expectEvents.every((eEvt) => {
-      const found = actualEvents
+      const found = (actualEvents as unknown as { event: any }[])
         .map((aEvt) => eEvt.is(aEvt.event))
-        .reduce((acc, curr) => acc || curr, false);
+        .reduce((acc: boolean, curr: boolean) => acc || curr, false);
       if (!found) {
         const message = `Event ${chalk.bgWhiteBright.blackBright(eEvt.meta.name)} not present in block`;
         if (options.logger) {

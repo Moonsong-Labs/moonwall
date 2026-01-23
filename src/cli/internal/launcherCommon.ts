@@ -75,9 +75,9 @@ async function devBinCheck(env: Environment) {
       return;
     }
 
-    const runningContainers = matchingContainers.map(({ Id, Ports }) => ({
+    const runningContainers = matchingContainers.map(({ Id, Ports }: Docker.ContainerInfo) => ({
       Id: Id.slice(0, 12),
-      Ports: Ports.map(({ PublicPort, PrivatePort }) =>
+      Ports: Ports.map(({ PublicPort, PrivatePort }: Docker.Port) =>
         PublicPort ? `${PublicPort} -> ${PrivatePort}` : `${PrivatePort}`
       ).join(", "),
     }));
@@ -109,7 +109,7 @@ async function promptKillContainers(matchingContainers: Docker.ContainerInfo[]) 
 
   if (answer === "kill") {
     const docker = new Docker();
-    for (const { Id } of matchingContainers) {
+    for (const { Id } of matchingContainers as Docker.ContainerInfo[]) {
       const container = docker.getContainer(Id);
       await container.stop();
       await container.remove();

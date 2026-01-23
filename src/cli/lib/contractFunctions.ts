@@ -95,7 +95,9 @@ export async function interactWithPrecompileContract(
 ) {
   const { precompileName, ...rest } = callOptions;
 
-  const precompileInfo = PRECOMPILES[precompileName];
+  const precompileInfo = (PRECOMPILES as Record<string, string | readonly [string, string]>)[
+    precompileName
+  ];
   if (!precompileInfo) {
     throw new Error(`No precompile found with the name: ${precompileName}`);
   }

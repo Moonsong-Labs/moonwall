@@ -429,7 +429,10 @@ export class MoonwallContext {
     }
 
     const env = getEnvironmentFromConfig();
-    const launchSpec = "launchSpec" in env.foundation ? env.foundation.launchSpec[0] : undefined;
+    const launchSpec =
+      "launchSpec" in env.foundation && Array.isArray(env.foundation.launchSpec)
+        ? env.foundation.launchSpec[0]
+        : undefined;
 
     // Use programmatic chopsticks API for non-legacy chopsticks foundation
     if (
@@ -474,7 +477,8 @@ export class MoonwallContext {
       return ctx;
     }
 
-    const maxStartupTimeout = launchSpec?.useDocker ? 300000 : 30000; // 5 minutes for Docker, 30s otherwise
+    const maxStartupTimeout =
+      launchSpec && "useDocker" in launchSpec && launchSpec.useDocker ? 300000 : 30000; // 5 minutes for Docker, 30s otherwise
 
     await withTimeout(
       Promise.all(
@@ -497,7 +501,23 @@ export class MoonwallContext {
                       ? env.foundation.zombieSpec.legacy
                       : false;
 
-              const result = isLegacy ? await launchNodeLegacy(options) : await launchNode(options);
+              const result = isLegacy
+                ? await launchNodeLegacy(
+                    options as {
+                      command: string;
+                      args: string[];
+                      name: string;
+                      launchSpec?: import("../../api/types/index.js").DevLaunchSpec;
+                    }
+                  )
+                : await launchNode(
+                    options as {
+                      command: string;
+                      args: string[];
+                      name: string;
+                      launchSpec?: import("../../api/types/index.js").DevLaunchSpec;
+                    }
+                  );
               this.nodes.push(result.runningNode);
               if (result.runningNode instanceof ChildProcess) {
                 debugSetup(

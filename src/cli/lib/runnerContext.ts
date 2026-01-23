@@ -197,14 +197,16 @@ const loadParams = (config?: ReadOnlyLaunchSpec) => {
 const scheduleWithBottleneck = <T extends ProviderApi>(api: T): T => {
   return new Proxy(api, {
     get(target, propKey) {
-      const origMethod = target[propKey];
+      const origMethod = (target as Record<string | symbol, unknown>)[propKey];
       if (typeof origMethod === "function" && propKey !== "rpc" && propKey !== "tx") {
-        return (...args: any[]) => {
+        return (...args: unknown[]) => {
           if (!limiter) {
             throw new Error("Limiter not initialized");
           }
 
-          return limiter.schedule(() => origMethod.apply(target, args));
+          return limiter.schedule(() =>
+            (origMethod as (...args: unknown[]) => PromiseLike<unknown>).apply(target, args)
+          );
         };
       }
       return origMethod;
