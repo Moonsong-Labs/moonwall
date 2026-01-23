@@ -203,7 +203,7 @@ describeSuite({
         const { status, contractAddress } = await deployViemContract(context, abi, bytecode);
 
         expect(status).to.be.toStrictEqual("success");
-        expect(contractAddress.length).to.be.greaterThan(0);
+        expect(contractAddress!.length).to.be.greaterThan(0);
       },
     });
 
@@ -246,7 +246,7 @@ describeSuite({
 
         const contractInstance = getContract({
           abi: tokenAbi as Abi,
-          address: contractAddress,
+          address: contractAddress!,
           client: {
             wallet: context.viem() as any,
             public: context.viem() as any,
@@ -259,7 +259,7 @@ describeSuite({
 
         await context.viem().writeContract({
           abi: tokenAbi as Abi,
-          address: contractAddress,
+          address: contractAddress!,
           value: 0n,
           functionName: "transfer",
           args: [BALTATHAR_ADDRESS, parseEther("2.0")],
@@ -307,7 +307,7 @@ describeSuite({
 
         const gas = await context.viem().estimateContractGas({
           abi: tokenAbi,
-          address: contractAddress,
+          address: contractAddress!,
           functionName: "transfer",
           args: [BALTATHAR_ADDRESS, parseEther("2.0")],
           account: ALITH_ADDRESS,
@@ -345,7 +345,7 @@ describeSuite({
         const { result } = await context.viem().simulateContract({
           account: ALITH_ADDRESS,
           abi: tokenAbi,
-          address: contractAddress,
+          address: contractAddress!,
           functionName: "transfer",
           args: [BALTATHAR_ADDRESS, parseEther("2.0")],
         });
@@ -385,7 +385,7 @@ describeSuite({
 
         const txHash = await context.viem().writeContract({
           abi: tokenAbi,
-          address: contractAddress,
+          address: contractAddress!,
           functionName: "transfer",
           args: [BALTATHAR_ADDRESS, parseEther("2.0")],
         });

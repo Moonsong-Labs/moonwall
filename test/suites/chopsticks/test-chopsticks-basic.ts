@@ -158,9 +158,10 @@ describeSuite({
 
         const apiAt = await context.polkadotJs().at(result);
         const events = await apiAt.query.system.events();
-        const failedEvent = events.find((evt) =>
-          context.polkadotJs().events.system.ExtrinsicFailed.is(evt.event)
-        );
+        const failedEvent = events.find((evt) => {
+          const record = evt as { event: { section: string; method: string; index: unknown } };
+          return context.polkadotJs().events.system.ExtrinsicFailed.is(record.event);
+        });
         log(`Found ExtrinsicFailed event: ${failedEvent ? "Yes" : "No"}`);
         expect(failedEvent, "No Event found in block").toBeTruthy();
       },

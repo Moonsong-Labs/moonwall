@@ -107,7 +107,7 @@ describeSuite({
         const initialHeight = (
           await context.polkadotJs("parachain").rpc.chain.getHeader()
         ).number.toNumber();
-        logger.info("Initial height", initialHeight);
+        logger.info(`Initial height: ${initialHeight}`);
         await context.restartNode("alith");
         logger.info("Node restarted");
 

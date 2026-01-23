@@ -18,7 +18,7 @@ describeSuite({
           .free;
         expect(balanceBefore.toString()).toEqual("0");
         log("hello hello");
-        log("Test account balance before transfer:", balanceBefore.toString());
+        log(`Test account balance before transfer: ${balanceBefore.toString()}`);
         await context
           .polkadotJs()
           .tx.balances.transferAllowDeath(DUMMY_ACCOUNT, parseEther("1"))

@@ -28,12 +28,11 @@ Make sure that you specify the correct version of Moonwall that you'd like to us
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@moonbeam-network/api-augment": "^0.2600.0",
-    "moonwall": "^4.7.5",
-    "@moonwall/util": "^4.7.5",
-    "ethers":"^6.10.0",
-    "@polkadot/api": "^10.11.2",
-    "typescript": "^5.6.3"
+    "@moonbeam-network/api-augment": "^0.3900.0",
+    "moonwall": "^1.0.0",
+    "ethers": "^6.16.0",
+    "@polkadot/api": "^16.1.0",
+    "typescript": "^5.9.0"
   }
 }
 ```

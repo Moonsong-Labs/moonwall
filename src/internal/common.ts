@@ -6,7 +6,7 @@ export function normalizeUrlToHttps(url: string): string {
 
 // Sort dict by key
 export function sortObjectByKeys(obj: Record<string, any>): Record<string, any> {
-  const sortedKeys = Object.keys(obj).sort();
+  const sortedKeys = Object.keys(obj).toSorted();
   const sortedObj: Record<string, any> = {};
 
   for (const key of sortedKeys) {
@@ -156,15 +156,13 @@ export async function directRpcRequest(
     clearTimeout(timeoutId);
     if (error.name === "AbortError") {
       throw new Error(
-        `RPC request to ${endpoint} timed out after ${timeoutMs}ms (method: ${method})`
+        `RPC request to ${endpoint} timed out after ${timeoutMs}ms (method: ${method})`,
+        { cause: error }
       );
     }
-    console.error(
-      `[directRpcRequest] Error for ${endpoint} method ${method}:`,
-      error.message,
-      error.cause
-    );
-    throw new Error(`RPC request to ${endpoint} failed (method: ${method}): ${error.message}`);
+    throw new Error(`RPC request to ${endpoint} failed (method: ${method}): ${error.message}`, {
+      cause: error,
+    });
   }
 }
 

@@ -36,7 +36,7 @@ describeSuite({
     it({
       id: "C200",
       title: "should have a recent eth block",
-      test: async function () {
+      test: async () => {
         const specVersion = api.consts.system.version.specVersion.toNumber();
         const clientVersion = (await api.rpc.system.version()).toString().split("-")[0];
 
@@ -44,7 +44,8 @@ describeSuite({
           debug(
             `ChainSpec ${specVersion}, client ${clientVersion} unsupported BlockTag, skipping.`
           );
-          this.skip();
+          // Skip test by returning early (vitest doesn't support dynamic skip)
+          return;
         }
         const timestamp = (await web3.eth.getBlock("latest")).timestamp;
         const diff = BigInt(Date.now()) - timestamp * 1000n;
@@ -59,8 +60,8 @@ describeSuite({
         timePeriod /
         (1000 * 60 * 60)
       ).toFixed(2)} hours #C300`,
-      test: async function () {
-        this.timeout(timeout);
+      timeout,
+      test: async () => {
         const signedBlock = await api.rpc.chain.getBlock(await api.rpc.chain.getFinalizedHead());
 
         const lastBlockNumber = signedBlock.block.header.number.toNumber();
