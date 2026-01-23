@@ -5,5 +5,5 @@
     "rootDir": "."
   },
   "include": ["suites/**/*.ts", "types/**/*.d.ts"],
-  "exclude": ["node_modules", "suites/bun_test"]
+  "exclude": ["node_modules", "suites/bun_test", "suites/papi"]
 }

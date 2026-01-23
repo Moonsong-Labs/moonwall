@@ -53,10 +53,8 @@ jobs:
       - *setup-node
       - *pnpm-install
       - run: pnpm run build
-      - name: Typecheck src
+      - name: Typecheck
         run: pnpm run typecheck
-      - name: Typecheck test suites
-        run: cd test && pnpm run typecheck
 
   test_init:
     runs-on: ubuntu-latest

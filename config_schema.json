@@ -579,7 +579,7 @@
   "description": "The main configuration object for Moonwall.",
   "properties": {
     "$schema": {
-      "description": "The schema for the config.\nBy default should use: \"https://raw.githubusercontent.com/Moonsong-Labs/moonwall/main/packages/types/config_schema.json\"",
+      "description": "The schema for the config.\nBy default should use: \"https://raw.githubusercontent.com/Moonsong-Labs/moonwall/main/config_schema.json\"",
       "type": "string"
     },
     "additionalRepos": {
@@ -692,15 +692,34 @@
           "multiThreads": {
             "anyOf": [
               {
-                "additionalProperties": true,
-                "properties": {},
+                "description": "Vitest 4 pool configuration for multi-threaded test execution.\nPool-specific options are now top-level (no more nested poolOptions).",
+                "properties": {
+                  "isolate": {
+                    "default": true,
+                    "description": "Isolate environment for each test file.",
+                    "type": "boolean"
+                  },
+                  "maxWorkers": {
+                    "description": "Maximum number of workers to run tests in parallel.\nUse `1` to run tests sequentially within the pool.",
+                    "type": "number"
+                  },
+                  "memoryLimit": {
+                    "description": "Memory limit per worker as fraction of total memory (vmThreads only).\nExample: 0.25 = 25% of available memory.\nMaps to Vitest's vmMemoryLimit option.",
+                    "type": "number"
+                  },
+                  "pool": {
+                    "description": "The pool type to use for test execution.\n- `threads`: Worker threads (default)\n- `forks`: Child processes\n- `vmThreads`: VM threads with isolated contexts\n- `typescript`: TypeScript worker threads",
+                    "enum": ["forks", "threads", "typescript", "vmThreads"],
+                    "type": "string"
+                  }
+                },
                 "type": "object"
               },
               {
                 "type": ["number", "boolean"]
               }
             ],
-            "description": "An optional boolean to indicate if multi-threading is enabled.\nOptionally, you can specify your own threadPool spec using a PoolOptions config object.\nVisit https://vitest.dev/config/#pooloptions for more info"
+            "description": "Multi-threading configuration for test execution.\n- `false`: Sequential execution (default)\n- `true`: Enable parallel execution with defaults\n- `number`: Enable parallel with specific maxWorkers count\n- `object`: Full Vitest 4 pool configuration\n\nVisit https://vitest.dev/config/#pool for more info"
           },
           "name": {
             "description": "The name of the environment.",

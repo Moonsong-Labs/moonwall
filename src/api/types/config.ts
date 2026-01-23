@@ -99,11 +99,15 @@ export type Environment = {
   connections?: ProviderConfig[];
 
   /**
-   * An optional boolean to indicate if multi-threading is enabled.
-   * Optionally, you can specify your own threadPool spec using a PoolOptions config object.
-   * Visit https://vitest.dev/config/#pooloptions for more info
+   * Multi-threading configuration for test execution.
+   * - `false`: Sequential execution (default)
+   * - `true`: Enable parallel execution with defaults
+   * - `number`: Enable parallel with specific maxWorkers count
+   * - `object`: Full Vitest 4 pool configuration
+   *
+   * Visit https://vitest.dev/config/#pool for more info
    */
-  multiThreads?: boolean | number | object;
+  multiThreads?: boolean | number | MultiThreadConfig;
 
   /**
    * Enable Vitest's dependency optimizer to pre-bundle imports (viem, ethers).
@@ -664,4 +668,38 @@ export type ForkConfig = {
    * Turns on trace logging for LazyLoading service (optional)
    */
   verbose?: boolean;
+};
+
+/**
+ * Vitest 4 pool configuration for multi-threaded test execution.
+ * Pool-specific options are now top-level (no more nested poolOptions).
+ */
+export type MultiThreadConfig = {
+  /**
+   * The pool type to use for test execution.
+   * - `threads`: Worker threads (default)
+   * - `forks`: Child processes
+   * - `vmThreads`: VM threads with isolated contexts
+   * - `typescript`: TypeScript worker threads
+   */
+  pool: "threads" | "forks" | "vmThreads" | "typescript";
+
+  /**
+   * Maximum number of workers to run tests in parallel.
+   * Use `1` to run tests sequentially within the pool.
+   */
+  maxWorkers?: number;
+
+  /**
+   * Isolate environment for each test file.
+   * @default true
+   */
+  isolate?: boolean;
+
+  /**
+   * Memory limit per worker as fraction of total memory (vmThreads only).
+   * Example: 0.25 = 25% of available memory.
+   * Maps to Vitest's vmMemoryLimit option.
+   */
+  memoryLimit?: number;
 };

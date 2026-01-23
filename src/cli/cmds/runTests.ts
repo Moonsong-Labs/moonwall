@@ -1,7 +1,7 @@
 import type { Environment } from "../../api/types/index.js";
 import chalk from "chalk";
 import path from "node:path";
-import type { UserConfig, Vitest } from "vitest/node";
+import type { TestUserConfig, Vitest } from "vitest/node";
 import { startVitest } from "vitest/node";
 import { createLogger } from "../../util/index.js";
 import { clearNodeLogs } from "../internal/cmdFunctions/tempLogs.js";
@@ -94,7 +94,7 @@ export type testRunArgs = {
   vitestPassthroughArgs?: string[];
 };
 
-export async function executeTests(env: Environment, testRunArgs?: testRunArgs & UserConfig) {
+export async function executeTests(env: Environment, testRunArgs?: testRunArgs & TestUserConfig) {
   return new Promise<Vitest>(async (resolve, reject) => {
     const globalConfig = await importAsyncConfig();
     if (env.foundation.type === "read_only") {
@@ -131,7 +131,7 @@ export async function executeTests(env: Environment, testRunArgs?: testRunArgs &
 
     const additionalArgs = { ...testRunArgs };
 
-    const vitestOptions = testRunArgs?.vitestPassthroughArgs?.reduce<UserConfig>((acc, arg) => {
+    const vitestOptions = testRunArgs?.vitestPassthroughArgs?.reduce<TestUserConfig>((acc, arg) => {
       const [key, value] = arg.split("=");
       return {
         ...acc,
@@ -188,7 +188,7 @@ export async function executeTests(env: Environment, testRunArgs?: testRunArgs &
         ...additionalArgs,
         ...vitestOptions,
         ...(filteredFiles ? { include: filteredFiles.map((f) => path.resolve(f)) } : {}),
-      } satisfies UserConfig;
+      } satisfies TestUserConfig;
 
       if (env.printVitestOptions) {
         logger.info(`Options to use: ${JSON.stringify(optionsToUse, null, 2)}`);
@@ -206,7 +206,7 @@ export async function executeTests(env: Environment, testRunArgs?: testRunArgs &
 const filterList = ["<empty line>", "", "stdout | unknown test"];
 
 class VitestOptionsBuilder {
-  private options: UserConfig = {
+  private options: TestUserConfig = {
     watch: false,
     globals: true,
     reporters: ["default"],
@@ -277,14 +277,9 @@ class VitestOptionsBuilder {
   addThreadConfig(threads: number | boolean | object = false): this {
     this.options.fileParallelism = false;
     this.options.pool = "forks";
-    this.options.poolOptions = {
-      forks: {
-        isolate: true,
-        minForks: 1,
-        maxForks: 3,
-        singleFork: false,
-      },
-    };
+    // Vitest 4: pool options are now top-level (isolate, maxWorkers)
+    this.options.isolate = true;
+    this.options.maxWorkers = 3;
 
     if (threads === true && process.env.MOON_RECYCLE !== "true") {
       this.options.fileParallelism = true;
@@ -292,19 +287,33 @@ class VitestOptionsBuilder {
 
     if (typeof threads === "number" && process.env.MOON_RECYCLE !== "true") {
       this.options.fileParallelism = true;
-      if (this.options.poolOptions?.forks) {
-        this.options.poolOptions.forks.maxForks = threads;
-        this.options.poolOptions.forks.singleFork = false;
-      }
+      this.options.maxWorkers = threads;
     }
 
     if (typeof threads === "object" && process.env.MOON_RECYCLE !== "true") {
-      const key = Object.keys(threads)[0];
-      if (["threads", "forks", "vmThreads", "typescript"].includes(key)) {
-        this.options.pool = key as "threads" | "forks" | "vmThreads" | "typescript";
-        this.options.poolOptions = Object.values(threads)[0];
-      } else {
-        throw new Error(`Invalid pool type: ${key}`);
+      // Vitest 4 format: { pool: "forks", maxWorkers: 1, isolate: false, ... }
+      const config = threads as {
+        pool: string;
+        maxWorkers?: number;
+        isolate?: boolean;
+        memoryLimit?: number;
+      };
+
+      if (!["threads", "forks", "vmThreads", "typescript"].includes(config.pool)) {
+        throw new Error(`Invalid pool type: ${config.pool}`);
+      }
+
+      this.options.fileParallelism = true;
+      this.options.pool = config.pool as "threads" | "forks" | "vmThreads" | "typescript";
+
+      if (config.maxWorkers !== undefined) {
+        this.options.maxWorkers = config.maxWorkers;
+      }
+      if (config.isolate !== undefined) {
+        this.options.isolate = config.isolate;
+      }
+      if (config.memoryLimit !== undefined) {
+        this.options.vmMemoryLimit = config.memoryLimit;
       }
     }
 
@@ -326,7 +335,7 @@ class VitestOptionsBuilder {
     return this;
   }
 
-  build(): UserConfig {
+  build(): TestUserConfig {
     return this.options;
   }
 }

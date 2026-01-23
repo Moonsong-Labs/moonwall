@@ -491,11 +491,9 @@
       "testFileDir": ["suites/test_separation"],
       "reporters": ["basic", "html"],
       "multiThreads": {
-        "threads": {
-          "isolate": false,
-          "singleThread": true,
-          "useAtomics": false
-        }
+        "pool": "threads",
+        "maxWorkers": 1,
+        "isolate": false
       },
       "foundation": {
         "type": "dev",
@@ -514,12 +512,9 @@
       "testFileDir": ["suites/test_separation"],
       "reporters": ["basic", "html"],
       "multiThreads": {
-        "forks": {
-          "minForks": 1,
-          "maxForks": 1,
-          "isolate": false,
-          "singleFork": true
-        }
+        "pool": "forks",
+        "maxWorkers": 1,
+        "isolate": false
       },
       "foundation": {
         "type": "dev",
@@ -537,10 +532,8 @@
       "name": "dev_forkMulti",
       "testFileDir": ["suites/test_separation"],
       "multiThreads": {
-        "forks": {
-          "isolate": false,
-          "singleFork": false
-        }
+        "pool": "forks",
+        "isolate": false
       },
       "reporters": ["basic", "html"],
       "foundation": {
@@ -560,12 +553,9 @@
       "testFileDir": ["suites/test_separation"],
       "reporters": ["basic", "html"],
       "multiThreads": {
-        "vmThreads": {
-          "minThreads": 1,
-          "maxThreads": 1,
-          "useAtomics": false,
-          "memoryLimit": 0.25
-        }
+        "pool": "vmThreads",
+        "maxWorkers": 1,
+        "memoryLimit": 0.25
       },
       "foundation": {
         "type": "dev",
@@ -583,10 +573,8 @@
       "name": "dev_vmMulti",
       "testFileDir": ["suites/test_separation"],
       "multiThreads": {
-        "vmThreads": {
-          "useAtomics": false,
-          "memoryLimit": 0.25
-        }
+        "pool": "vmThreads",
+        "memoryLimit": 0.25
       },
       "reporters": ["basic", "html"],
       "foundation": {

@@ -1,6 +1,6 @@
 import { type ViemClient, beforeAll, describeSuite, expect } from "moonwall";
 import { xcAssetAbi } from "moonwall";
-import { formatEther, formatUnits, getContract } from "viem";
+import { type Client, formatEther, formatUnits, getContract } from "viem";
 
 describeSuite({
   id: "V01",
@@ -42,7 +42,7 @@ describeSuite({
         const contract = getContract({
           address,
           abi: xcAssetAbi,
-          client: { public: api, wallet: api },
+          client: { public: api as Client, wallet: api as Client },
         });
         const decimals = (await contract.read.decimals()) as number;
         const totalSupply = (await contract.read.totalSupply()) as bigint;
