@@ -18,10 +18,10 @@ hero:
       link: /guide/intro/getting-started
     - theme: alt
       text: Write Tests
-      link: /guide/write/quick-start
+      link: /guide/testing
     - theme: alt
       text: Define Network
-      link: /config/intro
+      link: /config/moonwall-config
     - theme: alt
       text: View on GitHub
       link: https://github.com/Moonsong-Labs/moonwall

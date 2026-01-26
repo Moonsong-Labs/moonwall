@@ -40,7 +40,7 @@ export default defineConfig({
 
     nav: [
       { text: "Docs", link: "/guide/intro/getting-started" },
-      { text: "Config", link: "/config/intro" },
+      { text: "Config", link: "/config/moonwall-config" },
       { text: "FAQ", link: "/guide/troubleshooting/faq" },
       {
         text: `v${version}`,

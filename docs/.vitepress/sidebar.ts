@@ -16,16 +16,16 @@ export function sidebarGuide(): DefaultTheme.SidebarItem[] {
       text: "Core Concepts",
       collapsed: false,
       items: [
-        { text: "Foundations", link: "/guide/foundations" },
-        { text: "Providers", link: "/guide/intro/providers" },
+        { text: "Foundations", link: "foundations" },
+        { text: "Providers", link: "intro/providers" },
       ],
     },
     {
       text: "Testing",
       collapsed: false,
       items: [
-        { text: "Writing & Running Tests", link: "/guide/testing" },
-        { text: "Context Functions", link: "/guide/write/context-functions" },
+        { text: "Writing & Running Tests", link: "testing" },
+        { text: "Context Functions", link: "write/context-functions" },
       ],
     },
     {
@@ -41,10 +41,10 @@ export function sidebarGuide(): DefaultTheme.SidebarItem[] {
       text: "Reference",
       collapsed: true,
       items: [
-        { text: "Utilities", link: "/guide/utilities" },
-        { text: "Migration from v5", link: "/guide/intro/migration-v1" },
-        { text: "FAQ", link: "/guide/troubleshooting/faq" },
-        { text: "Common Errors", link: "/guide/troubleshooting/errors" },
+        { text: "Utilities", link: "utilities" },
+        { text: "Migration from v5", link: "intro/migration-v1" },
+        { text: "FAQ", link: "troubleshooting/faq" },
+        { text: "Common Errors", link: "troubleshooting/errors" },
       ],
     },
   ];
