@@ -15,6 +15,7 @@ coverage
 coverage.json
 typechain
 typechain-types
+.playwright-mcp/
 target/
 
 **/cache
