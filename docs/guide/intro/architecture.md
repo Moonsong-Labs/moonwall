@@ -229,7 +229,6 @@ flowchart TB
 
 ## Related Documentation
 
-- [Foundations](/guide/intro/foundations) - Detailed foundation usage
+- [Foundations](/guide/foundations) - Detailed foundation usage
 - [Providers](/guide/intro/providers) - Provider configuration
 - [Environment Configuration](/config/environment) - Environment options
-- [Foundation Configuration](/config/foundation) - Foundation parameters

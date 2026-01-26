@@ -151,5 +151,5 @@ This creates a basic `moonwall.config.json` with a dev foundation setup.
 ## Related Documentation
 
 - [Environment Configuration](/config/environment) - Environment-specific options
-- [Foundation Configuration](/config/foundation) - Foundation parameters by type
+- [Foundations](/guide/foundations) - Foundation parameters by type
 - [Getting Started](/guide/intro/getting-started) - Initial setup guide
