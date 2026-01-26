@@ -35,6 +35,12 @@ export default withMermaid(
     },
   },
 
+  vite: {
+    optimizeDeps: {
+      include: ["mermaid"],
+    },
+  },
+
   themeConfig: {
     externalLinkIcon: true,
 
