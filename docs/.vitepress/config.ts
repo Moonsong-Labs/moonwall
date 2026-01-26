@@ -1,11 +1,13 @@
 import { defineConfig } from "vitepress";
+import { withMermaid } from "vitepress-plugin-mermaid";
 import { sidebarGuide, sidebarConfig } from "./sidebar";
 import { version } from "../package.json";
 
 const title = "Moonwall";
 const description = "Run substrate networks and perform tests, with least fuss possible.";
 
-export default defineConfig({
+export default withMermaid(
+  defineConfig({
   lang: "en-US",
 
   base: "/moonwall/",
@@ -80,4 +82,4 @@ export default defineConfig({
       { icon: "linkedin", link: "https://www.linkedin.com/company/moonsong-labs/" },
     ],
   },
-});
+}));
