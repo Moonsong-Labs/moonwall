@@ -1,8 +1,11 @@
 import type { MoonwallConfig, Environment } from "@moonwall/types";
+import { regex } from "arkregex";
 import { readFile, access } from "node:fs/promises";
 import { readFileSync, existsSync, constants } from "node:fs";
 import JSONC from "jsonc-parser";
 import path, { extname } from "node:path";
+
+const envVarRegex = regex("\\$\\{([^}]+)}", "g");
 
 let cachedConfig: MoonwallConfig | undefined;
 
@@ -190,7 +193,7 @@ export function loadEnvVars(): void {
 
 function replaceEnvVars(value: any): any {
   if (typeof value === "string") {
-    return value.replace(/\$\{([^}]+)\}/g, (match, group) => {
+    return value.replace(envVarRegex, (match, group) => {
       const envVarValue = process.env[group];
       // Disabled until we only process Environment Config associated with the current Environment
 

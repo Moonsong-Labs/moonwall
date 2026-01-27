@@ -1,4 +1,7 @@
 import { type SgNode, Lang, parse, findInFiles } from "@ast-grep/napi";
+import { regex } from "arkregex";
+
+const quotesRegex = regex("^['\"`]|['\"`]$", "g");
 
 export interface TestIds {
   suiteId: string | undefined;
@@ -16,7 +19,7 @@ function extractIdFromObject(objNode: SgNode): string | undefined {
       const value = child.field("value");
       if (key?.text() === "id" && value) {
         // Remove quotes from the string literal
-        return value.text().replace(/^['"`]|['"`]$/g, "");
+        return value.text().replace(quotesRegex, "");
       }
     }
   }

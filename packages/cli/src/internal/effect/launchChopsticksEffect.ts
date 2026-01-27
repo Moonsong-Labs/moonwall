@@ -9,12 +9,22 @@
  * test suites (not just a single Effect scope).
  */
 
-import { Effect, Layer, type Scope } from "effect";
+import { Effect, Layer, Option, type Scope } from "effect";
+import { regex } from "arkregex";
 import type { HexString } from "@polkadot/util/types";
 import { createLogger } from "@moonwall/util";
 import type { ChopsticksLaunchSpec } from "@moonwall/types";
 import * as fs from "node:fs";
 import * as path from "node:path";
+
+const effectCauseRegex = regex("\\[cause\\]:\\s*Error:\\s*(.+)", "s");
+
+const extractErrorCause = (errorString: string): string =>
+  Option.fromNullable(errorString.match(effectCauseRegex)).pipe(
+    Option.flatMapNullable((m) => m[1]),
+    Option.map((s) => s.trim()),
+    Option.getOrElse(() => errorString)
+  );
 
 // We use dynamic imports for chopsticks to allow configuring the logger
 // BEFORE any chopsticks code runs. This is necessary because chopsticks
@@ -858,17 +868,8 @@ export async function launchChopsticksFromSpec(
   } catch (error: unknown) {
     // Re-throw with clearer message that includes the actual cause
     // Effect errors format their toString() nicely, extract the [cause] part if present
-    const errorString = String(error);
-
-    // Extract the relevant cause message from Effect's error format
-    // Format: "(FiberFailure) ChopsticksSetupError: ... [cause]: Error: actual message"
-    const causeMatch = errorString.match(/\[cause\]:\s*Error:\s*(.+)/s);
-    if (causeMatch) {
-      throw new Error(`Chopsticks config validation failed: ${causeMatch[1].trim()}`);
-    }
-
-    // Fallback to full error string
-    throw new Error(`Chopsticks config validation failed: ${errorString}`);
+    const causeMessage = extractErrorCause(String(error));
+    throw new Error(`Chopsticks config validation failed: ${causeMessage}`);
   }
 
   logger.debug(`Config parsed in ${Date.now() - startTime}ms`);
@@ -884,10 +885,7 @@ export async function launchChopsticksFromSpec(
     cleanup = result.cleanup;
   } catch (error: unknown) {
     // Re-throw with clearer message - use same extraction as config validation
-    const errorString = String(error);
-    const causeMatch = errorString.match(/\[cause\]:\s*Error:\s*(.+)/s);
-    const causeMessage = causeMatch ? causeMatch[1].trim() : errorString;
-
+    const causeMessage = extractErrorCause(String(error));
     throw new Error(
       `Chopsticks failed to connect to endpoint '${configResult.endpoint}': ${causeMessage}`
     );
