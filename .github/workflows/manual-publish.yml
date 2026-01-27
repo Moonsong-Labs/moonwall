@@ -3,40 +3,58 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Version to publish"
+        description: "NPM dist-tag (dev, beta, next, etc.)"
         required: true
-        default: "beta"
+        default: "dev"
       branch:
         description: "Branch to publish from"
         required: true
         default: "develop"
+      prerelease-suffix:
+        description: "Pre-release suffix (e.g., dev.0, beta.1)"
+        required: true
+        default: "dev.0"
       dry-run:
         description: "Run without publishing"
         required: false
         default: "true"
 
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        package: ["cli", "util"]
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.branch }}
+
       - uses: pnpm/action-setup@v4
         with:
-          version: 9.1.4
+          version: 10.28.1
+
       - uses: actions/setup-node@v4
         with:
           node-version: 23
           cache: "pnpm"
+          registry-url: "https://registry.npmjs.org"
+
       - run: pnpm install
-      - run: pnpm run build
-      - uses: JS-DevTools/npm-publish@v3
-        with:
-          token: ${{ secrets.NPM_TOKEN }}
-          tag: ${{ github.event.inputs.tag }}
-          package: packages/${{ matrix.package }}
-          dry-run: ${{ github.event.inputs.dry-run}}
+
+      - name: Set pre-release version
+        run: |
+          CURRENT=$(node -p "require('./package.json').version")
+          BASE_VERSION=$(echo $CURRENT | sed 's/-.*//')
+          NEW_VERSION="${BASE_VERSION}-${{ github.event.inputs.prerelease-suffix }}"
+          npm version $NEW_VERSION --no-git-tag-version
+          echo "Publishing version: $NEW_VERSION"
+
+      - run: pnpm build
+
+      - name: Publish to NPM
+        run: |
+          if [ "${{ github.event.inputs.dry-run }}" = "true" ]; then
+            pnpm publish --tag ${{ github.event.inputs.tag }} --dry-run --no-git-checks
+          else
+            pnpm publish --tag ${{ github.event.inputs.tag }} --no-git-checks
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
