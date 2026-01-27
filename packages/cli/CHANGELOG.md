@@ -1,5 +1,14 @@
 # @moonwall/cli
 
+## 5.18.3
+
+### Patch Changes
+
+- 6917699: Refactor regexs
+- Updated dependencies [6917699]
+  - @moonwall/util@5.18.3
+  - @moonwall/types@5.18.3
+
 ## 5.18.2
 
 ### Patch Changes
