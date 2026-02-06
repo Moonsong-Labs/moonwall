@@ -1,9 +1,9 @@
-import { describe, it, expect, vi } from "vitest";
+import { expect } from "vitest";
+import { describe, it } from "@effect/vitest";
 import { Effect, Layer } from "effect";
 import { BuildBlockMode } from "@acala-network/chopsticks";
 import {
   type ChopsticksServiceImpl,
-  ChopsticksSetupError,
   ChopsticksBlockError,
   ChopsticksStorageError,
   type ChopsticksConfig,
@@ -81,7 +81,7 @@ describe("launchChopsticksEffect - Phase 2: Module Structure", () => {
       expect(mockService.chain).toBeDefined();
     });
 
-    it("should allow createBlock to return BlockCreationResult", async () => {
+    it.effect("should allow createBlock to return BlockCreationResult", () => {
       const mockService: ChopsticksServiceImpl = {
         chain: {} as any,
         addr: "127.0.0.1:8000",
@@ -100,12 +100,15 @@ describe("launchChopsticksEffect - Phase 2: Module Structure", () => {
         submitHorizontalMessages: () => Effect.void,
       };
 
-      const result = await Effect.runPromise(mockService.createBlock());
-      expect(result.block.hash).toBe("0x123456");
-      expect(result.block.number).toBe(999);
+      return mockService.createBlock().pipe(
+        Effect.map((result) => {
+          expect(result.block.hash).toBe("0x123456");
+          expect(result.block.number).toBe(999);
+        })
+      );
     });
 
-    it("should allow createBlock to fail with ChopsticksBlockError", async () => {
+    it.effect("should allow createBlock to fail with ChopsticksBlockError", () => {
       const mockService: ChopsticksServiceImpl = {
         chain: {} as any,
         addr: "127.0.0.1:8000",
@@ -127,20 +130,17 @@ describe("launchChopsticksEffect - Phase 2: Module Structure", () => {
         submitHorizontalMessages: () => Effect.void,
       };
 
-      const result = await Effect.runPromise(
-        mockService
-          .createBlock()
-          .pipe(
-            Effect.catchTag("ChopsticksBlockError", (error) =>
-              Effect.succeed({ caught: true, operation: error.operation })
-            )
-          )
+      return mockService.createBlock().pipe(
+        Effect.catchTag("ChopsticksBlockError", (error) =>
+          Effect.succeed({ caught: true, operation: error.operation })
+        ),
+        Effect.map((result) => {
+          expect(result).toEqual({ caught: true, operation: "newBlock" });
+        })
       );
-
-      expect(result).toEqual({ caught: true, operation: "newBlock" });
     });
 
-    it("should allow setStorage to fail with ChopsticksStorageError", async () => {
+    it.effect("should allow setStorage to fail with ChopsticksStorageError", () => {
       const mockService: ChopsticksServiceImpl = {
         chain: {} as any,
         addr: "127.0.0.1:8000",
@@ -163,17 +163,14 @@ describe("launchChopsticksEffect - Phase 2: Module Structure", () => {
         submitHorizontalMessages: () => Effect.void,
       };
 
-      const result = await Effect.runPromise(
-        mockService
-          .setStorage({ module: "System", method: "Account", params: [] })
-          .pipe(
-            Effect.catchTag("ChopsticksStorageError", (error) =>
-              Effect.succeed({ caught: true, module: error.module, method: error.method })
-            )
-          )
+      return mockService.setStorage({ module: "System", method: "Account", params: [] }).pipe(
+        Effect.catchTag("ChopsticksStorageError", (error) =>
+          Effect.succeed({ caught: true, module: error.module, method: error.method })
+        ),
+        Effect.map((result) => {
+          expect(result).toEqual({ caught: true, module: "System", method: "Account" });
+        })
       );
-
-      expect(result).toEqual({ caught: true, module: "System", method: "Account" });
     });
   });
 
@@ -432,7 +429,7 @@ describe("ChopsticksServiceLayer - Phase 3: Layer.scoped", () => {
   describe("Layer Error Handling", () => {
     it("should produce ChopsticksSetupError on failure via ChopsticksServiceLayer", async () => {
       const { ChopsticksServiceLayer } = await import("../index.js");
-      const { ChopsticksService, ChopsticksSetupError } = await import("../index.js");
+      const { ChopsticksService } = await import("../index.js");
 
       const layer = ChopsticksServiceLayer({
         endpoint: "wss://nonexistent.invalid",

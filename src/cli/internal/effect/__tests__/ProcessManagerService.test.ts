@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { Effect, Exit } from "effect";
+import { expect, vi, beforeEach } from "vitest";
+import { describe, it } from "@effect/vitest";
+import { Effect } from "effect";
 import { ProcessManagerService, ProcessManagerServiceLive, NodeLaunchError } from "../index.js";
 import { spawn } from "node:child_process";
 import * as fs from "node:fs";
@@ -53,7 +54,7 @@ describe("ProcessManagerService", () => {
     (fs.promises.access as ReturnType<typeof vi.fn>).mockImplementation(() => Promise.resolve());
   });
 
-  it("should launch a process and return cleanup function", async () => {
+  it.effect("should launch a process and return cleanup function", () => {
     const config = {
       command: "node",
       args: ["-e", "console.log('hello')"],
@@ -61,7 +62,7 @@ describe("ProcessManagerService", () => {
       logDirectory: "/tmp/test_logs",
     };
 
-    const program = ProcessManagerService.pipe(
+    return ProcessManagerService.pipe(
       Effect.flatMap((service) =>
         service.launch(config).pipe(
           Effect.flatMap(({ result, cleanup }) =>
@@ -86,12 +87,9 @@ describe("ProcessManagerService", () => {
       ),
       Effect.provide(ProcessManagerServiceLive)
     );
-
-    const exit = await Effect.runPromiseExit(program);
-    expect(Exit.isSuccess(exit)).toBe(true);
   });
 
-  it("should handle process launch failure", async () => {
+  it.effect("should handle process launch failure", () => {
     (spawn as ReturnType<typeof vi.fn>).mockImplementationOnce(() => {
       throw new Error("Mock spawn error");
     });
@@ -102,23 +100,20 @@ describe("ProcessManagerService", () => {
       name: "fail-process",
     };
 
-    const program = ProcessManagerService.pipe(
+    return ProcessManagerService.pipe(
       Effect.flatMap((service) => service.launch(config)),
-      Effect.provide(ProcessManagerServiceLive)
+      Effect.provide(ProcessManagerServiceLive),
+      Effect.flip,
+      Effect.map((error) => {
+        expect(error).toBeInstanceOf(NodeLaunchError);
+        if (error instanceof NodeLaunchError) {
+          expect(error.command).toBe(config.command);
+        }
+      })
     );
-
-    const exit = await Effect.runPromiseExit(program);
-    expect(Exit.isFailure(exit)).toBe(true);
-    if (Exit.isFailure(exit) && exit.cause._tag === "Fail") {
-      const error = exit.cause.error;
-      expect(error).toBeInstanceOf(NodeLaunchError);
-      if (error instanceof NodeLaunchError) {
-        expect(error.command).toBe(config.command);
-      }
-    }
   });
 
-  it("should ensure log directory exists if not present", async () => {
+  it.effect("should ensure log directory exists if not present", () => {
     const config = {
       command: "node",
       args: ["-e", "console.log('hello')"],
@@ -130,14 +125,14 @@ describe("ProcessManagerService", () => {
       Promise.reject(new Error("ENOENT"))
     );
 
-    const program = ProcessManagerService.pipe(
+    return ProcessManagerService.pipe(
       Effect.flatMap((service) => service.launch(config)),
-      Effect.provide(ProcessManagerServiceLive)
+      Effect.provide(ProcessManagerServiceLive),
+      Effect.map(() => {
+        expect(fs.promises.mkdir).toHaveBeenCalledWith(config.logDirectory, {
+          recursive: true,
+        });
+      })
     );
-
-    await Effect.runPromise(program);
-    expect(fs.promises.mkdir).toHaveBeenCalledWith(config.logDirectory, {
-      recursive: true,
-    });
   });
 });

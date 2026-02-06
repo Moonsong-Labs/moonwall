@@ -1,5 +1,6 @@
-import { describe, it, expect } from "vitest";
-import { Effect, Exit, Layer } from "effect";
+import { expect } from "vitest";
+import { describe, it } from "@effect/vitest";
+import { Effect, Layer } from "effect";
 import { BuildBlockMode } from "@acala-network/chopsticks";
 import {
   ChopsticksService,
@@ -93,8 +94,8 @@ describe("ChopsticksService - Phase 1: Types and Errors", () => {
   });
 
   describe("Error Pattern Matching with catchTag", () => {
-    it("should allow pattern matching on ChopsticksSetupError", async () => {
-      const program = Effect.gen(function* () {
+    it.effect("should allow pattern matching on ChopsticksSetupError", () =>
+      Effect.gen(function* () {
         yield* Effect.fail(
           new ChopsticksSetupError({
             cause: new Error("test"),
@@ -105,15 +106,13 @@ describe("ChopsticksService - Phase 1: Types and Errors", () => {
       }).pipe(
         Effect.catchTag("ChopsticksSetupError", (error) =>
           Effect.succeed(`Caught setup error for ${error.endpoint}`)
-        )
-      );
+        ),
+        Effect.map((result) => expect(result).toBe("Caught setup error for wss://test.io"))
+      )
+    );
 
-      const result = await Effect.runPromise(program);
-      expect(result).toBe("Caught setup error for wss://test.io");
-    });
-
-    it("should allow pattern matching on ChopsticksBlockError", async () => {
-      const program = Effect.gen(function* () {
+    it.effect("should allow pattern matching on ChopsticksBlockError", () =>
+      Effect.gen(function* () {
         yield* Effect.fail(
           new ChopsticksBlockError({
             cause: new Error("test"),
@@ -125,14 +124,12 @@ describe("ChopsticksService - Phase 1: Types and Errors", () => {
       }).pipe(
         Effect.catchTag("ChopsticksBlockError", (error) =>
           Effect.succeed(`Caught ${error.operation} error`)
-        )
-      );
+        ),
+        Effect.map((result) => expect(result).toBe("Caught setHead error"))
+      )
+    );
 
-      const result = await Effect.runPromise(program);
-      expect(result).toBe("Caught setHead error");
-    });
-
-    it("should allow catching multiple error types with catchTags", async () => {
+    it.effect("should allow catching multiple error types with catchTags", () => {
       const failWithSetup = Effect.fail(
         new ChopsticksSetupError({ cause: new Error("setup"), endpoint: "wss://test" })
       );
@@ -151,11 +148,15 @@ describe("ChopsticksService - Phase 1: Types and Errors", () => {
           })
         );
 
-      const result1 = await Effect.runPromise(handleErrors(failWithSetup));
-      expect(result1).toBe("setup: wss://test");
-
-      const result2 = await Effect.runPromise(handleErrors(failWithBlock));
-      expect(result2).toBe("block: newBlock");
+      return handleErrors(failWithSetup).pipe(
+        Effect.flatMap((result1) => {
+          expect(result1).toBe("setup: wss://test");
+          return handleErrors(failWithBlock);
+        }),
+        Effect.map((result2) => {
+          expect(result2).toBe("block: newBlock");
+        })
+      );
     });
   });
 
@@ -189,7 +190,7 @@ describe("ChopsticksService - Phase 1: Types and Errors", () => {
       expect(ChopsticksService.key).toBe("ChopsticksService");
     });
 
-    it("should allow providing a mock ChopsticksService", async () => {
+    it.effect("should allow providing a mock ChopsticksService", () => {
       const mockService = {
         chain: {} as any,
         addr: "127.0.0.1:8000",
@@ -207,13 +208,13 @@ describe("ChopsticksService - Phase 1: Types and Errors", () => {
 
       const mockLayer = Layer.succeed(ChopsticksService, mockService);
 
-      const program = Effect.gen(function* () {
+      return Effect.gen(function* () {
         const service = yield* ChopsticksService;
         return service.addr;
-      }).pipe(Effect.provide(mockLayer));
-
-      const result = await Effect.runPromise(program);
-      expect(result).toBe("127.0.0.1:8000");
+      }).pipe(
+        Effect.provide(mockLayer),
+        Effect.map((result) => expect(result).toBe("127.0.0.1:8000"))
+      );
     });
   });
 
@@ -253,7 +254,7 @@ describe("ChopsticksService - Phase 1: Types and Errors", () => {
       expect(config["build-block-mode"]).toBe(BuildBlockMode.Manual);
     });
 
-    it("should allow providing ChopsticksConfig via Layer", async () => {
+    it.effect("should allow providing ChopsticksConfig via Layer", () => {
       const config: ChopsticksConfig = {
         endpoint: "wss://test.io",
         port: 9000,
@@ -262,13 +263,13 @@ describe("ChopsticksService - Phase 1: Types and Errors", () => {
 
       const configLayer = Layer.succeed(ChopsticksConfigTag, config);
 
-      const program = Effect.gen(function* () {
+      return Effect.gen(function* () {
         const cfg = yield* ChopsticksConfigTag;
         return cfg.endpoint;
-      }).pipe(Effect.provide(configLayer));
-
-      const result = await Effect.runPromise(program);
-      expect(result).toBe("wss://test.io");
+      }).pipe(
+        Effect.provide(configLayer),
+        Effect.map((result) => expect(result).toBe("wss://test.io"))
+      );
     });
   });
 
