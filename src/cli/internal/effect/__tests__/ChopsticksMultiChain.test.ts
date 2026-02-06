@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "@effect/vitest";
 import { Effect, Layer } from "effect";
 import { BuildBlockMode } from "@acala-network/chopsticks";
 import {
@@ -63,8 +63,8 @@ describe("ChopsticksMultiChain - Phase 4: Multi-chain XCM Support", () => {
       expect(error.operation).toBe("setup");
     });
 
-    it("should allow pattern matching with catchTag", async () => {
-      const program = Effect.gen(function* () {
+    it.effect("should allow pattern matching with catchTag", () =>
+      Effect.gen(function* () {
         yield* Effect.fail(
           new ChopsticksOrchestrationError({
             cause: new Error("XCM failed"),
@@ -76,12 +76,10 @@ describe("ChopsticksMultiChain - Phase 4: Multi-chain XCM Support", () => {
       }).pipe(
         Effect.catchTag("ChopsticksOrchestrationError", (error) =>
           Effect.succeed(`Caught: ${error.operation} on ${error.chains.join(", ")}`)
-        )
-      );
-
-      const result = await Effect.runPromise(program);
-      expect(result).toBe("Caught: xcm on relay");
-    });
+        ),
+        Effect.map((result) => expect(result).toBe("Caught: xcm on relay"))
+      )
+    );
   });
 
   describe("Configuration Types", () => {
@@ -205,13 +203,13 @@ describe("ChopsticksMultiChain - Phase 4: Multi-chain XCM Support", () => {
       expect(typeof mockService.processXcm).toBe("function");
     });
 
-    it("should have sendUmp return Effect with correct error type", async () => {
+    it.effect("should have sendUmp return Effect with correct error type", () => {
       const mockService: MultiChainService = {
         relay: {} as any,
         parachain: () => undefined,
         chains: new Map(),
         createBlocksAll: () => Effect.succeed(new Map()),
-        sendUmp: (paraId, messages) =>
+        sendUmp: (paraId, _messages) =>
           Effect.fail(
             new ChopsticksXcmError({
               cause: new Error("UMP failed"),
@@ -224,27 +222,24 @@ describe("ChopsticksMultiChain - Phase 4: Multi-chain XCM Support", () => {
         processXcm: () => Effect.void,
       };
 
-      const result = await Effect.runPromise(
-        mockService
-          .sendUmp(2000, ["0x1234"])
-          .pipe(
-            Effect.catchTag("ChopsticksXcmError", (error) =>
-              Effect.succeed({ caught: true, type: error.messageType })
-            )
-          )
+      return mockService.sendUmp(2000, ["0x1234"]).pipe(
+        Effect.catchTag("ChopsticksXcmError", (error) =>
+          Effect.succeed({ caught: true, type: error.messageType })
+        ),
+        Effect.map((result) => {
+          expect(result).toEqual({ caught: true, type: "ump" });
+        })
       );
-
-      expect(result).toEqual({ caught: true, type: "ump" });
     });
 
-    it("should have sendDmp return Effect with correct error type", async () => {
+    it.effect("should have sendDmp return Effect with correct error type", () => {
       const mockService: MultiChainService = {
         relay: {} as any,
         parachain: () => undefined,
         chains: new Map(),
         createBlocksAll: () => Effect.succeed(new Map()),
         sendUmp: () => Effect.void,
-        sendDmp: (paraId, messages) =>
+        sendDmp: (paraId, _messages) =>
           Effect.fail(
             new ChopsticksXcmError({
               cause: new Error("DMP failed"),
@@ -256,20 +251,17 @@ describe("ChopsticksMultiChain - Phase 4: Multi-chain XCM Support", () => {
         processXcm: () => Effect.void,
       };
 
-      const result = await Effect.runPromise(
-        mockService
-          .sendDmp(2000, [{ sentAt: 1, msg: "0x1234" }])
-          .pipe(
-            Effect.catchTag("ChopsticksXcmError", (error) =>
-              Effect.succeed({ caught: true, type: error.messageType })
-            )
-          )
+      return mockService.sendDmp(2000, [{ sentAt: 1, msg: "0x1234" }]).pipe(
+        Effect.catchTag("ChopsticksXcmError", (error) =>
+          Effect.succeed({ caught: true, type: error.messageType })
+        ),
+        Effect.map((result) => {
+          expect(result).toEqual({ caught: true, type: "dmp" });
+        })
       );
-
-      expect(result).toEqual({ caught: true, type: "dmp" });
     });
 
-    it("should have sendHrmp return Effect with correct error type", async () => {
+    it.effect("should have sendHrmp return Effect with correct error type", () => {
       const mockService: MultiChainService = {
         relay: {} as any,
         parachain: () => undefined,
@@ -277,7 +269,7 @@ describe("ChopsticksMultiChain - Phase 4: Multi-chain XCM Support", () => {
         createBlocksAll: () => Effect.succeed(new Map()),
         sendUmp: () => Effect.void,
         sendDmp: () => Effect.void,
-        sendHrmp: (fromParaId, toParaId, messages) =>
+        sendHrmp: (fromParaId, toParaId, _messages) =>
           Effect.fail(
             new ChopsticksXcmError({
               cause: new Error("HRMP failed"),
@@ -288,20 +280,17 @@ describe("ChopsticksMultiChain - Phase 4: Multi-chain XCM Support", () => {
         processXcm: () => Effect.void,
       };
 
-      const result = await Effect.runPromise(
-        mockService
-          .sendHrmp(2000, 2001, [{ sentAt: 1, data: "0x1234" }])
-          .pipe(
-            Effect.catchTag("ChopsticksXcmError", (error) =>
-              Effect.succeed({ caught: true, type: error.messageType })
-            )
-          )
+      return mockService.sendHrmp(2000, 2001, [{ sentAt: 1, data: "0x1234" }]).pipe(
+        Effect.catchTag("ChopsticksXcmError", (error) =>
+          Effect.succeed({ caught: true, type: error.messageType })
+        ),
+        Effect.map((result) => {
+          expect(result).toEqual({ caught: true, type: "hrmp" });
+        })
       );
-
-      expect(result).toEqual({ caught: true, type: "hrmp" });
     });
 
-    it("should have createBlocksAll return Effect with correct error type", async () => {
+    it.effect("should have createBlocksAll return Effect with correct error type", () => {
       const mockService: MultiChainService = {
         relay: {} as any,
         parachain: () => undefined,
@@ -319,17 +308,14 @@ describe("ChopsticksMultiChain - Phase 4: Multi-chain XCM Support", () => {
         processXcm: () => Effect.void,
       };
 
-      const result = await Effect.runPromise(
-        mockService
-          .createBlocksAll()
-          .pipe(
-            Effect.catchTag("ChopsticksBlockError", (error) =>
-              Effect.succeed({ caught: true, op: error.operation })
-            )
-          )
+      return mockService.createBlocksAll().pipe(
+        Effect.catchTag("ChopsticksBlockError", (error) =>
+          Effect.succeed({ caught: true, op: error.operation })
+        ),
+        Effect.map((result) => {
+          expect(result).toEqual({ caught: true, op: "newBlock" });
+        })
       );
-
-      expect(result).toEqual({ caught: true, op: "newBlock" });
     });
   });
 
@@ -338,7 +324,7 @@ describe("ChopsticksMultiChain - Phase 4: Multi-chain XCM Support", () => {
       expect(ChopsticksMultiChainService.key).toBe("ChopsticksMultiChainService");
     });
 
-    it("should allow providing mock service via Layer", async () => {
+    it.effect("should allow providing mock service via Layer", () => {
       const mockService: MultiChainService = {
         relay: { addr: "127.0.0.1:8000" } as any,
         parachain: () => undefined,
@@ -352,13 +338,13 @@ describe("ChopsticksMultiChain - Phase 4: Multi-chain XCM Support", () => {
 
       const mockLayer = Layer.succeed(ChopsticksMultiChainService, mockService);
 
-      const program = Effect.gen(function* () {
+      return Effect.gen(function* () {
         const service = yield* ChopsticksMultiChainService;
         return service.relay.addr;
-      }).pipe(Effect.provide(mockLayer));
-
-      const result = await Effect.runPromise(program);
-      expect(result).toBe("127.0.0.1:8000");
+      }).pipe(
+        Effect.provide(mockLayer),
+        Effect.map((result) => expect(result).toBe("127.0.0.1:8000"))
+      );
     });
   });
 

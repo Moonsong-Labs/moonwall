@@ -3,24 +3,30 @@
     "types": ["node"],
     "lib": ["ESNext"],
     "target": "ES2022",
-    "module": "ESNext",
+    "module": "preserve",
     "moduleResolution": "Bundler",
     "rootDir": "./src",
     "outDir": "./dist",
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true,
     "moduleDetection": "force",
+    "verbatimModuleSyntax": true,
     "jsx": "react-jsx",
     "noEmit": true,
     "declaration": true,
     "declarationMap": true,
+    "sourceMap": true,
     "strict": true,
-    "esModuleInterop": true,
+    "noUnusedLocals": true,
+    "noImplicitOverride": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "noImplicitAny": true,
     "incremental": true
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["dist", "node_modules", "test", "packages"]
+  "exclude": ["dist", "node_modules", "test", "packages"],
+  "plugins": [
+  {
+    "name": "@effect/language-service"
+  }]
 }

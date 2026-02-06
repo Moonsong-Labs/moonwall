@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import { Effect, Exit, Layer } from "effect";
+import { describe, expect, it } from "@effect/vitest";
+import { Effect, Layer } from "effect";
 import { Socket } from "@effect/platform";
 import {
   NodeReadinessService,
@@ -88,11 +88,7 @@ const createMockSocketLayer = (config: {
 };
 
 describe("NodeReadinessService", () => {
-  beforeEach(() => {
-    // No setup needed - we provide mock layers per test
-  });
-
-  it("should successfully check readiness when system_chain responds", async () => {
+  it.live("should successfully check readiness when system_chain responds", () => {
     const mockConfig = { port: 9999, isEthereumChain: false, maxAttempts: 1 };
 
     // Create a mock Socket that returns a successful system_chain response
@@ -101,19 +97,16 @@ describe("NodeReadinessService", () => {
       responseData: { jsonrpc: "2.0", id: 1, result: "Moonbeam" },
     });
 
-    const program = NodeReadinessService.pipe(
+    return NodeReadinessService.pipe(
       Effect.flatMap((service) => service.checkReady(mockConfig)),
-      Effect.provide(makeNodeReadinessServiceTest(mockSocketLayer))
+      Effect.provide(makeNodeReadinessServiceTest(mockSocketLayer)),
+      Effect.map((result) => {
+        expect(result).toBe(true);
+      })
     );
-
-    const exit = await Effect.runPromiseExit(program);
-    expect(Exit.isSuccess(exit)).toBe(true);
-    if (Exit.isSuccess(exit)) {
-      expect(exit.value).toBe(true);
-    }
   });
 
-  it("should fail if WebSocket connection errors", async () => {
+  it.live("should fail if WebSocket connection errors", () => {
     const mockConfig = { port: 1234, isEthereumChain: false, maxAttempts: 1 };
 
     // Create a mock Socket that errors on connection
@@ -122,23 +115,18 @@ describe("NodeReadinessService", () => {
       shouldError: true,
     });
 
-    const program = NodeReadinessService.pipe(
+    return NodeReadinessService.pipe(
       Effect.flatMap((service) => service.checkReady(mockConfig)),
-      Effect.provide(makeNodeReadinessServiceTest(mockSocketLayer))
+      Effect.provide(makeNodeReadinessServiceTest(mockSocketLayer)),
+      Effect.flip,
+      Effect.map((error) => {
+        expect(error).toBeInstanceOf(NodeReadinessError);
+        expect(error.port).toBe(mockConfig.port);
+      })
     );
-
-    const exit = await Effect.runPromiseExit(program);
-    expect(Exit.isFailure(exit)).toBe(true);
-    if (Exit.isFailure(exit)) {
-      expect(exit.cause._tag).toBe("Fail");
-      if (exit.cause._tag === "Fail") {
-        expect(exit.cause.error).toBeInstanceOf(NodeReadinessError);
-        expect(exit.cause.error.port).toBe(mockConfig.port);
-      }
-    }
   });
 
-  it("should check system_chain for non-Ethereum chains", async () => {
+  it.live("should check system_chain for non-Ethereum chains", () => {
     const mockConfig = { port: 9999, isEthereumChain: false, maxAttempts: 1 };
 
     // Create a mock Socket that returns a successful system_chain response
@@ -147,16 +135,13 @@ describe("NodeReadinessService", () => {
       responseData: { jsonrpc: "2.0", id: 1, result: "Polkadot" },
     });
 
-    const program = NodeReadinessService.pipe(
+    return NodeReadinessService.pipe(
       Effect.flatMap((service) => service.checkReady(mockConfig)),
       Effect.provide(makeNodeReadinessServiceTest(mockSocketLayer))
     );
-
-    const exit = await Effect.runPromiseExit(program);
-    expect(Exit.isSuccess(exit)).toBe(true);
   });
 
-  it("should check both system_chain and eth_chainId for Ethereum chains", async () => {
+  it.live("should check both system_chain and eth_chainId for Ethereum chains", () => {
     const mockConfig = { port: 9999, isEthereumChain: true, maxAttempts: 1 };
 
     // Create a mock Socket that returns successful responses
@@ -165,29 +150,29 @@ describe("NodeReadinessService", () => {
       responseData: { jsonrpc: "2.0", id: 1, result: "0x507" },
     });
 
-    const program = NodeReadinessService.pipe(
+    return NodeReadinessService.pipe(
       Effect.flatMap((service) => service.checkReady(mockConfig)),
       Effect.provide(makeNodeReadinessServiceTest(mockSocketLayer))
     );
-
-    const exit = await Effect.runPromiseExit(program);
-    expect(Exit.isSuccess(exit)).toBe(true);
   });
 
-  it("should timeout if no response within configured time", async () => {
-    const mockConfig = { port: 9999, isEthereumChain: false, maxAttempts: 1 };
+  it.live(
+    "should timeout if no response within configured time",
+    () => {
+      const mockConfig = { port: 9999, isEthereumChain: false, maxAttempts: 1 };
 
-    // Create a mock Socket that never responds
-    const mockSocketLayer = createMockSocketLayer({
-      shouldSucceed: false,
-    });
+      // Create a mock Socket that never responds
+      const mockSocketLayer = createMockSocketLayer({
+        shouldSucceed: false,
+      });
 
-    const program = NodeReadinessService.pipe(
-      Effect.flatMap((service) => service.checkReady(mockConfig)),
-      Effect.provide(makeNodeReadinessServiceTest(mockSocketLayer))
-    );
-
-    const exit = await Effect.runPromiseExit(program);
-    expect(Exit.isFailure(exit)).toBe(true);
-  });
+      return NodeReadinessService.pipe(
+        Effect.flatMap((service) => service.checkReady(mockConfig)),
+        Effect.provide(makeNodeReadinessServiceTest(mockSocketLayer)),
+        Effect.flip,
+        Effect.map(() => {})
+      );
+    },
+    { timeout: 15000 }
+  );
 });
