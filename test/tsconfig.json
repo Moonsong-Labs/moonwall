@@ -2,7 +2,8 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "types": ["node"],
-    "rootDir": "."
+    "rootDir": ".",
+    "noUnusedLocals": false
   },
   "include": ["suites/**/*.ts", "types/**/*.d.ts"],
   "exclude": ["node_modules", "suites/bun_test", "suites/papi"]

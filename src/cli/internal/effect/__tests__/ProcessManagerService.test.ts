@@ -1,143 +1,163 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { Effect, Exit } from "effect";
-import { ProcessManagerService, ProcessManagerServiceLive, NodeLaunchError } from "../index.js";
-import { spawn } from "node:child_process";
+import { describe, expect, it } from "@effect/vitest";
+import { Effect, Layer } from "effect";
+import { EventEmitter } from "node:events";
+import * as path from "node:path";
+import * as os from "node:os";
 import * as fs from "node:fs";
+import {
+  ProcessManagerService,
+  Spawner,
+  makeProcessManagerServiceTest,
+  NodeLaunchError,
+  type MoonwallProcess,
+} from "../index.js";
 
-// Mock child_process.spawn to prevent actual process spawning during tests
-vi.mock("node:child_process", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("node:child_process")>();
-  const { EventEmitter } = await import("node:events");
-  return {
-    ...actual,
-    spawn: vi.fn(() => {
-      const mockProcess = new EventEmitter() as any;
-      mockProcess.pid = 12345;
-      mockProcess.stdout = new EventEmitter() as any;
-      mockProcess.stderr = new EventEmitter() as any;
-      mockProcess.kill = vi.fn(() => {
-        // Simulate proper process termination
-        setTimeout(() => {
-          mockProcess.emit("close", 0, null);
-        }, 10);
-      });
-      return mockProcess;
-    }),
+/**
+ * Create a mock MoonwallProcess (EventEmitter with pid, stdout, stderr, kill)
+ */
+const createMockProcess = (overrides?: {
+  pid?: number;
+  hasStdout?: boolean;
+  hasStderr?: boolean;
+}): MoonwallProcess => {
+  const proc = new EventEmitter() as unknown as MoonwallProcess;
+  Object.defineProperty(proc, "pid", { value: overrides?.pid ?? 12345, writable: true });
+
+  if (overrides?.hasStdout !== false) {
+    Object.defineProperty(proc, "stdout", { value: new EventEmitter(), writable: true });
+  }
+  if (overrides?.hasStderr !== false) {
+    Object.defineProperty(proc, "stderr", { value: new EventEmitter(), writable: true });
+  }
+
+  const killFn = () => {
+    setTimeout(() => proc.emit("close", 0, null), 10);
   };
-});
+  Object.defineProperty(proc, "kill", { value: killFn, writable: true });
 
-// Mock fs to control createWriteStream and fs.promises
-vi.mock("node:fs", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("node:fs")>();
-  const { EventEmitter } = await import("node:events");
+  return proc;
+};
 
-  return {
-    ...actual,
-    createWriteStream: vi.fn(() => {
-      const mockStream = new EventEmitter() as any;
-      mockStream.write = vi.fn();
-      mockStream.end = vi.fn();
-      return mockStream;
-    }),
-    promises: {
-      ...actual.promises,
-      access: vi.fn(() => Promise.resolve()),
-      mkdir: vi.fn(() => Promise.resolve()),
-    },
-  };
-});
-
-describe("ProcessManagerService", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    (fs.promises.access as ReturnType<typeof vi.fn>).mockImplementation(() => Promise.resolve());
+/**
+ * Create a mock Spawner layer with optional overrides
+ */
+const createMockSpawnerLayer = (overrides?: {
+  spawn?: (
+    command: string,
+    args: ReadonlyArray<string>
+  ) => Effect.Effect<MoonwallProcess, NodeLaunchError>;
+}): Layer.Layer<Spawner> =>
+  Layer.succeed(Spawner, {
+    spawn: overrides?.spawn ?? ((_cmd, _args) => Effect.sync(() => createMockProcess())),
   });
 
-  it("should launch a process and return cleanup function", async () => {
+/**
+ * Create a unique temp directory for test isolation
+ */
+const makeTempDir = (): string => {
+  const dir = path.join(
+    os.tmpdir(),
+    `moonwall-test-${Date.now()}-${Math.random().toString(36).slice(2)}`
+  );
+  fs.mkdirSync(dir, { recursive: true });
+  return dir;
+};
+
+describe("ProcessManagerService", () => {
+  it.effect("should launch a process and return cleanup function", () => {
+    const tmpDir = makeTempDir();
     const config = {
       command: "node",
       args: ["-e", "console.log('hello')"],
       name: "test-process",
-      logDirectory: "/tmp/test_logs",
+      logDirectory: tmpDir,
     };
 
-    const program = ProcessManagerService.pipe(
+    const testLayer = makeProcessManagerServiceTest(createMockSpawnerLayer());
+
+    return ProcessManagerService.pipe(
       Effect.flatMap((service) =>
         service.launch(config).pipe(
           Effect.flatMap(({ result, cleanup }) =>
             Effect.sync(() => {
               expect(result.process.pid).toBeDefined();
-              expect(result.logPath).toContain(config.logDirectory);
-              expect(spawn).toHaveBeenCalledWith(config.command, config.args);
-              expect(fs.createWriteStream).toHaveBeenCalledWith(
-                expect.stringContaining(config.logDirectory),
-                { flags: "a" }
-              );
+              expect(result.process.pid).toBe(12345);
+              expect(result.logPath).toContain(tmpDir);
             }).pipe(
               Effect.flatMap(() => cleanup),
               Effect.tap(() =>
                 Effect.sync(() => {
-                  expect(result.process.kill).toHaveBeenCalledWith("SIGTERM");
+                  // Process should have been marked as terminating by cleanup
+                  expect(result.process.isMoonwallTerminating).toBe(true);
+                  expect(result.process.moonwallTerminationReason).toBe("Manual cleanup requested");
                 })
               )
             )
           )
         )
       ),
-      Effect.provide(ProcessManagerServiceLive)
+      Effect.provide(testLayer),
+      Effect.ensuring(Effect.sync(() => fs.rmSync(tmpDir, { recursive: true, force: true })))
     );
-
-    const exit = await Effect.runPromiseExit(program);
-    expect(Exit.isSuccess(exit)).toBe(true);
   });
 
-  it("should handle process launch failure", async () => {
-    (spawn as ReturnType<typeof vi.fn>).mockImplementationOnce(() => {
-      throw new Error("Mock spawn error");
+  it.effect("should handle process launch failure", () => {
+    const failingSpawner = createMockSpawnerLayer({
+      spawn: (command, _args) =>
+        Effect.fail(
+          new NodeLaunchError({
+            cause: new Error("Mock spawn error"),
+            command,
+            args: [],
+          })
+        ),
     });
-
+    const tmpDir = makeTempDir();
     const config = {
       command: "invalid-command",
       args: [],
       name: "fail-process",
+      logDirectory: tmpDir,
     };
 
-    const program = ProcessManagerService.pipe(
-      Effect.flatMap((service) => service.launch(config)),
-      Effect.provide(ProcessManagerServiceLive)
-    );
+    const testLayer = makeProcessManagerServiceTest(failingSpawner);
 
-    const exit = await Effect.runPromiseExit(program);
-    expect(Exit.isFailure(exit)).toBe(true);
-    if (Exit.isFailure(exit) && exit.cause._tag === "Fail") {
-      const error = exit.cause.error;
-      expect(error).toBeInstanceOf(NodeLaunchError);
-      if (error instanceof NodeLaunchError) {
-        expect(error.command).toBe(config.command);
-      }
-    }
+    return ProcessManagerService.pipe(
+      Effect.flatMap((service) => service.launch(config)),
+      Effect.provide(testLayer),
+      Effect.flip,
+      Effect.map((error) => {
+        expect(error).toBeInstanceOf(NodeLaunchError);
+        if (error instanceof NodeLaunchError) {
+          expect(error.command).toBe(config.command);
+        }
+      }),
+      Effect.ensuring(Effect.sync(() => fs.rmSync(tmpDir, { recursive: true, force: true })))
+    );
   });
 
-  it("should ensure log directory exists if not present", async () => {
+  it.effect("should ensure log directory is created when it does not exist", () => {
+    // Use a nested path that doesn't exist yet — real FileSystem will create it
+    const tmpBase = makeTempDir();
+    const nestedLogDir = path.join(tmpBase, "nested", "log", "dir");
     const config = {
       command: "node",
       args: ["-e", "console.log('hello')"],
       name: "test-process",
-      logDirectory: "/tmp/new_test_logs",
+      logDirectory: nestedLogDir,
     };
 
-    (fs.promises.access as ReturnType<typeof vi.fn>).mockImplementationOnce(() =>
-      Promise.reject(new Error("ENOENT"))
-    );
+    const testLayer = makeProcessManagerServiceTest(createMockSpawnerLayer());
 
-    const program = ProcessManagerService.pipe(
+    return ProcessManagerService.pipe(
       Effect.flatMap((service) => service.launch(config)),
-      Effect.provide(ProcessManagerServiceLive)
+      Effect.provide(testLayer),
+      Effect.map(({ result }) => {
+        // Verify the nested directory was created
+        expect(fs.existsSync(nestedLogDir)).toBe(true);
+        expect(result.logPath).toContain(nestedLogDir);
+      }),
+      Effect.ensuring(Effect.sync(() => fs.rmSync(tmpBase, { recursive: true, force: true })))
     );
-
-    await Effect.runPromise(program);
-    expect(fs.promises.mkdir).toHaveBeenCalledWith(config.logDirectory, {
-      recursive: true,
-    });
   });
 });

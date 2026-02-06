@@ -235,18 +235,6 @@ export async function upgradeRuntime(api: ApiPromise, preferences: UpgradePrefer
             log("Complete ✅");
           }
 
-          const referendum = await api.query.referenda.referendumInfoFor.entries();
-          const _referendaIndex = referendum
-            .filter(
-              (ref: any) =>
-                ref[1].unwrap().isOngoing &&
-                ref[1].unwrap().asOngoing.proposal.isLookup &&
-                ref[1].unwrap().asOngoing.proposal.asLookup.hash.toHex() === encodedHash
-            )
-            .map((ref) =>
-              (api.registry.createType("u32", ref[0].toU8a().slice(-4)) as any).toNumber()
-            )?.[0];
-
           await executeOpenTechCommitteeProposal(api, encodedHash);
 
           break;
