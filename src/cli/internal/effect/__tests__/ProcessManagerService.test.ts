@@ -1,5 +1,5 @@
-import { expect, vi, beforeEach } from "vitest";
-import { describe, it } from "@effect/vitest";
+import { vi } from "vitest";
+import { beforeEach, describe, expect, it } from "@effect/vitest";
 import { Effect } from "effect";
 import { ProcessManagerService, ProcessManagerServiceLive, NodeLaunchError } from "../index.js";
 import { spawn } from "node:child_process";

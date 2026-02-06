@@ -1,5 +1,4 @@
-import { expect } from "vitest";
-import { describe, it } from "@effect/vitest";
+import { describe, expect, it } from "@effect/vitest";
 
 describe("launchNodeEffect", () => {
   it("should have proper argument handling tested via ProcessManagerService", () => {

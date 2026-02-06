@@ -1,5 +1,4 @@
-import { beforeEach, afterEach, expect } from "vitest";
-import { describe, it } from "@effect/vitest";
+import { afterEach, beforeEach, describe, expect, it } from "@effect/vitest";
 import { Duration, Effect } from "effect";
 import * as fs from "node:fs";
 import * as path from "node:path";

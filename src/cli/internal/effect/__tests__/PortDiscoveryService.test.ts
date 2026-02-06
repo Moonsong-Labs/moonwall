@@ -1,5 +1,4 @@
-import { expect } from "vitest";
-import { describe, it } from "@effect/vitest";
+import { describe, expect, it } from "@effect/vitest";
 import { Effect } from "effect";
 import { PortDiscoveryService, PortDiscoveryServiceLive, PortDiscoveryError } from "../index.js";
 
