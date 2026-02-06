@@ -73,6 +73,51 @@ export const instantFastTrack = async <
   return proposalHash;
 };
 
+// Sets up a whitelisted referendum without placing decision deposit or voting.
+// Used by tests that need to manually control the referendum lifecycle.
+export const whiteListTrackNoSend = async <
+  Call extends SubmittableExtrinsic<ApiType>,
+  ApiType extends ApiTypes,
+>(
+  context: DevModeContext,
+  proposal: string | Call
+): Promise<{ whitelistedHash: string }> => {
+  const proposalHash =
+    typeof proposal === "string" ? proposal : await notePreimage(context, proposal);
+
+  // Construct dispatchWhiteListed call
+  const proposalLen = (
+    (await context.pjsApi.query.preimage.requestStatusFor(proposalHash)) as any
+  ).unwrap().asUnrequested.len;
+
+  const dispatchWLCall = context.pjsApi.tx.whitelist.dispatchWhitelistedCall(
+    proposalHash,
+    proposalLen,
+    { refTime: 2_000_000_000, proofSize: 100_000 }
+  );
+
+  // Note preimage of dispatchWhitelistedCall
+  const wLPreimage = await notePreimage(context, dispatchWLCall);
+  const wLPreimageLen = dispatchWLCall.encodedLength - 2;
+
+  // Submit openGov proposal (without placing decision deposit)
+  const openGovProposal = await context.pjsApi.tx.referenda
+    .submit(
+      { Origins: { whitelistedcaller: "WhitelistedCaller" } },
+      { Lookup: { hash: wLPreimage, len: wLPreimageLen } },
+      { After: { After: 0 } }
+    )
+    .signAsync(faith);
+
+  await context.createBlock(openGovProposal);
+
+  // Whitelist the original call via openTechCommittee
+  const whitelistCall = context.pjsApi.tx.whitelist.whitelistCall(proposalHash);
+  await execOpenTechCommitteeProposal(context, whitelistCall);
+
+  return { whitelistedHash: wLPreimage };
+};
+
 // Uses WhitelistedOrigin track to quickly execute a call
 export const whiteListedTrack = async <
   Call extends SubmittableExtrinsic<ApiType>,
