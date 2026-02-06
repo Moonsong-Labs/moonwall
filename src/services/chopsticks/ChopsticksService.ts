@@ -9,7 +9,7 @@
  */
 
 import { Context, Data, Effect } from "effect";
-import type { Blockchain, BuildBlockMode, fetchConfig } from "@acala-network/chopsticks";
+import type { Blockchain, fetchConfig } from "@acala-network/chopsticks";
 import type { HexString } from "@polkadot/util/types";
 
 /**

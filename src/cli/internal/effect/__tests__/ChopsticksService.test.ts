@@ -172,20 +172,6 @@ describe("ChopsticksService - Phase 1: Types and Errors", () => {
     });
 
     it("should require ChopsticksService in Effect context", () => {
-      // This effect requires ChopsticksService to be provided
-      // We verify this by checking the type system enforces context requirements
-      const program = Effect.gen(function* () {
-        const service = yield* ChopsticksService;
-        return service.addr;
-      });
-
-      // The program type should show it requires ChopsticksService
-      // This is a compile-time check - the Effect type includes ChopsticksService in R
-      type ProgramType = typeof program;
-      type _RequiresService =
-        Effect.Effect.Context<ProgramType> extends ChopsticksService ? true : false;
-
-      // We can verify the service key is required
       expect(ChopsticksService.key).toBe("ChopsticksService");
     });
 

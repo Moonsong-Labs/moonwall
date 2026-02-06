@@ -102,6 +102,7 @@
   },
   "devDependencies": {
     "@changesets/cli": "2.29.8",
+    "@effect/language-service": "^0.73.0",
     "@polkadot/api": "16.4.8",
     "@polkadot/api-base": "16.4.8",
     "@polkadot/api-derive": "16.4.8",
