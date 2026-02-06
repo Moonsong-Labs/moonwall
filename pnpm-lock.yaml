@@ -1820,7 +1820,6 @@ packages:
     engines: {node: '>=18'}
     peerDependencies:
       '@polkadot/util': 13.5.9
-      '@polkadot/util-crypto': 13.5.9
 
   '@polkadot/keyring@14.0.1':
     resolution: {integrity: sha512-kHydQPCeTvJrMC9VQO8LPhAhTUxzxfNF1HEknhZDBPPsxP/XpkYsEy/Ln1QzJmQqD5VsgwzLDE6cExbJ2CT9CA==}
@@ -3604,7 +3603,6 @@ packages:
 
   glob@10.5.0:
     resolution: {integrity: sha512-DfXN8DfhJ7NH3Oe7cFmu3NCu1wKbkReJ8TorzSAFbSKrlNaQSKfIzqYqVY8zlbs2NLBbWpRiU52GX2PbaBVNkg==}
-    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
     hasBin: true
 
   glob@7.2.3:
@@ -7434,10 +7432,10 @@ snapshots:
       '@polkadot/util-crypto': 13.5.9(@polkadot/util@13.5.6)
       tslib: 2.8.1
 
-  '@polkadot/keyring@13.5.9(@polkadot/util-crypto@13.5.9(@polkadot/util@13.5.6))(@polkadot/util@13.5.9)':
+  '@polkadot/keyring@13.5.9(@polkadot/util@13.5.9)':
     dependencies:
       '@polkadot/util': 13.5.9
-      '@polkadot/util-crypto': 13.5.9(@polkadot/util@13.5.6)
+      '@polkadot/util-crypto': 13.5.9(@polkadot/util@13.5.9)
       tslib: 2.8.1
 
   '@polkadot/keyring@14.0.1(@polkadot/util-crypto@14.0.1(@polkadot/util@14.0.1))(@polkadot/util@14.0.1)':
@@ -7608,7 +7606,7 @@ snapshots:
 
   '@polkadot/rpc-provider@16.5.3':
     dependencies:
-      '@polkadot/keyring': 13.5.9(@polkadot/util-crypto@13.5.9(@polkadot/util@13.5.6))(@polkadot/util@13.5.9)
+      '@polkadot/keyring': 13.5.9(@polkadot/util@13.5.9)
       '@polkadot/types': 16.5.3
       '@polkadot/types-support': 16.5.3
       '@polkadot/util': 13.5.9
@@ -7819,7 +7817,7 @@ snapshots:
 
   '@polkadot/types@16.5.3':
     dependencies:
-      '@polkadot/keyring': 13.5.9(@polkadot/util-crypto@13.5.9(@polkadot/util@13.5.6))(@polkadot/util@13.5.9)
+      '@polkadot/keyring': 13.5.9(@polkadot/util@13.5.9)
       '@polkadot/types-augment': 16.5.3
       '@polkadot/types-codec': 16.5.3
       '@polkadot/types-create': 16.5.3
@@ -8630,7 +8628,7 @@ snapshots:
       sirv: 3.0.2
       tinyglobby: 0.2.15
       tinyrainbow: 3.0.3
-      vitest: 4.0.18(@types/node@25.0.10)(@vitest/ui@4.0.18)(jsdom@23.2.0)(tsx@4.21.0)(yaml@2.8.2)
+      vitest: 4.0.18(@types/node@24.10.1)(@vitest/ui@4.0.18)(jsdom@23.2.0)(tsx@4.21.0)(yaml@2.8.2)
 
   '@vitest/utils@4.0.18':
     dependencies:
