@@ -11,6 +11,9 @@ moonbeam
 polkadot
 geth
 node_modules
+**/.vscode/
+.vscode/
+
 coverage
 coverage.json
 typechain
