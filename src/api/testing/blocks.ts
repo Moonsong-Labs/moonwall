@@ -285,6 +285,11 @@ export function extractSingleResult(
     if (result.length === 0) {
       throw new Error("Block result array is empty");
     }
+    if (index >= result.length) {
+      throw new Error(
+        `Index ${index} out of bounds for block result array of length ${result.length}`
+      );
+    }
     return result[index];
   }
   return result;

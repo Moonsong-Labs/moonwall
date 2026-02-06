@@ -1,108 +1,90 @@
 import { BN } from "@polkadot/util";
 
-/**
- * Percent class - represents a percentage value (0-100)
- * Used for calculating percentage portions of amounts
- */
-export class Percent {
-  private readonly percent: bigint;
+// Perthings arithmetic conformant type. Matches Substrate's sp_runtime fixed-point types.
+// Uses exact integer arithmetic throughout — no floating point.
+class Perthing {
+  private readonly unit: BN;
+  private readonly unitBigInt: bigint;
+  private readonly perthing: BN;
 
-  constructor(value: number | bigint | BN) {
-    if (value instanceof BN) {
-      this.percent = BigInt(value.toString());
+  constructor(unit: BN, numerator: BN | number | bigint, denominator?: BN | number | bigint) {
+    this.unit = unit;
+    this.unitBigInt = BigInt(unit.toString());
+
+    const num = numerator instanceof BN ? numerator : new BN(numerator.toString());
+
+    if (denominator !== undefined) {
+      const denom = denominator instanceof BN ? denominator : new BN(denominator.toString());
+      this.perthing = num.mul(unit).div(denom);
     } else {
-      this.percent = BigInt(value);
+      this.perthing = num;
     }
   }
 
-  /**
-   * Get the raw percent value as BN
-   */
   value(): BN {
-    return new BN(this.percent.toString());
+    return this.perthing;
   }
 
-  /**
-   * Calculate percentage of an amount (round-to-nearest)
-   * Matches Substrate's Percent::from_percent() behavior
-   */
   of(amount: BN): BN;
   of(amount: bigint): bigint;
   of(amount: BN | bigint): BN | bigint {
     if (amount instanceof BN) {
-      // Round-to-nearest: add 50 before dividing by 100
-      return amount.muln(Number(this.percent)).addn(50).divn(100);
+      return this.divNearest(this.perthing.mul(amount), this.unit);
     }
-    return (amount * this.percent + 50n) / 100n;
+    return this.divNearestBigInt(amount * BigInt(this.perthing.toString()), this.unitBigInt);
   }
 
-  /**
-   * Calculate percentage of an amount (ceiling division)
-   * Supports both BN and bigint inputs
-   */
   ofCeil(amount: BN): BN;
   ofCeil(amount: bigint): bigint;
   ofCeil(amount: BN | bigint): BN | bigint {
     if (amount instanceof BN) {
-      const result = amount.muln(Number(this.percent));
-      return result.addn(99).divn(100);
+      return this.divCeil(this.perthing.mul(amount), this.unit);
     }
-    return (amount * this.percent + 99n) / 100n;
+    return this.divCeilBigInt(amount * BigInt(this.perthing.toString()), this.unitBigInt);
+  }
+
+  toString(): string {
+    return this.perthing.toString();
+  }
+
+  private divNearest(a: BN, num: BN): BN {
+    const dm = a.divmod(num);
+    if (dm.mod.isZero()) return dm.div;
+    const half = num.ushrn(1);
+    return dm.mod.gt(half) ? dm.div.addn(1) : dm.div;
+  }
+
+  private divCeil(a: BN, num: BN): BN {
+    const dm = a.divmod(num);
+    if (dm.mod.isZero()) return dm.div;
+    return dm.div.addn(1);
+  }
+
+  private divNearestBigInt(a: bigint, unit: bigint): bigint {
+    const div = a / unit;
+    const mod = a % unit;
+    if (mod === 0n) return div;
+    return mod > unit >> 1n ? div + 1n : div;
+  }
+
+  private divCeilBigInt(a: bigint, unit: bigint): bigint {
+    const div = a / unit;
+    const mod = a % unit;
+    if (mod === 0n) return div;
+    return div + 1n;
   }
 }
 
-/**
- * Perbill class - represents parts per billion (0-1,000,000,000)
- * 1,000,000,000 (1e9) = 100%
- */
-export class Perbill {
-  private readonly perbill: BN;
-
-  /**
-   * Create a Perbill from a raw value or a fraction
-   * @param numerator - The raw perbill value, or numerator if denominator is provided
-   * @param denominator - Optional denominator to express as fraction (e.g., 355/1000 = 35.5%)
-   */
-  constructor(numerator: number | bigint | BN, denominator?: number) {
-    if (denominator !== undefined) {
-      // Fractional form: numerator/denominator expressed as perbill
-      // e.g., Perbill(355, 1000) = 355/1000 * 1e9 = 355_000_000
-      const num =
-        typeof numerator === "bigint"
-          ? Number(numerator)
-          : numerator instanceof BN
-            ? numerator.toNumber()
-            : numerator;
-      this.perbill = new BN(Math.floor((num / denominator) * 1_000_000_000));
-    } else {
-      // Raw perbill value
-      if (numerator instanceof BN) {
-        this.perbill = numerator;
-      } else {
-        this.perbill = new BN(numerator.toString());
-      }
-    }
+// Parts per billion (0 – 1,000,000,000). 1e9 = 100%.
+export class Perbill extends Perthing {
+  constructor(numerator: BN | number | bigint, denominator?: BN | number | bigint) {
+    super(new BN(1_000_000_000), numerator, denominator);
   }
+}
 
-  /**
-   * Get the raw perbill value as BN
-   */
-  value(): BN {
-    return this.perbill;
-  }
-
-  /**
-   * Calculate the perbill portion of an amount (round-to-nearest)
-   * Matches Substrate's Perbill behavior
-   */
-  of(amount: BN): BN;
-  of(amount: bigint): bigint;
-  of(amount: BN | bigint): BN | bigint {
-    if (amount instanceof BN) {
-      // Round-to-nearest: add half of divisor
-      const half = new BN(500_000_000);
-      return amount.mul(this.perbill).add(half).div(new BN(1_000_000_000));
-    }
-    return (amount * BigInt(this.perbill.toString()) + 500_000_000n) / 1_000_000_000n;
+// Parts per cent (0 – 100). 100 = 100%.
+export class Percent extends Perthing {
+  constructor(numerator: BN | number | bigint, denominator?: BN | number | bigint) {
+    super(new BN(100), numerator, denominator);
   }
 }

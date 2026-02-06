@@ -1,4 +1,4 @@
-import type { DevModeContext } from "../../api/types/index.js";
+import type { DevModeContext, ExtrinsicCreation } from "../../api/types/index.js";
 import {
   GLMR,
   alith,
@@ -73,15 +73,19 @@ export const instantFastTrack = async <
   return proposalHash;
 };
 
-// Sets up a whitelisted referendum without placing decision deposit or voting.
-// Used by tests that need to manually control the referendum lifecycle.
-export const whiteListTrackNoSend = async <
+// Shared helper: notes preimages, submits a whitelisted referendum, and whitelists
+// the call via openTechCommittee. Returns the data both callers need.
+const setupWhitelistedReferendum = async <
   Call extends SubmittableExtrinsic<ApiType>,
   ApiType extends ApiTypes,
 >(
   context: DevModeContext,
   proposal: string | Call
-): Promise<{ whitelistedHash: string }> => {
+): Promise<{
+  proposalHash: string;
+  whitelistedHash: string;
+  result: ExtrinsicCreation | undefined;
+}> => {
   const proposalHash =
     typeof proposal === "string" ? proposal : await notePreimage(context, proposal);
 
@@ -100,7 +104,7 @@ export const whiteListTrackNoSend = async <
   const wLPreimage = await notePreimage(context, dispatchWLCall);
   const wLPreimageLen = dispatchWLCall.encodedLength - 2;
 
-  // Submit openGov proposal (without placing decision deposit)
+  // Submit openGov proposal
   const openGovProposal = await context.pjsApi.tx.referenda
     .submit(
       { Origins: { whitelistedcaller: "WhitelistedCaller" } },
@@ -109,13 +113,26 @@ export const whiteListTrackNoSend = async <
     )
     .signAsync(faith);
 
-  await context.createBlock(openGovProposal);
+  const { result } = await context.createBlock(openGovProposal);
 
   // Whitelist the original call via openTechCommittee
   const whitelistCall = context.pjsApi.tx.whitelist.whitelistCall(proposalHash);
   await execOpenTechCommitteeProposal(context, whitelistCall);
 
-  return { whitelistedHash: wLPreimage };
+  return { proposalHash, whitelistedHash: wLPreimage, result };
+};
+
+// Sets up a whitelisted referendum without placing decision deposit or voting.
+// Used by tests that need to manually control the referendum lifecycle.
+export const whiteListTrackNoSend = async <
+  Call extends SubmittableExtrinsic<ApiType>,
+  ApiType extends ApiTypes,
+>(
+  context: DevModeContext,
+  proposal: string | Call
+): Promise<{ whitelistedHash: string }> => {
+  const { whitelistedHash } = await setupWhitelistedReferendum(context, proposal);
+  return { whitelistedHash };
 };
 
 // Uses WhitelistedOrigin track to quickly execute a call
@@ -126,42 +143,13 @@ export const whiteListedTrack = async <
   context: DevModeContext,
   proposal: string | Call
 ): Promise<boolean> => {
-  const proposalHash =
-    typeof proposal === "string" ? proposal : await notePreimage(context, proposal);
+  const { whitelistedHash, result } = await setupWhitelistedReferendum(context, proposal);
 
-  // Construct dispatchWhiteListed call
-  const proposalLen = (
-    (await context.pjsApi.query.preimage.requestStatusFor(proposalHash)) as any
-  ).unwrap().asUnrequested.len;
-  const dispatchWLCall = context.pjsApi.tx.whitelist.dispatchWhitelistedCall(
-    proposalHash,
-    proposalLen,
-    {
-      refTime: 2_000_000_000,
-      proofSize: 100_000,
-    }
-  );
-
-  // Note preimage of it
-  const wLPreimage = await notePreimage(context, dispatchWLCall);
-  const wLPreimageLen = dispatchWLCall.encodedLength - 2;
   console.log(
-    `📝 DispatchWhitelistedCall preimage noted: ${wLPreimage.slice(0, 6)}...${wLPreimage.slice(
+    `📝 DispatchWhitelistedCall preimage noted: ${whitelistedHash.slice(0, 6)}...${whitelistedHash.slice(
       -4
-    )}, len: ${wLPreimageLen}`
+    )}`
   );
-
-  // Submit openGov proposal
-  const openGovProposal = await context.pjsApi.tx.referenda
-    .submit(
-      {
-        Origins: { whitelistedcaller: "WhitelistedCaller" },
-      },
-      { Lookup: { hash: wLPreimage, len: wLPreimageLen } },
-      { After: { After: 0 } }
-    )
-    .signAsync(faith);
-  const { result } = await context.createBlock(openGovProposal);
 
   if (!result?.events) {
     throw new Error("No events in block");
@@ -179,8 +167,6 @@ export const whiteListedTrack = async <
   console.log(`🏛️ Referendum submitted with proposal id: ${proposalId}`);
   await context.createBlock(context.pjsApi.tx.referenda.placeDecisionDeposit(proposalId));
 
-  const whitelistCall = context.pjsApi.tx.whitelist.whitelistCall(proposalHash);
-  await execOpenTechCommitteeProposal(context, whitelistCall);
   await maximizeConvictionVotingOf(context, [ethan], proposalId);
   await context.createBlock();
 
