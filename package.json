@@ -73,6 +73,7 @@
     "@vitest/ui": "^4.0.18",
     "@zombienet/orchestrator": "0.0.114",
     "@zombienet/utils": "^0.0.30",
+    "arkregex": "^0.0.5",
     "bottleneck": "2.19.5",
     "cfonts": "^3.3.1",
     "chalk": "^5.6.2",

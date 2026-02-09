@@ -13,8 +13,12 @@ import { Effect, Layer, type Scope } from "effect";
 import type { HexString } from "@polkadot/util/types";
 import { createLogger } from "../../util/index.js";
 import type { ChopsticksLaunchSpec } from "../../api/types/index.js";
+import { regex } from "arkregex";
 import * as fs from "node:fs";
 import * as path from "node:path";
+
+/** Matches [cause]: Error: <message> in Effect error format */
+const effectCauseRegex = regex("\\[cause\\]:\\s*Error:\\s*(.+)", "s");
 
 // We use dynamic imports for chopsticks to allow configuring the logger
 // BEFORE any chopsticks code runs. This is necessary because chopsticks
@@ -862,7 +866,7 @@ export async function launchChopsticksFromSpec(
 
     // Extract the relevant cause message from Effect's error format
     // Format: "(FiberFailure) ChopsticksSetupError: ... [cause]: Error: actual message"
-    const causeMatch = errorString.match(/\[cause\]:\s*Error:\s*(.+)/s);
+    const causeMatch = errorString.match(effectCauseRegex);
     if (causeMatch) {
       throw new Error(`Chopsticks config validation failed: ${causeMatch[1].trim()}`);
     }
@@ -885,7 +889,7 @@ export async function launchChopsticksFromSpec(
   } catch (error: unknown) {
     // Re-throw with clearer message - use same extraction as config validation
     const errorString = String(error);
-    const causeMatch = errorString.match(/\[cause\]:\s*Error:\s*(.+)/s);
+    const causeMatch = errorString.match(effectCauseRegex);
     const causeMessage = causeMatch ? causeMatch[1].trim() : errorString;
 
     throw new Error(

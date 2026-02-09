@@ -10,10 +10,14 @@ import { createLogger } from "../../util/index.js";
 import path from "node:path";
 import net from "node:net";
 import { Effect } from "effect";
+import { regex } from "arkregex";
 import { standardRepos } from "../lib/repoDefinitions/index.js";
 import { shardManager } from "../lib/shardManager.js";
 import invariant from "tiny-invariant";
 import { StartupCacheService, StartupCacheServiceLive } from "./effect/index.js";
+
+/** Matches --chain=<name> or --chain <name> in CLI arguments */
+const chainArgRegex = regex("--chain[=\\s]?(\\S+)");
 
 const logger = createLogger({ name: "commandParsers" });
 
@@ -171,7 +175,7 @@ export class LaunchCommandParser {
     // Check if using --dev flag
     const hasDevFlag = this.args.includes("--dev");
     // Extract chain name from --chain=XXX or --chain XXX
-    const existingChainName = chainArg?.match(/--chain[=\s]?(\S+)/)?.[1];
+    const existingChainName = chainArg?.match(chainArgRegex)?.[1];
 
     // We can generate raw chain spec for both --dev mode and explicit --chain=XXX
     const canGenerateRawSpec = hasDevFlag || !!existingChainName;

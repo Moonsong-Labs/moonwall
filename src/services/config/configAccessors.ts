@@ -2,6 +2,10 @@ import type { MoonwallConfig, Environment } from "../../api/types/index.js";
 import { readFileSync } from "node:fs";
 import JSONC from "jsonc-parser";
 import path, { extname } from "node:path";
+import { regex } from "arkregex";
+
+/** Matches ${VAR_NAME} environment variable references */
+const envVarRegex = regex("\\$\\{([^}]+)}", "g");
 
 let cachedConfig: MoonwallConfig | undefined;
 
@@ -43,7 +47,7 @@ function parseConfigSync(filePath: string) {
 
 function replaceEnvVars(value: any): any {
   if (typeof value === "string") {
-    return value.replace(/\$\{([^}]+)\}/g, (match, group) => {
+    return value.replace(envVarRegex, (match, group) => {
       const envVarValue = process.env[group];
       return envVarValue || match;
     });

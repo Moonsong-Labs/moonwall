@@ -1,5 +1,10 @@
+import { regex } from "arkregex";
+
+/** Matches ws:// or wss:// protocol prefix */
+const wsProtocolRegex = regex("^ws(s)?:");
+
 export function normalizeUrlToHttps(url: string): string {
-  return url.replace(/^ws(s)?:/, "http$1:");
+  return url.replace(wsProtocolRegex, "http$1:");
 }
 
 export async function directRpcRequest(
