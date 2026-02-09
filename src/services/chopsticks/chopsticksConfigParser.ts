@@ -11,9 +11,13 @@
 import { Effect } from "effect";
 import * as fs from "node:fs";
 import * as yaml from "yaml";
+import { regex } from "arkregex";
 import { ChopsticksSetupError, type ChopsticksConfig } from "./ChopsticksService.js";
 import type { BuildBlockMode } from "@acala-network/chopsticks";
 import { createLogger } from "../../util/index.js";
+
+/** Matches ${env.VAR_NAME} environment variable references in chopsticks configs */
+const envVarPatternRegex = regex("\\$\\{env\\.([^}]+)}", "g");
 
 // Local values to avoid value import from chopsticks (which initializes loggers)
 const BuildBlockModeValues = {
@@ -29,7 +33,7 @@ const logger = createLogger({ name: "chopsticksConfigParser" });
  * Supports ${env.VAR_NAME} syntax
  */
 const resolveEnvVars = (value: string): string => {
-  return value.replace(/\$\{env\.([^}]+)\}/g, (_, varName) => {
+  return value.replace(envVarPatternRegex, (_, varName) => {
     const envValue = process.env[varName];
     if (envValue === undefined) {
       logger.warn(`Environment variable ${varName} is not set`);

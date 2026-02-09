@@ -1,6 +1,10 @@
 import pino from "pino";
 import type { Logger } from "pino";
 import pinoPretty from "pino-pretty";
+import { regex } from "arkregex";
+
+/** Matches glob wildcards for converting to regex patterns */
+const globWildcardRegex = regex("\\*", "g");
 
 export interface LoggerOptions {
   name: string;
@@ -62,7 +66,7 @@ export function clearLoggers(): void {
 
 // Helper function to enable/disable specific loggers
 export function setLoggerEnabled(pattern: string, enabled: boolean): void {
-  const regex = new RegExp(pattern.replace(/\*/g, ".*"));
+  const regex = new RegExp(pattern.replace(globWildcardRegex, ".*"));
 
   loggers.forEach((logger, name) => {
     if (regex.test(name)) {

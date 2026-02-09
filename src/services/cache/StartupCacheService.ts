@@ -3,9 +3,13 @@ import { NodeContext } from "@effect/platform-node";
 import type { PlatformError } from "@effect/platform/Error";
 import { createLogger } from "../../util/index.js";
 import { Context, Duration, Effect, Layer, Option, Stream } from "effect";
+import { regex } from "arkregex";
 import * as crypto from "node:crypto";
 import { StartupCacheError, type FileLockError } from "../errors.js";
 import { withFileLock } from "./FileLock.js";
+
+/** Matches --chain=<name> or --chain <name> in CLI arguments */
+const chainArgRegex = regex("--chain[=\\s]?(\\S+)");
 
 const logger = createLogger({ name: "StartupCacheService" });
 
@@ -200,7 +204,7 @@ const getCachedArtifactsImpl = (
     const shortHash = binaryHash.substring(0, 12);
     const chainName = config.isDevMode
       ? "dev"
-      : config.chainArg?.match(/--chain[=\s]?(\S+)/)?.[1] || "default";
+      : config.chainArg?.match(chainArgRegex)?.[1] || "default";
     const binName = pathService.basename(config.binPath);
     const cacheSubDir = pathService.join(config.cacheDir, `${binName}-${chainName}-${shortHash}`);
     const hashPath = pathService.join(cacheSubDir, "binary.hash");
