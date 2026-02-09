@@ -79,7 +79,33 @@ If you're using the JSON schema for `moonwall.config.json` validation:
 }
 ```
 
-### 4. Update Global Installation (if applicable)
+### 4. Install Peer Dependencies
+
+`@polkadot/*` packages are now **peer dependencies**. In the old monorepo, `@moonwall/cli` bundled these as direct dependencies — they came along automatically. With the unified `moonwall` package, you need to install them yourself.
+
+If your tests use Polkadot.js (most Substrate tests do), add these to your project:
+
+```bash
+pnpm add @polkadot/api @polkadot/types @polkadot/keyring @polkadot/util @polkadot/util-crypto
+```
+
+The full list of peer dependencies:
+
+| Package | Version Range |
+|---------|--------------|
+| `@polkadot/api` | `^16.1.0` |
+| `@polkadot/api-base` | `^16.1.0` |
+| `@polkadot/api-derive` | `^16.1.0` |
+| `@polkadot/keyring` | `^13.0.0` |
+| `@polkadot/rpc-provider` | `^16.1.0` |
+| `@polkadot/types` | `^16.1.0` |
+| `@polkadot/types-codec` | `^16.1.0` |
+| `@polkadot/util` | `^13.0.0` |
+| `@polkadot/util-crypto` | `^13.0.0` |
+
+Your package manager will warn about missing peer dependencies during install if any are absent.
+
+### 5. Update Global Installation (if applicable)
 
 **Before:**
 ```bash
