@@ -15,7 +15,7 @@ and then visit the link shown:
 
 ```sh
 
-  vitepress v1.0.0-rc.10
+  vitepress v1.6.4
 
   ➜  Local:   http://localhost:5174/moonwall/
   ➜  Network: use --host to expose

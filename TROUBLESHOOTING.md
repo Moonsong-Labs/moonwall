@@ -7,7 +7,7 @@ This guide provides solutions for common issues encountered when using Moonwall 
 - [Development Environment Issues](#development-environment-issues)
   - [Using Moonwall in Other Repositories](#using-moonwall-in-other-repositories)
   - [Alternative to `pnpm link`](#alternative-to-pnpm-link)
-  - [Debugging Moonwall Packages](#debugging-moonwall-packages)
+  - [Debugging Moonwall Locally](#debugging-moonwall-locally)
 - [Runtime Errors](#runtime-errors)
   - [Network Connection Issues](#network-connection-issues)
   - [Test Execution Failures](#test-execution-failures)
@@ -80,7 +80,7 @@ For a more robust development workflow:
    }
    ```
 
-### Debugging Moonwall Packages
+### Debugging Moonwall Locally
 
 When debugging issues between your project and Moonwall:
 
