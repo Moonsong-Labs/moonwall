@@ -1,9 +1,9 @@
 {
-  "name": "@moonwall/docs",
+  "name": "moonwall-docs",
   "type": "module",
-  "version": "5.18.2",
+  "version": "1.0.1",
   "private": true,
-  "description": "Testing framework for the Moon family of projects",
+  "description": "Documentation site for the Moonwall project",
   "scripts": {
     "docs:dev": "vitepress dev",
     "docs:build": "vitepress build",
