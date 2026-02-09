@@ -1,0 +1,53 @@
+name: Add Changeset
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Target branch to add changeset to"
+        required: true
+        default: "develop"
+      bump:
+        description: "Version bump type"
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      summary:
+        description: "What changed? (becomes the changeset description)"
+        required: true
+        type: string
+
+jobs:
+  add-changeset:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - name: Generate changeset filename
+        id: filename
+        env:
+          SUMMARY: ${{ inputs.summary }}
+        run: echo "name=$(echo "$SUMMARY" | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | cut -c1-40)-$(date +%s)" >> "$GITHUB_OUTPUT"
+
+      - name: Create changeset file
+        env:
+          SUMMARY: ${{ inputs.summary }}
+          BUMP: ${{ inputs.bump }}
+        run: |
+          printf '%s\n' "---" "\"moonwall\": ${BUMP}" "---" "" "${SUMMARY}" > ".changeset/${{ steps.filename.outputs.name }}.md"
+
+      - name: Commit and push
+        env:
+          SUMMARY: ${{ inputs.summary }}
+          BUMP: ${{ inputs.bump }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .changeset/
+          git commit -m "chore: add ${BUMP} changeset - ${SUMMARY}"
+          git push
