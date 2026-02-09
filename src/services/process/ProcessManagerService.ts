@@ -2,8 +2,12 @@ import { Context, Effect, Fiber, Layer, pipe, Stream } from "effect";
 import { FileSystem, Path } from "@effect/platform";
 import { NodeFileSystem, NodePath, NodeStream } from "@effect/platform-node";
 import { spawn, type ChildProcess } from "node:child_process";
+import { regex } from "arkregex";
 import { NodeLaunchError, ProcessError } from "../errors.js";
 import { createLogger } from "../../util/index.js";
+
+/** Matches the artifact of node_node_undefined in log paths */
+const nodeUndefinedRegex = regex("node_node_undefined", "g");
 
 const logger = createLogger({ name: "ProcessManagerService" });
 
@@ -108,7 +112,7 @@ const getLogPath = (
 
       return pathService
         .join(dirPath, `${baseName}_node_${port}_${pid}.log`)
-        .replace(/node_node_undefined/g, "chopsticks");
+        .replace(nodeUndefinedRegex, "chopsticks");
     }),
     Effect.mapError(
       (cause) =>

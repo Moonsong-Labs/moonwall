@@ -5,7 +5,11 @@ import * as NodeFileSystem from "@effect/platform-node/NodeFileSystem";
 import * as NodeSocket from "@effect/platform-node/NodeSocket";
 import { createLogger } from "../../util/index.js";
 import { Context, Deferred, Effect, Layer, Option, Schedule, type Scope } from "effect";
+import { regex } from "arkregex";
 import { PortDiscoveryError } from "../errors.js";
+
+/** Matches host:port in lsof output */
+const lsofPortRegex = regex("(?:.+):(\\d+)");
 
 const logger = createLogger({ name: "RpcPortDiscoveryService" });
 const debug = logger.debug.bind(logger);
@@ -33,9 +37,8 @@ export class RpcPortDiscoveryService extends Context.Tag("RpcPortDiscoveryServic
  * Parse ports from lsof output
  */
 const parsePortsFromLsof = (stdout: string): number[] => {
-  const regex = /(?:.+):(\d+)/;
   return stdout.split("\n").flatMap((line) => {
-    const match = line.match(regex);
+    const match = line.match(lsofPortRegex);
     return match ? [Number.parseInt(match[1], 10)] : [];
   });
 };

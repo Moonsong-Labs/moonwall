@@ -1,7 +1,11 @@
 import { Effect, Context, Layer, Schedule } from "effect";
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
+import { regex } from "arkregex";
 import { PortDiscoveryError } from "../errors.js";
+
+/** Matches host:port in lsof output */
+const lsofPortRegex = regex("(?:.+):(\\d+)");
 
 const execAsync = promisify(exec);
 
@@ -33,8 +37,7 @@ const parsePortsFromLsof = (stdout: string): number[] => {
   const lines = stdout.split("\n");
 
   for (const line of lines) {
-    const regex = /(?:.+):(\d+)/;
-    const match = line.match(regex);
+    const match = line.match(lsofPortRegex);
     if (match) {
       ports.push(Number.parseInt(match[1], 10));
     }

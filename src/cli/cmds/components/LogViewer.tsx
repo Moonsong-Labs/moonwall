@@ -4,6 +4,11 @@ import fs from "node:fs";
 import type { Environment } from "../../../api/types/index.js";
 import { executeTests } from "../runTests.js";
 
+/** Matches log lines containing error indicators */
+const errorRegex = /error|panic|fail/i;
+/** Matches log lines containing warning indicators */
+const warnRegex = /warn/i;
+
 interface LogViewerProps {
   env: Environment;
   logFilePath: string;
@@ -204,8 +209,8 @@ export const LogViewer: React.FC<LogViewerProps> = ({
   const visibleTestOutput = testOutput.slice(-testOutputLines);
 
   const getLineColor = (line: string): string => {
-    if (/error|panic|fail/i.test(line)) return "red";
-    if (/warn/i.test(line)) return "yellow";
+    if (errorRegex.test(line)) return "red";
+    if (warnRegex.test(line)) return "yellow";
     return "white";
   };
 
