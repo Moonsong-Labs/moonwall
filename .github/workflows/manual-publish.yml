@@ -3,17 +3,23 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "NPM dist-tag (dev, beta, next, etc.)"
+        description: "NPM dist-tag"
         required: true
-        default: "dev"
+        default: "latest"
+        type: choice
+        options:
+          - latest
+          - dev
+          - beta
+          - next
       branch:
         description: "Branch to publish from"
         required: true
-        default: "develop"
+        default: "main"
       prerelease-suffix:
-        description: "Pre-release suffix (e.g., dev.0, beta.1)"
-        required: true
-        default: "dev.0"
+        description: "Pre-release suffix (e.g., dev.0, beta.1). Leave empty for stable release."
+        required: false
+        default: ""
       dry-run:
         description: "Run without publishing"
         required: false
@@ -33,19 +39,24 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 23
+          node-version: 24
           cache: "pnpm"
           registry-url: "https://registry.npmjs.org"
 
       - run: pnpm install
 
-      - name: Set pre-release version
+      - name: Set version
         run: |
           CURRENT=$(node -p "require('./package.json').version")
-          BASE_VERSION=$(echo $CURRENT | sed 's/-.*//')
-          NEW_VERSION="${BASE_VERSION}-${{ github.event.inputs.prerelease-suffix }}"
-          npm version $NEW_VERSION --no-git-tag-version
-          echo "Publishing version: $NEW_VERSION"
+          SUFFIX="${{ github.event.inputs.prerelease-suffix }}"
+          if [ -n "$SUFFIX" ]; then
+            BASE_VERSION=$(echo $CURRENT | sed 's/-.*//')
+            NEW_VERSION="${BASE_VERSION}-${SUFFIX}"
+            npm version $NEW_VERSION --no-git-tag-version
+            echo "Publishing pre-release version: $NEW_VERSION"
+          else
+            echo "Publishing stable version: $CURRENT"
+          fi
 
       - run: pnpm build
 
