@@ -51,3 +51,11 @@ export class FileLockError extends Data.TaggedError("FileLockError")<{
   readonly reason: "timeout" | "acquisition_failed";
   readonly lockPath: string;
 }> {}
+
+/**
+ * Error thrown when test execution (vitest startup) fails
+ */
+export class TestExecutionError extends Data.TaggedError("TestExecutionError")<{
+  readonly cause: unknown;
+  readonly environment: string;
+}> {}
