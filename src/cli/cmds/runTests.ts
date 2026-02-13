@@ -44,25 +44,26 @@ async function filterTestFilesByPattern(
  */
 async function enrichReadOnlyContext(): Promise<void> {
   if (!process.env.MOON_TEST_ENV) return;
+  let contextCreated = false;
   try {
     const ctx = await contextCreator();
-    const chainData = ctx.providers
-      .filter((p) => p.type === "polkadotJs" && p.name.includes("para"))
-      .map((p) => ({
-        rtName: (p.greet() as any).rtName,
-        rtVersion: (p.greet() as any).rtVersion,
-      }));
-    if (chainData.length === 0) {
+    contextCreated = true;
+    const paraProviders = ctx.providers.filter(
+      (p) => p.type === "polkadotJs" && p.name.includes("para")
+    );
+    if (paraProviders.length === 0) {
       logger.warn("No polkadotJs provider with 'para' in name found — skipping runtime enrichment");
       return;
     }
-    const { rtVersion, rtName } = chainData[0];
-    process.env.MOON_RTVERSION = rtVersion;
-    process.env.MOON_RTNAME = rtName;
+    const greeting = (await paraProviders[0].greet()) as { rtName: string; rtVersion: number };
+    process.env.MOON_RTVERSION = String(greeting.rtVersion);
+    process.env.MOON_RTNAME = greeting.rtName;
   } catch (e) {
     logger.warn(`Could not read runtime info for read_only env: ${e}`);
   } finally {
-    await MoonwallContext.destroy();
+    if (contextCreated) {
+      await MoonwallContext.destroy();
+    }
   }
 }
 
