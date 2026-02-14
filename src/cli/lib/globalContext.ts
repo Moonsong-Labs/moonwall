@@ -477,7 +477,9 @@ export class MoonwallContext {
       return ctx;
     }
 
-    const isForkingNode = nodes.some((n) => n.args.some((a) => a.includes("--fork-chain-from-rpc")));
+    const isForkingNode = nodes.some((n) =>
+      n.args.some((a) => a.includes("--fork-chain-from-rpc"))
+    );
     const maxStartupTimeout =
       launchSpec && "useDocker" in launchSpec && launchSpec.useDocker
         ? 300000 // 5 min for Docker
