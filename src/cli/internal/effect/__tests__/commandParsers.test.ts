@@ -69,4 +69,13 @@ describe("LaunchCommandParser.withPorts", () => {
     const { args } = parser.build();
     expect(args).toContain("--rpc-port=12345");
   });
+
+  it("should not add --rpc-port in RECYCLE mode when MOONWALL_RPC_PORT is unset", async () => {
+    process.env.MOON_RECYCLE = "true";
+
+    const parser = new LaunchCommandParser({ launchSpec: minimalSpec });
+    await parser.withPorts();
+    const { args } = parser.build();
+    expect(args.some((a) => a.includes("--rpc-port"))).toBe(false);
+  });
 });

@@ -331,6 +331,11 @@ export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
  * Get a free port using OS ephemeral port allocation.
  * Binds to port 0 (OS picks a free port), reads the assigned port, then releases it.
  * The ephemeral range (typically 32768–60999) avoids conflicts with well-known service ports.
+ *
+ * Note: There is an inherent TOCTOU window between releasing the port here and the node
+ * binding to it. This is accepted because --rpc-port=0 (atomic allocation) is not viable —
+ * nodes that restart their RPC server during init (forking, tanssi) rebind to a different
+ * random port, making the discovered port stale. Pre-allocating ensures a stable port.
  */
 export const getFreePort = async (): Promise<number> => {
   return new Promise((resolve, reject) => {

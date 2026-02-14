@@ -10,7 +10,7 @@ import { clearNodeLogs } from "../internal/cmdFunctions/tempLogs.js";
 import { commonChecks } from "../internal/launcherCommon.js";
 import { cacheConfig, importAsyncConfig, loadEnvVars } from "../lib/configReader.js";
 import { MoonwallContext, contextCreator, runNetworkOnly } from "../lib/globalContext.js";
-import { shardManager } from "../lib/shardManager.js";
+
 import { findTestFilesMatchingPattern } from "../internal/testIdParser.js";
 const logger = createLogger({ name: "runner" });
 
@@ -72,9 +72,6 @@ export async function testCmd(envName: string, additionalArgs?: testRunArgs): Pr
   const globalConfig = await importAsyncConfig();
   const env = globalConfig.environments.find(({ name }) => name === envName);
   process.env.MOON_TEST_ENV = envName;
-
-  // Initialize sharding configuration
-  shardManager.initializeSharding(additionalArgs?.shard);
 
   if (!env) {
     const envList = globalConfig.environments
