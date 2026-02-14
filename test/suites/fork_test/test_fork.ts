@@ -8,7 +8,7 @@ describeSuite({
   foundationMethods: "dev",
   options: {
     forkConfig: {
-      url: "https://moonbeam.unitedbloc.com",
+      url: process.env.MOONBEAM_HTTP_ENDPOINT || "https://moonbeam.unitedbloc.com",
       verbose: true,
       blockHash: "0xffe39256c17cc4523a07c907bcf1aeeef4db217cd57cfcfb95d56088e0bb9f2d",
     },
