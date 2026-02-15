@@ -1,6 +1,6 @@
 import "@moonbeam-network/api-augment";
 import { beforeAll, describeSuite, expect } from "moonwall";
-import { ALITH_ADDRESS, GLMR, baltathar } from "moonwall";
+import { ALITH_ADDRESS, GLMR, baltathar, signAndSend } from "moonwall";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 
 describeSuite({
@@ -59,27 +59,11 @@ describeSuite({
       test: async () => {
         const balBefore = (await paraApi.query.system.account(ALITH_ADDRESS)).data.free;
 
-        // log("Please wait, this will take a while until the transaction is finalized (slow runner)");
+        await signAndSend(
+          paraApi.tx.balances.transferAllowDeath(ALITH_ADDRESS, 2n * GLMR),
+          baltathar
+        );
 
-        // await new Promise((resolve) => {
-        //   paraApi.tx.balances
-        //     .transferAllowDeath(ALITH_ADDRESS, 2n * GLMR)
-        //     .signAndSend(baltathar, ({ status, events }) => {
-        //       if (status.isInBlock) {
-        //         log("Transaction is in block");
-        //       }
-        //       if (status.isFinalized) {
-        //         log("Transaction is finalized!");
-        //         resolve(events);
-        //       }
-        //     });
-        // });
-
-        await paraApi.tx.balances
-          .transferAllowDeath(ALITH_ADDRESS, 2n * GLMR)
-          .signAndSend(baltathar);
-
-        await context.waitBlock(4, "parachain", "quantity");
         const balAfter = (await paraApi.query.system.account(ALITH_ADDRESS)).data.free;
         expect(balBefore.lt(balAfter)).to.be.true;
       },
