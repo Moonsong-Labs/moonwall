@@ -2,6 +2,7 @@ import fs from "node:fs";
 import chalk from "chalk";
 import os from "node:os";
 import path from "node:path";
+import { regex } from "arkregex";
 import { FileSystem } from "@effect/platform";
 import { NodeFileSystem } from "@effect/platform-node";
 import { Effect, Layer } from "effect";
@@ -153,7 +154,7 @@ export const checkListeningPortsEffect = (processId: number) =>
     );
 
     const binName = stdOut.split("\n")[0].split(" ")[0];
-    const portRegex = /:(\d+)\s+\(LISTEN\)/;
+    const portRegex = regex(":(\\d+)\\s+\\(LISTEN\\)");
     const ports = stdOut
       .split("\n")
       .filter(Boolean)
