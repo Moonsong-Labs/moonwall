@@ -59,29 +59,21 @@ describeSuite({
       test: async () => {
         const balBefore = (await paraApi.query.system.account(ALITH_ADDRESS)).data.free;
 
-        // log("Please wait, this will take a while until the transaction is finalized (slow runner)");
-
-        // await new Promise((resolve) => {
-        //   paraApi.tx.balances
-        //     .transferAllowDeath(ALITH_ADDRESS, 2n * GLMR)
-        //     .signAndSend(baltathar, ({ status, events }) => {
-        //       if (status.isInBlock) {
-        //         log("Transaction is in block");
-        //       }
-        //       if (status.isFinalized) {
-        //         log("Transaction is finalized!");
-        //         resolve(events);
-        //       }
-        //     });
-        // });
-
         await paraApi.tx.balances
           .transferAllowDeath(ALITH_ADDRESS, 2n * GLMR)
           .signAndSend(baltathar);
 
-        await context.waitBlock(4, "parachain", "quantity");
-        const balAfter = (await paraApi.query.system.account(ALITH_ADDRESS)).data.free;
-        expect(balBefore.lt(balAfter)).to.be.true;
+        // Poll for balance change — under CI load the collator's tx pool access
+        // can timeout intermittently, producing empty blocks. We check each new
+        // block instead of assuming inclusion within a fixed count.
+        let balAfter = balBefore;
+        for (let i = 0; i < 20; i++) {
+          await context.waitBlock(1, "parachain", "quantity");
+          balAfter = (await paraApi.query.system.account(ALITH_ADDRESS)).data.free;
+          if (balAfter.toBigInt() > balBefore.toBigInt()) break;
+        }
+
+        expect(balAfter.toBigInt()).toBeGreaterThan(balBefore.toBigInt());
       },
     });
 

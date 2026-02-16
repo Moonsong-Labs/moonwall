@@ -3,12 +3,14 @@ import chalk from "chalk";
 import path from "node:path";
 import type { TestUserConfig, Vitest } from "vitest/node";
 import { startVitest } from "vitest/node";
+import { Effect } from "effect";
 import { createLogger } from "../../util/index.js";
+import { TestExecutionError } from "../../services/errors.js";
 import { clearNodeLogs } from "../internal/cmdFunctions/tempLogs.js";
 import { commonChecks } from "../internal/launcherCommon.js";
 import { cacheConfig, importAsyncConfig, loadEnvVars } from "../lib/configReader.js";
 import { MoonwallContext, contextCreator, runNetworkOnly } from "../lib/globalContext.js";
-import { shardManager } from "../lib/shardManager.js";
+
 import { findTestFilesMatchingPattern } from "../internal/testIdParser.js";
 const logger = createLogger({ name: "runner" });
 
@@ -36,14 +38,40 @@ async function filterTestFilesByPattern(
   return matches;
 }
 
+/**
+ * Enriches process.env with runtime name/version for read_only environments.
+ * Best-effort: warns on failure rather than throwing.
+ */
+async function enrichReadOnlyContext(): Promise<void> {
+  if (!process.env.MOON_TEST_ENV) return;
+  let contextCreated = false;
+  try {
+    const ctx = await contextCreator();
+    contextCreated = true;
+    const paraProviders = ctx.providers.filter(
+      (p) => p.type === "polkadotJs" && p.name.includes("para")
+    );
+    if (paraProviders.length === 0) {
+      logger.warn("No polkadotJs provider with 'para' in name found — skipping runtime enrichment");
+      return;
+    }
+    const greeting = (await paraProviders[0].greet()) as { rtName: string; rtVersion: number };
+    process.env.MOON_RTVERSION = String(greeting.rtVersion);
+    process.env.MOON_RTNAME = greeting.rtName;
+  } catch (e) {
+    logger.warn(`Could not read runtime info for read_only env: ${e}`);
+  } finally {
+    if (contextCreated) {
+      await MoonwallContext.destroy();
+    }
+  }
+}
+
 export async function testCmd(envName: string, additionalArgs?: testRunArgs): Promise<boolean> {
   await cacheConfig();
   const globalConfig = await importAsyncConfig();
   const env = globalConfig.environments.find(({ name }) => name === envName);
   process.env.MOON_TEST_ENV = envName;
-
-  // Initialize sharding configuration
-  shardManager.initializeSharding(additionalArgs?.shard);
 
   if (!env) {
     const envList = globalConfig.environments
@@ -71,6 +99,10 @@ export async function testCmd(envName: string, additionalArgs?: testRunArgs): Pr
     process.env.MOON_EXIT = "true";
   }
 
+  if (env.foundation.type === "read_only") {
+    await enrichReadOnlyContext();
+  }
+
   const vitest = await executeTests(env, additionalArgs);
   const failed = vitest.state
     .getFiles()
@@ -94,77 +126,58 @@ export type testRunArgs = {
   vitestPassthroughArgs?: string[];
 };
 
-export async function executeTests(env: Environment, testRunArgs?: testRunArgs & TestUserConfig) {
-  return new Promise<Vitest>(async (resolve, reject) => {
-    const globalConfig = await importAsyncConfig();
-    if (env.foundation.type === "read_only") {
-      try {
-        if (!process.env.MOON_TEST_ENV) {
-          throw new Error("MOON_TEST_ENV not set");
-        }
+export function executeTests(
+  env: Environment,
+  testRunArgs?: testRunArgs & TestUserConfig
+): Promise<Vitest> {
+  return Effect.runPromise(
+    Effect.gen(function* () {
+      const globalConfig = yield* Effect.tryPromise({
+        try: () => importAsyncConfig(),
+        catch: (e) => new TestExecutionError({ cause: e, environment: env.name }),
+      });
 
-        const ctx = await contextCreator();
-        const chainData = ctx.providers
-          .filter((provider) => provider.type === "polkadotJs" && provider.name.includes("para"))
-          .map((provider) => {
-            return {
-              [provider.name]: {
-                rtName: (provider.greet() as any).rtName,
-                rtVersion: (provider.greet() as any).rtVersion,
-              },
-            };
-          });
-        // TODO: Extend/develop this feature to respect para/relay chain specifications
-        if (chainData.length < 1) {
-          throw "Could not read runtime name or version \nTo fix: ensure moonwall config has a polkadotJs provider with a name containing 'para'";
-        }
+      const additionalArgs = { ...testRunArgs };
 
-        const { rtVersion, rtName } = Object.values(chainData[0])[0];
-        process.env.MOON_RTVERSION = rtVersion;
-        process.env.MOON_RTNAME = rtName;
-      } catch (e) {
-        logger.error(e);
-      } finally {
-        await MoonwallContext.destroy();
+      const vitestOptions = testRunArgs?.vitestPassthroughArgs?.reduce<TestUserConfig>(
+        (acc, arg) => {
+          const [key, value] = arg.split("=");
+          return {
+            ...acc,
+            [key]: Number(value) || value,
+          };
+        },
+        {}
+      );
+
+      // transform  in regexp pattern
+      if (env.skipTests && env.skipTests.length > 0) {
+        // the final pattern will look like this: "^((?!SO00T02|SM00T01|SM00T03).)*$"
+        additionalArgs.testNamePattern = `^((?!${env.skipTests?.map((test) => `${test.name}`).join("|")}).)*$`;
       }
-    }
 
-    const additionalArgs = { ...testRunArgs };
+      const options = new VitestOptionsBuilder()
+        .setReporters(env.reporters || ["default"])
+        .setOutputFile(env.reportFile)
+        .setName(env.name)
+        .setTimeout(env.timeout || globalConfig.defaultTestTimeout)
+        .setInclude(env.include || ["**/*{test,spec,test_,test-}*{ts,mts,cts}"])
+        .addThreadConfig(env.multiThreads)
+        .setCacheImports(env.cacheImports)
+        .addVitestPassthroughArgs(env.vitestArgs)
+        .build();
 
-    const vitestOptions = testRunArgs?.vitestPassthroughArgs?.reduce<TestUserConfig>((acc, arg) => {
-      const [key, value] = arg.split("=");
-      return {
-        ...acc,
-        [key]: Number(value) || value,
-      };
-    }, {});
+      if (
+        globalConfig.environments.find((env) => env.name === process.env.MOON_TEST_ENV)?.foundation
+          .type === "zombie"
+      ) {
+        yield* Effect.tryPromise({
+          try: () => runNetworkOnly(),
+          catch: (e) => new TestExecutionError({ cause: e, environment: env.name }),
+        });
+        process.env.MOON_RECYCLE = "true";
+      }
 
-    // transform  in regexp pattern
-    if (env.skipTests && env.skipTests.length > 0) {
-      // the final pattern will look like this: "^((?!SO00T02|SM00T01|SM00T03).)*$"
-      additionalArgs.testNamePattern = `^((?!${env.skipTests?.map((test) => `${test.name}`).join("|")}).)*$`;
-    }
-
-    const options = new VitestOptionsBuilder()
-      .setReporters(env.reporters || ["default"])
-      .setOutputFile(env.reportFile)
-      .setName(env.name)
-      .setTimeout(env.timeout || globalConfig.defaultTestTimeout)
-      .setInclude(env.include || ["**/*{test,spec,test_,test-}*{ts,mts,cts}"])
-      .addThreadConfig(env.multiThreads)
-      .setCacheImports(env.cacheImports)
-      .addVitestPassthroughArgs(env.vitestArgs)
-      .build();
-
-    if (
-      globalConfig.environments.find((env) => env.name === process.env.MOON_TEST_ENV)?.foundation
-        .type === "zombie"
-    ) {
-      await runNetworkOnly();
-      process.env.MOON_RECYCLE = "true";
-    }
-
-    try {
       const testFileDir =
         additionalArgs?.subDirectory !== undefined
           ? env.testFileDir.map((folder) =>
@@ -177,11 +190,11 @@ export async function executeTests(env: Environment, testRunArgs?: testRunArgs &
 
       // Pre-filter test files by scanning for suite IDs matching the pattern
       // This avoids loading all files in vitest just to discover which ones match
-      const filteredFiles = await filterTestFilesByPattern(
-        folders,
-        includePatterns,
-        additionalArgs?.testNamePattern
-      );
+      const filteredFiles = yield* Effect.tryPromise({
+        try: () =>
+          filterTestFilesByPattern(folders, includePatterns, additionalArgs?.testNamePattern),
+        catch: (e) => new TestExecutionError({ cause: e, environment: env.name }),
+      });
 
       const optionsToUse = {
         ...options,
@@ -195,12 +208,14 @@ export async function executeTests(env: Environment, testRunArgs?: testRunArgs &
       }
 
       const foldersToUse = filteredFiles ? ["."] : folders;
-      resolve((await startVitest("test", foldersToUse, optionsToUse)) as Vitest);
-    } catch (e) {
-      logger.error(e);
-      reject(e);
-    }
-  });
+      const vitest = yield* Effect.tryPromise({
+        try: () => startVitest("test", foldersToUse, optionsToUse),
+        catch: (e) => new TestExecutionError({ cause: e, environment: env.name }),
+      });
+
+      return vitest as Vitest;
+    })
+  );
 }
 
 const filterList = ["<empty line>", "", "stdout | unknown test"];

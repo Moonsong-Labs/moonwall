@@ -12,7 +12,6 @@ import net from "node:net";
 import { Effect } from "effect";
 import { regex } from "arkregex";
 import { standardRepos } from "../lib/repoDefinitions/index.js";
-import { shardManager } from "../lib/shardManager.js";
 import invariant from "tiny-invariant";
 import { StartupCacheService, StartupCacheServiceLive } from "./effect/index.js";
 
@@ -329,62 +328,27 @@ export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
 }
 
 /**
- * Check if a port is available for use
- */
-const isPortAvailable = async (port: number): Promise<boolean> => {
-  return new Promise((resolve) => {
-    const server = net.createServer();
-    server.listen(port, () => {
-      server.once("close", () => resolve(true));
-      server.close();
-    });
-    server.on("error", () => resolve(false));
-  });
-};
-
-/**
- * Get the next available port starting from a given port
- */
-const getNextAvailablePort = async (startPort: number): Promise<number> => {
-  let port = startPort;
-  while (port <= 65535) {
-    if (await isPortAvailable(port)) {
-      return port;
-    }
-    port++;
-  }
-  throw new Error(`No available ports found starting from ${startPort}`);
-};
-
-/**
- * Get a free port with availability checking
- * Uses async port allocation for better collision avoidance
+ * Get a free port using OS ephemeral port allocation.
+ * Binds to port 0 (OS picks a free port), reads the assigned port, then releases it.
+ * The ephemeral range (typically 32768–60999) avoids conflicts with well-known service ports.
+ *
+ * Note: There is an inherent TOCTOU window between releasing the port here and the node
+ * binding to it. This is accepted because --rpc-port=0 (atomic allocation) is not viable —
+ * nodes that restart their RPC server during init (forking, tanssi) rebind to a different
+ * random port, making the discovered port stale. Pre-allocating ensures a stable port.
  */
 export const getFreePort = async (): Promise<number> => {
-  // Get shard information from centralized manager
-  const shardIndex = shardManager.getShardIndex();
-  const totalShards = shardManager.getTotalShards();
-
-  // Use VITEST_POOL_ID as additional offset if available
-  const poolId = parseInt(process.env.VITEST_POOL_ID || "0", 10);
-
-  // Calculate port with better isolation between shards
-  // Base port 10000 + (shard * 1000) + (pool * 100) + deterministic offset
-  const basePort = 10000;
-  const shardOffset = shardIndex * 1000;
-  const poolOffset = poolId * 100;
-
-  // Use a deterministic but unique offset based on environment
-  const processOffset = process.pid % 50;
-
-  const calculatedPort = basePort + shardOffset + poolOffset + processOffset;
-
-  // Ensure we stay within a reasonable port range
-  const startPort = Math.min(calculatedPort, 60000 + shardIndex * 100 + poolId);
-
-  logger.debug(
-    `Port calculation: shard=${shardIndex + 1}/${totalShards}, pool=${poolId}, final=${startPort}`
-  );
-
-  return getNextAvailablePort(startPort);
+  return new Promise((resolve, reject) => {
+    const server = net.createServer();
+    server.listen(0, () => {
+      const addr = server.address();
+      if (!addr || typeof addr === "string") {
+        server.close(() => reject(new Error("Could not determine assigned port")));
+        return;
+      }
+      const port = addr.port;
+      server.close(() => resolve(port));
+    });
+    server.on("error", reject);
+  });
 };
