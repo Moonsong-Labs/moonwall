@@ -10,10 +10,12 @@ export class CommandRunnerError extends Data.TaggedError("CommandRunnerError")<{
 export class CommandRunner extends Context.Tag("CommandRunner")<
   CommandRunner,
   {
+    /** Run a shell command and return stdout. Runs via shell, so pipes and redirects work. */
     readonly exec: (
       command: string,
-      options?: { encoding?: BufferEncoding; timeout?: number }
+      options?: { timeout?: number }
     ) => Effect.Effect<string, CommandRunnerError>;
+    /** Run a shell command with inherited stdio (output goes to terminal). */
     readonly execInherit: (command: string) => Effect.Effect<void, CommandRunnerError>;
   }
 >() {}
@@ -23,7 +25,7 @@ export const CommandRunnerLive = Layer.succeed(CommandRunner, {
     Effect.try({
       try: () =>
         execSync(command, {
-          encoding: options?.encoding ?? "utf-8",
+          encoding: "utf-8",
           timeout: options?.timeout,
         }) as string,
       catch: (cause: any) =>

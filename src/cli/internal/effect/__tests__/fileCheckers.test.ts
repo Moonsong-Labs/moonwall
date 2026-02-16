@@ -1,5 +1,5 @@
 import { describe, expect, it } from "@effect/vitest";
-import { Effect, Exit, Layer } from "effect";
+import { Effect, Layer } from "effect";
 import { NodeFileSystem } from "@effect/platform-node";
 import * as fs from "node:fs";
 import * as os from "node:os";
@@ -194,9 +194,6 @@ describe("fileCheckers", () => {
       fs.chmodSync(binPath, 0o755);
 
       return checkAccessEffect(binPath).pipe(
-        Effect.map(() => {
-          expect(true).toBe(true);
-        }),
         Effect.ensuring(Effect.sync(() => fs.rmSync(tmpDir, { recursive: true, force: true })))
       );
     });
@@ -295,6 +292,32 @@ describe("fileCheckers", () => {
       );
     });
 
+    it.effect("should deduplicate ports", () => {
+      const lsofOutput =
+        "node    1234 user   20u  IPv4  12345      0t0  TCP *:9944 (LISTEN)\nnode    1234 user   21u  IPv4  12346      0t0  TCP *:9944 (LISTEN)\n";
+      const mockRunner = makeCommandRunner({ "lsof -p": lsofOutput });
+
+      return checkListeningPortsEffect(1234).pipe(
+        Effect.provide(mockRunner),
+        Effect.map(({ ports }) => {
+          expect(ports).toEqual(["9944"]);
+        })
+      );
+    });
+
+    it.effect("should handle IPv6 lsof output", () => {
+      const lsofOutput =
+        "node    1234 user   20u  IPv6  12345      0t0  TCP [::1]:9944 (LISTEN)\nnode    1234 user   21u  IPv4  12346      0t0  TCP *:9945 (LISTEN)\n";
+      const mockRunner = makeCommandRunner({ "lsof -p": lsofOutput });
+
+      return checkListeningPortsEffect(1234).pipe(
+        Effect.provide(mockRunner),
+        Effect.map(({ ports }) => {
+          expect(ports).toEqual(["9944", "9945"]);
+        })
+      );
+    });
+
     it.effect("should log fallback info and fail when lsof fails", () => {
       const mockRunner = Layer.succeed(CommandRunner, {
         exec: (command) => {
@@ -347,15 +370,38 @@ describe("fileCheckers", () => {
       );
     });
 
+    it.effect("should kill multiple processes when user selects kill", () => {
+      const lsof42 = "node    42 user   20u  IPv4  12345      0t0  TCP *:9944 (LISTEN)\n";
+      const lsof43 = "node    43 user   20u  IPv4  12346      0t0  TCP *:9955 (LISTEN)\n";
+      const killedPids: number[] = [];
+      const mockRunner = Layer.succeed(CommandRunner, {
+        exec: (command) => {
+          if (command.includes("lsof") && command.includes("42")) return Effect.succeed(lsof42);
+          if (command.includes("lsof") && command.includes("43")) return Effect.succeed(lsof43);
+          if (command.startsWith("kill")) {
+            killedPids.push(Number.parseInt(command.split(" ")[1], 10));
+            return Effect.succeed("");
+          }
+          return Effect.fail(new CommandRunnerError({ cause: "unhandled", command }));
+        },
+        execInherit: () => Effect.void,
+      });
+      const mockPrompter = makePrompter("kill");
+
+      return promptAlreadyRunningEffect([42, 43]).pipe(
+        Effect.provide(Layer.mergeAll(mockRunner, mockPrompter)),
+        Effect.map(() => {
+          expect(killedPids).toEqual([42, 43]);
+        })
+      );
+    });
+
     it.effect("should do nothing when user selects continue", () => {
       const mockRunner = makeCommandRunner({ "lsof -p": lsofOutput });
       const mockPrompter = makePrompter("continue");
 
       return promptAlreadyRunningEffect([42]).pipe(
-        Effect.provide(Layer.mergeAll(mockRunner, mockPrompter)),
-        Effect.map(() => {
-          expect(true).toBe(true);
-        })
+        Effect.provide(Layer.mergeAll(mockRunner, mockPrompter))
       );
     });
 
@@ -393,31 +439,45 @@ describe("fileCheckers", () => {
       );
     });
 
-    it.effect("should fail with UserAbortError when user declines download", () => {
+    it.effect("should fail with UserAbortError when user declines download (x64)", () => {
+      if (process.arch !== "x64") return Effect.void;
+
       const mockPrompter = makePrompter(false);
       const mockRunner = Layer.succeed(CommandRunner, {
         exec: () => Effect.succeed(""),
         execInherit: () => Effect.void,
       });
 
-      // Use a path that doesn't exist, and mock process.arch check by testing on x64
-      // This test only runs meaningfully on x64
-      const result = downloadBinsIfMissingEffect("/nonexistent/dir/some-binary").pipe(
+      return downloadBinsIfMissingEffect("/nonexistent/dir/some-binary").pipe(
         Effect.provide(Layer.mergeAll(NodeFileSystem.layer, mockRunner, mockPrompter)),
-        Effect.exit
-      );
-
-      return result.pipe(
-        Effect.map((exit) => {
-          if (process.arch === "x64") {
-            expect(Exit.isFailure(exit)).toBe(true);
-          }
-          // On non-x64, it fails with BinaryNotFoundError instead
+        Effect.flip,
+        Effect.map((error) => {
+          expect(error).toBeInstanceOf(UserAbortError);
         })
       );
     });
 
-    it.effect("should run download commands when user accepts", () => {
+    it.effect("should fail with BinaryNotFoundError on non-x64", () => {
+      if (process.arch === "x64") return Effect.void;
+
+      const mockPrompter = makePrompter(false);
+      const mockRunner = Layer.succeed(CommandRunner, {
+        exec: () => Effect.succeed(""),
+        execInherit: () => Effect.void,
+      });
+
+      return downloadBinsIfMissingEffect("/nonexistent/dir/some-binary").pipe(
+        Effect.provide(Layer.mergeAll(NodeFileSystem.layer, mockRunner, mockPrompter)),
+        Effect.flip,
+        Effect.map((error) => {
+          expect(error).toBeInstanceOf(BinaryNotFoundError);
+        })
+      );
+    });
+
+    it.effect("should run download commands when user accepts (x64)", () => {
+      if (process.arch !== "x64") return Effect.void;
+
       const commands: string[] = [];
       const mockRunner = Layer.succeed(CommandRunner, {
         exec: () => Effect.succeed(""),
@@ -430,14 +490,10 @@ describe("fileCheckers", () => {
 
       return downloadBinsIfMissingEffect("/nonexistent/dir/some-binary").pipe(
         Effect.provide(Layer.mergeAll(NodeFileSystem.layer, mockRunner, mockPrompter)),
-        Effect.exit,
-        Effect.map((exit) => {
-          if (process.arch === "x64") {
-            expect(Exit.isSuccess(exit)).toBe(true);
-            expect(commands).toHaveLength(2);
-            expect(commands[0]).toContain("mkdir -p");
-            expect(commands[1]).toContain("pnpm moonwall download");
-          }
+        Effect.map(() => {
+          expect(commands).toHaveLength(2);
+          expect(commands[0]).toContain("mkdir -p");
+          expect(commands[1]).toContain("pnpm moonwall download");
         })
       );
     });

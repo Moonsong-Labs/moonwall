@@ -33,7 +33,7 @@ export class NodeReadinessError extends Data.TaggedError("NodeReadinessError")<{
 export class ProcessError extends Data.TaggedError("ProcessError")<{
   readonly cause: unknown;
   readonly pid?: number;
-  readonly operation: "spawn" | "kill" | "check" | "pgrep" | "lsof";
+  readonly operation: "spawn" | "kill" | "check";
 }> {}
 
 /**

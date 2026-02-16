@@ -87,18 +87,18 @@ export const checkExistsEffect = (binPathArg: string) =>
  * Check that a binary has execute permissions.
  * Sync — testable with real temp files.
  */
-export const checkAccessEffect = (binPathArg: string) =>
-  Effect.try({
+export const checkAccessEffect = (binPathArg: string) => {
+  const binPath = binPathArg.split(" ")[0];
+  return Effect.try({
     try: () => {
-      const binPath = binPathArg.split(" ")[0];
       fs.accessSync(binPath, fs.constants.X_OK);
     },
     catch: () => {
-      const binPath = binPathArg.split(" ")[0];
       console.error(`The file ${binPath} is not executable`);
       return new BinaryPermissionError({ path: binPath });
     },
   });
+};
 
 /**
  * Check if a binary is already running via pgrep.
@@ -153,13 +153,12 @@ export const checkListeningPortsEffect = (processId: number) =>
     );
 
     const binName = stdOut.split("\n")[0].split(" ")[0];
+    const portRegex = /:(\d+)\s+\(LISTEN\)/;
     const ports = stdOut
       .split("\n")
       .filter(Boolean)
-      .map((line) => {
-        const port = line.split(":")[1];
-        return port.split(" ")[0];
-      });
+      .map((line) => portRegex.exec(line)?.[1])
+      .filter(Boolean) as string[];
     const filtered = new Set(ports);
     return { binName, processId, ports: [...filtered].toSorted() };
   });
