@@ -279,7 +279,7 @@ describe("fileCheckers", () => {
       const lsofOutput =
         "node    1234 user   20u  IPv4  12345      0t0  TCP *:9944 (LISTEN)\nnode    1234 user   21u  IPv4  12346      0t0  TCP *:9945 (LISTEN)\n";
       const mockRunner = makeCommandRunner({
-        "lsof -p": lsofOutput,
+        "lsof -a": lsofOutput,
       });
 
       return checkListeningPortsEffect(1234).pipe(
@@ -295,7 +295,7 @@ describe("fileCheckers", () => {
     it.effect("should deduplicate ports", () => {
       const lsofOutput =
         "node    1234 user   20u  IPv4  12345      0t0  TCP *:9944 (LISTEN)\nnode    1234 user   21u  IPv4  12346      0t0  TCP *:9944 (LISTEN)\n";
-      const mockRunner = makeCommandRunner({ "lsof -p": lsofOutput });
+      const mockRunner = makeCommandRunner({ "lsof -a": lsofOutput });
 
       return checkListeningPortsEffect(1234).pipe(
         Effect.provide(mockRunner),
@@ -308,7 +308,7 @@ describe("fileCheckers", () => {
     it.effect("should handle IPv6 lsof output", () => {
       const lsofOutput =
         "node    1234 user   20u  IPv6  12345      0t0  TCP [::1]:9944 (LISTEN)\nnode    1234 user   21u  IPv4  12346      0t0  TCP *:9945 (LISTEN)\n";
-      const mockRunner = makeCommandRunner({ "lsof -p": lsofOutput });
+      const mockRunner = makeCommandRunner({ "lsof -a": lsofOutput });
 
       return checkListeningPortsEffect(1234).pipe(
         Effect.provide(mockRunner),
@@ -397,7 +397,7 @@ describe("fileCheckers", () => {
     });
 
     it.effect("should do nothing when user selects continue", () => {
-      const mockRunner = makeCommandRunner({ "lsof -p": lsofOutput });
+      const mockRunner = makeCommandRunner({ "lsof -a": lsofOutput });
       const mockPrompter = makePrompter("continue");
 
       return promptAlreadyRunningEffect([42]).pipe(
@@ -406,7 +406,7 @@ describe("fileCheckers", () => {
     });
 
     it.effect("should fail with UserAbortError when user selects abort", () => {
-      const mockRunner = makeCommandRunner({ "lsof -p": lsofOutput });
+      const mockRunner = makeCommandRunner({ "lsof -a": lsofOutput });
       const mockPrompter = makePrompter("abort");
 
       return promptAlreadyRunningEffect([42]).pipe(

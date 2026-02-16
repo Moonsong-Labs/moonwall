@@ -134,7 +134,7 @@ export const checkListeningPortsEffect = (processId: number) =>
   Effect.gen(function* () {
     const runner = yield* CommandRunner;
 
-    const stdOut = yield* runner.exec(`lsof -p  ${processId} | grep LISTEN`).pipe(
+    const stdOut = yield* runner.exec(`lsof -a -p ${processId} -i -P -n | grep LISTEN`).pipe(
       Effect.tapError(() =>
         runner.exec(`ps -p ${processId} -o comm=`).pipe(
           Effect.tap((binName) =>
