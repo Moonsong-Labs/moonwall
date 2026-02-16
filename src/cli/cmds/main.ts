@@ -309,7 +309,7 @@ const chooseTestEnv = async (config: MoonwallConfig) => {
       value: a.name,
       disabled: false,
     }))
-    .sort((a, b) => (a.name > b.name ? -1 : +1));
+    .toSorted((a, b) => (a.name > b.name ? -1 : +1));
   envs.push(...([new Separator(), { name: "Back", value: "back" }, new Separator()] as any));
   const envName = (await select({
     message: "Select a environment to run",
@@ -339,9 +339,9 @@ const chooseRunEnv = async (config: MoonwallConfig) => {
   });
 
   const choices = [
-    ...envs.filter(({ disabled }) => disabled === false).sort((a, b) => (a.name > b.name ? 1 : -1)),
+    ...envs.filter(({ disabled }) => disabled === false).toSorted((a, b) => (a.name > b.name ? 1 : -1)),
     new Separator(),
-    ...envs.filter(({ disabled }) => disabled === true).sort((a, b) => (a.name > b.name ? 1 : -1)),
+    ...envs.filter(({ disabled }) => disabled === true).toSorted((a, b) => (a.name > b.name ? 1 : -1)),
     new Separator(),
     { name: "Back", value: "back" },
     new Separator(),

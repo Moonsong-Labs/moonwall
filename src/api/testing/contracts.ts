@@ -35,7 +35,7 @@ export function getCompiled<TAbi extends Abi>(contractPath: string): CompiledCon
     return JSON.parse(json);
   } catch (_error) {
     throw new Error(
-      `Contract name ${contractPath} is not compiled. Please check compiled json exists`
+      `Contract name ${contractPath} is not compiled. Please check compiled json exists`, { cause: _error }
     );
   }
 }

@@ -81,14 +81,12 @@ export async function resolveChopsticksInteractiveCmdChoice() {
 
   if (containsPallet(api, "ParachainStaking")) {
     choices.push(
-      ...[
-        { name: "🔼  Jump To Round", value: "jumpToRound" },
-        { name: "⏫  Jump N Rounds", value: "jumpRounds" },
-      ]
+      { name: "🔼  Jump To Round", value: "jumpToRound" },
+        { name: "⏫  Jump N Rounds", value: "jumpRounds" }
     );
   }
 
-  choices.push(...[new Separator(), { name: "🔙  Go Back", value: "back" }]);
+  choices.push(new Separator(), { name: "🔙  Go Back", value: "back" });
 
   const cmd = await select({
     choices,

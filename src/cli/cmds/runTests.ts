@@ -76,7 +76,7 @@ export async function testCmd(envName: string, additionalArgs?: testRunArgs): Pr
   if (!env) {
     const envList = globalConfig.environments
       .map((env) => env.name)
-      .sort()
+      .toSorted()
       .join(", ");
     throw new Error(
       `No environment found in config for: ${chalk.bgWhiteBright.blackBright(
