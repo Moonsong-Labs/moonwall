@@ -1,19 +1,18 @@
 import fs from "node:fs";
-import { execSync } from "node:child_process";
 import chalk from "chalk";
 import os from "node:os";
 import path from "node:path";
-import { select } from "@inquirer/prompts";
 import { FileSystem } from "@effect/platform";
 import { NodeFileSystem } from "@effect/platform-node";
-import { Effect } from "effect";
+import { Effect, Layer } from "effect";
 import {
   BinaryNotFoundError,
   BinaryArchMismatchError,
   BinaryPermissionError,
-  ProcessError,
   UserAbortError,
 } from "../../services/errors.js";
+import { CommandRunner, CommandRunnerLive } from "../../services/CommandRunner.js";
+import { Prompter, PrompterLive } from "../../services/Prompter.js";
 
 // ─── Constants ──────────────────────────────────────────────────────
 
@@ -28,7 +27,7 @@ const architectureMap: Record<number, string> = {
 
 /**
  * Read ELF header to determine binary architecture.
- * Sync — reads 20 bytes, no need for full FileSystem service.
+ * Sync — reads 20 bytes, testable with real temp files.
  */
 export const getBinaryArchitectureEffect = (filePath: string) =>
   Effect.try({
@@ -86,6 +85,7 @@ export const checkExistsEffect = (binPathArg: string) =>
 
 /**
  * Check that a binary has execute permissions.
+ * Sync — testable with real temp files.
  */
 export const checkAccessEffect = (binPathArg: string) =>
   Effect.try({
@@ -105,69 +105,64 @@ export const checkAccessEffect = (binPathArg: string) =>
  * pgrep exit status 1 = no processes found (success with empty array).
  */
 export const checkAlreadyRunningEffect = (binaryName: string) =>
-  Effect.try({
-    try: () => {
-      console.log(
-        `Checking if ${chalk.bgWhiteBright.blackBright(binaryName)} is already running...`
+  Effect.gen(function* () {
+    const runner = yield* CommandRunner;
+    console.log(`Checking if ${chalk.bgWhiteBright.blackBright(binaryName)} is already running...`);
+
+    const stdout = yield* runner
+      .exec(`pgrep -x ${binaryName.slice(0, 14)}`, { timeout: 2000 })
+      .pipe(
+        Effect.catchIf(
+          (e) => e.exitCode === 1,
+          () => Effect.succeed("")
+        )
       );
-      // pgrep only supports 15 characters
-      const stdout = execSync(`pgrep -x ${binaryName.slice(0, 14)}`, {
-        encoding: "utf8",
-        timeout: 2000,
-      });
-      return stdout
-        .split("\n")
-        .filter(Boolean)
-        .map((pId) => Number.parseInt(pId, 10));
-    },
-    catch: (cause) => new ProcessError({ cause, operation: "pgrep" }),
-  }).pipe(
-    Effect.catchIf(
-      (e) => (e.cause as any)?.status === 1,
-      () => Effect.succeed([] as number[])
-    )
-  );
+
+    if (!stdout) return [] as number[];
+    return stdout
+      .split("\n")
+      .filter(Boolean)
+      .map((pId) => Number.parseInt(pId, 10));
+  });
 
 /**
  * Check what ports a process is listening on via lsof.
  * Falls back to `ps` to report the binary name on failure.
  */
 export const checkListeningPortsEffect = (processId: number) =>
-  Effect.try({
-    try: () => {
-      const stdOut = execSync(`lsof -p  ${processId} | grep LISTEN`, {
-        encoding: "utf-8",
+  Effect.gen(function* () {
+    const runner = yield* CommandRunner;
+
+    const stdOut = yield* runner.exec(`lsof -p  ${processId} | grep LISTEN`).pipe(
+      Effect.tapError(() =>
+        runner.exec(`ps -p ${processId} -o comm=`).pipe(
+          Effect.tap((binName) =>
+            Effect.sync(() => {
+              console.log(
+                `Process ${processId} is running which for binary ${binName.trim()}, however it is unresponsive.`
+              );
+              console.log(
+                "Running Moonwall with this in the background may cause unexpected behaviour. Please manually kill the process and try running Moonwall again."
+              );
+              console.log(`N.B. You can kill it with: sudo kill -9 ${processId}`);
+            })
+          ),
+          Effect.ignore
+        )
+      )
+    );
+
+    const binName = stdOut.split("\n")[0].split(" ")[0];
+    const ports = stdOut
+      .split("\n")
+      .filter(Boolean)
+      .map((line) => {
+        const port = line.split(":")[1];
+        return port.split(" ")[0];
       });
-      const binName = stdOut.split("\n")[0].split(" ")[0];
-      const ports = stdOut
-        .split("\n")
-        .filter(Boolean)
-        .map((line) => {
-          const port = line.split(":")[1];
-          return port.split(" ")[0];
-        });
-      const filtered = new Set(ports);
-      return { binName, processId, ports: [...filtered].sort() };
-    },
-    catch: (cause) => new ProcessError({ cause, pid: processId, operation: "lsof" }),
-  }).pipe(
-    Effect.tapError(() =>
-      Effect.sync(() => {
-        try {
-          const binName = execSync(`ps -p ${processId} -o comm=`).toString().trim();
-          console.log(
-            `Process ${processId} is running which for binary ${binName}, however it is unresponsive.`
-          );
-          console.log(
-            "Running Moonwall with this in the background may cause unexpected behaviour. Please manually kill the process and try running Moonwall again."
-          );
-          console.log(`N.B. You can kill it with: sudo kill -9 ${processId}`);
-        } catch {
-          // ps command also failed — nothing more we can do
-        }
-      })
-    )
-  );
+    const filtered = new Set(ports);
+    return { binName, processId, ports: [...filtered].toSorted() };
+  });
 
 /**
  * Prompt user to handle already-running processes.
@@ -175,6 +170,9 @@ export const checkListeningPortsEffect = (processId: number) =>
  */
 export const promptAlreadyRunningEffect = (pids: number[]) =>
   Effect.gen(function* () {
+    const runner = yield* CommandRunner;
+    const prompter = yield* Prompter;
+
     const portInfos = yield* Effect.forEach(pids, (pid) => checkListeningPortsEffect(pid));
 
     const message = portInfos
@@ -184,27 +182,20 @@ export const promptAlreadyRunningEffect = (pids: number[]) =>
       )
       .join("\n");
 
-    const answer = yield* Effect.tryPromise({
-      try: () =>
-        select({
-          message: `The following processes are already running: \n${message}`,
-          default: "continue",
-          choices: [
-            { name: "🪓  Kill processes and continue", value: "kill" as const },
-            { name: "➡️   Continue (and let processes live)", value: "continue" as const },
-            { name: "🛑  Abort (and let processes live)", value: "abort" as const },
-          ],
-        }),
-      catch: (cause) => new UserAbortError({ cause, context: "promptAlreadyRunning" }),
+    const answer = yield* prompter.select({
+      message: `The following processes are already running: \n${message}`,
+      default: "continue" as const,
+      choices: [
+        { name: "🪓  Kill processes and continue", value: "kill" as const },
+        { name: "➡️   Continue (and let processes live)", value: "continue" as const },
+        { name: "🛑  Abort (and let processes live)", value: "abort" as const },
+      ],
     });
 
     switch (answer) {
       case "kill":
         for (const pid of pids) {
-          yield* Effect.try({
-            try: () => execSync(`kill ${pid}`),
-            catch: (cause) => new ProcessError({ cause, pid, operation: "kill" }),
-          });
+          yield* runner.exec(`kill ${pid}`);
         }
         break;
 
@@ -226,22 +217,20 @@ export const promptAlreadyRunningEffect = (pids: number[]) =>
 export const downloadBinsIfMissingEffect = (binPath: string) =>
   Effect.gen(function* () {
     const fileSystem = yield* FileSystem.FileSystem;
+    const runner = yield* CommandRunner;
+    const prompter = yield* Prompter;
     const binName = path.basename(binPath);
     const binDir = path.dirname(binPath);
     const exists = yield* fileSystem.exists(binPath);
 
     if (!exists && process.arch === "x64") {
-      const download = yield* Effect.tryPromise({
-        try: () =>
-          select({
-            message: `The binary ${chalk.bgBlack.greenBright(binName)} is missing from ${chalk.bgBlack.greenBright(path.join(process.cwd(), binDir))}.\nWould you like to download it now?`,
-            default: true,
-            choices: [
-              { name: `Yes, download ${binName}`, value: true },
-              { name: "No, quit program", value: false },
-            ],
-          }),
-        catch: (cause) => new UserAbortError({ cause, context: "downloadBinsIfMissing" }),
+      const download = yield* prompter.select({
+        message: `The binary ${chalk.bgBlack.greenBright(binName)} is missing from ${chalk.bgBlack.greenBright(path.join(process.cwd(), binDir))}.\nWould you like to download it now?`,
+        default: true,
+        choices: [
+          { name: `Yes, download ${binName}`, value: true },
+          { name: "No, quit program", value: false },
+        ],
       });
 
       if (!download) {
@@ -250,19 +239,8 @@ export const downloadBinsIfMissingEffect = (binPath: string) =>
         );
       }
 
-      yield* Effect.try({
-        try: () => {
-          execSync(`mkdir -p ${binDir}`);
-          execSync(`pnpm moonwall download ${binName} latest ${binDir}`, {
-            stdio: "inherit",
-          });
-        },
-        catch: (cause) =>
-          new BinaryNotFoundError({
-            path: binPath,
-            message: `Download failed: ${cause}`,
-          }),
-      });
+      yield* runner.execInherit(`mkdir -p ${binDir}`);
+      yield* runner.execInherit(`pnpm moonwall download ${binName} latest ${binDir}`);
     } else if (!exists) {
       console.log(
         `The binary: ${chalk.bgBlack.greenBright(binName)} is missing from: ${chalk.bgBlack.greenBright(path.join(process.cwd(), binDir))}`
@@ -281,6 +259,8 @@ export const downloadBinsIfMissingEffect = (binPath: string) =>
 
 // ─── Public Wrappers (preserve existing caller contract) ────────────
 
+const liveLayers = Layer.mergeAll(NodeFileSystem.layer, CommandRunnerLive, PrompterLive);
+
 export async function checkExists(pathArg: string) {
   return checkExistsEffect(pathArg).pipe(Effect.provide(NodeFileSystem.layer), Effect.runPromise);
 }
@@ -290,20 +270,26 @@ export function checkAccess(pathArg: string) {
 }
 
 export function checkAlreadyRunning(binaryName: string): number[] {
-  return checkAlreadyRunningEffect(binaryName).pipe(Effect.runSync);
+  return checkAlreadyRunningEffect(binaryName).pipe(
+    Effect.provide(CommandRunnerLive),
+    Effect.runSync
+  );
 }
 
 export function checkListeningPorts(processId: number) {
-  return checkListeningPortsEffect(processId).pipe(Effect.runSync);
+  return checkListeningPortsEffect(processId).pipe(
+    Effect.provide(CommandRunnerLive),
+    Effect.runSync
+  );
 }
 
 export async function promptAlreadyRunning(pids: number[]) {
-  return promptAlreadyRunningEffect(pids).pipe(Effect.runPromise);
+  return promptAlreadyRunningEffect(pids).pipe(Effect.provide(liveLayers), Effect.runPromise);
 }
 
 export async function downloadBinsIfMissing(binPath: string) {
   return downloadBinsIfMissingEffect(binPath).pipe(
-    Effect.provide(NodeFileSystem.layer),
+    Effect.provide(liveLayers),
     Effect.catchTag(
       "UserAbortError",
       (): Effect.Effect<void> =>

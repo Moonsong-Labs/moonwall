@@ -1,32 +1,29 @@
 import type { Environment } from "../../api/types/index.js";
 import chalk from "chalk";
-import { execSync } from "node:child_process";
-import fs from "node:fs";
+import type Docker from "dockerode";
 import path from "node:path";
+import { FileSystem } from "@effect/platform";
+import { NodeFileSystem } from "@effect/platform-node";
 import { importAsyncConfig, parseZombieConfigForBins } from "../lib/configReader.js";
 import {
   checkAlreadyRunningEffect,
   downloadBinsIfMissingEffect,
   promptAlreadyRunningEffect,
 } from "./fileCheckers.js";
-import Docker from "dockerode";
-import { select } from "@inquirer/prompts";
-import { NodeFileSystem } from "@effect/platform-node";
-import { Effect } from "effect";
+import { Effect, Layer } from "effect";
 import { ScriptExecutionError, UserAbortError } from "../../services/errors.js";
+import { CommandRunner, CommandRunnerLive } from "../../services/CommandRunner.js";
+import { Prompter, PrompterLive } from "../../services/Prompter.js";
+import { DockerClient, DockerClientLive } from "../../services/DockerClient.js";
 
 // ─── Internal Effect Functions ──────────────────────────────────────
 
 /**
  * Check zombie environment binaries for already-running processes.
+ * Takes resolved bins list to avoid config-reader dependency in tests.
  */
-export const zombieBinCheckEffect = (env: Environment) =>
+export const zombieBinCheckEffect = (bins: string[]) =>
   Effect.gen(function* () {
-    if (env.foundation.type !== "zombie") {
-      return yield* Effect.die(new Error("This function is only for zombie environments"));
-    }
-
-    const bins = parseZombieConfigForBins(env.foundation.zombieSpec.configPath);
     const pids = yield* Effect.forEach(bins, (bin) => checkAlreadyRunningEffect(bin)).pipe(
       Effect.map((results) => results.flat())
     );
@@ -42,16 +39,15 @@ export const zombieBinCheckEffect = (env: Environment) =>
  */
 const promptKillContainersEffect = (matchingContainers: Docker.ContainerInfo[]) =>
   Effect.gen(function* () {
-    const answer = yield* Effect.tryPromise({
-      try: () =>
-        select({
-          message: `The following containers are already running image ${matchingContainers[0].Image}: ${matchingContainers.map(({ Id }) => Id).join(", ")}\n Would you like to kill them?`,
-          choices: [
-            { name: "🪓  Kill containers", value: "kill" as const },
-            { name: "👋   Quit", value: "goodbye" as const },
-          ],
-        }),
-      catch: (cause) => new UserAbortError({ cause, context: "promptKillContainers" }),
+    const prompter = yield* Prompter;
+    const docker = yield* DockerClient;
+
+    const answer = yield* prompter.select({
+      message: `The following containers are already running image ${matchingContainers[0].Image}: ${matchingContainers.map(({ Id }) => Id).join(", ")}\n Would you like to kill them?`,
+      choices: [
+        { name: "🪓  Kill containers", value: "kill" as const },
+        { name: "👋   Quit", value: "goodbye" as const },
+      ],
     });
 
     if (answer === "goodbye") {
@@ -62,18 +58,14 @@ const promptKillContainersEffect = (matchingContainers: Docker.ContainerInfo[]) 
     }
 
     if (answer === "kill") {
-      const docker = new Docker();
       for (const { Id } of matchingContainers) {
-        const container = docker.getContainer(Id);
-        yield* Effect.tryPromise(() => container.stop());
-        yield* Effect.tryPromise(() => container.remove());
+        yield* docker.stopContainer(Id);
+        yield* docker.removeContainer(Id);
       }
 
-      const containers = yield* Effect.tryPromise(() =>
-        docker.listContainers({
-          filters: { ancestor: matchingContainers.map(({ Image }) => Image) },
-        })
-      );
+      const containers = yield* docker.listContainers({
+        ancestor: matchingContainers.map(({ Image }) => Image),
+      });
 
       if (containers.length > 0) {
         console.error(
@@ -100,13 +92,13 @@ export const devBinCheckEffect = (env: Environment) =>
     const launchSpec = env.foundation.launchSpec[0];
 
     if (launchSpec.useDocker) {
-      const docker = new Docker();
+      const docker = yield* DockerClient;
       const imageName = launchSpec.binPath;
 
       console.log(`Checking if ${imageName} is running...`);
-      const matchingContainers = yield* Effect.tryPromise(() =>
-        docker.listContainers({ filters: { ancestor: [imageName] } })
-      ).pipe(Effect.map((containers) => containers.flat()));
+      const matchingContainers = yield* docker
+        .listContainers({ ancestor: [imageName] })
+        .pipe(Effect.map((containers) => containers.flat()));
 
       if (matchingContainers.length === 0) {
         return;
@@ -139,21 +131,21 @@ export const devBinCheckEffect = (env: Environment) =>
   });
 
 /**
- * Execute a script from the configured scriptsDir.
+ * Execute a script from a given scriptsDir.
+ * Takes scriptsDir as parameter to avoid config-reader dependency in tests.
  */
-export const executeScriptEffect = (scriptCommand: string, args?: string) =>
+export const executeScriptEffect = (scriptCommand: string, scriptsDir: string, args?: string) =>
   Effect.gen(function* () {
-    const globalConfig = yield* Effect.promise(() => importAsyncConfig());
-    const scriptsDir = globalConfig.scriptsDir;
+    const fileSystem = yield* FileSystem.FileSystem;
+    const runner = yield* CommandRunner;
 
-    if (!scriptsDir) {
-      return yield* Effect.die(new Error("No scriptsDir found in config"));
-    }
-
-    const files = yield* Effect.tryPromise({
-      try: () => fs.promises.readdir(scriptsDir),
-      catch: (cause) => new ScriptExecutionError({ cause, script: scriptCommand, scriptsDir }),
-    });
+    const files = yield* fileSystem
+      .readDirectory(scriptsDir)
+      .pipe(
+        Effect.mapError(
+          (cause) => new ScriptExecutionError({ cause, script: scriptCommand, scriptsDir })
+        )
+      );
 
     const script = scriptCommand.split(" ")[0];
     const ext = path.extname(script);
@@ -172,61 +164,61 @@ export const executeScriptEffect = (scriptCommand: string, args?: string) =>
     console.log(`========== Executing script: ${chalk.bgGrey.greenBright(script)} ==========`);
 
     const argsString = args ? ` ${args}` : "";
-    yield* Effect.try({
-      try: () => {
-        switch (ext) {
-          case ".js":
-            execSync(`node ${scriptPath}${argsString}`, { stdio: "inherit" });
-            break;
-          case ".ts":
-            execSync(`pnpm tsx ${scriptPath}${argsString}`, { stdio: "inherit" });
-            break;
-          case ".sh":
-            execSync(`${scriptPath}${argsString}`, { stdio: "inherit" });
-            break;
-          default:
-            console.log(`${ext} not supported, skipping ${script}`);
-        }
-      },
-      catch: (cause) => {
-        console.error(`Error executing script: ${chalk.bgGrey.redBright(cause)}`);
-        return new ScriptExecutionError({ cause, script, scriptsDir });
-      },
-    });
+    switch (ext) {
+      case ".js":
+        yield* runner.execInherit(`node ${scriptPath}${argsString}`);
+        break;
+      case ".ts":
+        yield* runner.execInherit(`pnpm tsx ${scriptPath}${argsString}`);
+        break;
+      case ".sh":
+        yield* runner.execInherit(`${scriptPath}${argsString}`);
+        break;
+      default:
+        console.log(`${ext} not supported, skipping ${script}`);
+    }
   });
 
 /**
  * Orchestrate all pre-launch checks by foundation type.
+ * Takes resolved config to avoid config-reader dependency in tests.
  */
-export const commonChecksEffect = (env: Environment) =>
+export const commonChecksEffect = (env: Environment, scriptsDir?: string) =>
   Effect.gen(function* () {
-    const globalConfig = yield* Effect.promise(() => importAsyncConfig());
-
     if (env.foundation.type === "dev") {
       yield* devBinCheckEffect(env);
     }
 
     if (env.foundation.type === "zombie") {
-      yield* zombieBinCheckEffect(env);
+      const bins = parseZombieConfigForBins(env.foundation.zombieSpec.configPath);
+      yield* zombieBinCheckEffect(bins);
     }
 
     if (
       process.env.MOON_RUN_SCRIPTS === "true" &&
-      globalConfig.scriptsDir &&
+      scriptsDir &&
       env.runScripts &&
       env.runScripts.length > 0
     ) {
       for (const scriptCommand of env.runScripts) {
-        yield* executeScriptEffect(scriptCommand);
+        yield* executeScriptEffect(scriptCommand, scriptsDir);
       }
     }
   });
 
 // ─── Public Wrappers (preserve existing caller contract) ────────────
 
+const liveLayers = Layer.mergeAll(
+  NodeFileSystem.layer,
+  CommandRunnerLive,
+  PrompterLive,
+  DockerClientLive
+);
+
 export async function commonChecks(env: Environment) {
-  return commonChecksEffect(env).pipe(
-    Effect.provide(NodeFileSystem.layer),
+  const globalConfig = await importAsyncConfig();
+  return commonChecksEffect(env, globalConfig.scriptsDir).pipe(
+    Effect.provide(liveLayers),
     Effect.catchTag(
       "UserAbortError",
       (): Effect.Effect<void> =>
@@ -239,5 +231,12 @@ export async function commonChecks(env: Environment) {
 }
 
 export async function executeScript(scriptCommand: string, args?: string) {
-  return executeScriptEffect(scriptCommand, args).pipe(Effect.runPromise);
+  const globalConfig = await importAsyncConfig();
+  if (!globalConfig.scriptsDir) {
+    throw new Error("No scriptsDir found in config");
+  }
+  return executeScriptEffect(scriptCommand, globalConfig.scriptsDir, args).pipe(
+    Effect.provide(liveLayers),
+    Effect.runPromise
+  );
 }
