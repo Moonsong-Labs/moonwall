@@ -157,7 +157,7 @@ export const executeScriptEffect = (scriptCommand: string, scriptsDir: string, a
         script,
         scriptsDir,
       });
-      console.error(`Error executing script: ${chalk.bgGrey.redBright(err.cause)}`);
+      console.error(`Error executing script: ${chalk.bgGrey.redBright(String(err.cause))}`);
       return yield* Effect.fail(err);
     }
 

@@ -334,7 +334,7 @@ export function parseChopsticksRunCmd(launchSpecs: ChopsticksLaunchSpec[]): {
  *
  * Note: There is an inherent TOCTOU window between releasing the port here and the node
  * binding to it. This is accepted because --rpc-port=0 (atomic allocation) is not viable —
- * nodes that restart their RPC server during init (forking, tanssi) rebind to a different
+ * nodes that restart their RPC server during init (forking, Tanssi) rebind to a different
  * random port, making the discovered port stale. Pre-allocating ensures a stable port.
  */
 export const getFreePort = async (): Promise<number> => {

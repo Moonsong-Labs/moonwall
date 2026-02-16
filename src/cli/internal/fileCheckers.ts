@@ -139,7 +139,7 @@ export const checkListeningPortsEffect = (processId: number) =>
           Effect.tap((binName) =>
             Effect.sync(() => {
               console.log(
-                `Process ${processId} is running which for binary ${binName.trim()}, however it is unresponsive.`
+                `Process ${processId}, which is running binary ${binName.trim()}, is unresponsive.`
               );
               console.log(
                 "Running Moonwall with this in the background may cause unexpected behaviour. Please manually kill the process and try running Moonwall again."
