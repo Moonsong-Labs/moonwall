@@ -324,7 +324,7 @@ export async function launchMultiChainEffect(config: MultiChainConfig): Promise<
       cleanup: async () => {
         logger.debug("Cleaning up multi-chain setup...");
         // Cleanup in reverse order (parachains first, then relay)
-        for (const cleanupFn of cleanups.reverse()) {
+        for (const cleanupFn of cleanups.toReversed()) {
           await cleanupFn();
         }
         logger.debug("Multi-chain cleanup complete");
@@ -332,7 +332,7 @@ export async function launchMultiChainEffect(config: MultiChainConfig): Promise<
     };
   } catch (error) {
     // If any launch fails, cleanup what was started
-    for (const cleanupFn of cleanups.reverse()) {
+    for (const cleanupFn of cleanups.toReversed()) {
       try {
         await cleanupFn();
       } catch {
@@ -397,7 +397,7 @@ export const ChopsticksMultiChainLayer = (
       yield* Effect.addFinalizer(() =>
         Effect.gen(function* () {
           logger.debug("Finalizing multi-chain setup...");
-          for (const cleanup of cleanups.reverse()) {
+          for (const cleanup of cleanups.toReversed()) {
             yield* cleanup;
           }
           logger.debug("Multi-chain finalization complete");

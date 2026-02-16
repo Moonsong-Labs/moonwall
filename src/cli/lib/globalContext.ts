@@ -466,7 +466,9 @@ export class MoonwallContext {
 
               debugSetup(`✅ Chopsticks '${spec.configPath}' started at ${result.addr}`);
             } catch (error: any) {
-              throw new Error(`Failed to start chopsticks '${spec.configPath}': ${error.message}`);
+              throw new Error(`Failed to start chopsticks '${spec.configPath}': ${error.message}`, {
+                cause: error,
+              });
             }
           })
         ),
@@ -532,7 +534,9 @@ export class MoonwallContext {
                 );
               }
             } catch (error: any) {
-              throw new Error(`Failed to start node '${name || "unnamed"}': ${error.message}`);
+              throw new Error(`Failed to start node '${name || "unnamed"}': ${error.message}`, {
+                cause: error,
+              });
             }
           }
         })
@@ -610,7 +614,8 @@ export class MoonwallContext {
 
           if (attempt === maxRetries) {
             throw new Error(
-              `Failed to connect provider '${provider.name}' after ${maxRetries} attempts: ${error.message}`
+              `Failed to connect provider '${provider.name}' after ${maxRetries} attempts: ${error.message}`,
+              { cause: error }
             );
           }
 

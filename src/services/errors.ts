@@ -59,3 +59,44 @@ export class TestExecutionError extends Data.TaggedError("TestExecutionError")<{
   readonly cause: unknown;
   readonly environment: string;
 }> {}
+
+/**
+ * Error thrown when a required binary is not found on disk
+ */
+export class BinaryNotFoundError extends Data.TaggedError("BinaryNotFoundError")<{
+  readonly path: string;
+  readonly message: string;
+}> {}
+
+/**
+ * Error thrown when binary architecture doesn't match the system
+ */
+export class BinaryArchMismatchError extends Data.TaggedError("BinaryArchMismatchError")<{
+  readonly binaryArch: string;
+  readonly systemArch: string;
+  readonly path: string;
+}> {}
+
+/**
+ * Error thrown when a binary lacks execute permissions
+ */
+export class BinaryPermissionError extends Data.TaggedError("BinaryPermissionError")<{
+  readonly path: string;
+}> {}
+
+/**
+ * Error thrown when the user aborts an interactive prompt
+ */
+export class UserAbortError extends Data.TaggedError("UserAbortError")<{
+  readonly cause: unknown;
+  readonly context: string;
+}> {}
+
+/**
+ * Error thrown when a pre-test script fails to execute
+ */
+export class ScriptExecutionError extends Data.TaggedError("ScriptExecutionError")<{
+  readonly cause: unknown;
+  readonly script: string;
+  readonly scriptsDir: string;
+}> {}

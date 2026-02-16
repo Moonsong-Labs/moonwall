@@ -709,7 +709,7 @@ export const executeOpenTechCommitteeProposal = async (api: ApiPromise, encodedH
       await new Promise((resolve) => setTimeout(resolve, 1000));
     } catch (e) {
       console.error(e);
-      throw new Error(`Error querying referendum info for proposalId: ${proposalId}`);
+      throw new Error(`Error querying referendum info for proposalId: ${proposalId}`, { cause: e });
     }
   }
 

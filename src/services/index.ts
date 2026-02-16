@@ -1,4 +1,7 @@
 export * from "./errors.js";
+export * from "./CommandRunner.js";
+export * from "./Prompter.js";
+export * from "./DockerClient.js";
 export * from "./process/index.js";
 export * from "./network/index.js";
 export * from "./chopsticks/index.js";

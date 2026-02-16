@@ -173,7 +173,7 @@ export async function getVersions(name: string, runtime = false) {
   const set = new Set(versions);
   return runtime
     ? [...set]
-    : [...set].sort(
+    : [...set].toSorted(
         (a, b) => (semver.valid(a) && semver.valid(b) ? semver.rcompare(a, b) : a) as any
       );
 }

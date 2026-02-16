@@ -228,7 +228,8 @@ export class ProviderFactory {
             `❌ Failed to create viem provider ${this.providerConfig.name} at ${this.url}: ${error.message}`
           );
           throw new Error(
-            `Viem provider initialization failed for ${this.providerConfig.name} at ${this.url}: ${error.message}`
+            `Viem provider initialization failed for ${this.providerConfig.name} at ${this.url}: ${error.message}`,
+            { cause: error }
           );
         }
       },

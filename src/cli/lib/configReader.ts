@@ -135,5 +135,5 @@ export function parseZombieConfigForBins(zombieConfigPath: string) {
     }
   }
 
-  return [...new Set(commands)].sort();
+  return [...new Set(commands)].toSorted();
 }
