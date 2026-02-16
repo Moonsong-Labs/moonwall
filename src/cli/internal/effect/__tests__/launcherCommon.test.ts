@@ -110,16 +110,29 @@ describe("launcherCommon", () => {
     );
 
     it.effect("should prompt when processes are found and user continues", () => {
+      const savedCI = process.env.CI;
+      delete process.env.CI;
+
       const lsofOutput = "polkadot 100 user   20u  IPv4  12345      0t0  TCP *:9944 (LISTEN)\n";
       const layers = Layer.mergeAll(
         runningProcessRunner("100\n", lsofOutput),
         makePrompter("continue")
       );
 
-      return zombieBinCheckEffect(["polkadot"]).pipe(Effect.provide(layers));
+      return zombieBinCheckEffect(["polkadot"]).pipe(
+        Effect.provide(layers),
+        Effect.ensuring(
+          Effect.sync(() => {
+            if (savedCI !== undefined) process.env.CI = savedCI;
+          })
+        )
+      );
     });
 
     it.effect("should fail with UserAbortError when user aborts", () => {
+      const savedCI = process.env.CI;
+      delete process.env.CI;
+
       const lsofOutput = "polkadot 100 user   20u  IPv4  12345      0t0  TCP *:9944 (LISTEN)\n";
       const layers = Layer.mergeAll(
         runningProcessRunner("100\n", lsofOutput),
@@ -131,7 +144,12 @@ describe("launcherCommon", () => {
         Effect.flip,
         Effect.map((error) => {
           expect(error).toBeInstanceOf(UserAbortError);
-        })
+        }),
+        Effect.ensuring(
+          Effect.sync(() => {
+            if (savedCI !== undefined) process.env.CI = savedCI;
+          })
+        )
       );
     });
   });
@@ -172,6 +190,9 @@ describe("launcherCommon", () => {
     });
 
     it.effect("should prompt to kill containers when found (non-CI)", () => {
+      const savedCI = process.env.CI;
+      delete process.env.CI;
+
       const containers = [{ Id: "abc123def456", Image: "moonbeam:latest", Ports: [] }];
       const env = makeDevEnv({ useDocker: true, binPath: "moonbeam:latest" });
 
@@ -198,10 +219,20 @@ describe("launcherCommon", () => {
         NodeFileSystem.layer
       );
 
-      return devBinCheckEffect(env).pipe(Effect.provide(layers));
+      return devBinCheckEffect(env).pipe(
+        Effect.provide(layers),
+        Effect.ensuring(
+          Effect.sync(() => {
+            if (savedCI !== undefined) process.env.CI = savedCI;
+          })
+        )
+      );
     });
 
     it.effect("should fail with UserAbortError when user quits", () => {
+      const savedCI = process.env.CI;
+      delete process.env.CI;
+
       const containers = [{ Id: "abc123def456", Image: "moonbeam:latest", Ports: [] }];
       const env = makeDevEnv({ useDocker: true, binPath: "moonbeam:latest" });
       const layers = Layer.mergeAll(
@@ -216,7 +247,12 @@ describe("launcherCommon", () => {
         Effect.flip,
         Effect.map((error) => {
           expect(error).toBeInstanceOf(UserAbortError);
-        })
+        }),
+        Effect.ensuring(
+          Effect.sync(() => {
+            if (savedCI !== undefined) process.env.CI = savedCI;
+          })
+        )
       );
     });
   });
