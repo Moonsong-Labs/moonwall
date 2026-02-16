@@ -339,9 +339,13 @@ const chooseRunEnv = async (config: MoonwallConfig) => {
   });
 
   const choices = [
-    ...envs.filter(({ disabled }) => disabled === false).toSorted((a, b) => (a.name > b.name ? 1 : -1)),
+    ...envs
+      .filter(({ disabled }) => disabled === false)
+      .toSorted((a, b) => (a.name > b.name ? 1 : -1)),
     new Separator(),
-    ...envs.filter(({ disabled }) => disabled === true).toSorted((a, b) => (a.name > b.name ? 1 : -1)),
+    ...envs
+      .filter(({ disabled }) => disabled === true)
+      .toSorted((a, b) => (a.name > b.name ? 1 : -1)),
     new Separator(),
     { name: "Back", value: "back" },
     new Separator(),

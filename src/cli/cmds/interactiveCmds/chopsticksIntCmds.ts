@@ -82,7 +82,7 @@ export async function resolveChopsticksInteractiveCmdChoice() {
   if (containsPallet(api, "ParachainStaking")) {
     choices.push(
       { name: "🔼  Jump To Round", value: "jumpToRound" },
-        { name: "⏫  Jump N Rounds", value: "jumpRounds" }
+      { name: "⏫  Jump N Rounds", value: "jumpRounds" }
     );
   }
 

@@ -868,7 +868,9 @@ export async function launchChopsticksFromSpec(
     // Format: "(FiberFailure) ChopsticksSetupError: ... [cause]: Error: actual message"
     const causeMatch = errorString.match(effectCauseRegex);
     if (causeMatch) {
-      throw new Error(`Chopsticks config validation failed: ${causeMatch[1].trim()}`, { cause: error });
+      throw new Error(`Chopsticks config validation failed: ${causeMatch[1].trim()}`, {
+        cause: error,
+      });
     }
 
     // Fallback to full error string
@@ -893,7 +895,8 @@ export async function launchChopsticksFromSpec(
     const causeMessage = causeMatch ? causeMatch[1].trim() : errorString;
 
     throw new Error(
-      `Chopsticks failed to connect to endpoint '${configResult.endpoint}': ${causeMessage}`, { cause: error }
+      `Chopsticks failed to connect to endpoint '${configResult.endpoint}': ${causeMessage}`,
+      { cause: error }
     );
   }
 
