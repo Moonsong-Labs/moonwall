@@ -1,2 +1,3 @@
 {"type":"config","name":"Speed up pnpm moonwall test dev_multi startup/teardown","metricName":"total_s","metricUnit":"s","bestDirection":"lower"}
 {"run":1,"commit":"02ee5da","metric":0,"metrics":{},"status":"crash","description":"baseline: initial autoresearch harness crashed because tsx --eval used top-level await in CJS mode","timestamp":1773395770261,"segment":0}
+{"run":2,"commit":"1f1d2af","metric":55.9,"metrics":{},"status":"keep","description":"baseline: initial valid benchmark harness run for dev_multi wall-clock timing","timestamp":1773395854180,"segment":0}

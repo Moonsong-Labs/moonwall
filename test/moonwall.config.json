@@ -473,6 +473,13 @@
       "reporters": ["basic", "html"],
       "multiThreads": true,
       "cacheImports": true,
+      "connections": [
+        {
+          "name": "node",
+          "type": "polkadotJs",
+          "endpoints": ["AUTO"]
+        }
+      ],
       "foundation": {
         "type": "dev",
         "launchSpec": [

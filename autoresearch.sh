@@ -22,11 +22,13 @@ print(time.perf_counter_ns())
 PY
 )"
 
+bench_log="$(mktemp -t moonwall-dev-multi.XXXXXX.log)"
+
 set +e
 (
   cd test
   pnpm moonwall test dev_multi
-)
+) >"$bench_log" 2>&1
 status=$?
 set -e
 
@@ -36,6 +38,8 @@ print(time.perf_counter_ns())
 PY
 )"
 
+tail -n 60 "$bench_log"
+
 python - "$start_ns" "$end_ns" <<'PY'
 import sys
 start_ns = int(sys.argv[1])
@@ -43,4 +47,5 @@ end_ns = int(sys.argv[2])
 print(f"METRIC total_s={(end_ns - start_ns)/1e9:.6f}")
 PY
 
+rm -f "$bench_log"
 exit "$status"
