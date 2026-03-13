@@ -8,10 +8,9 @@ import type {
   MoonwallProvider,
   ProviderType,
 } from "../../api/types/index.js";
-import { createLogger } from "../../util/index.js";
+import { createLogger } from "../../internal/logger.js";
 import type { ApiPromise } from "@polkadot/api";
-import zombie, { type Network } from "@zombienet/orchestrator";
-import Docker from "dockerode";
+import type { Network } from "@zombienet/orchestrator";
 import { ChildProcess, exec, execSync } from "node:child_process";
 import fs from "node:fs";
 import net from "node:net";
@@ -50,12 +49,25 @@ import {
 const logger = createLogger({ name: "context" });
 const debugSetup = logger.debug.bind(logger);
 
+type DockerContainerLike = {
+  stop: () => Promise<unknown>;
+  remove: () => Promise<unknown>;
+};
+
+const isDockerContainer = (node: unknown): node is DockerContainerLike =>
+  !!node &&
+  typeof node === "object" &&
+  "stop" in node &&
+  typeof (node as { stop?: unknown }).stop === "function" &&
+  "remove" in node &&
+  typeof (node as { remove?: unknown }).remove === "function";
+
 export class MoonwallContext {
   private static instance: MoonwallContext | undefined;
   configured = false;
   environment!: MoonwallEnvironment;
   providers: ConnectedProvider[];
-  nodes: (ChildProcess | Docker.Container)[];
+  nodes: (ChildProcess | DockerContainerLike)[];
   foundation: FoundationType;
   zombieNetwork?: Network;
   rtUpgradePath?: string;
@@ -189,6 +201,7 @@ export class MoonwallContext {
 
     await checkZombieBins(zombieConfig);
 
+    const { default: zombie } = await import("@zombienet/orchestrator");
     const network = await zombie.start("", zombieConfig, { logType: "silent" });
     const ipcLogPath = path.join(network.tmpDir, "ipc-server.log");
     const ipcLogger = fs.createWriteStream(ipcLogPath, { flags: "a" });
@@ -759,7 +772,7 @@ export class MoonwallContext {
           }
         }
 
-        if (node instanceof Docker.Container) {
+        if (isDockerContainer(node)) {
           try {
             await node.stop();
             await node.remove();
@@ -833,7 +846,7 @@ export class MoonwallContext {
         }
       }
 
-      if (node instanceof Docker.Container) {
+      if (isDockerContainer(node)) {
         console.log("🛑  Stopping container");
 
         // Try to append termination reason to Docker container log

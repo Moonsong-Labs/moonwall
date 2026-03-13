@@ -6,7 +6,7 @@ import type {
   LaunchOverrides,
   ForkConfig,
 } from "../../api/types/index.js";
-import { createLogger } from "../../util/index.js";
+import { createLogger } from "../../internal/logger.js";
 import path from "node:path";
 import net from "node:net";
 import { Effect } from "effect";

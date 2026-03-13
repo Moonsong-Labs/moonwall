@@ -3,10 +3,10 @@ import fs from "node:fs";
 import path from "node:path";
 import WebSocket from "ws";
 import { checkAccess, checkExists } from "./fileCheckers.js";
-import { createLogger } from "../../util/index.js";
+import { createLogger } from "../../internal/logger.js";
 import { setTimeout as timer } from "node:timers/promises";
 import type { DevLaunchSpec } from "../../api/types/index.js";
-import Docker from "dockerode";
+import type Docker from "dockerode";
 import invariant from "tiny-invariant";
 import { isEthereumDevConfig, isEthereumZombieConfig } from "../lib/configReader.js";
 import { launchNodeEffect } from "./effect/index.js";
@@ -41,6 +41,7 @@ async function launchDockerContainer(
   name: string,
   dockerConfig?: DevLaunchSpec["dockerConfig"]
 ) {
+  const { default: Docker } = await import("dockerode");
   const docker = new Docker();
   const port = args.find((a) => a.includes("port"))?.split("=")[1];
   debug(`\x1b[36mStarting Docker container ${imageName} on port ${port}...\x1b[0m`);
