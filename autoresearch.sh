@@ -6,6 +6,10 @@ cd "$ROOT_DIR"
 
 pnpm -s exec tsx -e "void (async () => { await import('./src/cli/lib/globalContext.ts'); await import('./src/cli/internal/node.ts'); await import('./src/services/process/launchNodeEffect.ts'); })();" >/dev/null
 
+if [[ ! -f dist/cli.js ]] || find src package.json -type f -newer dist/cli.js -print -quit | grep -q .; then
+  pnpm -s exec zshy >/dev/null
+fi
+
 tmp_output=$(mktemp)
 cleanup() {
   rm -f "$tmp_output"

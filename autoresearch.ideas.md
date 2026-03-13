@@ -1,3 +1,2 @@
-- Auto-enable startup artifact caching for compatible local dev binaries when a warm cache already exists, while preserving explicit opt-in for first-run precompilation cost.
-- Collapse launch readiness and provider connection into a single shared connection path so Moonwall does not separately probe the RPC endpoint and then immediately reconnect with providers.
-- Cache binary existence/permission/architecture validation per process to trim repeated preflight overhead in multi-environment or multi-node runs.
+- Benchmark direct Moonbeam startup with and without `--wasmtime-precompiled` / raw chain-spec substitution to confirm which cached-artifact pieces still save real wall time on `papi_dev`.
+- Investigate lower-level Moonbeam node boot cost directly: even on the corrected harness, `papi_dev` still spends about ~3.1s from process spawn to first successful RPC response.
