@@ -473,7 +473,7 @@
       "reporters": ["basic", "html"],
       "multiThreads": {
         "pool": "threads",
-        "maxWorkers": 6,
+        "maxWorkers": 8,
         "isolate": true
       },
       "cacheImports": true,
