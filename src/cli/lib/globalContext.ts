@@ -72,6 +72,9 @@ export class MoonwallContext {
   rtUpgradePath?: string;
   ipcServer?: net.Server;
   injectedOptions?: LaunchOverrides;
+  private nodeLaunchModulePromise?:
+    | Promise<typeof import("../internal/node.js")>
+    | Promise<typeof import("../internal/localNode.js")>;
   private nodeCleanupHandlers: (() => Promise<void>)[] = [];
 
   constructor(config: MoonwallConfig, options?: LaunchOverrides) {
@@ -138,6 +141,10 @@ export class MoonwallContext {
       launchOverrides: this.injectedOptions,
       verbose: false,
     });
+
+    this.nodeLaunchModulePromise = env.foundation.launchSpec[0].legacy
+      ? import("../internal/localNode.js")
+      : import("../internal/node.js");
 
     return {
       name: env.name,
@@ -528,8 +535,16 @@ export class MoonwallContext {
                       ? env.foundation.zombieSpec.legacy
                       : false;
 
+              const launchModule = isLegacy
+                ? this.nodeLaunchModulePromise
+                  ? await this.nodeLaunchModulePromise
+                  : await import("../internal/localNode.js")
+                : this.nodeLaunchModulePromise
+                  ? await this.nodeLaunchModulePromise
+                  : await import("../internal/node.js");
+
               const result = isLegacy
-                ? await (await import("../internal/localNode.js")).launchNodeLegacy(
+                ? await (launchModule as typeof import("../internal/localNode.js")).launchNodeLegacy(
                     options as {
                       command: string;
                       args: string[];
@@ -537,7 +552,7 @@ export class MoonwallContext {
                       launchSpec?: import("../../api/types/index.js").DevLaunchSpec;
                     }
                   )
-                : await (await import("../internal/node.js")).launchNode(
+                : await (launchModule as typeof import("../internal/node.js")).launchNode(
                     options as {
                       command: string;
                       args: string[];
