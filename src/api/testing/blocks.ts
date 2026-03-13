@@ -16,8 +16,6 @@ import type { Block, SignedBlock } from "@polkadot/types/interfaces/runtime/type
 import type Bottleneck from "bottleneck";
 import { createLogger } from "../../internal/logger.js";
 import type { ExtrinsicCreation } from "../types/index.js";
-const logger = createLogger({ name: "test:blocks" });
-const debug = logger.debug.bind(logger);
 
 export async function createAndFinalizeBlock(
   api: ApiPromise,
@@ -171,7 +169,7 @@ export const getBlockArray = async (
   const lastBlockTime = getBlockTime(signedBlock);
 
   const firstBlockTime = lastBlockTime - timePeriod;
-  debug(`Searching for the block at: ${new Date(firstBlockTime)}`);
+  createLogger({ name: "test:blocks" }).debug(`Searching for the block at: ${new Date(firstBlockTime)}`);
   const firstBlockNumber = (await limiter.wrap(fetchHistoricBlockNum)(
     api,
     lastBlockNumber,
