@@ -344,6 +344,9 @@ class VitestOptionsBuilder {
             include: [
               "viem",
               "ethers",
+              "web3",
+              "web3-providers-ws",
+              "ws",
               "@polkadot/api",
               "@polkadot/keyring",
               "@polkadot/util",
