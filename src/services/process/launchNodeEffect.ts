@@ -12,7 +12,7 @@ import {
 } from "../network/RpcPortDiscoveryService.js";
 import { NodeReadinessService, NodeReadinessServiceLive } from "../network/NodeReadinessService.js";
 import { ProcessError } from "../errors.js";
-import { createLogger } from "../../util/index.js";
+import { createLogger } from "../../internal/logger.js";
 
 const logger = createLogger({ name: "launchNodeEffect" });
 const debug = logger.debug.bind(logger);

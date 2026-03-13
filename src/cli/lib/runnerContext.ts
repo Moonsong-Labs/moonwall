@@ -13,7 +13,7 @@ import type {
 } from "../../api/types/index.js";
 import type { ApiPromise } from "@polkadot/api";
 import Bottleneck from "bottleneck";
-import { createLogger } from "../../util/index.js";
+import { createLogger } from "../../internal/logger.js";
 import type { Wallet } from "ethers";
 import { afterAll, beforeAll, describe, it } from "vitest";
 import type { Web3 } from "web3";

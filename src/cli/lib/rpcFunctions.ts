@@ -1,6 +1,6 @@
 import { vitestAutoUrl } from "../internal/providerFactories.js";
 import { getEnvironmentFromConfig } from "./configReader.js";
-import { normalizeUrlToHttps } from "../../util/index.js";
+import { normalizeUrlToHttps } from "../../internal/common.js";
 
 export async function customDevRpcRequest(method: string, params: any[] = []): Promise<any> {
   const env = getEnvironmentFromConfig();

@@ -8,7 +8,7 @@ import type {
   MoonwallProvider,
   ProviderType,
 } from "../../api/types/index.js";
-import { createLogger } from "../../util/index.js";
+import { createLogger } from "../../internal/logger.js";
 import type { ApiPromise } from "@polkadot/api";
 import zombie, { type Network } from "@zombienet/orchestrator";
 import Docker from "dockerode";

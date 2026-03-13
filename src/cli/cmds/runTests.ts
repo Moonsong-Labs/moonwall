@@ -4,7 +4,7 @@ import path from "node:path";
 import type { TestUserConfig, Vitest } from "vitest/node";
 import { startVitest } from "vitest/node";
 import { Effect } from "effect";
-import { createLogger } from "../../util/index.js";
+import { createLogger } from "../../internal/logger.js";
 import { TestExecutionError } from "../../services/errors.js";
 import { clearNodeLogs } from "../internal/cmdFunctions/tempLogs.js";
 import { commonChecks } from "../internal/launcherCommon.js";

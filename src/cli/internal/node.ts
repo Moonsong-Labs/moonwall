@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import WebSocket from "ws";
 import { checkAccess, checkExists } from "./fileCheckers.js";
-import { createLogger } from "../../util/index.js";
+import { createLogger } from "../../internal/logger.js";
 import { setTimeout as timer } from "node:timers/promises";
 import type { DevLaunchSpec } from "../../api/types/index.js";
 import Docker from "dockerode";

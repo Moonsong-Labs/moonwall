@@ -5,24 +5,19 @@ import type {
   ProviderType,
   ViemClient,
 } from "../../api/types/index.js";
-import {
-  ALITH_PRIVATE_KEY,
-  createLogger,
-  deriveViemChain,
-  normalizeUrlToHttps,
-} from "../../util/index.js";
-import { ApiPromise, WsProvider } from "@polkadot/api";
+import { ALITH_PRIVATE_KEY } from "../../api/constants/lightAccounts.js";
+import { normalizeUrlToHttps } from "../../internal/common.js";
+import { createLogger } from "../../internal/logger.js";
+import type { ApiPromise, WsProvider } from "@polkadot/api";
 import type { ApiOptions } from "@polkadot/api/types";
-import { Wallet, ethers } from "ethers";
-import { createClient, type PolkadotClient } from "polkadot-api";
-import { getWsProvider } from "polkadot-api/ws-provider";
-import { createWalletClient, http, publicActions } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
-import { Web3 } from "web3";
-import { WebSocketProvider } from "web3-providers-ws";
-import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat";
+import type { Wallet } from "ethers";
+import type { PolkadotClient } from "polkadot-api";
+import type { Web3 } from "web3";
 import * as fs from "node:fs";
+import { createRequire } from "node:module";
 import * as path from "node:path";
+
+const require = createRequire(import.meta.url);
 const logger = createLogger({ name: "providers" });
 const debug = logger.debug.bind(logger);
 
@@ -135,6 +130,7 @@ export class ProviderFactory {
       name: this.providerConfig.name,
       type: this.providerConfig.type,
       connect: async () => {
+        const { ApiPromise, WsProvider } = require("@polkadot/api") as typeof import("@polkadot/api");
         const cachedMetadata = cacheEnabled ? loadCachedMetadata() : undefined;
         const startTime = Date.now();
 
@@ -167,7 +163,10 @@ export class ProviderFactory {
 
         return api;
       },
-      ws: (timeout?: number) => new WsProvider(this.url, 1000, {}, timeout),
+      ws: (timeout?: number) => {
+        const { WsProvider } = require("@polkadot/api") as typeof import("@polkadot/api");
+        return new WsProvider(this.url, 1000, {}, timeout);
+      },
     };
   }
 
@@ -177,6 +176,8 @@ export class ProviderFactory {
       name: this.providerConfig.name,
       type: this.providerConfig.type,
       connect: () => {
+        const { Web3 } = require("web3") as typeof import("web3");
+        const { WebSocketProvider } = require("web3-providers-ws") as typeof import("web3-providers-ws");
         const provider = new WebSocketProvider(
           this.url,
           {},
@@ -194,6 +195,7 @@ export class ProviderFactory {
       name: this.providerConfig.name,
       type: this.providerConfig.type,
       connect: () => {
+        const { Wallet, ethers } = require("ethers") as typeof import("ethers");
         const provider = this.url.startsWith("ws")
           ? new ethers.WebSocketProvider(this.url)
           : new ethers.JsonRpcProvider(this.url);
@@ -209,6 +211,10 @@ export class ProviderFactory {
       type: this.providerConfig.type,
       connect: async () => {
         try {
+          const { createWalletClient, http, publicActions } = require("viem") as typeof import("viem");
+          const { privateKeyToAccount } = require("viem/accounts") as typeof import("viem/accounts");
+          const { deriveViemChain } = await import("../../api/testing/viem.js");
+
           debug(`Original URL (this.url): ${this.url}`);
           const httpUrl = normalizeUrlToHttps(this.url);
           debug(`Converted HTTP URL: ${httpUrl} for provider ${this.providerConfig.name}`);
@@ -241,6 +247,9 @@ export class ProviderFactory {
       name: this.providerConfig.name,
       type: this.providerConfig.type,
       connect: () => {
+        const { createClient } = require("polkadot-api") as typeof import("polkadot-api");
+        const { getWsProvider } = require("polkadot-api/ws-provider") as typeof import("polkadot-api/ws-provider");
+        const { withPolkadotSdkCompat } = require("polkadot-api/polkadot-sdk-compat") as typeof import("polkadot-api/polkadot-sdk-compat");
         // Dev nodes in moonwall often sit idle between manual block builds, which means
         // the default 40s websocket heartbeat in polkadot-api can trigger false
         // disconnects. Relax the heartbeat so the connection remains up while the

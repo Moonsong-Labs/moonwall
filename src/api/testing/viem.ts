@@ -17,7 +17,7 @@ import {
 import { setTimeout as timer } from "node:timers/promises";
 import { privateKeyToAccount } from "viem/accounts";
 import type { Chain } from "viem/chains";
-import { ALITH_ADDRESS, ALITH_PRIVATE_KEY } from "../constants/accounts.js";
+import { ALITH_ADDRESS, ALITH_PRIVATE_KEY } from "../constants/lightAccounts.js";
 import { normalizeUrlToHttps, directRpcRequest } from "../../internal/common.js";
 
 /**

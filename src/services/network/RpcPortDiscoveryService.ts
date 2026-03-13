@@ -3,7 +3,7 @@ import * as NodeCommandExecutor from "@effect/platform-node/NodeCommandExecutor"
 import * as NodeContext from "@effect/platform-node/NodeContext";
 import * as NodeFileSystem from "@effect/platform-node/NodeFileSystem";
 import * as NodeSocket from "@effect/platform-node/NodeSocket";
-import { createLogger } from "../../util/index.js";
+import { createLogger } from "../../internal/logger.js";
 import { Context, Deferred, Effect, Layer, Option, Schedule, type Scope } from "effect";
 import { regex } from "arkregex";
 import { PortDiscoveryError } from "../errors.js";

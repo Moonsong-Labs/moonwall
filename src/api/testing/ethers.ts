@@ -1,7 +1,10 @@
 import type { GenericContext, EthersTransactionOptions } from "../types/index.js";
-import { type AccessListish, type BigNumberish, type TransactionRequest, Wallet } from "ethers";
+import type { AccessListish, BigNumberish, TransactionRequest } from "ethers";
 import type { TransactionType } from "../types/index.js";
-import { ALITH_ADDRESS } from "../constants/accounts.js";
+import { ALITH_ADDRESS } from "../constants/lightAccounts.js";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
 
 type TransactionHandler = (blob: TransactionBlob, params: TransactionRequest) => void;
 
@@ -53,7 +56,10 @@ export async function createEthersTransaction<TOptions extends EthersTransaction
   handler(blob, params);
 
   const signer = params.privateKey
-    ? new Wallet(params.privateKey, context.ethers().provider)
+    ? new (require("ethers") as typeof import("ethers")).Wallet(
+        params.privateKey,
+        context.ethers().provider
+      )
     : context.ethers();
 
   const txn = await signer.populateTransaction(blob);
