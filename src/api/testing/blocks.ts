@@ -13,7 +13,7 @@ import type {
   RuntimeDispatchInfoV1,
 } from "@polkadot/types/interfaces";
 import type { Block, SignedBlock } from "@polkadot/types/interfaces/runtime/types";
-import Bottleneck from "bottleneck";
+import type Bottleneck from "bottleneck";
 import { createLogger } from "../../internal/logger.js";
 import type { ExtrinsicCreation } from "../types/index.js";
 const logger = createLogger({ name: "test:blocks" });
@@ -159,6 +159,7 @@ export const getBlockArray = async (
   let limiter = bottleneck;
 
   if (!limiter) {
+    const { default: Bottleneck } = await import("bottleneck");
     limiter = new Bottleneck({ maxConcurrent: 10, minTime: 100 });
   }
   const finalizedHead = await limiter.schedule(() => api.rpc.chain.getFinalizedHead());
