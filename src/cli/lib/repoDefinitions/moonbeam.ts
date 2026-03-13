@@ -9,7 +9,6 @@ const repo: RepoSpec = {
         "--no-hardware-benchmarks",
         "--no-telemetry",
         "--reserved-only",
-        "--rpc-cors=all",
         "--unsafe-rpc-external",
         "--unsafe-force-node-key-generation",
         "--no-grandpa",
