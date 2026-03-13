@@ -341,7 +341,15 @@ class VitestOptionsBuilder {
         optimizer: {
           ssr: {
             enabled: true,
-            include: ["viem", "ethers"],
+            include: [
+              "viem",
+              "ethers",
+              "@polkadot/api",
+              "@polkadot/keyring",
+              "@polkadot/util",
+              "@polkadot/util-crypto",
+              "@moonbeam-network/api-augment",
+            ],
           },
           web: { enabled: false },
         },
