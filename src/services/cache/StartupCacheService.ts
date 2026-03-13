@@ -5,6 +5,7 @@ import { createLogger } from "../../util/index.js";
 import { Context, Duration, Effect, Layer, Option, Stream } from "effect";
 import { regex } from "arkregex";
 import * as crypto from "node:crypto";
+import * as nodeFs from "node:fs";
 import { StartupCacheError, type FileLockError } from "../errors.js";
 import { withFileLock } from "./FileLock.js";
 
@@ -43,6 +44,17 @@ type PlatformCommandR = PlatformR | CommandExecutor.CommandExecutor;
 // Helper functions
 // =============================================================================
 
+type BinaryFingerprint = {
+  version: 1;
+  binPath: string;
+  size: number;
+  mtimeMs: number;
+  ctimeMs: number;
+  ino: number;
+  dev: number;
+  hash: string;
+};
+
 const hashFile = (
   filePath: string
 ): Effect.Effect<string, StartupCacheError, FileSystem.FileSystem> =>
@@ -54,6 +66,70 @@ const hashFile = (
       .pipe(Stream.runForEach((chunk) => Effect.sync(() => hash.update(chunk))));
     return hash.digest("hex");
   }).pipe(Effect.mapError((cause) => new StartupCacheError({ cause, operation: "hash" })));
+
+const fingerprintPath = (cacheDir: string, binName: string, chainName: string, pathService: Path.Path) =>
+  pathService.join(cacheDir, `${binName}-${chainName}.fingerprint.json`);
+
+const matchesFingerprint = (
+  fingerprint: BinaryFingerprint,
+  stat: nodeFs.Stats,
+  binPath: string
+): boolean =>
+  fingerprint.version === 1 &&
+  fingerprint.binPath === binPath &&
+  fingerprint.size === stat.size &&
+  fingerprint.mtimeMs === stat.mtimeMs &&
+  fingerprint.ctimeMs === stat.ctimeMs &&
+  fingerprint.ino === Number(stat.ino) &&
+  fingerprint.dev === Number(stat.dev) &&
+  typeof fingerprint.hash === "string" &&
+  fingerprint.hash.length > 0;
+
+const getBinaryHash = (config: {
+  binPath: string;
+  cacheDir: string;
+  binName: string;
+  chainName: string;
+}): Effect.Effect<string, StartupCacheError, PlatformR> =>
+  Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
+    const pathService = yield* Path.Path;
+    const stat = yield* Effect.try({
+      try: () => nodeFs.statSync(config.binPath),
+      catch: (cause) => new StartupCacheError({ cause, operation: "hash" }),
+    });
+
+    const cachedFingerprint = yield* fs.readFileString(
+      fingerprintPath(config.cacheDir, config.binName, config.chainName, pathService)
+    ).pipe(
+      Effect.flatMap((content) => Effect.sync(() => JSON.parse(content) as BinaryFingerprint)),
+      Effect.orElseSucceed(() => undefined as BinaryFingerprint | undefined)
+    );
+
+    if (cachedFingerprint && matchesFingerprint(cachedFingerprint, stat, config.binPath)) {
+      logger.debug(`Using cached binary hash for ${config.binName}`);
+      return cachedFingerprint.hash;
+    }
+
+    const hash = yield* hashFile(config.binPath);
+    const nextFingerprint: BinaryFingerprint = {
+      version: 1,
+      binPath: config.binPath,
+      size: stat.size,
+      mtimeMs: stat.mtimeMs,
+      ctimeMs: stat.ctimeMs,
+      ino: Number(stat.ino),
+      dev: Number(stat.dev),
+      hash,
+    };
+
+    yield* fs.writeFileString(
+      fingerprintPath(config.cacheDir, config.binName, config.chainName, pathService),
+      JSON.stringify(nextFingerprint)
+    ).pipe(Effect.orElseSucceed(() => undefined));
+
+    return hash;
+  });
 
 const findPrecompiledWasm = (dir: string): Effect.Effect<Option.Option<string>, never, PlatformR> =>
   Effect.gen(function* () {
@@ -200,12 +276,17 @@ const getCachedArtifactsImpl = (
     const fs = yield* FileSystem.FileSystem;
     const pathService = yield* Path.Path;
 
-    const binaryHash = yield* hashFile(config.binPath);
-    const shortHash = binaryHash.substring(0, 12);
     const chainName = config.isDevMode
       ? "dev"
       : config.chainArg?.match(chainArgRegex)?.[1] || "default";
     const binName = pathService.basename(config.binPath);
+    const binaryHash = yield* getBinaryHash({
+      binPath: config.binPath,
+      cacheDir: config.cacheDir,
+      binName,
+      chainName,
+    });
+    const shortHash = binaryHash.substring(0, 12);
     const cacheSubDir = pathService.join(config.cacheDir, `${binName}-${chainName}-${shortHash}`);
     const hashPath = pathService.join(cacheSubDir, "binary.hash");
     const lockPath = pathService.join(config.cacheDir, `${binName}-${chainName}.lock`);
