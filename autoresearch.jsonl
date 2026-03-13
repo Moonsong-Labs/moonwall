@@ -3,3 +3,4 @@
 {"run":2,"commit":"1f1d2af","metric":55.9,"metrics":{},"status":"keep","description":"baseline: initial valid benchmark harness run for dev_multi wall-clock timing","timestamp":1773395854180,"segment":0}
 {"run":3,"commit":"38f83f9","metric":53.4,"metrics":{},"status":"keep","description":"dev_multi: use explicit polkadotJs-only connection set and stop createDevBlock from requiring viem just to detect its presence","timestamp":1773396033758,"segment":0}
 {"run":4,"commit":"a46dba6","metric":38.38951,"metrics":{},"status":"keep","description":"measurement: persist benchmark-only total_s to autoresearch.lastmetric and rebaseline current dev_multi code at 38.3895s","timestamp":1773396216977,"segment":0}
+{"run":5,"commit":"0e81b26","metric":37.824565,"metrics":{},"status":"keep","description":"dev_multi: switch Vitest pool from default forks to threads while preserving isolate=true and maxWorkers=3","timestamp":1773396319856,"segment":0}
