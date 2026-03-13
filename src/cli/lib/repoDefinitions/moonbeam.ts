@@ -8,7 +8,6 @@ const repo: RepoSpec = {
       defaultArgs: [
         "--no-hardware-benchmarks",
         "--no-telemetry",
-        "--reserved-only",
         "--unsafe-rpc-external",
         "--unsafe-force-node-key-generation",
         "--no-grandpa",
