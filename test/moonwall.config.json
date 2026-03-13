@@ -474,7 +474,7 @@
       "envVars": ["POLKADOTJS_DISABLE_ESM_CJS_WARNING=1"],
       "multiThreads": {
         "pool": "threads",
-        "maxWorkers": 8,
+        "maxWorkers": 9,
         "isolate": true
       },
       "cacheImports": true,
