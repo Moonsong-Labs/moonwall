@@ -8,8 +8,6 @@ import { importAsyncConfig, parseZombieConfigForBins } from "../lib/configReader
 import { Effect, Layer } from "effect";
 import { ScriptExecutionError, UserAbortError } from "../../services/errors.js";
 import { CommandRunner, CommandRunnerLive } from "../../services/CommandRunner.js";
-import { Prompter, PrompterLive } from "../../services/Prompter.js";
-import { DockerClient, DockerClientLive } from "../../services/DockerClient.js";
 
 // ─── Internal Effect Functions ──────────────────────────────────────
 
@@ -83,42 +81,49 @@ export const zombieBinCheckEffect = (bins: string[]) =>
  * Fails with UserAbortError on quit, dies on failed container cleanup.
  */
 const promptKillContainersEffect = (matchingContainers: Docker.ContainerInfo[]) =>
-  Effect.gen(function* () {
-    const prompter = yield* Prompter;
-    const docker = yield* DockerClient;
+  Effect.tryPromise({
+    try: async () => {
+      const [{ select }, { default: Docker }] = await Promise.all([
+        import("@inquirer/prompts"),
+        import("dockerode"),
+      ]);
+      const docker = new Docker();
 
-    const answer = yield* prompter.select({
-      message: `The following containers are already running image ${matchingContainers[0].Image}: ${matchingContainers.map(({ Id }) => Id).join(", ")}\n Would you like to kill them?`,
-      choices: [
-        { name: "🪓  Kill containers", value: "kill" as const },
-        { name: "👋   Quit", value: "goodbye" as const },
-      ],
-    });
+      const answer = await select({
+        message: `The following containers are already running image ${matchingContainers[0].Image}: ${matchingContainers.map(({ Id }) => Id).join(", ")}\n Would you like to kill them?`,
+        choices: [
+          { name: "🪓  Kill containers", value: "kill" as const },
+          { name: "👋   Quit", value: "goodbye" as const },
+        ],
+      });
 
-    if (answer === "goodbye") {
-      console.log("Goodbye!");
-      return yield* Effect.fail(
-        new UserAbortError({ cause: "User quit", context: "promptKillContainers" })
-      );
-    }
-
-    if (answer === "kill") {
-      for (const { Id } of matchingContainers) {
-        yield* docker.stopContainer(Id);
-        yield* docker.removeContainer(Id);
+      if (answer === "goodbye") {
+        console.log("Goodbye!");
+        throw new UserAbortError({ cause: "User quit", context: "promptKillContainers" });
       }
 
-      const containers = yield* docker.listContainers({
-        ancestor: matchingContainers.map(({ Image }) => Image),
+      for (const { Id } of matchingContainers) {
+        await docker.getContainer(Id).stop();
+        await docker.getContainer(Id).remove();
+      }
+
+      const containers = await docker.listContainers({
+        filters: { ancestor: matchingContainers.map(({ Image }) => Image) },
       });
 
       if (containers.length > 0) {
         console.error(
           `The following containers are still running: ${containers.map(({ Id }) => Id).join(", ")}`
         );
-        return yield* Effect.die(new Error("Failed to kill all containers"));
+        throw new Error("Failed to kill all containers");
       }
-    }
+    },
+    catch: (cause) =>
+      cause instanceof UserAbortError
+        ? cause
+        : cause instanceof Error
+          ? cause
+          : new Error(String(cause)),
   });
 
 /**
@@ -253,12 +258,7 @@ export const commonChecksEffect = (env: Environment, scriptsDir?: string) =>
 
 // ─── Public Wrappers (preserve existing caller contract) ────────────
 
-const liveLayers = Layer.mergeAll(
-  NodeFileSystem.layer,
-  CommandRunnerLive,
-  PrompterLive,
-  DockerClientLive
-);
+const liveLayers = Layer.mergeAll(NodeFileSystem.layer, CommandRunnerLive);
 
 export async function commonChecks(env: Environment) {
   const globalConfig = await importAsyncConfig();
