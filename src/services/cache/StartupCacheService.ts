@@ -1,7 +1,7 @@
 import { Command, type CommandExecutor, FileSystem, Path } from "@effect/platform";
 import { NodeContext } from "@effect/platform-node";
 import type { PlatformError } from "@effect/platform/Error";
-import { createLogger } from "../../util/index.js";
+import { createLogger } from "../../internal/logger.js";
 import { Context, Duration, Effect, Layer, Option, Stream } from "effect";
 import { regex } from "arkregex";
 import * as crypto from "node:crypto";

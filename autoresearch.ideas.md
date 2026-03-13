@@ -1,4 +1,4 @@
 - Build a **dev-chain snapshot/clone** path for `dev_multi`: launch one pristine node, materialize a reusable initialized database snapshot, then clone that snapshot per isolated file instead of paying full genesis initialization each time.
-- **Dedupe the @polkadot dependency tree** (or force a single ESM/CJS shape) so repeated duplicate-package detection stops happening at all instead of merely being muted.
-- Split the `moonwall` worker import graph so `describeSuite()` paths do not eagerly pull in unused governance, contract, viem, and web3 machinery for polkadotJs-only dev tests.
-- Add a `cacheImports` mode that derives optimizer includes from the actual environment + imported APIs, then persists a curated warm cache for benchmark-heavy environments like `dev_multi`.
+- **Dedupe the @polkadot dependency tree** (or force a single ESM/CJS shape) so duplicate-package detection stops happening at all instead of merely being partially muted.
+- Continue slimming the **public/root import graph** without breaking API: target `src/index.ts` and other public barrels so `moonwall` test imports do not eagerly load advanced governance/contract/runtime machinery that `dev_multi` never uses.
+- Explore a **lean dev-only public entrypoint** or preserved-API lazy facade for tests, so example suites can import the runner/context/constants path without dragging in unrelated integrations.

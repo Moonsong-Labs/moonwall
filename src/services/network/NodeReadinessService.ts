@@ -1,6 +1,6 @@
 import { Socket } from "@effect/platform";
 import * as NodeSocket from "@effect/platform-node/NodeSocket";
-import { createLogger } from "../../util/index.js";
+import { createLogger } from "../../internal/logger.js";
 import { Context, Deferred, Effect, Fiber, Layer, Schedule, type Scope } from "effect";
 import { NodeReadinessError } from "../errors.js";
 

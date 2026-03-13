@@ -1,6 +1,6 @@
 import child_process from "node:child_process";
 import { promisify } from "node:util";
-import { createLogger } from "../../util/index.js";
+import { createLogger } from "../../internal/logger.js";
 import type { ChildProcessWithoutNullStreams } from "node:child_process";
 const logger = createLogger({ name: "actions:runner" });
 const debug = logger.debug.bind(logger);

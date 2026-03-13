@@ -19,7 +19,7 @@ import readline from "node:readline";
 import { setTimeout as timer } from "node:timers/promises";
 import { promisify } from "node:util";
 import invariant from "tiny-invariant";
-import { launchNodeLegacy, withTimeout } from "../internal/index.js";
+import { withTimeout } from "../internal/processHelpers.js";
 import {
   LaunchCommandParser,
   parseChopsticksRunCmd,
@@ -524,7 +524,7 @@ export class MoonwallContext {
                       : false;
 
               const result = isLegacy
-                ? await launchNodeLegacy(
+                ? await (await import("../internal/localNode.js")).launchNodeLegacy(
                     options as {
                       command: string;
                       args: string[];

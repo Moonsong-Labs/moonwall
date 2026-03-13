@@ -1,15 +1,8 @@
 import type { DevModeContext, ExtrinsicCreation } from "../../api/types/index.js";
-import {
-  GLMR,
-  alith,
-  baltathar,
-  charleth,
-  dorothy,
-  ethan,
-  faith,
-  filterAndApply,
-  signAndSend,
-} from "../../util/index.js";
+import { alith, baltathar, charleth, dorothy, ethan, faith } from "../../api/constants/accounts.js";
+import { GLMR } from "../../api/constants/chain.js";
+import { filterAndApply } from "../../api/testing/events.js";
+import { signAndSend } from "../../api/testing/extrinsics.js";
 import type { ApiPromise } from "@polkadot/api";
 import type { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types";
 import type { KeyringPair } from "@polkadot/keyring/types";
