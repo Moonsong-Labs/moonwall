@@ -134,6 +134,10 @@ export class MoonwallContext {
   private async handleDev(env: Environment, config: MoonwallConfig) {
     invariant(env.foundation.type === "dev", "Foundation type must be 'dev'");
 
+    const nodeLaunchModulePromise = env.foundation.launchSpec[0].legacy
+      ? import("../internal/localNode.js")
+      : import("../internal/node.js");
+
     // Always use async port allocation for better collision avoidance
     const { cmd, args, launch } = await LaunchCommandParser.create({
       launchSpec: env.foundation.launchSpec[0],
@@ -142,9 +146,7 @@ export class MoonwallContext {
       verbose: false,
     });
 
-    this.nodeLaunchModulePromise = env.foundation.launchSpec[0].legacy
-      ? import("../internal/localNode.js")
-      : import("../internal/node.js");
+    this.nodeLaunchModulePromise = nodeLaunchModulePromise;
 
     return {
       name: env.name,
