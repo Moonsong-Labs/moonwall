@@ -44,17 +44,18 @@ const waitForRpcPortHint = async (
   process: MoonwallProcess,
   timeoutMs = 10_000
 ): Promise<number | null> => {
-  const start = Date.now();
-
-  while (Date.now() - start < timeoutMs) {
-    if (process.detectedRpcPort !== undefined) {
-      return process.detectedRpcPort;
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 10));
+  if (process.detectedRpcPort !== undefined) {
+    return process.detectedRpcPort;
   }
 
-  return null;
+  if (!process.rpcPortHintReady) {
+    return null;
+  }
+
+  return await Promise.race([
+    process.rpcPortHintReady,
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), timeoutMs)),
+  ]);
 };
 
 /**

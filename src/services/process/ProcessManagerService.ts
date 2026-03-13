@@ -20,6 +20,8 @@ export interface MoonwallProcess extends ChildProcess {
   moonwallTerminationReason?: string;
   effectCleanup?: () => Promise<void>;
   detectedRpcPort?: number;
+  rpcPortHintReady?: Promise<number>;
+  resolveRpcPortHint?: (port: number) => void;
 }
 
 /**
@@ -63,6 +65,9 @@ export const SpawnerLive = Layer.succeed(Spawner, {
     Effect.try({
       try: () => {
         const child = spawn(command, [...args]) as MoonwallProcess;
+        child.rpcPortHintReady = new Promise<number>((resolve) => {
+          child.resolveRpcPortHint = resolve;
+        });
         child.on("error", (error) => {
           logger.error(`Process spawn error: ${error}`);
         });
@@ -189,6 +194,8 @@ const setupLogging = (
       const match = chunk.toString().match(rpcPortHintRegex);
       if (match?.[1]) {
         child.detectedRpcPort = Number.parseInt(match[1], 10);
+        child.resolveRpcPortHint?.(child.detectedRpcPort);
+        child.resolveRpcPortHint = undefined;
       }
     };
 
