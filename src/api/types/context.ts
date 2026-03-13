@@ -39,13 +39,7 @@ export type MoonwallEnvironment = {
 export interface MoonwallProvider {
   name: string;
   type: ProviderType;
-  connect: () =>
-    | Promise<ApiPromise>
-    | Wallet
-    | Web3<any>
-    | Promise<ViemClient>
-    | PolkadotClient
-    | null;
+  connect: () => Promise<ProviderApi | null> | ProviderApi | null;
   ws?: (timeout?: number) => WsProvider;
 }
 

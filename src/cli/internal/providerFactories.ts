@@ -1,30 +1,24 @@
 import type {
   MoonwallProvider,
+  ProviderApi,
   ProviderConfig,
   ProviderMap,
   ProviderType,
   ViemClient,
 } from "../../api/types/index.js";
-import {
-  ALITH_PRIVATE_KEY,
-  createLogger,
-  deriveViemChain,
-  normalizeUrlToHttps,
-} from "../../util/index.js";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import type { ApiOptions } from "@polkadot/api/types";
-import { Wallet, ethers } from "ethers";
-import { createClient, type PolkadotClient } from "polkadot-api";
-import { getWsProvider } from "polkadot-api/ws-provider";
-import { createWalletClient, http, publicActions } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
-import { Web3 } from "web3";
-import { WebSocketProvider } from "web3-providers-ws";
-import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat";
+import type { Wallet } from "ethers";
+import type { PolkadotClient } from "polkadot-api";
+import type { Web3 } from "web3";
+import { createLogger } from "../../internal/logger.js";
+import { normalizeUrlToHttps } from "../../internal/common.js";
 import * as fs from "node:fs";
 import * as path from "node:path";
 const logger = createLogger({ name: "providers" });
 const debug = logger.debug.bind(logger);
+const DEFAULT_MOONWALL_PRIVATE_KEY =
+  "0x5fb92d6e98884f76de468fa3f6278f8807c48bebc13595d45af5bdc4da702133" as const;
 
 /**
  * Get the metadata cache directory.
@@ -105,7 +99,7 @@ export class ProviderFactory {
       this.url = endpoint;
     }
     debug(`Constructor - providerConfig.endpoints[0]: ${endpoint}, this.url: ${this.url}`);
-    this.privateKey = process.env.MOON_PRIV_KEY || ALITH_PRIVATE_KEY;
+    this.privateKey = process.env.MOON_PRIV_KEY || DEFAULT_MOONWALL_PRIVATE_KEY;
   }
 
   public create(): MoonwallProvider {
@@ -176,7 +170,12 @@ export class ProviderFactory {
     return {
       name: this.providerConfig.name,
       type: this.providerConfig.type,
-      connect: () => {
+      connect: async () => {
+        const [{ Web3 }, { WebSocketProvider }] = await Promise.all([
+          import("web3"),
+          import("web3-providers-ws"),
+        ]);
+
         const provider = new WebSocketProvider(
           this.url,
           {},
@@ -193,7 +192,8 @@ export class ProviderFactory {
     return {
       name: this.providerConfig.name,
       type: this.providerConfig.type,
-      connect: () => {
+      connect: async () => {
+        const { Wallet, ethers } = await import("ethers");
         const provider = this.url.startsWith("ws")
           ? new ethers.WebSocketProvider(this.url)
           : new ethers.JsonRpcProvider(this.url);
@@ -209,6 +209,12 @@ export class ProviderFactory {
       type: this.providerConfig.type,
       connect: async () => {
         try {
+          const [{ createWalletClient, http, publicActions }, { privateKeyToAccount }, { deriveViemChain }] = await Promise.all([
+            import("viem"),
+            import("viem/accounts"),
+            import("../../api/testing/viem.js"),
+          ]);
+
           debug(`Original URL (this.url): ${this.url}`);
           const httpUrl = normalizeUrlToHttps(this.url);
           debug(`Converted HTTP URL: ${httpUrl} for provider ${this.providerConfig.name}`);
@@ -240,7 +246,13 @@ export class ProviderFactory {
     return {
       name: this.providerConfig.name,
       type: this.providerConfig.type,
-      connect: () => {
+      connect: async () => {
+        const [{ createClient }, { getWsProvider }, { withPolkadotSdkCompat }] = await Promise.all([
+          import("polkadot-api"),
+          import("polkadot-api/ws-provider"),
+          import("polkadot-api/polkadot-sdk-compat"),
+        ]);
+
         // Dev nodes in moonwall often sit idle between manual block builds, which means
         // the default 40s websocket heartbeat in polkadot-api can trigger false
         // disconnects. Relax the heartbeat so the connection remains up while the
@@ -365,13 +377,7 @@ export class ProviderInterfaceFactory {
   constructor(
     public name: string,
     public type: ProviderType,
-    public connect: () =>
-      | Promise<ApiPromise>
-      | Wallet
-      | Web3
-      | Promise<ViemClient>
-      | PolkadotClient
-      | null
+    public connect: () => Promise<ProviderApi | null> | ProviderApi | null
   ) {}
 
   public async create(): Promise<GenericProvider<this["type"]>> {
@@ -491,7 +497,7 @@ export class ProviderInterfaceFactory {
   public static async populate(
     name: string,
     type: ProviderType,
-    connect: () => Promise<ApiPromise> | Wallet | Web3 | Promise<ViemClient> | PolkadotClient | null
+    connect: () => Promise<ProviderApi | null> | ProviderApi | null
   ) {
     debug(`🔄 Populating provider: ${name} of type: ${type}`);
     try {
