@@ -38,14 +38,18 @@ print(time.perf_counter_ns())
 PY
 )"
 
-tail -n 60 "$bench_log"
+tail -n 10 "$bench_log"
 
-python - "$start_ns" "$end_ns" <<'PY'
+metric_line="$(python - "$start_ns" "$end_ns" <<'PY'
 import sys
 start_ns = int(sys.argv[1])
 end_ns = int(sys.argv[2])
 print(f"METRIC total_s={(end_ns - start_ns)/1e9:.6f}")
 PY
+)"
+
+printf '%s\n' "$metric_line" | tee autoresearch.lastmetric >/dev/null
+printf '%s\n' "$metric_line"
 
 rm -f "$bench_log"
 exit "$status"
