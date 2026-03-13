@@ -39,7 +39,7 @@ The current workload is the `test` workspace environment `dev_multi`, which runs
 ## What's Been Tried
 - Initial code reading completed.
 - Important workload insight: `test/suites/test_separation` contains **13** files, not 5. Startup/teardown happens in many waves if worker concurrency is low.
-- Current best known result: **21.433467s** on the current working tree (pending commit).
+- Current best known result: **21.187120s** at commit `69b75ef`.
 - Kept wins:
   - Reworked `dev_multi` to use an explicit **polkadotJs-only** connection set and fixed `createDevBlock()` so it no longer requires a viem provider just to detect whether one exists.
   - Switched `dev_multi` from Vitest `forks` to **`threads` with `isolate: true`**.
@@ -56,6 +56,8 @@ The current workload is the `test` workspace environment `dev_multi`, which runs
   - Removed polling from that new fast path by resolving a **promise directly from process output** when the RPC-port log line appears.
   - Lazy-loaded the old **RpcPortDiscoveryService** only on fallback, so the normal stdout-hint path avoids importing the heavier lsof/socket discovery stack up front.
   - Slimmed the public test-helper import path by **lazy-loading `ethers`, `viem`, and `ws` inside rarely used helper functions** in `src/api/testing`, so importing `moonwall` for simple dev tests no longer eagerly pulls those runtimes.
+  - Made `src/api/testing/blocks.ts` lighter on the root import path by **lazy-loading `Bottleneck` only when `getBlockArray()` actually runs**.
+  - Removed another unused import-time cost from `src/api/testing/blocks.ts` by **deferring creation of the `test:blocks` logger until the block-history helper is actually called**.
 - Discarded / dead ends:
   - `maxWorkers=8` and `maxWorkers=10` both regressed after the latest import-graph wins; **9 workers** remains the current sweet spot.
   - `vmThreads` crashed with file-level startup errors for this workload.
@@ -72,14 +74,16 @@ The current workload is the `test` workspace environment `dev_multi`, which runs
   - Lazy-importing `globalContext` from `runnerContext` or `runTests` regressed.
   - Slimming unused zombie/chopsticks handlers with extra lazy imports regressed, and moving zombie IPC/startup/cleanup into a lazy helper module also lost on re-run.
   - Lazily importing chopsticks launch code in `globalContext` and lazily importing auxiliary CLI entrypoint commands both regressed.
-  - Changing the root `api/types` re-export to type-only plus explicit runtime constants did not beat the current best.
+  - Lazy-loading `configReader`/`providerFactories` inside `rpcFunctions`, lazy-loading `@polkadot/util-crypto` inside `governanceProcedures`, and making `src/api/types/index.ts` mostly type-only all regressed.
+  - Lazily creating the unused `ed25519` / `sr25519` keyrings in `accounts.ts` did not beat the current best.
+  - Re-testing the pre-`ee7d565` static `RpcPortDiscoveryService` import path on top of the latest code lost to HEAD, so the older `79c932d` measurement should be treated as an outlier rather than a rollback target.
   - Caching a seeded `--base-path` and cloning it per isolated file removed the explicit genesis rebuild step, but cloned ParityDB startups were still slower than fresh `--tmp` starts.
   - Disabling node stdout/stderr capture regressed.
   - Adding `--in-peers=0` / `--out-peers=0` to the default moonbeam dev args regressed.
   - Caching the selected config/env on `MoonwallContext` and bypassing the `runNetworkOnly()` indirection did not beat the current best.
 - Structural takeaway:
   - The biggest wins so far came from reducing **per-worker fixed overhead** (fewer provider types, less eager loading, better import optimization, better startup-cache bookkeeping) and from reducing the number of **startup waves** across 13 isolated files.
-  - Small piecemeal lazy-wrapper experiments often look promising but have repeatedly lost to simpler static code.
+  - Small piecemeal lazy-wrapper experiments often look promising but have repeatedly lost to simpler static code — however, **module-local lazy runtime imports in clearly unused root helper modules are still paying off**.
   - A naive **clone-the-initialized-base-path** snapshot approach is not enough by itself: even without a fresh genesis rebuild, cloned ParityDB startups came in slower than the current `--tmp` path.
   - The old lsof-based port-discovery path is no longer the normal hot path; the current best launches now win by treating **node stdout as the primary readiness hint** and using lsof only as a fallback.
   - The public `moonwall` test-consumer entry is still a major lever: broad root/helper re-exports can quietly force eager loads of large runtimes even when a suite only needs `describeSuite`, `expect`, and dev accounts.

@@ -13,7 +13,10 @@ import { Effect } from "effect";
 import { regex } from "arkregex";
 import { standardRepos } from "../lib/repoDefinitions/index.js";
 import invariant from "tiny-invariant";
-import { StartupCacheService, StartupCacheServiceLive } from "./effect/index.js";
+import {
+  StartupCacheService,
+  StartupCacheServiceLive,
+} from "../../services/cache/StartupCacheService.js";
 
 /** Matches --chain=<name> or --chain <name> in CLI arguments */
 const chainArgRegex = regex("--chain[=\\s]?(\\S+)");
