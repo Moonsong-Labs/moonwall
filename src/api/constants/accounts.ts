@@ -1,14 +1,67 @@
-import { Keyring } from "@polkadot/api";
 import {
   DEFAULT_GENESIS_BALANCE,
   DEFAULT_GENESIS_MAPPING,
   DEFAULT_GENESIS_STAKING,
 } from "./chain.js";
 import type { KeyringPair } from "@polkadot/keyring/types";
+import { createRequire } from "node:module";
 
-const keyringEth = new Keyring({ type: "ethereum" });
-const keyringEd25519 = new Keyring({ type: "ed25519" });
-const keyringSr25519 = new Keyring({ type: "sr25519" });
+const require = createRequire(import.meta.url);
+
+type KeyringType = "ethereum" | "sr25519" | "ed25519";
+type PolkadotApiModule = typeof import("@polkadot/api");
+
+const loadPolkadotApi = (): PolkadotApiModule => require("@polkadot/api") as PolkadotApiModule;
+
+const createKeyring = (type: KeyringType) => {
+  const { Keyring } = loadPolkadotApi();
+  return new Keyring({ type });
+};
+
+let keyringEth: ReturnType<typeof createKeyring> | undefined;
+let keyringEd25519: ReturnType<typeof createKeyring> | undefined;
+let keyringSr25519: ReturnType<typeof createKeyring> | undefined;
+
+const getKeyring = (type: KeyringType) => {
+  switch (type) {
+    case "ethereum":
+      return (keyringEth ??= createKeyring("ethereum"));
+    case "ed25519":
+      return (keyringEd25519 ??= createKeyring("ed25519"));
+    case "sr25519":
+      return (keyringSr25519 ??= createKeyring("sr25519"));
+  }
+};
+
+const createLazyKeyringPair = (type: KeyringType, uri: string): KeyringPair => {
+  let pair: KeyringPair | undefined;
+
+  const getPair = (): KeyringPair => {
+    pair ??= getKeyring(type).addFromUri(uri);
+    return pair;
+  };
+
+  return new Proxy({} as KeyringPair, {
+    get(_target, prop, _receiver) {
+      const resolved = getPair();
+      const value = Reflect.get(resolved as object, prop, resolved);
+      return typeof value === "function" ? value.bind(resolved) : value;
+    },
+    set(_target, prop, value, _receiver) {
+      return Reflect.set(getPair() as object, prop, value, getPair());
+    },
+    has(_target, prop) {
+      return Reflect.has(getPair() as object, prop);
+    },
+    ownKeys() {
+      return Reflect.ownKeys(getPair() as object);
+    },
+    getOwnPropertyDescriptor(_target, prop) {
+      const descriptor = Object.getOwnPropertyDescriptor(getPair() as object, prop);
+      return descriptor ?? { configurable: true, enumerable: true, writable: true, value: undefined };
+    },
+  });
+};
 
 // Prefunded accounts.
 export const ALITH_ADDRESS: `0x${string}` = "0xf24FF3a9CF04c71Dbc94D0b566f7A27B94566cac";
@@ -73,28 +126,22 @@ export const ALITH_GENESIS_RESERVE_BALANCE = DEFAULT_GENESIS_MAPPING;
 export const ALITH_GENESIS_TRANSFERABLE_BALANCE =
   ALITH_GENESIS_FREE_BALANCE - ALITH_GENESIS_LOCK_BALANCE;
 
-export const alith: KeyringPair = keyringEth.addFromUri(ALITH_PRIVATE_KEY);
-export const baltathar: KeyringPair = keyringEth.addFromUri(BALTATHAR_PRIVATE_KEY);
-export const charleth: KeyringPair = keyringEth.addFromUri(CHARLETH_PRIVATE_KEY);
-export const dorothy: KeyringPair = keyringEth.addFromUri(DOROTHY_PRIVATE_KEY);
-export const ethan: KeyringPair = keyringEth.addFromUri(ETHAN_PRIVATE_KEY);
-export const faith: KeyringPair = keyringEth.addFromUri(FAITH_PRIVATE_KEY);
-export const goliath: KeyringPair = keyringEth.addFromUri(GOLIATH_PRIVATE_KEY);
+export const alith: KeyringPair = createLazyKeyringPair("ethereum", ALITH_PRIVATE_KEY);
+export const baltathar: KeyringPair = createLazyKeyringPair("ethereum", BALTATHAR_PRIVATE_KEY);
+export const charleth: KeyringPair = createLazyKeyringPair("ethereum", CHARLETH_PRIVATE_KEY);
+export const dorothy: KeyringPair = createLazyKeyringPair("ethereum", DOROTHY_PRIVATE_KEY);
+export const ethan: KeyringPair = createLazyKeyringPair("ethereum", ETHAN_PRIVATE_KEY);
+export const faith: KeyringPair = createLazyKeyringPair("ethereum", FAITH_PRIVATE_KEY);
+export const goliath: KeyringPair = createLazyKeyringPair("ethereum", GOLIATH_PRIVATE_KEY);
 
 // deprecated
-export const gerald: KeyringPair = keyringEth.addFromUri(GERALD_PRIVATE_KEY);
+export const gerald: KeyringPair = createLazyKeyringPair("ethereum", GERALD_PRIVATE_KEY);
 
 let accountSeed = 10000;
 export function generateKeyringPair(
-  type: "ethereum" | "sr25519" | "ed25519" = "ethereum",
+  type: KeyringType = "ethereum",
   privateKey?: string
 ): KeyringPair {
   const key = privateKey || `0xDEADBEEF${(accountSeed++).toString(16).padStart(56, "0")}`;
-  if (type === "sr25519") {
-    return keyringSr25519.addFromUri(key);
-  }
-  if (type === "ed25519") {
-    return keyringEd25519.addFromUri(key);
-  }
-  return keyringEth.addFromUri(key);
+  return getKeyring(type).addFromUri(key);
 }

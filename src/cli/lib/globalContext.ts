@@ -10,8 +10,8 @@ import type {
 } from "../../api/types/index.js";
 import { createLogger } from "../../internal/logger.js";
 import type { ApiPromise } from "@polkadot/api";
-import zombie, { type Network } from "@zombienet/orchestrator";
-import Docker from "dockerode";
+import type { Network } from "@zombienet/orchestrator";
+import type { Container as DockerContainer } from "dockerode";
 import { ChildProcess, exec, execSync } from "node:child_process";
 import fs from "node:fs";
 import net from "node:net";
@@ -20,20 +20,13 @@ import readline from "node:readline";
 import { setTimeout as timer } from "node:timers/promises";
 import { promisify } from "node:util";
 import invariant from "tiny-invariant";
-import { launchNodeLegacy, withTimeout } from "../internal/index.js";
 import {
   LaunchCommandParser,
   parseChopsticksRunCmd,
   parseZombieCmd,
 } from "../internal/commandParsers.js";
-import {
-  checkZombieBins,
-  getZombieConfig,
-  type IPCRequestMessage,
-  type IPCResponseMessage,
-} from "../internal/foundations/index.js";
+import type { IPCRequestMessage, IPCResponseMessage } from "../../foundations/zombie/helpers.js";
 import { launchNode, type MoonwallProcess } from "../internal/node.js";
-import { launchChopsticksFromSpec } from "../internal/effect/index.js";
 import {
   ProviderFactory,
   ProviderInterfaceFactory,
@@ -50,12 +43,30 @@ import {
 const logger = createLogger({ name: "context" });
 const debugSetup = logger.debug.bind(logger);
 
+const withTimeout = <T>(promise: Promise<T>, ms: number): Promise<T> => {
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("Operation timed out")), ms)
+    ),
+  ]);
+};
+
+const isDockerContainer = (node: unknown): node is DockerContainer => {
+  return (
+    typeof node === "object" &&
+    node !== null &&
+    typeof (node as { stop?: unknown }).stop === "function" &&
+    typeof (node as { remove?: unknown }).remove === "function"
+  );
+};
+
 export class MoonwallContext {
   private static instance: MoonwallContext | undefined;
   configured = false;
   environment!: MoonwallEnvironment;
   providers: ConnectedProvider[];
-  nodes: (ChildProcess | Docker.Container)[];
+  nodes: (ChildProcess | DockerContainer)[];
   foundation: FoundationType;
   zombieNetwork?: Network;
   rtUpgradePath?: string;
@@ -184,6 +195,10 @@ export class MoonwallContext {
 
     console.log("🧟 Spawning zombie nodes ...");
     const nodes = this.environment.nodes;
+    const { checkZombieBins, getZombieConfig } = await import(
+      "../../foundations/zombie/helpers.js"
+    );
+    const { default: zombie } = await import("@zombienet/orchestrator");
 
     const zombieConfig = getZombieConfig(nodes[0].cmd);
 
@@ -442,6 +457,9 @@ export class MoonwallContext {
     ) {
       debugSetup("🍴 Launching chopsticks via programmatic API...");
 
+      const { launchChopsticksFromSpec } = await import(
+        "../../services/chopsticks/launchChopsticksEffect.js"
+      );
       const maxStartupTimeout = 120000; // 2 minutes for chopsticks (needs to connect to remote endpoint)
 
       await withTimeout(
@@ -511,7 +529,7 @@ export class MoonwallContext {
                       : false;
 
               const result = isLegacy
-                ? await launchNodeLegacy(
+                ? await (await import("../internal/localNode.js")).launchNodeLegacy(
                     options as {
                       command: string;
                       args: string[];
@@ -759,7 +777,7 @@ export class MoonwallContext {
           }
         }
 
-        if (node instanceof Docker.Container) {
+        if (isDockerContainer(node)) {
           try {
             await node.stop();
             await node.remove();
@@ -833,7 +851,7 @@ export class MoonwallContext {
         }
       }
 
-      if (node instanceof Docker.Container) {
+      if (isDockerContainer(node)) {
         console.log("🛑  Stopping container");
 
         // Try to append termination reason to Docker container log

@@ -1,5 +1,5 @@
 import type { Web3 } from "web3";
-import { alith } from "../constants/accounts.js";
+import { ALITH_ADDRESS } from "../constants/lightAccounts.js";
 import { MIN_GAS_PRICE } from "../constants/chain.js";
 
 export async function customWeb3Request(web3: Web3, method: string, params: any[]) {
@@ -43,7 +43,7 @@ export interface Web3EthCallOptions {
 export async function web3EthCall(web3: Web3, options: Web3EthCallOptions) {
   return await customWeb3Request(web3, "eth_call", [
     {
-      from: options.from === undefined ? options.from : alith.address,
+      from: options.from === undefined ? options.from : ALITH_ADDRESS,
       value: options.value,
       gas: options.gas === undefined ? options.gas : 256000,
       gasPrice: options.gas === undefined ? options.gas : `0x${MIN_GAS_PRICE}`,
