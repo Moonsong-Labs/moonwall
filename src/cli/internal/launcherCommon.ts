@@ -5,11 +5,6 @@ import path from "node:path";
 import { FileSystem } from "@effect/platform";
 import { NodeFileSystem } from "@effect/platform-node";
 import { importAsyncConfig, parseZombieConfigForBins } from "../lib/configReader.js";
-import {
-  checkAlreadyRunningEffect,
-  downloadBinsIfMissingEffect,
-  promptAlreadyRunningEffect,
-} from "./fileCheckers.js";
 import { Effect, Layer } from "effect";
 import { ScriptExecutionError, UserAbortError } from "../../services/errors.js";
 import { CommandRunner, CommandRunnerLive } from "../../services/CommandRunner.js";
@@ -17,6 +12,56 @@ import { Prompter, PrompterLive } from "../../services/Prompter.js";
 import { DockerClient, DockerClientLive } from "../../services/DockerClient.js";
 
 // ─── Internal Effect Functions ──────────────────────────────────────
+
+const checkAlreadyRunningEffect = (binaryName: string) =>
+  Effect.gen(function* () {
+    const runner = yield* CommandRunner;
+    console.log(`Checking if ${chalk.bgWhiteBright.blackBright(binaryName)} is already running...`);
+
+    const stdout = yield* runner
+      .exec(`pgrep -x ${binaryName.slice(0, 14)}`, { timeout: 2000 })
+      .pipe(
+        Effect.catchIf(
+          (e) => e.exitCode === 1,
+          () => Effect.succeed("")
+        )
+      );
+
+    if (!stdout) {
+      return [] as number[];
+    }
+
+    return stdout
+      .split("\n")
+      .filter(Boolean)
+      .map((pId) => Number.parseInt(pId, 10));
+  });
+
+const promptAlreadyRunningEffect = (pids: number[]) =>
+  Effect.tryPromise({
+    try: async () => {
+      const { promptAlreadyRunning } = await import("./fileCheckers.js");
+      await promptAlreadyRunning(pids);
+    },
+    catch: (cause) => new UserAbortError({ cause, context: "promptAlreadyRunning" }),
+  });
+
+const ensureBinaryAvailableEffect = (binPath: string) =>
+  Effect.gen(function* () {
+    const fileSystem = yield* FileSystem.FileSystem;
+    const exists = yield* fileSystem.exists(binPath);
+    if (exists) {
+      return;
+    }
+
+    yield* Effect.tryPromise({
+      try: async () => {
+        const { downloadBinsIfMissing } = await import("./fileCheckers.js");
+        await downloadBinsIfMissing(binPath);
+      },
+      catch: (cause) => new UserAbortError({ cause, context: "downloadBinsIfMissing" }),
+    });
+  });
 
 /**
  * Check zombie environment binaries for already-running processes.
@@ -127,7 +172,7 @@ export const devBinCheckEffect = (env: Environment) =>
       yield* promptAlreadyRunningEffect(pids);
     }
 
-    yield* downloadBinsIfMissingEffect(launchSpec.binPath);
+    yield* ensureBinaryAvailableEffect(launchSpec.binPath);
   });
 
 /**
