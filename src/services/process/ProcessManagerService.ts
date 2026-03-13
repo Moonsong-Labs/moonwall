@@ -10,6 +10,7 @@ import { createLogger } from "../../internal/logger.js";
 const nodeUndefinedRegex = regex("node_node_undefined", "g");
 
 const logger = createLogger({ name: "ProcessManagerService" });
+const rpcPortHintRegex = /Running JSON-RPC server: addr=[^,\n]*:(\d+)/;
 
 /**
  * Extended ChildProcess with Moonwall metadata
@@ -18,6 +19,7 @@ export interface MoonwallProcess extends ChildProcess {
   isMoonwallTerminating?: boolean;
   moonwallTerminationReason?: string;
   effectCleanup?: () => Promise<void>;
+  detectedRpcPort?: number;
 }
 
 /**
@@ -179,6 +181,21 @@ const setupLogging = (
     const fs = yield* FileSystem.FileSystem;
 
     const onError = (err: unknown) => new ProcessError({ cause: err, operation: "spawn" as const });
+    const captureRpcPortHint = (chunk: string | Buffer) => {
+      if (child.detectedRpcPort !== undefined) {
+        return;
+      }
+
+      const match = chunk.toString().match(rpcPortHintRegex);
+      if (match?.[1]) {
+        child.detectedRpcPort = Number.parseInt(match[1], 10);
+      }
+    };
+
+    yield* Effect.sync(() => {
+      child.stdout?.on("data", captureRpcPortHint);
+      child.stderr?.on("data", captureRpcPortHint);
+    });
 
     const stdout = child.stdout
       ? NodeStream.fromReadable<ProcessError>(() => child.stdout!, onError)
@@ -200,6 +217,9 @@ const setupLogging = (
     // Setup exit handler that writes final message on close
     yield* Effect.sync(() => {
       child.once("close", (code, signal) => {
+        child.stdout?.removeListener("data", captureRpcPortHint);
+        child.stderr?.removeListener("data", captureRpcPortHint);
+
         const message = constructExitMessage(child, code, signal);
         // Write final exit message — use appendFileSync since streams are closed
         try {

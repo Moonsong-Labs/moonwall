@@ -5,7 +5,11 @@
 import { Effect, Layer } from "effect";
 import type { DevLaunchSpec } from "../../api/types/index.js";
 import type { ChildProcess } from "node:child_process";
-import { ProcessManagerService, ProcessManagerServiceLive } from "./ProcessManagerService.js";
+import {
+  ProcessManagerService,
+  ProcessManagerServiceLive,
+  type MoonwallProcess,
+} from "./ProcessManagerService.js";
 import {
   RpcPortDiscoveryService,
   RpcPortDiscoveryServiceLive,
@@ -35,6 +39,23 @@ export interface LaunchNodeResult {
   readonly port: number;
   readonly logPath: string;
 }
+
+const waitForRpcPortHint = async (
+  process: MoonwallProcess,
+  timeoutMs = 10_000
+): Promise<number | null> => {
+  const start = Date.now();
+
+  while (Date.now() - start < timeoutMs) {
+    if (process.detectedRpcPort !== undefined) {
+      return process.detectedRpcPort;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+
+  return null;
+};
 
 /**
  * Combined layer with all dependencies
@@ -107,11 +128,11 @@ export async function launchNodeEffect(
             );
           }
 
-          return RpcPortDiscoveryService.pipe(
+          const discoverRpcPortViaService = RpcPortDiscoveryService.pipe(
             Effect.flatMap((rpcDiscovery) =>
               Effect.sync(() =>
                 logger.debug(
-                  `[T+${Date.now() - startTime}ms] Discovering RPC port for PID ${pid}...`
+                  `[T+${Date.now() - startTime}ms] Discovering RPC port for PID ${pid} via lsof...`
                 )
               ).pipe(
                 Effect.flatMap(() =>
@@ -122,7 +143,25 @@ export async function launchNodeEffect(
                   })
                 )
               )
-            ),
+            )
+          );
+
+          const discoverRpcPort = Effect.tryPromise({
+            try: () => waitForRpcPortHint(processResult.process as MoonwallProcess),
+            catch: (cause) => cause,
+          }).pipe(
+            Effect.flatMap((logPort) => {
+              if (!logPort) {
+                return discoverRpcPortViaService;
+              }
+
+              return Effect.sync(() => {
+                logger.debug(
+                  `[T+${Date.now() - startTime}ms] Used RPC port hint ${logPort} captured from node stdout`
+                );
+                return logPort;
+              });
+            }),
             Effect.mapError(
               (error) =>
                 new ProcessError({
@@ -130,7 +169,10 @@ export async function launchNodeEffect(
                   pid,
                   operation: "check",
                 })
-            ),
+            )
+          );
+
+          return discoverRpcPort.pipe(
             Effect.flatMap((port) =>
               Effect.sync(() =>
                 logger.debug(
