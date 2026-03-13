@@ -470,7 +470,7 @@
     {
       "name": "dev_multi",
       "testFileDir": ["suites/test_separation"],
-      "reporters": ["basic", "html"],
+      "reporters": ["basic"],
       "multiThreads": {
         "pool": "threads",
         "maxWorkers": 8,
