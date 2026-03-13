@@ -471,7 +471,11 @@
       "name": "dev_multi",
       "testFileDir": ["suites/test_separation"],
       "reporters": ["basic", "html"],
-      "multiThreads": true,
+      "multiThreads": {
+        "pool": "threads",
+        "maxWorkers": 3,
+        "isolate": true
+      },
       "cacheImports": true,
       "connections": [
         {
