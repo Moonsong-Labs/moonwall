@@ -1,0 +1,3 @@
+- Auto-enable startup artifact caching for compatible local dev binaries when a warm cache already exists, while preserving explicit opt-in for first-run precompilation cost.
+- Collapse launch readiness and provider connection into a single shared connection path so Moonwall does not separately probe the RPC endpoint and then immediately reconnect with providers.
+- Cache binary existence/permission/architecture validation per process to trim repeated preflight overhead in multi-environment or multi-node runs.

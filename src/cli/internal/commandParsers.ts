@@ -9,6 +9,9 @@ import type {
 import { createLogger } from "../../util/index.js";
 import path from "node:path";
 import net from "node:net";
+import { createHash } from "node:crypto";
+import { createReadStream } from "node:fs";
+import { access, readFile, readdir } from "node:fs/promises";
 import { Effect } from "effect";
 import { regex } from "arkregex";
 import { standardRepos } from "../lib/repoDefinitions/index.js";
@@ -19,6 +22,49 @@ import { StartupCacheService, StartupCacheServiceLive } from "./effect/index.js"
 const chainArgRegex = regex("--chain[=\\s]?(\\S+)");
 
 const logger = createLogger({ name: "commandParsers" });
+
+const hashFile = async (filePath: string): Promise<string> => {
+  const hash = createHash("sha256");
+
+  await new Promise<void>((resolve, reject) => {
+    const stream = createReadStream(filePath);
+    stream.on("data", (chunk) => hash.update(chunk));
+    stream.once("end", () => resolve());
+    stream.once("error", reject);
+  });
+
+  return hash.digest("hex");
+};
+
+const hasWarmStartupCache = async (config: {
+  binPath: string;
+  chainArg?: string;
+  cacheDir: string;
+  isDevMode: boolean;
+}): Promise<boolean> => {
+  try {
+    const binaryHash = await hashFile(config.binPath);
+    const shortHash = binaryHash.substring(0, 12);
+    const chainName = config.isDevMode ? "dev" : config.chainArg?.match(chainArgRegex)?.[1] || "default";
+    const binName = path.basename(config.binPath);
+    const cacheSubDir = path.join(config.cacheDir, `${binName}-${chainName}-${shortHash}`);
+    const hashPath = path.join(cacheSubDir, "binary.hash");
+
+    await access(cacheSubDir);
+    const savedHash = (await readFile(hashPath, "utf8")).trim();
+    if (savedHash !== binaryHash) {
+      return false;
+    }
+
+    const files = await readdir(cacheSubDir);
+    return files.some(
+      (file) =>
+        file.startsWith("precompiled_wasm_") || file.endsWith(".cwasm") || file.endsWith(".wasm")
+    );
+  } catch {
+    return false;
+  }
+};
 
 export function parseZombieCmd(launchSpec: ZombieLaunchSpec) {
   if (launchSpec) {
@@ -153,19 +199,17 @@ export class LaunchCommandParser {
    * This uses an Effect-based service that caches artifacts by binary hash.
    *
    * When cacheStartupArtifacts is enabled, this generates:
-   * 1. Precompiled WASM for the runtime
-   * 2. Raw chain spec to skip genesis WASM compilation
+   * 1. Precompile the runtime WASM to native code using `precompile-wasm`
+   * 2. Generate a raw chain spec to skip genesis WASM compilation
    *
    * This reduces startup from ~3s to ~200ms (~10x improvement).
    */
   async withStartupCache(): Promise<LaunchCommandParser> {
-    if (!this.launchSpec.cacheStartupArtifacts) {
-      return this;
-    }
-
     // Skip for Docker images
     if (this.launchSpec.useDocker) {
-      logger.warn("Startup caching is not supported for Docker images, skipping");
+      if (this.launchSpec.cacheStartupArtifacts) {
+        logger.warn("Startup caching is not supported for Docker images, skipping");
+      }
       return this;
     }
 
@@ -181,6 +225,19 @@ export class LaunchCommandParser {
 
     const cacheDir =
       this.launchSpec.startupCacheDir || path.join(process.cwd(), "tmp", "startup-cache");
+
+    const shouldUseCache =
+      this.launchSpec.cacheStartupArtifacts ||
+      (await hasWarmStartupCache({
+        binPath: this.launchSpec.binPath,
+        chainArg,
+        cacheDir,
+        isDevMode: hasDevFlag,
+      }));
+
+    if (!shouldUseCache) {
+      return this;
+    }
 
     const program = StartupCacheService.pipe(
       Effect.flatMap((service) =>

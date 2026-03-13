@@ -41,6 +41,8 @@ This workload starts a local Moonbeam dev node, waits for it to become reachable
 - Avoid changes that only optimize logs or reporting while leaving node startup unchanged.
 
 ## What's Been Tried
-- Baseline not yet recorded.
-- Initial code reading suggests the main opportunity is avoiding redundant RPC-port discovery work when Moonwall already knows the target RPC port from config or pre-allocation.
-- Another likely opportunity is reducing duplicate readiness / connection retries between process launch and provider setup.
+- Baseline harness initially crashed because the `tsx -e` precheck used top-level await; fixed by wrapping imports in an async IIFE.
+- Baseline pass for `cd test && pnpm exec moonwall test papi_dev`: **15.6s**.
+- Kept improvement: `src/services/process/launchNodeEffect.ts` now skips lsof-based RPC-port discovery when `--rpc-port` is already explicit in the final node args, and instead waits for readiness directly on that known port. First passing result after this change: **14.5s**.
+- Architectural insight: `LaunchCommandParser.withPorts()` already pre-allocates or injects a stable RPC port for many dev launches, so paying the extra `lsof` + candidate-port probing cost in `launchNodeEffect()` is often redundant.
+- Remaining likely opportunities: reduce extra connection/setup work after readiness, especially any repeated retries or client initialization overhead once the node is already reachable.
