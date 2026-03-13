@@ -1,5 +1,4 @@
 import type { ApiPromise } from "@polkadot/api";
-import WebSocket from "ws";
 
 //**************************
 // DEV
@@ -85,6 +84,7 @@ export async function jumpBlocksChopsticks(port: number, blockCount: number) {
 }
 
 const sendNewBlockCmd = async (port: number, count = 1) => {
+  const { default: WebSocket } = await import("ws");
   const websocketUrl = `ws://127.0.0.1:${port}`;
   const socket = new WebSocket(websocketUrl);
 

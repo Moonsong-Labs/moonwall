@@ -5,17 +5,8 @@ import type {
   GenericContext,
   ViemTransactionOptions,
 } from "../types/index.js";
-import type { Abi } from "viem";
-import {
-  type BlockTag,
-  type DeployContractParameters,
-  type TransactionSerializable,
-  createWalletClient,
-  hexToNumber,
-  http,
-} from "viem";
+import type { Abi, BlockTag, DeployContractParameters, TransactionSerializable } from "viem";
 import { setTimeout as timer } from "node:timers/promises";
-import { privateKeyToAccount } from "viem/accounts";
 import type { Chain } from "viem/chains";
 import { ALITH_ADDRESS, ALITH_PRIVATE_KEY } from "../constants/accounts.js";
 import { normalizeUrlToHttps, directRpcRequest } from "../../internal/common.js";
@@ -79,6 +70,7 @@ export async function deriveViemChain(endpoint: string, maxRetries: number = 3) 
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
+      const { hexToNumber } = await import("viem");
       const id = hexToNumber(await directRpcRequest(httpEndpoint, "eth_chainId", []));
       const name = await directRpcRequest(httpEndpoint, "system_chain", []);
       const { tokenSymbol, tokenDecimals } = await directRpcRequest(
@@ -143,6 +135,10 @@ export async function deployViemContract<TOptions extends ContractDeploymentOpti
 ) {
   const url = context.viem().transport.url;
 
+  const [{ createWalletClient, http }, { privateKeyToAccount }] = await Promise.all([
+    import("viem"),
+    import("viem/accounts"),
+  ]);
   const { privateKey = ALITH_PRIVATE_KEY, ...rest } = options || ({} as any);
   const blob = {
     ...rest,
@@ -223,6 +219,7 @@ export async function createViemTransaction<TOptions extends DeepPartial<ViemTra
   context: GenericContext,
   options: TOptions
 ): Promise<`0x${string}`> {
+  const { privateKeyToAccount } = await import("viem/accounts");
   const type = !!options && !!options.txnType ? options.txnType : "eip1559";
   const privateKey = !!options && !!options.privateKey ? options.privateKey : ALITH_PRIVATE_KEY;
   const account = privateKeyToAccount(privateKey);
