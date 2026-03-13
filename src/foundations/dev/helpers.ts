@@ -4,18 +4,15 @@ import type {
   ExtrinsicCreation,
   GenericContext,
 } from "../../api/types/index.js";
-import {
-  alith,
-  createAndFinalizeBlock,
-  customWeb3Request,
-  generateKeyringPair,
-} from "../../util/index.js";
+import { alith, generateKeyringPair } from "../../api/constants/accounts.js";
+import { createAndFinalizeBlock } from "../../api/testing/blocks.js";
+import { customWeb3Request } from "../../api/testing/providers.js";
 import { Keyring } from "@polkadot/api";
 import type { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types";
 import type { RegistryError } from "@polkadot/types-codec/types/registry";
 import type { EventRecord } from "@polkadot/types/interfaces";
 import chalk from "chalk";
-import { createLogger } from "../../util/index.js";
+import { createLogger } from "../../internal/logger.js";
 import { setTimeout } from "node:timers/promises";
 import { getEnvironmentFromConfig, isEthereumDevConfig } from "../../services/config/index.js";
 import { extractError } from "../../api/testing/events.js";

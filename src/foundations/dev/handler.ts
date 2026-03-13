@@ -16,20 +16,11 @@ import {
   CHARLETH_PRIVATE_KEY,
   DOROTHY_PRIVATE_KEY,
   alith,
-  createEthersTransaction,
-  createViemTransaction,
-  jumpBlocksDev,
-  jumpRoundsDev,
-} from "../../util/index.js";
+} from "../../api/constants/accounts.js";
 import { Keyring } from "@polkadot/api";
 import type { ApiTypes } from "@polkadot/api/types";
 import { createDevBlock } from "./helpers.js";
 import { getEnvironmentFromConfig, isEthereumDevConfig } from "../../services/config/index.js";
-import {
-  deployCreateCompiledContract,
-  interactWithContract,
-  interactWithPrecompileContract,
-} from "../../contracts/index.js";
 
 export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testCase, logger }) => {
   const env = getEnvironmentFromConfig();
@@ -121,7 +112,7 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
 
     createTxn: !ethCompatible
       ? undefined
-      : <
+      : async <
           TOptions extends
             | (DeepPartial<ViemTransactionOptions> & {
                 libraryType?: "viem";
@@ -133,14 +124,19 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
           options: TOptions
         ) => {
           const { libraryType = "viem", ...txnOptions } = options;
-          return libraryType === "viem"
-            ? createViemTransaction(ctx, txnOptions as DeepPartial<ViemTransactionOptions>)
-            : createEthersTransaction(ctx, txnOptions as EthersTransactionOptions);
+          if (libraryType === "viem") {
+            const { createViemTransaction } = await import("../../api/testing/viem.js");
+            return createViemTransaction(ctx, txnOptions as DeepPartial<ViemTransactionOptions>);
+          }
+
+          const { createEthersTransaction } = await import("../../api/testing/ethers.js");
+          return createEthersTransaction(ctx, txnOptions as EthersTransactionOptions);
         },
 
     readPrecompile: !ethCompatible
       ? undefined
       : async (options: PrecompileCallOptions) => {
+          const { interactWithPrecompileContract } = await import("../../contracts/index.js");
           const response = await interactWithPrecompileContract(ctx, {
             call: true,
             ...options,
@@ -150,6 +146,7 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
     writePrecompile: !ethCompatible
       ? undefined
       : async (options: PrecompileCallOptions) => {
+          const { interactWithPrecompileContract } = await import("../../contracts/index.js");
           const response = await interactWithPrecompileContract(ctx, {
             call: false,
             ...options,
@@ -160,6 +157,7 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
     readContract: !ethCompatible
       ? undefined
       : async (options: ContractCallOptions) => {
+          const { interactWithContract } = await import("../../contracts/index.js");
           const response = await interactWithContract(ctx, {
             call: true,
             ...options,
@@ -170,6 +168,7 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
     writeContract: !ethCompatible
       ? undefined
       : async (options: ContractCallOptions) => {
+          const { interactWithContract } = await import("../../contracts/index.js");
           const response = await interactWithContract(ctx, {
             call: false,
             ...options,
@@ -180,10 +179,12 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
     deployContract: !ethCompatible
       ? undefined
       : async (contractName: string, options?: ContractDeploymentOptions) => {
+          const { deployCreateCompiledContract } = await import("../../contracts/index.js");
           return await deployCreateCompiledContract(ctx, contractName, options);
         },
 
     jumpBlocks: async (blocks: number) => {
+      const { jumpBlocksDev } = await import("../../api/testing/jumping.js");
       await jumpBlocksDev(context.polkadotJs(), blocks);
     },
 
@@ -191,6 +192,7 @@ export const devHandler: FoundationHandler<"dev"> = ({ testCases, context, testC
       if (!ctx.isParachainStaking) {
         throw new Error("ParachainStaking pallet is not enabled");
       }
+      const { jumpRoundsDev } = await import("../../api/testing/jumping.js");
       await jumpRoundsDev(context.polkadotJs(), rounds);
     },
   } satisfies DevModeContext;
