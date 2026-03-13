@@ -2,7 +2,7 @@
  * Simplified Effect-based node launcher for integration with existing code
  */
 
-import { Effect, Layer } from "effect";
+import { Effect } from "effect";
 import type { DevLaunchSpec } from "../../api/types/index.js";
 import type { ChildProcess } from "node:child_process";
 import {
@@ -10,10 +10,6 @@ import {
   ProcessManagerServiceLive,
   type MoonwallProcess,
 } from "./ProcessManagerService.js";
-import {
-  RpcPortDiscoveryService,
-  RpcPortDiscoveryServiceLive,
-} from "../network/RpcPortDiscoveryService.js";
 import { ProcessError } from "../errors.js";
 import { createLogger } from "../../internal/logger.js";
 
@@ -58,10 +54,6 @@ const waitForRpcPortHint = async (
   ]);
 };
 
-/**
- * Combined layer with all dependencies
- */
-const AllServicesLive = Layer.mergeAll(ProcessManagerServiceLive, RpcPortDiscoveryServiceLive);
 
 /**
  * Launch a blockchain node with Effect-based lifecycle management
@@ -129,31 +121,41 @@ export async function launchNodeEffect(
             );
           }
 
-          const discoverRpcPortViaService = RpcPortDiscoveryService.pipe(
-            Effect.flatMap((rpcDiscovery) =>
-              Effect.sync(() =>
-                logger.debug(
-                  `[T+${Date.now() - startTime}ms] Discovering RPC port for PID ${pid} via lsof...`
-                )
-              ).pipe(
-                Effect.flatMap(() =>
-                  rpcDiscovery.discoverRpcPort({
-                    pid,
-                    isEthereumChain: config.isEthereumChain,
-                    maxAttempts: 600, // Match PortDiscoveryService: 600 × 200ms = 120s
-                  })
-                )
-              )
-            )
-          );
-
           const discoverRpcPort = Effect.tryPromise({
             try: () => waitForRpcPortHint(processResult.process as MoonwallProcess),
             catch: (cause) => cause,
           }).pipe(
             Effect.flatMap((logPort) => {
               if (!logPort) {
-                return discoverRpcPortViaService;
+                return Effect.tryPromise({
+                  try: async () => {
+                    const { RpcPortDiscoveryService, RpcPortDiscoveryServiceLive } = await import(
+                      "../network/RpcPortDiscoveryService.js"
+                    );
+
+                    return await Effect.runPromise(
+                      RpcPortDiscoveryService.pipe(
+                        Effect.flatMap((rpcDiscovery) =>
+                          Effect.sync(() =>
+                            logger.debug(
+                              `[T+${Date.now() - startTime}ms] Discovering RPC port for PID ${pid} via lsof...`
+                            )
+                          ).pipe(
+                            Effect.flatMap(() =>
+                              rpcDiscovery.discoverRpcPort({
+                                pid,
+                                isEthereumChain: config.isEthereumChain,
+                                maxAttempts: 600,
+                              })
+                            )
+                          )
+                        ),
+                        Effect.provide(RpcPortDiscoveryServiceLive)
+                      )
+                    );
+                  },
+                  catch: (cause) => cause,
+                });
               }
 
               return Effect.sync(() => {
@@ -194,7 +196,7 @@ export async function launchNodeEffect(
         })
       )
     )
-  ).pipe(Effect.provide(AllServicesLive));
+  ).pipe(Effect.provide(ProcessManagerServiceLive));
 
   // Run without Scope - cleanup is returned as a function
   // We can't simply use scopes because:
