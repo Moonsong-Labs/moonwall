@@ -15,16 +15,30 @@ import type { ApiPromise } from "@polkadot/api";
 import Bottleneck from "bottleneck";
 import { createLogger } from "../../internal/logger.js";
 import type { Wallet } from "ethers";
+import { createRequire } from "node:module";
 import { afterAll, beforeAll, describe, it } from "vitest";
 import type { Web3 } from "web3";
 import { getEnvironmentFromConfig } from "./configReader.js";
 import { MoonwallContext, contextCreator } from "./globalContext.js";
-import { chopsticksHandler, devHandler, readOnlyHandler, zombieHandler } from "./handlers/index.js";
 import type { PolkadotClient } from "polkadot-api";
 
+const require = createRequire(import.meta.url);
 const RT_VERSION = Number(process.env.MOON_RTVERSION);
 const RT_NAME = process.env.MOON_RTNAME;
 let limiter: Bottleneck | undefined;
+
+const loadFoundationHandler = (foundation: FoundationType): FoundationHandler<any> => {
+  switch (foundation) {
+    case "dev":
+      return (require("../../foundations/dev/handler.js") as typeof import("../../foundations/dev/handler.js")).devHandler;
+    case "chopsticks":
+      return (require("../../foundations/chopsticks/handler.js") as typeof import("../../foundations/chopsticks/handler.js")).chopsticksHandler;
+    case "zombie":
+      return (require("../../foundations/zombie/handler.js") as typeof import("../../foundations/zombie/handler.js")).zombieHandler;
+    case "read_only":
+      return (require("../../foundations/read-only/handler.js") as typeof import("../../foundations/read-only/handler.js")).readOnlyHandler;
+  }
+};
 
 // About: This has been designed in the handler pattern so that eventually we can integrate it to vitest
 // https://vitest.dev/advanced/runner.html
@@ -156,17 +170,7 @@ export function describeSuite<T extends FoundationType>({
       papi: (apiName?: string): PolkadotClient => getApi("papi", apiName),
     };
 
-    const foundationHandlers: Record<FoundationType, FoundationHandler<any>> = {
-      dev: devHandler,
-      chopsticks: chopsticksHandler,
-      zombie: zombieHandler,
-      read_only: readOnlyHandler,
-    };
-
-    const handler = foundationHandlers[foundationMethods];
-    if (!handler) {
-      throw new Error(`Unsupported foundation methods: ${foundationMethods}`);
-    }
+    const handler = loadFoundationHandler(foundationMethods);
 
     handler({
       testCases: testCases as TestCasesFn<any>,
