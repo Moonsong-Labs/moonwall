@@ -26,7 +26,7 @@ import {
   parseZombieCmd,
 } from "../internal/commandParsers.js";
 import type { IPCRequestMessage, IPCResponseMessage } from "../../foundations/zombie/helpers.js";
-import { launchNode, type MoonwallProcess } from "../internal/node.js";
+import type { MoonwallProcess } from "../internal/node.js";
 import {
   ProviderFactory,
   ProviderInterfaceFactory,
@@ -537,7 +537,7 @@ export class MoonwallContext {
                       launchSpec?: import("../../api/types/index.js").DevLaunchSpec;
                     }
                   )
-                : await launchNode(
+                : await (await import("../internal/node.js")).launchNode(
                     options as {
                       command: string;
                       args: string[];

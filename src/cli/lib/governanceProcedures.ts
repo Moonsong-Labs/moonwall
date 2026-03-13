@@ -1,20 +1,19 @@
 import type { DevModeContext, ExtrinsicCreation } from "../../api/types/index.js";
-import {
-  GLMR,
-  alith,
-  baltathar,
-  charleth,
-  dorothy,
-  ethan,
-  faith,
-  filterAndApply,
-  signAndSend,
-} from "../../util/index.js";
+import { GLMR } from "../../api/constants/chain.js";
+import { alith, baltathar, charleth, dorothy, ethan, faith } from "../../api/constants/accounts.js";
+import { filterAndApply } from "../../api/testing/events.js";
+import { signAndSend } from "../../api/testing/extrinsics.js";
 import type { ApiPromise } from "@polkadot/api";
 import type { ApiTypes, SubmittableExtrinsic } from "@polkadot/api/types";
 import type { KeyringPair } from "@polkadot/keyring/types";
 import type { Codec } from "@polkadot/types-codec/types";
-import { blake2AsHex } from "@polkadot/util-crypto";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
+const blake2AsHex = (...args: Parameters<typeof import("@polkadot/util-crypto").blake2AsHex>) =>
+  (require("@polkadot/util-crypto") as typeof import("@polkadot/util-crypto")).blake2AsHex(
+    ...args
+  );
 
 export const COUNCIL_MEMBERS: KeyringPair[] = [baltathar, charleth, dorothy];
 export const COUNCIL_THRESHOLD = Math.ceil((COUNCIL_MEMBERS.length * 2) / 3);

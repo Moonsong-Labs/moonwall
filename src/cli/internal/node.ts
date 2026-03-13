@@ -1,15 +1,15 @@
 import type { ChildProcess } from "node:child_process";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import WebSocket from "ws";
-import { checkAccess, checkExists } from "./fileCheckers.js";
 import { createLogger } from "../../internal/logger.js";
 import { setTimeout as timer } from "node:timers/promises";
 import type { DevLaunchSpec } from "../../api/types/index.js";
-import Docker from "dockerode";
+import type Docker from "dockerode";
 import invariant from "tiny-invariant";
 import { isEthereumDevConfig, isEthereumZombieConfig } from "../lib/configReader.js";
-import { launchNodeEffect } from "./effect/index.js";
+import { launchNodeEffect } from "../../services/process/launchNodeEffect.js";
 
 const logger = createLogger({ name: "node" });
 const debug = logger.debug.bind(logger);
@@ -34,6 +34,42 @@ export interface MoonwallProcess extends ChildProcess {
   effectCleanup?: () => Promise<void>;
 }
 
+const architectureMap: Record<number, string> = {
+  0: "unknown",
+  3: "x86",
+  62: "x64",
+  183: "arm64",
+};
+
+const ensureBinaryExists = (binPathArg: string) => {
+  const binPath = binPathArg.split(" ")[0];
+  if (!fs.existsSync(binPath)) {
+    throw new Error(
+      `No binary file found at location: ${binPath} \n Are you sure your moonwall.config.json file has the correct binPath in launchSpec?`
+    );
+  }
+
+  const fd = fs.openSync(binPath, "r");
+  try {
+    const buffer = Buffer.alloc(20);
+    fs.readSync(fd, buffer, 0, 20, 0);
+    const binaryArch = architectureMap[buffer.readUInt16LE(18)] || "unknown";
+    const currentArch = os.arch();
+    if (binaryArch !== currentArch && binaryArch !== "unknown") {
+      throw new Error(
+        `Binary architecture mismatch: expected ${currentArch}, found ${binaryArch} at ${binPath}`
+      );
+    }
+  } finally {
+    fs.closeSync(fd);
+  }
+};
+
+const ensureBinaryExecutable = (binPathArg: string) => {
+  const binPath = binPathArg.split(" ")[0];
+  fs.accessSync(binPath, fs.constants.X_OK);
+};
+
 // TODO: Add multi-threading support
 async function launchDockerContainer(
   imageName: string,
@@ -41,6 +77,7 @@ async function launchDockerContainer(
   name: string,
   dockerConfig?: DevLaunchSpec["dockerConfig"]
 ) {
+  const { default: Docker } = await import("dockerode");
   const docker = new Docker();
   const port = args.find((a) => a.includes("port"))?.split("=")[1];
   debug(`\x1b[36mStarting Docker container ${imageName} on port ${port}...\x1b[0m`);
@@ -126,8 +163,8 @@ export async function launchNode(options: {
   }
 
   if (cmd.includes("moonbeam")) {
-    await checkExists(cmd);
-    checkAccess(cmd);
+    ensureBinaryExists(cmd);
+    ensureBinaryExecutable(cmd);
   }
 
   // Determine if this is an Ethereum chain based on args

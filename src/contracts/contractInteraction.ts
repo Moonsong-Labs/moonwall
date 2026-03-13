@@ -6,21 +6,17 @@ import type {
   MoonwallContract,
   PrecompileCallOptions,
 } from "../api/types/index.js";
-import {
-  ALITH_PRIVATE_KEY,
-  PRECOMPILES,
-  createEthersTransaction,
-  createViemTransaction,
-  deployViemContract,
-} from "../util/index.js";
+import { ALITH_PRIVATE_KEY } from "../api/constants/lightAccounts.js";
+import { PRECOMPILES } from "../api/constants/chain.js";
 import chalk from "chalk";
-import { Interface, type InterfaceAbi, Wallet } from "ethers";
+import type { InterfaceAbi } from "ethers";
 import fs, { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import path from "node:path";
-import type { Abi } from "viem";
-import { type Log, decodeFunctionResult, encodeFunctionData, toHex } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
+import type { Abi, Log } from "viem";
 import { importJsonConfig } from "../services/config/index.js";
+
+const require = createRequire(import.meta.url);
 
 function getCompiledPath(contractName: string) {
   const config = importJsonConfig();
@@ -129,6 +125,9 @@ export async function interactWithContract(
     rawTxOnly = false,
     call = false,
   } = callOptions;
+  const { encodeFunctionData, decodeFunctionResult, toHex } = require("viem") as typeof import("viem");
+  const { privateKeyToAccount } = require("viem/accounts") as typeof import("viem/accounts");
+  const { Interface, Wallet } = require("ethers") as typeof import("ethers");
   const { abi } = fetchCompiledContract(contractName);
   const data = encodeFunctionData({
     abi,
@@ -151,20 +150,24 @@ export async function interactWithContract(
 
   if (!call && rawTxOnly) {
     return web3Library === "viem"
-      ? createViemTransaction(context, {
-          to: contractAddress as any,
-          data,
-          gas: gasParam,
-          privateKey,
-          value,
-        })
-      : createEthersTransaction(context, {
-          to: contractAddress,
-          data,
-          gas: gasParam,
-          value: toHex(value),
-          privateKey,
-        });
+      ? import("../api/testing/viem.js").then(({ createViemTransaction }) =>
+          createViemTransaction(context, {
+            to: contractAddress as any,
+            data,
+            gas: gasParam,
+            privateKey,
+            value,
+          })
+        )
+      : import("../api/testing/ethers.js").then(({ createEthersTransaction }) =>
+          createEthersTransaction(context, {
+            to: contractAddress,
+            data,
+            gas: gasParam,
+            value: toHex(value),
+            privateKey,
+          })
+        );
   }
 
   if (call) {
@@ -238,6 +241,7 @@ export async function deployCreateCompiledContract<TOptions extends ContractDepl
     args,
   };
 
+  const { deployViemContract } = await import("../api/testing/viem.js");
   const { contractAddress, logs, status, hash } = await deployViemContract(
     context,
     abi,
