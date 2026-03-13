@@ -47,5 +47,8 @@
     "web3": "*",
     "yargs": "^18.0.0"
   },
+  "engines": {
+    "node": ">=24"
+  },
   "packageManager": "pnpm@9.1.4"
 }

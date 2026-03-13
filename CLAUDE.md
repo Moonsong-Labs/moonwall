@@ -96,7 +96,7 @@ Moonwall is structured as a single TypeScript package.
 ### Key Technologies
 
 *   **TypeScript**: The primary programming language, providing strong typing.
-*   **zshy**: Used for bundling TypeScript code and generating ESM exports.
+*   **tsdown**: Used for building the TypeScript package into ESM output in `dist/`.
 *   **0xfmt/0xlint**: For code formatting and linting, ensuring consistent code style.
 *   **Vitest**: The testing framework used for running unit and integration tests.
     *   **`@vitest/ui`**: Provides a browser-based UI for viewing test results.

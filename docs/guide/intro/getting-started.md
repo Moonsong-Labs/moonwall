@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/) v20.10 or higher
+- [Node.js](https://nodejs.org/) v24 or higher
 - macOS or Linux (WSL supported)
 - [pnpm](https://pnpm.io/) (recommended) or your preferred package manager
 

@@ -1,21 +1,24 @@
 {
   "name": "moonwall-docs",
-  "type": "module",
   "version": "1.0.1",
   "private": true,
   "description": "Documentation site for the Moonwall project",
+  "type": "module",
   "scripts": {
     "docs:dev": "vitepress dev",
     "docs:build": "vitepress build",
     "docs:preview": "vitepress preview"
+  },
+  "dependencies": {
+    "@algolia/client-search": "^5.45.0",
+    "search-insights": "^2.13.0"
   },
   "devDependencies": {
     "mermaid": "^11.12.2",
     "vitepress": "1.6.4",
     "vitepress-plugin-mermaid": "^2.0.17"
   },
-  "dependencies": {
-    "@algolia/client-search": "^5.45.0",
-    "search-insights": "^2.13.0"
+  "engines": {
+    "node": ">=24"
   }
 }

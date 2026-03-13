@@ -1,47 +1,48 @@
 {
   "name": "moonwall",
-  "type": "module",
   "version": "1.0.1",
   "description": "Testing framework for Substrate-based networks",
-  "author": "timbrinded",
-  "license": "ISC",
+  "keywords": [
+    "kusama",
+    "moonbeam",
+    "moondance",
+    "moonwall",
+    "polkadot",
+    "substrate",
+    "testing"
+  ],
   "homepage": "https://github.com/Moonsong-Labs/moonwall#readme",
+  "bugs": {
+    "url": "https://github.com/Moonsong-Labs/moonwall/issues"
+  },
+  "license": "ISC",
+  "author": "timbrinded",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Moonsong-Labs/moonwall.git"
   },
-  "bugs": {
-    "url": "https://github.com/Moonsong-Labs/moonwall/issues"
-  },
-  "keywords": [
-    "moonwall",
-    "moonbeam",
-    "moondance",
-    "polkadot",
-    "kusama",
-    "substrate",
-    "testing"
-  ],
-  "zshy": {
-    "exports": {
-      ".": "./src/index.ts"
-    },
-    "bin": {
-      "moonwall": "./src/cli.ts",
-      "moondebug": "./src/moondebug.ts"
-    },
-    "cjs": false
-  },
-  "engines": {
-    "node": ">=20"
+  "bin": {
+    "moondebug": "./dist/moondebug.js",
+    "moonwall": "./dist/cli.js"
   },
   "files": [
-    "dist",
-    "config_schema.json"
+    "config_schema.json",
+    "dist"
   ],
+  "type": "module",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "build": "zshy",
-    "postbuild": "pnpm install",
+    "build": "tsdown --config tsdown.config.ts && tsdown --config tsdown.cli.config.ts",
     "schema": "typescript-json-schema --tsNodeRegister --esModuleInterop -o config_schema.json ./src/types/config.ts MoonwallConfig && pnpm oxfmt --write config_schema.json",
     "clean": "rm -rf dist && rm -rf node_modules && pnpm -r clean ",
     "lint": "oxlint ./src",
@@ -128,11 +129,10 @@
     "@typescript/native-preview": "7.0.0-dev.20260122.4",
     "oxfmt": "^0.26.0",
     "oxlint": "^1.41.0",
-    "tsup": "^8.5.1",
+    "tsdown": "^0.21.2",
     "tsx": "^4.21.0",
     "typescript": "5.9.3",
-    "typescript-json-schema": "0.67.1",
-    "zshy": "^0.7.0"
+    "typescript-json-schema": "0.67.1"
   },
   "peerDependencies": {
     "@polkadot/api": "^16.1.0",
@@ -145,8 +145,8 @@
     "@polkadot/util": "^13.0.0",
     "@polkadot/util-crypto": "^13.0.0"
   },
-  "publishConfig": {
-    "access": "public"
+  "engines": {
+    "node": ">=24"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
@@ -159,17 +159,5 @@
       "ssh2",
       "vue-demi"
     ]
-  },
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    }
-  },
-  "bin": {
-    "moonwall": "./dist/cli.js",
-    "moondebug": "./dist/moondebug.js"
   }
 }
