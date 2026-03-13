@@ -11,7 +11,7 @@ import path from "node:path";
 import net from "node:net";
 import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
-import { access, readFile, readdir } from "node:fs/promises";
+import { access, readFile, readdir, stat, writeFile } from "node:fs/promises";
 import { Effect } from "effect";
 import { regex } from "arkregex";
 import { standardRepos } from "../lib/repoDefinitions/index.js";
@@ -35,6 +35,97 @@ const hashFile = async (filePath: string): Promise<string> => {
   return hash.digest("hex");
 };
 
+interface BinaryFingerprintCacheEntry {
+  readonly version: 1;
+  readonly binPath: string;
+  readonly size: number;
+  readonly mtimeMs: number;
+  readonly ctimeMs: number;
+  readonly ino: number;
+  readonly dev: number;
+  readonly hash: string;
+}
+
+const fingerprintCachePath = (cacheDir: string, binName: string, chainName: string) =>
+  path.join(cacheDir, `${binName}-${chainName}.fingerprint.json`);
+
+const readCachedBinaryHashFingerprint = async (config: {
+  binPath: string;
+  cacheDir: string;
+  binName: string;
+  chainName: string;
+}): Promise<string | undefined> => {
+  try {
+    const [fileStat, fileContents] = await Promise.all([
+      stat(config.binPath),
+      readFile(fingerprintCachePath(config.cacheDir, config.binName, config.chainName), "utf8"),
+    ]);
+
+    const cached = JSON.parse(fileContents) as BinaryFingerprintCacheEntry;
+    if (
+      cached.version !== 1 ||
+      cached.binPath !== config.binPath ||
+      cached.size !== fileStat.size ||
+      cached.mtimeMs !== fileStat.mtimeMs ||
+      cached.ctimeMs !== fileStat.ctimeMs ||
+      cached.ino !== fileStat.ino ||
+      cached.dev !== fileStat.dev
+    ) {
+      return undefined;
+    }
+
+    return cached.hash;
+  } catch {
+    return undefined;
+  }
+};
+
+const writeBinaryHashFingerprint = async (config: {
+  binPath: string;
+  cacheDir: string;
+  binName: string;
+  chainName: string;
+  hash: string;
+}): Promise<void> => {
+  try {
+    const fileStat = await stat(config.binPath);
+    const payload: BinaryFingerprintCacheEntry = {
+      version: 1,
+      binPath: config.binPath,
+      size: fileStat.size,
+      mtimeMs: fileStat.mtimeMs,
+      ctimeMs: fileStat.ctimeMs,
+      ino: fileStat.ino,
+      dev: fileStat.dev,
+      hash: config.hash,
+    };
+
+    await writeFile(
+      fingerprintCachePath(config.cacheDir, config.binName, config.chainName),
+      JSON.stringify(payload),
+      "utf8"
+    );
+  } catch {
+    // Best-effort only
+  }
+};
+
+const resolveBinaryHash = async (config: {
+  binPath: string;
+  cacheDir: string;
+  binName: string;
+  chainName: string;
+}): Promise<string> => {
+  const cachedHash = await readCachedBinaryHashFingerprint(config);
+  if (cachedHash) {
+    return cachedHash;
+  }
+
+  const computedHash = await hashFile(config.binPath);
+  await writeBinaryHashFingerprint({ ...config, hash: computedHash });
+  return computedHash;
+};
+
 const getWarmStartupCacheArtifacts = async (config: {
   binPath: string;
   chainArg?: string;
@@ -49,11 +140,16 @@ const getWarmStartupCacheArtifacts = async (config: {
   | undefined
 > => {
   try {
-    const binaryHash = await hashFile(config.binPath);
-    const shortHash = binaryHash.substring(0, 12);
     const chainName =
       config.isDevMode ? "dev" : config.chainArg?.match(chainArgRegex)?.[1] || "default";
     const binName = path.basename(config.binPath);
+    const binaryHash = await resolveBinaryHash({
+      binPath: config.binPath,
+      cacheDir: config.cacheDir,
+      binName,
+      chainName,
+    });
+    const shortHash = binaryHash.substring(0, 12);
     const cacheSubDir = path.join(config.cacheDir, `${binName}-${chainName}-${shortHash}`);
     const hashPath = path.join(cacheSubDir, "binary.hash");
     const rawChainSpecPath = path.join(cacheSubDir, `${chainName}-raw.json`);
