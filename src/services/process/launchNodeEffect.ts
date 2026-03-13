@@ -10,6 +10,7 @@ import {
   RpcPortDiscoveryService,
   RpcPortDiscoveryServiceLive,
 } from "../network/RpcPortDiscoveryService.js";
+import { NodeReadinessService, NodeReadinessServiceLive } from "../network/NodeReadinessService.js";
 import { ProcessError } from "../errors.js";
 import { createLogger } from "../../util/index.js";
 
@@ -39,14 +40,81 @@ export interface LaunchNodeResult {
 /**
  * Combined layer with all dependencies
  */
-const AllServicesLive = Layer.mergeAll(ProcessManagerServiceLive, RpcPortDiscoveryServiceLive);
+const AllServicesLive = Layer.mergeAll(
+  ProcessManagerServiceLive,
+  RpcPortDiscoveryServiceLive,
+  NodeReadinessServiceLive
+);
+
+const parseExplicitRpcPort = (args: readonly string[]): number | undefined => {
+  for (let index = 0; index < args.length; index++) {
+    const arg = args[index];
+
+    if (arg.startsWith("--rpc-port=")) {
+      const port = Number.parseInt(arg.slice("--rpc-port=".length), 10);
+      return Number.isFinite(port) && port > 0 ? port : undefined;
+    }
+
+    if (arg === "--rpc-port") {
+      const next = args[index + 1];
+      const port = Number.parseInt(next ?? "", 10);
+      return Number.isFinite(port) && port > 0 ? port : undefined;
+    }
+  }
+
+  return undefined;
+};
+
+const resolveRpcPort = (
+  pid: number,
+  knownRpcPort: number | undefined,
+  config: LaunchNodeConfig,
+  startTime: number
+) => {
+  if (knownRpcPort !== undefined) {
+    return NodeReadinessService.pipe(
+      Effect.flatMap((readiness) =>
+        Effect.sync(() =>
+          logger.debug(
+            `[T+${Date.now() - startTime}ms] Using explicit RPC port ${knownRpcPort}; skipping lsof discovery`
+          )
+        ).pipe(
+          Effect.flatMap(() =>
+            readiness.checkReady({
+              port: knownRpcPort,
+              isEthereumChain: config.isEthereumChain,
+              maxAttempts: 600,
+            })
+          ),
+          Effect.as(knownRpcPort)
+        )
+      )
+    );
+  }
+
+  return RpcPortDiscoveryService.pipe(
+    Effect.flatMap((rpcDiscovery) =>
+      Effect.sync(() =>
+        logger.debug(`[T+${Date.now() - startTime}ms] Discovering RPC port for PID ${pid}...`)
+      ).pipe(
+        Effect.flatMap(() =>
+          rpcDiscovery.discoverRpcPort({
+            pid,
+            isEthereumChain: config.isEthereumChain,
+            maxAttempts: 600,
+          })
+        )
+      )
+    )
+  );
+};
 
 /**
  * Launch a blockchain node with Effect-based lifecycle management
  *
  * This function provides automatic resource management:
  * - Process spawning with port 0 (OS assigns available port)
- * - Port discovery via lsof
+ * - Port discovery via lsof when the RPC port is not already known
  * - WebSocket readiness check
  * - Automatic cleanup on scope closure
  *
@@ -62,7 +130,6 @@ export async function launchNodeEffect(
   const nodeConfig = {
     isChopsticks: config.args.some((arg) => arg.includes("chopsticks.cjs")),
     hasRpcPort: config.args.some((arg) => arg.includes("--rpc-port")),
-    hasPort: config.args.some((arg) => arg.includes("--port")),
   };
 
   const finalArgs =
@@ -76,6 +143,7 @@ export async function launchNodeEffect(
         ]
       : config.args; // Chopsticks uses YAML config, or port already configured
 
+  const knownRpcPort = parseExplicitRpcPort(finalArgs);
   debug(`Final args: ${JSON.stringify(finalArgs)}`);
 
   const program = ProcessManagerService.pipe(
@@ -107,22 +175,7 @@ export async function launchNodeEffect(
             );
           }
 
-          return RpcPortDiscoveryService.pipe(
-            Effect.flatMap((rpcDiscovery) =>
-              Effect.sync(() =>
-                logger.debug(
-                  `[T+${Date.now() - startTime}ms] Discovering RPC port for PID ${pid}...`
-                )
-              ).pipe(
-                Effect.flatMap(() =>
-                  rpcDiscovery.discoverRpcPort({
-                    pid,
-                    isEthereumChain: config.isEthereumChain,
-                    maxAttempts: 600, // Match PortDiscoveryService: 600 × 200ms = 120s
-                  })
-                )
-              )
-            ),
+          return resolveRpcPort(pid, knownRpcPort, config, startTime).pipe(
             Effect.mapError(
               (error) =>
                 new ProcessError({
@@ -134,7 +187,9 @@ export async function launchNodeEffect(
             Effect.flatMap((port) =>
               Effect.sync(() =>
                 logger.debug(
-                  `[T+${Date.now() - startTime}ms] Discovered and validated RPC port: ${port}`
+                  knownRpcPort !== undefined
+                    ? `[T+${Date.now() - startTime}ms] Explicit RPC port is ready: ${port}`
+                    : `[T+${Date.now() - startTime}ms] Discovered and validated RPC port: ${port}`
                 )
               ).pipe(
                 Effect.map(() => ({
