@@ -1,0 +1,2 @@
+{"type":"config","name":"Speed up pnpm moonwall test dev_multi startup/teardown","metricName":"total_s","metricUnit":"s","bestDirection":"lower"}
+{"run":1,"commit":"02ee5da","metric":0,"metrics":{},"status":"crash","description":"baseline: initial autoresearch harness crashed because tsx --eval used top-level await in CJS mode","timestamp":1773395770261,"segment":0}
