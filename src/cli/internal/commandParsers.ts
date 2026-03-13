@@ -16,7 +16,6 @@ import { Effect } from "effect";
 import { regex } from "arkregex";
 import { standardRepos } from "../lib/repoDefinitions/index.js";
 import invariant from "tiny-invariant";
-import { StartupCacheService, StartupCacheServiceLive } from "./effect/index.js";
 
 /** Matches --chain=<name> or --chain <name> in CLI arguments */
 const chainArgRegex = regex("--chain[=\\s]?(\\S+)");
@@ -36,33 +35,55 @@ const hashFile = async (filePath: string): Promise<string> => {
   return hash.digest("hex");
 };
 
-const hasWarmStartupCache = async (config: {
+const getWarmStartupCacheArtifacts = async (config: {
   binPath: string;
   chainArg?: string;
   cacheDir: string;
   isDevMode: boolean;
-}): Promise<boolean> => {
+  needsRawChainSpec: boolean;
+}): Promise<
+  | {
+      precompiledPath: string;
+      rawChainSpecPath?: string;
+    }
+  | undefined
+> => {
   try {
     const binaryHash = await hashFile(config.binPath);
     const shortHash = binaryHash.substring(0, 12);
-    const chainName = config.isDevMode ? "dev" : config.chainArg?.match(chainArgRegex)?.[1] || "default";
+    const chainName =
+      config.isDevMode ? "dev" : config.chainArg?.match(chainArgRegex)?.[1] || "default";
     const binName = path.basename(config.binPath);
     const cacheSubDir = path.join(config.cacheDir, `${binName}-${chainName}-${shortHash}`);
     const hashPath = path.join(cacheSubDir, "binary.hash");
+    const rawChainSpecPath = path.join(cacheSubDir, `${chainName}-raw.json`);
 
     await access(cacheSubDir);
     const savedHash = (await readFile(hashPath, "utf8")).trim();
     if (savedHash !== binaryHash) {
-      return false;
+      return undefined;
     }
 
     const files = await readdir(cacheSubDir);
-    return files.some(
+    const precompiledFile = files.find(
       (file) =>
         file.startsWith("precompiled_wasm_") || file.endsWith(".cwasm") || file.endsWith(".wasm")
     );
+
+    if (!precompiledFile) {
+      return undefined;
+    }
+
+    if (config.needsRawChainSpec) {
+      await access(rawChainSpecPath);
+    }
+
+    return {
+      precompiledPath: path.join(cacheSubDir, precompiledFile),
+      rawChainSpecPath: config.needsRawChainSpec ? rawChainSpecPath : undefined,
+    };
   } catch {
-    return false;
+    return undefined;
   }
 };
 
@@ -194,6 +215,39 @@ export class LaunchCommandParser {
     }
   }
 
+  private applyStartupCacheArtifacts(
+    result: { precompiledPath: string; rawChainSpecPath?: string; fromCache?: boolean },
+    hasDevFlag: boolean,
+    existingChainName?: string
+  ): void {
+    const precompiledDir = path.dirname(result.precompiledPath);
+    this.overrideArg(`--wasmtime-precompiled=${precompiledDir}`);
+
+    if (result.rawChainSpecPath) {
+      if (hasDevFlag) {
+        this.args = this.args.filter((arg) => arg !== "--dev");
+        this.overrideArg(`--chain=${result.rawChainSpecPath}`);
+        this.overrideArg("--alice");
+        this.overrideArg("--force-authoring");
+        this.overrideArg("--rpc-cors=all");
+        this.overrideArg(
+          "--node-key=0000000000000000000000000000000000000000000000000000000000000001"
+        );
+      } else if (existingChainName) {
+        this.overrideArg(`--chain=${result.rawChainSpecPath}`);
+      }
+      logger.debug(`Using raw chain spec for ~10x faster startup: ${result.rawChainSpecPath}`);
+    }
+
+    process.env.MOONWALL_CACHE_DIR = precompiledDir;
+
+    logger.debug(
+      result.fromCache === false
+        ? `Precompiled WASM created: ${result.precompiledPath}`
+        : `Using cached precompiled WASM: ${result.precompiledPath}`
+    );
+  }
+
   /**
    * Cache startup artifacts if enabled in launchSpec.
    * This uses an Effect-based service that caches artifacts by binary hash.
@@ -226,70 +280,49 @@ export class LaunchCommandParser {
     const cacheDir =
       this.launchSpec.startupCacheDir || path.join(process.cwd(), "tmp", "startup-cache");
 
-    const shouldUseCache =
-      this.launchSpec.cacheStartupArtifacts ||
-      (await hasWarmStartupCache({
-        binPath: this.launchSpec.binPath,
-        chainArg,
-        cacheDir,
-        isDevMode: hasDevFlag,
-      }));
+    const warmCacheArtifacts = await getWarmStartupCacheArtifacts({
+      binPath: this.launchSpec.binPath,
+      chainArg,
+      cacheDir,
+      isDevMode: hasDevFlag,
+      needsRawChainSpec: canGenerateRawSpec,
+    });
 
-    if (!shouldUseCache) {
+    if (warmCacheArtifacts) {
+      this.applyStartupCacheArtifacts(
+        { ...warmCacheArtifacts, fromCache: true },
+        hasDevFlag,
+        existingChainName
+      );
       return this;
     }
 
-    const program = StartupCacheService.pipe(
-      Effect.flatMap((service) =>
-        service.getCachedArtifacts({
-          binPath: this.launchSpec.binPath,
-          chainArg,
-          cacheDir,
-          // Generate raw chain spec for faster startup (works for both --dev and --chain=XXX)
-          generateRawChainSpec: canGenerateRawSpec,
-          // Pass dev mode flag for proper chain name detection
-          isDevMode: hasDevFlag,
-        })
-      ),
-      Effect.provide(StartupCacheServiceLive)
-    );
+    if (!this.launchSpec.cacheStartupArtifacts) {
+      return this;
+    }
 
     try {
-      const result = await Effect.runPromise(program);
-      // --wasmtime-precompiled expects a DIRECTORY, not a file path
-      // Get the directory containing the precompiled wasm
-      const precompiledDir = path.dirname(result.precompiledPath);
-      this.overrideArg(`--wasmtime-precompiled=${precompiledDir}`);
-
-      // If we have a raw chain spec, use it for ~10x faster startup
-      if (result.rawChainSpecPath) {
-        if (hasDevFlag) {
-          // Remove --dev flag and add equivalent flags
-          this.args = this.args.filter((arg) => arg !== "--dev");
-          this.overrideArg(`--chain=${result.rawChainSpecPath}`);
-          // Add flags that --dev would normally set
-          this.overrideArg("--alice");
-          this.overrideArg("--force-authoring");
-          this.overrideArg("--rpc-cors=all");
-          // Use a deterministic node key for consistency
-          this.overrideArg(
-            "--node-key=0000000000000000000000000000000000000000000000000000000000000001"
-          );
-        } else if (existingChainName) {
-          // Replace original --chain=XXX with --chain=<raw-spec-path>
-          this.overrideArg(`--chain=${result.rawChainSpecPath}`);
-        }
-        logger.debug(`Using raw chain spec for ~10x faster startup: ${result.rawChainSpecPath}`);
-      }
-
-      // Set cache directory env var for metadata caching in provider factories
-      process.env.MOONWALL_CACHE_DIR = precompiledDir;
-
-      logger.debug(
-        result.fromCache
-          ? `Using cached precompiled WASM: ${result.precompiledPath}`
-          : `Precompiled WASM created: ${result.precompiledPath}`
+      const { StartupCacheService, StartupCacheServiceLive } = await import(
+        "../../services/cache/StartupCacheService.js"
       );
+
+      const program = StartupCacheService.pipe(
+        Effect.flatMap((service) =>
+          service.getCachedArtifacts({
+            binPath: this.launchSpec.binPath,
+            chainArg,
+            cacheDir,
+            // Generate raw chain spec for faster startup (works for both --dev and --chain=XXX)
+            generateRawChainSpec: canGenerateRawSpec,
+            // Pass dev mode flag for proper chain name detection
+            isDevMode: hasDevFlag,
+          })
+        ),
+        Effect.provide(StartupCacheServiceLive)
+      );
+
+      const result = await Effect.runPromise(program);
+      this.applyStartupCacheArtifacts(result, hasDevFlag, existingChainName);
     } catch (error) {
       // Log warning but continue without precompilation
       logger.warn(`WASM precompilation failed, continuing without: ${error}`);
