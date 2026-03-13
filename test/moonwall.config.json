@@ -471,6 +471,7 @@
       "name": "dev_multi",
       "testFileDir": ["suites/test_separation"],
       "reporters": ["basic"],
+      "envVars": ["POLKADOTJS_DISABLE_ESM_CJS_WARNING=1"],
       "multiThreads": {
         "pool": "threads",
         "maxWorkers": 8,
