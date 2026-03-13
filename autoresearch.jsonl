@@ -1,0 +1,2 @@
+{"type":"config","name":"Reduce Moonwall dev test runtime via faster node startup","metricName":"wall_clock_s","metricUnit":"s","bestDirection":"lower"}
+{"run":1,"commit":"02ee5da","metric":0,"metrics":{},"status":"crash","description":"Baseline harness crash: tsx -e precheck used top-level await and failed before benchmark ran","timestamp":1773385294102,"segment":0}
